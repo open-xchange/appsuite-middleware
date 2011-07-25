@@ -93,7 +93,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -102,7 +102,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -158,7 +158,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
                 registrations.add(context.registerService(EventHandler.class.getName(), registerer, dict));
             }
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -187,7 +187,7 @@ public final class WebDAVFileStorageActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

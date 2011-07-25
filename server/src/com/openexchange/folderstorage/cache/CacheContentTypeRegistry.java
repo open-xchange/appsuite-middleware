@@ -68,7 +68,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
  */
 public final class CacheContentTypeRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheContentTypeRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheContentTypeRegistry.class));
 
     private static final CacheContentTypeRegistry instance = new CacheContentTypeRegistry();
 

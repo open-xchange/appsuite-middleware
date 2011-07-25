@@ -93,9 +93,7 @@ import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
-import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
-import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
@@ -285,8 +283,9 @@ public class CaldavPerformer implements SessionHolder {
 
     public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {
         try {
-            final WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
-            final WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
+            final ServletWebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
+            webdavRequest.setUrlPrefix("/caldav/");
+            final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             session.set(sess);
             if (LOG.isDebugEnabled()) {

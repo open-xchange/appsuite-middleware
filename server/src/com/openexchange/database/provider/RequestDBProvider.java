@@ -64,7 +64,7 @@ public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RequestDBProvider.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestDBProvider.class));
     private boolean commits = true;
 
 

@@ -99,7 +99,7 @@ import com.openexchange.management.ManagementExceptionCode;
  */
 public abstract class AbstractAgent {
 
-    static final Log LOG = LogFactory.getLog(AbstractAgent.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractAgent.class));
 
     private static final class AbstractAgentSocketFactory extends RMISocketFactory implements Serializable {
 

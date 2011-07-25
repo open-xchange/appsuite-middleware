@@ -65,6 +65,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -76,7 +77,7 @@ public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessageUtility.class));
 
     /**
      * No instantiation.
@@ -277,24 +278,41 @@ public final class MessageUtility {
         if (null == inStream) {
             return STR_EMPTY;
         }
-        if (!isBig5(charset)) {
-            return readStream0(inStream, charset);
+        if (isBig5(charset)) {
+            /*
+             * Special treatment for possible BIG5 encoded stream
+             */
+            final byte[] bytes = getBytesFrom(inStream);
+            if (bytes.length == 0) {
+                return STR_EMPTY;
+            }
+            final String retval = new String(bytes, "big5");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            /*
+             * Expect the charset to be Big5-HKSCS
+             */
+            return new String(bytes, "Big5-HKSCS");
         }
-        /*
-         * Special treatment for possible BIG5 encoded stream
-         */
-        final byte[] bytes = getBytesFrom(inStream);
-        if (bytes.length == 0) {
-            return STR_EMPTY;
+        if (isGB2312(charset)) {
+            /*
+             * Special treatment for possible BIG5 encoded stream
+             */
+            final byte[] bytes = getBytesFrom(inStream);
+            if (bytes.length == 0) {
+                return STR_EMPTY;
+            }
+            final String retval = new String(bytes, "GB2312");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            /*
+             * Detect the charset
+             */
+            return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
         }
-        final String retval = new String(bytes, "big5");
-        if (retval.indexOf(UNKNOWN) < 0) {
-            return retval;
-        }
-        /*
-         * Expect the charset to be Big5-HKSCS
-         */
-        return new String(bytes, "Big5-HKSCS");
+        return readStream0(inStream, charset);
     }
 
     private static String readStream0(final InputStream inStream, final String charset) throws IOException {
@@ -348,12 +366,30 @@ public final class MessageUtility {
      * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
      */
     public static boolean isBig5(final String charset) {
+        if (null == charset) {
+            return false;
+        }
         final String lc = charset.toLowerCase(Locale.US);
         if (!lc.startsWith("big", 0)) {
             return false;
         }
         final String wo = PATTERN_BIG5.matcher(lc).replaceAll("");
         return BIG5.equals(wo) || BIGFIVE.equals(wo);
+    }
+
+    private static final String GB2312 = "gb2312";
+
+    /**
+     * Checks if specified charset name can be considered as GB2312.
+     * 
+     * @param charset The charset name to check
+     * @return <code>true</code> if charset name can be considered as GB2312; otherwise <code>false</code>
+     */
+    public static boolean isGB2312(final String charset) {
+        if (null == charset) {
+            return false;
+        }
+        return GB2312.equals(charset.toLowerCase(Locale.US));
     }
 
     /**

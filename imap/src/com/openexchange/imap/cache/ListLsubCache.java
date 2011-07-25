@@ -73,7 +73,10 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class ListLsubCache {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListLsubCache.Key.class);
+    /**
+     * The logger.
+     */
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ListLsubCache.Key.class);
 
     private static final class Key {
 
@@ -330,6 +333,28 @@ public final class ListLsubCache {
     }
 
     /**
+     * Gets up-to-date LIST entry for specified full name.
+     * 
+     * @param fullName The full name
+     * @param accountId The account ID
+     * @param imapStore The IMAP store
+     * @param session The session
+     * @return The cached LIST entry
+     * @throws MailException If loading the entry fails
+     */
+    public static ListLsubEntry getActualLISTEntry(final String fullName, final int accountId, final AccessedIMAPStore imapStore, final Session session) throws OXException {
+        try {
+            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
+            final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+            synchronized (collection) {
+                return collection.getActualEntry(fullName, imapFolder);
+            }
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
      * Gets cached LIST entry for specified full name.
      * 
      * @param fullName The full name
@@ -428,15 +453,34 @@ public final class ListLsubCache {
             final FutureTask<ListLsubCollection> ft = new FutureTask<ListLsubCollection>(new Callable<ListLsubCollection>() {
 
                 public ListLsubCollection call() throws OXException {
-                    final String[] shared;
-                    final String[] user;
+                    String[] shared;
+                    String[] user;
                     try {
                         final IMAPStore imapStore = (IMAPStore) imapFolder.getStore();
-                        if (imapStore.hasCapability("NAMESPACE")) {
+                        try {
                             shared = check(NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId));
-                            user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
-                        } else {
+                        } catch (final MessagingException e) {
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                LOG.warn("Couldn't get shared namespaces.", e);
+                            } else {
+                                LOG.debug("Couldn't get shared namespaces.", e);
+                            }
                             shared = new String[0];
+                        } catch (final RuntimeException e) {
+                            LOG.warn("Couldn't get shared namespaces.", e);
+                            shared = new String[0];
+                        }
+                        try {
+                            user = check(NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId));
+                        } catch (final MessagingException e) {
+                            if (imapStore.hasCapability("NAMESPACE")) {
+                                LOG.warn("Couldn't get user namespaces.", e);
+                            } else {
+                                LOG.debug("Couldn't get user namespaces.", e);
+                            }
+                            user = new String[0];
+                        } catch (final RuntimeException e) {
+                            LOG.warn("Couldn't get user namespaces.", e);
                             user = new String[0];
                         }
                     } catch (final MessagingException e) {

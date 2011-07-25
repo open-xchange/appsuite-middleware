@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public final class CheckPermissionOnRemove extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnRemove.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CheckPermissionOnRemove.class));
 
     /**
      * Initializes a new {@link CheckPermissionOnRemove}

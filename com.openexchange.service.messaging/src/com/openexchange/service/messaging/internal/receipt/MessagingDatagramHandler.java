@@ -80,7 +80,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public class MessagingDatagramHandler {
 
-    private static final Log LOG = LogFactory.getLog(MessagingDatagramHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MessagingDatagramHandler.class));
 
     private final ConcurrentMap<Key, MessagingContiguousMessage> truncated;
 

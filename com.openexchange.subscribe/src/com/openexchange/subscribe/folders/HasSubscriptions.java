@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class HasSubscriptions implements AdditionalFolderField {
 
-    private static final Log LOG = LogFactory.getLog(HasSubscriptions.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HasSubscriptions.class));
 
     private final SubscriptionSourceDiscoveryService discovery;
 

@@ -81,7 +81,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     
     private String titleExceptionsRegex, linkToTargetPage;
 
-    private static final Log LOG = LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
     
     private boolean addPagesTogether;
 

@@ -295,7 +295,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
-                    org.apache.commons.logging.LogFactory.getLog(FacebookMessagingMessageAccess.class).warn(warning.getMessage(), warning);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
                 }
                 final Iterator<Element> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
@@ -796,7 +796,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Check if any entity is missing
          */
         if (!safetyCheck.isEmpty()) {
-            final Log logger = LogFactory.getLog(FacebookMessagingMessageAccess.class);
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookMessagingMessageAccess.class));
             if (logger.isWarnEnabled()) {
                 logger.warn("Information of following Facebook " + (group ? "groups" : "users") + " are missing: " + Arrays.toString(safetyCheck.toArray()));
             }

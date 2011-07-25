@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,87 @@
  *
  */
 
-package com.openexchange.event;
+package com.openexchange.log.internal;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.Loggable;
 
 /**
- * {@link LoginEventListener} - Abstract super class for login event handlers.
+ * {@link LoggableImpl}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class LoginEventListener implements EventHandler {
+public final class LoggableImpl implements Loggable {
 
-    public abstract void handle(LoginEvent event);
+    private final Level level;
 
-    public final void handleEvent(final Event event) {
-        handle(new LoginEvent(event));
+    private final Log log;
+
+    private final AtomicReference<String> message;
+
+    private final Throwable throwable;
+
+    private final Throwable callerTrace;
+
+    /**
+     * Initializes a new {@link LoggableImpl}.
+     * 
+     * @param level
+     * @param log
+     * @param message
+     * @param throwable
+     */
+    public LoggableImpl(final Level level, final Log log, final String message, final Throwable throwable, final Throwable callerTrace) {
+        super();
+        this.level = level;
+        this.log = log;
+        this.message = new AtomicReference<String>(message);
+        this.throwable = throwable;
+        this.callerTrace = callerTrace;
     }
 
-    public void register(final BundleContext context) {
-        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { LoginEvent.TOPIC });
-        context.registerService(EventHandler.class.getName(), this, serviceProperties);
+    public Level getLevel() {
+        return level;
+    }
+
+    public Log getLog() {
+        return log;
+    }
+
+    public String getMessage() {
+        return message.get();
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    public StackTraceElement[] getCallerTrace() {
+        return callerTrace.getStackTrace();
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("LoggableImpl [");
+        if (level != null) {
+            builder.append("level=").append(level).append(", ");
+        }
+        if (log != null) {
+            builder.append("log=").append(log).append(", ");
+        }
+        if (message != null) {
+            builder.append("message=\"").append(message).append("\", ");
+        }
+        if (throwable != null) {
+            builder.append("throwable=").append("<available>").append(", ");
+        }
+        if (callerTrace != null) {
+            builder.append("callerTrace=").append("<available>");
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

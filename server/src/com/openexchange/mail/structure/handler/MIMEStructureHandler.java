@@ -81,6 +81,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -107,6 +108,7 @@ import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -122,7 +124,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEStructureHandler.class));
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 
@@ -243,6 +245,28 @@ public final class MIMEStructureHandler implements StructureHandler {
     private static final int BUFLEN = 8192;
 
     public boolean handleAttachment(final MailPart part, final String id) throws OXException {
+        if (isVCalendar(part.getContentType().getBaseType())) {
+            /*
+             * Check ICal part for a valid METHOD and its presence in Content-Type header
+             */
+            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+            if (iCalParser != null) {
+                try {
+                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    if (null != method) {
+                        /*
+                         * Assume an iTIP response or request
+                         */
+                        final ContentType contentType = part.getContentType();
+                        if (!contentType.containsParameter("method")) {
+                            contentType.setParameter("method", method.toUpperCase(Locale.US));
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.warn("A runtime error occurred.", e);
+                }
+            }
+        }
         addBodyPart(part, id);
         return true;
     }
@@ -344,7 +368,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                 /*
                  * Ensure proper content type
                  */
-                final JSONObject headers = currentMailObject.getJSONObject(KEY_HEADERS);
+                final JSONObject headers = currentMailObject.optJSONObject(KEY_HEADERS);
                 if (null == headers) {
                     // Add multipart's headers
                     final Map<String, String> headersMap = new HashMap<String, String>(1);
@@ -489,7 +513,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, part, currentMailObject.getJSONObject(KEY_HEADERS), id);
+                final JSONObject headersJSONObject = currentMailObject.optJSONObject(KEY_HEADERS);
+                fillBodyPart(bodyObject, part, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -509,7 +534,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(BODY, body);
             } else {
                 // Put direct
-                fillBodyPart(bodyObject, size, isp, contentType, currentMailObject.getJSONObject(KEY_HEADERS), id);
+                final JSONObject headersJSONObject = currentMailObject.optJSONObject(KEY_HEADERS);
+                fillBodyPart(bodyObject, size, isp, contentType, null == headersJSONObject ? new JSONObject() : headersJSONObject, id);
             }
             add2BodyJsonObject(bodyObject);
         } catch (final JSONException e) {
@@ -915,6 +941,10 @@ public final class MIMEStructureHandler implements StructureHandler {
             isWhitespace = Character.isWhitespace(chars[i]);
         }
         return isWhitespace;
+    }
+
+    private static boolean isVCalendar(final String baseContentType) {
+        return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
     }
 
 }

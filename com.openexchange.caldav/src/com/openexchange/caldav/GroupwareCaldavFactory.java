@@ -55,9 +55,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -311,7 +313,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
             FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
             CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
-            CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS,
+            CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS, 
             Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.UID,
             Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS };
 
@@ -327,6 +329,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
         private final Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
         
+        private Set<Integer> patchGuard = new HashSet<Integer>();
         
         public void cacheFolder(final int folderId) {
             cacheFolderFast(folderId); // Switch this to the other method, once it loads participants
@@ -438,6 +441,14 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 return Collections.emptyList();
             }
             return appointments;
+        }
+
+        public boolean hasBeenPatched(Appointment appointment) {
+            return patchGuard.contains(appointment.getObjectID());
+        }
+
+        public void markAsPatched(Appointment appointment) {
+            patchGuard.add(appointment.getObjectID());
         }
 
     }

@@ -110,8 +110,12 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     }
 
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
+        final MailMessage mail = getMessage(folder, mailId, false);
+        if (null == mail) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
+        }
         final MailPartHandler handler = new MailPartHandler(sequenceId);
-        new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
+        new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart ret = handler.getMailPart();
         if (ret == null) {
             throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, folder);

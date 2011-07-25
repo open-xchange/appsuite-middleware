@@ -74,7 +74,7 @@ public class ExportServlet extends ImportExport {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ExportServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExportServlet.class));
 
     private static final long serialVersionUID = -4391378107330348835L;
 

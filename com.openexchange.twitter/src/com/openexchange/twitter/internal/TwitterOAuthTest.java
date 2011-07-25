@@ -53,9 +53,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import twitter4j.Twitter;
+import twitter4j.OXTwitter;
+import twitter4j.OXTwitterImpl;
 import twitter4j.TwitterException;
-import twitter4j.http.RequestToken;
+import twitter4j.auth.AuthorizationFactory;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationContext;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -73,7 +77,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 public class TwitterOAuthTest {
     
     public static void main(final String[] args){
-        final Twitter twitter = new Twitter();
+        final Configuration configuration = ConfigurationContext.getInstance();
+        final OXTwitter twitter = new OXTwitterImpl(configuration, AuthorizationFactory.getInstance(configuration));
         
         final String twitterId = "";
         final String password = "";

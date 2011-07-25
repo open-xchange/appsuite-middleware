@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
 
-    protected static final Log LOG = LogFactory.getLog(CrawlerCookieSpecWithQuirkyQuotes.class);
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpecWithQuirkyQuotes.class));
     
     public CrawlerCookieSpecWithQuirkyQuotes(){
     }

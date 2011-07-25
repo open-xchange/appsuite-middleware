@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class));
     
     public int addedWithVersion() {
         return 8;

@@ -60,6 +60,8 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.event.EventFactoryService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
@@ -87,7 +89,7 @@ public final class PushActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(PushActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.push");
@@ -98,9 +100,18 @@ public final class PushActivator implements BundleActivator {
             trackers = new ArrayList<ServiceTracker>(4);
             PushManagerRegistry.init();
             trackers.add(new ServiceTracker(context, PushManagerService.class.getName(), new PushManagerServiceTracker(context)));
+            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new WhitelistServiceTracker(context)));
             /*
              * Thread pool service tracker
              */
+            trackers.add(new ServiceTracker(context, ConfigurationService.class.getName(), new RegistryServiceTrackerCustomizer<ConfigurationService>(
+                context,
+                ServiceRegistry.getInstance(),
+                ConfigurationService.class)));
+            trackers.add(new ServiceTracker(context, EventFactoryService.class.getName(), new RegistryServiceTrackerCustomizer<EventFactoryService>(
+                context,
+                ServiceRegistry.getInstance(),
+                EventFactoryService.class)));
             trackers.add(new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(
                     context,
                     ServiceRegistry.getInstance(),
@@ -125,7 +136,7 @@ public final class PushActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(PushActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.push");

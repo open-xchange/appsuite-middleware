@@ -73,7 +73,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  */
 public final class GetTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GetTask.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GetTask.class));
 
     private final Context ctx;
 

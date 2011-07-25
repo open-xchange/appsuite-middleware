@@ -75,7 +75,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class LoginPageByFormActionReturningStringStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
    
-   private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
+   private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, submitName;
 

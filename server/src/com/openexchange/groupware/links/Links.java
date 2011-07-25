@@ -89,7 +89,7 @@ import com.openexchange.session.Session;
  */
 public class Links {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Links.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Links.class));
 
     private static interface ModuleAccess {
 

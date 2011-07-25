@@ -75,7 +75,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage{
-    private static Log LOG = LogFactory.getLog(LoginPageByFormActionStep.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, stringAvailableAfterLogin, baseUrl;
 

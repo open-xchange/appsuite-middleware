@@ -83,7 +83,7 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         parameters.add(new NameValuePair("idList", ""));
         parameters.add(new NameValuePair("format", "csv_Outlook2003_eng"));
         
-        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.37.8.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
+        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.42.4.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
         
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");

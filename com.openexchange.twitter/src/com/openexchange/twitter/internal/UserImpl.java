@@ -51,8 +51,6 @@ package com.openexchange.twitter.internal;
 
 import java.net.URL;
 import java.util.Date;
-import twitter4j.DirectMessage;
-import twitter4j.TwitterException;
 import twitter4j.User;
 
 /**
@@ -94,7 +92,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
         return twitter4jUser.getFriendsCount();
     }
 
-    public int getId() {
+    public long getId() {
         return twitter4jUser.getId();
     }
 
@@ -112,10 +110,6 @@ public final class UserImpl implements com.openexchange.twitter.User {
 
     public String getProfileBackgroundImageUrl() {
         return twitter4jUser.getProfileBackgroundImageUrl();
-    }
-
-    public String getProfileBackgroundTile() {
-        return twitter4jUser.getProfileBackgroundTile();
     }
 
     public URL getProfileImageURL() {
@@ -139,15 +133,15 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     public int getRateLimitLimit() {
-        return twitter4jUser.getRateLimitLimit();
+        return twitter4jUser.getRateLimitStatus().getHourlyLimit();
     }
 
     public int getRateLimitRemaining() {
-        return twitter4jUser.getRateLimitRemaining();
+        return twitter4jUser.getRateLimitStatus().getRemainingHits();
     }
 
     public long getRateLimitReset() {
-        return twitter4jUser.getRateLimitReset();
+        return twitter4jUser.getRateLimitStatus().getResetTimeInSeconds();
     }
 
     public String getScreenName() {
@@ -155,7 +149,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     public Date getStatusCreatedAt() {
-        return twitter4jUser.getStatusCreatedAt();
+        return twitter4jUser.getStatus().getCreatedAt();
     }
 
     public int getStatusesCount() {
@@ -163,27 +157,27 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     public long getStatusId() {
-        return twitter4jUser.getStatusId();
+        return twitter4jUser.getStatus().getId();
     }
 
     public String getStatusInReplyToScreenName() {
-        return twitter4jUser.getStatusInReplyToScreenName();
+        return twitter4jUser.getStatus().getInReplyToScreenName();
     }
 
     public long getStatusInReplyToStatusId() {
-        return twitter4jUser.getStatusInReplyToStatusId();
+        return twitter4jUser.getStatus().getInReplyToStatusId();
     }
 
-    public int getStatusInReplyToUserId() {
-        return twitter4jUser.getStatusInReplyToUserId();
+    public long getStatusInReplyToUserId() {
+        return twitter4jUser.getStatus().getInReplyToUserId();
     }
 
     public String getStatusSource() {
-        return twitter4jUser.getStatusSource();
+        return twitter4jUser.getStatus().getSource();
     }
 
     public String getStatusText() {
-        return twitter4jUser.getStatusText();
+        return twitter4jUser.getStatus().getText();
     }
 
     public String getTimeZone() {
@@ -206,20 +200,8 @@ public final class UserImpl implements com.openexchange.twitter.User {
         return twitter4jUser.isProtected();
     }
 
-    public boolean isStatusFavorited() {
-        return twitter4jUser.isStatusFavorited();
-    }
-
-    public boolean isStatusTruncated() {
-        return twitter4jUser.isStatusTruncated();
-    }
-
     public boolean isVerified() {
         return twitter4jUser.isVerified();
-    }
-
-    public DirectMessage sendDirectMessage(final String text) throws TwitterException {
-        return twitter4jUser.sendDirectMessage(text);
     }
 
     @Override

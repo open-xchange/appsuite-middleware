@@ -70,7 +70,7 @@ public abstract class Refresher<T extends Serializable> {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Refresher.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Refresher.class));
 
     /**
      * Factory for reloading cached objects.

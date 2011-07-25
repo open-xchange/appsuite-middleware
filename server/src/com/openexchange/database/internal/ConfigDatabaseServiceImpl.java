@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
 
     private final boolean forceWriteOnly;
 

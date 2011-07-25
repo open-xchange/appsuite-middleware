@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
@@ -81,7 +82,7 @@ public final class AJPv13Activator extends DeferredActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
 
     private static final int AJP_MODE_STABLE = 1;
 
@@ -111,7 +112,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -121,7 +122,7 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -164,6 +165,17 @@ public final class AJPv13Activator extends DeferredActivator {
                 throw new IllegalArgumentException("Unknown AJP mode: " + mode);
             }
             inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
+            inits.add(new Initialization() {
+                
+                public void stop() {
+                    AJPv13Request.setEchoHeaderName(null);
+                }
+                
+                public void start() {
+                    final ConfigurationService service = getService(ConfigurationService.class);
+                    AJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
+                }
+            });
             /*
              * Start
              */
@@ -200,7 +212,7 @@ public final class AJPv13Activator extends DeferredActivator {
              */
 
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -235,7 +247,7 @@ public final class AJPv13Activator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

@@ -69,7 +69,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 public class ServletActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(ServletActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
 
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";

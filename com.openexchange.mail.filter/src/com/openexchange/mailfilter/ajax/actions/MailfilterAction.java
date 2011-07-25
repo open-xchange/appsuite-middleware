@@ -100,7 +100,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private static final Log log = LogFactory.getLog(MailfilterAction.class);
+    private static final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailfilterAction.class));
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 

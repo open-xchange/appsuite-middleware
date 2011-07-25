@@ -70,7 +70,7 @@ public final class CalendarCache {
 
     private static final String CACHE_NAME = "CalendarCache";
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarCache.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCache.class));
     
     private Cache jcs;
     

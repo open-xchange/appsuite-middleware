@@ -81,7 +81,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
-    private static final Log LOG = LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
     
     private final UserService users;
     private final UserConfigurationService userConfigs;

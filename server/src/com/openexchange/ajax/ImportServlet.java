@@ -91,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ImportServlet extends ImportExport {
     
     private static final long serialVersionUID = 5639598623111215315L;
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ImportServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImportServlet.class));
     //identifying part of the ajax method that does the callback after the upload
     public static final String JSON_CALLBACK = "import";
 

@@ -69,7 +69,7 @@ public class Appointment extends DataServlet {
 
     private static final long serialVersionUID = 8550664916596120436L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Appointment.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Appointment.class));
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {

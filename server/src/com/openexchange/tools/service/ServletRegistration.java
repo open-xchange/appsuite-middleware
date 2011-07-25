@@ -73,7 +73,7 @@ import com.openexchange.server.osgiservice.DeferredRegistryRegistration;
  */
 public class ServletRegistration extends DeferredRegistryRegistration<HttpService, HttpServlet> {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ServletRegistration.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegistration.class));
     
     private static final Class<?>[] NO_SERVICES = new Class<?>[0];
     private static final Class<?>[] CONFIGURATION_SERVICE = new Class<?>[]{ConfigurationService.class};

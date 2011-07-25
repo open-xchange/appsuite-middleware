@@ -79,7 +79,7 @@ import com.openexchange.session.Session;
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
 
     private final List<AppointmentEventInterface> appointmentListeners;
 

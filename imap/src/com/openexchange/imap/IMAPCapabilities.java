@@ -87,7 +87,7 @@ public class IMAPCapabilities extends MailCapabilities {
     /**
      * IMAP4rev1
      */
-    public static final String CAP_IMAP4_REV1 = "IMAP4rev1";
+    public static final String CAP_IMAP4_REV1 = "IMAP4REV1";
 
     /**
      * UIDPLUS

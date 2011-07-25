@@ -83,6 +83,7 @@ import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -230,7 +231,7 @@ public final class ServerActivator extends DeferredActivator {
     }
 	
 	
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ServerActivator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
      * Bundle ID of admin.<br>
@@ -254,7 +255,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, StringParser.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -763,6 +764,7 @@ public final class ServerActivator extends DeferredActivator {
         http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
         http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
         http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+        http.registerServlet("/ajax/mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
         http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
         http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);

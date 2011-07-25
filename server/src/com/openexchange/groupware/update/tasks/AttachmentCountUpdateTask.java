@@ -76,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
     
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentCountUpdateTask.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentCountUpdateTask.class));
     
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.

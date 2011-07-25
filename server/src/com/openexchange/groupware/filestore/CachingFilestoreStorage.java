@@ -65,7 +65,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
 
     private static final String REGION_NAME = "Filestore";
 

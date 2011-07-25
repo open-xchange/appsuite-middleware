@@ -72,7 +72,7 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class DBService implements TransactionAware, DBProviderUser, DBProvider {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DBService.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBService.class));
 
     private RequestDBProvider provider;
 

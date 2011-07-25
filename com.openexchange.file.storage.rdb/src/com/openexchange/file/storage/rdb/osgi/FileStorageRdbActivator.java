@@ -108,7 +108,7 @@ public class FileStorageRdbActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -117,7 +117,7 @@ public class FileStorageRdbActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -222,7 +222,7 @@ public class FileStorageRdbActivator extends DeferredActivator {
                 registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
             }
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -252,7 +252,7 @@ public class FileStorageRdbActivator extends DeferredActivator {
             getServiceRegistry().clearRegistry();
             secretService.close();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageRdbActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

@@ -70,7 +70,7 @@ public class CalendarCallbacks implements CalendarListener {
     private List<CalendarListener> copyForReading = new ArrayList<CalendarListener>();
     
     private static final CalendarCallbacks INSTANCE = new CalendarCallbacks();
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarCallbacks.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCallbacks.class));
 
     private boolean mustCopy;
 

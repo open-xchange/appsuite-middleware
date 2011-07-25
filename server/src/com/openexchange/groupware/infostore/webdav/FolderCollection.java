@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderCollection.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCollection.class));
 	private final InfostoreWebdavFactory factory;
 	private WebdavPath url;
 	private final PropertyHelper propertyHelper;

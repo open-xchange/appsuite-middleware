@@ -66,7 +66,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultAuthorizationImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultAuthorizationImpl.class));
 
     private static final DefaultAuthorizationImpl INSTANCE = new DefaultAuthorizationImpl();
 

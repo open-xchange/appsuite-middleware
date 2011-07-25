@@ -68,7 +68,7 @@ public class StringByRegexStep extends AbstractStep<String, Page> {
 
     private String regex;
     
-    private static final Log LOG = LogFactory.getLog(StringByRegexStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByRegexStep.class));
     
     public StringByRegexStep(){
         

@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentRepairRecurrenceString implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceString.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceString.class));
 
     public AppointmentRepairRecurrenceString() {
         super();

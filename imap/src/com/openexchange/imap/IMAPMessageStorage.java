@@ -137,7 +137,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -344,10 +344,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug(sb.toString(), e);
                     }
                     if (0 == retry) {
-                        session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
+                        session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
                         retry++;
                     } else if (1 == retry) {
-                        session.setParameter(key, FetchIMAPCommand.NO_BODYSTRUCTURE_PROFILE_MODIFIER);
+                        session.setParameter(key, FetchIMAPCommand.HEADERLESS_PROFILE_MODIFIER);
                         retry++;
                     } else {
                         throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -364,7 +364,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
         //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
-        final NewFetchIMAPCommand command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        final NewFetchIMAPCommand command;
+        if (array instanceof long[]) {
+            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        } else {
+            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+        }
         final long start = System.currentTimeMillis();
         final MailMessage[] tmp = command.doCommand();
         final long time = System.currentTimeMillis() - start;
@@ -1845,6 +1850,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static final MailFields MAILFIELDS_DEFAULT = new MailFields(MailField.ID, MailField.FOLDER_ID);
 
+    private static boolean assumeIMAPSortIsReliable() {
+        return false; // Introduce config parameter?
+    }
+
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
      * 
@@ -1861,7 +1870,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         MailMessage[] retval = null;
         {
             boolean allFetch = true;
-            if (MAILFIELDS_DEFAULT.equals(lowCostFields)) {
+            if (assumeIMAPSortIsReliable() && MAILFIELDS_DEFAULT.equals(lowCostFields)) { // Enable if sure that IMAP sort works reliably
                 try {
                     final long start = System.currentTimeMillis();
                     final long[] uids = IMAPSort.allUIDs(imapFolder, OrderDirection.DESC.equals(order), imapConfig);
@@ -2107,7 +2116,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 resetIMAPFolder();
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
-            }
+            } 
         }
     }
 

@@ -61,7 +61,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  */
 public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteListenerServiceTracker.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteListenerServiceTracker.class));
 
     private final BundleContext context;
 

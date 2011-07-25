@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class PrincipalURL extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "principal-url";
+    private static final String PROPERTY_NAME = "principal-URL";
     private SessionHolder sessionHolder = null;
     
     public PrincipalURL(SessionHolder sessionHolder) {
@@ -71,7 +71,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
     
     @Override
     protected String getValue() {
-        return "<D:href>/servlet/home/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
+        return "<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
     }
 
 }

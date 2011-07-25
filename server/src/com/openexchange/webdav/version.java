@@ -65,7 +65,7 @@ import com.openexchange.server.impl.Version;
  */
 public final class version extends HttpServlet {
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(version.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(version.class));
 
     /**
      * For serialization.

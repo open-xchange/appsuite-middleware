@@ -74,7 +74,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  */
 public class SpamUpdateTask implements UpdateTask {
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SpamUpdateTask.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpamUpdateTask.class));
 
 	public int addedWithVersion() {
 		return 1;

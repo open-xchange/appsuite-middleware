@@ -68,7 +68,7 @@ import com.openexchange.config.internal.filewatcher.FileListener;
  */
 public final class PropertyWatcher implements FileListener {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyWatcher.class));
 
     private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new ConcurrentHashMap<String, PropertyWatcher>();
 

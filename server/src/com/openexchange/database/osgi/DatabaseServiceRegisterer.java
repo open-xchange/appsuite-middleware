@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DatabaseServiceRegisterer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceRegisterer.class));
 
     private final BundleContext context;
 

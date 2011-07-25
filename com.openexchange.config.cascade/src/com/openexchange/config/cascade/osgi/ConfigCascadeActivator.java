@@ -73,7 +73,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
     
-    static final Log LOG = LogFactory.getLog(ConfigCascadeActivator.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigCascadeActivator.class));
 
     private boolean configured = false;
 

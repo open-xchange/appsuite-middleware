@@ -68,7 +68,7 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
  */
 public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3StorageProviderServiceTrackerCustomizer.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3StorageProviderServiceTrackerCustomizer.class));
 
     private final BundleContext context;
 

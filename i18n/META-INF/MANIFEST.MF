@@ -10,8 +10,9 @@ Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
+ com.openexchange.log,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.3.2"
+ org.osgi.framework,
+ org.osgi.util.tracker

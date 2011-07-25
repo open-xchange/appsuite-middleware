@@ -76,7 +76,7 @@ public final class ConversionServlet extends SessionServlet {
 
     private static final long serialVersionUID = 2192713156202101696L;
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionServlet.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionServlet.class));
 
     private static final String ACTION_CONVERT = "convert";
 

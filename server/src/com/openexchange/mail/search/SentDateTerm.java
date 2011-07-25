@@ -53,10 +53,11 @@ import java.util.Collection;
 import java.util.Date;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link SentDateTerm}
@@ -124,7 +125,8 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         try {
             sentDate = msg.getSentDate();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(SentDateTerm.class)).warn("Error during search.", e);
+            return false;
         }
         if (null == sentDate) {
             return false;

@@ -77,7 +77,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class IMAPSearch {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSearch.class));
 
     /**
      * No instantiation

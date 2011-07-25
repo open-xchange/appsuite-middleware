@@ -15,7 +15,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public class LDAPHostnameProperties {
     
-    private static final Log LOG = LogFactory.getLog(LDAPHostnameProperties.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPHostnameProperties.class));
     
     /**
      * Fetches the property (convenience method)

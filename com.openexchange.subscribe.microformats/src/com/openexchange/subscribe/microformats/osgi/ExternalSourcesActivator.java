@@ -73,7 +73,7 @@ import com.openexchange.timer.TimerService;
  */
 public class ExternalSourcesActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(ExternalSourcesActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
     
     private static final String SOURCES_LIST = "com.openexchange.subscribe.external.sources";
 

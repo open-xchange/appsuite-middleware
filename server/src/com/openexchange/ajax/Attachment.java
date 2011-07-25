@@ -125,7 +125,8 @@ public class Attachment extends PermissionServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Attachment.class));
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Attachment.class));
+
 
     private long maxUploadSize = -2;
 

@@ -125,17 +125,19 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
     }
 
     @Override
-    protected void handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(final Response response) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
         if (response == null) {
-            return;
-        } else if (!(response instanceof FetchResponse)) {
-            return;
+            return true;
+        }
+        if (!(response instanceof FetchResponse)) {
+            return false;
         }
         sla.append(((UID) (((FetchResponse) response).getItem(0))).uid);
         index++;
+        return true;
     }
 
 }

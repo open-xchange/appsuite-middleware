@@ -75,7 +75,7 @@ public class WebdavPropfindAction extends AbstractAction {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 	
-	private static final Log LOG = LogFactory.getLog(WebdavPropfindAction.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPropfindAction.class));
 	
 	protected final XMLOutputter outputter = new XMLOutputter();
 

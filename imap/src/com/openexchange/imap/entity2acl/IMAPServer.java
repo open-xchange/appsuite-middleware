@@ -50,6 +50,8 @@
 package com.openexchange.imap.entity2acl;
 
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * {@link IMAPServer} - Represents an IMAP server with ACL support.
@@ -57,6 +59,10 @@ import java.net.InetSocketAddress;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum IMAPServer {
+    /**
+     * Dummy unknown value.
+     */
+    UNKNOWN("Unknown", null, null, null),
     /**
      * Courier
      */
@@ -194,6 +200,17 @@ public enum IMAPServer {
         return greetingMatcher.matches(greeting);
     }
 
+    private static final EnumSet<IMAPServer> SET = EnumSet.complementOf(EnumSet.of(IMAPServer.UNKNOWN));
+
+    /**
+     * Gets the IMAP servers.
+     * 
+     * @return The IMAP servers
+     */
+    public static Set<IMAPServer> getIMAPServers() {
+        return SET;
+    }
+
     /**
      * Gets the class name of {@link Entity2ACL} implementation that corresponds to specified name.
      * 
@@ -201,10 +218,9 @@ public enum IMAPServer {
      * @return The class name of {@link Entity2ACL} implementation or <code>null</code> if none matches.
      */
     public static final Entity2ACL getIMAPServerImpl(final String name) {
-        final IMAPServer[] imapServers = IMAPServer.values();
-        for (int i = 0; i < imapServers.length; i++) {
-            if (imapServers[i].getName().equalsIgnoreCase(name)) {
-                return imapServers[i].getImpl();
+        for (final IMAPServer imapServer : getIMAPServers()) {
+            if (imapServer.getName().equalsIgnoreCase(name)) {
+                return imapServer.getImpl();
             }
         }
         return null;

@@ -80,7 +80,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public abstract class Consistency implements ConsistencyMBean {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Consistency.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Consistency.class));
 
     public List<String> listMissingFilesInContext(final int contextId) throws OXException {
         LOG.info("Listing missing files in context "+contextId);
@@ -423,7 +423,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForInfoitem.class));
 
         private final DatabaseImpl database;
 
@@ -483,7 +483,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForAttachment.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateDummyFileForAttachment.class));
 
         private final AttachmentBase attachments;
 
@@ -547,7 +547,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RemoveFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoveFile.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RemoveFile.class));
 
         private final FileStorage storage;
 
@@ -578,7 +578,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteInfoitem.class));
 
         private final DatabaseImpl database;
 
@@ -628,7 +628,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteAttachment implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteAttachment.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeleteAttachment.class));
 
         private final AttachmentBase attachments;
         public DeleteAttachment(final AttachmentBase attachments) {
@@ -686,7 +686,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateInfoitem.class));
+        private static final org.apache.commons.logging.Log LOG1 = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreateInfoitem.class));
 
         private static final String description = "This file needs attention";
         private static final String title = "Restoredfile";

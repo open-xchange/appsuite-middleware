@@ -120,7 +120,7 @@ public final class UnifiedINBOXUID {
             return this;
         } catch (final GeneralSecurityException e) {
             // Must not occur
-            org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXUID.class).warn("\n\tPBE (password-based-encryption) failed.\n", e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXUID.class)).warn("\n\tPBE (password-based-encryption) failed.\n", e);
             uidl = mailPath;
         }
         return this;

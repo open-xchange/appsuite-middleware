@@ -68,7 +68,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class HTTPServletRegistration extends ServiceTracker{
     
-    private static Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
     
     private Servlet servlet;
     private String alias;

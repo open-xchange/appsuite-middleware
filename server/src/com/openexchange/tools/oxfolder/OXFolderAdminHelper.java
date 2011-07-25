@@ -87,7 +87,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderAdminHelper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderAdminHelper.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderAdminHelper.class));
 
     private static final boolean ADMIN_EDITABLE = false;
 

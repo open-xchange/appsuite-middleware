@@ -88,7 +88,7 @@ public final class UnifiedINBOXFolderConverter {
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class));
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -153,7 +153,7 @@ public final class UnifiedINBOXFolderConverter {
      * 
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
-     * @param fullname The folder's fullname
+     * @param fullName The folder's full name
      * @param localizedName The localized name of the folder
      * @return The appropriately filled instance of {@link MailFolder}
      * @throws OXException If converting mail folder fails
@@ -167,7 +167,7 @@ public final class UnifiedINBOXFolderConverter {
      * 
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
-     * @param fullname The folder's fullname
+     * @param fullname The folder's full name
      * @param localizedName The localized name of the folder
      * @param executor The executor to use to concurrently load accounts' message counts
      * @return The appropriately filled instance of {@link MailFolder}
@@ -232,6 +232,7 @@ public final class UnifiedINBOXFolderConverter {
         ownPermission.setGroupPermission(false);
         ownPermission.setFolderPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER);
         ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        ownPermission.setFolderAdmin(false);
         mailFolder.setOwnPermission(ownPermission);
     }
 

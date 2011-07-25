@@ -1,3 +1,33 @@
+open-xchange-oauth-msn (6.20.0.0-12) unstable; urgency=low
+
+  * another build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 22 Jul 2011 10:02:14 +0000
+
+open-xchange-oauth-msn (6.20.0.0-11) unstable; urgency=low
+
+  * build for public ptf 2011-07-25
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 20 Jul 2011 15:08:34 +0000
+
+open-xchange-oauth-msn (6.20.0.0-10) unstable; urgency=low
+
+  * build for public ptf 2011-07-06
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 14:21:11 +0000
+
+open-xchange-oauth-msn (6.20.0.0-9) unstable; urgency=low
+
+  * build for PTF 2011070410000182
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 04 Jul 2011 13:34:47 +0000
+
+open-xchange-oauth-msn (6.20.0.0-8) unstable; urgency=low
+
+  * build for PTF 2011062710000382
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 01 Jul 2011 07:07:54 +0000
+
 open-xchange-oauth-msn (6.20.0.0-7) unstable; urgency=low
 
   * Public PTF 2011-06-22

@@ -65,7 +65,7 @@ import com.openexchange.java.Autoboxing;
  */
 public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TargetRegistryCustomizer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TargetRegistryCustomizer.class));
 
     private final BundleContext context;
 

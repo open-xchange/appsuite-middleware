@@ -69,7 +69,7 @@ import com.openexchange.sessiond.impl.SessiondMBeanImpl;
  */
 final class ManagementRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ManagementRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
 
     private BundleContext context;
     private ObjectName objectName;

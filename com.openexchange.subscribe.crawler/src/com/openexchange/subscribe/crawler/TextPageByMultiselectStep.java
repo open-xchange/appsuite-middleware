@@ -73,7 +73,7 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
     
     private int formNumber;
     
-    private static final Log LOG = LogFactory.getLog(TextPageByMultiselectStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextPageByMultiselectStep.class));
     
     public TextPageByMultiselectStep(){
         

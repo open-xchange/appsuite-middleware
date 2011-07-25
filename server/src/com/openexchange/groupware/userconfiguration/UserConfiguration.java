@@ -69,7 +69,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -8277899698366715803L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
 
     /**
      * The permission bit for mail access.
@@ -215,6 +215,18 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * The permission bit for denied portal access.
      */
     public static final int DENIED_PORTAL = 1 << 28;
+    
+    /**
+     * The permission bit for caldav access. ATTENTION: This is actually handled by the config cascade!
+     */
+    public static final int CALDAV = 1 << 29;
+    
+    
+    /**
+     * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
+     */
+    public static final int CARDDAV = 1 << 30;
+    
 
     /*-
      * Field members
@@ -848,20 +860,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to enable multiple mail accounts.
-     * <p>
-     * Since this is currently a beta feature, it is globally configurable via user's attribute <code>"beta"</code>.
      * 
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
-        try {
-            return hasBetaEnabled() && hasPermission(MULTIPLE_MAIL_ACCOUNTS);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
     }
 
@@ -881,14 +883,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
-        try {
-            return hasBetaEnabled() && hasPermission(SUBSCRIPTION);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(SUBSCRIPTION);
     }
 
@@ -908,14 +902,6 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
-        try {
-            return hasBetaEnabled() && hasPermission(PUBLICATION);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        /*
-         * Return flag
-         */
         return hasPermission(PUBLICATION);
     }
 
@@ -1081,20 +1067,4 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public String toString() {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
-
-    private static final String BETA = "beta";
-
-    private static final String PROP_BETA = "com.openexchange.user.beta";
-
-    /**
-     * Checks whether configuration's user has beta features enabled.
-     * 
-     * @return <code>true</code> if configuration's user has beta features enabled; otherwise <code>false</code>
-     * @throws OXException If user cannot be fetched from storage
-     */
-    private boolean hasBetaEnabled() throws OXException {
-        final UserAttributeAccess uaa = UserAttributeAccess.getDefaultInstance();
-        return uaa.getBooleanAttribute(BETA, UserStorage.getInstance().getUser(userId, ctx), uaa.getBooleanProperty(PROP_BETA, true));
-    }
-
 }

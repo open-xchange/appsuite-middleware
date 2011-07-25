@@ -91,7 +91,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
     private static final String _invalidMethodError = "invalid method!";
 
-    private static final Log LOG = LogFactory.getLog(folders.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(folders.class));
 
     /**
      * Initializes a new {@link folders}

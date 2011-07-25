@@ -82,6 +82,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.attachment.AttachmentToken;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -113,7 +115,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class JSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JSONMessageHandler.class));
 
     private static final class PlainTextContent {
 
@@ -166,6 +168,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private PlainTextContent plainText;
 
+    private final boolean token;
+
+    private final int ttlMillis;
+
     /**
      * Initializes a new {@link JSONMessageHandler}
      * 
@@ -177,7 +183,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
      *            it is ignored.
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws OXException {
+    public JSONMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
         super();
         this.accountId = accountId;
         modified = new boolean[1];
@@ -187,6 +193,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
         this.displayMode = displayMode;
         this.mailPath = new MailPath(mailPath);
         jsonObject = new JSONObject();
+        this.token = token;
+        this.ttlMillis = ttlMillis;
     }
 
     /**
@@ -199,10 +207,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
      * @param session The session providing needed user data
      * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise
      *            it is ignored.
+     * @param token <code>true</code> to add attachment tokens
+     * @param ttlMillis The tokens' timeout
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm) throws OXException {
-        this(accountId, mailPath, mail, displayMode, session, usm, getContext(session));
+    public JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
+        this(accountId, mailPath, mail, displayMode, session, usm, getContext(session), token, ttlMillis);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -216,8 +226,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JSONMessageHandler} for internal usage
      */
-    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx) throws OXException {
+    private JSONMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final Session session, final UserSettingMail usm, final Context ctx, final boolean token, final int ttlMillis) throws OXException {
         super();
+        this.ttlMillis = ttlMillis;
+        this.token = token;
         this.accountId = accountId;
         modified = new boolean[1];
         this.session = session;
@@ -281,7 +293,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
             /*
              * Sequence ID
              */
-            jsonObject.put(MailListField.ID.getKey(), part.containsSequenceId() ? part.getSequenceId() : id);
+            final String attachmentId = part.containsSequenceId() ? part.getSequenceId() : id;
+            jsonObject.put(MailListField.ID.getKey(), attachmentId);
             /*
              * Filename
              */
@@ -321,6 +334,23 @@ public final class JSONMessageHandler implements MailMessageHandler {
              * Content
              */
             jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+            if (token) {
+                /*
+                 * Token
+                 */
+                try {
+                    final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
+                    token.setAccessInfo(accountId, session.getUserId(), session.getContextId());
+                    token.setAttachmentInfo(
+                        this.jsonObject.getString(FolderChildFields.FOLDER_ID),
+                        this.jsonObject.getString(DataFields.ID),
+                        attachmentId);
+                    AttachmentTokenRegistry.getInstance().putToken(token, session);
+                    jsonObject.put("token", token.getId());
+                } catch (final Exception e) {
+                    LOG.warn("Adding attachment token failed.", e);
+                }
+            }
             // if (isInline &&
             // part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             // // TODO: Add rtf2html conversion here!
@@ -789,7 +819,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 LOG.error(sb.toString());
                 return true;
             }
-            final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx);
+            final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
@@ -885,18 +915,19 @@ public final class JSONMessageHandler implements MailMessageHandler {
          */
         if (isVCalendar(baseContentType)) {
             /*
-             * Check ICal part for a valid UID and presence of method=RESPONSE parameter
+             * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
             final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
             if (iCalParser != null) {
                 try {
-                    if (null != iCalParser.parseUID(part.getInputStream())) {
+                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    if (null != method) {
                         /*
-                         * Assume an invitation response
+                         * Assume an iTIP response or request
                          */
                         final ContentType contentType = part.getContentType();
                         if (!contentType.containsParameter("method")) {
-                            contentType.setParameter("method", "RESPONSE");
+                            contentType.setParameter("method", method.toUpperCase(Locale.US));
                         }
                     }
                 } catch (final RuntimeException e) {

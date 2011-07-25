@@ -54,10 +54,11 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link HeaderTerm}
@@ -114,7 +115,8 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         try {
             val = msg.getHeader(hdr[0]);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(HeaderTerm.class)).warn("Error during search.", e);
+            return false;
         }
         if ((val == null || val.length == 0) && (hdr[1] == null)) {
             return true;

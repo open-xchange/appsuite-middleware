@@ -57,11 +57,13 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.search.RecipientStringTerm;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link BccTerm}
@@ -110,13 +112,24 @@ public final class BccTerm extends SearchTerm<String> {
     @Override
     public boolean matches(final Message msg) throws OXException {
         try {
-            if (containsWildcard()) {
-                return toRegex(addr).matcher(getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC))).find();
+            /*
+             * Get plain headers
+             */
+            final String[] headers = msg.getHeader("Bcc");
+            if (null == headers || headers.length == 0) {
+                return false;
             }
-            return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC)).toLowerCase(Locale.ENGLISH).indexOf(
-                addr.toLowerCase(Locale.ENGLISH)) != -1);
+            /*
+             * Parse addresses
+             */
+            final InternetAddress[] addresses = MIMEMessageUtility.parseAddressList(MIMEMessageUtility.decodeMultiEncodedHeader(headers[0]), false, false);
+            if (containsWildcard()) {
+                return toRegex(addr).matcher(getAllAddresses(addresses)).find();
+            }          
+            return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(BccTerm.class)).warn("Error during search.", e);
+            return false;
         }
     }
 

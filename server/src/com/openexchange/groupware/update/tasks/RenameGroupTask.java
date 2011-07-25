@@ -75,7 +75,7 @@ import com.openexchange.server.services.I18nServices;
  */
 public class RenameGroupTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RenameGroupTask.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RenameGroupTask.class));
 
     /**
      * Initializes a new {@link RenameGroupTask}.

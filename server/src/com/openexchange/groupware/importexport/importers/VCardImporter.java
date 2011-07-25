@@ -100,7 +100,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public class VCardImporter extends AbstractImporter implements OXExceptionConstants {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(VCardImporter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
 
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {

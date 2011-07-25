@@ -68,7 +68,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 final class Pipe<T> implements DataSource<T>, DataSink<T> {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Pipe.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pipe.class));
 
     private final ThreadPoolService threadPool;
     private final BlockingQueue<Object> queue = new LinkedBlockingQueue<Object>();

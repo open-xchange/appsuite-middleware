@@ -73,7 +73,7 @@ import com.openexchange.subscribe.microformats.parser.OXMFForm;
  */
 public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
     
-    private static final Log LOG = LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class));
 
     public Reader getData(Subscription subscription) throws OXException {
         if(!ExternalSubscriptionSource.class.isInstance(subscription.getSource())) {

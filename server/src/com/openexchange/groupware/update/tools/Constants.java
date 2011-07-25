@@ -77,9 +77,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.updatetasktoolkit", "name", "Update Task Toolkit");
         } catch (final MalformedObjectNameException e) {
-            LogFactory.getLog(Constants.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class)).error(e.getMessage(), e);
         } catch (final NullPointerException e) {
-            LogFactory.getLog(Constants.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class)).error(e.getMessage(), e);
         }
         return retval;
     }

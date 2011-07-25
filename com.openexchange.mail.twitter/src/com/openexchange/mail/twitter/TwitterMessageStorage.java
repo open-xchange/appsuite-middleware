@@ -181,7 +181,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             throw MailExceptionCode.FOLDER_NOT_FOUND.create(folder);
         }
         try {
-            final List<Status> timeline = twitterAccess.getFriendsTimeline();
+            final List<Status> timeline = twitterAccess.getHomeTimeline();
             final Status[] statuses = new Status[mailIds.length];
             for (int i = 0; i < mailIds.length; i++) {
                 final long mailId = mailIds[i];
@@ -227,7 +227,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
             /*
              * Get friends' time line
              */
-            final List<Status> timeline = twitterAccess.getFriendsTimeline();
+            final List<Status> timeline = twitterAccess.getHomeTimeline();
             final int size = timeline.size();
             msgs = new ArrayList<MailMessage>(size);
             final String accountName = getMailAccount().getName();

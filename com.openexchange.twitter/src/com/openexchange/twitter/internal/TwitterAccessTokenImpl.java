@@ -49,7 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
-import twitter4j.http.AccessToken;
+import twitter4j.auth.AccessToken;
 import com.openexchange.twitter.TwitterAccessToken;
 
 /**

@@ -4,7 +4,7 @@
 Name:           open-xchange-push
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Push Bundle
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-threadpool >= @OXVERSION@ open-xchange-configread >= @OXVERSION@
 #
 
 %description
@@ -79,3 +79,4 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/etc/groupware/mail-push.properties

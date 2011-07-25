@@ -87,7 +87,7 @@ import com.openexchange.user.json.writer.UserWriter;
  */
 public final class AllAction extends AbstractUserAction {
 
-    private static final Log LOG = LogFactory.getLog(AllAction.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AllAction.class));
 
     /**
      * The <tt>all</tt> action string.

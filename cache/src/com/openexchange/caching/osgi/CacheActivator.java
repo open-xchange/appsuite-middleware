@@ -76,7 +76,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public final class CacheActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(CacheActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheActivator.class));
 
     private final Dictionary<String, String> dictionary;
 

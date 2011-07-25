@@ -328,7 +328,7 @@ public abstract class MailConfig {
                 return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
             } catch (final AddressException e) {
                 final String primaryAddress = mailAccount.getPrimaryAddress();
-                org.apache.commons.logging.LogFactory.getLog(MailConfig.class).warn(
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailConfig.class)).warn(
                     "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
                     e);
                 return primaryAddress;
@@ -540,7 +540,6 @@ public abstract class MailConfig {
             mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
         }
         // Assign password
-        final String sessionPassword = session.getPassword();
         if (mailAccount.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
@@ -550,7 +549,7 @@ public abstract class MailConfig {
                 }
                 mailConfig.password = masterPw;
             } else {
-                mailConfig.password = sessionPassword;
+                mailConfig.password = session.getPassword();
             }
         } else {
             final String mailAccountPassword = mailAccount.getPassword();

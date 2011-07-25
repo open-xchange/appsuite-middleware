@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class LockCleaner implements FolderEventInterface, InfostoreEventInterface {
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LockCleaner.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LockCleaner.class));
 	
 	private final EntityLockManager infoLockManager;
 	private final FolderLockManager folderLockManager;

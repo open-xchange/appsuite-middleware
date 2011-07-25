@@ -93,33 +93,13 @@ public final class StatusImpl implements Status {
         return twitter4jStatus.getInReplyToStatusId();
     }
 
-    public int getInReplyToUserId() {
+    public long getInReplyToUserId() {
         return twitter4jStatus.getInReplyToUserId();
-    }
-
-    public double getLatitude() {
-        return twitter4jStatus.getLatitude();
-    }
-
-    public double getLongitude() {
-        return twitter4jStatus.getLongitude();
-    }
-
-    public int getRateLimitLimit() {
-        return twitter4jStatus.getRateLimitLimit();
-    }
-
-    public int getRateLimitRemaining() {
-        return twitter4jStatus.getRateLimitRemaining();
-    }
-
-    public long getRateLimitReset() {
-        return twitter4jStatus.getRateLimitReset();
     }
 
     public RetweetDetails getRetweetDetails() {
         if (null == retweetDetails) {
-            retweetDetails = new RetweetDetailsImpl(twitter4jStatus.getRetweetDetails());
+            retweetDetails = new RetweetDetailsImpl(twitter4jStatus.getRetweetedStatus(), twitter4jStatus.getRetweetCount());
         }
         return retweetDetails;
     }

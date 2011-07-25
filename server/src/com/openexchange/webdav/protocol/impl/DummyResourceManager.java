@@ -63,7 +63,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public final class DummyResourceManager implements WebdavFactory {
 
-    private static final Log LOG = LogFactory.getLog(DummyResourceManager.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DummyResourceManager.class));
 	private static final DummyResourceManager INSTANCE = new DummyResourceManager();
 
 	public static DummyResourceManager getInstance(){

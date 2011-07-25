@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SpecificServiceChooser<T> {
     
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SpecificServiceChooser.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpecificServiceChooser.class));
     
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 

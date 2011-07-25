@@ -66,7 +66,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TaskWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
 
     public TaskWriter(final TimeZone timeZone) {
         super(timeZone, null);

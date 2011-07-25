@@ -82,7 +82,7 @@ public class CalendarFolderObject implements Serializable {
 
     private final boolean fill_shared;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarFolderObject.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarFolderObject.class));
 
     public static final String IDENTIFIER = "CalendarFolderObject@";
 

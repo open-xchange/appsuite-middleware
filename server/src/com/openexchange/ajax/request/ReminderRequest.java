@@ -103,7 +103,7 @@ public final class ReminderRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReminderRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderRequest.class));
 
     /**
      * Gets the time stamp.

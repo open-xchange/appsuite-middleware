@@ -56,8 +56,10 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +80,9 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -91,14 +95,14 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * A {@link CaldavResource} bridges an OX appointment to a caldav resource. 
+ * A {@link CaldavResource} bridges an OX appointment to a caldav resource.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavResource extends AbstractResource {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavResource.class));
-    
+    private static final Log LOG = LogFactory.getLog(CaldavResource.class);
+
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private final GroupwareCaldavFactory factory;
@@ -128,9 +132,13 @@ public class CaldavResource extends AbstractResource {
         this.factory = factory;
         this.url = parent.getUrl().dup().append(appointment.getUid() + ".ics");
 
-        patchOrganizer();
-        patchOrganizersParticipantState();
-        patchSeriesStartAndEnd();
+        if (!factory.getState().hasBeenPatched(appointment)) {
+            factory.getState().markAsPatched(appointment);
+            patchGroups();
+            patchOrganizer();
+            patchOrganizersParticipantState();
+            patchSeriesStartAndEnd();
+        }
     }
 
     public CaldavResource(final CaldavCollection parent, final WebdavPath url, final GroupwareCaldavFactory factory) {
@@ -235,8 +243,8 @@ public class CaldavResource extends AbstractResource {
                 }
 
             }
-        } catch (final ConversionError e) {
-            LOG.error(e.getMessage(),e );
+        } catch (ConversionError e) {
+            LOG.error(e.getMessage(), e);
             throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
@@ -245,9 +253,9 @@ public class CaldavResource extends AbstractResource {
         if (oldAppointment.getFullTime() && !cdo.getFullTime() && !cdo.containsFullTime()) {
             cdo.setFullTime(false); // Set this explicitly, so the update actually changes it
         }
-        
+
         if (oldAppointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && !cdo.containsRecurrenceCount() && !cdo.containsUntil()) {
-            cdo.setUntil(cdo.getUntil()); // Again, set this explicitly if this changed. 
+            cdo.setUntil(cdo.getUntil()); // Again, set this explicitly if this changed.
         }
     }
 
@@ -258,7 +266,6 @@ public class CaldavResource extends AbstractResource {
         }
         // Normalize the wanted DelEx to midnight, and add them to our set.
         final Set<Date> wantedSet = new HashSet<Date>(Arrays.asList(wantedDeleteExceptions));
-
 
         Date[] knownDeleteExceptions = oldAppointment.getDeleteException();
         if (knownDeleteExceptions == null) {
@@ -293,7 +300,7 @@ public class CaldavResource extends AbstractResource {
         checkRange();
         write(true);
     }
-    
+
     @Override
     public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
         final WebdavResource destinationResource = factory.resolveResource(dest);
@@ -321,22 +328,35 @@ public class CaldavResource extends AbstractResource {
             if (create) {
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
+                Appointment oldAppointment = factory.getState().get(appointment.getUid(), appointment.getParentFolderID());
+                patchResources(oldAppointment, toSave);
                 appointmentSQLInterface.updateAppointmentObject(toSave, parent.getId(), toSave.getLastModified());
             }
 
-            for (final Appointment exception : exceptionsToSave) {
-                setAppropriateIDForException(exception);
+            // Exceptions may not change resource participants, so don't patch them here
+            for (Appointment exception : exceptionsToSave) {
+                Appointment matchingException = getMatchingChangeException(exception);
+                if (matchingException != null) {
+                    exception.setObjectID(matchingException.getObjectID());
+                    exception.setLastModified(matchingException.getLastModified());
+                } else {
+                    exception.setObjectID(appointment.getObjectID());
+                }
+
                 exception.removeUid(); // TODO: Needed?
                 final CalendarDataObject cdo = (CalendarDataObject) exception;
                 factory.getCalendarUtilities().removeRecurringType(cdo);
-                appointmentSQLInterface.updateAppointmentObject(
-                    cdo,
-                    exception.getParentFolderID(),
-                    appointment.getLastModified());
+                appointmentSQLInterface.updateAppointmentObject(cdo, exception.getParentFolderID(), appointment.getLastModified());
             }
 
-            for (final CalendarDataObject deleteException : deleteExceptionsToSave) {
-                setAppropriateIDForException(deleteException);
+            for (CalendarDataObject deleteException : deleteExceptionsToSave) {
+                Appointment matchingException = getMatchingChangeException(deleteException);
+                if (matchingException != null) {
+                    deleteException.setObjectID(matchingException.getObjectID());
+                    deleteException.setLastModified(matchingException.getLastModified());
+                } else {
+                    deleteException.setObjectID(appointment.getObjectID());
+                }
                 appointmentSQLInterface.deleteAppointmentObject(deleteException, parent.getId(), appointment.getLastModified());
             }
 
@@ -358,20 +378,14 @@ public class CaldavResource extends AbstractResource {
         }
     }
 
-    private void setAppropriateIDForException(final Appointment exception) {
-        final List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
-        if (changeExceptions == null) {
-            exception.setObjectID(appointment.getObjectID());
-            return;
-        }
-        for (final Appointment existingException : changeExceptions) {
-            if (existingException.getRecurrenceDatePosition().equals(exception.getRecurrenceDatePosition())) {
-                exception.setObjectID(existingException.getObjectID());
-                exception.setLastModified(existingException.getLastModified());
-                return;
+    private Appointment getMatchingChangeException(Appointment exception) {
+        List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
+        for (Appointment existingException : changeExceptions) {
+           if (existingException.getRecurrenceDatePosition().equals(exception.getRecurrenceDatePosition())) {
+                return existingException;
             }
         }
-        exception.setObjectID(appointment.getObjectID());
+        return null;
     }
 
     public void delete() throws OXException {
@@ -560,10 +574,77 @@ public class CaldavResource extends AbstractResource {
     }
 
     private void patchSeriesStartAndEnd() {
-        if (this.appointment.isMaster()) {
-            final CalendarCollectionService calUtils = factory.getCalendarUtilities();
-            calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
+        CalendarCollectionService calUtils = factory.getCalendarUtilities();
+        calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
+
+        if (this.appointment.containsUntil()) {
+            this.appointment.setUntil(plusOneDay(appointment.getUntil()));
         }
+    }
+
+    private Date plusOneDay(Date until) {
+
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(until);
+        calendar.setTimeZone(UTC);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        Date oneDayLater = calendar.getTime();
+        return oneDayLater;
+    }
+
+    private void patchGroups() {
+        // We want to add all user participants to the participants list and remove all group participants
+
+        Set<Integer> guardian = new HashSet<Integer>();
+        List<Participant> newParticipants = new ArrayList<Participant>();
+
+        Participant[] participants = appointment.getParticipants();
+        for (Participant participant : participants) {
+            if (UserParticipant.class.isInstance(participant)) {
+                UserParticipant userParticipant = (UserParticipant) participant;
+                guardian.add(userParticipant.getIdentifier());
+                newParticipants.add(userParticipant);
+            } else if (!GroupParticipant.class.isInstance(participant)) {
+                newParticipants.add(participant);
+            }
+        }
+
+        UserParticipant[] users = appointment.getUsers();
+        for (UserParticipant userParticipant : users) {
+            if (!guardian.contains(userParticipant.getIdentifier())) {
+                newParticipants.add(userParticipant);
+            }
+        }
+
+        appointment.setParticipants(newParticipants);
+    }
+
+    private void patchResources(Appointment old, Appointment update) {
+        // We want to add all ResourceParticipants from the oldAppointment to the update, effectively disallowing modification of resources
+        Set<Integer> guardian = new HashSet<Integer>();
+        List<Participant> newParticipants = new ArrayList<Participant>();
+
+        Participant[] participants = update.getParticipants();
+        for (Participant participant : participants) {
+            if (ResourceParticipant.class.isInstance(participant)) {
+                guardian.add(participant.getIdentifier());
+            }
+            newParticipants.add(participant);
+        }
+
+        participants = old.getParticipants();
+        for (Participant participant : participants) {
+            if (ResourceParticipant.class.isInstance(participant) && !guardian.contains(participant.getIdentifier())) {
+                newParticipants.add(participant);
+            }
+        }
+
+        update.setParticipants(newParticipants);
     }
 
 }

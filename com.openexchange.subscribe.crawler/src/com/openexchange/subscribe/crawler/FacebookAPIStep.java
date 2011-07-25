@@ -76,7 +76,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
-    private static final Log LOG = LogFactory.getLog(FacebookAPIStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookAPIStep.class));
 
     String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, apiKey, secret, birthdayPattern;
 

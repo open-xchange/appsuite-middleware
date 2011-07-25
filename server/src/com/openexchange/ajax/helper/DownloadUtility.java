@@ -69,7 +69,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class DownloadUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DownloadUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DownloadUtility.class));
 
     /**
      * Initializes a new {@link DownloadUtility}.

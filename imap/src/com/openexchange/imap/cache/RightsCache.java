@@ -88,7 +88,12 @@ public final class RightsCache {
         final SessionMailCache mailCache = SessionMailCache.getInstance(session, accontId);
         mailCache.get(entry);
         if (load && (null == entry.getValue())) {
-            entry.setValue(f.myRights());
+            try {
+                entry.setValue(f.myRights());
+            } catch (final MessagingException e) {
+                // Hmm...
+                throw e;
+            }
             mailCache.put(entry);
         }
         return entry.getValue();
@@ -103,6 +108,17 @@ public final class RightsCache {
      */
     public static void removeCachedRights(final IMAPFolder f, final Session session, final int accontId) {
         SessionMailCache.getInstance(session, accontId).remove(new RightsCacheEntry(f.getFullName()));
+    }
+
+    /**
+     * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
+     * 
+     * @param fullName The IMAP folder full name
+     * @param session The session providing the session-bound cache
+     * @param accontId The account ID
+     */
+    public static void removeCachedRights(final String fullName, final Session session, final int accontId) {
+        SessionMailCache.getInstance(session, accontId).remove(new RightsCacheEntry(fullName));
     }
 
     private static final class RightsCacheEntry implements SessionMailCacheEntry<Rights> {

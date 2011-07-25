@@ -78,7 +78,7 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CachingUserStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingUserStorage.class));
 
     private static final String REGION_NAME = "User";
 

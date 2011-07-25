@@ -78,7 +78,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
  */
 public class PushHandler implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(PushHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushHandler.class));
 
     public PushHandler() {
         super();
@@ -91,7 +91,12 @@ public class PushHandler implements EventHandler {
             if (obj == null) {
                 return;
             }
-            event = (CommonEvent) obj;
+            try {
+                event = (CommonEvent) obj;
+            } catch (final ClassCastException cce) {
+                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                return;
+            }
         }
 
         final int contextId = event.getContextId();

@@ -137,7 +137,7 @@ public class Infostore extends PermissionServlet {
     // public static final Exception2Message OXEXCEPTION_HANDLER = new
     // InfostoreException2Message();
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Infostore.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Infostore.class));
 
     private final long maxUploadSize = -1;
 

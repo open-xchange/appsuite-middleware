@@ -95,7 +95,7 @@ public class FolderWriter extends FolderChildWriter {
 
     protected int userId = -1;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderWriter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderWriter.class));
 
     public FolderWriter(final int userId) {
         this.userId = userId;

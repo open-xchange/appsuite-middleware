@@ -68,7 +68,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ControlActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ControlActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ControlActivator.class));
 
     private ServiceTracker managementServiceTracker;
 

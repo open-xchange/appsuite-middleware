@@ -141,7 +141,19 @@ public class StringScanner extends Scanner {
         final int start = pos - 1;
         pos = Text.length();
         peek = -1;
-        return Text.substring(start);
+        return unescape(Text.substring(start));
+    }
+
+    private String unescape(String substring) {
+        StringBuilder b = new StringBuilder();
+        boolean escape = false;
+        for(char c : substring.toCharArray()) {
+            switch(c) {
+            case '\\' : if (escape) { b.append('\\'); escape = false; } else { escape = true; } break;
+            default: b.append(c); escape = false; break;
+            }
+        }
+        return b.toString();
     }
 
     /**

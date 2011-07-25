@@ -89,7 +89,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
     private Activator activator;
 
-    private static final Log LOG = LogFactory.getLog(LinkedInServiceImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
 
     public LinkedInServiceImpl(Activator activator) {
         this.activator = activator;

@@ -66,6 +66,7 @@ import com.openexchange.push.PushManagerService;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
+import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
@@ -79,7 +80,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ImapIdleActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ImapIdleActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdleActivator.class));
 
     private List<ServiceRegistration> serviceRegistrations;
 
@@ -166,12 +167,20 @@ public final class ImapIdleActivator extends DeferredActivator {
                 }
             }
 
+            final String modestr =configurationService.getProperty("com.openexchange.push.imapidle.pushmode", PushMode.ALWAYS.toString());
+            PushMode pushmode = PushMode.fromString(modestr);
+            if( pushmode == null ) {
+                LOG.info("WARNING: " + modestr + " is an invalid setting for com.openexchange.push.imapidle.pushmode, using default");
+                pushmode = PushMode.ALWAYS;
+            }
+            
             errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay", 1000);
 
             final boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
             ImapIdlePushListener.setFolder(folder);
             ImapIdlePushListener.setDebugEnabled(debug);
-
+            ImapIdlePushListener.setPushmode(pushmode);
+            
             /*
              * Start-up
              */
@@ -190,6 +199,7 @@ public final class ImapIdleActivator extends DeferredActivator {
             LOG.info(debug ? " debugging enabled" : "debugging disabled");
             LOG.info("Foldername: " + folder);
             LOG.info("Error delay: " + errordelay + "");
+            LOG.info("pushmode: " + pushmode);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

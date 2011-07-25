@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class ScriptCoordinate {
 
-    private static Log LOG = LogFactory.getLog(ScriptCoordinate.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScriptCoordinate.class));
     
     private final int startLineNumber;
     private final int startColumnNumber;

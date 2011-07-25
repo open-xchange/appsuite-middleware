@@ -91,7 +91,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
  */
 public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ForwardRequest.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ForwardRequest.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

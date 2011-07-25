@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class PushMulticastSocket implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(PushMulticastSocket.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMulticastSocket.class));
 
     private Thread thread;
 

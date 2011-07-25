@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ListPerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ListPerformer.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

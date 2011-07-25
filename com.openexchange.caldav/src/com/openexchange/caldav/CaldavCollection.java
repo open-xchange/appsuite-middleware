@@ -58,6 +58,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caldav.GroupwareCaldavFactory.State;
+import com.openexchange.caldav.mixins.CTag;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.exception.OXException;
@@ -101,7 +102,8 @@ public class CaldavCollection extends AbstractCollection {
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
             new SupportedReportSet(),
-            new SupportedCalendarComponentSet()
+            new SupportedCalendarComponentSet(),
+            new CTag(factory.getState().getFolder(getId()), getId())
         );
         
 
@@ -174,13 +176,9 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     public List<WebdavResource> getChildren() throws OXException {
-        final State state = factory.getState();
-        final List<Appointment> appointments = state.getFolder(getId());
-        if (appointments == null) {
-            final int a = 12;
-            System.out.println(a);
-        }
-        final List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
+        State state = factory.getState();
+        List<Appointment> appointments = state.getFolder(getId());
+        List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
         for (final Appointment appointment : appointments) {
             final CaldavResource resource = new CaldavResource(this, appointment, factory);

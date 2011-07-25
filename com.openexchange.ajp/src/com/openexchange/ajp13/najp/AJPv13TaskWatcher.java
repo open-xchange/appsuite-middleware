@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
+import com.openexchange.log.Log;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -73,7 +74,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13TaskWatcher.class));
 
     private ScheduledTimerTask scheduledTimerTask;
 

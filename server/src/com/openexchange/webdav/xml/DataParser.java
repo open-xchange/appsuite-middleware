@@ -98,7 +98,7 @@ public class DataParser {
 
     private int inFolder;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DataParser.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DataParser.class));
 
     protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
         if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {

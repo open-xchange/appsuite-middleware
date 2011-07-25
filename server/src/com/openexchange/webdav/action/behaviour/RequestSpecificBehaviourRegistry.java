@@ -60,7 +60,7 @@ import com.openexchange.webdav.action.WebdavRequest;
 
 public class RequestSpecificBehaviourRegistry {
 	
-	private static final Log LOG = LogFactory.getLog(RequestSpecificBehaviourRegistry.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestSpecificBehaviourRegistry.class));
 	
 	
 	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?

@@ -70,7 +70,7 @@ import com.openexchange.concurrent.Synchronizer;
  */
 public final class XAJPv13ServletOutputStream extends ServletOutputStream implements Synchronizable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ServletOutputStream.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ServletOutputStream.class));
 
     private static final String ERR_OUTPUT_CLOSED = "OutputStream is closed";
 

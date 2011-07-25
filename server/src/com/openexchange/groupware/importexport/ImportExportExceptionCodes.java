@@ -145,6 +145,8 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
     /** Ignoring invalid value for field "%1$s": %2$s  */
     IGNORE_FIELD(ImportExportExceptionMessages.IGNORE_FIELD_MSG, CATEGORY_USER_INPUT, 1306),
     
+    CONTACT_INTERFACE_MISSING(ImportExportExceptionMessages.CONTACT_INTERFACE_MISSING, Category.CATEGORY_ERROR, 1307),
+    COULD_NOT_WRITE(ImportExportExceptionMessages.COULD_NOT_WRITE, Category.CATEGORY_ERROR, 1308),    
     ;
 
     private String message;

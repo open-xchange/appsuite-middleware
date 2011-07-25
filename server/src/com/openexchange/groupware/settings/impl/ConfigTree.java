@@ -69,7 +69,7 @@ public final class ConfigTree {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConfigTree.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigTree.class));
 
     /**
      * Reference to the settings tree.

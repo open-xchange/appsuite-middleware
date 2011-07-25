@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-06-09 10:48+0200\n"
+"PO-Revision-Date: 2011-07-25 11:51+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -154,6 +154,9 @@ msgstr ""
 
 msgid "Alarm date for the reminder is missing."
 msgstr "Es wurde kein Datum für die Erinnerungsfunktion angegeben."
+
+msgid "Alias entries are missing for user %1$d in context %2$d."
+msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden."
 
 msgid "An I/O error occurred"
 msgstr "Es trat ein E/A-Fehler auf."
@@ -1642,6 +1645,13 @@ msgstr ""
 msgid "New password contains invalid characters"
 msgstr "Neues Passwort enthält ungültige Zeichen"
 
+msgid ""
+"No UDP channel is configured. Check for failed channel opens on server "
+"startup."
+msgstr ""
+"Es wurde kein UDP-Kanal konfiguriert. Beim Server-Start läuft eine Prüfung "
+"nach fehlerhaften Kanälen. "
+
 msgid "No access to mail folder %1$s"
 msgstr "Kein Zugriff auf E-Mail-Ordner %1$s"
 
@@ -2768,6 +2778,11 @@ msgstr "Aktualisierung der Quota-Verwendung für Kontext %1$d fehlgeschlagen."
 
 msgid "Updated too many reminders."
 msgstr "Zu viele Erinnerungen aktualisiert."
+
+msgid "Updating attributes failed in context %1$d for user %2$d."
+msgstr ""
+"Das Aktualisieren der Attribute im Kontext %1$d für Benutzer %2$d ist "
+"fehlgeschlagen."
 
 msgid "Updating database ... Try again later."
 msgstr "Datenbank wird aktualisiert... Bitte später erneut versuchen."
@@ -4731,6 +4746,15 @@ msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 #. Invalid date format detected: "%1$s". Ignoring value.
 msgid "Invalid date format detected: \"%1$s\". Ignoring value."
 msgstr "Ungültiges Datumsformat: \"%1$s\". Wert wird ignoriert."
+
+#. Could not load ContactInterface to write storage contacts.
+msgid "Could not load ContactInterface to write storage contacts."
+msgstr ""
+"ContactInterface konnte nicht zum Schreiben der Kontakte im Speicher geladen "
+"werden. "
+
+msgid "Could not write entry into database."
+msgstr "Eintrag konnte nicht in Datenbank geschrieben werden."
 
 #. Ignoring invalid value for field "%1$s": %2$s
 msgid "Ignoring invalid value for field \"%1$s\": %2$s"

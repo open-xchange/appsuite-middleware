@@ -56,9 +56,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import twitter4j.OXTwitter;
-import twitter4j.Twitter;
-import twitter4j.http.AccessToken;
-import twitter4j.http.RequestToken;
+import twitter4j.OXTwitterImpl;
+import twitter4j.auth.AuthorizationFactory;
+import twitter4j.auth.BasicAuthorization;
+import twitter4j.auth.NullAuthorization;
+import twitter4j.auth.OAuthAuthorization;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.OXConfigurationBase;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -93,11 +98,15 @@ public final class TwitterServiceImpl implements TwitterService {
     }
 
     public TwitterAccess getTwitterAccess(final String twitterId, final String password) {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter(twitterId, password));
+        return new TwitterAccessImpl(new OXTwitterImpl(OXConfigurationBase.getInstance().generateConfiguration(), new BasicAuthorization(
+            twitterId,
+            password)));
     }
 
     public TwitterAccess getUnauthenticatedTwitterAccess() {
-        return new TwitterAccessImpl(new twitter4j.OXTwitter());
+        return new TwitterAccessImpl(new OXTwitterImpl(
+            OXConfigurationBase.getInstance().generateConfiguration(),
+            NullAuthorization.getInstance()));
     }
 
     public Paging newPaging() {
@@ -105,7 +114,6 @@ public final class TwitterServiceImpl implements TwitterService {
     }
 
     public TwitterAccess getOAuthTwitterAccess(final String twitterToken, final String twitterTokenSecret) throws OXException {
-        final OXTwitter twitter = new twitter4j.OXTwitter();
         /*
          * Insert the appropriate consumer key and consumer secret here
          */
@@ -114,14 +122,13 @@ public final class TwitterServiceImpl implements TwitterService {
         if (null == consumerKey || null == consumerSecret) {
             throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
         }
-        twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        twitter.setOAuthAccessToken(new AccessToken(twitterToken, twitterTokenSecret));
-        return new TwitterAccessImpl(twitter);
+        final Configuration configuration =
+            OXConfigurationBase.getInstance().generateConfiguration(consumerKey, consumerSecret, twitterToken, twitterTokenSecret);
+        return new TwitterAccessImpl(new OXTwitterImpl(configuration, new OAuthAuthorization(configuration)));
     }
 
     public TwitterAccessToken getTwitterAccessToken(final String twitterId, final String password) throws OXException {
         try {
-            final Twitter twitter = new Twitter();
             /*
              * Obtain request token
              */
@@ -130,6 +137,8 @@ public final class TwitterServiceImpl implements TwitterService {
             if (null == consumerKey || null == consumerSecret) {
                 throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
             }
+            final Configuration configuration = OXConfigurationBase.getInstance().generateConfiguration(consumerKey, consumerSecret);
+            final OXTwitter twitter = new OXTwitterImpl(configuration, AuthorizationFactory.getInstance(configuration));
             twitter.setOAuthConsumer(consumerKey, consumerSecret);
             final RequestToken requestToken;
             try {
@@ -259,5 +268,4 @@ public final class TwitterServiceImpl implements TwitterService {
             throw TwitterExceptionCodes.ACCESS_TOKEN_FAILED.create(e, twitterId);
         }
     }
-
 }

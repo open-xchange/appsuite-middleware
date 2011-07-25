@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class Database {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Database.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Database.class));
 
     private static DatabaseService databaseService;
 

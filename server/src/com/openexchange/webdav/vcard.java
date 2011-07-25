@@ -144,7 +144,7 @@ public final class vcard extends PermissionServlet {
 
     private static String SQL_ENTRY_DELETE = "DELETE FROM vcard_ids WHERE target_object_id = ? AND principal_id = ?";
 
-    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(vcard.class));
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(vcard.class));
 
     public void oxinit() {
         // Nothing to do

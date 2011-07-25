@@ -67,7 +67,7 @@ public class WebdavLogAction extends AbstractAction {
         add("AUTHORIZATION");
     }};
     
-	private static final Log LOG = LogFactory.getLog(WebdavLogAction.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLogAction.class));
 	private boolean logBody;
 	private boolean logResponse;
 	

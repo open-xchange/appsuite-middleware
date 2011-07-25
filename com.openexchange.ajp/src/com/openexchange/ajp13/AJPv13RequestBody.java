@@ -121,6 +121,6 @@ public final class AJPv13RequestBody extends AJPv13Request {
         super(payloadData);
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestBody.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13RequestBody.class));
 
 }

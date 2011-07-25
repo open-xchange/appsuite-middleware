@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 public final class HeaderCacheMailProviderRegistry {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(HeaderCacheMailProviderRegistry.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCacheMailProviderRegistry.class));
 
     /**
      * Concurrent map used as set for mail providers

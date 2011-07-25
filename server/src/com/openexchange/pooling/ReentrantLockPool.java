@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReentrantLockPool.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReentrantLockPool.class));
 
     private final int minIdle;
     private final int maxIdle;
@@ -514,7 +514,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting cleaner run.");
         }
+        final List<PooledData<T>> toCheck = new ArrayList<PooledData<T>>();
         final List<PooledData<T>> removed = new ArrayList<PooledData<T>>();
+        final List<PooledData<T>> notReturned = new ArrayList<PooledData<T>>();
         lock.lock();
         try {
             int idleSize = data.numIdle();
@@ -526,38 +528,25 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         maxIdleTime > 0 && metaData.getTimeDiff() > maxIdleTime
                     ) || (
                         maxLifeTime > 0 && metaData.getLiveTime() > maxLifeTime
-                    ) || (
-                        // object not valid anymore
-                        testOnIdle && !(lifecycle.activate(metaData)
-                        && lifecycle.validate(metaData)
-                        && lifecycle.deactivate(metaData))
                     );
                 if (remove) {
                     data.removeIdle(index);
                     idleSize = data.numIdle();
                     removed.add(metaData);
-                    continue;
+                } else if (testOnIdle) {
+                    // Validation check must be done outside lock.
+                    data.removeIdle(index);
+                    idleSize = data.numIdle();
+                    toCheck.add(metaData);
+                } else {
+                    index++;
                 }
-                index++;
             }
             final Iterator<PooledData<T>> iter = data.listActive();
             while (iter.hasNext()) {
                 final PooledData<T> metaData = iter.next();
                 if (metaData.getTimeDiff() > maxIdleTime) {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append("Object was not returned. Fetched: ");
-                    sb.append(metaData.getTimestamp());
-                    sb.append(", UseTime: ");
-                    sb.append(metaData.getTimeDiff());
-                    sb.append(", ID: ");
-                    sb.append(metaData.getIdentifier());
-                    sb.append(", Object: ");
-                    sb.append(metaData.getPooled());
-                    final PoolingException e = new PoolingException(sb.toString());
-                    if (testThreads && null != metaData.getTrace()) {
-                        e.setStackTrace(metaData.getTrace());
-                    }
-                    LOG.error(e.getMessage(), e);
+                    notReturned.add(metaData);
                     iter.remove();
                     idleAvailable.signal();
                 }
@@ -565,8 +554,36 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } finally {
             lock.unlock();
         }
+        for (final PooledData<T> metaData : toCheck) {
+            if (!(lifecycle.activate(metaData) && lifecycle.validate(metaData) && lifecycle.deactivate(metaData))) {
+                removed.add(metaData);
+            } else {
+                lock.lock();
+                try {
+                    data.addIdle(metaData);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
         for (final PooledData<T> metaData : removed) {
             lifecycle.destroy(metaData.getPooled());
+        }
+        for (final PooledData<T> metaData : notReturned) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Object was not returned. Fetched: ");
+            sb.append(metaData.getTimestamp());
+            sb.append(", UseTime: ");
+            sb.append(metaData.getTimeDiff());
+            sb.append(", ID: ");
+            sb.append(metaData.getIdentifier());
+            sb.append(", Object: ");
+            sb.append(metaData.getPooled());
+            final PoolingException e = new PoolingException(sb.toString());
+            if (testThreads && null != metaData.getTrace()) {
+                e.setStackTrace(metaData.getTrace());
+            }
+            LOG.error(e.getMessage(), e);
         }
         try {
             ensureMinIdle();

@@ -64,7 +64,7 @@ import com.openexchange.i18n.I18nService;
  */
 public final class I18nServices {
 
-    private static final Log LOG = LogFactory.getLog(I18nServices.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
 
     private static final I18nServices SINGLETON = new I18nServices();
 

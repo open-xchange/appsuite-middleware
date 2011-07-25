@@ -95,7 +95,7 @@ public final class AllFetch {
     /**
      * The logger constant.
      */
-    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AllFetch.class);
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AllFetch.class));
 
     /**
      * Whether debug logging is enabled.
@@ -376,6 +376,16 @@ public final class AllFetch {
                             command,
                             response.toString()));
                     } else if (response.isNO()) {
+                        /*
+                         * Check number of messages
+                         */
+                        try {
+                            if (IMAPCommandsCollection.getTotal(imapFolder) <= 0) {
+                                return new MailMessage[0];
+                            }
+                        } catch (final MessagingException e) {
+                            LOG.warn("STATUS command failed. Throwing original exception: " + response.toString(), e);
+                        }
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,

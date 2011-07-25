@@ -62,7 +62,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class AuthorizationServiceActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(AuthorizationServiceActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
 
     private ServiceRegistration registration;
 

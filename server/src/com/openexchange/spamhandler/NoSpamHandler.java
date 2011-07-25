@@ -106,6 +106,6 @@ public final class NoSpamHandler extends SpamHandler {
 
     @Override
     public boolean isUnsubscribeSpamFolders() {
-        return false;
+        return true;
     }
 }

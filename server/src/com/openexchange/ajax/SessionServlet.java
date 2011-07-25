@@ -103,7 +103,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SessionServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionServlet.class));
 
     public static final String SESSION_KEY = "sessionObject";
 

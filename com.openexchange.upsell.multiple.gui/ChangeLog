@@ -1,3 +1,7 @@
+* 2011-07-21 - stefan.preuss@open-xchange.com
+
+ - Bugfix #19593 - [L3] ie7 upsell window not working
+
 * 2011-06-28 - dennis.sieben@open-xchange.com
 
  - Bugfix #19626 - Upsell multiple should listen for new oxupdater event

@@ -127,7 +127,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private String categories;
     
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FreeBusyResults.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyResults.class));
     
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);

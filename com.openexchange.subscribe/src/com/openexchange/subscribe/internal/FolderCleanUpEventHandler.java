@@ -76,7 +76,7 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class FolderCleanUpEventHandler implements EventHandler {
     
-    private static final Log LOG = LogFactory.getLog(FolderCleanUpEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCleanUpEventHandler.class));
     private final ContextService contexts;
     private final SubscriptionStorage storage;
     private ServiceRegistration registration;

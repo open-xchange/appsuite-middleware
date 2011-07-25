@@ -74,6 +74,10 @@ public class LoginFields {
 
     public static final String AUTOLOGIN_PARAM = "autologin";
 
+    public static final String CLIENT_IP_PARAM = "clientIP";
+
+    public static final String USER_AGENT = "clientUserAgent";
+
     private LoginFields() {
         super();
     }

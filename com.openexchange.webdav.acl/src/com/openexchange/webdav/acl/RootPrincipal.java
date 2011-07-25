@@ -128,10 +128,10 @@ public class RootPrincipal extends AbstractCollection {
     public List<WebdavResource> getChildren() throws OXException {
         final UserService users = factory.getUserService();
         try {
-            final User[] user = users.getUser(factory.getContext());
-            final List<WebdavResource> children = new ArrayList<WebdavResource>(user.length);
-            for (final User u : user) {
-                children.add(new UserPrincipalResource(factory, u));
+            User[] user = users.getUser(factory.getContext());
+            List<WebdavResource> children = new ArrayList<WebdavResource>(user.length);
+            for (User u : user) {
+                children.add(new UserPrincipalResource(factory, u, getUrl().dup().append(u.getLoginInfo())));
             }
             return children;
         } catch (final OXException e) {
@@ -139,14 +139,19 @@ public class RootPrincipal extends AbstractCollection {
         }
     }
     
-    public UserPrincipalResource resolveUser(final WebdavPath url) throws OXException {
-        final String name = url.name();
-        final UserService users = factory.getUserService();
+    public UserPrincipalResource resolveUser(WebdavPath url) throws OXException {
+        String name = url.name();
+        if (name.contains("@")) {
+            name = name.split("@")[0];
+        } else if (name.contains("*")) {
+            name = name.split("\\*")[0];
+        }
+        UserService users = factory.getUserService();
         try {
-            final int userId = users.getUserId(name, factory.getContext());
-            final User user = users.getUser(userId, factory.getContext());
-            return new UserPrincipalResource(factory, user);
-        } catch (final OXException e) {
+            int userId = users.getUserId(name, factory.getContext());
+            User user = users.getUser(userId, factory.getContext());
+            return new UserPrincipalResource(factory, user, url);
+        } catch (OXException e) {
             throw WebdavProtocolException.generalError(url, 500);
         }
     }

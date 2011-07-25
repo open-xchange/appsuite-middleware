@@ -65,7 +65,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
 	
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
 	
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;

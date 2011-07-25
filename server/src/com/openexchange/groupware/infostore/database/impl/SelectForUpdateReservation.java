@@ -76,7 +76,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (cid, folder, name) VALUES (?, ?, ?)";
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
 
     private final String fileName;
 

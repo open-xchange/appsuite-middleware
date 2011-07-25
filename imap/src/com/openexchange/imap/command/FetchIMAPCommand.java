@@ -98,7 +98,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FetchIMAPCommand.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FetchIMAPCommand.class));
 
     private static interface SeqNumFetcher {
 
@@ -431,12 +431,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
     }
 
     @Override
-    protected void handleResponse(final Response currentReponse) throws MessagingException {
+    protected boolean handleResponse(final Response currentReponse) throws MessagingException {
         /*
          * Response is null or not a FetchResponse
          */
         if (!FetchResponse.class.isInstance(currentReponse)) {
-            return;
+            return false;
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         int seqnum;
@@ -508,6 +508,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (!error) {
             retval[pos] = msg;
         }
+        return true;
     }
 
     private static final Set<Integer> ENV_FIELDS;

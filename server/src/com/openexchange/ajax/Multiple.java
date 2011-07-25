@@ -98,7 +98,7 @@ public class Multiple extends SessionServlet {
 
     private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Multiple.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Multiple.class));
     
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -127,6 +127,9 @@ public class Multiple extends SessionServlet {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         } catch (final OXException e) {
+            log(RESPONSE_ERROR, e);
+            sendError(resp);
+        } catch (final RuntimeException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         } finally {

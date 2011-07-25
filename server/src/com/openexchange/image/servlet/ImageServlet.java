@@ -120,6 +120,18 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        writeImage(req, resp, hashSource);
+    }
+
+    /**
+     * Writes image denoted by request to given response.
+     * 
+     * @param req The request
+     * @param resp The response
+     * @param hashSource The hash source
+     * @throws IOException If an I/O error occurs
+     */
+    public static void writeImage(final HttpServletRequest req, final HttpServletResponse resp, final CookieHashSource hashSource) throws IOException {
         try {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (sessiondService == null) {
@@ -159,9 +171,9 @@ public final class ImageServlet extends HttpServlet {
     
     private static void sendErrorAndLog(final HttpServletResponse resp, final int errorCode, final String errorMsg, final String logMsg, final Throwable... throwable) throws IOException {
         if (throwable != null && throwable.length > 0) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(logMsg, throwable[0]);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg, throwable[0]);
         } else {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(logMsg);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg);
         }
         
         if (errorMsg != null) {
@@ -264,7 +276,7 @@ public final class ImageServlet extends HttpServlet {
         try {
             in.close();
         } catch (final IOException e) {
-            org.apache.commons.logging.LogFactory.getLog(ImageServlet.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
 }

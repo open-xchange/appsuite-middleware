@@ -77,7 +77,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
     
-    private static final Log LOG = LogFactory.getLog(LoginPageStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageStep.class));
     
     private Page loginPage;
 

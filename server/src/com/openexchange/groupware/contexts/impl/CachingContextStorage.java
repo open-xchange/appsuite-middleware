@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CachingContextStorage.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingContextStorage.class));
     private static final String REGION_NAME = "Context";
 
     private final Lock cacheLock;

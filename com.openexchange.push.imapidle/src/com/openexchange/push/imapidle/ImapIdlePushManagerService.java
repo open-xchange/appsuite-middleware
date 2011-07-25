@@ -75,6 +75,7 @@ public final class ImapIdlePushManagerService implements PushManagerService {
         if (ImapIdlePushListenerRegistry.getInstance().addPushListener(
             session.getContextId(),
             session.getUserId(),
+            session.getSessionID(),
             pushListener)) {
             pushListener.open();
             return pushListener;
@@ -85,7 +86,8 @@ public final class ImapIdlePushManagerService implements PushManagerService {
     public boolean stopListener(final Session session) {
         return ImapIdlePushListenerRegistry.getInstance().removePushListener(
             session.getContextId(),
-            session.getUserId());
+            session.getUserId(),
+            session.getSessionID());
     }
 
     @Override

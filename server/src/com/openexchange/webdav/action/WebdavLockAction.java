@@ -73,7 +73,7 @@ public class WebdavLockAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
 	
-	private static final Log LOG = LogFactory.getLog(WebdavLockAction.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLockAction.class));
 	
 	public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {

@@ -59,7 +59,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class FireDetachedEventAction extends AttachmentEventAction {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FireDetachedEventAction.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FireDetachedEventAction.class));
 
     @Override
     protected void undoAction() throws OXException {

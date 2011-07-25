@@ -97,7 +97,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private static final long serialVersionUID = -7510487764376433468L;
 
-    private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(POP3Access.class);
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Access.class));
 
     private static final ConcurrentMap<LoginKey, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<LoginKey, Future<Object>>();
 
@@ -256,16 +256,6 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         setMailProperties((Properties) System.getProperties().clone());
     }
 
-    private void reset() {
-        super.resetFields();
-        // pop3Storage = null;
-        // pop3StorageProperties = null;
-        folderStorage = null;
-        messageStorage = null;
-        logicTools = null;
-        connected = false;
-    }
-
     /**
      * Gets this POP3 access' session.
      * 
@@ -346,7 +336,13 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             /*
              * Reset
              */
-            reset();
+            super.resetFields();
+            // pop3Storage = null;
+            // pop3StorageProperties = null;
+            folderStorage = null;
+            messageStorage = null;
+            logicTools = null;
+            connected = false;
         }
     }
 
@@ -375,6 +371,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
     public MailFolder getRootFolder() throws OXException {
         pop3Storage.connect();
         addWarnings(pop3Storage.getWarnings());
+        connected = true;
         return pop3Storage.getFolderStorage().getRootFolder();
     }
 

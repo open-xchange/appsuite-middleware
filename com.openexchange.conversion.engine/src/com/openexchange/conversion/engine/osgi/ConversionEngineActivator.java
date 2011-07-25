@@ -69,7 +69,7 @@ import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
  */
 public final class ConversionEngineActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ConversionEngineActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConversionEngineActivator.class));
 
     private ServiceRegistration serviceRegistration;
 

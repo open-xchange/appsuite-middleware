@@ -61,6 +61,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.exception.OXException;
 
 /**
  * {@link PushChannels}
@@ -68,24 +69,24 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PushChannels {
-    
+
     public static enum ChannelType {
         INTERNAL, EXTERNAL;
     }
-    
-    private static final Log LOG = LogFactory.getLog(PushChannels.class);
-    
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushChannels.class));
+
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;
-    
+
     private List<PushRegistryListenerThread> listeners = new LinkedList<PushRegistryListenerThread>();
-    
-    public PushChannels(PushConfiguration config) {
+
+    public PushChannels(PushConfiguration config) throws OXException {
         final int serverRegisterPort = config.getRegisterPort();
         final InetAddress senderAddress = config.getSenderAddress();
 
         final InetAddress internalSenderAddress = config.getHostName();
-        
+
         try {
             if (config.isPushEnabled()) {
                 if (LOG.isInfoEnabled()) {
@@ -97,11 +98,11 @@ public class PushChannels {
                 } else {
                     externalChannel = new DatagramSocket(serverRegisterPort);
                 }
-                
+
                 if (internalSenderAddress != null && senderAddress != null && !isSameInterface(senderAddress, internalSenderAddress)) {
                     internalChannel = new DatagramSocket(serverRegisterPort, internalSenderAddress);
                 }
-                
+
                 listenForRegistrations();
 
             } else {
@@ -109,43 +110,46 @@ public class PushChannels {
                     LOG.info("Push Registeration is disabled");
                 }
             }
-        } catch (final Exception exc) {
-            LOG.error("PushSocket", exc);
+        } catch (SocketException e) {
+            throw PushUDPExceptionCode.NO_CHANNEL.create(e);
         }
     }
-    
+
     private boolean isSameInterface(InetAddress senderAddress, InetAddress internalSenderAddress) throws SocketException {
         NetworkInterface senderIface = NetworkInterface.getByInetAddress(senderAddress);
         NetworkInterface internalIface = NetworkInterface.getByInetAddress(internalSenderAddress);
-        
+
         return senderIface.equals(internalIface);
     }
 
     private void listenForRegistrations() {
         listeners.add(new PushRegistryListenerThread(externalChannel));
-        
+
         if (internalChannel != null) {
             listeners.add(new PushRegistryListenerThread(internalChannel));
         }
-        
+
         for (Thread t : listeners) {
             t.start();
         }
     }
 
-    public DatagramSocket getInternalChannel() {
-        if (internalChannel == null) {
-            return externalChannel;
+    public DatagramSocket getInternalChannel() throws OXException {
+        if (null == internalChannel) {
+            return getExternalChannel();
         }
         return internalChannel;
     }
-    
-    
-    public DatagramSocket getExternalChannel() {
+
+
+    public DatagramSocket getExternalChannel() throws OXException {
+        if (null == externalChannel) {
+            throw PushUDPExceptionCode.NO_CHANNEL.create();
+        }
         return externalChannel;
     }
-    
-    public void makeAndSendPackage(final byte[] b, final InetAddress host, final int port, ChannelType channel) {
+
+    public void makeAndSendPackage(final byte[] b, final InetAddress host, final int port, ChannelType channel) throws OXException {
         final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
         try {
             getSocket(channel).send(datagramPackage);
@@ -154,17 +158,17 @@ public class PushChannels {
         }
     }
 
-    public void makeAndSendPackage(final byte[] b, final String host, final int port, ChannelType channel) throws UnknownHostException {
+    public void makeAndSendPackage(final byte[] b, final String host, final int port, ChannelType channel) throws UnknownHostException, OXException {
         makeAndSendPackage(b, InetAddress.getByName(host), port, channel);
     }
 
-    private DatagramSocket getSocket(ChannelType channel) {
+    private DatagramSocket getSocket(ChannelType channel) throws OXException {
         if (channel == ChannelType.INTERNAL) {
             return getInternalChannel();
         }
         return getExternalChannel();
     }
-    
+
     public void shutdown() {
         try {
             if (internalChannel != null) {
@@ -178,11 +182,11 @@ public class PushChannels {
         } catch (Exception x) {
             // Don't care
         }
-        
+
         for (PushRegistryListenerThread t : listeners) {
             t.stopListening();
         }
     }
-    
-    
+
+
 }

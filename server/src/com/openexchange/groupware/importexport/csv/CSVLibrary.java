@@ -79,7 +79,7 @@ public final class CSVLibrary {
         super();
     }
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CSVLibrary.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVLibrary.class));
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
 

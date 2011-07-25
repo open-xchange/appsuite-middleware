@@ -54,15 +54,20 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class I18nTranslator implements Translator {
 
-    private static final Log LOG = LogFactory.getLog(I18nTranslator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nTranslator.class));
 
     private final I18nService service;
 
+    /**
+     * Initializes a new {@link I18nTranslator}.
+     * 
+     * @param service The i18n service
+     */
     public I18nTranslator(final I18nService service) {
         super();
         this.service = service;
@@ -70,7 +75,10 @@ public class I18nTranslator implements Translator {
 
     public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
-            LOG.warn("I18n service for locale " + service.getLocale() + " has no translation for \"" + toTranslate + "\".");
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(new StringBuilder(64).append("I18n service for locale ").append(service.getLocale()).append(
+                    " has no translation for \"").append(toTranslate).append("\".").toString());
+            }
             return toTranslate;
         }
         return service.getLocalized(toTranslate);

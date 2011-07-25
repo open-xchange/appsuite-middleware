@@ -93,7 +93,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
         try {
 
-            final Log log = LogFactory.getLog(MALPollModifyTableTask.class);
+            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollModifyTableTask.class));
 
             boolean contentDropped = false;
 

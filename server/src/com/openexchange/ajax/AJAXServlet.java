@@ -107,7 +107,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final long serialVersionUID = 718576864014891156L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
 
     // Modules
     public static final String MODULE_TASK = "tasks";
@@ -182,6 +182,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_MATTACH = "attachment";
 
     public static final String ACTION_ZIP_MATTACH = "zip_attachments";
+
+    public static final String ACTION_ZIP_MESSAGES = "zip_messages";
 
     public static final String ACTION_MAIL_RECEIPT_ACK = "receipt_ack";
 

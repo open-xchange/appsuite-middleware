@@ -69,7 +69,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 public final class MailFolderStorageActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailFolderStorageActivator.class));
 
     private ServiceRegistration folderStorageRegistration;
 

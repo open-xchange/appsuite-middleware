@@ -40,7 +40,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 12
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -80,3 +80,6 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 
+%changelog
+* Wed Jul 20 2011 - benjamin.otterbach@open-xchange.com
+  - Fixed Bug #19775 : "No Spam" button does not work

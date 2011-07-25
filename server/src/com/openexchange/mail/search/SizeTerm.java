@@ -52,10 +52,11 @@ package com.openexchange.mail.search;
 import java.util.Collection;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link SizeTerm}
@@ -103,7 +104,8 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
         try {
             size = msg.getSize();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(SizeTerm.class)).warn("Error during search.", e);
+            return false;
         }
         final ComparablePattern<Integer> pattern = getPattern();
         final ComparisonType comparisonType = pattern.getComparisonType();

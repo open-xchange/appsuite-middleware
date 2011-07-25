@@ -64,7 +64,7 @@ import com.openexchange.pooling.ReentrantLockPool;
  */
 public class ConnectionPool extends ReentrantLockPool<Connection> implements ConnectionPoolMBean {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConnectionPool.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConnectionPool.class));
 
     /**
      * Default time between checks if a connection still works.

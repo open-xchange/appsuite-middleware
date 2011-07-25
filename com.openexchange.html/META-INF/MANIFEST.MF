@@ -12,6 +12,7 @@ Bundle-ClassPath: com.openexchange.html.jar,
  .
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.log,
  com.openexchange.proxy,
  com.openexchange.server.osgiservice,
  com.openexchange.session,

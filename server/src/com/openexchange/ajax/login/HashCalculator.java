@@ -68,7 +68,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class HashCalculator {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HashCalculator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
 
     public static String getHash(HttpServletRequest req, String client) {
         try {

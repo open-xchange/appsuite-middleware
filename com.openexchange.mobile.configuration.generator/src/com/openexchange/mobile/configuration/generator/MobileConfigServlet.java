@@ -88,7 +88,7 @@ public class MobileConfigServlet extends HttpServlet {
         
     }
 
-    private static final transient Log LOG = LogFactory.getLog(MobileConfigServlet.class);
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobileConfigServlet.class));
 
     /**
      * 

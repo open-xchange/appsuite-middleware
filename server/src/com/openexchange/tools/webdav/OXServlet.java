@@ -89,7 +89,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     private static final long serialVersionUID = 301910346402779362L;
 
-    private static final transient Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(OXServlet.class));
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXServlet.class));
 
     /**
      * Simple {@link LoginRequest} implementation.
@@ -190,7 +190,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface())) {
+        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer())) {
             return;
         }
         try {
@@ -208,7 +208,15 @@ public abstract class OXServlet extends WebDavServlet {
             throw se;
         }
     }
+    
+    protected LoginCustomizer getLoginCustomizer() {
+        return null;
+    }
 
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
+        return doAuth(req, resp, face, null);
+    }
+    
     /**
      * Performs authentication.
      * 
@@ -218,7 +226,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
      * @throws IOException If an I/O error occurs
      */
-    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face) throws IOException {
+    public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face, LoginCustomizer customizer) throws IOException {
         Session session;
         try {
             session = findSessionByCookie(req, resp);
@@ -231,9 +239,12 @@ public abstract class OXServlet extends WebDavServlet {
             /*
              * No session found by cookie
              */
-            final LoginRequest loginRequest;
+            LoginRequest loginRequest;
             try {
                 loginRequest = parseLogin(req, face);
+                if (customizer != null) {
+                    loginRequest = customizer.modifyLogin(loginRequest);
+                }
             } catch (final OXException e) {
                 LOG.debug(e.getMessage(), e);
                 addUnauthorizedHeader(req, resp);

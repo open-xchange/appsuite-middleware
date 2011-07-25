@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountSMTPProperties extends MailAccountTransportProperties implements ISMTPProperties {
 
-    private static final Log LOG = LogFactory.getLog(MailAccountSMTPProperties.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccountSMTPProperties.class));
 
     private final MailAccount mailAccount;
 

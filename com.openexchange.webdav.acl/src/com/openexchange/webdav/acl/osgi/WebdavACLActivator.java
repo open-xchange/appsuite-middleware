@@ -81,7 +81,8 @@ public class WebdavACLActivator extends HousekeepingActivator {
         try {
             WebdavPrincipalPerformer.setServices(this);
 
-            rememberTracker(new ServletRegistration(context, new WebdavPrincipalServlet(), "/servlet/home"));
+            rememberTracker(new ServletRegistration(context, new WebdavPrincipalServlet(), "/servlet/dav/principals/users"));
+            
             WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);

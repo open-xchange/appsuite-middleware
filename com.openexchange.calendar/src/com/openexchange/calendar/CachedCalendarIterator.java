@@ -85,7 +85,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class CachedCalendarIterator implements SearchIterator<CalendarDataObject> {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CachedCalendarIterator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachedCalendarIterator.class));
 
 	private final List<OXException> warnings;
     private final List<CalendarDataObject> list;

@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class FileWatcher {
 
-    static final Log LOG = LogFactory.getLog(FileWatcher.class);
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileWatcher.class));
 
     private final class FileWatcherTimerTask extends TimerTask {
 

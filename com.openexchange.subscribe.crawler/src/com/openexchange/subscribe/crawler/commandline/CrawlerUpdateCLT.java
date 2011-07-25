@@ -87,7 +87,7 @@ public class CrawlerUpdateCLT {
     
     private static final Options toolkitOptions;
     
-    private static final Log LOG = LogFactory.getLog(CrawlerUpdateCLT.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateCLT.class));
 
     static {
         toolkitOptions = new Options();

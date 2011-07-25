@@ -84,7 +84,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public final class FolderCacheManager {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderCacheManager.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCacheManager.class));
 
     private static volatile FolderCacheManager instance;
 

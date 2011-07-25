@@ -115,7 +115,7 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public final class SMTPTransport extends MailTransport {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SMTPTransport.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SMTPTransport.class));
 
     private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 

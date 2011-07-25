@@ -73,7 +73,7 @@ public class Trash implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Trash.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Trash.class));
 
     /**
      * Default constructor.

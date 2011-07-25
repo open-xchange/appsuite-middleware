@@ -62,6 +62,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -72,7 +73,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MailAccessCacheEventListener.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccessCacheEventListener.class));
 
     private ServiceRegistration serviceRegistration;
 
@@ -94,6 +95,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             for (final Session session : sessions.values()) {
                 try {
                     mac.clearUserEntries(session);
+                    AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(), session.getContextId());
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                             ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
@@ -114,6 +116,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             }
             try {
                 mac.clearUserEntries(session);
+                AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(), session.getContextId());
                 if (LOG.isInfoEnabled()) {
                     LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                         ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(" in context ").append(

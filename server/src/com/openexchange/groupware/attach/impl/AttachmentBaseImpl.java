@@ -108,7 +108,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 

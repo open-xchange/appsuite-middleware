@@ -110,6 +110,11 @@ public class LocalFileStorage implements FileStorage {
     private final File storage;
 
     /**
+     * Whether the path to this filestorage has already been created
+     */
+	private boolean alreadyInitialized;
+
+    /**
      * Default buffer size.
      */
     private static final int DEFAULT_BUFSIZE = 1024;
@@ -136,7 +141,7 @@ public class LocalFileStorage implements FileStorage {
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
     
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
     
     /**
      * This lock is used to avoid threads from creating a filestore dir simultaneously.
@@ -154,29 +159,8 @@ public class LocalFileStorage implements FileStorage {
         super();
         storage = new File(uri);
         
-        if (!storage.exists()) {
-            try {
-                LOCK.lock();
-                if (!storage.exists() && !mkdirs(storage)) {
-                    throw FileStorageCodes.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
-                }
-            } finally {
-                LOCK.unlock();
-            }            
-        }
+       	alreadyInitialized = storage.exists();
         
-        lock(LOCK_TIMEOUT);
-        try {
-            if (!exists(STATEFILENAME)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Repairing.");
-                }
-                final State state = repairState();
-                saveState(state);
-            }
-        } finally {
-            unlock();
-        }
     }
 
     /**
@@ -184,8 +168,18 @@ public class LocalFileStorage implements FileStorage {
      */
     protected LocalFileStorage() {
         super();
-        storage = null;
+        storage = assignStorage();
     }
+
+    //Ugly workaround because someone insisted to make storage final:
+	private File assignStorage() {
+		try {
+        	return File.createTempFile("test-storage", "tmp");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
     /**
      * Checks, if Statefile is correct. Especially if nextEntry is right and all Files really exist.
@@ -331,6 +325,7 @@ public class LocalFileStorage implements FileStorage {
      * @throws OXException if an error occurs while storing the file.
      */
     public String saveNewFile(final InputStream input) throws OXException {
+    	initialize();
         String nextentry = null;
         State state = null;
         lock(LOCK_TIMEOUT);
@@ -501,6 +496,10 @@ public class LocalFileStorage implements FileStorage {
      * @throws OXException if removing fails.
      */
     public void remove() throws OXException {
+        // Already initialized?
+        if (!alreadyInitialized || !storage.exists()) {
+            return;
+        }
         lock(LOCK_TIMEOUT);
         eliminate();
         // no unlock here because everything is removed.
@@ -660,7 +659,7 @@ public class LocalFileStorage implements FileStorage {
         final long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             unlock();
-            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restartet application.");
+            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restarted application.");
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
@@ -848,5 +847,36 @@ public class LocalFileStorage implements FileStorage {
             return false;
         }
         return directory.mkdir();
+    }
+    
+    private void initialize() throws OXException{
+    	if(alreadyInitialized) {
+            return;
+        }
+    	
+        try {
+            LOCK.lock();
+            if (!storage.exists() && !mkdirs(storage)) {
+                throw FileStorageCodes.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
+            }
+        } finally {
+            LOCK.unlock();
+        }
+        
+        lock(LOCK_TIMEOUT);
+        try {
+            if (!exists(STATEFILENAME)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Repairing.");
+                }
+                final State state = repairState();
+                saveState(state);
+            }
+        } finally {
+            unlock();
+        }
+        alreadyInitialized = true;
+
+
     }
 }

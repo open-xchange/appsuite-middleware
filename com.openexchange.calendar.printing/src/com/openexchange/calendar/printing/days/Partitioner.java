@@ -77,7 +77,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Partitioner {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Partitioner.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Partitioner.class));
     private final CPParameters params;
     private final CPCalendar cal;
     private final AppointmentSQLInterface appointmentSql;

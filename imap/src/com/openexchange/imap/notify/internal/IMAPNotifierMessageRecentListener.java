@@ -74,7 +74,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPNotifierMessageRecentListener.class));
 
     private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
 
@@ -249,7 +249,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
             }
         } catch (final OXException e) {
-            LogFactory.getLog(IMAPNotifierMessageRecentListener.class).warn("Couldn't notofy about possible recent message.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierMessageRecentListener.class)).warn("Couldn't notofy about possible recent message.", e);
         }
     }
 

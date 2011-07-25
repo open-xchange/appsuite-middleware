@@ -75,7 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public abstract class LinkableState implements State {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LinkableState.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkableState.class));
 
     protected static volatile Template object_link_template;
 

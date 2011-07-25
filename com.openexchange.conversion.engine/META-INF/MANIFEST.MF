@@ -9,6 +9,8 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.exception,
  com.openexchange.session,
  org.apache.commons.logging,
+ com.openexchange.log,
+ org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.conversion.engine.osgi.ConversionEngineActivator

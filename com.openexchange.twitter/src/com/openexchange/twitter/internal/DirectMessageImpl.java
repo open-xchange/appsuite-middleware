@@ -80,20 +80,20 @@ public final class DirectMessageImpl implements DirectMessage {
         return twitter4jDirectMessage.getCreatedAt();
     }
 
-    public int getId() {
+    public long getId() {
         return twitter4jDirectMessage.getId();
     }
 
     public int getRateLimitLimit() {
-        return twitter4jDirectMessage.getRateLimitLimit();
+        return twitter4jDirectMessage.getRateLimitStatus().getHourlyLimit();
     }
 
     public int getRateLimitRemaining() {
-        return twitter4jDirectMessage.getRateLimitRemaining();
+        return twitter4jDirectMessage.getRateLimitStatus().getRemainingHits();
     }
 
     public long getRateLimitReset() {
-        return twitter4jDirectMessage.getRateLimitReset();
+        return twitter4jDirectMessage.getRateLimitStatus().getResetTimeInSeconds();
     }
 
     public User getRecipient() {
@@ -103,7 +103,7 @@ public final class DirectMessageImpl implements DirectMessage {
         return recipient;
     }
 
-    public int getRecipientId() {
+    public long getRecipientId() {
         return twitter4jDirectMessage.getRecipientId();
     }
 
@@ -118,7 +118,7 @@ public final class DirectMessageImpl implements DirectMessage {
         return sender;
     }
 
-    public int getSenderId() {
+    public long getSenderId() {
         return twitter4jDirectMessage.getSenderId();
     }
 

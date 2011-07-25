@@ -92,9 +92,9 @@ public class ConflictHandler {
 
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
-    private final CalendarDataObject edao;
-    private final CalendarCollection recColl;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
+    private CalendarDataObject edao;
+    private CalendarCollection recColl;
 
     public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean create) {
         this.cdao = cdao;
@@ -451,7 +451,7 @@ public class ConflictHandler {
                 if (recColl.checkMillisInThePast(conflict_dao.getEndDate().getTime())) {
                     continue;
                 }
-                if (!create && cdao.getObjectID() == conflict_dao.getObjectID()) { // Same id should never conflict if we are running an update
+                if (!create && !shouldConflict(cdao, conflict_dao)) { // Same id should never conflict if we are running an update
                     continue;
                 }
                 for (int i = 0; i < results.size() && current_results < MAX_CONFLICT_RESULTS; i++) {

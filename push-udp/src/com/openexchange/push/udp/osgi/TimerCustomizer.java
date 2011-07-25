@@ -66,7 +66,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class TimerCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(TimerCustomizer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TimerCustomizer.class));
 
     private final BundleContext context;
 

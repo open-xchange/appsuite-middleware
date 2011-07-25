@@ -52,6 +52,8 @@ package com.openexchange.twitter.internal;
 import java.util.ArrayList;
 import java.util.List;
 import twitter4j.OXTwitter;
+import twitter4j.StatusUpdate;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.twitter.DirectMessage;
 import com.openexchange.twitter.Paging;
@@ -68,7 +70,7 @@ import com.openexchange.twitter.User;
  */
 public final class TwitterAccessImpl implements TwitterAccess {
 
-    private final OXTwitter twitter4jTwitter;
+	private final OXTwitter twitter4jTwitter;
 
     private volatile User user;
 
@@ -188,7 +190,9 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     public Status updateStatus(final String status, final long inReplyToStatusId) throws OXException {
         try {
-            return new StatusImpl(twitter4jTwitter.updateStatus(status, inReplyToStatusId));
+            final StatusUpdate statusUpdate = new StatusUpdate(status);
+            statusUpdate.setInReplyToStatusId(inReplyToStatusId);
+            return new StatusImpl(twitter4jTwitter.updateStatus(statusUpdate));
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -216,14 +220,6 @@ public final class TwitterAccessImpl implements TwitterAccess {
         } catch (final twitter4j.TwitterException e) {
             throw TwitterExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    public String getPassword() {
-        return twitter4jTwitter.getPassword();
-    }
-
-    public String getUserId() {
-        return twitter4jTwitter.getUserId();
     }
 
     public User getUser() throws OXException {

@@ -137,7 +137,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
 
     private final UserConfiguration userConfiguration;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
 
     public RdbContactSQLImpl(final Session session) throws OXException {
         super();
@@ -538,50 +538,54 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
 
             if (considerUsersAliases) {
-                try {
-                    int pos;
-                    final String aliasColumn = "ua.value";
-                    {
-                        /*
-                         * Compose statement: Search for matching users' aliases but ignore own aliases
-                         */
-                        String select = cs.getSelect();
-                        final StringBuilder sb = new StringBuilder(select.length());
-                        pos = select.indexOf(" FROM");
-                        if (pos < 0 && (pos = select.indexOf(" from")) < 0) {
-                            throw new SQLException("SELECT statement does not contain \"FROM\".");
+                final String email1 = searchobject.getEmail1();
+                if (null != email1) {
+                    try {
+                        int pos;
+                        final String aliasColumn = "ua.value";
+                        {
+                            /*
+                             * Compose statement: Search for matching users' aliases but ignore own aliases
+                             */
+                            String select = cs.getSelect();
+                            final StringBuilder sb = new StringBuilder(select.length());
+                            pos = select.indexOf(" FROM");
+                            if (pos < 0 && (pos = select.indexOf(" from")) < 0) {
+                                throw new SQLException("SELECT statement does not contain \"FROM\".");
+                            }
+                            select =
+                                sb.append(select.substring(0, pos)).append(',').append(aliasColumn).append(select.substring(pos)).toString();
+                            sb.setLength(0);
+                            sb.append(select);
+                            sb.append(" JOIN user_attribute AS ua ON co.cid = ? AND ua.cid = ? AND co.userid = ua.id");
+                            sb.append(" WHERE ua.name = ? AND value LIKE ? AND ua.id != ? AND co.userid IS NOT NULL");
+                            stmt = con.prepareStatement(sb.toString());
                         }
-                        select = sb.append(select.substring(0, pos)).append(',').append(aliasColumn).append(select.substring(pos)).toString();
-                        sb.setLength(0);
-                        sb.append(select);
-                        sb.append(" JOIN user_attribute AS ua ON co.cid = ? AND ua.cid = ? AND co.userid = ua.id");
-                        sb.append(" WHERE ua.name = ? AND value LIKE ? AND ua.id != ? AND co.userid IS NOT NULL");
-                        stmt = con.prepareStatement(sb.toString());
-                    }
-                    pos = 1;
-                    stmt.setInt(pos++, ctx.getContextId());
-                    stmt.setInt(pos++, ctx.getContextId());
-                    stmt.setString(pos++, "alias");
-                    stmt.setString(pos++, prepareForSearch(searchobject.getEmail1(), false, true, true));
-                    stmt.setInt(pos++, userId);
-                    result = stmt.executeQuery();
-                    while (result.next()) {
-                        /*
-                         * Check if associated contact was already found by previous search
-                         */
-                        final String alias = result.getString(aliasColumn);
-                        if (!foundAddresses.contains(alias)) {
-                            final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
-                            contact.setEmail1(alias);
-                            contacts.add(contact);
+                        pos = 1;
+                        stmt.setInt(pos++, ctx.getContextId());
+                        stmt.setInt(pos++, ctx.getContextId());
+                        stmt.setString(pos++, "alias");
+                        stmt.setString(pos++, prepareForSearch(email1, false, true, true));
+                        stmt.setInt(pos++, userId);
+                        result = stmt.executeQuery();
+                        while (result.next()) {
+                            /*
+                             * Check if associated contact was already found by previous search
+                             */
+                            final String alias = result.getString(aliasColumn);
+                            if (!foundAddresses.contains(alias)) {
+                                final Contact contact = convertResultSet2ContactObject(result, extendedCols, false, con);
+                                contact.setEmail1(alias);
+                                contacts.add(contact);
+                            }
                         }
+                    } catch (final SQLException e) {
+                        throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+                    } finally {
+                        DBUtils.closeSQLStuff(result, stmt);
+                        result = null;
+                        stmt = null;
                     }
-                } catch (final SQLException e) {
-                    throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
-                } finally {
-                    DBUtils.closeSQLStuff(result, stmt);
-                    result = null;
-                    stmt = null;
                 }
             }
         } finally {

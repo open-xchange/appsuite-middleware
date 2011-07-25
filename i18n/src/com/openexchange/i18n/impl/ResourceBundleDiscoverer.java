@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class ResourceBundleDiscoverer extends FileDiscoverer {
 
-    private static final Log LOG = LogFactory.getLog(ResourceBundleDiscoverer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResourceBundleDiscoverer.class));
 
     public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);

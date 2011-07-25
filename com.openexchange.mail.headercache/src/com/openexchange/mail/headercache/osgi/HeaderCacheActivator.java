@@ -76,7 +76,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class HeaderCacheActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HeaderCacheActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HeaderCacheActivator.class));
 
     private List<ServiceRegistration> registrations;
 

@@ -71,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ReplicationMonitor {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
     private static long masterConnectionsFetched;
 

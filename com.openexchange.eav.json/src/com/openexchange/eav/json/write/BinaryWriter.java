@@ -77,7 +77,7 @@ public class BinaryWriter extends AbstractWriter<String>{
         TYPES = EnumSet.of(EAVType.BINARY);
     }
     
-    private static final Log LOG = LogFactory.getLog(BinaryWriter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(BinaryWriter.class));
     
     public void write(EAVNode node, JSONObject json) throws JSONException, EAVJsonException {
         if (node.isMultiple()) {

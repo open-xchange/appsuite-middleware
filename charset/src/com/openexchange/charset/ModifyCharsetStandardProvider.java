@@ -95,7 +95,7 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
-            org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class).warn(
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
                 new StringBuilder("Charset \"CP50220\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
             return null;

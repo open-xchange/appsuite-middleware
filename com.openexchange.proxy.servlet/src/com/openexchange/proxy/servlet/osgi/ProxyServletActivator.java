@@ -83,7 +83,7 @@ public class ProxyServletActivator implements BundleActivator {
     private List<ServiceRegistration> registrations;
 
     public void start(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy.servlet");
@@ -114,7 +114,7 @@ public class ProxyServletActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.proxy.servlet");

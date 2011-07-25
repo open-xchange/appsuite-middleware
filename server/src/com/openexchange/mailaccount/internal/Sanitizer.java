@@ -91,7 +91,7 @@ final class Sanitizer {
                 storageService.invalidateMailAccount(accountId, user, contextId);
             } catch (final OXException e) {
                 // Swallow
-                org.apache.commons.logging.LogFactory.getLog(Sanitizer.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Sanitizer.class)).error(e.getMessage(), e);
             }
             return true;
         }

@@ -100,6 +100,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -121,7 +122,7 @@ import com.sun.mail.imap.Rights;
  */
 public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -344,7 +345,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return new int[] { 0, 0 };
                 }
-                return IMAPCommandsCollection.getTotalAndUnread(f);
+                try {
+                    return IMAPCommandsCollection.getTotalAndUnread(f);
+                } catch (final MessagingException e) {
+                    return new int[] { 0, 0 };
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -371,7 +376,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getUnread(f);
+                try {
+                    return IMAPCommandsCollection.getUnread(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -398,7 +407,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getRecent(f);
+                try {
+                    return IMAPCommandsCollection.getRecent(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -425,7 +438,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (!entry.canOpen()) {
                     return 0;
                 }
-                return IMAPCommandsCollection.getTotal(f);
+                try {
+                    return IMAPCommandsCollection.getTotal(f);
+                } catch (final MessagingException e) {
+                    return 0;
+                }
             }
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -531,7 +548,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 final List<MailFolder> list =
                     new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
                 for (final ListLsubEntry subfolder : subfolders) {
-                    list.add(FolderCache.getCachedFolder(subfolder.getFullName(), this));
+                    final String subfolderFullName = subfolder.getFullName();
+                    try {
+                        list.add(FolderCache.getCachedFolder(subfolderFullName, this));
+                    } catch (final OXException e) {
+                        if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) {
+                            throw e;
+                        }
+                        /*
+                         * Obviously folder does (no more) exist
+                         */
+                        FolderCache.removeCachedFolder(subfolderFullName, session, accountId);
+                        ListLsubCache.removeCachedEntry(subfolderFullName, accountId, session);
+                        RightsCache.removeCachedRights(subfolderFullName, session, accountId);
+                        UserFlagsCache.removeUserFlags(subfolderFullName, session, accountId);
+                    }
                 }
                 if (!additionalFullNames.isEmpty()) {
                     for (final String fn : additionalFullNames) {

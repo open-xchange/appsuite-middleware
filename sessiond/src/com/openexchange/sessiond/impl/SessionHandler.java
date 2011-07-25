@@ -90,7 +90,7 @@ public final class SessionHandler {
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
-    private static final Log LOG = LogFactory.getLog(SessionHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionHandler.class));
 
     private static final boolean INFO = LOG.isInfoEnabled();
 
@@ -262,13 +262,19 @@ public final class SessionHandler {
         if (null == sessionControl) {
             return null;
         }
-        // Set local IP
-        final Session session = sessionControl.getSession();
-
-        final String oldIP = session.getLocalIp();
-        if (!newIP.equals(oldIP)) {
-            LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
-            session.setLocalIp(newIP);
+        /*
+         * Check if local IP should be replaced
+         */
+        if (null != newIP) {
+            /*
+             * Set local IP
+             */
+            final Session session = sessionControl.getSession();
+            final String oldIP = session.getLocalIp();
+            if (!newIP.equals(oldIP)) {
+                LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                session.setLocalIp(newIP);
+            }
         }
         return sessionControl.getSession();
     }

@@ -129,9 +129,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private final List<OXException> warnings = new ArrayList<OXException>(2);
 
     private boolean has_next;
-
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarOperation.class));
-
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarOperation.class));
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;
@@ -716,8 +714,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         final int startDateZoneOffset = tz.getOffset(startDate);
         final long endDate = cdao.containsUntil() && cdao.getUntil() != null ? cdao.getUntil().getTime() : edao.getUntil().getTime();
-        long startTime = cdao.getStartDate().getTime();
-        long endTime = (cdao.getEndDate().getTime());
+        long startTime = cdao.getStartDate() == null ? edao.getStartDate().getTime() : cdao.getStartDate().getTime();
+        long endTime = cdao.getEndDate() == null ? edao.getEndDate().getTime() : cdao.getEndDate().getTime();
         final int startTimeZoneOffset = tz.getOffset(startTime);
         startTime = startTime % Constants.MILLI_DAY;
         endTime = endTime % Constants.MILLI_DAY + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
@@ -1381,6 +1379,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     }
                 }
             }
+            if (ret == CalendarCollection.CHANGE_RECURRING_TYPE) {
+                //calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
+            }
             return ret;
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
@@ -1390,9 +1391,13 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
                 cdao.setStartDate(edao.getStartDate());
-                cdao.setEndDate(edao.getEndDate());
-            } else if (CalendarDataObject.NO_RECURRENCE != cdao.getRecurrenceType()) {
-                cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) / Constants.MILLI_DAY)));
+                if (cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
+                    calculateEndDateForNoType(cdao, edao);
+                } else {
+                    cdao.setEndDate(edao.getEndDate());
+                }
+            } else if(CalendarDataObject.NO_RECURRENCE != cdao.getRecurrenceType()) {
+                cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/Constants.MILLI_DAY)));
                 calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             }
 
@@ -1524,6 +1529,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Set proper end time
             cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
             pattern_change = true;
+        }
+        if (cdao.containsEndDate() && !cdao.getEndDate().equals(edao.getEndDate())) {
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao));
         }
         if (changeUntil(cdao, edao)) {
             if (!completenessChecked) {
@@ -1826,7 +1834,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
                 public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
                     final String organizer = rs.getString(columnCount);
-                    cdao.setOrganizer(organizer);
+                    if (!rs.wasNull()) {
+                        cdao.setOrganizer(organizer);
+                    }
                 }
             });
             put(I(Appointment.UID), new FieldFiller() {

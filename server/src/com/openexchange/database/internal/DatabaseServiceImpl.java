@@ -68,7 +68,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
 
     private final boolean forceWriteOnly;
 

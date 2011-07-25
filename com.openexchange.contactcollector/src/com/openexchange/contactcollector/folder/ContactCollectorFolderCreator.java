@@ -79,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public class ContactCollectorFolderCreator implements LoginHandlerService {
 
-    private static final Log LOG = LogFactory.getLog(ContactCollectorFolderCreator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactCollectorFolderCreator.class));
 
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.

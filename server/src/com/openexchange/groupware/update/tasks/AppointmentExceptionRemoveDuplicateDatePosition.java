@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentExceptionRemoveDuplicateDatePosition implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AppointmentExceptionRemoveDuplicateDatePosition.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentExceptionRemoveDuplicateDatePosition.class));
 
     public AppointmentExceptionRemoveDuplicateDatePosition() {
         super();

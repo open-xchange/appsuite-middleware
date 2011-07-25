@@ -75,7 +75,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(EnlargeTaskTitle.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EnlargeTaskTitle.class));
 
     /**
      * Default constructor.

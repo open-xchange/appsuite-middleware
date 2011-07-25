@@ -63,7 +63,7 @@ public interface DirectMessage {
      * 
      * @return The id
      */
-    int getId();
+    long getId();
 
     /**
      * Gets the text.
@@ -77,14 +77,14 @@ public interface DirectMessage {
      * 
      * @return The sender id
      */
-    int getSenderId();
+    long getSenderId();
 
     /**
      * Gets the recipient id.
      * 
      * @return The recipient id
      */
-    int getRecipientId();
+    long getRecipientId();
 
     /**
      * Gets the creation date.

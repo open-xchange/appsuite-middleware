@@ -76,7 +76,7 @@ private Activator activator;
     
     private final SubscriptionSource source = new SubscriptionSource();
     
-    private static final Log LOG = LogFactory.getLog(YahooSubscribeService.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooSubscribeService.class));
     
     public YahooSubscribeService(Activator activator){
         this.activator = activator;

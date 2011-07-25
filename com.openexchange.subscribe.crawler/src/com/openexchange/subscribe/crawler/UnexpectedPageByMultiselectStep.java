@@ -73,7 +73,7 @@ public class UnexpectedPageByMultiselectStep extends AbstractStep<UnexpectedPage
     
     private int formNumber;
     
-    private static final Log LOG = LogFactory.getLog(UnexpectedPageByMultiselectStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UnexpectedPageByMultiselectStep.class));
     
     public UnexpectedPageByMultiselectStep(){
         

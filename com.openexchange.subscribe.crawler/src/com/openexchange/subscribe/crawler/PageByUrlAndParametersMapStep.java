@@ -74,7 +74,7 @@ public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object
     
     private Map<String, String> parameters;
     
-    private static final Log LOG = LogFactory.getLog(PageByUrlAndParametersMapStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlAndParametersMapStep.class));
     
     public PageByUrlAndParametersMapStep(){
         

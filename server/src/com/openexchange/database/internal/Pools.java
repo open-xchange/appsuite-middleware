@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
  */
 public final class Pools implements Runnable {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Pools.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pools.class));
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
 

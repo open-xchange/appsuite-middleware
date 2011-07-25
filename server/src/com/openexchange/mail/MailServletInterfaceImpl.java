@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -152,6 +153,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.user.UserService;
 
 /**
@@ -175,7 +177,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailServletInterfaceImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailServletInterfaceImpl.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -879,6 +881,114 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public ManagedFile getMessages(final String folder, final String[] msgIds) throws OXException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        /*
+         * Get parts
+         */
+        final MailMessage[] mails = new MailMessage[msgIds.length];
+        for (int i = 0; i < msgIds.length; i++) {
+            mails[i] = mailAccess.getMessageStorage().getMessage(fullname, msgIds[i], false);
+        }
+        /*
+         * Store them temporary to files
+         */
+        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
+        
+        final ManagedFile[] files = new ManagedFile[mails.length];
+        try {
+            final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream(8192);
+            for (int i = 0; i < files.length; i++) {
+                final MailMessage mail = mails[i];
+                if (null == mail) {
+                    files[i] = null;
+                } else {
+                    bout.reset();
+                    mail.writeTo(bout);
+                    files[i] = mfm.createManagedFile(bout.toByteArray());
+                }
+            }
+            /*
+             * ZIP them
+             */
+            try {
+                final File tempFile = mfm.newTempFile();
+                final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tempFile));
+                try {
+                    final byte[] buf = new byte[8192];
+                    for (int i = 0; i < files.length; i++) {
+                        final ManagedFile file = files[i];
+                        if (null != file) {
+                            final FileInputStream in = new FileInputStream(file.getFile());
+                            try {
+                                /*
+                                 * Add ZIP entry to output stream
+                                 */
+                                final String subject = mails[i].getSubject();
+                                out.putNextEntry(new ZipEntry((isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "_")) + ".eml"));
+                                /*
+                                 * Transfer bytes from the file to the ZIP file
+                                 */
+                                int len;
+                                while ((len = in.read(buf)) > 0) {
+                                    out.write(buf, 0, len);
+                                }
+                                /*
+                                 * Complete the entry
+                                 */
+                                out.closeEntry();
+                            } finally {
+                                try {
+                                    in.close();
+                                } catch (final IOException e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    // Complete the ZIP file
+                    try {
+                        out.close();
+                    } catch (final IOException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                /*
+                 * Return managed file
+                 */
+                return mfm.createManagedFile(tempFile);
+            } catch (final IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        } catch (final OXException e) {
+            throw e;
+        } finally {
+            for (int i = 0; i < files.length; i++) {
+                final ManagedFile file = files[i];
+                if (null != file) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
+    }
+
+    @Override
     public ManagedFile getMessageAttachments(final String folder, final String msgUID, final String[] attachmentPositions) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
@@ -926,7 +1036,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                out.putNextEntry(new ZipEntry(parts[i].getFileName()));
+                                out.putNextEntry(new ZipEntry(parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "_")));
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */

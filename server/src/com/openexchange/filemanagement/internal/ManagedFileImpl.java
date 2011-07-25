@@ -67,7 +67,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
  */
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileImpl.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ManagedFileImpl.class));
 
     private final String id;
 

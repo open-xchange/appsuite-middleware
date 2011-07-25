@@ -1,4 +1,180 @@
-* 2011-06-24 - marcus.klein@open-xchange.com
+* 2011-07-24 - marcus.klein@open-xchange.com
+
+ - Fixed bug 19928: Added configuration parameter insecure. Default is false. Actions redirect and redeem then require a proper initialized
+   session with correct User-Agent and client IP. Setting to true restores default behavior.
+
+* 2011-07-24 - thorben.betten@open-xchange.com
+
+ - Fix for Bug #19928: Created echo-header mechanism to respond a unique identifier provided by a configurable header.
+ - Fix for bug #19942: Checking for empty IMAP folder on "NO" response from IMAP server
+
+* 2011-07-23 - thorben.betten@open-xchange.com
+
+ - Fixed bug 19936: Replacing non-ascii characters
+ - Fixed bug 19927: Save bits only on logout
+ - Bug 19933: Proper charset detection for "GB2312"
+
+* 2011-07-22 - thorben.betten@open-xchange.com
+
+ - Fix bug 19923: Using timeout
+ - Fix bug 19924: Using timeout
+
+* 2011-07-22 - choeger@open-xchange.com
+
+ - Bugfix #19921: package open-xchange is missing a dependency on open-xchange-publish-infostore-online
+
+* 2011-07-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug #19920: Using proper tree identifier
+ - Bugfix #19910: Multiple IMAP-IDLE listeners for certain clients
+ - Bugfix #19880: Logging problem is fixed, too
+
+* 2011-07-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
+ - Bugfix #19880: Partial fix. Decoupling the clean up task of the database pooling from other subsystems to avoid blocking situations.
+
+* 2011-07-21 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
+ 
+* 2011-07-20 - martin.herfurth@open-xchange.com
+
+ - Bugfix #19109: Moving a sequence destroys the appointment.
+
+* 2011-07-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19688: Introduced white-list property to specify clients which are allowed to receive a notification about a new mail (mail-push)
+
+* 2011-07-20 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19547: Resolve groups in update cycle, retain all resources of an appointment, declare only primary mail address as private address.
+
+* 2011-07-19 - francisco.laguna@open-xchange.com
+
+ - Bugfix #19484: Only patch appointments once for use in CalDAV interface
+
+* 2011-07-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #19818: Setting secure flag on cookies even if autologin is not enabled.
+
+* 2011-07-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #19776: Applying proper subscription status to newly created mail default folders
+ - Bugfix #19824: Token-based access to mail attachments
+ - Bugfix #19875: Updated GMX export URL in corresponding .yml files
+
+* 2011-07-18 - martin.herfurth@open-xchange.com
+
+ - Bugfix #19490: Error during exception change.
+ - Bugfix #19489: Removing recurrence information from a recurring appointment.
+
+* 2011-07-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #19728: Configured max. connection restriction for GMail by default
+ - Bugfix #19722: Additional check for possibly configured global password if password is missing on mail connect attempt
+ - Bugfix #19777: Changed/deleted contacts is honored in existing distribution lists
+ - Bugfix #14653 + #12985: Suppress notification message if no relevant changes can be detected
+
+* 2011-07-17 - thorben.betten@open-xchange.com
+
+ - Bugfix #19821: Properly handling a disappeared mail folder on root level
+
+* 2011-07-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #19726: Checking for existence of storage directory prior attempting to delete it
+ - Bugfix #19747: Fixed possible NPE when parsing an ICal's participants
+
+* 2011-07-15 - thorben.betten@open-xchange.com
+
+ - Bugfix #19792: Fixed possible IndexOutOfBoundsException when fetching an IMAP folder's messages
+ - Bugfix #19816: No alias check with NULL value
+
+* 2011-07-14 - thorben.betten@open-xchange.com
+
+ - Bugfix #19766: Reliable check for a folder's content type
+ - Bugfix #19736: Retry mechanism for mail default folder check
+
+* 2011-07-13 - thorben.betten@open-xchange.com
+
+ - Bugfix #19752: Using newest stable twitter4j API to display home timeline (incl. retweets)
+
+* 2011-07-13 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19647: Tolerating whitespaces in subscription URIs 
+
+* 2011-07-13 - francisco.laguna@open-xchange.com
+
+ - Bugfix #18688: Correct attachment count in calendar
+
+* 2011-07-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #19739: Auto-detection of ACL entities
+
+* 2011-07-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #19576: Removed the usage of the beta flag. It is still only present in the API.
+
+* 2011-07-12 - martin.herfurth@open-xchange.com
+
+ - Bugfix #19667: Resources in a series are conflicting with itself in exceptions.
+
+* 2011-07-11 - steffen.templin@open-xchange.com
+
+ - Bugfix #19487: The name of the updater installer that can be downloaded from web gui is configurable now
+ - Bugfix #19488: The template values product-name, base-name and icon are configuration-file properties now
+
+* 2011-07-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #19635: Ensure termination of consumer task upon mail mass import
+ - Bugfix #19128: Accepting context administrator as a user's contact creator, too
+
+* 2011-07-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #19480: Reliable sorting of message by arrival date.
+ - Bugfix #19595: Added permission check prior to creating attachment-publishing infostore folder
+ - Bugfix #19608: Ensured proper removal from MailAccess watcher on close
+
+* 2011-07-08 - thorben.betten@open-xchange.com
+
+ - Bugfix #19751: Proper generation of FETCH command items if IMAPrev1 is supported
+
+* 2011-07-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #19585: Allowing empty cookie values; e.g. 'mycookie='
+ - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
+
+* 2011-07-02 - thorben.betten@open-xchange.com
+
+ - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
+ - Bugfix #19683: Fixed NPE in Unified Mail
+ - Bugfix #19684: Dealing with possible missing headers when writing OLOX2's structured JSON mail object
+ - Bugfix #19628: Safe reading of a message's address headers
+ - Bugfix #19657: Dealing with possible failure when reading from an account's folder
+
+* 2011-07-01 - thorben.betten@open-xchange.com
+
+ - Bugfix #19536: Proper detection of possible quota exceeded error
+
+* 2011-07-01 - tobias.prinz@open-xchange.com
+
+ - Bugfix #19600: Deleting the first and only user of a context made the filestore inaccessible to other users in that context. Fixed. 
+
+* 2011-06-30 - steffen.templin@open-xchange.com
+
+ - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM instead of only for OLOX20.
+
+* 2011-06-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
+ - Bugfix #19669: Proper expunge flag on folder closure
+
+* 2011-06-29 - marcus.klein@open-xchange.com
+
+ - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
+   configuration tells to move spam mails to that folder.
+
+* 2011-06-27 - francisco.laguna@open-xchange.com
 
  - Bug #19598: Don't die on decryption errors so users can remove their OAuth accounts
 

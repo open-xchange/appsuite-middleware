@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
 
     public interface JSONValuePutter {
 

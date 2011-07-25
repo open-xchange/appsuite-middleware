@@ -22,6 +22,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.html,
  com.openexchange.i18n,
  com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.publish,
  com.openexchange.publish.helpers,
  com.openexchange.publish.interfaces,
@@ -38,8 +39,8 @@ Import-Package: com.openexchange.api2,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker;version="1.3.3"
+ org.osgi.util.tracker
 Bundle-ClassPath: .
 Export-Package: com.openexchange.publish.microformats.tools

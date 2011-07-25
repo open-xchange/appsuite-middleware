@@ -83,7 +83,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     /**
      * The logger instance.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(EnqueueingMailAccessCache.class));
+    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(EnqueueingMailAccessCache.class));
 
     /**
      * The flag whether debug logging is enabled.
@@ -105,14 +105,16 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @throws OXException If instance initialization fails
      */
     public static EnqueueingMailAccessCache getInstance(final int queueCapacity) throws OXException {
-        if (null == singleton) {
+        EnqueueingMailAccessCache tmp = singleton;
+        if (null == tmp) {
             synchronized (EnqueueingMailAccessCache.class) {
-                if (null == singleton) {
-                    singleton = new EnqueueingMailAccessCache(queueCapacity);
+                tmp = singleton;
+                if (null == tmp) {
+                    singleton = tmp = new EnqueueingMailAccessCache(queueCapacity);
                 }
             }
         }
-        return singleton;
+        return tmp;
     }
 
     /**

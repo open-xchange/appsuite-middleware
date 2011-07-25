@@ -50,6 +50,7 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
@@ -67,6 +68,17 @@ public abstract class AJPv13Request {
      * @value 8188
      */
     protected final static int MAX_REQUEST_BODY_CHUNK_SIZE = 8188;
+
+    private static final AtomicReference<String> ECHO_HEADER_NAME = new AtomicReference<String>();
+
+    /**
+     * Sets the name of the echo header.
+     * 
+     * @param headerName The header name
+     */
+    public static void setEchoHeaderName(final String headerName) {
+        ECHO_HEADER_NAME.set(headerName);
+    }
 
     private final byte[] payloadData;
 
@@ -127,9 +139,18 @@ public abstract class AJPv13Request {
                  */
                 ajpRequestHandler.doParseQueryString(ajpRequestHandler.peekData());
             }
-            /*
+            /*-
              * Call servlet's service() method which will then request all receivable data chunks from client through servlet input stream
+             * 
+             * TODO: javax.servlet.Filter invocation here
              */
+            final String headerName = ECHO_HEADER_NAME.get();
+            if (null != headerName) {
+                final String echoValue = ajpRequestHandler.getServletRequest().getHeader(headerName);
+                if (null != echoValue) {
+                    ajpRequestHandler.getServletResponse().setHeader(headerName, echoValue);
+                }
+            }
             ajpRequestHandler.doServletService();
         }
         final BlockableBufferedOutputStream out = ajpConnection.getOutputStream();

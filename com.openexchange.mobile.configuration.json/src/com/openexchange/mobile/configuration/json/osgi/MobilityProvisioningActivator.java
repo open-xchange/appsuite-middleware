@@ -68,7 +68,8 @@ import com.openexchange.tools.service.SessionServletRegistration;
  * 
  */
 public class MobilityProvisioningActivator extends DeferredActivator {
-    private static transient final Log LOG = LogFactory.getLog(MobilityProvisioningActivator.class);
+
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
     
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class,HttpService.class };

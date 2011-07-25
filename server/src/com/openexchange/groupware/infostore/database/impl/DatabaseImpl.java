@@ -102,7 +102,7 @@ public class DatabaseImpl extends DBService {
 
     private static final String[] DEL_TABLES = new String[] { TABLE_DEL_INFOSTORE, TABLE_DEL_INFOSTORE_DOCUMENT };
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DatabaseImpl.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseImpl.class));
 
     private final static int DOCUMENT_VERSION_NUMBER_WITHOUT_FILE = 0;
 

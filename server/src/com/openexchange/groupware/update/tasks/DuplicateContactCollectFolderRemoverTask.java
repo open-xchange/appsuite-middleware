@@ -122,7 +122,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Logger
          */
-        final Log log = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DuplicateContactCollectFolderRemoverTask.class));
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(DuplicateContactCollectFolderRemoverTask.class));
         /*
          * Progress state
          */

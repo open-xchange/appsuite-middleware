@@ -81,7 +81,7 @@ public class Activator implements BundleActivator {
 
     private ArrayList<ServiceRegistration> services;
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     public static final String PATH_PROPERTY = "com.openexchange.subscribe.crawler.path";
 

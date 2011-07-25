@@ -57,7 +57,7 @@ public class SubscribeJSONServlet {
 
 //    private static final long serialVersionUID = 1L;
 //
-//    private static final Log LOG = LogFactory.getLog(SubscribeJSONServlet.class);
+//    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscribeJSONServlet.class));
 //
 //    private static final int POST = 0;
 //

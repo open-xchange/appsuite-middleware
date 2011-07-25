@@ -61,6 +61,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -68,11 +70,14 @@ import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -94,8 +99,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccess.class));
 
     private static final class Key {
 
@@ -199,6 +203,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
     }
 
+    private static final long MAX_RUNNING_MILLIS = StorageUtility.getMaxRunningMillis();
+
     /**
      * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed
      * {@link MailAccess} instance.
@@ -248,11 +254,10 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
-            queue.put(PRESENT);
+            return !queue.offer(PRESENT, MAX_RUNNING_MILLIS, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
-        return false;
     }
 
     /*-
@@ -389,7 +394,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * - The max. number of {@link MailAccess} instanced allowed being cached concurrently for a user's account. TODO: Add to configuration?
      */
-    private static final int MAX_PER_USER = 2;
+    private static final int MAX_PER_USER = 3;
 
     /**
      * Gets the appropriate {@link IMailAccessCache mail access cache} instance.
@@ -613,7 +618,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         } else if (mailConfig.getLogin() == null) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("login");
         } else if (mailConfig.getPassword() == null) {
-            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+            if (!PasswordSource.GLOBAL.equals(cur)) {
+                throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+            }
+            final String masterPw = MailProperties.getInstance().getMasterPassword();
+            if (masterPw == null) {
+                throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+            }
+            mailConfig.setPassword(masterPw);
         }
     }
 
@@ -771,12 +784,12 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param put2Cache <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
     public final void close(final boolean put2Cache) {
-        if (!isConnectedUnsafe()) {
-            signalClosed(this);
-            return;
-        }
-        boolean put = put2Cache;
         try {
+            if (!isConnectedUnsafe()) {
+                signalClosed(this);
+                return;
+            }
+            boolean put = put2Cache;
             try {
                 /*
                  * Release all used, non-cachable resources

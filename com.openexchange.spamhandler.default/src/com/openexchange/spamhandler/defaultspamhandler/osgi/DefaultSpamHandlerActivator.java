@@ -69,7 +69,7 @@ import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
 public final class DefaultSpamHandlerActivator extends DeferredActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class));
 
     private final Dictionary<String, String> dictionary;
 

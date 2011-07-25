@@ -66,7 +66,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
  */
 public abstract class XAJPv13Request {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13Request.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13Request.class));
 
     /**
      * Max size of an incoming request body:<br>

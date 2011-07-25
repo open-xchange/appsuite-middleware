@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
  */
 public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(UpdateTaskCustomizer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskCustomizer.class));
 
     private final BundleContext context;
 

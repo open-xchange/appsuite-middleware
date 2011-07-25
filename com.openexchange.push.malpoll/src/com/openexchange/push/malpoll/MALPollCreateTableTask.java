@@ -74,7 +74,7 @@ import com.openexchange.tools.update.Tools;
  */
 public final class MALPollCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final Log LOG = LogFactory.getLog(MALPollCreateTableTask.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollCreateTableTask.class));
 
     public int addedWithVersion() {
         return 102;

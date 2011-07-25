@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public final class Server {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Server.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Server.class));
 
     private static final String PROPERTY_NAME = "SERVER_NAME";
 

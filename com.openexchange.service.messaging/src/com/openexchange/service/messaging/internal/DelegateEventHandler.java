@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
  */
 public final class DelegateEventHandler implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(DelegateEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelegateEventHandler.class));
 
     private final MessagingService messagingService;
 

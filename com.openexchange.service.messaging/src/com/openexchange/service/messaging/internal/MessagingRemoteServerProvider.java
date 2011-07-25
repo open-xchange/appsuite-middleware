@@ -74,7 +74,7 @@ import com.openexchange.exception.OXException;
 public final class MessagingRemoteServerProvider extends ServiceTracker {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(MessagingRemoteServerProvider.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingRemoteServerProvider.class));
 
     private static volatile MessagingRemoteServerProvider instance;
 

@@ -76,7 +76,7 @@ public final class Create {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Create.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Create.class));
 
     /**
      * Context.

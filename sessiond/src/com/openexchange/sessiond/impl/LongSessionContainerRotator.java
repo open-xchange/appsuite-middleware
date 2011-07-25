@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class LongSessionContainerRotator implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(LongSessionContainerRotator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LongSessionContainerRotator.class));
 
     public LongSessionContainerRotator() {
         super();

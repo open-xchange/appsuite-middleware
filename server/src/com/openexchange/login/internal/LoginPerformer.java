@@ -51,12 +51,14 @@ package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
@@ -87,7 +89,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
@@ -110,7 +112,7 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doLogin(final LoginRequest request) throws OXException {
-        return doLogin(request, Collections.<String, Object> emptyMap());
+        return doLogin(request, new HashMap<String, Object>());
     }
 
     /**
@@ -124,6 +126,9 @@ public final class LoginPerformer {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
+            if (request.getHeaders() != null) {
+                properties.put("headers", request.getHeaders());
+            }
             final Authenticated authed = Authentication.login(request.getLogin(), request.getPassword(), properties);
             final Context ctx = findContext(authed.getContextInfo());
             retval.setContext(ctx);
@@ -144,7 +149,11 @@ public final class LoginPerformer {
             // Create session
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
             final String sessionId = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
-            retval.setSession(sessiondService.getSession(sessionId));
+            Session session = sessiondService.getSession(sessionId);
+            if (SessionEnhancement.class.isInstance(authed)) {
+                ((SessionEnhancement) authed).enhanceSession(session);
+            }
+            retval.setSession(session);
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
         } catch (final OXException e) {

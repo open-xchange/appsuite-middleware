@@ -69,7 +69,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
  */
 public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TwitterOAuthAccountDeleteListener.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterOAuthAccountDeleteListener.class));
 
     /**
      * Initializes a new {@link TwitterOAuthAccountDeleteListener}.

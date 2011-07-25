@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
     
 
     @Override

@@ -95,6 +95,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
        add("update");
        add("delete");
        add("list");
+       add("fetch");
     }};
     
     public SubscriptionMultipleHandler(final SubscriptionSourceDiscoveryService discovery, final SubscriptionExecutionService executor, final SecretService secretService) {
@@ -135,6 +136,8 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 return listSubscriptions(request, session);
             } else if (action.equals("refresh")) {
                 return refreshSubscriptions(request, session);
+            } else if (action.equals("fetch")) {
+                return fetchSubscription(request, session);
             } else {
                 UNKNOWN_ACTION.create(action);
                 return null;
@@ -145,10 +148,16 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             throw wrapThrowable(t);
         }
     }
+    
+    private Object fetchSubscription(JSONObject request, ServerSession session) throws JSONException, OXException {
+        final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
+        subscription.setId(-1);
+        return executor.executeSubscriptions(Arrays.asList(subscription), session);
+    }
+
 
     private Object refreshSubscriptions(final JSONObject request, final ServerSession session) throws OXException, JSONException {
         final List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
-        final Context context = session.getContext();
         final Set<Integer> ids = new HashSet<Integer>();
         if (request.has("folder")) {
             final String folderId = request.getString("folder");
@@ -177,11 +186,8 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 subscriptionsToRefresh.add(subscription);
             }
         }
-
-        executor.executeSubscriptions(subscriptionsToRefresh);
         
-        
-        return 1;
+        return executor.executeSubscriptions(subscriptionsToRefresh, session);
     }
 
 

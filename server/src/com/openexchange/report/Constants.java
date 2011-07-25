@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class Constants {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Constants.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class));
 
     public static final ObjectName REPORTING_NAME = initReportingName();
     public static final ObjectName OXTENDER_MONITOR_NAME = initOxtenderMonitorName();

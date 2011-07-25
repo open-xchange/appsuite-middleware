@@ -67,6 +67,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -154,7 +155,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private static final String STR_UNKNOWN = "UNKNOWN";
 
-    private final static Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
+    private final static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -697,12 +698,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         } else {
                             message = createParticipantMessage(session, newObj, p, title, actionRepl, state, locale, renderMap, isUpdate, b);
                         }
-                        messages.add(message);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                                " (id = ").append(newObj.getObjectID()).append(") \"").append(
-                                EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
-                                "\" notification message generated for receiver ").append(p.email).toString());
+                        if (null != message) {
+                            messages.add(message);
+                            if (DEBUG) {
+                                LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
+                                    " (id = ").append(newObj.getObjectID()).append(") \"").append(
+                                    EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
+                                    "\" notification message generated for receiver ").append(p.email).toString());
+                            }
                         }
                     }
                 }
@@ -803,6 +806,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return createParticipantMessage0(session, cal, p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
+    private static final Pattern PATTERN_PREFIX_MODIFIED = Pattern.compile("(^|\r?\n)" + Pattern.quote(TemplateReplacement.PREFIX_MODIFIED));
+
     private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
@@ -875,6 +880,13 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     msg.message = new StringTemplate(message).render(p.getLocale(), clone);
                 }
             } else {
+                if (!renderMap.containsChanges()) {
+                    /*
+                     * No element contains relevant changes to notify about...
+                     */
+                    return null;
+                }
+                
                 String textMessage = "";
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
                     final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
@@ -885,7 +897,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                
+
+                /*
+                 * Check for PREFIX_MODIFIED
+                 */
+                if (!PATTERN_PREFIX_MODIFIED.matcher(textMessage).find()) {
+                    /*
+                     * No element contains relevant changes to notify about...
+                     */
+                    return null;
+                }
+
                 if (cal.getRecurrenceType() == Appointment.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
                     msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 } else {
@@ -2058,7 +2080,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (s2 == null && s1.length() == 0) {
             return true;
         }
-        return s1.equals(s2);
+        return s1.trim().equals(s2 == null ? null : s2.trim());
     }
 
     /**

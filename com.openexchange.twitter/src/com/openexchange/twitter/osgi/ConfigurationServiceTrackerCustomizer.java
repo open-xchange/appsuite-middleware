@@ -53,6 +53,7 @@ import static com.openexchange.twitter.osgi.TwitterServiceRegistry.getServiceReg
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import twitter4j.conf.OXConfigurationBase;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.twitter.internal.TwitterConfiguration;
 
@@ -88,7 +89,9 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
         /*
          * ... and configure
          */
-        TwitterConfiguration.configure((ConfigurationService) service);
+        final ConfigurationService configurationService = (ConfigurationService) service;
+        TwitterConfiguration.configure(configurationService);
+        OXConfigurationBase.getInstance().parseFrom(configurationService);
         return service;
     }
 

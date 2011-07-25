@@ -149,7 +149,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreFacadeImpl.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFacadeImpl.class));
 
     public static final InfostoreQueryCatalog QUERIES = new InfostoreQueryCatalog();
 

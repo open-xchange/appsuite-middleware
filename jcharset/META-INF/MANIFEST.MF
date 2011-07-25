@@ -8,6 +8,6 @@ Bundle-Activator: net.freeutils.charset.osgi.JCharsetActivator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ClassPath: net.freeutils.jcharset.osgi.jar,
  lib/jcharset-1.3.jar
-Export-Package: net.freeutils.charset;version="1.3.0"
+Export-Package: net.freeutils.charset
 Import-Package: org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework

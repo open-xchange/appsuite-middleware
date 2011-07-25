@@ -117,7 +117,7 @@ public final class ical extends PermissionServlet {
     /**
      * Logger.
      */
-    private static final transient Log LOG = LogFactory.getLog(ical.class);
+    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ical.class));
 
     private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,

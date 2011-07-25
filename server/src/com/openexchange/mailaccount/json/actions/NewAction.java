@@ -147,6 +147,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     primaryAccount = storageService.getDefaultMailAccount(session.getUserId(), session.getContextId());
                     name = getName(StorageUtility.INDEX_CONFIRMED_HAM, primaryAccount);
                 }
+                account.setConfirmedHam(name);
                 account.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
             }
             // Confirmed-Ham
@@ -165,6 +166,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     }
                     name = getName(StorageUtility.INDEX_CONFIRMED_SPAM, primaryAccount);
                 }
+                account.setConfirmedSpam(name);
                 account.setConfirmedSpamFullname(tmp.append(name).toString());
             }
             // Drafts
@@ -183,6 +185,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     }
                     name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
+                account.setDrafts(name);
                 account.setDraftsFullname(tmp.append(name).toString());
             }
             // Sent
@@ -201,6 +204,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     }
                     name = getName(StorageUtility.INDEX_SENT, primaryAccount);
                 }
+                account.setSent(name);
                 account.setSentFullname(tmp.append(name).toString());
             }
             // Spam
@@ -219,6 +223,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     }
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
+                account.setSpam(name);
                 account.setSpamFullname(tmp.append(name).toString());
             }
             // Trash
@@ -237,6 +242,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     }
                     name = getName(StorageUtility.INDEX_TRASH, primaryAccount);
                 }
+                account.setTrash(name);
                 account.setTrashFullname(tmp.append(name).toString());
             }
         } catch (final OXException e) {
@@ -246,7 +252,7 @@ public final class NewAction extends AbstractMailAccountAction {
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
             sb.append(account.getId()).append(" failed with user ").append(session.getUserId());
             sb.append(" in context ").append(session.getContextId());
-            org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountAction.class).warn(sb.toString(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAccountAction.class)).warn(sb.toString(), e);
         }
     }
 

@@ -83,7 +83,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     
     private String identifyingCriteria;
     
-    private static Log LOG = LogFactory.getLog(AnchorsByLinkRegexStep.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkRegexStep.class));
 
     private boolean mayHaveEmptyOutput;
 

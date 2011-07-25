@@ -64,7 +64,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  */
 public final class SpellCheckServletActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class));
 
     private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
 

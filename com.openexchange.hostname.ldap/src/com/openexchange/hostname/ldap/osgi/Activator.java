@@ -66,7 +66,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 public class Activator extends DeferredActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     // add services which we need in our plugins later
     private static final Class<?>[] NEEDED_SERVICES = { CacheService.class, ConfigurationService.class };

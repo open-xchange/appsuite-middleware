@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define         ox_release 13
+%define         ox_release 18
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -82,6 +82,10 @@ ant -Dguiprefix=%{docroot}/ox6 -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{build
 %config(noreplace) /opt/open-xchange/etc/groupware/settings/upsell-multiple-gui.properties
 %{docroot}/ox6/plugins/com.openexchange.upsell.multiple.gui/*
 %changelog
+* Thu Jul 21 2011 - stefan.preuss@open-xchange.com
+ - Bugfix #19593 - [L3] ie7 upsell window not working
+* Tue Jun 28 2011 - dennis.sieben@open-xchange.com
+ - Bugfix #19626 - Upsell multiple should listen for new oxupdater event
 * Mon Mar 21 2011 - dennis.sieben@open-xchange.com
  - Bugfix #18556 - [L3] Upsell Multiple doesn't hide flash UWA widgets
 * Tue Mar 15 2011 - mkraft@open-xchange.com

@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MailAccessWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccessWatcher.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccessWatcher.class));
 
     private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
@@ -202,7 +202,7 @@ public final class MailAccessWatcher {
 
         private final org.apache.commons.logging.Log logger;
 
-        private boolean traceEnabled;
+        private final boolean traceEnabled;
 
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
@@ -226,14 +226,14 @@ public final class MailAccessWatcher {
                 for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = map.entrySet().iterator(); iter.hasNext();) {
                     final Entry<MailAccess<?, ?>, Long> e = iter.next();
                     final MailAccess<?, ?> mailAccess = e.getKey();
-                    if (mailAccess.isConnectedUnsafe()) {
+                    if (mailAccess.isConnected()) {
                         if (mailAccess.isWaiting()) {
                             if (traceEnabled) {
                                 logger.trace(new StringBuilder("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
                             }
                         } else {
                             final Long val = e.getValue();
-                            if ((null != val)) {
+                            if (null != val) {
                                 final long duration = (now - l(val));
                                 if (duration > watcherTime) {
                                     sb.setLength(0);

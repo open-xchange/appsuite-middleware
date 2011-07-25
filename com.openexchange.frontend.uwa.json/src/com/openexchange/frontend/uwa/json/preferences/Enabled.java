@@ -95,16 +95,13 @@ public class Enabled implements PreferencesItemService {
                     if (property.isDefined()) {
                         setting.setSingleValue(property.get());
                     } else {
-                        setting.setSingleValue(true);
+                        setting.setSingleValue(Boolean.TRUE);
                     }
                 } catch (OXException e) {
                     throw new OXException(e);
                 }
             }
 
-            /**
-             * {@inheritDoc}
-             */
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

@@ -88,7 +88,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     protected static boolean initialized;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TemplateListResourceBundle.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TemplateListResourceBundle.class));
 
     @Override
     protected Object handleGetObject(final String arg0) {

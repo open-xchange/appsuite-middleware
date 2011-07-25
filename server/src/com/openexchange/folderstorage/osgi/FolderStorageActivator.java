@@ -167,7 +167,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderStorageActivator.class));
 
     private List<ServiceRegistration> serviceRegistrations;
 

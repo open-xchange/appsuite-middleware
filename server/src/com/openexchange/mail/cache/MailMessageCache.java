@@ -147,7 +147,11 @@ public final class MailMessageCache {
         return updaters;
     }
 
-    protected static final String REGION_NAME = "MailMessageCache";
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessageCache.class));
+
+    private static final Object[] EMPTY_ARGS = new Object[0];
+
+    static final String REGION_NAME = "MailMessageCache";
 
     private static final ConcurrentMap<CacheKey, ReadWriteLock> contextLocks = new ConcurrentHashMap<CacheKey, ReadWriteLock>();
 

@@ -61,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class CustomCharsetProviderInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CustomCharsetProviderInit.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CustomCharsetProviderInit.class));
 
     /**
      * Initializes a new {@link CustomCharsetProviderInit}.

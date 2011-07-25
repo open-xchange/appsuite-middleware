@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.JSONMessageCache;
 import com.openexchange.mail.cache.JSONMessageCacheConfiguration;
@@ -74,7 +75,7 @@ import com.openexchange.server.Initialization;
  */
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailInitialization.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailInitialization.class));
 
     private static final MailInitialization instance = new MailInitialization();
 
@@ -196,6 +197,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         /*
          * Stop global mail system
          */
+        AttachmentTokenRegistry.releaseInstance();
         EventPool.releaseInstance();
         JSONMessageCache.releaseInstance();
         JSONMessageCacheConfiguration.releaseInstance();

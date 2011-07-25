@@ -78,7 +78,7 @@ public final class TwitterActivator implements BundleActivator {
     }
 
     public void start(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.twitter");
@@ -104,7 +104,7 @@ public final class TwitterActivator implements BundleActivator {
     }
 
     public void stop(final BundleContext context) throws Exception {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.twitter");

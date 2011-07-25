@@ -73,7 +73,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(NewAdminExtensionsUpdateTask.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NewAdminExtensionsUpdateTask.class));
 
     /*
      * (non-Javadoc)

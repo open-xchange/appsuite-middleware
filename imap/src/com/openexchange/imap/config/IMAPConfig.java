@@ -102,6 +102,8 @@ public final class IMAPConfig extends MailConfig {
 
     private InetSocketAddress imapServerSocketAddress;
 
+    private IMAPStore imapStore;
+
     private final Map<String, Object> params;
 
     /**
@@ -113,6 +115,22 @@ public final class IMAPConfig extends MailConfig {
         super();
         this.accountId = accountId;
         params = new ConcurrentHashMap<String, Object>(4);
+    }
+
+    /**
+     * Gets the optional IMAP store.
+     * 
+     * @return The IMAP store
+     */
+    public IMAPStore optImapStore() {
+        return imapStore;
+    }
+
+    /**
+     * Drops the IMAP store reference.
+     */
+    public void dropImapStore() {
+        imapStore = null;
     }
 
     /**
@@ -220,12 +238,12 @@ public final class IMAPConfig extends MailConfig {
     public void initializeCapabilities(final IMAPStore imapStore, final Session session) throws OXException {
         if (imapCapabilities == null) {
             synchronized (this) {
+                this.imapStore = imapStore;
                 if (imapCapabilities != null) {
                     return;
                 }
                 try {
-                    final CapabilitiesResponse response =
-                        CapabilitiesCache.getCapabilitiesResponse(imapStore, this, session, accountId);
+                    final CapabilitiesResponse response = CapabilitiesCache.getCapabilitiesResponse(imapStore, this, session, accountId);
                     imapCapabilities = response.getImapCapabilities();
                     capabilities = response.getMap();
                     aclExtension = response.getAclExtension();

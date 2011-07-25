@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -73,7 +74,7 @@ public class MultipleAdapter implements MultipleHandler {
 
     private final AJAXActionServiceFactory factory;
 
-    private AJAXRequestResult result;
+    private final AtomicReference<AJAXRequestResult> result;
 
     /**
      * Initializes a new {@link MultipleAdapter}.
@@ -83,6 +84,7 @@ public class MultipleAdapter implements MultipleHandler {
     public MultipleAdapter(final AJAXActionServiceFactory factory) {
         super();
         this.factory = factory;
+        result = new AtomicReference<AJAXRequestResult>();
     }
 
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
@@ -104,11 +106,13 @@ public class MultipleAdapter implements MultipleHandler {
                 request.putParameter(name, entry.getValue().toString());
             }
         }
-        result = actionService.perform(request, session);
-        return result.getResultObject();
+        final AJAXRequestResult ret = actionService.perform(request, session);
+        result.set(ret);
+        return ret.getResultObject();
     }
 
     public Date getTimestamp() {
+        final AJAXRequestResult result = this.result.get();
         if (null == result) {
             return null;
         }
@@ -117,14 +121,14 @@ public class MultipleAdapter implements MultipleHandler {
     }
 
     public void close() {
-        result = null;
+        result.set(null);
     }
 
     public Collection<OXException> getWarnings() {
-        if (null == result) {
+        if (null == result.get()) {
             return Collections.<OXException> emptySet();
         }
-        return result.getWarnings();
+        return result.get().getWarnings();
     }
 
 }

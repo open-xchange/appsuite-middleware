@@ -56,6 +56,8 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
+import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
+import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
 
@@ -66,7 +68,7 @@ import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAli
  */
 public final class InternalList {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InternalList.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalList.class));
 
     private static final InternalList SINGLETON = new InternalList();
 
@@ -382,6 +384,13 @@ public final class InternalList {
         new CreateIndexOnContextAttributesTask(),
         
         // Recreate the index on the user attributes table for alias lookup
-        new CreateIndexOnUserAttributesForAliasLookupTask()
+        new CreateIndexOnUserAttributesForAliasLookupTask(),
+        
+        // Correct the attachment count in the dates table
+        new CorrectAttachmentCountInAppointments(),
+
+        // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
+        // NULL. This task corrects this.
+        new CorrectOrganizerInAppointments()
     };
 }

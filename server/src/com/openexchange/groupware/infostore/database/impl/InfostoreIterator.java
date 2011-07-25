@@ -76,7 +76,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreIterator.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreIterator.class));
 
     public static InfostoreIterator loadDocumentIterator(final int id, final int version, final DBProvider provider, final Context ctx) {
         final String query = QUERIES.getSelectDocument(id, version, ctx.getContextId());

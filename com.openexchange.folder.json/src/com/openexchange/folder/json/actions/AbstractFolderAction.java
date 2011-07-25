@@ -175,7 +175,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 }
                 final ContentType ct = tmpMap.get(str);
                 if (null == ct) {
-                    org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for string: " + str);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for string: " + str);
                     throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
                 }
                 ret.add(ct);
@@ -183,7 +183,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 final Integer key = Integer.valueOf(module);
                 final ContentType ct = availableContentTypes.get(key);
                 if (null == ct) {
-                    org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + key);
                     throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
                 }
                 ret.add(ct);
@@ -216,7 +216,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             /*
              * Not found
              */
-            org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + tmp);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + tmp);
             throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
         }
         /*
@@ -225,7 +225,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         final Integer key = Integer.valueOf(module);
         final ContentType ct = availableContentTypes.get(key);
         if (null == ct) {
-            org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class).error("No content type for module: " + key);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractFolderAction.class)).error("No content type for module: " + key);
             throw AjaxExceptionCodes.InvalidParameterValue.create(parameterName, tmp);
         }
         return ct;

@@ -89,7 +89,7 @@ public class freebusy extends HttpServlet {
 
     private static final long serialVersionUID = 6336387126907903347L;
 
-    private static final Log LOG = LogFactory.getLog(freebusy.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(freebusy.class));
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 

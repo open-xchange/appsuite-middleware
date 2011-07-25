@@ -51,6 +51,7 @@ package com.openexchange.imap.entity2acl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,9 +59,16 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import javax.mail.MessagingException;
+
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.sun.mail.imap.ACL;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACLAutoDetector} - Auto-detects {@link Entity2ACL} implementation.
@@ -69,7 +77,7 @@ import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
  */
 public final class Entity2ACLAutoDetector {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Entity2ACLAutoDetector.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Entity2ACLAutoDetector.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -185,10 +193,10 @@ public final class Entity2ACLAutoDetector {
         return entity2Acl;
     }
 
+    private static final Map<InetSocketAddress, IMAPServer> CACHE = new ConcurrentHashMap<InetSocketAddress, IMAPServer>();
+
     private static IMAPServer mapInfo2IMAPServer(final String info, final IMAPConfig imapConfig) throws OXException {
-        final IMAPServer[] imapServers = IMAPServer.values();
-        for (int i = 0; i < imapServers.length; i++) {
-            final IMAPServer imapServer = imapServers[i];
+        for (final IMAPServer imapServer : IMAPServer.getIMAPServers()) {
             if (imapServer.matches(info)) {
                 return imapServer;
             }
@@ -211,7 +219,57 @@ public final class Entity2ACLAutoDetector {
             }
             return IMAPServer.CYRUS;
         }
-        throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
+        /*
+         * First look-up in cache
+         */
+        final InetSocketAddress socketAddress;
+        try {
+            socketAddress = imapConfig.getImapServerSocketAddress();
+        } catch (final IMAPException e) {
+            throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
+        }
+        IMAPServer imapServer = CACHE.get(socketAddress);
+        if (null != imapServer) {
+            if (IMAPServer.UNKNOWN.equals(imapServer)) {
+                throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
+            }
+            return imapServer;
+        }
+        synchronized (CACHE) {
+            imapServer = CACHE.get(socketAddress);
+            if (null != imapServer) {
+                return imapServer;
+            }
+            /*
+             * Try to determine ACL entities by simple checking for alias "owner"
+             */
+            final IMAPStore imapStore = imapConfig.optImapStore();
+            if (null == imapStore) {
+                throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
+            }
+            try {
+                final IMAPFolder folder = (IMAPFolder) imapStore.getFolder("INBOX");
+                if (imapConfig.getACLExtension().canGetACL(
+                    RightsCache.getCachedRights(folder, true, imapConfig.getSession(), imapConfig.getAccountId()))) {
+                    final ACL[] acls = folder.getACL();
+                    boolean owner = false;
+                    for (int i = 0; !owner && i < acls.length; i++) {
+                        owner = "owner".equalsIgnoreCase(acls[i].getName());
+                    }
+                    imapServer = owner ? IMAPServer.COURIER : IMAPServer.CYRUS;
+                    CACHE.put(socketAddress, imapServer);
+                    return imapServer;
+                }
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(info);
+            } catch (final MessagingException e) {
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
+            } catch (final RuntimeException e) {
+                CACHE.put(socketAddress, IMAPServer.UNKNOWN);
+                throw Entity2ACLExceptionCode.UNKNOWN_IMAP_SERVER.create(e, info);
+            }
+        }
     }
 
 }

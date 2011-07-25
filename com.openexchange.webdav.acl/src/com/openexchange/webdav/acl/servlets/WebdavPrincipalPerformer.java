@@ -267,8 +267,9 @@ public class WebdavPrincipalPerformer implements SessionHolder{
 
     public void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) {
         try {
-            final WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
-            final WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
+            final ServletWebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
+            webdavRequest.setUrlPrefix("/principals/users/");
+            final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             session.set(sess);
             if (LOG.isDebugEnabled()) {

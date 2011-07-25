@@ -105,7 +105,7 @@ public interface Status {
      * 
      * @return The in-reply user id
      */
-    int getInReplyToUserId();
+    long getInReplyToUserId();
 
     /**
      * Gets the in-reply-to screen name.
@@ -113,20 +113,6 @@ public interface Status {
      * @return The in-reply-to screen name
      */
     String getInReplyToScreenName();
-
-    /**
-     * returns The location's latitude that this tweet refers to.
-     * 
-     * @since Twitter4J 2.0.10
-     */
-    double getLatitude();
-
-    /**
-     * Gets the location's longitude that this tweet refers to.
-     * 
-     * @return The location's longitude that this tweet refers to
-     */
-    double getLongitude();
 
     /**
      * Test if the status is favorited.

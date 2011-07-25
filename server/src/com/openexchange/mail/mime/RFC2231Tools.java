@@ -67,7 +67,7 @@ import com.openexchange.tools.encoding.Charsets;
  */
 public final class RFC2231Tools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RFC2231Tools.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RFC2231Tools.class));
 
     /**
      * No instantiation

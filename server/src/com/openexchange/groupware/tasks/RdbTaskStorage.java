@@ -82,7 +82,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbTaskStorage extends TaskStorage {
 
-    static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(RdbTaskStorage.class));
+    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbTaskStorage.class));
 
     /**
      * This SQL statement counts the tasks in a folder. TODO Move to {@link SQL} class.

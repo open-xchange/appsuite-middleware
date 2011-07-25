@@ -49,12 +49,16 @@
 
 package com.openexchange.subscribe;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 
 
 public class TargetFolderSession implements Session {
     private final TargetFolderDefinition target;
+    private Map<String, Object> params = new HashMap<String, Object>();
+    
     public TargetFolderSession(final TargetFolderDefinition target){
         this.target = target;
     }
@@ -82,11 +86,11 @@ public class TargetFolderSession implements Session {
     }
 
     public Object getParameter(final String name) {
-        throw new UnsupportedOperationException();
+        return params.get(name);
     }
 
     public boolean containsParameter(final String name) {
-        throw new UnsupportedOperationException();
+        return params.containsKey(name);
     }
 
     public String getPassword() {
@@ -114,7 +118,7 @@ public class TargetFolderSession implements Session {
     }
 
     public void setParameter(final String name, final Object value) {
-        throw new UnsupportedOperationException();        
+        params.put(name, value);
     }
 
     public String getAuthId() {

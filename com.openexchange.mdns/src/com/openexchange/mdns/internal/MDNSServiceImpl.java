@@ -75,7 +75,7 @@ import com.openexchange.mdns.MDNSServiceInfo;
  */
 public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(MDNSServiceImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSServiceImpl.class));
 
     /**
      * Maps service identifiers to available services

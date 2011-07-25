@@ -80,6 +80,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -101,7 +102,7 @@ public final class AJAXFile extends PermissionServlet {
      */
     private static final long serialVersionUID = 1L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXFile.class));
+    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXFile.class));
 
     private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
 

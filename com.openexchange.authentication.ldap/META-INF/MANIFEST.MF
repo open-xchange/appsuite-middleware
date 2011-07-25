@@ -13,5 +13,6 @@ Import-Package: com.openexchange.authentication,
  javax.naming.directory,
  javax.naming.ldap,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ com.openexchange.log,
+ org.osgi.framework
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

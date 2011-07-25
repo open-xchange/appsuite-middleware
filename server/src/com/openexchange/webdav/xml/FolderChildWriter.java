@@ -68,7 +68,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class FolderChildWriter extends DataWriter {
 	
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderChildWriter.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderChildWriter.class));
 	
 	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) {
 		writeDataElements(folderchildobject, e_prop);

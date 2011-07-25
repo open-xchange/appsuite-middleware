@@ -85,6 +85,7 @@
     <property name="txjar" value="com.openexchange.tx.jar"/>
 	<property name="cryptojar" value="com.openexchange.crypto.jar"/>
     <property name="filestoragecompositionjar" value="com.openexchange.file.storage.composition.jar"/>
+    <property name="configCascade.jar" value="com.openexchange.config.cascade.jar"/>
 
     <property name="activationjar" value="activation-1.1.1.jar"/>
     <property name="chardetjar" value="chardet-1.1.jar"/>
@@ -138,6 +139,7 @@
         <pathelement location="${bundlesdir}/${txjar}"/>
     	<pathelement location="${bundlesdir}/${cryptojar}"/>
         <pathelement location="${bundlesdir}/${filestoragecompositionjar}"/>
+        <pathelement location="${bundlesdir}/${configCascade.jar}"/>
 
         <pathelement location="${bundlesdir}/javax.activation/lib/${activationjar}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commonscodecjar}"/>

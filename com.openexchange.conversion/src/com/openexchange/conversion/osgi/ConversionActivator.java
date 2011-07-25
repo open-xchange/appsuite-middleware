@@ -49,6 +49,8 @@
 
 package com.openexchange.conversion.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -58,6 +60,9 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConversionActivator implements BundleActivator {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConversionActivator.class));
+
 
     /**
      * Default constructor.

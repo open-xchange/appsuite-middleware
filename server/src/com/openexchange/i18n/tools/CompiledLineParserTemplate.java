@@ -66,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
 
     private static final String STR_EMPTY = "";
 

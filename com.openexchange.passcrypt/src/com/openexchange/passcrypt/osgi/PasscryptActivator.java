@@ -88,7 +88,7 @@ public final class PasscryptActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -97,7 +97,7 @@ public final class PasscryptActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class);
+        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -138,7 +138,7 @@ public final class PasscryptActivator extends DeferredActivator {
             registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), passwordCrypter, null));
             registrations.add(context.registerService(SecretMigrator.class.getName(), passwordCrypter, null));
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }
@@ -163,7 +163,7 @@ public final class PasscryptActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class)).error(e.getMessage(), e);
             throw e;
         }
     }

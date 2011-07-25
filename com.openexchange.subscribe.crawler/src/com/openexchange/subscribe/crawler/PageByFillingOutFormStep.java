@@ -76,7 +76,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
     
     private Map<String, String> parameters = new HashMap<String, String>();
     
-    private static Log LOG = LogFactory.getLog(PageByFillingOutFormStep.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFillingOutFormStep.class));
     
     public PageByFillingOutFormStep(){
         

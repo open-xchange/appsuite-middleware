@@ -26,7 +26,78 @@ postFix() {
 
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
-  
+
+  # SoftwareChange_Request-798
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/login.properties
+  if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+      echo "# Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session on" >> $pfile
+      echo "# login redirect or login redeem requests. To create a session from a server for some client you have to pass the clients IP address when" >> $pfile
+      echo "# creating the session." >> $pfile
+      echo "# WARNING! Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not work" >> $pfile
+      echo "# correctly." >> $pfile
+      echo "com.openexchange.ajax.login.insecure=false" >> $pfile 
+  fi
+
+  # SoftwareChange_Request-797
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/server.properties
+  if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+      echo "# Specify the name of the echo header whose value is echoed for each request providing that header" >> $pfile
+      echo "com.openexchange.servlet.echoHeaderName=X-Echo-Header" >> $pfile
+  fi
+
+  # SoftwareChange_Request-791
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
+  if ! grep "com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >/dev/null $pfile; then
+      echo "# Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL NULL" >> $pfile
+      echo "# This task corrects this." >> $pfile
+      echo "!com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >> $pfile
+  fi
+
+  # SoftwareChange_Request-788
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/system.properties
+  if ! ox_exists_property com.openexchange.config.cascade.scopes $pfile; then
+      ox_set_property com.openexchange.config.cascade.scopes "user, context, contextSets, server" $pfile
+  fi
+
+  # SoftwareChange_Request-784
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+      ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.gmail.com:2,imap.googlemail.com:2" $pfile
+  fi
+
+  # SoftwareChange_Request-766
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+      ox_set_property com.openexchange.imap.maxNumExternalConnections '""' $pfile
+  fi
+
+  # SoftwareChange_Request-774
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/cache.ccf
+  local val=0$(ox_read_property jcs.region.Context.cacheattributes.MaxObjects $pfile)
+  if [ $val -lt 10000 ]; then
+      ox_set_property jcs.region.Context.cacheattributes.MaxObjects 10000 $pfile
+  fi
+
+  # SoftwareChange_Request-755
+  # -----------------------------------------------------------------------
+  local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  if ! ox_exists_property com.openexchange.imap.notifyRecent $pfile; then
+      ox_set_property com.openexchange.imap.notifyRecent "false" $pfile
+  fi
+  if ! ox_exists_property com.openexchange.imap.notifyFrequencySeconds $pfile; then
+      ox_set_property com.openexchange.imap.notifyFrequencySeconds "300" $pfile
+  fi
+  if ! ox_exists_property com.openexchange.imap.notifyFullNames $pfile; then
+      ox_set_property com.openexchange.imap.notifyFullNames "INBOX" $pfile
+  fi
+
   # SoftwareChange_Request-754
   # -----------------------------------------------------------------------
   local pfile=/opt/open-xchange/etc/groupware/whitelist.properties
@@ -45,11 +116,12 @@ postFix() {
   fi
 
   # SoftwareChange_Request-711
+  # obsoleted by SoftwareChange_Request-766
   # -----------------------------------------------------------------------
-  local pfile=/opt/open-xchange/etc/groupware/imap.properties
-  if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
-      ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
-  fi
+  #local pfile=/opt/open-xchange/etc/groupware/imap.properties
+  #if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+  #    ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
+  #fi
 
   # SoftwareChange_Request-705
   # -----------------------------------------------------------------------

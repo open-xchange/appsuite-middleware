@@ -67,6 +67,7 @@ import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
+import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
@@ -93,10 +94,11 @@ public class CaldavActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
             
-            rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/caldav"));
-            rememberTracker(new ServletRegistration(context, new DevNullServlet(), "/servlet/dev/null")); // FIXME activate this elsewhere
+            rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/dav/caldav"));
+            rememberTracker(new ServletRegistration(context, new DevNullServlet(), "/servlet/dav/dev/null")); // FIXME activate this elsewhere
             
             CaldavPerformer performer = CaldavPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
@@ -111,6 +113,8 @@ public class CaldavActivator extends HousekeepingActivator {
                 
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
+            
+            registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);

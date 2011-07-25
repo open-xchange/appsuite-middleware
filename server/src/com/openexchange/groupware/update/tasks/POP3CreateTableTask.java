@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class POP3CreateTableTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(POP3CreateTableTask.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(POP3CreateTableTask.class));
 
     public int addedWithVersion() {
         return 42;

@@ -56,6 +56,9 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailExceptionCode;
@@ -117,20 +120,28 @@ public final class BodyTerm extends SearchTerm<String> {
 
     @Override
     public boolean matches(final Message msg) throws OXException {
-        final String text = getTextContent(msg);
-        if (text == null) {
-            if (null == pattern) {
-                return true;
+        try {
+            final String text = getTextContent(msg);
+            if (text == null) {
+                if (null == pattern) {
+                    return true;
+                }
+                return false;
             }
+            if (null == pattern) {
+                return false;
+            }
+            if (containsWildcard()) {
+                return toRegex(pattern).matcher(text).find();
+            }
+            return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
+        } catch (final OXException e) {
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
+            return false;
+        } catch (final RuntimeException e) {
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);
             return false;
         }
-        if (null == pattern) {
-            return false;
-        }
-        if (containsWildcard()) {
-            return toRegex(pattern).matcher(text).find();
-        }
-        return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
     }
 
     @Override

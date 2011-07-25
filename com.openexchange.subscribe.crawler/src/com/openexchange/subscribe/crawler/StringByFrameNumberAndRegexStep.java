@@ -70,7 +70,7 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
 
     private String regex;
 
-    private static final Log LOG = LogFactory.getLog(StringByFrameNumberAndRegexStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByFrameNumberAndRegexStep.class));
 
     public StringByFrameNumberAndRegexStep() {
 

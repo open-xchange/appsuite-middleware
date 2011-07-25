@@ -98,7 +98,7 @@ import com.openexchange.resource.Resource;
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static Log LOG = LogFactory.getLog(Participants.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Participants.class));
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 
@@ -236,7 +236,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             } else {
                 final URI uri = attendee.getCalAddress();
-                if("mailto".equalsIgnoreCase(uri.getScheme())) {
+                if(null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
                     final String mail = uri.getSchemeSpecificPart();
                     final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
                     mails.put(mail, icalP);

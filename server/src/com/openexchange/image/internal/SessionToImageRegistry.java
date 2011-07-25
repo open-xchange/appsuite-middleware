@@ -71,7 +71,7 @@ public class SessionToImageRegistry {
     
     private static final SessionToImageRegistry INSTANCE = new SessionToImageRegistry();
     
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SessionToImageRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SessionToImageRegistry.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
     

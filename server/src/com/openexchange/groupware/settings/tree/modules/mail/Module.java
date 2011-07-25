@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
  */
 public class Module implements PreferencesItemService {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Module.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Module.class));
 
     /**
      * Default constructor.

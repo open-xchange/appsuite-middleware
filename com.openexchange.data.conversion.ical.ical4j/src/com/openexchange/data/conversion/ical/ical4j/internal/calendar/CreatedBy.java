@@ -74,7 +74,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  */
 public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    private static final Log LOG = LogFactory.getLog(CreatedBy.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreatedBy.class));
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

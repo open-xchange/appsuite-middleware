@@ -70,7 +70,7 @@ public final class ManagementInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ManagementInit.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementInit.class));
 
     /**
      * Prevent instantiation.

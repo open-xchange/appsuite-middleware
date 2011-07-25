@@ -15,4 +15,5 @@ Import-Package: com.openexchange.authorization,
  com.openexchange.groupware.ldap,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework

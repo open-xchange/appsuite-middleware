@@ -157,7 +157,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private static final Namespace dav = Namespace.getNamespace("D", davUri);
 
-    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(XmlServlet.class));
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(XmlServlet.class));
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {

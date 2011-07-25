@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
-    private static final Log LOG = LogFactory.getLog(SearchIteratorAdapter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SearchIteratorAdapter.class));
 
     private static final class EmptySearchIterator<T> implements SearchIterator<T> {
 

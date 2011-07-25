@@ -108,7 +108,7 @@ public final class MyServletRequest  {
 	private final ConfigurationService configservice;
 	
 	
-	private static final Log LOG = LogFactory.getLog(MyServletRequest.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyServletRequest.class));
 	
 	// HTTP API methods/parameters
 	public static final String ACTION_GET_CONFIGURED_METHOD = "get_method"; // action to retrieve configured upsell method

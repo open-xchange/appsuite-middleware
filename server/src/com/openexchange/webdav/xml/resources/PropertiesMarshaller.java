@@ -85,7 +85,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return new Multistatus<Iterable<WebdavProperty>>();
 	}
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PropertiesMarshaller.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertiesMarshaller.class));
 	
 	public PropertiesMarshaller(final String charset){
 		this.charset = charset;

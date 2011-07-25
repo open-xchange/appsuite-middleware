@@ -78,7 +78,7 @@ public final class XAJPv13Session {
      */
     public static final int NOT_SET = -1;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13Session.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13Session.class));
 
     private final XAJPv13ProtocolHandler protocolHandler;
 

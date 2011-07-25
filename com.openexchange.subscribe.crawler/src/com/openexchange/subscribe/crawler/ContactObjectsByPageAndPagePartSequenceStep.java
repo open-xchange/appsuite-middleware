@@ -80,7 +80,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = LogFactory.getLog(ContactObjectsByPageAndPagePartSequenceStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByPageAndPagePartSequenceStep.class));
 
     public ContactObjectsByPageAndPagePartSequenceStep() {
         

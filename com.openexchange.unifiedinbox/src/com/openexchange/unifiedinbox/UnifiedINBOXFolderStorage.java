@@ -58,6 +58,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -88,7 +91,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderStorage.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderStorage.class));
 
     private final UnifiedINBOXAccess access;
 
@@ -297,10 +300,13 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             int completed = 0;
             while (completed < retval.length) {
                 // No timeout
-                final Retval r = completionService.take().get();
+                final Future<Retval> future = completionService.poll(UnifiedINBOXUtility.getMaxRunningMillis(), TimeUnit.MILLISECONDS);
                 completed++;
-                if (null != r) {
-                    retval[r.index] = r.mailFolder;
+                if (null != future) {
+                    final Retval r = future.get();
+                    if (null != r) {
+                        retval[r.index] = r.mailFolder;
+                    }
                 }
             }
             if (LOG.isDebugEnabled()) {

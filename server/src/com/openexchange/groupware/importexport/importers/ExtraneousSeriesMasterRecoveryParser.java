@@ -116,8 +116,8 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
         return delegate.parseTasks(icalText, defaultTZ, context, errors, warnings);
     }
 
-    public String parseUID(final InputStream ical) {
-        return delegate.parseUID(ical);
+    public String parseProperty(final String propertyName, final InputStream ical) {
+        return delegate.parseProperty(propertyName, ical);
     }
     
 }

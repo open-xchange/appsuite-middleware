@@ -73,7 +73,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 	
 	private boolean isInit = false;
 	
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ReminderConfigImpl.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderConfigImpl.class));
 	
 	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {

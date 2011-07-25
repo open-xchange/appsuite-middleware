@@ -55,6 +55,9 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogService;
+import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -77,6 +80,8 @@ public final class ThreadPoolActivator extends DeferredActivator {
 
     private ThreadPoolServiceImpl threadPool;
 
+    private LogServiceImpl logService;
+
     /**
      * Initializes a new {@link ThreadPoolActivator}.
      */
@@ -86,7 +91,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class);
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class));
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("starting bundle: com.openexchange.threadpool");
@@ -116,6 +121,8 @@ public final class ThreadPoolActivator extends DeferredActivator {
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
+            logService = new LogServiceImpl(threadPool);
+            Log.set(logService);
             /*
              * Service trackers
              */
@@ -133,6 +140,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
             registrations.add(context.registerService(ThreadPoolService.class.getName(), threadPool, null));
             registrations.add(context.registerService(TimerService.class.getName(), new CustomThreadPoolExecutorTimerService(
                 threadPool.getThreadPoolExecutor()), null));
+            registrations.add(context.registerService(LogService.class.getName(), logService, null));
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
@@ -141,7 +149,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class);
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class));
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
@@ -169,6 +177,11 @@ public final class ThreadPoolActivator extends DeferredActivator {
             /*
              * Stop thread pool
              */
+            if (null != logService) {
+                logService.stop();
+                logService = null;
+                Log.set(null);
+            }
             if (null != threadPool) {
                 try {
                     threadPool.shutdownNow();
@@ -196,7 +209,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class);
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class));
         if (LOG.isInfoEnabled()) {
             LOG.info("Appeared service: " + clazz.getName());
         }
@@ -204,7 +217,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class);
+        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadPoolActivator.class));
         if (LOG.isInfoEnabled()) {
             LOG.info("Disappeared service: " + clazz.getName());
         }

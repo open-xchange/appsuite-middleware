@@ -65,7 +65,7 @@ import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
 public final class URLMailAttachmentActivator implements BundleActivator {
 
     private static final org.apache.commons.logging.Log LOG =
-        org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentActivator.class);
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentActivator.class));
 
     private final String name;
 

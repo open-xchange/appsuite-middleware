@@ -89,7 +89,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(VCardExporter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardExporter.class));
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,

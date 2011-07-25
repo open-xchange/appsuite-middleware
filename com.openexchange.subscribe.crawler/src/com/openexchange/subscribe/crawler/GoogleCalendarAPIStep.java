@@ -80,7 +80,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Object> implements LoginStep {
 
-    private static final Log LOG = LogFactory.getLog(GoogleCalendarAPIStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleCalendarAPIStep.class));
 
     private String username, password;
 

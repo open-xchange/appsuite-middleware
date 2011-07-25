@@ -74,7 +74,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 
     private static final Property KEY = Property.ATTACHMENT;
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
     
     private static AttachmentConfig singleton;
 

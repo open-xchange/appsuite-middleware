@@ -65,7 +65,7 @@ import com.openexchange.tools.encoding.Charsets;
  */
 public class PushDiscoverySender implements Runnable {
 
-    private static final Log LOG = LogFactory.getLog(PushDiscoverySender.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushDiscoverySender.class));
 
     private final int multicastPort;
 

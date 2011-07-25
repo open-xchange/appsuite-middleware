@@ -40,5 +40,6 @@ Import-Package: com.openexchange.api2,
  com.openexchange.user,
  com.openexchange.userconf,
  javax.mail.internet,
- org.apache.commons.logging;version="1.0.4",
- org.osgi.framework;version="1.3.0"
+ org.apache.commons.logging,
+ com.openexchange.log,
+ org.osgi.framework

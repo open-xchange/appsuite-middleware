@@ -61,20 +61,6 @@ import com.openexchange.exception.OXException;
 public interface TwitterAccess {
 
     /**
-     * Gets authenticating user identifier.
-     * 
-     * @return The user identifier
-     */
-    public String getUserId();
-
-    /**
-     * Gets authenticating password.
-     * 
-     * @return The password
-     */
-    public String getPassword();
-
-    /**
      * Gets authenticating user.
      * 
      * @return The authenticating user
@@ -223,9 +209,7 @@ public interface TwitterAccess {
      * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
      * 
      * @param status The text of your status update
-     * @param inReplyToStatusId The ID of an existing status that the status to be posted is in reply to. This implicitly sets the
-     *            in_reply_to_user_id attribute of the resulting status to the user ID of the message being replied to. Invalid/missing
-     *            status IDs will be ignored.
+     * @param inReplyToStatusId The ID of the status to retweet
      * @return The latest status
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
      */

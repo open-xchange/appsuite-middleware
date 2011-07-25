@@ -78,7 +78,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class GetArisingReminder {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GetArisingReminder.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GetArisingReminder.class));
     private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;

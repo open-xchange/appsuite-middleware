@@ -85,7 +85,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class IMAPSort {
 
-    static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPSort.class);
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPSort.class));
 
     /**
      * No instantiation

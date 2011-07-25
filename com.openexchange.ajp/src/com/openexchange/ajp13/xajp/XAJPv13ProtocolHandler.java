@@ -75,7 +75,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 @Execution(Execution.NONTHREADED)
 public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IConnectExceptionHandler, IDisconnectHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ProtocolHandler.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(XAJPv13ProtocolHandler.class));
 
     protected static final byte MAGIC1 = 0x12;
 

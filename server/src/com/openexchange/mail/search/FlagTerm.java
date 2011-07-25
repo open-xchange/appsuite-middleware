@@ -53,10 +53,11 @@ import java.util.Collection;
 import javax.mail.Flags;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
@@ -111,7 +112,8 @@ public final class FlagTerm extends SearchTerm<Integer> {
         try {
             msgFlags = msg.getFlags();
         } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FlagTerm.class)).warn("Error during search.", e);
+            return false;
         }
         return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);
     }

@@ -96,7 +96,7 @@ public class LDAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = LogFactory.getLog(LDAPAuthentication.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPAuthentication.class));
 
     /**
      * Properties for the JNDI context.

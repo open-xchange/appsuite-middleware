@@ -80,6 +80,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
@@ -133,7 +134,7 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(IMAPFolderConverter.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPFolderConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -360,7 +361,7 @@ public final class IMAPFolderConverter {
                     mailFolder.setSubscribedSubfolders(false);
                 }
                 final boolean selectable = mailFolder.isHoldsMessages();
-                final Rights ownRights;
+                Rights ownRights;
                 /*
                  * Add own rights
                  */
@@ -370,30 +371,14 @@ public final class IMAPFolderConverter {
                     if (!exists || mailFolder.isNonExistent()) {
                         ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
                     } else if (!selectable) {
-                        /*
-                         * Distinguish between holds folders and none
-                         */
-                        if (mailFolder.isHoldsFolders()) {
-                            /*
-                             * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
-                             * namespace folders
-                             */
-                            if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId)) {
-                                ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
-                            } else {
-                                ownPermission.setAllPermission(
-                                    OCLPermission.CREATE_SUB_FOLDERS,
-                                    OCLPermission.NO_PERMISSIONS,
-                                    OCLPermission.NO_PERMISSIONS,
-                                    OCLPermission.NO_PERMISSIONS);
-                                ownPermission.setFolderAdmin(true);
-                                ownRights = ACLPermission.permission2Rights(ownPermission, imapConfig);
-                            }
-                        } else {
-                            ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
-                        }
+                        ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission);
                     } else {
-                        ownPermission.parseRights((ownRights = getOwnRights(imapFolder, session, imapConfig)), imapConfig);
+                        ownRights = getOwnRights(imapFolder, session, imapConfig);
+                        if (null == ownRights) {
+                            ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission);
+                        } else {
+                            ownPermission.parseRights(ownRights, imapConfig);
+                        }
                     }
                     /*
                      * Check own permission against folder type
@@ -436,7 +421,10 @@ public final class IMAPFolderConverter {
                     mailFolder.setDeletedMessageCount(-1);
                 }
                 mailFolder.setSubscribed(MailProperties.getInstance().isSupportSubscription() ? ("INBOX".equals(mailFolder.getFullname()) ? true : listEntry.isSubscribed()) : true);
-                if (imapConfig.isSupportsACLs()) {
+                /*
+                 * Parse ACLs to user/group permissions for primary account only.
+                 */
+                if (MailAccount.DEFAULT_ID == accountId && imapConfig.isSupportsACLs()) {
                     // Check if ACLs can be read; meaning GETACL is allowed
                     if (selectable && exists && imapConfig.getACLExtension().canGetACL(ownRights)) {
                         try {
@@ -470,6 +458,33 @@ public final class IMAPFolderConverter {
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         }
+    }
+
+    private static Rights ownRightsFromProblematic(final Session session, final IMAPAccess imapAccess, final String imapFullName, final IMAPConfig imapConfig, final IMAPMailFolder mailFolder, final int accountId, final ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
+        final Rights ownRights;
+        /*
+         * Distinguish between holds folders and none
+         */
+        if (mailFolder.isHoldsFolders()) {
+            /*
+             * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
+             * namespace folders
+             */
+            if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId)) {
+                ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
+            } else {
+                ownPermission.setAllPermission(
+                    OCLPermission.CREATE_SUB_FOLDERS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS,
+                    OCLPermission.NO_PERMISSIONS);
+                ownPermission.setFolderAdmin(true);
+                ownRights = ACLPermission.permission2Rights(ownPermission, imapConfig);
+            }
+        } else {
+            ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
+        }
+        return ownRights;
     }
 
     private static void checkSubfoldersByCommands(final IMAPFolder imapFolder, final IMAPMailFolder mailFolder, final String fullname, final char separator, final boolean checkSubscribed) throws MessagingException {
@@ -745,6 +760,7 @@ public final class IMAPFolderConverter {
                      * Handle command failed exception
                      */
                     handleCommandFailedException(((com.sun.mail.iap.CommandFailedException) nextException), folder.getFullName());
+                    return null;
                 } else {
                     LOG.error(e.getMessage(), e);
                 }
@@ -768,17 +784,17 @@ public final class IMAPFolderConverter {
         return retval;
     }
 
-    private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullname) {
+    private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullName) {
         final String msg = e.getMessage().toLowerCase(Locale.ENGLISH);
         if (msg.indexOf("Mailbox doesn't exist") >= 0 || msg.indexOf("Mailbox does not exist") >= 0) {
             /*
              * This occurs when requesting MYRIGHTS on a shared or somehow non-existent folder. Just log a warning!
              */
             if (LOG.isWarnEnabled()) {
-                LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullname), e);
+                LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
             }
         } else {
-            LOG.error(e.getMessage(), e);
+            LOG.debug("Failed MYRIGHTS for: " + fullName, e);
         }
     }
 

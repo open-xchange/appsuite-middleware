@@ -177,7 +177,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String UNION = " UNION ";
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
 
     private static CalendarCollection collection = new CalendarCollection();
 
@@ -3202,8 +3202,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 pu.setNull(4, java.sql.Types.INTEGER);
                             } else {
                                 pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
-                                final RecurringResultsInterface recurringResults = collection.calculateRecurring(
-                                    edao,
+                                RecurringResultsInterface recurringResults = collection.calculateRecurring(
+                                    cdao,
                                     calc_date.getTime(),
                                     end_date.getTime(),
                                     0);
@@ -3638,8 +3638,8 @@ public class CalendarMySQL implements CalendarSqlImp {
         return CalendarObject.NONE;
     }
 
-    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
-        Connection readcon = null, writecon = null;
+    public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
+        Connection writecon = null;
         int changes[];
         PreparedStatement pst = null;
         int oldAmount = 0;
@@ -3647,13 +3647,15 @@ public class CalendarMySQL implements CalendarSqlImp {
         PreparedStatement prep = null;
         long last_modified = 0L;
         try {
-            readcon = DBPool.pickup(c);
+            writecon = DBPool.pickupWriteable(c);
+            writecon.setAutoCommit(false);
             final StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01 = ");
             sb.append(oid);
             sb.append(" AND cid = ");
             sb.append(c.getContextId());
-            prep = getPreparedStatement(readcon, sb.toString());
+            sb.append(" FOR UPDATE");
+            prep = getPreparedStatement(writecon, sb.toString());
             rs = getResultSet(prep);
             if (rs.next()) {
                 oldAmount = rs.getInt(1);
@@ -3661,25 +3663,14 @@ public class CalendarMySQL implements CalendarSqlImp {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
                 throw OXException.notFound("");
             }
-        } catch (final SQLException sqle) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
-        } finally {
-            collection.closeResultSet(rs);
-            collection.closePreparedStatement(prep);
-            if (readcon != null) {
-                DBPool.closeReaderSilent(c, readcon);
+       
+
+            oldAmount += numberOfAttachments;
+            if (oldAmount < 0) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+                throw new OXException();
             }
-        }
 
-        oldAmount += numberOfAttachments;
-        if (oldAmount < 0) {
-            LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
-            throw OXException.notFound("");
-        }
-
-        try {
-            writecon = DBPool.pickupWriteable(c);
-            writecon.setAutoCommit(false);
             pst = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ?, intfield08 = ? WHERE intfield01 = ? AND cid = ?");
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
@@ -3694,6 +3685,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 throw OXException.notFound("");
             }
             LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
+            writecon.commit();
+        } catch (final OXException dbpe) {
+            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             if (writecon != null) {
                 try {

@@ -68,7 +68,7 @@ public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>/servlet/caldav/</D:href>";
+        return "<D:href>/caldav/</D:href>";
     }
 
 }

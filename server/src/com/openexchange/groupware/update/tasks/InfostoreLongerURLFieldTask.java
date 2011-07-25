@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 public class InfostoreLongerURLFieldTask  implements UpdateTask {
 
-    private final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreLongerURLFieldTask.class));
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreLongerURLFieldTask.class));
 
     public int addedWithVersion() {
         return 12;

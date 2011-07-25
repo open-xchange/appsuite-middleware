@@ -72,7 +72,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(SystemConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SystemConfig.class));
 
     /**
      * Key of the system property that contains the file name of the

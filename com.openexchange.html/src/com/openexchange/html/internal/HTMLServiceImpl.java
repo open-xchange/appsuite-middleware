@@ -85,7 +85,7 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public final class HTMLServiceImpl implements HTMLService {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(HTMLServiceImpl.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLServiceImpl.class));
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 

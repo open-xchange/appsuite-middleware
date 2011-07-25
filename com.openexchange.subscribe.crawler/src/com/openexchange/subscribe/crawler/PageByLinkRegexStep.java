@@ -74,7 +74,7 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
     protected boolean executedSuccessfully;
     
-    private static Log LOG = LogFactory.getLog(PageByLinkRegexStep.class);
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByLinkRegexStep.class));
 
     public PageByLinkRegexStep() {
         super();

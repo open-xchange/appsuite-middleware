@@ -77,7 +77,7 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  */
 public class HashingFileStorage implements FileStorage {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HashingFileStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashingFileStorage.class));
 
     private final File storage;
 

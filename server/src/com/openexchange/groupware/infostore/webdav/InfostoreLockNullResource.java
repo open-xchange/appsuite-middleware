@@ -86,7 +86,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
 
 
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreLockNullResource.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreLockNullResource.class));
 	
 	
 	private final InfostoreWebdavFactory factory;

@@ -74,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(QuotaFileStorage.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaFileStorage.class));
 
     /**
      * The context of the QuotaFileStorage

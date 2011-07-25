@@ -106,7 +106,7 @@ public final class groupuser extends PermissionServlet {
 
     private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
 
-    private static transient final Log LOG = LogFactory.getLog(groupuser.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(groupuser.class));
 
     @Override
     protected Interface getInterface() {

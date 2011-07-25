@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  */
 public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UserSettingMailStorage.class));
 
     private static volatile UserSettingMailStorage singleton;
 
@@ -151,6 +151,29 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
             return null;
         }
     }
+
+    /**
+     * Saves given user's mail settings bits to database
+     * 
+     * @param usm the user's mail settings to save
+     * @param user the user ID
+     * @param ctx the context
+     * @throws OXException if user's mail settings could not be saved
+     */
+    public final void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx) throws OXException {
+        saveUserSettingMailBits(usm, user, ctx, null);
+    }
+
+    /**
+     * Saves given user's mail settings bits to database
+     * 
+     * @param usm the user's mail settings to save
+     * @param user the user ID
+     * @param ctx the context
+     * @param writeConArg - the writable connection; may be <code>null</code>
+     * @throws OXException if user's mail settings could not be saved
+     */
+    public abstract void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException;
 
     /**
      * Saves given user's mail settings to database

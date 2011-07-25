@@ -65,7 +65,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class TwitterEventHandler implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(TwitterEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TwitterEventHandler.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 

@@ -68,6 +68,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -82,7 +83,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public final class AJPv13Task implements Task<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
 
     /**
      * Creates a new {@link AJPv13Task} instance.

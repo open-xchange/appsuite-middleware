@@ -4,7 +4,7 @@
 Name:           open-xchange-charset
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@
+BuildRequires:  ant open-xchange-global >= @OXVERSION@
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 13
+%define		ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        charset bundle
-Requires:	open-xchange-common >= @OXVERSION@
+Requires:	open-xchange-global >= @OXVERSION@
 #
 
 %description

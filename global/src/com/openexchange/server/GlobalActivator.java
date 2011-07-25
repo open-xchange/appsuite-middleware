@@ -76,7 +76,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GlobalActivator.class));
 
     private Initialization initialization;
 

@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 7
+%define		ox_release 12
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -69,6 +69,22 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %clean
 %{__rm} -rf %{buildroot}
+
+if [ ${1:-0} -eq 2 ]; then
+   # only when updating
+   . /opt/open-xchange/etc/oxfunctions.sh
+
+   # prevent bash from expanding, see bug 13316
+   GLOBIGNORE='*'
+
+   # SoftwareChange_Request-779
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/push_imapidle.properties
+   if ! ox_exists_property com.openexchange.push.imapidle.pushmode $pfile; then
+      ox_set_property com.openexchange.push.imapidle.pushmode always $pfile
+   fi
+
+fi
 
 %files
 %defattr(-,root,root)

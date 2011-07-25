@@ -69,7 +69,7 @@ public final class CrawlerUpdateMBeanImpl extends StandardMBean implements Crawl
     
     private Activator activator;
     
-    private static final Log LOG = LogFactory.getLog(CrawlerUpdateMBeanImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateMBeanImpl.class));
 
     /**
      * Initializes a new {@link CrawlerUpdateMBeanImpl}.

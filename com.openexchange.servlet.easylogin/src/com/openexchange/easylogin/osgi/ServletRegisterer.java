@@ -69,7 +69,7 @@ import com.openexchange.easylogin.EasyLogin;
  */
 public class ServletRegisterer implements ServiceTrackerCustomizer {
 
-    private static final Log LOG = LogFactory.getLog(ServletRegisterer.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegisterer.class));
 
     private static final String ALIAS = "servlet/easylogin";
 

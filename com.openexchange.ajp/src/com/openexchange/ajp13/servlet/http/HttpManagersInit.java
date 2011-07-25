@@ -76,8 +76,7 @@ import com.openexchange.server.Initialization;
  */
 public final class HttpManagersInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpManagersInit.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpManagersInit.class));
 
     private static final HttpManagersInit instance = new HttpManagersInit();
 

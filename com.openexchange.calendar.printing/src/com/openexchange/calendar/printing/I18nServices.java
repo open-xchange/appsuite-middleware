@@ -64,7 +64,7 @@ import com.openexchange.i18n.LocaleTools;
  */
 public class I18nServices {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(I18nServices.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
     private static final I18nServices SINGLETON = new I18nServices();
 
     private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();

@@ -69,6 +69,8 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}
@@ -77,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-	private static final Log LOG = LogFactory.getLog(SubscriptionExecutionServiceImpl.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
 
     private final SubscriptionSourceDiscoveryService discoverer;
 
@@ -90,17 +92,19 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         this.folderUpdaters = folderUpdaters;
         this.contextService = contexts;
     }
-
-    public void executeSubscription(final String sourceId, final Context context, final int subscriptionId) throws OXException {
-        final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
-        final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
-        final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+    
+    public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException {
+        SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
+        Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
+        subscription.setSession(session);
+        boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
         }
         final Collection data = subscribeService.getContent(subscription);
 
         storeData(data, subscription);
+        return data.size();
     }
 
     /**
@@ -141,24 +145,28 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         return ofa.getFolderObject(folderId);
     }
 
-    public void executeSubscription(final Context context, final int subscriptionId) throws OXException {
-        final SubscriptionSource source = discoverer.getSource(context, subscriptionId);
+    public int executeSubscription(ServerSession session, int subscriptionId) throws OXException {
+        Context context = session.getContext();
+        SubscriptionSource source = discoverer.getSource(context, subscriptionId);
         if(source == null) {
             throw INACTIVE_SOURCE.create();
         }
-        final SubscribeService subscribeService = source.getSubscribeService();
-        final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
-        final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
+        SubscribeService subscribeService = source.getSubscribeService();
+        Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
+        subscription.setSession(session);
+        boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
         if(!knowsSource) {
             throw INACTIVE_SOURCE.create();
         }        final Collection data = subscribeService.getContent(subscription);
         storeData(data, subscription);
-
+        return data.size();
     }
 
-    public void executeSubscriptions(final List<Subscription> subscriptionsToRefresh) throws OXException {
-        for (final Subscription subscription : subscriptionsToRefresh) {
-        	if(!subscription.isEnabled()) {
+    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session) throws OXException {
+        int sum = 0;
+        for (Subscription subscription : subscriptionsToRefresh) {
+            subscription.setSession(session);
+            if(!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");
                 
             } else {
@@ -169,8 +177,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             	final SubscribeService subscribeService = source.getSubscribeService();
             	final Collection data = subscribeService.getContent(subscription);
             	storeData(data, subscription);
+            	sum += data.size();
             }
         }
+        return sum;
     }
     private boolean isThereMoreThanOneSubscriptionOnThisFolder(final Context context, final String folder, final String secret) throws OXException {
         final List<SubscriptionSource> sources = discoverer.getSources();
@@ -184,4 +194,8 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         if (allSubscriptionsOnThisFolder.size() >= 2){return true;}
         else {return false;}
     }
+
+
+
+
 }

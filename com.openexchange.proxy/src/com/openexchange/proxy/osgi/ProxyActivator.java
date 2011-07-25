@@ -60,7 +60,7 @@ import org.osgi.framework.BundleContext;
 public class ProxyActivator implements BundleActivator {
 
 	public void start(final BundleContext context) throws Exception {
-	    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class);
+	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.proxy");
@@ -72,7 +72,7 @@ public class ProxyActivator implements BundleActivator {
 	}
 
 	public void stop(final BundleContext context) throws Exception {
-	    final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class);
+	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.proxy");

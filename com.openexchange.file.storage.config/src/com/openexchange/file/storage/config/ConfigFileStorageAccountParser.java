@@ -147,7 +147,7 @@ public final class ConfigFileStorageAccountParser {
                 }
                 map.put(account.getId(), account);
             } catch (final OXException e) {
-                final Log logger = LogFactory.getLog(ConfigFileStorageAccountParser.class);
+                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigFileStorageAccountParser.class));
                 logger.warn("Configuration for file storage account \"" + id + "\" is invalid: " + e.getMessage(), e);
             }
         }

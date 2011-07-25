@@ -98,7 +98,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     private OAuthAccessor oAuthAccessor;
 
-    private static final Log LOG = LogFactory.getLog(StringByOAuthRequestStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByOAuthRequestStep.class));
     
     private Page loginPage;
     

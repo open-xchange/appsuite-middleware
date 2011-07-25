@@ -193,7 +193,7 @@ public final class SieveTextFilter {
     
     private static final String LEGAL_FLAG_CHARS = "[a-zA-Z1-9]";
 
-    private static final Log LOG = LogFactory.getLog(SieveTextFilter.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveTextFilter.class));
     
     private static final String RULENAME_TAG = "Rulename: ";
     

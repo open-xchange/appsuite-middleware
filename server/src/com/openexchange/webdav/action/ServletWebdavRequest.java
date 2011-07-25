@@ -67,13 +67,13 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
 	private final HttpServletRequest req;
-	private final String urlPrefix;
+	private String urlPrefix;
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
 	private ApacheURLDecoder decoder = new ApacheURLDecoder();
 	
-	private static final Log LOG = LogFactory.getLog(ServletWebdavRequest.class);
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletWebdavRequest.class));
 	
 	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
 		super(factory);
@@ -106,6 +106,10 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	public String getURLPrefix() {
 		return urlPrefix;
 	}
+	
+    public void setUrlPrefix(String urlPrefix) {
+        this.urlPrefix = urlPrefix;
+    }
 
 	public WebdavPath getUrl() {
 		return url;

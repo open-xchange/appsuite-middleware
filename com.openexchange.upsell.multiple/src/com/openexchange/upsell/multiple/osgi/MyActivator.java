@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
 
 public class MyActivator extends DeferredActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(MyActivator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyActivator.class));
 
     // add services which we need in our plugins later
     private static final Class<?>[] NEEDED_SERVICES = {

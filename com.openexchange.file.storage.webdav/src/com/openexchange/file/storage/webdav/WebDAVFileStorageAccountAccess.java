@@ -359,7 +359,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 try {
                     timeout = Integer.parseInt(sTimeout.trim());
                 } catch (final NumberFormatException e) {
-                    org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageAccountAccess.class).warn(
+                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(WebDAVFileStorageAccountAccess.class)).warn(
                         "Configuration property \"" + WebDAVConstants.WEBDAV_TIMEOUT + "\" is not a number: " + sTimeout);
                     timeout = TIMEOUT;
                 }

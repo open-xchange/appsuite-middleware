@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(ServerConfig.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerConfig.class));
 
     /**
      * Singleton object.

@@ -189,7 +189,7 @@ public abstract class ServiceHolder<S> {
 
     private static Timer serviceHolderTimer;
 
-    private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServiceHolder.class));
 
     private static final String printStackTrace(final StackTraceElement[] trace) {
         final StringBuilder sb = new StringBuilder(512);

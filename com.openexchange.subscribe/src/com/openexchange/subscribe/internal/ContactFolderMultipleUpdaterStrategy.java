@@ -84,7 +84,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     private static final int TARGET = 2;
     
-    private static final Log LOG = LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class));
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
     private static final int[] COMPARISON_COLUMNS = Contact.CONTENT_COLUMNS;
@@ -95,7 +95,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         boolean contactsAreAbleToBeAssociated = false;
         final FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
         
-        if (candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
+        if (false && candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
             
             final UUID uuid = UUID.fromString(candidate.getUserField20());
                                     

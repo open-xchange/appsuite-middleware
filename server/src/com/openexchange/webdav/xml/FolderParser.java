@@ -71,7 +71,7 @@ import com.openexchange.webdav.xml.fields.FolderFields;
 
 public class FolderParser extends FolderChildParser {
 	
-	private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FolderParser.class));
+	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderParser.class));
 	
 	public FolderParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;

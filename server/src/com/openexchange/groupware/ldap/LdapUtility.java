@@ -76,7 +76,7 @@ public final class LdapUtility {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(LdapUtility.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapUtility.class));
 
     /**
      * Empty map.

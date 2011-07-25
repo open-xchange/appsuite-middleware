@@ -66,7 +66,7 @@ public class TaskAttachmentListener implements AttachmentListener {
 
     private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TaskAttachmentListener.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskAttachmentListener.class));
 
     public TaskAttachmentListener() {
         super();

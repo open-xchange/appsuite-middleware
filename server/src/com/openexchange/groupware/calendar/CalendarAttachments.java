@@ -72,7 +72,7 @@ import com.openexchange.tools.StringCollection;
 
 public class CalendarAttachments implements  AttachmentListener, AttachmentAuthorization {
     
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalendarAttachments.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAttachments.class));
     
     private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
     

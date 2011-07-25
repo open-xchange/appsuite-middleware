@@ -62,7 +62,7 @@ import org.osgi.framework.BundleContext;
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(CompositeBundleActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
     private final Stack<BundleActivator> activated = new Stack<BundleActivator>();
 
     public void start(final BundleContext context) throws Exception {

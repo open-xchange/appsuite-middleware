@@ -54,8 +54,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -111,7 +111,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MIMEMessageUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageUtility.class));
 
     private static final Set<HeaderName> ENCODINGS;
 
@@ -265,13 +265,13 @@ public final class MIMEMessageUtility {
         return isWhitespace;
     }
 
-    private static final Pattern PATTERN_EMBD_IMG =
-        Pattern.compile("(<img[^>]+src=\"?cid:)([^\"]+)(\"?[^>]*/?>)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG = Pattern.compile(
+        "(<img[^>]+src=\"cid:)([^\"]+)(\"[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern PATTERN_EMBD_IMG_ALT =
-        Pattern.compile(
-            "(<img[^>]+src=\"?)([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"?[^>]*/?>)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern PATTERN_EMBD_IMG_ALT = Pattern.compile(
+        "(<img[^>]+src=\")([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)(\"[^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains inlined images
@@ -296,7 +296,7 @@ public final class MIMEMessageUtility {
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
     public static List<String> getContentIDs(final CharSequence htmlContent) {
-        final List<String> retval = new ArrayList<String>();
+        final List<String> retval = new LinkedList<String>();
         Matcher m = PATTERN_EMBD_IMG.matcher(htmlContent);
         while (m.find()) {
             retval.add(m.group(2));
@@ -327,10 +327,9 @@ public final class MIMEMessageUtility {
         return false;
     }
 
-    public static final Pattern PATTERN_REF_IMG =
-        Pattern.compile(
-            "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    public static final Pattern PATTERN_REF_IMG = Pattern.compile(
+        "(<img[^>]*?)(src=\")([^\"]+?)((?:uid=|id=))([^\"&]+)(?:(&[^\"]+\")|(\"))([^>]*/?>)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     /**
      * Detects if given HTML content contains references to local image files
@@ -949,8 +948,10 @@ public final class MIMEMessageUtility {
                 throw e;
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                    "using plain addresses' string representation instead.").toString(), e);
+                LOG.debug(
+                    new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
+                        "using plain addresses' string representation instead.").toString(),
+                    e);
             }
             addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
         }
@@ -1003,11 +1004,11 @@ public final class MIMEMessageUtility {
      * 
      * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
      * System.out.println(buildAddr);
-     * //Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
+     * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
      * 
      * final InternetAddress ia = new InternetAddress(buildAddr);
      * System.out.println(ia.toUnicodeString());
-     * //Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
+     * // Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
      * </pre>
      * 
      * @param personal The personal's string representation

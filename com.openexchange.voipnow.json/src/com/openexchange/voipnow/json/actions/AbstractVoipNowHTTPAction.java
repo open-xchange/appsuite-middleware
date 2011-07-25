@@ -240,7 +240,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
                     stream.close();
                 }
             } catch (final IOException e) {
-                org.apache.commons.logging.LogFactory.getLog(AbstractVoipNowHTTPAction.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractVoipNowHTTPAction.class)).error(e.getMessage(), e);
             }
         }
     }

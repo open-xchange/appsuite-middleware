@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class CrawlerCookieSpec extends CookieSpecBase {
     
-    protected static final Log LOG = LogFactory.getLog(CrawlerCookieSpec.class);
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpec.class));
     
     public CrawlerCookieSpec(){
     }

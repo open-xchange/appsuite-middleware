@@ -108,7 +108,7 @@ public class InfostoreRequest extends CommonRequest {
 
     private final UserConfiguration userConfiguration;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(InfostoreRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRequest.class));
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);

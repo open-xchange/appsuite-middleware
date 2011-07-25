@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class CheckSizeSwitch {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CheckSizeSwitch.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CheckSizeSwitch.class));
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
     private final DBProvider provider;

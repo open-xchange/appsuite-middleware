@@ -96,7 +96,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
     private boolean isInit = false;
 
-    private static final Log LOG = LogFactory.getLog(PushConfigurationImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushConfigurationImpl.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -226,6 +226,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         } catch (UnknownHostException e) {
             LOG.error("Unable to determine internet address for hostname: " + hostnameString, e);
         }
+        LOG.info("Using " + hostname.getHostAddress() + " for inter OX UDP communication.");
 
         isInit = true;
     }

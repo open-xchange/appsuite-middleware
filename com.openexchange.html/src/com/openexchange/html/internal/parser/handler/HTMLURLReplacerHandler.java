@@ -125,7 +125,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
     }
 
     public void handleError(final String errorMsg) {
-        final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class);
+        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class));
         log.error(errorMsg);
     }
 
@@ -193,7 +193,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class);
+            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLURLReplacerHandler.class));
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);

@@ -75,7 +75,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     private Exception exception;
 
     
-    private static final Log LOG = LogFactory.getLog(PageByNamedHtmlElementStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByNamedHtmlElementStep.class));
 
     
     public PageByNamedHtmlElementStep(){

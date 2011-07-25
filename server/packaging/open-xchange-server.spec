@@ -36,7 +36,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 %endif
 %endif
 Version:	@OXVERSION@
-%define		ox_release 15
+%define		ox_release 20
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -79,7 +79,7 @@ Requires:  java-sun
 %package -n	open-xchange
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
-Requires:	open-xchange-authentication >= @OXVERSION@ open-xchange-charset >= @OXVERSION@ open-xchange-conversion-engine >= @OXVERSION@ open-xchange-conversion-servlet >= @OXVERSION@ open-xchange-contactcollector >= @OXVERSION@ open-xchange-i18n >= @OXVERSION@ open-xchange-mailstore >= @OXVERSION@ open-xchange-jcharset >= @OXVERSION@ open-xchange-push-udp >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-sessiond >= @OXVERSION@ open-xchange-smtp >= @OXVERSION@ open-xchange-spamhandler >= @OXVERSION@ open-xchange-user-json >= @OXVERSION@ open-xchange-settings-extensions >= @OXVERSION@ open-xchange-theme-default >= @OXVERSION@ open-xchange-folder-json >= @OXVERSION@ open-xchange-proxy-servlet >= @OXVERSION@ open-xchange-secret-recovery-json >= @OXVERSION@ open-xchange-secret-recovery-mail >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-file-storage-json >= @OXVERSION@ open-xchange-file-storage-infostore >= @OXVERSION@ open-xchange-file-storage-config >= @OXVERSION@ open-xchange-authorization >= @OXVERSION@ open-xchange-logging >= @OXVERSION@ open-xchange-httpservice >= @OXVERSION@ open-xchange-config-cascade-context >= @OXVERSION@ open-xchange-config-cascade-user >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-storage >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-frontend-uwa-json >= @OXVERSION@
+Requires:	open-xchange-authentication >= @OXVERSION@ open-xchange-charset >= @OXVERSION@ open-xchange-conversion-engine >= @OXVERSION@ open-xchange-conversion-servlet >= @OXVERSION@ open-xchange-contactcollector >= @OXVERSION@ open-xchange-i18n >= @OXVERSION@ open-xchange-mailstore >= @OXVERSION@ open-xchange-jcharset >= @OXVERSION@ open-xchange-push-udp >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-calendar >= @OXVERSION@ open-xchange-sessiond >= @OXVERSION@ open-xchange-smtp >= @OXVERSION@ open-xchange-spamhandler >= @OXVERSION@ open-xchange-user-json >= @OXVERSION@ open-xchange-settings-extensions >= @OXVERSION@ open-xchange-theme-default >= @OXVERSION@ open-xchange-folder-json >= @OXVERSION@ open-xchange-proxy-servlet >= @OXVERSION@ open-xchange-secret-recovery-json >= @OXVERSION@ open-xchange-secret-recovery-mail >= @OXVERSION@ open-xchange-tx >= @OXVERSION@ open-xchange-file-storage-json >= @OXVERSION@ open-xchange-file-storage-infostore >= @OXVERSION@ open-xchange-file-storage-config >= @OXVERSION@ open-xchange-authorization >= @OXVERSION@ open-xchange-logging >= @OXVERSION@ open-xchange-httpservice >= @OXVERSION@ open-xchange-config-cascade-context >= @OXVERSION@ open-xchange-config-cascade-user >= @OXVERSION@ open-xchange-modules-json >= @OXVERSION@ open-xchange-modules-model >= @OXVERSION@ open-xchange-modules-storage >= @OXVERSION@ open-xchange-frontend-uwa >= @OXVERSION@ open-xchange-frontend-uwa-json >= @OXVERSION@ open-xchange-publish-infostore-online >= @OXVERSION@
 %if 0%{?suse_version}
 Requires: mysql-client >= 5.0.0
 %endif
@@ -149,6 +149,77 @@ if [ ${1:-0} -eq 2 ]; then
    # prevent bash from expanding, see bug 13316
    GLOBIGNORE='*'
 
+   # SoftwareChange_Request-798
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/login.properties
+   if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+       echo "# Configures whether an insecure login is allowed. Meaning if local IP and/or user-agent strings are replaced in associated user session on" >> $pfile
+       echo "# login redirect or login redeem requests. To create a session from a server for some client you have to pass the clients IP address when" >> $pfile
+       echo "# creating the session." >> $pfile
+       echo "# WARNING! Setting this parameter to true may result in users seeing a different users content if the infrastructure around OX does not work" >> $pfile
+       echo "# correctly." >> $pfile
+       echo "com.openexchange.ajax.login.insecure=false" >> $pfile 
+   fi
+
+   # SoftwareChange_Request-797
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/server.properties
+   if ! grep "com.openexchange.ajax.login.insecure" >/dev/null $pfile; then
+       echo "# Specify the name of the echo header whose value is echoed for each request providing that header" >> $pfile
+       echo "com.openexchange.servlet.echoHeaderName=X-Echo-Header" >> $pfile
+   fi
+
+   # SoftwareChange_Request-791
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
+   if ! grep "com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >/dev/null $pfile; then
+       echo "# Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL NULL" >> $pfile
+       echo "# This task corrects this." >> $pfile
+       echo "!com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments" >> $pfile
+   fi
+ 
+   # SoftwareChange_Request-788
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/system.properties
+   if ! ox_exists_property com.openexchange.config.cascade.scopes $pfile; then
+       ox_set_property com.openexchange.config.cascade.scopes "user, context, contextSets, server" $pfile
+   fi
+
+   # SoftwareChange_Request-784
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+       ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.gmail.com:2,imap.googlemail.com:2" $pfile
+   fi
+
+   # SoftwareChange_Request-766
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+       ox_set_property com.openexchange.imap.maxNumExternalConnections '""' $pfile
+   fi
+ 
+   # SoftwareChange_Request-774
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/cache.ccf
+   val=0$(ox_read_property jcs.region.Context.cacheattributes.MaxObjects $pfile)
+   if [ $val -lt 10000 ]; then
+       ox_set_property jcs.region.Context.cacheattributes.MaxObjects 10000 $pfile
+   fi
+
+   # SoftwareChange_Request-755
+   # -----------------------------------------------------------------------
+   pfile=/opt/open-xchange/etc/groupware/imap.properties
+   if ! ox_exists_property com.openexchange.imap.notifyRecent $pfile; then
+       ox_set_property com.openexchange.imap.notifyRecent "false" $pfile
+   fi
+   if ! ox_exists_property com.openexchange.imap.notifyFrequencySeconds $pfile; then
+       ox_set_property com.openexchange.imap.notifyFrequencySeconds "300" $pfile
+   fi
+   if ! ox_exists_property com.openexchange.imap.notifyFullNames $pfile; then
+       ox_set_property com.openexchange.imap.notifyFullNames "INBOX" $pfile
+   fi
+
    # SoftwareChange_Request-754
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/groupware/whitelist.properties
@@ -161,17 +232,18 @@ if [ ${1:-0} -eq 2 ]; then
    # SoftwareChange_Request-748
    # -----------------------------------------------------------------------
    pfile=/opt/open-xchange/etc/common/excludedupdatetasks.properties
-   if ! grep -E "^com.openexchange.subscribe.yahoo.update.DeleteOldYahooSubscriptions" >/dev/null $pfile; then
+   if ! grep -E "^com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions" >/dev/null $pfile; then
       echo "# Remove crawler-style yahoo subscriptions. ENABLE THIS IF YOU WANT TO USE open-xchange-subscribe-yahoo. DISABLE IT OTHERWISE!" >> $pfile
-      echo "com.openexchange.subscribe.yahoo.update.DeleteOldYahooSubscriptions" >> $pfile
+      echo "com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions" >> $pfile
    fi
 
    # SoftwareChange_Request-711
+   # obsoleted by SoftwareChange_Request-766
    # -----------------------------------------------------------------------
-   pfile=/opt/open-xchange/etc/groupware/imap.properties
-   if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
-      ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
-   fi
+   #pfile=/opt/open-xchange/etc/groupware/imap.properties
+   #if ! ox_exists_property com.openexchange.imap.maxNumExternalConnections $pfile; then
+   #   ox_set_property com.openexchange.imap.maxNumExternalConnections "imap.googlemail.com:4," $pfile
+   #fi
 
    # SoftwareChange_Request-705
    # -----------------------------------------------------------------------
@@ -809,8 +881,107 @@ fi
 %doc doc/examples
 
 %changelog
+* Fri Jul 22 2011 - choeger@open-xchange.com
+ - Bugfix #19921: package open-xchange is missing a dependency on open-xchange-publish-infostore-online
+* Fri Jul 22 2011 - thorben.betten@open-xchange.com
+ - Fix bug 19923: Using timeout
+ - Fix bug 19924: Using timeout
+* Thu Jul 21 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19915: A mis-matching byte order mark (BOM) does not throw the parser off anymore.
+* Thu Jul 21 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19890: No more NullPointerExceptions in UDP push bundle if socket initialization fails.
+ - Bugfix #19880: Partial fix. Decoupling the clean up task of the database pooling from other subsystems to avoid blocking situations.
+* Thu Jul 21 2011 - thorben.betten@open-xchange.com
+ - Fix for bug #19920: Using proper tree identifier
+ - Bugfix #19910: Multiple IMAP-IDLE listeners for certain clients
+ - Bugfix #19880: Logging problem is fixed, too
+* Wed Jul 20 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19547: Resolve groups in update cycle, retain all resources of an appointment, declare only primary mail address as private address.
+* Wed Jul 20 2011 - thorben.betten@open-xchange.com
+ - Fix for bug 19688: Introduced white-list property to specify clients which are allowed to receive a notification about a new mail (mail-push)
+* Wed Jul 20 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19109: Moving a sequence destroys the appointment.
+* Tue Jul 19 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19776: Applying proper subscription status to newly created mail default folders
+ - Bugfix #19824: Token-based access to mail attachments
+ - Bugfix #19875: Updated GMX export URL in corresponding .yml files
+* Tue Jul 19 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19818: Setting secure flag on cookies even if autologin is not enabled.
+* Tue Jul 19 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #19484: Only patch appointments once for use in CalDAV interface
+* Mon Jul 18 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19728: Configured max. connection restriction for GMail by default
+ - Bugfix #19722: Additional check for possibly configured global password if password is missing on mail connect attempt
+ - Bugfix #19777: Changed/deleted contacts is honored in existing distribution lists
+ - Bugfix #14653 + #12985: Suppress notification message if no relevant changes can be detected
+* Mon Jul 18 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19490: Error during exception change.
+ - Bugfix #19489: Removing recurrence information from a recurring appointment.
+* Sun Jul 17 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19821: Properly handling a disappeared mail folder on root level
+* Sat Jul 16 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19726: Checking for existence of storage directory prior attempting to delete it
+ - Bugfix #19747: Fixed possible NPE when parsing an ICal's participants
+* Fri Jul 15 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19792: Fixed possible IndexOutOfBoundsException when fetching an IMAP folder's messages
+ - Bugfix #19816: No alias check with NULL value
+* Thu Jul 14 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19766: Reliable check for a folder's content type
+ - Bugfix #19736: Retry mechanism for mail default folder check
+* Wed Jul 13 2011 - francisco.laguna@open-xchange.com
+ - Bugfix #18688: Correct attachment count in calendar
+* Wed Jul 13 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19647: Tolerating whitespaces in subscription URIs 
+* Wed Jul 13 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19752: Using newest stable twitter4j API to display home timeline (incl. retweets)
+* Tue Jul 12 2011 - martin.herfurth@open-xchange.com
+ - Bugfix #19667: Resources in a series are conflicting with itself in exceptions.
+* Tue Jul 12 2011 - marcus.klein@open-xchange.com
+ - Bugfix #19576: Removed the usage of the beta flag. It is still only present in the API.
+* Tue Jul 12 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19739: Auto-detection of ACL entities
+* Mon Jul 11 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19635: Ensure termination of consumer task upon mail mass import
+ - Bugfix #19128: Accepting context administrator as a user's contact creator, too
+* Mon Jul 11 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19487: The name of the updater installer that can be downloaded from web gui is configurable now
+ - Bugfix #19488: The template values product-name, base-name and icon are configuration-file properties now
+* Sun Jul 10 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19480: Reliable sorting of message by arrival date.
+ - Bugfix #19595: Added permission check prior to creating attachment-publishing infostore folder
+ - Bugfix #19608: Ensured proper removal from MailAccess watcher on close
+* Fri Jul 08 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19751: Proper generation of FETCH command items if IMAPrev1 is supported
+* Mon Jul 04 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19585: Allowing empty cookie values; e.g. 'mycookie='
+ - Bugfix #19691: Dropping AJP connection (in AJP way) if a corrupt AJP cycle is detected
+* Sat Jul 02 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19561: Proper re-initialization of LIST/LSUB cache
+ - Bugfix #19683: Fixed NPE in Unified Mail
+ - Bugfix #19684: Dealing with possible missing headers when writing OLOX2's structured JSON mail object
+ - Bugfix #19628: Safe reading of a message's address headers
+ - Bugfix #19657: Dealing with possible failure when reading from an account's folder
+* Fri Jul 01 2011 - tobias.prinz@open-xchange.com
+ - Bugfix #19600: Deleting the first and only user of a context made the filestore inaccessible to other users in that context. Fixed. 
+* Fri Jul 01 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19536: Proper detection of possible quota exceeded error
+* Thu Jun 30 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19658: [L3] Moving mails with the OX WebGUI makes them disappear (dovecot)
+ - Bugfix #19669: Proper expunge flag on folder closure
+* Thu Jun 30 2011 - steffen.templin@open-xchange.com
+ - Bugfix #19670: To see the updater-download-link in the OX GUI the user also needs permissions for USM instead of only for OLOX20.
+* Wed Jun 29 2011 - marcus.klein@open-xchange.com
+ - Not creating always confirmed-spam and confirmed-ham folders anymore for Cloudmark spam handler. confirmed-spam is created if the
+   configuration tells to move spam mails to that folder.
+* Mon Jun 27 2011 - francisco.laguna@open-xchange.com
+ - Bug #19598: Don't die on decryption errors so users can remove their OAuth accounts
+* Fri Jun 24 2011 - marcus.klein@open-xchange.com
+ - TA7380 of US6578, Bugfix #19609: Passing HTTP headers to authentication implementation.
+* Thu Jun 23 2011 - thorben.betten@open-xchange.com
+ - Bugfix #19591: Dealing with failing retrieval of a POP3 server's capabilities (through CAPA command)
 * Wed Jun 22 2011 - thorben.betten@open-xchange.com
  - Bugfix #19571: Resolved warnings when creating a POP3 account
+ - Bugfix #19584: Properly dealing with a CommandFailedException and switching fetch profile
 * Tue Jun 21 2011 - thorben.betten@open-xchange.com
  - Bugfix #19540: Applying proper flag to contact instance if considered as distribution list
  - Bugfix #19471: Adapted to MS invitation mails

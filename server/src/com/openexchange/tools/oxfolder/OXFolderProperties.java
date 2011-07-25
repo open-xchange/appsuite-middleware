@@ -90,7 +90,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderProperties implements Initialization, CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OXFolderProperties.class));
 
     private static OXFolderProperties instance = new OXFolderProperties();
 

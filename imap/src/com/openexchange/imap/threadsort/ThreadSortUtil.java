@@ -69,7 +69,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class ThreadSortUtil {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(ThreadSortUtil.class);
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ThreadSortUtil.class));
 
     /**
      * Prevent instantiation

@@ -77,7 +77,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    private static final Log LOG = LogFactory.getLog(ChangeExceptions.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChangeExceptions.class));
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     
     private static CalendarCollectionService calendarCollection;

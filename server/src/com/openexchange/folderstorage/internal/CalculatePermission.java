@@ -136,7 +136,7 @@ public final class CalculatePermission {
                     }
                 }
             } catch (final OXException e) {
-                final Log logger = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
+                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalculatePermission.class));
                 logger.warn("User configuration could not be loaded. Ignoring user permissions.", e);
             }
         }

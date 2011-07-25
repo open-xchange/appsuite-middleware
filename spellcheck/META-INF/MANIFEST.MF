@@ -16,9 +16,10 @@ Import-Package: com.openexchange.config,
  com.openexchange.timer,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.json,
  org.mozilla.intl.chardet,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework
 Bundle-Activator: com.openexchange.spellcheck.osgi.SpellCheckActivator
 Bundle-ClassPath: .,
  lib/jazzy-0.5.2.jar

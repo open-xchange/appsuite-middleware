@@ -71,7 +71,7 @@ import com.openexchange.i18n.I18nService;
  */
 public class FileStorageJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = LogFactory.getLog(FileStorageJSONActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class));
 
     private static final Class<?>[] NEEDED_SERVICES =
         new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };

@@ -164,7 +164,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     private static final long serialVersionUID = -889739420660750770L;
 
-    private static transient final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Folder.class));
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Folder.class));
 
     private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
 

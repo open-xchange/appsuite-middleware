@@ -67,7 +67,7 @@ import com.openexchange.subscribe.linkedin.groupware.LinkedInSubscriptionsOAuthA
 
 public class Activator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private BundleContext bundleContext;
 

@@ -74,7 +74,7 @@ public final class ImageRegistry {
 
     private static final int INITIAL_DELAY = 1000;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -326,7 +326,7 @@ public final class ImageRegistry {
             return URLDecoder.decode(text, charset);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            org.apache.commons.logging.LogFactory.getLog(ImageData.class).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageData.class)).error(e.getMessage(), e);
             return text;
         }
     }

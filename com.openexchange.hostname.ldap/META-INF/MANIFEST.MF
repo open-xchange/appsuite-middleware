@@ -21,4 +21,5 @@ Import-Package: com.openexchange.cache,
  javax.naming.directory,
  javax.naming.ldap,
  org.apache.commons.logging,
+ com.openexchange.log,
  org.osgi.framework

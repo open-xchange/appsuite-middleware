@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 
 public class Activator implements BundleActivator {
 
-    private static transient final Log LOG = LogFactory.getLog(Activator.class);
+    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     /**
      * Reference to the service registration.

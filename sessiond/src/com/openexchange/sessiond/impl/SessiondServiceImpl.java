@@ -71,7 +71,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class SessiondServiceImpl implements SessiondService {
 
-    private static final Log LOG = LogFactory.getLog(SessiondServiceImpl.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
     private final Lock migrateLock;
 
@@ -144,6 +144,10 @@ public class SessiondServiceImpl implements SessiondService {
 
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {
         return SessionHandler.getSessionByRandomToken(randomToken, localIp);
+    }
+
+    public Session getSessionByRandomToken(final String randomToken) {
+        return SessionHandler.getSessionByRandomToken(randomToken, null);
     }
 
     public int getNumberOfActiveSessions() {

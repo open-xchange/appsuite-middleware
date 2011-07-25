@@ -64,7 +64,7 @@ import com.openexchange.configjump.ConfigJumpService;
  */
 public final class Services {
 
-    private static final Log LOG = LogFactory.getLog(Services.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Services.class));
 
     private final BundleContext context;
 

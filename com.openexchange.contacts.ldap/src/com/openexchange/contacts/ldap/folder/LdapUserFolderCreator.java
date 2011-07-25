@@ -68,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public class LdapUserFolderCreator implements LoginHandlerService {
 
-    private static final Log LOG = LogFactory.getLog(LdapUserFolderCreator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapUserFolderCreator.class));
 
     /**
      * Initializes a new {@link LdapUserFolderCreator}.

@@ -157,7 +157,7 @@ public final class OXMFParserImpl implements OXMFParser {
             try {
                 parser.close();
             } catch (final XMLStreamException e) {
-                LogFactory.getLog(OXMFParserImpl.class).error(e.getMessage(), e);
+                com.openexchange.log.Log.valueOf(LogFactory.getLog(OXMFParserImpl.class)).error(e.getMessage(), e);
             }
         }
     }

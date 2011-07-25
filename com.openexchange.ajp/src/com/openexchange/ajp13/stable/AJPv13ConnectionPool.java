@@ -61,7 +61,7 @@ import com.openexchange.ajp13.AJPv13Config;
  */
 final class AJPv13ConnectionPool {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ConnectionPool.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13ConnectionPool.class));
 
     private static final AtomicBoolean initialized = new AtomicBoolean();
 

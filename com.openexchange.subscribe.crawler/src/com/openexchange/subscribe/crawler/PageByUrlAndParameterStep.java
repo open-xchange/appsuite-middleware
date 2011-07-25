@@ -67,7 +67,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
 
-    private static final Log LOG = LogFactory.getLog(PageByUrlAndParameterStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlAndParameterStep.class));
 
     private String url;
 

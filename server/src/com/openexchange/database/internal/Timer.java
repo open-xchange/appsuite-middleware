@@ -70,7 +70,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class Timer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(Timer.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Timer.class));
 
     private final Lock waitingLock = new ReentrantLock();
 

@@ -73,7 +73,7 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
 
     private boolean executedSuccessfully;
     
-    private static final Log LOG = LogFactory.getLog(PageByUrlStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlStep.class));
 
     public PageByUrlStep() {
 

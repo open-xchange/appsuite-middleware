@@ -78,7 +78,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class CachingUserSettingMailStorage extends UserSettingMailStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CachingUserSettingMailStorage.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CachingUserSettingMailStorage.class));
 
     private static final String CACHE_REGION_NAME = "UserSettingMail";
 
@@ -127,6 +127,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     private static final String SQL_INSERT = "INSERT INTO user_setting_mail (cid, user, bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_UPDATE = "UPDATE user_setting_mail SET bits = ?, send_addr = ?, reply_to_addr = ?, msg_format = ?, display_msg_headers = ?, auto_linebreak = ?, std_trash = ?, std_sent = ?, std_drafts = ?, std_spam = ?, upload_quota = ?, upload_quota_per_file = ?, confirmed_spam = ?, confirmed_ham = ? WHERE cid = ? AND user = ?";
+
+    private static final String SQL_UPDATE_BITS = "UPDATE user_setting_mail SET bits = ? WHERE cid = ? AND user = ?";
 
     /**
      * Saves given user's mail settings to database
@@ -201,6 +203,51 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
+    @Override
+    public void saveUserSettingMailBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeConArg) throws OXException {
+        if (usm.isNoSave()) {
+            /*
+             * Saving to storage denied
+             */
+            return;
+        }
+        try {
+            Connection writeCon = writeConArg;
+            boolean closeCon = false;
+            PreparedStatement stmt = null;
+            final ResultSet rs = null;
+            try {
+                if (writeCon == null) {
+                    writeCon = DBPool.pickupWriteable(ctx);
+                    closeCon = true;
+                }
+                stmt = getUpdateStmtBits(usm, user, ctx, writeCon);
+                stmt.executeUpdate();
+                saveSignatures(usm, user, ctx, writeCon);
+            } finally {
+                closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
+            }
+            usm.setModifiedDuringSession(false);
+            if (useCache()) {
+                /*
+                 * Put clone into cache
+                 */
+                cacheWriteLock.lock();
+                try {
+                    usm.setNoSave(false);
+                    cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+                } catch (final OXException e) {
+                    LOG.error("UserSettingMail could not be put into cache", e);
+                } finally {
+                    cacheWriteLock.unlock();
+                }
+            }
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+    
     private static final String SQL_DELETE = "DELETE FROM user_setting_mail WHERE cid = ? AND user = ?";
 
     private static final String SQL_DELETE_SIGNATURES = "DELETE FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
@@ -416,6 +463,15 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         stmt.setString(14, usm.getConfirmedHam() == null ? UserSettingMail.STD_CONFIRMED_HAM : usm.getConfirmedHam());
         stmt.setInt(15, ctx.getContextId());
         stmt.setInt(16, user);
+        return stmt;
+    }
+
+    private static PreparedStatement getUpdateStmtBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
+        PreparedStatement stmt;
+        stmt = writeCon.prepareStatement(SQL_UPDATE_BITS);
+        stmt.setInt(1, usm.getBitsValue());
+        stmt.setInt(2, ctx.getContextId());
+        stmt.setInt(3, user);
         return stmt;
     }
 

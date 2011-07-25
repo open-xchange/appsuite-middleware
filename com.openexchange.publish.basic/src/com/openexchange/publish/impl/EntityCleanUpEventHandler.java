@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
 
-    private static final Log LOG = LogFactory.getLog(EntityCleanUpEventHandler.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EntityCleanUpEventHandler.class));
 
     private String module;
 

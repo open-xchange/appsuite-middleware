@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
@@ -90,6 +91,8 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 /**
  * {@link ICal4JParser} - The {@link ICalParser} using <a href="http://ical4j.sourceforge.net/">ICal4j</a> library.
  * 
@@ -100,7 +103,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final String UTF8 = "UTF-8";
 
-    private static final Log LOG = LogFactory.getLog(ICal4JParser.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JParser.class));
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
@@ -169,7 +172,10 @@ public class ICal4JParser implements ICalParser {
         return appointments;
     }
 
-    public String parseUID(final InputStream ical) {
+    public String parseProperty(final String propertyName, final InputStream ical) {
+        if (null == propertyName || null == ical) {
+            return null;
+        }
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
@@ -177,12 +183,8 @@ public class ICal4JParser implements ICalParser {
             if (calendar == null) {
                 return null;
             }
-            for (final Object componentObj : calendar.getComponents("VEVENT")) {
-                final Component vevent = (Component) componentObj;
-                final Property property = vevent.getProperty(Property.UID);
-                return null == property ? null : property.getValue();
-            }
-            return null;
+            final Property property = calendar.getProperty(propertyName.toUpperCase(Locale.US));
+            return null == property ? null : property.getValue();
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
             return null;
@@ -323,6 +325,9 @@ public class ICal4JParser implements ICalParser {
             // Copy until we find an END:VCALENDAR
             boolean beginFound = false;
             while((line = reader.readLine()) != null) {
+            	if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
+            		line = removeByteOrderMarks(line);
+            	}
                 if(line.startsWith("BEGIN:VCALENDAR")) {
                     beginFound = true;
                 } else if ( !beginFound && !"".equals(line)) {
@@ -427,6 +432,28 @@ public class ICal4JParser implements ICalParser {
          * We ignore those.
          */
         return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])" , "\nATTACH$1$3");
+    }
+    
+    private String removeByteOrderMarks(String line){
+    	char[] buf = line.toCharArray();
+    	int length = buf.length;
+    	
+		if(length > 3)
+			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28)
+					return new String(Arrays.copyOfRange(buf, 3, length));
+				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15)
+					return new String(Arrays.copyOfRange(buf, 3, length));
+			}
+		if(length > 1)
+			if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0)
+				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28)
+					return new String(Arrays.copyOfRange(buf, 2, length));
+		if(length > 0)
+			if(Character.getNumericValue(buf[0]) < 0)
+				if(Character.getType(buf[0]) == 16)
+					return new String(Arrays.copyOfRange(buf, 1, length));
+		return line;
     }
 
 }

@@ -84,7 +84,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessiondActivator extends DeferredActivator {
 
-    private static final Log LOG = LogFactory.getLog(SessiondActivator.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
 
     private ServiceRegistration sessiondServiceRegistration;
     private final List<ServiceTracker> trackers;

@@ -57,11 +57,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Message;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link StorageUtility} - Offers utility methods for both folder and message storage
@@ -70,8 +72,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  */
 public final class StorageUtility {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StorageUtility.class));
 
     /*
      * Public constants
@@ -101,6 +102,19 @@ public final class StorageUtility {
      */
     private StorageUtility() {
         super();
+    }
+
+    /**
+     * Gets the default max. running millis.
+     * 
+     * @return The default max. running millis
+     */
+    public static long getMaxRunningMillis() {
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null == service) {
+            return 60000L;
+        }
+        return service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
     }
 
     public static String getAllAddresses(final InternetAddress[] internetAddrs) {

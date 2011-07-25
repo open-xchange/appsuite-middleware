@@ -90,7 +90,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
     private String username, password;
 
-    private static final Log LOG = LogFactory.getLog(GoogleAPIStep.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleAPIStep.class));
 
     public GoogleAPIStep() {
     }

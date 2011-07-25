@@ -58,45 +58,56 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailLoginHandler} - The login handler delivering mailbox access event to data retention.
+ * {@link MailLoginHandler} - The login handler delivering mailbox access event
+ * to data retention.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailLoginHandler implements LoginHandlerService {
 
-    /**
-     * Initializes a new {@link MailLoginHandler}.
-     */
-    public MailLoginHandler() {
-        super();
-    }
+	/**
+	 * Initializes a new {@link MailLoginHandler}.
+	 */
+	public MailLoginHandler() {
+		super();
+	}
 
-    public void handleLogin(final LoginResult login) throws OXException {
-        /*
-         * Track mail login in data retention service
-         */
-        final DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
-        final Context ctx = login.getContext();
-        final Session session = login.getSession();
-        if (null != retentionService && UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-            final RetentionData retentionData = retentionService.newInstance();
-            retentionData.setStartTime(new Date(System.currentTimeMillis()));
-            retentionData.setIdentifier(MailAccess.getInstance(session).getMailConfig().getLogin());
-            retentionData.setIPAddress(session.getLocalIp());
-            retentionData.setLogin(session.getLogin());
-            /*
-             * Finally store it
-             */
-            retentionService.storeOnAccess(retentionData);
-        }
-    }
+	public void handleLogin(final LoginResult login) throws OXException {
+		/*
+		 * Track mail login in data retention service
+		 */
+		final DataRetentionService retentionService = ServerServiceRegistry
+				.getInstance().getService(DataRetentionService.class);
+		final Context ctx = login.getContext();
+		final Session session = login.getSession();
+		if (null != retentionService
+				&& UserConfigurationStorage.getInstance()
+						.getUserConfiguration(session.getUserId(), ctx)
+						.hasWebMail()) {
+			final RetentionData retentionData = retentionService.newInstance();
+			retentionData.setStartTime(new Date(System.currentTimeMillis()));
+			retentionData.setIdentifier(MailAccess.getInstance(session)
+					.getMailConfig().getLogin());
+			retentionData.setIPAddress(session.getLocalIp());
+			retentionData.setLogin(session.getLogin());
+			/*
+			 * Finally store it
+			 */
+			retentionService.storeOnAccess(retentionData);
+		}
+	}
 
-    public void handleLogout(final LoginResult logout) throws OXException {
-        // Time-out mail access cache
-        MailAccess.getMailAccessCache().clearUserEntries(logout.getSession());
-    }
+	public void handleLogout(final LoginResult logout) throws OXException {
+		// Time-out mail access cache
+		final Session session = logout.getSession();
+		MailAccess.getMailAccessCache().clearUserEntries(session);
+		AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(),
+				session.getContextId());
+
+	}
 }

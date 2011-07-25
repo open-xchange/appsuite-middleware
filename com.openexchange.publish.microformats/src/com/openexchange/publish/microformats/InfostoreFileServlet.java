@@ -92,7 +92,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String INFOSTORE_ID = "infoId";
     private static final String INFOSTORE_VERSION = "infoVersion";
 
-    private static final Log LOG = LogFactory.getLog(InfostoreFileServlet.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
     
     private static OXMFPublicationService infostorePublisher = null;
     

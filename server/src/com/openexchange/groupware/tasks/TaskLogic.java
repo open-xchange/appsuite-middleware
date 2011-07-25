@@ -100,7 +100,7 @@ public final class TaskLogic {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(TaskLogic.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskLogic.class));
 
     /**
      * Prevent instantiation

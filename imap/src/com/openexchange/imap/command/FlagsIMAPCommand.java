@@ -287,8 +287,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     }
 
     @Override
-    protected void handleResponse(final Response response) throws MessagingException {
+    protected boolean handleResponse(final Response response) throws MessagingException {
         // No intermediate response expected
+        return false;
     }
 
 }
