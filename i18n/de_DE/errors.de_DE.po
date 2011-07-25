@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2011-07-04 14:46+0200\n"
+"PO-Revision-Date: 2011-07-25 11:51+0200\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -1644,6 +1644,13 @@ msgstr ""
 
 msgid "New password contains invalid characters"
 msgstr "Neues Passwort enthält ungültige Zeichen"
+
+msgid ""
+"No UDP channel is configured. Check for failed channel opens on server "
+"startup."
+msgstr ""
+"Es wurde kein UDP-Kanal konfiguriert. Beim Server-Start läuft eine Prüfung "
+"nach fehlerhaften Kanälen. "
 
 msgid "No access to mail folder %1$s"
 msgstr "Kein Zugriff auf E-Mail-Ordner %1$s"
@@ -4739,6 +4746,15 @@ msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
 #. Invalid date format detected: "%1$s". Ignoring value.
 msgid "Invalid date format detected: \"%1$s\". Ignoring value."
 msgstr "Ungültiges Datumsformat: \"%1$s\". Wert wird ignoriert."
+
+#. Could not load ContactInterface to write storage contacts.
+msgid "Could not load ContactInterface to write storage contacts."
+msgstr ""
+"ContactInterface konnte nicht zum Schreiben der Kontakte im Speicher geladen "
+"werden. "
+
+msgid "Could not write entry into database."
+msgstr "Eintrag konnte nicht in Datenbank geschrieben werden."
 
 #. Ignoring invalid value for field "%1$s": %2$s
 msgid "Ignoring invalid value for field \"%1$s\": %2$s"
