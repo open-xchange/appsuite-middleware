@@ -66,7 +66,7 @@ import com.openexchange.ajp13.servlet.http.manager.NonBlockingHttpServletManager
  */
 public class HttpServletManager {
 
-    private static IHttpServletManager instance = DummyHttpServletManager.INSTANCE;
+    private static volatile IHttpServletManager instance = DummyHttpServletManager.INSTANCE;
 
     /**
      * Initializes a new {@link HttpServletManager}
