@@ -67,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
 import com.openexchange.ajax.contact.action.DeleteRequest;
@@ -82,8 +83,10 @@ import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
+import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.api2.OXException;
@@ -117,6 +120,8 @@ public class ContactTestManager implements TestManager {
 
     protected AbstractAJAXResponse lastResponse;
 
+    private int sleep = 500;
+    
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
@@ -233,7 +238,7 @@ public class ContactTestManager implements TestManager {
         InsertRequest request = new InsertRequest(contactToCreate, getFailOnError());
         InsertResponse response = null;
         try {
-            response = getClient().execute(request);
+            response = getClient().execute(request, getSleep());
             response.fillObject(contactToCreate);
             lastResponse = response;
         } catch (Exception e) {
@@ -258,7 +263,7 @@ public class ContactTestManager implements TestManager {
     public Contact updateAction(Contact contact) {
         UpdateRequest request = new UpdateRequest(contact);
         try {
-            lastResponse = getClient().execute(request);
+            lastResponse = getClient().execute(request, getSleep());
             contact.setLastModified(lastResponse.getTimestamp());
             remember(contact);
         } catch (Exception e) {
@@ -276,7 +281,7 @@ public class ContactTestManager implements TestManager {
         try {
             contactToDelete.setLastModified(new Date(Long.MAX_VALUE));
             DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
-            lastResponse = getClient().execute(request);
+            lastResponse = getClient().execute(request, getSleep());
         } catch (Exception e) {
             doExceptionHandling(
                 e,
@@ -302,7 +307,7 @@ public class ContactTestManager implements TestManager {
         GetRequest request = new GetRequest(folderId, objectId, getTimeZone(), false);
         GetResponse response = null;
         try {
-            response = getClient().execute(request);
+            response = getClient().execute(request, getSleep());
             lastResponse = response;
             if (response.hasError() && getFailOnError())
                 throw response.getException();
@@ -327,73 +332,56 @@ public class ContactTestManager implements TestManager {
     }
 
     public Contact[] allAction(int folderId, int[] columns, int orderBy, Order order, String collation) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         AllRequest request = new AllRequest(folderId, columns, orderBy, order, collation);
         try {
-            CommonAllResponse response = getClient().execute(request);
-            int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
-            int folderIdPos = response.getColumnPos(Contact.FOLDER_ID);
+            CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
-            for (Object[] temp : response) {
-                int tempObjectId = ((Integer) temp[objectIdPos]).intValue();
-                int tempFolderId = ((Integer) temp[folderIdPos]).intValue();
-                Contact tempContact = getAction(tempFolderId, tempObjectId);
-                allContacts.add(tempContact);
-            }
+            final JSONArray data = (JSONArray) response.getResponse().getData();
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
     
     public Contact[] allAction(int folderId, int[] columns) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         AllRequest request = new AllRequest(folderId, columns);
         try {
-            CommonAllResponse response = getClient().execute(request);
-            int objectIdPos = response.getColumnPos(Contact.OBJECT_ID);
-            int folderIdPos = response.getColumnPos(Contact.FOLDER_ID);
+            CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
-            for (Object[] temp : response) {
-                int tempObjectId = ((Integer) temp[objectIdPos]).intValue();
-                int tempFolderId = ((Integer) temp[folderIdPos]).intValue();
-                Contact tempContact = getAction(tempFolderId, tempObjectId);
-                allContacts.add(tempContact);
-            }
+            final JSONArray data = (JSONArray) response.getResponse().getData();
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
+
     }
 
-    /**
+	/**
      * get all contacts in one folder via the HTTP-API
      */
     public Contact[] allAction(int folderId) {
-        return allAction(folderId, new int[] { Contact.OBJECT_ID });
+        return allAction(folderId, Contact.ALL_COLUMNS);
     }
 
     /**
      * get all contacts specified by multiple int-arrays with 2 slots each (1st slot: folderId, 2nd slot objectId) via the HTTP-API
      */
     public Contact[] listAction(final int[]... folderAndObjectIds) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS, true);
         try {
-            CommonListResponse response = getClient().execute(request);
+            CommonListResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
 
     /**
@@ -407,42 +395,38 @@ public class ContactTestManager implements TestManager {
     	return searchAction(pattern, folderId, -1, null, null, Contact.ALL_COLUMNS);
     }
     public Contact[] searchAction(String pattern, int folderId, int orderBy, Order order, String collation, int... columns) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
         
         SearchRequest request = new SearchRequest(pattern, false, folderId, columns, orderBy, orderDir, collation, failOnError);
         try {
-            SearchResponse response = getClient().execute(request);
+            SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
 
     
     public Contact[] searchFirstletterAction(String firstLetter, int folderId) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         SearchRequest request = new SearchRequest(firstLetter, true, folderId, Contact.ALL_COLUMNS, -1, null, true);
         try {
-            SearchResponse response = getClient().execute(request);
+            SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with first letter: " + firstLetter + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
     
     public Contact[] searchAction(ContactSearchObject search) {
@@ -454,61 +438,69 @@ public class ContactTestManager implements TestManager {
     }
     
     public Contact[] searchAction(ContactSearchObject search, int[] columns, int orderBy, Order order, String collation) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         SearchRequest request = new SearchRequest(search, columns, orderBy, order, collation, getFailOnError());
         try {
-            SearchResponse response = getClient().execute(request);
+            SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with search-object: " +  search + ": " + e.getMessage());
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
     
     /**
      * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId, boolean initialSearch) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
-            SearchResponse response = getClient().execute(request);
+            SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
+    }
+    
+    public Contact[] searchAction(JSONObject filter, int[] columns, int orderBy, Order order){
+        List<Contact> contacts = new LinkedList<Contact>();
+		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
+		try {
+			CommonSearchResponse response = getClient().execute(request, getSleep());
+			lastResponse = response;
+            JSONArray data = (JSONArray) response.getResponse().getData();
+            contacts = transform(data);
+		} catch (Exception e) {
+            doExceptionHandling(e,"searching for contacts with term: \n" + filter.toString() );
+        }
+        return contacts.toArray(new Contact[]{});
     }
 
     /**
      * Get contacts in a folder that were updated since a specific date via the HTTP-API
      */
     public Contact[] updatesAction(int folderId, Date lastModified) {
-        Vector<Contact> allContacts = new Vector<Contact>();
+        List<Contact> allContacts = new LinkedList<Contact>();
         UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
-            ContactUpdatesResponse response = getClient().execute(request);
+            ContactUpdatesResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
-            this.convertJSONArray2Vector(data, allContacts);
+            allContacts = transform(data);
         } catch (Exception e) {
             doExceptionHandling(e, "UpdateRequest");
         }
-        Contact[] contactArray = new Contact[allContacts.size()];
-        allContacts.copyInto(contactArray);
-        return contactArray;
+        return allContacts.toArray(new Contact[]{});
     }
 
     protected void doExceptionHandling(Exception exception, String action) {
@@ -564,7 +556,8 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private void convertJSONArray2Vector(JSONArray data, Vector<Contact> allContacts) throws JSONException, OXException, OXJSONException {
+    private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXJSONException {
+    	List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
             JSONObject jsonObject = new JSONObject();
@@ -572,13 +565,14 @@ public class ContactTestManager implements TestManager {
                 if (!"null".equals(jsonArray.getString(a))) {
                     String fieldname = ContactMapping.columnToFieldName(Contact.ALL_COLUMNS[a]);
                     if (fieldname != null)
-                        jsonObject.put(fieldname, jsonArray.getString(a));
+                        jsonObject.put(fieldname, jsonArray.get(a));
                 }
             }
             Contact contactObject = new Contact();
             getContactParser().parse(contactObject, jsonObject);
-            allContacts.add(contactObject);
+            contacts.add(contactObject);
         }
+        return contacts;
     }
 
     public boolean doesFailOnError() {
@@ -596,6 +590,14 @@ public class ContactTestManager implements TestManager {
     public boolean hasLastException() {
         return lastException != null;
     }
+
+	public void setSleep(int sleep) {
+		this.sleep = sleep;
+	}
+
+	public int getSleep() {
+		return sleep;
+	}
 
 }
 

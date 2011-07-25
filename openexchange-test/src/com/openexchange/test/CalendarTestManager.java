@@ -73,6 +73,8 @@ import com.openexchange.ajax.appointment.action.HasRequest;
 import com.openexchange.ajax.appointment.action.HasResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
+import com.openexchange.ajax.appointment.action.NewAppointmentSearchRequest;
+import com.openexchange.ajax.appointment.action.NewAppointmentSearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
@@ -314,7 +316,11 @@ public class CalendarTestManager implements TestManager {
         ListRequest req = new ListRequest(foldersAndIds, addNecessaryColumns(columns), getFailOnError());
         CommonListResponse resp = execute(req);
         extractInfo(resp);
-        List<Appointment> list = new LinkedList<Appointment>();
+        return extractAppointments(resp);
+    }
+
+	public List<Appointment> extractAppointments(CommonListResponse resp) {
+		List<Appointment> list = new LinkedList<Appointment>();
         int[] cols = resp.getColumns();
         Object[][] arr = resp.getArray();
         for (Object[] values : arr) {
@@ -328,9 +334,20 @@ public class CalendarTestManager implements TestManager {
             fixDates(temp);
         }
         return list;
+	}
 
+    public List<Appointment> newappointments(Date start, Date end, int limit, int[] columns) {
+        NewAppointmentSearchRequest req = new NewAppointmentSearchRequest(start, end, limit, timezone, columns);
+        NewAppointmentSearchResponse resp = execute(req);
+        extractInfo(resp);
+        try {
+			return Arrays.asList(resp.getAppointments());
+		} catch (Exception e) {
+			lastException = e;
+			return null;
+		}
     }
-
+    
     private void fixDates(Appointment temp) {
         if (temp.getFullTime())
             return;
