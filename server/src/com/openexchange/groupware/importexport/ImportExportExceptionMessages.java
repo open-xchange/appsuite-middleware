@@ -137,9 +137,10 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     // Invalid date format detected: "%1$s". Ignoring value.
     public static final String INVALID_DATE_MSG = "Invalid date format detected: \"%1$s\". Ignoring value.";
 
-    public static final String CONTACT_INTERFACE_MISSING = "Could not load ContactInterface to write store contacts";
+    // Could not load ContactInterface to write storage contacts.
+    public static final String CONTACT_INTERFACE_MISSING = "Could not load ContactInterface to write storage contacts.";
 
-    public static final String COULD_NOT_WRITE = "Could not write entry into database";
+    public static final String COULD_NOT_WRITE = "Could not write entry into database.";
     
     //  Ignoring invalid value for field "%1$s": %2$s
     public static final String IGNORE_FIELD_MSG = "Ignoring invalid value for field \"%1$s\": %2$s";
