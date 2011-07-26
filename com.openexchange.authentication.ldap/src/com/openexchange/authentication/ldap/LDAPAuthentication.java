@@ -50,6 +50,7 @@
 package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
+
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
@@ -61,13 +62,16 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
+import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -116,7 +120,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * Default constructor.
      * @throws LoginException if setup fails.
      */
-    public LDAPAuthentication(Properties props) throws LoginException {
+    public LDAPAuthentication(Properties props) throws OXException {
         super();
         this.props = props;
         init();
@@ -125,7 +129,7 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
-    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws LoginException {
+    public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException {
         final String[] splitted = split(loginInfo.getUsername());
         final String uid = splitted[1];
         final String password = loginInfo.getPassword();
@@ -150,7 +154,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * @param password password.
      * @throws LoginException if some problem occurs.
      */
-    private String bind(String uid, String password) throws LoginException {
+    private String bind(String uid, String password) throws OXException {
         LdapContext context = null;
         String dn = null;
         String proxyAs = null;
@@ -289,7 +293,7 @@ public class LDAPAuthentication implements AuthenticationService {
      * Initializes the properties for the ldap authentication.
      * @throws LoginException if configuration fails.
      */
-    private void init() throws LoginException {
+    private void init() throws OXException {
         props.put(LdapContext.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 
         if (!props.containsKey(PropertyNames.UID_ATTRIBUTE.name)) {

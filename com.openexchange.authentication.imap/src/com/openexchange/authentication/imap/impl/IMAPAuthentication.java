@@ -52,34 +52,35 @@ package com.openexchange.authentication.imap.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
+
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceException;
 import com.openexchange.user.UserService;
 
 public class IMAPAuthentication implements AuthenticationService {
@@ -129,7 +130,7 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws LoginException {
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         // IMAPConnection def = null;
 
         Session session = null;
@@ -204,62 +205,54 @@ public class IMAPAuthentication implements AuthenticationService {
             // Added by cutmasta
             boolean USE_IMAPS = false;
             if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.USE_MULTIPLE.name))) {
+	            final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
+	
+	            final int ctxId = contextService.getContextId(splitted[0]);
+	            if (ContextStorage.NOT_FOUND == ctxId) {
+	                throw INVALID_CREDENTIALS.create();
+	            }
+	            final Context ctx = contextService.getContext(ctxId);
+	
+	            final UserService userService = getServiceRegistry().getService(UserService.class, true);
+	            final int userId;
+	            try {
+	                userId = userService.getUserId(uid, ctx);
+	            } catch (final OXException e) {
+	                throw INVALID_CREDENTIALS.create();
+	            }
+	            // final User user2 = userService.getUser(userId, ctx);
+	            
+	            /*
+	             * Load primary account and check its protocol to be IMAP
+	             */
+	            final MailAccount defaultMailAccount =
+	                getServiceRegistry().getService(MailAccountStorageService.class, true).getDefaultMailAccount(userId, ctxId);
+	            final String mailProtocol = defaultMailAccount.getMailProtocol();
+	            if (!mailProtocol.toLowerCase().startsWith("imap")) {
+	                throw UNKNOWN.create(new StringBuilder(128).append(
+	                    "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
+	                    " for user ").append(userId).append(" in context ").append(ctxId).toString());
+	            }
+	
+	            /*
+	             * Set user according to configured login source if different from LoginSource.USER_NAME
+	             */
+	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
+	            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
+	                user = defaultMailAccount.getLogin();
+	            }
+	            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
+	                user = defaultMailAccount.getPrimaryAddress();
+	            }
+	
+	            /*
+	             * Get IMAP server from primary account
+	             */
+	            host = defaultMailAccount.getMailServer();
+	            port = defaultMailAccount.getMailPort();
+	            USE_IMAPS = defaultMailAccount.isMailSecure();
+	            LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
 
-                try {
-                    final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
-
-                    final int ctxId = contextService.getContextId(splitted[0]);
-                    if (ContextStorage.NOT_FOUND == ctxId) {
-                        throw INVALID_CREDENTIALS.create();
-                    }
-                    final Context ctx = contextService.getContext(ctxId);
-
-                    final UserService userService = getServiceRegistry().getService(UserService.class, true);
-                    final int userId;
-                    try {
-                        userId = userService.getUserId(uid, ctx);
-                    } catch (final UserException e) {
-                        throw INVALID_CREDENTIALS.create();
-                    }
-                    // final User user2 = userService.getUser(userId, ctx);
-                    
-                    /*
-                     * Load primary account and check its protocol to be IMAP
-                     */
-                    final MailAccount defaultMailAccount =
-                        getServiceRegistry().getService(MailAccountStorageService.class, true).getDefaultMailAccount(userId, ctxId);
-                    final String mailProtocol = defaultMailAccount.getMailProtocol();
-                    if (!mailProtocol.toLowerCase().startsWith("imap")) {
-                        throw UNKNOWN.create(new StringBuilder(128).append(
-                            "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
-                            " for user ").append(userId).append(" in context ").append(ctxId).toString());
-                    }
-
-                    /*
-                     * Set user according to configured login source if different from LoginSource.USER_NAME
-                     */
-                    final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
-                    if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-                        user = defaultMailAccount.getLogin();
-                    }
-                    if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-                        user = defaultMailAccount.getPrimaryAddress();
-                    }
-
-                    /*
-                     * Get IMAP server from primary account
-                     */
-                    host = defaultMailAccount.getMailServer();
-                    port = defaultMailAccount.getMailPort();
-                    USE_IMAPS = defaultMailAccount.isMailSecure();
-                    LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
-                } catch (final ContextException e) {
-                    throw new LoginException(e);
-                } catch (final ServiceException e) {
-                    throw new LoginException(e);
-                } catch (final MailAccountException e) {
-                    throw new LoginException(e);
-                }
 
             } else {
                 // ## ssl feature for single defined imap server
@@ -360,14 +353,12 @@ public class IMAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static void initConfig() throws ConfigurationException {
+    private static void initConfig() throws OXException {
         synchronized (IMAPAuthentication.class) {
             if (null == props) {
                 final File file = new File(IMAP_AUTH_PROPERTY_FILE);
                 if (!file.exists()) {
-                    throw new ConfigurationException(
-                        com.openexchange.configuration.ConfigurationException.Code.FILE_NOT_FOUND,
-                        file.getAbsolutePath());
+                    throw com.openexchange.configuration.ConfigurationExceptionCodes.FILE_NOT_FOUND.create(file.getAbsolutePath());
                 }
                 FileInputStream fis = null;
                 try {
@@ -375,9 +366,7 @@ public class IMAPAuthentication implements AuthenticationService {
                     props = new Properties();
                     props.load(fis);
                 } catch (final IOException e) {
-                    throw new ConfigurationException(
-                        com.openexchange.configuration.ConfigurationException.Code.NOT_READABLE,
-                        file.getAbsolutePath());
+                    throw com.openexchange.configuration.ConfigurationExceptionCodes.NOT_READABLE.create(file.getAbsolutePath());
                 } finally {
                     if (null != fis) {
                         try {
