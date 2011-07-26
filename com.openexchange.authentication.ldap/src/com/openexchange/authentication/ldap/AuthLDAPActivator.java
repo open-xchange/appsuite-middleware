@@ -51,13 +51,15 @@ package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
 
+import javax.security.auth.login.LoginException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.LoginException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
@@ -95,7 +97,7 @@ public class AuthLDAPActivator extends DeferredActivator {
      * @throws LoginException if the authentication class can not be initialized.
      */
     @Override
-    protected void startBundle() throws LoginException {
+    protected void startBundle() throws OXException {
         LOG.info("Starting ldap authentication service.");
         final ConfigurationService config = getService(ConfigurationService.class);
         final Properties props = config.getFile("ldapauth.properties");
