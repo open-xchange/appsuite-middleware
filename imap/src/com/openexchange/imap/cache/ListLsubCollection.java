@@ -502,7 +502,8 @@ final class ListLsubCollection {
     }
 
     private static void dropEntryFrom(final ListLsubEntryImpl lle, final ConcurrentMap<String, ListLsubEntryImpl> map) {
-        for (final ListLsubEntryImpl child : lle.getChildrenSet()) {
+        final Set<ListLsubEntryImpl> tmp = new HashSet<ListLsubEntryImpl>(lle.getChildrenSet());
+        for (final ListLsubEntryImpl child : tmp) {
             dropEntryFrom(child, map);
         }
         map.remove(lle.getFullName());

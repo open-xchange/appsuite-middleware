@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.json;
 
+import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -58,6 +61,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailRequest {
+
+    /**
+     * Constant for not-found number.
+     */
+    public static final int NOT_FOUND = -9999;
 
     private final ServerSession session;
 
@@ -73,6 +81,54 @@ public final class MailRequest {
         super();
         this.request = request;
         this.session = session;
+    }
+
+    /**
+     * Gets optional <code>int</code> parameter.
+     * 
+     * @param name The parameter name
+     * @return The <code>int</code>
+     * @throws OXException If parameter is an invalid number value
+     */
+    public int optInt(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return NOT_FOUND;
+        }
+        try {
+            return Integer.parseInt(parameter.trim());
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+        }
+    }
+
+    /**
+     * Split pattern for CSV.
+     */
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Checks for presence of comma-separated <code>int</code> list.
+     * 
+     * @param name The parameter name
+     * @return The <code>int</code> array
+     * @throws OXException If an error occurs
+     */
+    public int[] checkIntArray(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        final String[] sa = SPLIT.split(parameter, 0);
+        final int[] ret = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            try {
+                ret[i] = Integer.parseInt(sa[i].trim());
+            } catch (final NumberFormatException e) {
+                throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+            }
+        }
+        return ret;
     }
 
     /**

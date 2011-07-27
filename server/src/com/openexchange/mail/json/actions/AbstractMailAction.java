@@ -47,14 +47,19 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.mail.json.actions;
 
+import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -62,9 +67,13 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionConstants;
+import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -78,6 +87,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAction.class));
+
+    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     private final ServiceLookup services;
 
@@ -149,6 +160,90 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
             }
         }
+    }
+
+    /**
+     * Triggers the contact collector for specified JSON mail's addresses.
+     * 
+     * @param session The session
+     * @param mail The JSON mail
+     */
+    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+            try {
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
+                // Strip by aliases
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final UserSettingMail usm = session.getUserSettingMail();
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            } catch (final JSONException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            }
+            if (!addrs.isEmpty()) {
+                // Add addresses
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    private static final String VIEW_RAW = "raw";
+
+    private static final String VIEW_TEXT = "text";
+
+    private static final String VIEW_HTML = "html";
+
+    private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
+
+    protected static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usmNoSave) {
+        final DisplayMode displayMode;
+        if (null != view) {
+            if (VIEW_RAW.equals(view)) {
+                displayMode = DisplayMode.RAW;
+            } else if (VIEW_TEXT.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(false);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(true);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(false);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else {
+                LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
+                    ". Using user's mail settings as fallback."));
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            }
+        } else {
+            displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+        }
+        return displayMode;
+    }
+
+    /**
+     * Gets the result filled with JSON <code>NULL</code>.
+     * 
+     * @return The result with JSON <code>NULL</code>.
+     */
+    protected static AJAXRequestResult getJSONNullResult() {
+        return RESULT_JSON_NULL;
     }
 
 }

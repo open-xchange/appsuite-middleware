@@ -8,6 +8,11 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.AJAXStateHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.mail.json.actions.AllAction;
+import com.openexchange.mail.json.actions.GetAction;
+import com.openexchange.mail.json.actions.GetStructureAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -15,7 +20,7 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler {
+public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
 
     private final Map<String, AbstractMailAction> actions;
 
@@ -27,7 +32,9 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     public MailActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractMailAction>(8);
+        actions.put("all", new AllAction(services));
         actions.put("get", new GetAction(services));
+        actions.put("get_structure", new GetStructureAction(services));
     }
 
     public AJAXActionService createActionService(final String action) throws OXException {
@@ -40,9 +47,12 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     public void end(final AJAXState state) throws OXException {
         /*
-         * Drop opened mail access instances
+         * Drop possibly opened mail access instances
          */
-        
+        final MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
+        if (null != mailInterface) {
+            mailInterface.close(true);
+        }
     }
 
 }
