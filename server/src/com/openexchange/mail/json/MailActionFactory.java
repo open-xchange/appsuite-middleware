@@ -12,6 +12,9 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.GetAction;
+import com.openexchange.mail.json.actions.GetMailCountAction;
+import com.openexchange.mail.json.actions.GetReplyAction;
+import com.openexchange.mail.json.actions.GetReplyAllAction;
 import com.openexchange.mail.json.actions.GetStructureAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -34,6 +37,14 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions = new ConcurrentHashMap<String, AbstractMailAction>(8);
         actions.put("all", new AllAction(services));
         actions.put("get", new GetAction(services));
+        actions.put("get_structure", new GetStructureAction(services));
+        actions.put("count", new GetMailCountAction(services));
+        actions.put("reply", new GetReplyAction(services));
+        actions.put("replyall", new GetReplyAllAction(services));
+        
+        
+        actions.put("get_structure", new GetStructureAction(services));
+        actions.put("get_structure", new GetStructureAction(services));
         actions.put("get_structure", new GetStructureAction(services));
     }
 

@@ -73,8 +73,6 @@ public final class GetStructureAction extends AbstractMailAction {
     private static final org.apache.commons.logging.Log LOG =
         Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetStructureAction.class));
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link GetStructureAction}.
      * 
