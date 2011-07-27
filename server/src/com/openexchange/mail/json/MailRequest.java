@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,21 +47,41 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.mail.json;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServiceLookup}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link MailRequest}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServiceLookup {
+public final class MailRequest {
+
+    private final ServerSession session;
+
+    private final AJAXRequestData request;
 
     /**
-     * Gets the service of specified type
+     * Initializes a new {@link MailRequest}.
      * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @param session The session
+     * @param request The request
      */
-    public <S extends Object> S getService(final Class<? extends S> clazz);
+    public MailRequest(final AJAXRequestData request, final ServerSession session) {
+        super();
+        this.request = request;
+        this.session = session;
+    }
+
+    /**
+     * Gets the request.
+     * 
+     * @return The request
+     */
+    public AJAXRequestData getRequest() {
+        return request;
+    }
+
 }

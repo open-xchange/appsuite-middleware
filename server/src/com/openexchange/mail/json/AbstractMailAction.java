@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,15 +47,31 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.mail.json;
 
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServiceLookup}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AbstractMailAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ServiceLookup {
+public abstract class AbstractMailAction implements AJAXActionService {
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractMailAction}.
+     */
+    protected AbstractMailAction(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     /**
      * Gets the service of specified type
@@ -63,5 +79,20 @@ public interface ServiceLookup {
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */
-    public <S extends Object> S getService(final Class<? extends S> clazz);
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
+    }
+
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        return perform(new MailRequest(request, session));
+    }
+
+    /**
+     * Performs specified mail request.
+     * 
+     * @param req The mail request
+     * @return The result
+     * @throws OXException If an error occurs
+     */
+    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException;
 }

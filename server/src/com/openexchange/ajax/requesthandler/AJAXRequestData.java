@@ -188,6 +188,25 @@ public class AJAXRequestData {
         }
         return params.get(name);
     }
+
+    /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists
+     */
+    public String checkParameter(final String name) throws OXException {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return value;
+    }
     
     /**
      * Tries to get a parameter value as parsed as a certain type
