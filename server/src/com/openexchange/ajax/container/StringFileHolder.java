@@ -47,49 +47,83 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.ajax.container;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.tools.session.ServerSession;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link MailRequest}
+ * {@link StringFileHolder}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailRequest {
+public final class StringFileHolder implements IFileHolder {
 
-    private final ServerSession session;
+    private final byte[] bytes;
 
-    private final AJAXRequestData request;
+    private String name;
+
+    private String contentType;
 
     /**
-     * Initializes a new {@link MailRequest}.
+     * Initializes a new {@link StringFileHolder} with default encoding (UTF-8).
      * 
-     * @param session The session
-     * @param request The request
+     * @param string The string
      */
-    public MailRequest(final AJAXRequestData request, final ServerSession session) {
+    public StringFileHolder(final String string) {
+        this(string, "UTF-8");
+    }
+
+    /**
+     * Initializes a new {@link StringFileHolder}.
+     * 
+     * @param string The string
+     * @param encoding The encoding; e.g. "UTF-8"
+     * @throws IllegalStateException If encoding is not supported
+     */
+    public StringFileHolder(final String string, final String encoding) {
         super();
-        this.request = request;
-        this.session = session;
+        try {
+            this.bytes = string.getBytes(encoding);
+            contentType = "application/octet-stream";
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public InputStream getStream() {
+        return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    public long getLength() {
+        return bytes.length;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
-     * Gets the request.
+     * Sets the content type; e.g. "application/octet-stream"
      * 
-     * @return The request
+     * @param contentType The content type
      */
-    public AJAXRequestData getRequest() {
-        return request;
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
     }
 
     /**
-     * Gets the session.
+     * Sets the (file) name.
      * 
-     * @return The session
+     * @param name The name
      */
-    public ServerSession getSession() {
-        return session;
+    public void setName(final String name) {
+        this.name = name;
     }
+
 }

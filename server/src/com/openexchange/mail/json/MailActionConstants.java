@@ -49,47 +49,18 @@
 
 package com.openexchange.mail.json;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.mail.MailServletInterface;
+
 
 /**
- * {@link MailRequest}
- * 
+ * {@link MailActionConstants}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailRequest {
-
-    private final ServerSession session;
-
-    private final AJAXRequestData request;
+public interface MailActionConstants {
 
     /**
-     * Initializes a new {@link MailRequest}.
-     * 
-     * @param session The session
-     * @param request The request
+     * The property name for {@link MailServletInterface} instance.
      */
-    public MailRequest(final AJAXRequestData request, final ServerSession session) {
-        super();
-        this.request = request;
-        this.session = session;
-    }
-
-    /**
-     * Gets the request.
-     * 
-     * @return The request
-     */
-    public AJAXRequestData getRequest() {
-        return request;
-    }
-
-    /**
-     * Gets the session.
-     * 
-     * @return The session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
+    public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
 }

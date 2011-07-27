@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
@@ -70,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class PushUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class))));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 

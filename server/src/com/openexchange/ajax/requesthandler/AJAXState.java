@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AJAXState}
@@ -83,21 +84,38 @@ public final class AJAXState {
     }
 
     /**
-     * @param key
-     * @return
-     * @see java.util.Map#containsKey(java.lang.Object)
+     * Check for presence of named property.
+     * 
+     * @param name The property name
+     * @return <code>true</code> if property is present; otherwise <code>false</code>
      */
-    public boolean containsProperty(final String key) {
-        return properties.containsKey(key);
+    public boolean containsProperty(final String name) {
+        return properties.containsKey(name);
     }
 
     /**
-     * @param key
-     * @return
-     * @see java.util.Map#get(java.lang.Object)
+     * Gets (optionally) the named property.
+     * 
+     * @param name The property name
+     * @return The property or <code>null</code> if absent
      */
-    public Object getProperty(final String key) {
-        return properties.get(key);
+    public <V> V optProperty(final String name) {
+        return (V) properties.get(name);
+    }
+
+    /**
+     * Gets the named property.
+     * 
+     * @param name The property name
+     * @return The property
+     * @throws OXException If property is absent
+     */
+    public <V> V getProperty(final String name) throws OXException {
+        final V value = (V) properties.get(name);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return value;
     }
 
     /**

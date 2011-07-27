@@ -35,10 +35,13 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     }
 
     public void begin(final AJAXState state) throws OXException {
-        
+        // Nope
     }
 
     public void end(final AJAXState state) throws OXException {
+        /*
+         * Drop opened mail access instances
+         */
         
     }
 

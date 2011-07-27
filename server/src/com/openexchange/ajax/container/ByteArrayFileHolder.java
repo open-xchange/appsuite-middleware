@@ -47,49 +47,64 @@
  *
  */
 
-package com.openexchange.mail.json;
+package com.openexchange.ajax.container;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.tools.session.ServerSession;
+import java.io.InputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link MailRequest}
+ * {@link ByteArrayFileHolder}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailRequest {
+public final class ByteArrayFileHolder implements IFileHolder {
 
-    private final ServerSession session;
+    private final byte[] bytes;
 
-    private final AJAXRequestData request;
+    private String name;
+
+    private String contentType;
 
     /**
-     * Initializes a new {@link MailRequest}.
-     * 
-     * @param session The session
-     * @param request The request
+     * Initializes a new {@link ByteArrayFileHolder}.
      */
-    public MailRequest(final AJAXRequestData request, final ServerSession session) {
+    public ByteArrayFileHolder(final byte[] bytes) {
         super();
-        this.request = request;
-        this.session = session;
+        this.bytes = bytes;
+        contentType = "application/octet-stream";
+    }
+
+    public InputStream getStream() {
+        return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    public long getLength() {
+        return bytes.length;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
-     * Gets the request.
+     * Sets the content type; e.g. "application/octet-stream"
      * 
-     * @return The request
+     * @param contentType The content type
      */
-    public AJAXRequestData getRequest() {
-        return request;
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
     }
 
     /**
-     * Gets the session.
+     * Sets the (file) name.
      * 
-     * @return The session
+     * @param name The name
      */
-    public ServerSession getSession() {
-        return session;
+    public void setName(final String name) {
+        this.name = name;
     }
 }

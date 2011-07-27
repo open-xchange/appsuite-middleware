@@ -49,11 +49,24 @@
 
 package com.openexchange.mail.json;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -61,7 +74,10 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailAction implements AJAXActionService {
+public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAction.class));
 
     private final ServiceLookup services;
 
@@ -95,4 +111,44 @@ public abstract class AbstractMailAction implements AJAXActionService {
      * @throws OXException If an error occurs
      */
     protected abstract AJAXRequestResult perform(MailRequest req) throws OXException;
+
+    /**
+     * Triggers the contact collector for specified mail's addresses.
+     * 
+     * @param session The session
+     * @param mail The mail
+     */
+    protected static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+            addrs.addAll(Arrays.asList(mail.getFrom()));
+            addrs.addAll(Arrays.asList(mail.getTo()));
+            addrs.addAll(Arrays.asList(mail.getCc()));
+            addrs.addAll(Arrays.asList(mail.getBcc()));
+            // Strip by aliases
+            try {
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final UserSettingMail usm = session.getUserSettingMail();
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+
+            }
+            if (!addrs.isEmpty()) {
+                // Add addresses
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
 }
