@@ -60,7 +60,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -110,28 +109,27 @@ public final class GetAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final AJAXRequestData request = req.getRequest();
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = request.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
-            String tmp = request.getParameter(Mail.PARAMETER_SHOW_SRC);
+            String tmp = req.getParameter(Mail.PARAMETER_SHOW_SRC);
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            tmp = request.getParameter(Mail.PARAMETER_EDIT_DRAFT);
+            tmp = req.getParameter(Mail.PARAMETER_EDIT_DRAFT);
             final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            tmp = request.getParameter(Mail.PARAMETER_SHOW_HEADER);
+            tmp = req.getParameter(Mail.PARAMETER_SHOW_HEADER);
             final boolean showMessageHeaders = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            tmp = request.getParameter(Mail.PARAMETER_SAVE);
+            tmp = req.getParameter(Mail.PARAMETER_SAVE);
             final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
-            tmp = request.getParameter(Mail.PARAMETER_VIEW);
+            tmp = req.getParameter(Mail.PARAMETER_VIEW);
             final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
-            tmp = request.getParameter(Mail.PARAMETER_UNSEEN);
+            tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
-            tmp = request.getParameter("token");
+            tmp = req.getParameter("token");
             final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
-            tmp = request.getParameter("ttlMillis");
+            tmp = req.getParameter("ttlMillis");
             int ttlMillis;
             try {
                 ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
@@ -147,19 +145,15 @@ public final class GetAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
-            if (mailInterface == null) {
-                mailInterface = MailServletInterface.getInstance(session);
-                request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
-            }
+            final MailServletInterface mailInterface = getMailInterface(req);
             /*
              * Determine mail identifier
              */
             final String uid;
             {
-                String tmp2 = request.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
                 if (null == tmp2) {
-                    tmp2 = request.getParameter(Mail.PARAMETER_MESSAGE_ID);
+                    tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
                     }

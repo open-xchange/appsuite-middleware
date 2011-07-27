@@ -52,7 +52,6 @@ package com.openexchange.mail.json.actions;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -89,14 +88,13 @@ public final class GetReplyAllAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final AJAXRequestData request = req.getRequest();
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = request.checkParameter(Mail.PARAMETER_FOLDERID);
-            final String uid = request.checkParameter(Mail.PARAMETER_ID);
-            final String view = request.getParameter(Mail.PARAMETER_VIEW);
+            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
@@ -109,11 +107,7 @@ public final class GetReplyAllAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
-            if (mailInterface == null) {
-                mailInterface = MailServletInterface.getInstance(session);
-                request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
-            }
+            final MailServletInterface mailInterface = getMailInterface(req);
             final List<OXException> warnings = new ArrayList<OXException>(2);
             final AJAXRequestResult data =
                 new AJAXRequestResult(MessageWriter.writeMailMessage(

@@ -52,7 +52,6 @@ package com.openexchange.mail.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.OXJSONWriter;
@@ -92,18 +91,15 @@ public final class AllAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        
-        
         try {
-            final AJAXRequestData request = req.getRequest();
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderId = request.checkParameter(Mail.PARAMETER_MAILFOLDER);
+            final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
-            final String sort = request.getParameter(Mail.PARAMETER_SORT);
-            final String order = request.getParameter(Mail.PARAMETER_ORDER);
+            final String sort = req.getParameter(Mail.PARAMETER_SORT);
+            final String order = req.getParameter(Mail.PARAMETER_ORDER);
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(Mail.PARAMETER_ORDER);
             }
@@ -120,11 +116,7 @@ public final class AllAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
-            if (mailInterface == null) {
-                mailInterface = MailServletInterface.getInstance(session);
-                request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
-            }
+            final MailServletInterface mailInterface = getMailInterface(req);
             /*
              * Pre-Select field writers
              */

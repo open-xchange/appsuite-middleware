@@ -83,6 +83,14 @@ public final class MailRequest {
         this.session = session;
     }
 
+    public String checkParameter(final String name) throws OXException {
+        return request.checkParameter(name);
+    }
+
+    public String getParameter(final String name) {
+        return request.getParameter(name);
+    }
+
     /**
      * Gets optional <code>int</code> parameter.
      * 

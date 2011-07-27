@@ -50,7 +50,6 @@
 package com.openexchange.mail.json.actions;
 
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -88,22 +87,21 @@ public final class GetStructureAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final AJAXRequestData request = req.getRequest();
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
             AJAXRequestResult data = getJSONNullResult();
-            final String folderPath = request.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
             // final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final boolean unseen;
             {
-                final String tmp = request.getParameter(Mail.PARAMETER_UNSEEN);
+                final String tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
                 unseen = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             }
             final long maxSize;
             {
-                final String tmp = request.getParameter("max_size");
+                final String tmp = req.getParameter("max_size");
                 if (null == tmp) {
                     maxSize = -1;
                 } else {
@@ -119,16 +117,12 @@ public final class GetStructureAction extends AbstractMailAction {
             /*
              * Get mail interface
              */
-            MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
-            if (mailInterface == null) {
-                mailInterface = MailServletInterface.getInstance(session);
-                request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
-            }
+            final MailServletInterface mailInterface = getMailInterface(req);
             final String uid;
             {
-                String tmp2 = request.getParameter(Mail.PARAMETER_ID);
+                String tmp2 = req.getParameter(Mail.PARAMETER_ID);
                 if (null == tmp2) {
-                    tmp2 = request.getParameter(Mail.PARAMETER_MESSAGE_ID);
+                    tmp2 = req.getParameter(Mail.PARAMETER_MESSAGE_ID);
                     if (null == tmp2) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(Mail.PARAMETER_ID);
                     }

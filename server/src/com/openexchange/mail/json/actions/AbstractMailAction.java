@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
@@ -108,6 +109,26 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      */
     protected <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);
+    }
+
+    /**
+     * Gets the mail interface.
+     * 
+     * @param mailRequest The mail request
+     * @return The mail interface
+     * @throws OXException If mail interface cannot be initialized
+     */
+    protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
+        /*
+         * Get mail interface
+         */
+        final AJAXRequestData request = mailRequest.getRequest();
+        MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
+        if (mailInterface == null) {
+            mailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
+        }
+        return mailInterface;
     }
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
