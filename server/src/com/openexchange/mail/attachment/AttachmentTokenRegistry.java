@@ -184,7 +184,27 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      */
     public AttachmentToken getToken(final String tokenId) {
         final AttachmentToken attachmentToken = tokens.get(tokenId);
-        if (null == attachmentToken || attachmentToken.isExpired()) {
+        if (null == attachmentToken) {
+            return null;
+        }
+        if (attachmentToken.isExpired()) {
+            tokens.remove(tokenId);
+            /*
+             * Clean from other map, too
+             */
+            for (final Iterator<ConcurrentMap<String, AttachmentToken>> iterator = map.values().iterator(); iterator.hasNext();) {
+                final ConcurrentMap<String, AttachmentToken> userTokens = iterator.next();
+                NextToken: for (final Iterator<AttachmentToken> iter2 = userTokens.values().iterator(); iter2.hasNext();) {
+                    final AttachmentToken token = iter2.next();
+                    if (token.getId().equals(tokenId)) {
+                        iter2.remove();
+                        break NextToken;
+                    }
+                }
+                if (userTokens.isEmpty()) {
+                    iterator.remove();
+                }
+            }
             return null;
         }
         return attachmentToken.touch();
