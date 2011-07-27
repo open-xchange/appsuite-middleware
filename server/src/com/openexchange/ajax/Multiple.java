@@ -66,6 +66,11 @@ import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.FolderRequest;
 import com.openexchange.ajax.request.JSONSimpleRequest;
 import com.openexchange.ajax.request.MailRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXState;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.MultipleAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -99,6 +104,17 @@ public class Multiple extends SessionServlet {
     private static final String ATTRIBUTE_MAIL_REQUEST = "mr";
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Multiple.class));
+
+    private static volatile Dispatcher dispatcher;
+
+    public static void setDispatcher(final Dispatcher dispatcher) {
+        Multiple.dispatcher = dispatcher;
+    }
+    
+    private static Dispatcher getDispatcher() {
+        return dispatcher;
+    }
+
     
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -114,10 +130,11 @@ public class Multiple extends SessionServlet {
         }
 
         final JSONArray respArr = new JSONArray();
+        AJAXState state = null;
         try {
             final ServerSession session = getSessionObject(req);
             for (int a = 0; a < dataArray.length(); a++) {
-                parseActionElement(respArr, dataArray, a, session, req);
+                state = parseActionElement(respArr, dataArray, a, session, req, state);
             }
             /*
              * Don't forget to write mail request
@@ -141,6 +158,9 @@ public class Multiple extends SessionServlet {
                     LOG.error(e.getMessage(), e);
                 }
             }
+            if (state != null) {
+                getDispatcher().end(state);
+            }
         }
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -149,7 +169,8 @@ public class Multiple extends SessionServlet {
         writer.flush();
     }
 
-    protected static final void parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req) throws JSONException, OXException {
+
+    protected static final AJAXState parseActionElement(final JSONArray respArr, final JSONArray dataArray, final int pos, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws JSONException, OXException {
         final JSONObject jsonObj = dataArray.getJSONObject(pos);
 
         final String module;
@@ -165,7 +186,7 @@ public class Multiple extends SessionServlet {
         
         final OXJSONWriter jWriter = new OXJSONWriter(respArr);
 
-        doAction(module, action, jsonObj, session, req, jWriter);
+        return doAction(module, action, jsonObj, session, req, jWriter, state);
     }
 
     private static final void writeMailRequest(final HttpServletRequest req) throws JSONException {
@@ -185,7 +206,7 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    protected static final void doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter) {
+    protected static final AJAXState doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter, AJAXState state) {
         try {
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
@@ -200,7 +221,29 @@ public class Multiple extends SessionServlet {
                 }
             }
             jsonObj.put(MultipleHandler.ROUTE, ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName());
-            
+            final Dispatcher dispatcher = getDispatcher();
+            if (dispatcher.handles(module)) {
+                final AJAXRequestData request = MultipleAdapter.parse(module, action, jsonObj, session, Tools.considerSecure(req));
+                final AJAXRequestResult result;
+                try {
+                    if (action == null) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                    }
+                    if (state == null) {
+                        state = dispatcher.begin();
+                    }
+                    result = dispatcher.perform(request, state, session);
+                    
+                    jsonWriter.key(ResponseFields.DATA);
+                    jsonWriter.value(result.getResultObject());
+
+                    
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                    ResponseWriter.writeException(e, jsonWriter);
+                    return state;
+                }
+            }
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
                 writeMailRequest(req);
@@ -295,7 +338,7 @@ public class Multiple extends SessionServlet {
                         if (storeMailRequest) {
                             req.setAttribute(ATTRIBUTE_MAIL_REQUEST, mailrequest);
                         }
-                        return;
+                        return state;
                     }
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -325,6 +368,7 @@ public class Multiple extends SessionServlet {
              */
             LOG.error(e.getMessage(), e);
         }
+        return state;
     }
 
     private static MultipleHandler lookUpMultipleHandler(final String module) {

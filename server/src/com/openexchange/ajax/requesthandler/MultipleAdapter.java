@@ -86,12 +86,8 @@ public class MultipleAdapter implements MultipleHandler {
         this.factory = factory;
         result = new AtomicReference<AJAXRequestResult>();
     }
-
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
-        final AJAXActionService actionService = factory.createActionService(action);
-        if (null == actionService) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
-        }
+    
+    public static AJAXRequestData parse(final String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
         
@@ -106,6 +102,19 @@ public class MultipleAdapter implements MultipleHandler {
                 request.putParameter(name, entry.getValue().toString());
             }
         }
+        request.setModule(module);
+        request.setFormat("json");
+        request.setAction(action);
+
+        return request;
+    }
+    
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
+        final AJAXActionService actionService = factory.createActionService(action);
+        if (null == actionService) {
+            throw AjaxExceptionCodes.UnknownAction.create( action);
+        }
+        final AJAXRequestData request = parse("", action, jsonObject, session, secure);
         final AJAXRequestResult ret = actionService.perform(request, session);
         result.set(ret);
         return ret.getResultObject();

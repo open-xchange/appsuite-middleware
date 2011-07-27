@@ -113,6 +113,8 @@ public class AJAXRequestData {
     
     private String format;
 
+    private AJAXState state;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      * 
@@ -523,5 +525,13 @@ public class AJAXRequestData {
     public void setData(final Object object, final String format) {
         setData(object);
         setFormat(format);
+    }
+
+    public void setState(final AJAXState state) {
+        this.state = state;
+    }
+    
+    public AJAXState getState() {
+        return state;
     }
 }

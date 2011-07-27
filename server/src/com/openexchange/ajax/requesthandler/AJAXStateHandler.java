@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,51 +50,28 @@
 package com.openexchange.ajax.requesthandler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
- * {@link DispatcherMultipleServiceFactoryHandler}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AJAXStateHandler}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DispatcherMultipleServiceFactoryHandler implements AJAXActionServiceFactory {
+public interface AJAXStateHandler {
 
-    private Dispatcher dispatcher;
-    private String module;
-    
-    public DispatcherMultipleServiceFactoryHandler(Dispatcher dispatcher, String module) {
-        super();
-        this.dispatcher = dispatcher;
-        this.module = module;
-    }
+    /**
+     * Initializes common state.
+     * 
+     * @param state The state
+     * @throws OXException If start-up fails
+     */
+    void begin(AJAXState state) throws OXException;
 
-    public AJAXActionService createActionService(String action) throws OXException {
-        return new DispatcherActionService(module, action, dispatcher);
-    }
-    
-    
-    protected static class DispatcherActionService implements AJAXActionService {
-        private String action;
-        private Dispatcher dispatcher;
-        private String module;
-        
-        public DispatcherActionService(String module, String action, Dispatcher dispatcher) {
-            this.module = module;
-            this.action = action;
-            this.dispatcher = dispatcher;
-        }
-
-        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-            request.setModule(module);
-            request.setFormat("json");
-            request.setAction(action);
-            AJAXRequestResult result = dispatcher.perform(request, session);
-            
-            return result;
-        }
-        
-    }
-    
+    /**
+     * Ends common state.
+     * 
+     * @param state The state
+     * @throws OXException If shut-down fails
+     */
+    void end(AJAXState state) throws OXException;
 
 }
