@@ -406,6 +406,7 @@ public final class GetAction extends AbstractMailAction {
                         fetchFromStorage ? "storage" : "cache"));
                 }
             }
+            data.addWarnings(warnings);
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {

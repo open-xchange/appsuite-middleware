@@ -206,7 +206,7 @@ public final class AllAction extends AbstractMailAction {
             return new AJAXRequestResult(jsonWriter.getObject(), "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
