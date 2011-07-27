@@ -95,7 +95,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
             for (final Session session : sessions.values()) {
                 try {
                     mac.clearUserEntries(session);
-                    AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(), session.getContextId());
+                    AttachmentTokenRegistry.getInstance().dropFor(session);
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(128).append("Detected a removed session: ").append(session.getSessionID()).append(
                             ". Removed all possibly cached mail access instances for user ").append(session.getUserId()).append(
