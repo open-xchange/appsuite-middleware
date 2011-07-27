@@ -1,0 +1,11 @@
+ui/global/toolbar/mode/value:
+    protected: false
+
+ui/global/windows/mode/value:
+    protected: false
+
+ui/global/windows/mode/value:
+    protected: false
+
+ui/mail/showContactImage/value:
+    protected: false

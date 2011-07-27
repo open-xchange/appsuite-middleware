@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<L:server xmlns:L="LDAP:" xmlns:ox="http://www.open-xchange.org">
+   <L:SERVER_NAME>die22</L:SERVER_NAME>
+   <L:SERVER_IP>10.20.30.22</L:SERVER_IP>
+   <L:LDAP_PORT>389</L:LDAP_PORT>
+   
+   <L:AUTH_TYPE>admin</L:AUTH_TYPE>
+   <L:BIND_USER>Manager</L:BIND_USER>
+   
+   <!-- <L:BIND_DN>uid=[bind_user],ou=Users,ou=OxObjects,dc=open-xchange,dc=com</L:BIND_DN> -->
+   <L:BIND_DN>cn=[bind_user],dc=open-xchange,dc=com</L:BIND_DN>
+   
+   <L:PASSWORD>secret</L:PASSWORD>
+
+   
+   <L:BASE_DN>dc=open-xchange,dc=com</L:BASE_DN>
+   <L:ADDRESSBOOK_DN>ou=Users,ou=OxObjects</L:ADDRESSBOOK_DN>
+   <L:BIRTHDAY-TIMEFORMAT>yyyy-MM-dd</L:BIRTHDAY-TIMEFORMAT>
+   <L:DATE-TIMEFORMAT>yyyyMMddmmhhssss'Z'</L:DATE-TIMEFORMAT>
+
+   <L:LIST_FILTER_RULE>(&amp;(objectClass=OXUserObject)(objectClass=posixAccount)(sn=[letter]*))</L:LIST_FILTER_RULE>
+   <L:CHANGE_SINCE_FILTER_RULE>(&amp;(objectClass=OXUserObject)(objectClass=posixAccount)(modifyTimestamp>=[last_modified]))</L:CHANGE_SINCE_FILTER_RULE>
+   <L:CONTACT_FILTER_RULE>(&amp;(&amp;(objectClass=OXUserObject)(objectClass=posixAccount))(|[user_ids]))</L:CONTACT_FILTER_RULE>
+   <L:SEARCH_FILTER_RULE>(&amp;(&amp;(objectClass=OXUserObject)(objectClass=posixAccount))(|(sn=[searchpattern])(cn=[searchpattern])(givenName=[searchpattern])(initials=[searchpattern])))</L:SEARCH_FILTER_RULE>
+   
+   <L:INCLUDE_SUBFOLDER>true</L:INCLUDE_SUBFOLDER>
+ 
+   <!-- <L:distribution_list_filter_rule>(&amp;(objectClass=OXUserObject)(objectClass=posixAccount)(cn=[search_by_name])(|(mail=[search_for_mail])(OXUserEmail2=[search_for_mail])(OXUserEmail3=[search_for_mail])))</L:distribution_list_filter_rule> -->
+   <!--	<L:participants_filter_rule>(&amp;(objectClass=posixAccount)(|[searchpattern]))</L:participants_filter_rule> -->
+
+   <L:OX_FOLDER_ID>2701</L:OX_FOLDER_ID>
+
+   <L:CONTEXT>1337</L:CONTEXT>
+
+   <L:field_mapping>
+        <ox:OBJECT_ID>uidNumber</ox:OBJECT_ID>
+        <ox:DISPLAYNAME>cn</ox:DISPLAYNAME>
+        <ox:LAST_NAME>sn</ox:LAST_NAME>
+        <ox:FIRST_NAME>givenName</ox:FIRST_NAME>
+        <ox:SECOND_NAME>initials</ox:SECOND_NAME>
+        <ox:SUFFIX>OXuserSuffix</ox:SUFFIX>
+        <ox:TITLE>title</ox:TITLE>
+        <ox:STREET>homePostalAddress</ox:STREET>
+        <ox:POSTAL_CODE>OXUserPostalCode</ox:POSTAL_CODE>
+        <ox:CITY>OXUserCity</ox:CITY>
+        <ox:STATE>OXUserState</ox:STATE>
+        <ox:COUNTRY>co</ox:COUNTRY>
+        <ox:BIRTHDAY>birthday</ox:BIRTHDAY>
+        <ox:MARITAL_STATUS>Oxusermaritalstatus</ox:MARITAL_STATUS>
+        <ox:NUMBER_OF_CHILDREN>OXUserChildren</ox:NUMBER_OF_CHILDREN>
+        <ox:PROFESSION>OXUserProfession</ox:PROFESSION>
+        <ox:NICKNAME>OXUserNickname</ox:NICKNAME>
+        <ox:SPOUSE_NAME>OXUserSpouseName</ox:SPOUSE_NAME>
+        <ox:ANNIVERSARY>OXUserAnniversary</ox:ANNIVERSARY>
+        <ox:NOTE>OXUserComment</ox:NOTE>
+        <ox:COMPANY>o</ox:COMPANY>
+        <ox:DEPARTMENT>ou</ox:DEPARTMENT>
+        <ox:POSITION>OXUserPosition</ox:POSITION>
+        <ox:EMPLOYEE_TYPE>employeeType</ox:EMPLOYEE_TYPE>
+        <ox:ROOM_NUMBER>roomNumber</ox:ROOM_NUMBER>
+        <ox:BUSINESS_STREET>street</ox:BUSINESS_STREET>
+        <ox:BUSINESS_POSTAL_CODE>postalCode</ox:BUSINESS_POSTAL_CODE>
+        <ox:BUSINESS_CITY>l</ox:BUSINESS_CITY>
+        <ox:BUSINESS_STATE>st</ox:BUSINESS_STATE>
+        <ox:BUSINESS_COUNTRY>c</ox:BUSINESS_COUNTRY>
+        <ox:NUMBER_OF_EMPLOYEE>employeeNumber</ox:NUMBER_OF_EMPLOYEE>
+        <ox:SALES_VOLUME>OXUserSalesVolume</ox:SALES_VOLUME>
+        <ox:TAX_ID>OXUserTaxID</ox:TAX_ID>
+        <ox:COMMERCIAL_REGISTER>OXUserComReg</ox:COMMERCIAL_REGISTER>
+        <ox:BRANCHES>OXUserBranches</ox:BRANCHES>
+        <ox:BUSINESS_CATEGORY>businessCategory</ox:BUSINESS_CATEGORY>
+        <ox:MORE_INFO>info</ox:MORE_INFO>
+        <ox:MANAGERS_NAME>Manager</ox:MANAGERS_NAME>
+        <ox:ASSISTANTS_NAME>Assistant</ox:ASSISTANTS_NAME>
+        <ox:SECOND_STREET>OXUserOtherStreet</ox:SECOND_STREET>
+        <ox:SECOND_POSTAL_CODE>OXUserOtherpostalcode</ox:SECOND_POSTAL_CODE>
+        <ox:SECOND_CITY>OXUserOtherCity</ox:SECOND_CITY>
+        <ox:SECOND_STATE>OXUserOtherState</ox:SECOND_STATE>
+        <ox:SECOND_COUNTRY>OXUserOtherCountry</ox:SECOND_COUNTRY>
+        <ox:PHONE_ASSISTANT>OxUserteleassistant</ox:PHONE_ASSISTANT>
+        <ox:PHONE_BUSINESS>TelephoneNumber</ox:PHONE_BUSINESS>
+        <ox:PHONE_BUSINESS2>OxUsertelebusiness2</ox:PHONE_BUSINESS2>
+        <ox:FAX_BUSINESS>FacsimileTelephoneNumber</ox:FAX_BUSINESS>
+        <ox:CALLBACK>OXUserTeleCallBack</ox:CALLBACK>
+        <ox:PHONE_CAR>OXUserTeleCar</ox:PHONE_CAR>
+        <ox:PHONE_COMPANY>OXUserTelecompany</ox:PHONE_COMPANY>
+        <ox:PHONE_HOME>homePhone</ox:PHONE_HOME>
+        <ox:PHONE_HOME2>OXUserTelehome2</ox:PHONE_HOME2>
+        <ox:FAX_HOME>OtherFacsimiletelephoneNumber</ox:FAX_HOME>
+        <ox:MOBILE1>mobile</ox:MOBILE1>
+        <ox:MOBILE2>OXUserTeleMobile2</ox:MOBILE2>
+        <ox:PHONE_OTHER>OxUserteleother</ox:PHONE_OTHER>
+        <ox:FAX_OTHER>OxUsertelefax2</ox:FAX_OTHER>
+        <ox:EMAIL1>mail</ox:EMAIL1>
+        <ox:EMAIL2>OXUseremail2</ox:EMAIL2>
+        <ox:EMAIL3>OXUseremail3</ox:EMAIL3>
+        <ox:URL>url</ox:URL>        
+        <ox:ISDN>internationaliSDNNumber</ox:ISDN>
+        <ox:PAGER>pager</ox:PAGER>
+        <ox:PRIMARY>OxUserteleprimary</ox:PRIMARY>
+        <ox:RADIO>OxUserteleradio</ox:RADIO>
+        <ox:TELEX>TelexNumber</ox:TELEX>
+        <ox:TTY_TDD>OxUserteletty</ox:TTY_TDD>
+        <ox:INSTANT_MESSENGER>OxUserinstantmessenger</ox:INSTANT_MESSENGER>
+        <ox:INSTANT_MESSENGER2>OxUserinstantmessenger2</ox:INSTANT_MESSENGER2>
+        <ox:IP_PHONE>IPPhone</ox:IP_PHONE>        
+        <ox:USERFIELD01>OXUserUserUndef01</ox:USERFIELD01>
+        <ox:USERFIELD02>OXUserUserUndef02</ox:USERFIELD02>
+        <ox:USERFIELD03>OXUserUserUndef03</ox:USERFIELD03>
+        <ox:USERFIELD04>OXUserUserUndef04</ox:USERFIELD04>
+        <ox:USERFIELD05>OXUserUserUndef05</ox:USERFIELD05>
+        <ox:USERFIELD06>OXUserUserUndef06</ox:USERFIELD06>
+        <ox:USERFIELD07>OXUserUserUndef07</ox:USERFIELD07>
+        <ox:USERFIELD08>OXUserUserUndef08</ox:USERFIELD08>
+        <ox:USERFIELD09>OXUserUserUndef09</ox:USERFIELD09>
+        <ox:USERFIELD10>OXUserUserUndef10</ox:USERFIELD10>
+        <ox:USERFIELD11>OXUserUserUndef11</ox:USERFIELD11>
+        <ox:USERFIELD12>OXUserUserUndef12</ox:USERFIELD12>
+        <ox:USERFIELD13>OXUserUserUndef13</ox:USERFIELD13>
+        <ox:USERFIELD14>OXUserUserUndef14</ox:USERFIELD14>
+        <ox:USERFIELD15>OXUserUserUndef15</ox:USERFIELD15>
+        <ox:USERFIELD16>OXUserUserUndef16</ox:USERFIELD16>
+        <ox:USERFIELD17>OXUserUserUndef17</ox:USERFIELD17>
+        <ox:USERFIELD18>OXUserUserUndef18</ox:USERFIELD18>
+        <ox:USERFIELD19>OXUserUserUndef19</ox:USERFIELD19>
+        <ox:USERFIELD20>OXUserUserUndef20</ox:USERFIELD20>
+		<ox:IMAGE1>jpegPhoto</ox:IMAGE1>
+		<ox:CATEGORIES>OXUserCategories</ox:CATEGORIES>
+
+		<ox:CREATION_DATE>createTimestamp</ox:CREATION_DATE>
+		<ox:LAST_MODIFIED>modifyTimestamp</ox:LAST_MODIFIED>
+			
+   </L:field_mapping>
+</L:server>

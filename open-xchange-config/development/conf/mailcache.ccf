@@ -1,0 +1,17 @@
+# Configuration of cache for mail messages.   
+jcs.region.MailMessageCache=
+jcs.region.MailMessageCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.MailMessageCache.cacheattributes.MaxObjects=10000000
+jcs.region.MailMessageCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.MailMessageCache.cacheattributes.UseMemoryShrinker=true
+jcs.region.MailMessageCache.cacheattributes.MaxMemoryIdleTimeSeconds=60
+jcs.region.MailMessageCache.cacheattributes.ShrinkerIntervalSeconds=30
+jcs.region.MailMessageCache.cacheattributes.MaxSpoolPerRun=500
+jcs.region.MailMessageCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.MailMessageCache.elementattributes.IsEternal=false
+jcs.region.MailMessageCache.elementattributes.MaxLifeSeconds=3600
+jcs.region.MailMessageCache.elementattributes.IdleTime=60
+# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
+jcs.region.MailMessageCache.elementattributes.IsSpool=false
+jcs.region.MailMessageCache.elementattributes.IsRemote=false
+jcs.region.MailMessageCache.elementattributes.IsLateral=false
