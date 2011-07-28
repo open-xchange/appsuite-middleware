@@ -66,4 +66,6 @@ public interface IFileHolder {
 
     String getName();
 
+    String getDisposition();
+
 }
