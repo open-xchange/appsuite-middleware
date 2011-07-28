@@ -1,14 +1,11 @@
 
-package com.openexchange.mail.json;
+package com.openexchange.filemanagement.json;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.AJAXState;
-import com.openexchange.ajax.requesthandler.AJAXStateHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.ClearAction;
@@ -33,20 +30,20 @@ import com.openexchange.mail.json.actions.UpdateAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailActionFactory}
+ * {@link ManagedFileActionFactory}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
+public class ManagedFileActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractMailAction> actions;
 
     /**
-     * Initializes a new {@link MailActionFactory}.
+     * Initializes a new {@link ManagedFileActionFactory}.
      * 
      * @param services The service look-up
      */
-    public MailActionFactory(final ServiceLookup services) {
+    public ManagedFileActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractMailAction>(8);
         actions.put("all", new AllAction(services));
@@ -74,20 +71,6 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
-    }
-
-    public void begin(final AJAXState state) throws OXException {
-        // Nope
-    }
-
-    public void end(final AJAXState state) throws OXException {
-        /*
-         * Drop possibly opened mail access instances
-         */
-        final MailServletInterface mailInterface = state.removeProperty(PROPERTY_MAIL_IFACE);
-        if (null != mailInterface) {
-            mailInterface.close(true);
-        }
     }
 
 }
