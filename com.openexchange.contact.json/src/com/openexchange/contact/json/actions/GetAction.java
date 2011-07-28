@@ -49,8 +49,16 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -58,12 +66,35 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends AbstractContactAction {
+public class GetAction extends ContactAction {
+
+    public GetAction(ServiceLookup serviceLookup) {
+        super(serviceLookup);
+    }
 
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        int id = req.getId();
+        int folder = req.getFolder();
+        ServerSession session = req.getSession();
+        
+        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        Contact contact = contactInterface.getObjectById(id, folder);        
+        
+        // Correct last modified and creation date with users timezone
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
+        
+        return new AJAXRequestResult(contact, "contact");
+    }
+    
+    private Date getCorrectedTime(Date date, TimeZone timeZone) {
+        int offset = timeZone.getOffset(date.getTime());
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.add(Calendar.MILLISECOND, offset);
+        
+        return calendar.getTime();
     }
 
 

@@ -282,5 +282,11 @@ public interface ContactSwitcher {
 
     public Object numberofattachments(Object... objects) throws OXException;
     
+    public Object numberofimages(Object... objects) throws OXException;
+    
+    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException;
+    
+    public Object usecount(Object... objects) throws OXException;
+    
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws OXException;
 }

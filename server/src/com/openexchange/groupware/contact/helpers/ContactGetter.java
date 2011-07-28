@@ -934,8 +934,33 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return I(conObj.getNumberOfAttachments());
     }
+    
+    public Object numberofimages(Object... objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getNumberOfImages();
+    }
+
+    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getLastModifiedOfNewestAttachment();
+    }
+
+    public Object usecount(Object... objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfAttachments");
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getUseCount();
+    }
 
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects){
         return false;
     }
+
 }

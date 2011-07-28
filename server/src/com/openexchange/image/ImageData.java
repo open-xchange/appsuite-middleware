@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.image.internal;
+package com.openexchange.image;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -57,7 +57,6 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.session.Session;
 
@@ -68,7 +67,7 @@ import com.openexchange.session.Session;
  */
 public final class ImageData {
 
-    static final int DEFAULT_TTL = 300000;
+
 
     /*-
      * ------------------------- Member stuff ------------------------------
@@ -97,7 +96,7 @@ public final class ImageData {
      * @param uniqueId This image data's unique ID; may be <code>null</code> to generate a new one
      * @param session The session providing user information
      */
-    ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive, final String uniqueId, final Session session) {
+    public ImageData(final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive, final String uniqueId, final Session session) {
         super();
         if (imageArguments == null) {
             throw new IllegalArgumentException("image arguments are null");

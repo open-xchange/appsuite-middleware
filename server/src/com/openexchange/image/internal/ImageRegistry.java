@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.image.ImageData;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -73,6 +74,8 @@ public final class ImageRegistry {
     private static final int DELAY = 30000;
 
     private static final int INITIAL_DELAY = 1000;
+    
+    static final int DEFAULT_TTL = 300000;
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageRegistry.class));
 
@@ -175,7 +178,7 @@ public final class ImageRegistry {
      * @return Either the new image data from specified data source and data arguments or the existing one if already contained in registry.
      */
     public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
-        return addImageData(session, imageSource, imageArguments, ImageData.DEFAULT_TTL);
+        return addImageData(session, imageSource, imageArguments, DEFAULT_TTL);
     }
 
     /**

@@ -49,9 +49,12 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -60,11 +63,17 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactActionFactory implements AJAXActionServiceFactory {
+    
+    private static final Map<String, ContactAction> ACTIONS = new HashMap<String, ContactAction>();
+    
+    public ContactActionFactory(ServiceLookup serviceLookup) {
+        super();
+        ACTIONS.put("get", new GetAction(serviceLookup));
+    }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return ACTIONS.get(action);
     }
 
 }

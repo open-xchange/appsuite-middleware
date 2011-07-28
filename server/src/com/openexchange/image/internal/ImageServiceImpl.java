@@ -50,6 +50,7 @@
 package com.openexchange.image.internal;
 
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.image.ImageData;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageService;
 import com.openexchange.session.Session;

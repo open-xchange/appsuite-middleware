@@ -49,18 +49,20 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link ContactRequest}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactRequest {
-    
+
     private AJAXRequestData request;
+
     private ServerSession session;
 
     public ContactRequest(AJAXRequestData request, ServerSession session) {
@@ -69,4 +71,19 @@ public class ContactRequest {
         this.session = session;
     }
 
+    public int getId() {
+        return request.getParameter("id", int.class);
+    }
+
+    public int getFolder() {
+        return request.getParameter("folder", int.class);
+    }
+
+    public TimeZone getTimeZone() {
+        return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+    }
+
+    public ServerSession getSession() {
+        return session;
+    }
 }

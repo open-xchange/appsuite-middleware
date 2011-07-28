@@ -53,15 +53,24 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractContactAction}
+ * {@link ContactAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractContactAction implements AJAXActionService {
+public abstract class ContactAction implements AJAXActionService {
+    
+    private ServiceLookup serviceLookup;
+
+    public ContactAction(ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
+    }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
@@ -71,5 +80,15 @@ public abstract class AbstractContactAction implements AJAXActionService {
     }
     
     protected abstract AJAXRequestResult perform(ContactRequest req) throws OXException;
+    
+    protected ContactInterfaceDiscoveryService getContactInterfaceDiscoveryService() {
+        ContactInterfaceDiscoveryService service = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+        if (service != null) {
+            return service;
+        } else {
+            // TODO: throw Exception
+            return null;
+        }
+    }
 
 }
