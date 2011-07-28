@@ -222,7 +222,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
                         LOG.warn("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
                     }
-                    ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
+                    clearInput();
                     return;
                 }
             } else {
@@ -233,28 +233,24 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             }
             ajpRequest.processRequest(this);
         } catch (final AJPv13Exception e) {
-            try {
-                ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
-            } catch (final IOException e1) {
-                LOG.warn("Error clearing AJP input stream", e);
-            }
+            clearInput();
             throw e;
         } catch (final IOException e) {
-            try {
-                ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
-            } catch (final IOException e1) {
-                LOG.warn("Error clearing AJP input stream", e);
-            }
+            clearInput();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } catch (final RuntimeException e) {
-            try {
-                ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
-            } catch (final IOException e1) {
-                LOG.warn("Error clearing AJP input stream", e);
-            }
+            clearInput();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
             ajpConblocker.release();
+        }
+    }
+
+    private void clearInput() {
+        try {
+            ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
+        } catch (final IOException e1) {
+            LOG.warn("Error clearing AJP input stream", e1);
         }
     }
 
