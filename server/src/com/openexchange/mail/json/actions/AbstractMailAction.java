@@ -67,14 +67,19 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -265,6 +270,74 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      */
     protected static AJAXRequestResult getJSONNullResult() {
         return RESULT_JSON_NULL;
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     * 
+     * @param session The session
+     * @param from The from address
+     * @param checkTransportSupport <code>true</code> to check transport support
+     * @param checkFrom <code>true</code> to check from validity
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    protected static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
+        /*
+         * Resolve "From" to proper mail account to select right transport server
+         */
+        int accountId;
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            final int user = session.getUserId();
+            final int cid = session.getContextId();
+            if (null == from) {
+                accountId = MailAccount.DEFAULT_ID;
+            } else {
+                accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
+                if (accountId != -1) {
+                    accountId = storageService.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), user, cid);
+                }
+            }
+            if (accountId != -1) {
+                if (!session.getUserConfiguration().isMultipleMailAccounts() && accountId != MailAccount.DEFAULT_ID) {
+                    throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
+                }
+                if (checkTransportSupport) {
+                    final MailAccount account = storageService.getMailAccount(accountId, user, cid);
+                    // Check if determined account supports mail transport
+                    if (null == account.getTransportServer()) {
+                        // Account does not support mail transport
+                        throw MailExceptionCode.NO_TRANSPORT_SUPPORT.create(account.getName(), Integer.valueOf(accountId));
+                    }
+                }
+            }
+        } catch (final OXException e) {
+            throw new OXException(e);
+        }
+        if (accountId == -1) {
+            if (checkFrom && null != from) {
+                /*
+                 * Check aliases
+                 */
+                try {
+                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                    final User user = session.getUser();
+                    final String[] aliases = user.getAliases();
+                    for (final String alias : aliases) {
+                        validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (!validAddrs.contains(from)) {
+                        throw MailExceptionCode.INVALID_SENDER.create(from.toString());
+                    }
+                } catch (final AddressException e) {
+                    throw MIMEMailException.handleMessagingException(e);
+                }
+            }
+            accountId = MailAccount.DEFAULT_ID;
+        }
+        return accountId;
     }
 
 }

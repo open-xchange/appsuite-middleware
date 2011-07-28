@@ -11,6 +11,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
+import com.openexchange.mail.json.actions.DeleteAction;
 import com.openexchange.mail.json.actions.GetAction;
 import com.openexchange.mail.json.actions.GetAttachmentAction;
 import com.openexchange.mail.json.actions.GetForwardAction;
@@ -22,6 +23,9 @@ import com.openexchange.mail.json.actions.GetReplyAllAction;
 import com.openexchange.mail.json.actions.GetStructureAction;
 import com.openexchange.mail.json.actions.GetUpdatesAction;
 import com.openexchange.mail.json.actions.GetVersitAction;
+import com.openexchange.mail.json.actions.ListAction;
+import com.openexchange.mail.json.actions.SearchAction;
+import com.openexchange.mail.json.actions.UpdateAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -54,6 +58,10 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("zip_messages", new GetMultipleMessagesAction(services));
         actions.put("saveVersit", new GetVersitAction(services));
 
+        actions.put("list", new ListAction(services));
+        actions.put("search", new SearchAction(services));
+        actions.put("update", new UpdateAction(services));
+        actions.put("delete", new DeleteAction(services));
         
     }
 
