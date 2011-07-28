@@ -12,6 +12,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.GetAction;
+import com.openexchange.mail.json.actions.GetAttachmentAction;
 import com.openexchange.mail.json.actions.GetForwardAction;
 import com.openexchange.mail.json.actions.GetMailCountAction;
 import com.openexchange.mail.json.actions.GetReplyAction;
@@ -45,6 +46,8 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("replyall", new GetReplyAllAction(services));
         actions.put("updates", new GetUpdatesAction(services));
         actions.put("forward", new GetForwardAction(services));
+        actions.put("attachment", new GetAttachmentAction(services));
+        
         
         
         actions.put("get_structure", new GetStructureAction(services));

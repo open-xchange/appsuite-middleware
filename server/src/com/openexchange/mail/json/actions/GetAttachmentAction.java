@@ -57,7 +57,6 @@ import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
@@ -68,7 +67,6 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -78,11 +76,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAttachmentAction extends AbstractMailAction {
-
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAttachmentAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link GetAttachmentAction}.
@@ -95,10 +88,8 @@ public final class GetAttachmentAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        boolean outSelected = false;
-        boolean saveToDisk = false;
         try {
-            final ServerSession session = req.getSession();
+            // final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
@@ -106,6 +97,7 @@ public final class GetAttachmentAction extends AbstractMailAction {
             final String uid = req.checkParameter(Mail.PARAMETER_ID);
             final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
+            final boolean saveToDisk;
             {
                 final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
                 saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
@@ -145,19 +137,6 @@ public final class GetAttachmentAction extends AbstractMailAction {
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }
-                /*-
-                 * TODO: Does not work, yet.
-                 * 
-                 * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-                 *     // Treat as a mail get
-                 *     final MailMessage mail = (MailMessage) mailPart.getContent();
-                 *     final Response response = new Response();
-                 *     response.setData(MessageWriter.writeMailMessage(mail, true, session));
-                 *     response.setTimestamp(null);
-                 *     ResponseWriter.write(response, resp.getWriter());
-                 *     return;
-                 * }
-                 */
             } else {
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                 if (mailPart == null) {
@@ -169,7 +148,6 @@ public final class GetAttachmentAction extends AbstractMailAction {
              * Read from stream
              */
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-            outSelected = true;
             /*
              * Write from content's input stream to byte array output stream
              */
