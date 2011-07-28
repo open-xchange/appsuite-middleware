@@ -120,7 +120,11 @@ public class FileHolder implements IFileHolder {
         return disposition;
     }
 
-    
+    /**
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     */
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
     }
