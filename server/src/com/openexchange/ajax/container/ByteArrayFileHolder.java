@@ -65,6 +65,8 @@ public final class ByteArrayFileHolder implements IFileHolder {
 
     private String contentType;
 
+    private String disposition;
+
     /**
      * Initializes a new {@link ByteArrayFileHolder}.
      */
@@ -88,6 +90,19 @@ public final class ByteArrayFileHolder implements IFileHolder {
 
     public String getName() {
         return name;
+    }
+
+    public String getDisposition() {
+        return disposition;
+    }
+
+    /**
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     */
+    public void setDisposition(final String disposition) {
+        this.disposition = disposition;
     }
 
     /**
