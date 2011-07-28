@@ -49,20 +49,28 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HTMLService;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.json.writer.MessageWriter;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAttachmentAction}
@@ -87,6 +95,8 @@ public final class GetAttachmentAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        boolean outSelected = false;
+        boolean saveToDisk = false;
         try {
             final ServerSession session = req.getSession();
             /*
@@ -94,33 +104,94 @@ public final class GetAttachmentAction extends AbstractMailAction {
              */
             final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(Mail.PARAMETER_ID);
-            final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
-            /*
-             * Deny saving for this request-specific settings
-             */
-            usmNoSave.setNoSave(true);
-            /*
-             * Overwrite settings with request's parameters
-             */
-            final DisplayMode displayMode = detectDisplayMode(true, view, usmNoSave);
+            final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
+            final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
+            {
+                final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
+                saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
+            }
+            final boolean filter;
+            {
+                final String filterParam = req.getParameter(Mail.PARAMETER_FILTER);
+                filter = Boolean.parseBoolean(filterParam) || "1".equals(filterParam);
+            }
             /*
              * Get mail interface
              */
             final MailServletInterface mailInterface = getMailInterface(req);
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            final AJAXRequestResult data =
-                new AJAXRequestResult(MessageWriter.writeMailMessage(
-                    mailInterface.getAccountID(),
-                    mailInterface.getReplyMessageForDisplay(folderPath, uid, false, usmNoSave),
-                    displayMode,
-                    session,
-                    usmNoSave,
-                    warnings,
-                    false,
-                    -1), "json");
-            data.addWarnings(warnings);
-            return data;
+            if (sequenceId == null && imageContentId == null) {
+                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
+                    Mail.PARAMETER_MAILCID).toString());
+            }
+            final MailPart mailPart;
+            InputStream attachmentInputStream;
+            if (imageContentId == null) {
+                mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
+                if (mailPart == null) {
+                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+                    /*
+                     * Apply filter
+                     */
+                    final ContentType contentType = mailPart.getContentType();
+                    final String cs =
+                        contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
+                    final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                    final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+                    attachmentInputStream =
+                        new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
+                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
+                } else {
+                    attachmentInputStream = mailPart.getInputStream();
+                }
+                /*-
+                 * TODO: Does not work, yet.
+                 * 
+                 * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+                 *     // Treat as a mail get
+                 *     final MailMessage mail = (MailMessage) mailPart.getContent();
+                 *     final Response response = new Response();
+                 *     response.setData(MessageWriter.writeMailMessage(mail, true, session));
+                 *     response.setTimestamp(null);
+                 *     ResponseWriter.write(response, resp.getWriter());
+                 *     return;
+                 * }
+                 */
+            } else {
+                mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
+                if (mailPart == null) {
+                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                attachmentInputStream = mailPart.getInputStream();
+            }
+            /*
+             * Read from stream
+             */
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+            outSelected = true;
+            /*
+             * Write from content's input stream to byte array output stream
+             */
+            try {
+                final int buflen = 0xFFFF;
+                final byte[] buffer = new byte[buflen];
+                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                    out.write(buffer, 0, len);
+                }
+                out.flush();
+            } finally {
+                attachmentInputStream.close();
+            }
+            /*
+             * Create file holder
+             */
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
+            fileHolder.setName(mailPart.getFileName());
+            fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
