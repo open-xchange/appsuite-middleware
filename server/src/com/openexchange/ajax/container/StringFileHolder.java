@@ -54,7 +54,7 @@ import java.io.UnsupportedEncodingException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link StringFileHolder}
+ * {@link StringFileHolder} - A {@link IFileHolder} implementation backed by a {@link String}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
