@@ -144,12 +144,26 @@ public final class MailRequest {
      * 
      * @param name The parameter name
      * @return The <code>String</code> array
-     * @throws OXException If an error occurs
+     * @throws OXException If parameter is absdent
      */
     public String[] checkStringArray(final String name) throws OXException {
         final String parameter = request.getParameter(name);
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return SPLIT.split(parameter, 0);
+    }
+
+    /**
+     * Checks for presence of comma-separated <code>String</code> list.
+     * 
+     * @param name The parameter name
+     * @return The <code>String</code> array
+     */
+    public String[] optStringArray(final String name) {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return null;
         }
         return SPLIT.split(parameter, 0);
     }
