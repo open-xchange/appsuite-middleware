@@ -25,6 +25,7 @@ import com.openexchange.mail.json.actions.GetUpdatesAction;
 import com.openexchange.mail.json.actions.GetVersitAction;
 import com.openexchange.mail.json.actions.ListAction;
 import com.openexchange.mail.json.actions.SearchAction;
+import com.openexchange.mail.json.actions.TransportMailAction;
 import com.openexchange.mail.json.actions.UpdateAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -62,7 +63,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("search", new SearchAction(services));
         actions.put("update", new UpdateAction(services));
         actions.put("delete", new DeleteAction(services));
-        
+        actions.put("transport", new TransportMailAction(services));
     }
 
     public AJAXActionService createActionService(final String action) throws OXException {
