@@ -11,6 +11,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
+import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.DeleteAction;
 import com.openexchange.mail.json.actions.GetAction;
 import com.openexchange.mail.json.actions.GetAttachmentAction;
@@ -24,6 +25,7 @@ import com.openexchange.mail.json.actions.GetStructureAction;
 import com.openexchange.mail.json.actions.GetUpdatesAction;
 import com.openexchange.mail.json.actions.GetVersitAction;
 import com.openexchange.mail.json.actions.ListAction;
+import com.openexchange.mail.json.actions.ReceiptAckAction;
 import com.openexchange.mail.json.actions.SearchAction;
 import com.openexchange.mail.json.actions.TransportMailAction;
 import com.openexchange.mail.json.actions.UpdateAction;
@@ -64,6 +66,8 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("update", new UpdateAction(services));
         actions.put("delete", new DeleteAction(services));
         actions.put("transport", new TransportMailAction(services));
+        actions.put("receipt_ack", new ReceiptAckAction(services));
+        actions.put("clear", new ClearAction(services));
     }
 
     public AJAXActionService createActionService(final String action) throws OXException {

@@ -228,13 +228,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
     }
 
-    private static final String VIEW_RAW = "raw";
+    protected static final String VIEW_RAW = "raw";
 
-    private static final String VIEW_TEXT = "text";
+    protected static final String VIEW_TEXT = "text";
 
-    private static final String VIEW_HTML = "html";
+    protected static final String VIEW_HTML = "html";
 
-    private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
+    protected static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
 
     protected static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usmNoSave) {
         final DisplayMode displayMode;

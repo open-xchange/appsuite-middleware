@@ -51,6 +51,9 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -85,6 +88,15 @@ public final class GetForwardAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final JSONArray paths = (JSONArray) req.getRequest().getData();
+        if (null == paths) {
+            return performGet(req);
+        } else {
+            return performPut(req, paths);
+        }
+    }
+
+    private AJAXRequestResult performGet(final MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
@@ -119,6 +131,63 @@ public final class GetForwardAction extends AbstractMailAction {
                     -1), "json");
             data.addWarnings(warnings);
             return data;
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
+        try {
+            final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final String[] folders = new String[paths.length()];
+            final String[] ids = new String[paths.length()];
+            for (int i = 0; i < folders.length; i++) {
+                final JSONObject folderAndID = paths.getJSONObject(i);
+                folders[i] = folderAndID.getString(Mail.PARAMETER_FOLDERID);
+                ids[i] = folderAndID.getString(Mail.PARAMETER_ID);
+            }
+            final String view = req.getParameter(Mail.PARAMETER_VIEW);
+            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            /*
+             * Deny saving for this request-specific settings
+             */
+            usmNoSave.setNoSave(true);
+            /*
+             * Overwrite settings with request's parameters
+             */
+            if (null != view) {
+                if (VIEW_TEXT.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(false);
+                } else if (VIEW_HTML.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(true);
+                } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+                    usmNoSave.setDisplayHtmlInlineContent(true);
+                    usmNoSave.setAllowHTMLImages(false);
+                } else {
+                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(
+                        view).append(". Using user's mail settings as fallback."));
+                }
+            }
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final List<OXException> warnings = new ArrayList<OXException>(2);
+            final AJAXRequestResult result =
+                new AJAXRequestResult(MessageWriter.writeMailMessage(
+                    mailInterface.getAccountID(),
+                    mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave),
+                    DisplayMode.MODIFYABLE,
+                    session,
+                    usmNoSave,
+                    warnings,
+                    false,
+                    -1), "json");
+            result.addWarnings(warnings);
+            return result;
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
