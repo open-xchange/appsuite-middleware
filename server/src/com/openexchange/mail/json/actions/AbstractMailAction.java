@@ -340,4 +340,26 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return accountId;
     }
 
+    protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
+        try {
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
+        } catch (final OXException e) {
+            throw new OXException(e);
+        }
+    }
+
+    protected static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final char[] chars = string.toCharArray();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < chars.length; i++) {
+            isWhitespace = Character.isWhitespace(chars[i]);
+        }
+        return isWhitespace;
+    }
+
 }

@@ -91,9 +91,8 @@ public final class GetForwardAction extends AbstractMailAction {
         final JSONArray paths = (JSONArray) req.getRequest().getData();
         if (null == paths) {
             return performGet(req);
-        } else {
-            return performPut(req, paths);
         }
+        return performPut(req, paths);
     }
 
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {

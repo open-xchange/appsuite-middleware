@@ -50,8 +50,13 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -87,6 +92,40 @@ public final class GetReplyAllAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final JSONArray paths = (JSONArray) req.getRequest().getData();
+        if (null == paths) {
+            return performGet(req);
+        }
+        return performPut(req, paths);
+    }
+
+    private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
+        try {
+            final int length = paths.length();
+            if (length != 1) {
+                throw new IllegalArgumentException("JSON array's length is not 1");
+            }
+            final AJAXRequestData requestData = new AJAXRequestData();
+            final AJAXRequestData request = req.getRequest();
+            for (final Iterator<String> it = request.getParameterNames(); it.hasNext();) {
+                final String name = it.next();
+                requestData.putParameter(name, request.getParameter(name));
+            }
+            for (int i = 0; i < length; i++) {
+                final JSONObject folderAndID = paths.getJSONObject(i);
+                requestData.putParameter(Mail.PARAMETER_FOLDERID, folderAndID.getString(Mail.PARAMETER_FOLDERID));
+                requestData.putParameter(Mail.PARAMETER_ID, folderAndID.get(Mail.PARAMETER_ID).toString());
+            }
+            /*
+             * ... and fake a GET request
+             */
+            return performGet(new MailRequest(requestData, req.getSession()));
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private AJAXRequestResult performGet(final MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
