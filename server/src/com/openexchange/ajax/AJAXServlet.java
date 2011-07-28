@@ -384,7 +384,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			+ "window.opener.callback_**action**)(**json**)"
 			+ "</script></head></html>";
 	
-    protected static final String SAVE_AS_TYPE = "application/octet-stream";
+    public static final String SAVE_AS_TYPE = "application/octet-stream";
 
     protected static final String _doGet = "doGet";
 

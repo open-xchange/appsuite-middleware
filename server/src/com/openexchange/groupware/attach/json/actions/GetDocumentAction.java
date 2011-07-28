@@ -49,21 +49,31 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import com.openexchange.ajax.Attachment;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetDocumentAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetDocumentAction extends AbstractAttachmentAction {
+
+    private static final org.apache.commons.logging.Log LOG =
+        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetDocumentAction.class));
 
     /**
      * Initializes a new {@link GetDocumentAction}.
@@ -73,37 +83,74 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     }
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        require(request, Attachment.PARAMETER_FOLDERID, Attachment.PARAMETER_ATTACHEDID, Attachment.PARAMETER_MODULE, Attachment.PARAMETER_ID);
+        require(
+            request,
+            Attachment.PARAMETER_FOLDERID,
+            Attachment.PARAMETER_ATTACHEDID,
+            Attachment.PARAMETER_MODULE,
+            Attachment.PARAMETER_ID);
 
         int folderId, attachedId, moduleId, id;
         final String contentType = request.getParameter(Attachment.PARAMETER_CONTENT_TYPE);
-        try {
-            folderId = request.geti requireNumber(req, res, action, Attachment.PARAMETER_FOLDERID);
-            attachedId = requireNumber(req, res, action, Attachment.PARAMETER_ATTACHEDID);
-            moduleId = requireNumber(req, res, action, Attachment.PARAMETER_MODULE);
-            id = requireNumber(req, res, action, Attachment.PARAMETER_ID);
+        folderId = requireNumber(request, Attachment.PARAMETER_FOLDERID);
+        attachedId = requireNumber(request, Attachment.PARAMETER_ATTACHEDID);
+        moduleId = requireNumber(request, Attachment.PARAMETER_MODULE);
+        id = requireNumber(request, Attachment.PARAMETER_ID);
 
-        } catch (final OXAborted x) {
-            return;
-        }
-
-        document(
-            res,
-            req.getHeader("user-agent"),
-            isIE(req),
+        return document(
             folderId,
             attachedId,
             moduleId,
             id,
             contentType,
-            ctx,
-            user,
-            userConfig);
-        
-        
-        
-        // TODO Auto-generated method stub
-        return null;
+            session.getContext(),
+            session.getUser(),
+            session.getUserConfiguration());
+    }
+
+    private AJAXRequestResult document(final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        try {
+            ATTACHMENT_BASE.startTransaction();
+            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            /*
+             * Get bytes
+             */
+            final ByteArrayOutputStream os;
+            final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            try {
+                os = new UnsynchronizedByteArrayOutputStream();
+                final byte[] buffer = new byte[0xFFFF];
+                int bytesRead = 0;
+                while ((bytesRead = documentData.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                os.flush();
+
+            } finally {
+                documentData.close();
+            }
+            /*
+             * File holder
+             */
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(os.toByteArray());
+            fileHolder.setContentType(contentType);
+            fileHolder.setName(attachment.getFilename());
+            ATTACHMENT_BASE.commit();
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final Throwable t) {
+            // This is a bit convoluted: In case the contentType is not
+            // overridden the returned file will be opened
+            // in a new window. To call the JS callback routine from a popup we
+            // can use parent.callback_error() but
+            // must use window.opener.callback_error()
+            throw rollback(t);
+        } finally {
+            try {
+                ATTACHMENT_BASE.finish();
+            } catch (final OXException e) {
+                LOG.debug("", e);
+            }
+        }
     }
 
 }

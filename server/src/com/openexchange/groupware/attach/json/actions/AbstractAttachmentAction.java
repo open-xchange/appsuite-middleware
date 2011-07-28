@@ -50,21 +50,28 @@
 package com.openexchange.groupware.attach.json.actions;
 
 import java.util.concurrent.atomic.AtomicLong;
+import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
+import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link AbstractAttachmentAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAttachmentAction implements AJAXActionService {
+
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentAction.class));
+
+    protected static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
     private final AtomicLong maxUploadSize;
 
@@ -77,6 +84,15 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
         super();
         maxUploadSize = new AtomicLong(-2L);
         this.serviceLookup = serviceLookup;
+    }
+
+    protected int requireNumber(final AJAXRequestData req, final String parameter) throws OXException {
+        final String value = req.getParameter(parameter);
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException nfe) {
+            throw AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value);
+        }
     }
 
     protected static void require(final AJAXRequestData req, final String... parameters) throws OXException {
@@ -96,11 +112,23 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
             } while (!maxUploadSize.compareAndSet(cur, configuredSize));
         }
         final long maxUploadSize = this.maxUploadSize.get();
-        if(maxUploadSize == 0) {
+        if (maxUploadSize == 0) {
             return;
         }
         if (size > maxUploadSize) {
             throw UploadSizeExceededException.create(size, maxUploadSize, true);
         }
+    }
+
+    protected OXException rollback(final Throwable t) {
+        try {
+            Attachment.ATTACHMENT_BASE.rollback();
+        } catch (final OXException e) {
+            LOG.debug("", e);
+        }
+        if (t instanceof OXException) {
+            return (OXException) t;
+        }
+        return new OXException(t);
     }
 }
