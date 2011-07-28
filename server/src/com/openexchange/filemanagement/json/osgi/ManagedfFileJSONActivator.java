@@ -47,40 +47,34 @@
  *
  */
 
-package com.openexchange.filemanagement.json;
+package com.openexchange.filemanagement.json.osgi;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.json.actions.GetAction;
-import com.openexchange.filemanagement.json.actions.KeepaliveAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.filemanagement.json.ManagedFileActionFactory;
+
 
 /**
- * {@link ManagedFileActionFactory}
- * 
+ * {@link ManagedfFileJSONActivator}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ManagedFileActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public final class ManagedfFileJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link ManagedFileActionFactory}.
-     * 
-     * @param services The service look-up
+     * Initializes a new {@link ManagedfFileJSONActivator}.
      */
-    public ManagedFileActionFactory(final ServiceLookup services) {
+    public ManagedfFileJSONActivator() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("keepalive", new KeepaliveAction(services));
-        actions.put("get", new GetAction(services));
     }
 
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new ManagedFileActionFactory(this), "file");
     }
 
 }

@@ -84,6 +84,7 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.ajax.login.osgi.LoginActivator(),
         new com.openexchange.tools.images.osgi.ImageToolsActivator(),
         new com.openexchange.mail.json.osgi.MailJSONActivator(),
+        new com.openexchange.filemanagement.json.osgi.ManagedfFileJSONActivator(),
     };
 
     public Activator() {

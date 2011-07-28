@@ -47,40 +47,39 @@
  *
  */
 
-package com.openexchange.filemanagement.json;
+package com.openexchange.filemanagement.json.actions;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXFile;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.json.actions.GetAction;
-import com.openexchange.filemanagement.json.actions.KeepaliveAction;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ManagedFileActionFactory}
- * 
+ * {@link KeepaliveAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ManagedFileActionFactory implements AJAXActionServiceFactory {
+public final class KeepaliveAction implements AJAXActionService {
 
-    private final Map<String, AJAXActionService> actions;
+    private final ServiceLookup services;
 
-    /**
-     * Initializes a new {@link ManagedFileActionFactory}.
-     * 
-     * @param services The service look-up
-     */
-    public ManagedFileActionFactory(final ServiceLookup services) {
+    public KeepaliveAction(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("keepalive", new KeepaliveAction(services));
-        actions.put("get", new GetAction(services));
+        this.services = services;
     }
 
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final String id = request.checkParameter(AJAXFile.PARAMETER_ID);
+        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        management.getByID(id);
+        return new AJAXRequestResult(JSONObject.NULL, "json");
     }
 
 }
