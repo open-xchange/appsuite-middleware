@@ -109,6 +109,42 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
         blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
+    /**
+     * Clears the input buffer.
+     * 
+     * @throws IOException If an I/O error occurs
+     */
+    public void clearBuffer() throws IOException {
+        /*
+         * Suck input stream dry
+         */
+        {
+            final InputStream in = this.in;
+            final int available = in.available();
+            if (available > 0) {
+                final byte tmp[] = new byte[available];
+                in.read(tmp, 0, available);
+            }
+        }
+        /*
+         * Clear buffer
+         */
+        markpos = -1;
+        marklimit = 0;
+        pos = 0;
+        count = 0;
+        final byte nbuf[] = new byte[8192];
+        final byte[] buffer = getBufIfOpen();
+        if (!bufUpdater.compareAndSet(this, buffer, nbuf)) {
+            // Can't replace buf if there was an async close.
+            // Note: This would need to be changed if fill()
+            // is ever made accessible to multiple threads.
+            // But for now, the only way CAS can fail is via close.
+            // assert buf == null;
+            throw new IOException("Stream closed");
+        }
+    }
+
     public void block() {
         blocker.block();
     }
