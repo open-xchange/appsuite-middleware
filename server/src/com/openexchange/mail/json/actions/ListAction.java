@@ -1,0 +1,216 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.json.actions;
+
+import static com.openexchange.tools.Collections.newHashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
+
+/**
+ * {@link ListAction}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class ListAction extends AbstractMailAction {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListAction.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
+     * Initializes a new {@link ListAction}.
+     * @param services
+     */
+    public ListAction(final ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        try {
+            final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final int[] columns = req.checkIntArray(Mail.PARAMETER_COLUMNS);
+            final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
+            /*
+             * Pre-Select field writers
+             */
+            final MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+            final MailFieldWriter[] headerWriters = null == headers ? null : MessageWriter.getHeaderFieldWriter(headers);
+            /*
+             * Get map
+             */
+            final Map<String, List<String>> idMap = fillMapByArray((JSONArray) req.getRequest().getData());
+            if (idMap.isEmpty()) {
+                /*
+                 * Request body is an empty JSON array
+                 */
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Empty JSON array detected in request body.", new Throwable());
+                }
+                return new AJAXRequestResult(new JSONArray(), "json");
+            }
+            /*
+             * Get mail interface
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final OXJSONWriter jsonWriter = new OXJSONWriter();
+            /*
+             * Start response
+             */
+            final long start = DEBUG ? System.currentTimeMillis() : 0L;
+            jsonWriter.array();
+            final int userId = session.getUserId();
+            final int contextId = session.getContextId();
+            for (final Map.Entry<String, List<String>> entry : idMap.entrySet()) {
+                final MailMessage[] mails = mailInterface.getMessageList(entry.getKey(), toArray(entry.getValue()), columns, headers);
+                final int accountID = mailInterface.getAccountID();
+                for (int i = 0; i < mails.length; i++) {
+                    final MailMessage mail = mails[i];
+                    if (mail != null) {
+                        final JSONArray ja = new JSONArray();
+                        for (int j = 0; j < writers.length; j++) {
+                            writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                        }
+                        if (null != headerWriters) {
+                            for (int j = 0; j < headerWriters.length; j++) {
+                                headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                            }
+                        }
+                        jsonWriter.value(ja);
+                    }
+                }
+            }
+            /*
+             * Close response and flush print writer
+             */
+            jsonWriter.endArray();
+            if (DEBUG) {
+                final long d = System.currentTimeMillis() - start;
+                LOG.debug(new StringBuilder(32).append("/ajax/mail?action=list performed in ").append(d).append("msec"));
+            }
+            return new AJAXRequestResult(jsonWriter.getObject(), "json");
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, OXException {
+        final int length = idArray.length();
+        if (length <= 0) {
+            return Collections.emptyMap();
+        }
+        final Map<String, List<String>> idMap = newHashMap(4);
+        final String parameterFolderId = Mail.PARAMETER_FOLDERID;
+        final String parameterId = Mail.PARAMETER_ID;
+        String folder;
+        List<String> list;
+        {
+            final JSONObject idObject = idArray.getJSONObject(0);
+            folder = ensureString(parameterFolderId, idObject);
+            list = new ArrayList<String>(length);
+            idMap.put(folder, list);
+            list.add(ensureString(parameterId, idObject));
+        }
+        for (int i = 1; i < length; i++) {
+            final JSONObject idObject = idArray.getJSONObject(i);
+            final String fld = ensureString(parameterFolderId, idObject);
+            if (!folder.equals(fld)) {
+                folder = fld;
+                final List<String> tmp = idMap.get(folder);
+                if (tmp == null) {
+                    list = new ArrayList<String>(length);
+                    idMap.put(folder, list);
+                } else {
+                    list = tmp;
+                }
+            }
+            list.add(ensureString(parameterId, idObject));
+        }
+        return idMap;
+    }
+
+    private static String ensureString(final String key, final JSONObject jo) throws OXException {
+        if (!jo.hasAndNotNull(key)) {
+            throw MailExceptionCode.MISSING_PARAMETER.create(key);
+        }
+        return jo.optString(key);
+    }
+
+    private static String[] toArray(final Collection<String> c) {
+        return c.toArray(new String[c.size()]);
+    }
+
+}

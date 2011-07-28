@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,98 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.ajax.container;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
-
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link StringFileHolder} - A {@link IFileHolder} implementation backed by a {@link String}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Dispatcher {
+public final class StringFileHolder implements IFileHolder {
+
+    private final byte[] bytes;
+
+    private String name;
+
+    private String contentType;
+
+    private String disposition;
 
     /**
-     * Performs given request.
+     * Initializes a new {@link StringFileHolder} with default encoding (UTF-8).
      * 
-     * @param request The request to perform
-     * @param state The state
-     * @param session The session providing needed user data
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
+     * @param string The string
      */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
-    
-    /**
-     * Begins a dispatcher turn.
-     * 
-     * @return The state
-     * @throws OXException If start-up fails
-     */
-    AJAXState begin() throws OXException;
+    public StringFileHolder(final String string) {
+        this(string, "UTF-8");
+    }
 
     /**
-     * Ends s dispatcher turn.
+     * Initializes a new {@link StringFileHolder}.
      * 
-     * @param state The state
+     * @param string The string
+     * @param encoding The encoding; e.g. "UTF-8"
+     * @throws IllegalStateException If encoding is not supported
      */
-    void end(AJAXState state);
+    public StringFileHolder(final String string, final String encoding) {
+        super();
+        try {
+            this.bytes = string.getBytes(encoding);
+            contentType = "application/octet-stream";
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public InputStream getStream() {
+        return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    public long getLength() {
+        return bytes.length;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Returns whether the dispatcher knows about the given module.
-     * @param module
-     * @return true if it can handle the module request, false otherwise
+     * Sets the content type; e.g. "application/octet-stream"
+     * 
+     * @param contentType The content type
      */
-    boolean handles(String module);
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
+    }
+
+    /**
+     * Sets the (file) name.
+     * 
+     * @param name The name
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getDisposition() {
+        return disposition;
+    }
+
+    /**
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     */
+    public void setDisposition(final String disposition) {
+        this.disposition = disposition;
+    }
+
 }

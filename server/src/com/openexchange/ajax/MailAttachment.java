@@ -66,9 +66,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -120,6 +118,9 @@ public class MailAttachment extends AJAXServlet {
             }
             Tools.removeCachingHeader(res);
             final AttachmentToken token = AttachmentTokenRegistry.getInstance().getToken(id);
+            if (null == token) {
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
             final MailPart mailPart = token.getAttachment();
             InputStream attachmentInputStream = null;
             try {

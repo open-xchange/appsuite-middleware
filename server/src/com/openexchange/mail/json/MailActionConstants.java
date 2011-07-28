@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.mail.json;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.mail.MailServletInterface;
 
 
 /**
- * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
+ * {@link MailActionConstants}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Dispatcher {
+public interface MailActionConstants {
 
     /**
-     * Performs given request.
-     * 
-     * @param request The request to perform
-     * @param state The state
-     * @param session The session providing needed user data
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
+     * The property name for {@link MailServletInterface} instance.
      */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
-    
-    /**
-     * Begins a dispatcher turn.
-     * 
-     * @return The state
-     * @throws OXException If start-up fails
-     */
-    AJAXState begin() throws OXException;
-
-    /**
-     * Ends s dispatcher turn.
-     * 
-     * @param state The state
-     */
-    void end(AJAXState state);
-
-    /**
-     * Returns whether the dispatcher knows about the given module.
-     * @param module
-     * @return true if it can handle the module request, false otherwise
-     */
-    boolean handles(String module);
+    public static final String PROPERTY_MAIL_IFACE = "com.openexchange.mail.json.mailInterface";
 }

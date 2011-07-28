@@ -107,7 +107,10 @@ public class FileResponseOutputter implements ResponseOutputter {
         
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         final String userAgent = req.getHeader("user-agent");
-        final String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+        String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+        if (null == contentDisposition) {
+            contentDisposition = file.getDisposition();
+        }
         final String name = file.getName();
         
         InputStream documentData = null;

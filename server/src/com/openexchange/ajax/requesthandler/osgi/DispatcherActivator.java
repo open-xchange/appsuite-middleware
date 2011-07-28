@@ -53,10 +53,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
-import com.openexchange.ajax.requesthandler.DispatcherMultipleServiceFactoryHandler;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseOutputter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -66,9 +66,6 @@ import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseOutputters.FileResponseOutputter;
 import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseOutputter;
 import com.openexchange.ajax.requesthandler.responseOutputters.StringResponseOutputter;
-import com.openexchange.java.Autoboxing;
-import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.tools.images.ImageScalingService;
@@ -97,11 +94,11 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
-            public void added(ServiceReference ref, ResultConverter thing) {
+            public void added(final ServiceReference ref, final ResultConverter thing) {
                 defaultConverter.addConverter(thing);
             }
 
-            public void removed(ServiceReference ref, ResultConverter thing) {
+            public void removed(final ServiceReference ref, final ResultConverter thing) {
                 defaultConverter.removeConverter(thing);
             }
             
@@ -110,6 +107,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
         
         final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
+        Multiple.setDispatcher(dispatcher);
         
         DispatcherServlet.registerRenderer(new JSONResponseOutputter());
         final FileResponseOutputter fileRenderer = new FileResponseOutputter();
@@ -118,11 +116,11 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
 
-            public void added(ServiceReference ref, ResponseOutputter thing) {
+            public void added(final ServiceReference ref, final ResponseOutputter thing) {
                 DispatcherServlet.registerRenderer(thing);
             }
 
-            public void removed(ServiceReference ref, ResponseOutputter thing) {
+            public void removed(final ServiceReference ref, final ResponseOutputter thing) {
                 DispatcherServlet.unregisterRenderer(thing);    
             }
             
@@ -133,11 +131,11 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
-            public void added(ServiceReference ref, ImageScalingService thing) {
+            public void added(final ServiceReference ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(thing);
             }
 
-            public void removed(ServiceReference ref, ImageScalingService thing) {
+            public void removed(final ServiceReference ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(null);
             }
             
@@ -148,42 +146,29 @@ public class DispatcherActivator extends HousekeepingActivator {
     
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
 
-        private DefaultDispatcher dispatcher;
-        private DispatcherServlet servlet;
+        private final DefaultDispatcher dispatcher;
+        private final DispatcherServlet servlet;
         
-        private Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
-        private Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
+        private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
+        private final Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
         
-        public Registerer(DefaultDispatcher dispatcher, DispatcherServlet servlet) {
+        public Registerer(final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
             this.dispatcher = dispatcher;
             this.servlet = servlet;
         }
 
-        public void added(ServiceReference ref, AJAXActionServiceFactory thing) {
-            String module = (String) ref.getProperty("module");
+        public void added(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+            final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
-            SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
+            final SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
             registrations.put(module, registration);
             rememberTracker(registration);
-            
-            if (registerForMultipleRequests(ref)) {
-                ServiceRegistration serviceRegistration = context.registerService(MultipleHandlerFactoryService.class.getName(), new AJAXActionServiceAdapterHandler(new DispatcherMultipleServiceFactoryHandler(dispatcher, module), module), null);
-                serviceRegistrations.put(module, serviceRegistration);
-            }
         }
         
-        private boolean registerForMultipleRequests(ServiceReference ref) {
-            Object property = ref.getProperty("multiple");
-            if (property == null) {
-                return true;
-            }
-            return Autoboxing.a2b(property);
-        }
-
-        public void removed(ServiceReference ref, AJAXActionServiceFactory thing) {
-            String module = (String) ref.getProperty("module");
+        public void removed(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+            final String module = (String) ref.getProperty("module");
             dispatcher.remove(module);
-            SessionServletRegistration tracker = registrations.remove(module);
+            final SessionServletRegistration tracker = registrations.remove(module);
             tracker.remove();
             forgetTracker(tracker);
             serviceRegistrations.remove(module).unregister();

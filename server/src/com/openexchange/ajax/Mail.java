@@ -152,7 +152,6 @@ import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -226,7 +225,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
             warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is display here.");
+            warnBuilder.append("For safety reason its original content is displayed here.");
             LOG.warn(warnBuilder.toString(), cause);
         }
         final String message = cause.getMessage();

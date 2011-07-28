@@ -1,0 +1,270 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.json.actions;
+
+import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.MailActionConstants;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
+/**
+ * {@link AbstractMailAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractMailAction.class));
+
+    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link AbstractMailAction}.
+     */
+    protected AbstractMailAction(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
+    }
+
+    /**
+     * Gets the mail interface.
+     * 
+     * @param mailRequest The mail request
+     * @return The mail interface
+     * @throws OXException If mail interface cannot be initialized
+     */
+    protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
+        /*
+         * Get mail interface
+         */
+        final AJAXRequestData request = mailRequest.getRequest();
+        MailServletInterface mailInterface = request.getState().optProperty(PROPERTY_MAIL_IFACE);
+        if (mailInterface == null) {
+            mailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
+        }
+        return mailInterface;
+    }
+
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        return perform(new MailRequest(request, session));
+    }
+
+    /**
+     * Performs specified mail request.
+     * 
+     * @param req The mail request
+     * @return The result
+     * @throws OXException If an error occurs
+     */
+    protected abstract AJAXRequestResult perform(MailRequest req) throws OXException;
+
+    /**
+     * Triggers the contact collector for specified mail's addresses.
+     * 
+     * @param session The session
+     * @param mail The mail
+     */
+    protected static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+            addrs.addAll(Arrays.asList(mail.getFrom()));
+            addrs.addAll(Arrays.asList(mail.getTo()));
+            addrs.addAll(Arrays.asList(mail.getCc()));
+            addrs.addAll(Arrays.asList(mail.getBcc()));
+            // Strip by aliases
+            try {
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final UserSettingMail usm = session.getUserSettingMail();
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+
+            }
+            if (!addrs.isEmpty()) {
+                // Add addresses
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    /**
+     * Triggers the contact collector for specified JSON mail's addresses.
+     * 
+     * @param session The session
+     * @param mail The JSON mail
+     */
+    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+        final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+            try {
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.FROM.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_TO.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_CC.getKey(), mail)));
+                addrs.addAll(Arrays.asList(parseAddressKey(MailJSONField.RECIPIENT_BCC.getKey(), mail)));
+                // Strip by aliases
+                final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                final UserSettingMail usm = session.getUserSettingMail();
+                if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+                    validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
+                }
+                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                validAddrs.add(new QuotedInternetAddress(user.getMail()));
+                final String[] aliases = user.getAliases();
+                for (final String alias : aliases) {
+                    validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                addrs.removeAll(validAddrs);
+            } catch (final AddressException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            } catch (final JSONException e) {
+                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+            }
+            if (!addrs.isEmpty()) {
+                // Add addresses
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    private static final String VIEW_RAW = "raw";
+
+    private static final String VIEW_TEXT = "text";
+
+    private static final String VIEW_HTML = "html";
+
+    private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
+
+    protected static DisplayMode detectDisplayMode(final boolean modifyable, final String view, final UserSettingMail usmNoSave) {
+        final DisplayMode displayMode;
+        if (null != view) {
+            if (VIEW_RAW.equals(view)) {
+                displayMode = DisplayMode.RAW;
+            } else if (VIEW_TEXT.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(false);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(true);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+                usmNoSave.setDisplayHtmlInlineContent(true);
+                usmNoSave.setAllowHTMLImages(false);
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            } else {
+                LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
+                    ". Using user's mail settings as fallback."));
+                displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+            }
+        } else {
+            displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
+        }
+        return displayMode;
+    }
+
+    /**
+     * Gets the result filled with JSON <code>NULL</code>.
+     * 
+     * @return The result with JSON <code>NULL</code>.
+     */
+    protected static AJAXRequestResult getJSONNullResult() {
+        return RESULT_JSON_NULL;
+    }
+
+}

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,79 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.ajax.container;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
+import java.io.InputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link DispatcherMultipleServiceFactoryHandler}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ByteArrayFileHolder} - A {@link IFileHolder} implementation backed by a <code>byte</code> array.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DispatcherMultipleServiceFactoryHandler implements AJAXActionServiceFactory {
+public final class ByteArrayFileHolder implements IFileHolder {
 
-    private Dispatcher dispatcher;
-    private String module;
-    
-    public DispatcherMultipleServiceFactoryHandler(Dispatcher dispatcher, String module) {
+    private final byte[] bytes;
+
+    private String name;
+
+    private String contentType;
+
+    private String disposition;
+
+    /**
+     * Initializes a new {@link ByteArrayFileHolder}.
+     */
+    public ByteArrayFileHolder(final byte[] bytes) {
         super();
-        this.dispatcher = dispatcher;
-        this.module = module;
+        this.bytes = bytes;
+        contentType = "application/octet-stream";
     }
 
-    public AJAXActionService createActionService(String action) throws OXException {
-        return new DispatcherActionService(module, action, dispatcher);
+    public InputStream getStream() {
+        return new UnsynchronizedByteArrayInputStream(bytes);
     }
-    
-    
-    protected static class DispatcherActionService implements AJAXActionService {
-        private String action;
-        private Dispatcher dispatcher;
-        private String module;
-        
-        public DispatcherActionService(String module, String action, Dispatcher dispatcher) {
-            this.module = module;
-            this.action = action;
-            this.dispatcher = dispatcher;
-        }
 
-        public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-            request.setModule(module);
-            request.setFormat("json");
-            request.setAction(action);
-            AJAXRequestResult result = dispatcher.perform(request, session);
-            
-            return result;
-        }
-        
+    public long getLength() {
+        return bytes.length;
     }
-    
 
+    public String getContentType() {
+        return contentType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDisposition() {
+        return disposition;
+    }
+
+    /**
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     */
+    public void setDisposition(final String disposition) {
+        this.disposition = disposition;
+    }
+
+    /**
+     * Sets the content type; e.g. "application/octet-stream"
+     * 
+     * @param contentType The content type
+     */
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
+    }
+
+    /**
+     * Sets the (file) name.
+     * 
+     * @param name The name
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
 }

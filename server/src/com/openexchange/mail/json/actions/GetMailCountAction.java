@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.mail.json.actions;
 
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
-
 /**
- * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link GetMailCountAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Dispatcher {
+public final class GetMailCountAction extends AbstractMailAction {
+
+    private static final org.apache.commons.logging.Log LOG =
+        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetMailCountAction.class));
 
     /**
-     * Performs given request.
+     * Initializes a new {@link GetMailCountAction}.
      * 
-     * @param request The request to perform
-     * @param state The state
-     * @param session The session providing needed user data
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
+     * @param services
      */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
-    
-    /**
-     * Begins a dispatcher turn.
-     * 
-     * @return The state
-     * @throws OXException If start-up fails
-     */
-    AJAXState begin() throws OXException;
+    public GetMailCountAction(final ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Ends s dispatcher turn.
-     * 
-     * @param state The state
-     */
-    void end(AJAXState state);
+    @Override
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        try {
+            final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
+            /*
+             * Get mail interface
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final AJAXRequestResult data = new AJAXRequestResult(Integer.valueOf(mailInterface.getAllMessageCount(folderId)[0]), "int");
+            return data;
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
-    /**
-     * Returns whether the dispatcher knows about the given module.
-     * @param module
-     * @return true if it can handle the module request, false otherwise
-     */
-    boolean handles(String module);
 }

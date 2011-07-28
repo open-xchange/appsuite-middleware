@@ -163,6 +163,7 @@ public class DispatcherServlet extends SessionServlet {
         
         AJAXRequestResult result = null;
         AJAXRequestData request = null; 
+        AJAXState state = null;
         try {
             if (action == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
@@ -170,17 +171,21 @@ public class DispatcherServlet extends SessionServlet {
             final ServerSession session = getSessionObject(req);
 
             request = parseRequest(req, preferStream, isFileUpload, session);
+            
+            state = dispatcher.begin();
 
-            result = dispatcher.perform(request, session);
+            result = dispatcher.perform(request, state, session);
             
 
             
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            final Response response = new Response();
-            response.setException(e);
-            JSONResponseOutputter.writeResponse(response, action, req, resp);
+            JSONResponseOutputter.writeResponse(new Response().setException(e), action, req, resp);
             return;
+        } finally {
+            if (null != state) {
+                dispatcher.end(state);
+            }
         }
         sendResponse(request, result, req, resp);
 

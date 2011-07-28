@@ -79,6 +79,8 @@ public final class AJAXRequestResult {
 
     private Collection<OXException> warnings;
 
+    private boolean deferred;
+
     private final Map<String, String> headers = new LinkedHashMap<String, String>();
 
     private String format = "json";
@@ -135,6 +137,24 @@ public final class AJAXRequestResult {
         if (format != null) {
             this.format = format;
         }
+    }
+
+    /**
+     * Gets the deferred flag
+     * 
+     * @return The deferred flag
+     */
+    public boolean isDeferred() {
+        return deferred;
+    }
+
+    /**
+     * Sets the deferred flag
+     * 
+     * @param deferred The deferred flag to set
+     */
+    public void setDeferred(final boolean deferred) {
+        this.deferred = deferred;
     }
 
     @Override

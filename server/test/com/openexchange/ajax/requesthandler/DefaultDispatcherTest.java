@@ -77,7 +77,7 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
-        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null);
+        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null, null);
 
         assertSame(res, receivedResult);
     }
@@ -106,7 +106,7 @@ public class DefaultDispatcherTest extends TestCase {
 
         SimAJAXCustomizer.LOG.clear();
         
-        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null);
+        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null, null);
 
         assertSame(res, receivedResult);
         
@@ -157,7 +157,7 @@ public class DefaultDispatcherTest extends TestCase {
 
         SimAJAXCustomizer.LOG.clear();
         
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
@@ -198,7 +198,7 @@ public class DefaultDispatcherTest extends TestCase {
 
         SimAJAXCustomizer.LOG.clear();
         
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
@@ -239,7 +239,7 @@ public class DefaultDispatcherTest extends TestCase {
 
         SimAJAXCustomizer.LOG.clear();
         
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
@@ -280,7 +280,7 @@ public class DefaultDispatcherTest extends TestCase {
 
         SimAJAXCustomizer.LOG.clear();
         
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
@@ -294,7 +294,7 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setAction("someAction");
 
         try {
-            dispatcher.perform(requestData, null);
+            dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
         } catch (final OXException x) {
             // All Done
@@ -314,7 +314,7 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setAction("someAction");
 
         try {
-            dispatcher.perform(requestData, null);
+            dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
         } catch (final OXException x) {
             // All Done
@@ -336,7 +336,7 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
     }
 
     private static class SimAJAXCustomizer implements AJAXActionCustomizer {

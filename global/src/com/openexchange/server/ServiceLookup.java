@@ -56,5 +56,12 @@ package com.openexchange.server;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ServiceLookup {
+
+    /**
+     * Gets the service of specified type
+     * 
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
     public <S extends Object> S getService(final Class<? extends S> clazz);
 }

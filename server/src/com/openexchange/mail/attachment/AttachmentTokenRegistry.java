@@ -50,9 +50,9 @@
 package com.openexchange.mail.attachment;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -119,14 +119,12 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      */
     private AttachmentTokenRegistry() throws OXException {
         super();
-		map = new ConcurrentHashMap<AttachmentTokenRegistry.Key, ConcurrentMap<String, AttachmentToken>>();
-		tokens = new ConcurrentHashMap<String, AttachmentToken>();
-		final TimerService timerService = ServerServiceRegistry.getInstance()
-				.getService(TimerService.class, true);
-		final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
-		timerTask = timerService.scheduleWithFixedDelay(task,
-				CLEANER_FREQUENCY, CLEANER_FREQUENCY);
-   }
+        map = new ConcurrentHashMap<AttachmentTokenRegistry.Key, ConcurrentMap<String, AttachmentToken>>();
+        tokens = new ConcurrentHashMap<String, AttachmentToken>();
+        final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
+        timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
+    }
 
     /**
      * Disposes this registry.
@@ -146,14 +144,35 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     public void dropFor(final int userId, final int contextId) {
         final ConcurrentMap<String, AttachmentToken> userTokens = map.remove(keyFor(userId, contextId));
         if (null != userTokens) {
-            for (final Iterator<String> iterator = userTokens.keySet().iterator(); iterator.hasNext();) {
-                tokens.remove(iterator.next());
-                iterator.remove();
+            for (final Iterator<Entry<String, AttachmentToken>> iter = userTokens.entrySet().iterator(); iter.hasNext();) {
+                final Entry<String, AttachmentToken> entry = iter.next();
+                tokens.remove(entry.getValue().getId());
+                iter.remove();
+                
             }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder("Cleaned user-sensitive attachment tokens for user ").append(userId).append(" in context ").append(
                 contextId).toString());
+        }
+    }
+
+    /**
+     * Drops tokens for given session.
+     * 
+     * @param Session The session
+     */
+    public void dropFor(final Session session) {
+        final ConcurrentMap<String, AttachmentToken> userTokens = map.remove(keyFor(session));
+        if (null != userTokens) {
+            final AttachmentToken token = userTokens.remove(session.getSessionID());
+            if (null != token) {
+                tokens.remove(token.getId());
+            }
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder("Cleaned user-sensitive attachment tokens for user ").append(session.getUserId()).append(" in context ").append(
+                session.getContextId()).toString());
         }
     }
 
@@ -165,7 +184,27 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      */
     public AttachmentToken getToken(final String tokenId) {
         final AttachmentToken attachmentToken = tokens.get(tokenId);
-        if (null == attachmentToken || attachmentToken.isExpired()) {
+        if (null == attachmentToken) {
+            return null;
+        }
+        if (attachmentToken.isExpired()) {
+            tokens.remove(tokenId);
+            /*
+             * Clean from other map, too
+             */
+            for (final Iterator<ConcurrentMap<String, AttachmentToken>> iterator = map.values().iterator(); iterator.hasNext();) {
+                final ConcurrentMap<String, AttachmentToken> userTokens = iterator.next();
+                NextToken: for (final Iterator<AttachmentToken> iter2 = userTokens.values().iterator(); iter2.hasNext();) {
+                    final AttachmentToken token = iter2.next();
+                    if (token.getId().equals(tokenId)) {
+                        iter2.remove();
+                        break NextToken;
+                    }
+                }
+                if (userTokens.isEmpty()) {
+                    iterator.remove();
+                }
+            }
             return null;
         }
         return attachmentToken.touch();
@@ -187,7 +226,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
                 userTokens = newmap;
             }
         }
-        userTokens.put(token.getId(), token);
+        userTokens.put(session.getSessionID(), token);
         tokens.put(token.getId(), token);
     }
 

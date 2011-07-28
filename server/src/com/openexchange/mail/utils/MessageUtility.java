@@ -293,7 +293,19 @@ public final class MessageUtility {
             /*
              * Expect the charset to be Big5-HKSCS
              */
-            return new String(bytes, "Big5-HKSCS");
+            try {
+                return new String(bytes, "Big5-HKSCS");
+            } catch (final Error error) {
+                // Huh..?
+                final Throwable cause = error.getCause();
+                if (cause.getClass().getName().equals("sun.io.ConversionBufferFullException")) {
+                    /*
+                     * Retry with auto-detected charset
+                     */
+                    return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                }
+                throw error;
+            }
         }
         if (isGB2312(charset)) {
             /*

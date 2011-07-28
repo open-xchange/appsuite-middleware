@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,47 +50,28 @@
 package com.openexchange.ajax.requesthandler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
-
-
 
 /**
- * A {@link Dispatcher} is marked as a top level dispatcher for the entire framework.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AJAXStateHandler}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Dispatcher {
+public interface AJAXStateHandler {
 
     /**
-     * Performs given request.
+     * Initializes common state.
      * 
-     * @param request The request to perform
      * @param state The state
-     * @param session The session providing needed user data
-     * @return The result yielded from given request
-     * @throws OXException If an error occurs
-     */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
-    
-    /**
-     * Begins a dispatcher turn.
-     * 
-     * @return The state
      * @throws OXException If start-up fails
      */
-    AJAXState begin() throws OXException;
+    void begin(AJAXState state) throws OXException;
 
     /**
-     * Ends s dispatcher turn.
+     * Ends common state.
      * 
      * @param state The state
+     * @throws OXException If shut-down fails
      */
-    void end(AJAXState state);
+    void end(AJAXState state) throws OXException;
 
-    /**
-     * Returns whether the dispatcher knows about the given module.
-     * @param module
-     * @return true if it can handle the module request, false otherwise
-     */
-    boolean handles(String module);
 }

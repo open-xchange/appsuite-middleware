@@ -106,8 +106,7 @@ public final class MailLoginHandler implements LoginHandlerService {
 		// Time-out mail access cache
 		final Session session = logout.getSession();
 		MailAccess.getMailAccessCache().clearUserEntries(session);
-		AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(),
-				session.getContextId());
+		AttachmentTokenRegistry.getInstance().dropFor(session);
 
 	}
 }

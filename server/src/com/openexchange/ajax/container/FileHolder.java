@@ -67,7 +67,9 @@ public class FileHolder implements IFileHolder {
 
     private String name;
 
-    public FileHolder(InputStream is, long length, String contentType, String name) {
+    private String disposition;
+
+    public FileHolder(final InputStream is, final long length, final String contentType, final String name) {
         super();
         this.is = is;
         this.length = length;
@@ -81,7 +83,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
-    public void setStream(InputStream is) {
+    public void setStream(final InputStream is) {
         this.is = is;
     }
 
@@ -91,7 +93,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
-    public void setLength(long length) {
+    public void setLength(final long length) {
         this.length = length;
     }
 
@@ -101,7 +103,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
-    public void setContentType(String contentType) {
+    public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
@@ -110,11 +112,21 @@ public class FileHolder implements IFileHolder {
         return name;
     }
     
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
     
-    
-    
+    public String getDisposition() {
+        return disposition;
+    }
+
+    /**
+     * Sets the disposition.
+     * 
+     * @param disposition The disposition
+     */
+    public void setDisposition(final String disposition) {
+        this.disposition = disposition;
+    }
     
 }

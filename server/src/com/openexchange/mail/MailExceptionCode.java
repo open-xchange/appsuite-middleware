@@ -345,8 +345,16 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Sent quota exceeded, you are only allowed to sent 1 mail in %1$s seconds.
      */
     RECIPIENTS_EXCEEDED("Please limit your recipients to %1$s  (including To/Cc/Bcc), and click 'Send' again.", Category.CATEGORY_ERROR, 76),
-    /** Unable to parse mail server URI "%1$s". */
-    URI_PARSE_FAILED("Unable to parse mail server URI \"%1$s\".", Category.CATEGORY_USER_INPUT, 77);
+    /**
+     * Unable to parse mail server URI "%1$s".
+     */
+    URI_PARSE_FAILED("Unable to parse mail server URI \"%1$s\".", Category.CATEGORY_USER_INPUT, 77),
+    /**
+     * Mail attachment expired or absent.
+     */
+    ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
+    
+    ;
 
     private final String message;
 
