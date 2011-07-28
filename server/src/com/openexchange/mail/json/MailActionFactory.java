@@ -21,6 +21,7 @@ import com.openexchange.mail.json.actions.GetReplyAction;
 import com.openexchange.mail.json.actions.GetReplyAllAction;
 import com.openexchange.mail.json.actions.GetStructureAction;
 import com.openexchange.mail.json.actions.GetUpdatesAction;
+import com.openexchange.mail.json.actions.GetVersitAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -51,12 +52,9 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("attachment", new GetAttachmentAction(services));
         actions.put("zip_attachments", new GetMultipleAttachmentAction(services));
         actions.put("zip_messages", new GetMultipleMessagesAction(services));
+        actions.put("saveVersit", new GetVersitAction(services));
+
         
-        
-        
-        actions.put("get_structure", new GetStructureAction(services));
-        actions.put("get_structure", new GetStructureAction(services));
-        actions.put("get_structure", new GetStructureAction(services));
     }
 
     public AJAXActionService createActionService(final String action) throws OXException {
