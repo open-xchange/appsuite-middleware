@@ -49,25 +49,27 @@
 
 package com.openexchange.groupware.attach.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.mail.json.MailActionFactory;
 
 /**
  * {@link AttachmentActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class AttachmentActivator implements BundleActivator {
+public final class AttachmentActivator extends AJAXModuleActivator {
 
     public AttachmentActivator() {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
-        // Nope
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new MailActionFactory(this), "attachment");
     }
 }
