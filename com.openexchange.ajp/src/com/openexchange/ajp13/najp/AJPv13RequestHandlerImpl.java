@@ -219,7 +219,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         clonedPackage[3] = (byte) (dataLength & (255));
                         clonedPackage[4] = (byte) prefixCode;
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
-                        ajpExc.setDump("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
+                        ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
                     }
                     throw ajpExc;
                 }
