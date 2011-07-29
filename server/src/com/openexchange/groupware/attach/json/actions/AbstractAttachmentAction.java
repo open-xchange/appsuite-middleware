@@ -120,15 +120,11 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
         }
     }
 
-    protected OXException rollback(final Throwable t) {
+    protected void rollback() {
         try {
             Attachment.ATTACHMENT_BASE.rollback();
         } catch (final OXException e) {
-            LOG.debug("", e);
+            LOG.debug("Rollback failed.", e);
         }
-        if (t instanceof OXException) {
-            return (OXException) t;
-        }
-        return new OXException(t);
     }
 }

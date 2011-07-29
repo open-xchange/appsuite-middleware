@@ -143,7 +143,11 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             // in a new window. To call the JS callback routine from a popup we
             // can use parent.callback_error() but
             // must use window.opener.callback_error()
-            throw rollback(t);
+            rollback();
+            if (t instanceof OXException) {
+                throw (OXException) t;
+            }
+            throw new OXException(t);
         } finally {
             try {
                 ATTACHMENT_BASE.finish();
