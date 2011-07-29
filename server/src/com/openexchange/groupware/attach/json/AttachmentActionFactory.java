@@ -54,6 +54,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.attach.json.actions.AttachAction;
+import com.openexchange.groupware.attach.json.actions.GetDocumentAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -68,7 +70,8 @@ public class AttachmentActionFactory implements AJAXActionServiceFactory {
     public AttachmentActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(8);
-        
+        actions.put("document", new GetDocumentAction(services));
+        actions.put("attach", new AttachAction(services));
     }
 
     public AJAXActionService createActionService(final String action) throws OXException {

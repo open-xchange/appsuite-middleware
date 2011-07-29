@@ -60,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
@@ -173,6 +174,25 @@ public class AJAXRequestData {
      */
     public Map<String, String> getParameters() {
         return new HashMap<String, String>(params);
+    }
+
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Gets the comma-sperated value.
+     * 
+     * @param name The parameter name
+     * @return The values as an array
+     */
+    public String[] getParameterValues(final String name) {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (null == value) {
+            return null;
+        }
+        return SPLIT.split(value, 0);
     }
 
     /**
@@ -553,4 +573,5 @@ public class AJAXRequestData {
     public AJAXState getState() {
         return state;
     }
+
 }

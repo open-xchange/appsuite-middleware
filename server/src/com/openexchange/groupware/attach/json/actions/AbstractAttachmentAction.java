@@ -51,6 +51,7 @@ package com.openexchange.groupware.attach.json.actions;
 
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajax.Attachment;
+import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -70,6 +71,8 @@ import com.openexchange.server.ServiceLookup;
 public abstract class AbstractAttachmentAction implements AJAXActionService {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAttachmentAction.class));
+
+    protected static final AttachmentParser PARSER = new AttachmentParser();
 
     protected static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
