@@ -251,7 +251,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                 ATTACHMENT_BASE.finish();
             }
 
-            return new AJAXRequestResult(Integer.valueOf(attachment.getId()), "int");
+            return new AJAXRequestResult(Integer.valueOf(attachment.getId()), new Date(ts), "int");
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         } catch (final RuntimeException e) {
