@@ -58,6 +58,8 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
     private static final long serialVersionUID = -11763074640120576L;
 
+    private String dump;
+
     /**
      * Initializes a new {@link AJPv13UnknownPrefixCodeException}
      * 
@@ -65,6 +67,24 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
      */
     public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
         super(AJPCode.UNKNOWN_PREFIX_CODE, false, Integer.valueOf(unknownPrefixCode));
+    }
+
+    /**
+     * Gets the dump.
+     * 
+     * @return The dump
+     */
+    public String getDump() {
+        return dump;
+    }
+
+    /**
+     * Sets the dump.
+     * 
+     * @param dumped The dump
+     */
+    public void setDump(final String dumped) {
+        this.dump = dumped;
     }
 
 }
