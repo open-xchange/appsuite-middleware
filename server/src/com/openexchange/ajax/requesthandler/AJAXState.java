@@ -63,6 +63,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+/**
+ * {@link AJAXState}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public final class AJAXState {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJAXState.class));
@@ -119,46 +124,52 @@ public final class AJAXState {
     }
 
     /**
-     * @param key
-     * @param value
-     * @return
-     * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+     * Puts specified property.
+     * 
+     * @param name The property name
+     * @param value The property value
+     * @return The value previously associated with given name or <code>null</code> if no such property existed before
      */
-    public Object putProperty(final String key, final Object value) {
-        return properties.put(key, value);
+    public Object putProperty(final String name, final Object value) {
+        return properties.put(name, value);
     }
 
     /**
-     * @param key
-     * @return
-     * @see java.util.Map#remove(java.lang.Object)
+     * Removes the property associated with specified name.
+     * 
+     * @param name The property name
+     * @return The removed property value or <code>null</code> if absent
      */
-    public Object removeProperty(final String key) {
-        return properties.remove(key);
+    public <V> V removeProperty(final String name) {
+        return (V) properties.remove(name);
     }
 
     /**
-     * @see java.util.Map#clear()
+     * Clears the properties.
      */
     public void clearProperties() {
         properties.clear();
     }
 
     /**
-     * @return
-     * @see java.util.Map#keySet()
+     * Gets the property names.
+     * 
+     * @return The property names.
      */
     public Set<String> propertyNames() {
-        return properties.keySet();
+        return new HashSet<String>(properties.keySet());
     }
 
+    /**
+     * Adds specified initializer identifier.
+     * 
+     * @param identifier The initializer identifier
+     * @param handler The associated handler
+     * @return <code>true</code> if no such initializer identifier was present before (successful insertion); otherwise <code>false</code>
+     */
     public boolean addInitializer(final String identifier, final AJAXStateHandler handler) {
         handlers.add(handler);
         return initializers.add(identifier);
-    }
-
-    public boolean containsInitializer(final String identifier) {
-        return initializers.contains(identifier);
     }
 
     /**

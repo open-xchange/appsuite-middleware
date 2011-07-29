@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.filemanagement.json;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.json.actions.GetAction;
+import com.openexchange.filemanagement.json.actions.KeepaliveAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AJAXModuleActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ManagedFileActionFactory}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public class ManagedFileActionFactory implements AJAXActionServiceFactory {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link ManagedFileActionFactory}.
+     * 
+     * @param services The service look-up
+     */
+    public ManagedFileActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions.put("keepalive", new KeepaliveAction(services));
+        actions.put("get", new GetAction(services));
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
+
 }

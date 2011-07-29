@@ -67,6 +67,7 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
+import com.openexchange.ajp13.BlockableBufferedInputStream;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -221,6 +222,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
                         LOG.warn("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
                     }
+                    clearInput();
                     return;
                 }
             } else {
@@ -230,10 +232,25 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(dataLength, true));
             }
             ajpRequest.processRequest(this);
+        } catch (final AJPv13Exception e) {
+            clearInput();
+            throw e;
         } catch (final IOException e) {
+            clearInput();
+            throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
+        } catch (final RuntimeException e) {
+            clearInput();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
             ajpConblocker.release();
+        }
+    }
+
+    private void clearInput() {
+        try {
+            ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
+        } catch (final IOException e1) {
+            LOG.warn("Error clearing AJP input stream", e1);
         }
     }
 

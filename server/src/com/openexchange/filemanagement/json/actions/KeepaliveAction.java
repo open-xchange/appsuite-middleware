@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.filemanagement.json.actions;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXFile;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AJAXModuleActivator}
+ * {@link KeepaliveAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public final class KeepaliveAction implements AJAXActionService {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    private final ServiceLookup services;
+
+    public KeepaliveAction(final ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final String id = request.checkParameter(AJAXFile.PARAMETER_ID);
+        final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        management.getByID(id);
+        return new AJAXRequestResult(JSONObject.NULL, "json");
     }
+
 }

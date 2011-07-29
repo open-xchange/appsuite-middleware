@@ -52,10 +52,21 @@ package com.openexchange.mail.json.actions;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -67,6 +78,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -88,6 +100,14 @@ public final class GetAttachmentAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final JSONObject bodyObject = (JSONObject) req.getRequest().getData();
+        if (null == bodyObject) {
+            return performGET(req);
+        }
+        return performPUT(req, bodyObject);
+    }
+
+    private AJAXRequestResult performGET(final MailRequest req) throws OXException {
         try {
             // final ServerSession session = req.getSession();
             /*
@@ -171,6 +191,83 @@ public final class GetAttachmentAction extends AbstractMailAction {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private AJAXRequestResult performPUT(final MailRequest req, final JSONObject bodyObject) throws OXException {
+        try {
+            final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final String folderPath = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String sequenceId = req.checkParameter(Mail.PARAMETER_MAILATTCHMENT);
+            final String destFolderIdentifier = req.checkParameter(Mail.PARAMETER_DESTINATION_FOLDER);
+            /*
+             * Get mail interface
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
+            final IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+            boolean performRollback = false;
+            try {
+                if (!session.getUserConfiguration().hasInfostore()) {
+                    throw MailExceptionCode.NO_MAIL_ACCESS.create();
+                }
+                final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+                if (mailPart == null) {
+                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                }
+                final String destFolderID = destFolderIdentifier;
+                /*
+                 * Create document's meta data
+                 */
+                final FileMetadataParserService parser = serviceRegistry.getService(FileMetadataParserService.class, true);
+                final JSONObject jsonFileObject = bodyObject;
+                final File file = parser.parse(jsonFileObject);
+                final List<Field> fields = parser.getFields(jsonFileObject);
+                final Set<Field> set = EnumSet.copyOf(fields);
+                if (!set.contains(Field.FILENAME)) {
+                    file.setFileName(mailPart.getFileName());
+                }
+                file.setFileMIMEType(mailPart.getContentType().toString());
+                /*
+                 * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
+                 * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore
+                 * measure the size.
+                 */
+                file.setFileSize(0);
+                if (!set.contains(Field.TITLE)) {
+                    file.setTitle(mailPart.getFileName());
+                }
+                file.setFolderId(destFolderID);
+                /*
+                 * Start writing to infostore folder
+                 */
+                fileAccess.startTransaction();
+                performRollback = true;
+                fileAccess.saveDocument(file, mailPart.getInputStream(), System.currentTimeMillis(), fields);
+                fileAccess.commit();
+            } catch (final Exception e) {
+                if (performRollback) {
+                    fileAccess.rollback();
+                }
+                throw e;
+            } finally {
+                if (fileAccess != null) {
+                    fileAccess.finish();
+                }
+            }
+            return new AJAXRequestResult(new JSONArray(), "json");
+        } catch (final OXException e) {
+            throw e;
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

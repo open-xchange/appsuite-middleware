@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,62 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.mail.json.actions;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AJAXModuleActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ClearAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public final class ClearAction extends AbstractMailAction {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    /**
+     * Initializes a new {@link ClearAction}.
+     * 
+     * @param services
+     */
+    public ClearAction(final ServiceLookup services) {
+        super(services);
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+    @Override
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        try {
+            //final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final JSONArray ja = (JSONArray) req.getRequest().getData();
+            /*
+             * Clear folder sequentially
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final int length = ja.length();
+            final JSONArray ret = new JSONArray();
+            for (int i = 0; i < length; i++) {
+                final String folderId = ja.getString(i);
+                if (!mailInterface.clearFolder(folderId)) {
+                    /*
+                     * Something went wrong
+                     */
+                    ret.put(folderId);
+                }
+            }
+            return new AJAXRequestResult(ret, "json");
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
+
 }

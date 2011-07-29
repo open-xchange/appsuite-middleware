@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,61 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.mail.json.actions;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AJAXModuleActivator}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link CopyAction}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public final class CopyAction extends AbstractMailAction {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    /**
+     * Initializes a new {@link CopyAction}.
+     * 
+     * @param services
+     */
+    public CopyAction(final ServiceLookup services) {
+        super(services);
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+    @Override
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        try {
+            //final ServerSession session = req.getSession();
+            /*
+             * Read in parameters
+             */
+            final String uid = req.checkParameter(Mail.PARAMETER_ID);
+            final String sourceFolder = req.checkParameter(Mail.PARAMETER_FOLDERID);
+            final String destFolder = ((JSONObject) req.getRequest().getData()).getString(FolderFields.FOLDER_ID);
+            /*
+             * Get mail interface
+             */
+            final MailServletInterface mailInterface = getMailInterface(req);
+            final String msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, false)[0];
+            final JSONObject data = new JSONObject();
+            data.put(FolderChildFields.FOLDER_ID, destFolder);
+            data.put(DataFields.ID, msgUID);
+            return new AJAXRequestResult(data, "json");
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
+
 }

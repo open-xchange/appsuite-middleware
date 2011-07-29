@@ -786,7 +786,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         }
         if (encoded) {
             try {
-                return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING);
+                return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING == null ? "UTF-8" : DEFAULT_ENCODING);
             } catch (final IOException e) {
                 throw new AJPv13Exception(AJPCode.IO_ERROR, true, e, e.getMessage());
             } catch (final MessagingException e) {

@@ -47,34 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.groupware.attach.json;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AJAXModuleActivator}
+ * {@link AttachmentActionFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public class AttachmentActionFactory implements AJAXActionServiceFactory {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
-    }
+    private final Map<String, AJAXActionService> actions;
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    public AttachmentActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(8);
         
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
     }
+
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
+
 }

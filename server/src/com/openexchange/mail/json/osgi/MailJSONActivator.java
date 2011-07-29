@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.mail.json.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.mail.json.MailActionFactory;
 
 
 /**
- * {@link AJAXModuleActivator}
+ * {@link MailJSONActivator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public final class MailJSONActivator extends AJAXModuleActivator {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
-    }
-    
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    /**
+     * Initializes a new {@link MailJSONActivator}.
+     */
+    public MailJSONActivator() {
+        super();
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
-        properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new MailActionFactory(this), "mail");
+    }
+
 }
