@@ -64,7 +64,7 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
      * @param unknownPrefixCode The unknown prefix code
      */
     public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
-        super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
+        super(AJPCode.UNKNOWN_PREFIX_CODE, false, Integer.valueOf(unknownPrefixCode));
     }
 
 }
