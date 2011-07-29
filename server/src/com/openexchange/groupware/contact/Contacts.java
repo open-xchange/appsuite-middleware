@@ -403,22 +403,41 @@ public final class Contacts {
             }
         }
 
-        PreparedStatement ps = null;
-
+        /*
+         * Generate identifier
+         */
+        final int id;
         try {
             /*
              * AutoCommit false for the IDGenerator!
              */
             writecon = DBPool.pickupWriteable(context);
             writecon.setAutoCommit(false);
-
-            final int id = IDGenerator.getId(context, Types.CONTACT, writecon);
+            id = IDGenerator.getId(context, Types.CONTACT, writecon);
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Got ID from Generator -> " + id);
             }
-            if (id == -1) {
-                throw ContactExceptionCodes.ID_GENERATION_FAILED.create();
+            writecon.commit();
+        } catch (final SQLException e) {
+            rollback(writecon);
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            if (null != writecon) {
+                autocommit(writecon);
+                try {
+                    DBPool.closeWriterSilent(context, writecon);
+                } catch (final Exception ex) {
+                    LOG.error("Unable to close WRITE Connection");
+                }
+                writecon = null;
             }
+        }
+
+        PreparedStatement ps = null;
+        try {
+            writecon = DBPool.pickupWriteable(context);
+            writecon.setAutoCommit(false);
+
             contact.setObjectID(id);
 
             final long lmd = System.currentTimeMillis();
