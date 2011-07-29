@@ -49,12 +49,19 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Attachment;
@@ -69,6 +76,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.log.Log;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -96,8 +108,49 @@ public final class AttachAction extends AbstractAttachmentAction {
         super(serviceLookup);
     }
 
+    public static transient final AttachmentField[] REQUIRED = Attachment.REQUIRED;
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
+            if (request.hasUploads()) {
+                final UploadEvent upload = request.getUploadEvent();
+                final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
+                final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
+
+                long sum = 0;
+                final JSONObject json = new JSONObject();
+                final List<UploadFile> l = upload.getUploadFiles();
+                final int size = l.size();
+                final Iterator<UploadFile> iter = l.iterator();
+                for (int a = 0; a < size; a++) {
+                    final UploadFile uploadFile = iter.next();
+                    final String fileField = uploadFile.getFieldName();
+                    final int index = Integer.parseInt(fileField.substring(5));
+                    final String obj = upload.getFormField("json_" + index);
+                    if (obj == null || obj.length() == 0) {
+                        continue;
+                    }
+                    json.reset();
+                    json.parseJSONString(obj);
+                    for (final AttachmentField required : REQUIRED) {
+                        if (!json.has(required.getName())) {
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create(required.getName());
+                        }
+                    }
+
+                    final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
+                    assureSize(index, attachments, uploadFiles);
+
+                    attachments.set(index, attachment);
+                    uploadFiles.set(index, uploadFile);
+                    sum += uploadFile.getSize();
+                    // checkSingleSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
+                    // session.getUserId(), session.getContext()));
+                    checkSize(sum);
+                }
+
+                return attach(attachments, uploadFiles, session, session.getContext(), session.getUser(), session.getUserConfiguration());
+            }
             final JSONObject object = (JSONObject) request.getData();
 
             for (final AttachmentField required : Attachment.REQUIRED) {
@@ -204,6 +257,102 @@ public final class AttachAction extends AbstractAttachmentAction {
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
         }
+    }
+
+    private AJAXRequestResult attach(final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles, final ServerSession session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+        initAttachments(attachments, uploadFiles);
+        try {
+            ATTACHMENT_BASE.startTransaction();
+            // final Iterator<AttachmentMetadata> attIter = attachments.iterator();
+            final Iterator<UploadFile> ufIter = uploadFiles.iterator();
+
+            final JSONArray arr = new JSONArray();
+
+            long timestamp = 0;
+
+            for (final AttachmentMetadata attachment : attachments) {
+                // while(attIter.hasNext()) {
+                // final AttachmentMetadata attachment = attIter.next();
+                final UploadFile uploadFile = ufIter.next();
+
+                attachment.setId(AttachmentBase.NEW);
+
+                final long modified =
+                    ATTACHMENT_BASE.attachToObject(
+                        attachment,
+                        new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile())),
+                        session,
+                        ctx,
+                        user,
+                        userConfig);
+                if (modified > timestamp) {
+                    timestamp = modified;
+                }
+                arr.put(attachment.getId());
+
+            }
+            ATTACHMENT_BASE.commit();
+            return new AJAXRequestResult(arr, new Date(timestamp), "json");
+        } catch (final OXException t) {
+            rollback();
+            throw t;
+        } catch (final IOException e) {
+            rollback();
+            throw AjaxExceptionCodes.IOError.create(e, e.getMessage());
+        } finally {
+            try {
+                ATTACHMENT_BASE.finish();
+            } catch (final OXException e) {
+                LOG.debug("", e);
+            }
+        }
+    }
+
+    private void initAttachments(final List<AttachmentMetadata> attachments, final List<UploadFile> uploads) {
+        final List<AttachmentMetadata> attList = new ArrayList<AttachmentMetadata>(attachments);
+        // final Iterator<AttachmentMetadata> attIter = new ArrayList<AttachmentMetadata>(attachments).iterator();
+        final Iterator<UploadFile> ufIter = new ArrayList<UploadFile>(uploads).iterator();
+
+        int index = 0;
+        for (final AttachmentMetadata attachment : attList) {
+            // while(attIter.hasNext()) {
+            // final AttachmentMetadata attachment = attIter.next();
+            if (attachment == null) {
+                attachments.remove(index);
+                ufIter.next();
+                uploads.remove(index);
+                continue;
+            }
+            final UploadFile upload = ufIter.next();
+            if (upload == null) {
+                attachments.remove(index);
+                uploads.remove(index);
+                continue;
+            }
+            if (attachment.getFilename() == null || "".equals(attachment.getFilename())) {
+                attachment.setFilename(upload.getPreparedFileName());
+            }
+            if (attachment.getFilesize() <= 0) {
+                attachment.setFilesize(upload.getSize());
+            }
+            if (attachment.getFileMIMEType() == null || "".equals(attachment.getFileMIMEType())) {
+                attachment.setFileMIMEType(upload.getContentType());
+            }
+            index++;
+        }
+    }
+
+    private void assureSize(final int index, final List<AttachmentMetadata> attachments, final List<UploadFile> uploadFiles) {
+        int enlarge = index - (attachments.size() - 1);
+        for (int i = 0; i < enlarge; i++) {
+            attachments.add(null);
+        }
+
+        enlarge = index - (uploadFiles.size() - 1);
+        for (int i = 0; i < enlarge; i++) {
+            uploadFiles.add(null);
+        }
+
     }
 
 }

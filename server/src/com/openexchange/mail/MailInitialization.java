@@ -51,6 +51,8 @@ package com.openexchange.mail;
 
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.activation.CommandMap;
+import javax.activation.MailcapCommandMap;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.exception.OXException;
@@ -148,6 +150,42 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
                 public void stop() {
                     EventPool.releaseInstance();
+                }
+            }, startedStack);
+            startUp(new Initialization() {
+                
+                public void stop() {
+                    // Nothing to do
+                }
+                
+                public void start() {
+                    /*-
+                     * Add handlers for main MIME types
+                     * 
+                        #
+                        #
+                        # Default mailcap file for the JavaMail System.
+                        #
+                        # JavaMail content-handlers:
+                        #
+                        text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
+                        text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
+                        text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
+                        multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
+                        message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
+                        #
+                        # can't support image types because java.awt.Toolkit doesn't work on servers
+                        #
+                        #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
+                        #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
+                     */
+                    final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+                    mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+                    mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+                    mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+                    mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
+                    mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+                    CommandMap.setDefaultCommandMap(mc);
                 }
             }, startedStack);
             /*
