@@ -67,7 +67,7 @@ public final class ResourceTools {
         super();
     }
 
-    private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[ $@%\\.+a-zA-Z0-9_-]+");
+    private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[\\S ]+");
 
     /**
      * Checks if specified resource identifier contains invalid characters.
