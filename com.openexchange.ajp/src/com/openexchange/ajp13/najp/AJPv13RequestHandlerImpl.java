@@ -206,9 +206,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                     /*
                      * Unknown prefix code in first package: Leave routine.
                      */
-                    if (LOG.isWarnEnabled()) {
-                        final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
-                        LOG.warn(ajpExc.getMessage(), ajpExc);
+                    final AJPv13UnknownPrefixCodeException ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
+                    {
                         /*
                          * Dump package
                          */
@@ -220,10 +219,9 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         clonedPackage[3] = (byte) (dataLength & (255));
                         clonedPackage[4] = (byte) prefixCode;
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
-                        LOG.warn("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
+                        ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
                     }
-                    clearInput();
-                    return;
+                    throw ajpExc;
                 }
             } else {
                 /*

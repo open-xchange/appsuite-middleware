@@ -49,100 +49,85 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import com.openexchange.ajax.Attachment;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import org.json.JSONValue;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.AttachmentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link GetDocumentAction}
+ * {@link GetAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetDocumentAction extends AbstractAttachmentAction {
+public final class GetAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetDocumentAction.class));
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAction.class));
+
+    private static final String DATASOURCE = "datasource";
+
+    private static final String IDENTIFIER = "identifier";
 
     /**
-     * Initializes a new {@link GetDocumentAction}.
+     * Initializes a new {@link GetAction}.
      */
-    public GetDocumentAction(final ServiceLookup serviceLookup) {
+    public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        require(
-            request,
-            Attachment.PARAMETER_FOLDERID,
-            Attachment.PARAMETER_ATTACHEDID,
-            Attachment.PARAMETER_MODULE,
-            Attachment.PARAMETER_ID);
+        try {
+            require(
+                request,
+                AJAXServlet.PARAMETER_FOLDERID,
+                AJAXServlet.PARAMETER_ATTACHEDID,
+                AJAXServlet.PARAMETER_MODULE,
+                AJAXServlet.PARAMETER_ID);
+            final int folderId = requireNumber(request, AJAXServlet.PARAMETER_FOLDERID);
+            final int attachedId = requireNumber(request, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
+            final int id = requireNumber(request, AJAXServlet.PARAMETER_ID);
 
-        int folderId, attachedId, moduleId, id;
-        final String contentType = request.getParameter(Attachment.PARAMETER_CONTENT_TYPE);
-        folderId = requireNumber(request, Attachment.PARAMETER_FOLDERID);
-        attachedId = requireNumber(request, Attachment.PARAMETER_ATTACHEDID);
-        moduleId = requireNumber(request, Attachment.PARAMETER_MODULE);
-        id = requireNumber(request, Attachment.PARAMETER_ID);
-
-        return document(
-            folderId,
-            attachedId,
-            moduleId,
-            id,
-            contentType,
-            session.getContext(),
-            session.getUser(),
-            session.getUserConfiguration());
+            return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "json");
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UnexpectedError.create(e, e.getMessage());
+        }
     }
 
-    private AJAXRequestResult document(final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private JSONValue get(final int folderId, final int attachedId, final int moduleId, final int id, final ServerSession session) throws OXException {
         try {
             ATTACHMENT_BASE.startTransaction();
-            final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(folderId, attachedId, moduleId, id, ctx, user, userConfig);
-            /*
-             * Get bytes
-             */
-            final ByteArrayOutputStream os;
-            final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(folderId, attachedId, moduleId, id, ctx, user, userConfig);
-            try {
-                os = new UnsynchronizedByteArrayOutputStream();
-                final byte[] buffer = new byte[0xFFFF];
-                int bytesRead = 0;
-                while ((bytesRead = documentData.read(buffer)) != -1) {
-                    os.write(buffer, 0, bytesRead);
-                }
-                os.flush();
 
-            } finally {
-                documentData.close();
-            }
-            /*
-             * File holder
-             */
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(os.toByteArray());
-            fileHolder.setContentType(contentType);
-            fileHolder.setName(attachment.getFilename());
+            final User user = session.getUser();
+            final AttachmentMetadata attachment =
+                ATTACHMENT_BASE.getAttachment(
+                    folderId,
+                    attachedId,
+                    moduleId,
+                    id,
+                    session.getContext(),
+                    user,
+                    session.getUserConfiguration());
+
+            final OXJSONWriter w = new OXJSONWriter();
+            final AttachmentWriter aWriter = new AttachmentWriter(w);
+            aWriter.timedResult(attachment.getCreationDate().getTime());
+            aWriter.write(attachment, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            aWriter.endTimedResult();
+
             ATTACHMENT_BASE.commit();
-            return new AJAXRequestResult(fileHolder, "file");
+
+            return w.getObject();
         } catch (final Throwable t) {
-            // This is a bit convoluted: In case the contentType is not
-            // overridden the returned file will be opened
-            // in a new window. To call the JS callback routine from a popup we
-            // can use parent.callback_error() but
-            // must use window.opener.callback_error()
             rollback();
             if (t instanceof OXException) {
                 throw (OXException) t;
@@ -152,9 +137,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.debug("", e);
+                LOG.error(e.getMessage(), e);
             }
         }
     }
-
 }

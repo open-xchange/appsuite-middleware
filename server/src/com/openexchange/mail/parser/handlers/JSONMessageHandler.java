@@ -287,6 +287,26 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return timeZone;
     }
 
+    private void addToken(final JSONObject jsonObject, final String attachmentId) {
+        if (token) {
+            /*
+             * Token
+             */
+            try {
+                final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
+                token.setAccessInfo(accountId, session.getUserId(), session.getContextId());
+                token.setAttachmentInfo(
+                    this.jsonObject.getString(FolderChildFields.FOLDER_ID),
+                    this.jsonObject.getString(DataFields.ID),
+                    attachmentId);
+                AttachmentTokenRegistry.getInstance().putToken(token, session);
+                jsonObject.put("token", token.getId());
+            } catch (final Exception e) {
+                LOG.warn("Adding attachment token failed.", e);
+            }
+        }
+    }
+
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -334,23 +354,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
              * Content
              */
             jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            if (token) {
-                /*
-                 * Token
-                 */
-                try {
-                    final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
-                    token.setAccessInfo(accountId, session.getUserId(), session.getContextId());
-                    token.setAttachmentInfo(
-                        this.jsonObject.getString(FolderChildFields.FOLDER_ID),
-                        this.jsonObject.getString(DataFields.ID),
-                        attachmentId);
-                    AttachmentTokenRegistry.getInstance().putToken(token, session);
-                    jsonObject.put("token", token.getId());
-                } catch (final Exception e) {
-                    LOG.warn("Adding attachment token failed.", e);
-                }
-            }
+            /*
+             * Add token
+             */
+            addToken(jsonObject, attachmentId);
             // if (isInline &&
             // part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             // // TODO: Add rtf2html conversion here!
@@ -642,7 +649,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 return true;
             }
             /*
-             * Just usual plain text
+             * Just common plain text
              */
             if (textAppended) {
                 if (textWasEmpty) {
@@ -1048,6 +1055,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
             } else {
                 jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MIMEMessageUtility.decodeMultiEncodedHeader(fileName));
             }
+            /*
+             * Add token
+             */
+            addToken(jsonObject, id);
             getAttachmentsArr().put(jsonObject);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

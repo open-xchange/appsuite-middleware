@@ -51,6 +51,7 @@ package com.openexchange.mail.json.actions;
 
 import java.io.IOException;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.json.JSONException;
@@ -60,14 +61,20 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.helper.ParamContainer;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -76,6 +83,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -103,7 +111,92 @@ public final class NewAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+        final AJAXRequestData request = req.getRequest();
         try {
+            if (request.hasUploads()) {
+                final ServerSession session = req.getSession();
+                final UploadEvent uploadEvent = request.getUploadEvent();
+                String msgIdentifier = null;
+                {
+                    final JSONObject jsonMailObj;
+                    {
+                        final String json0 = uploadEvent.getFormField(Mail.UPLOAD_FORMFIELD_MAIL);
+                        if (json0 == null || json0.trim().length() == 0) {
+                            throw MailExceptionCode.MISSING_PARAM.create(Mail.UPLOAD_FORMFIELD_MAIL);
+                        }
+                        jsonMailObj = new JSONObject(json0);
+                    }
+                    /*-
+                     * Parse
+                     * 
+                     * Resolve "From" to proper mail account to select right transport server
+                     */
+                    final InternetAddress from;
+                    try {
+                        from = MessageParser.getFromField(jsonMailObj)[0];
+                    } catch (final AddressException e) {
+                        throw MIMEMailException.handleMessagingException(e);
+                    }
+                    int accountId;
+                    try {
+                        accountId = resolveFrom2Account(session, from, true, true);
+                    } catch (final OXException e) {
+                        if (MailExceptionCode.NO_TRANSPORT_SUPPORT.equals(e)) {
+                            // Re-throw
+                            throw e;
+                        }
+                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                        // Send with default account's transport provider
+                        accountId = MailAccount.DEFAULT_ID;
+                    }
+                    final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+                    if (jsonMailObj.hasAndNotNull(MailJSONField.FLAGS.getKey()) && (jsonMailObj.getInt(MailJSONField.FLAGS.getKey()) & MailMessage.FLAG_DRAFT) > 0) {
+                        /*
+                         * ... and save draft
+                         */
+                        final ComposedMailMessage composedMail =
+                            MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, accountId);
+                        msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId);
+                    } else {
+                        /*
+                         * ... and send message
+                         */
+                        final ComposedMailMessage[] composedMails =
+                            MessageParser.parse4Transport(jsonMailObj, uploadEvent, session, accountId, request.isSecure() ? "https://" : "http://", request.getHostname());
+                        final ComposeType sendType =
+                            jsonMailObj.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                        msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
+                        for (int i = 1; i < composedMails.length; i++) {
+                            mailInterface.sendMessage(composedMails[i], sendType, accountId);
+                        }
+                        /*
+                         * Trigger contact collector
+                         */
+                        try {
+                            final ServerUserSetting setting = ServerUserSetting.getInstance();
+                            final int contextId = session.getContextId();
+                            final int userId = session.getUserId();
+                            if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                                contextId,
+                                userId).booleanValue()) {
+                                triggerContactCollector(session, composedMails[0]);
+                            }
+                        } catch (final OXException e) {
+                            LOG.warn("Contact collector could not be triggered.", e);
+                        }
+                    }
+                }
+                if (msgIdentifier == null) {
+                    throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                }
+                /*
+                 * Create JSON response object
+                 */
+                return new AJAXRequestResult(msgIdentifier, "string");
+            }
+            /*
+             * Non-POST
+             */
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
