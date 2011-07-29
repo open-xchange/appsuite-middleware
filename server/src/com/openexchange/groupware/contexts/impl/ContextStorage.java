@@ -113,7 +113,9 @@ public abstract class ContextStorage {
     public Context getContext(final int contextId) throws OXException {
         final Context retval = loadContext(contextId);
         if (retval.isUpdating()) {
-            throw ContextExceptionCodes.UPDATE.create();
+            final OXException exception = ContextExceptionCodes.UPDATE.create();
+            LOG.info(exception.getMessage());
+            throw exception;
         }
         return retval;
     }
