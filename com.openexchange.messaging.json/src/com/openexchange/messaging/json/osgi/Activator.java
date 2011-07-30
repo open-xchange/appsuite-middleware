@@ -157,17 +157,25 @@ public class Activator extends DeferredActivator {
 
     private void register() {
         try {
-
-            registry = getService(MessagingServiceRegistry.class);
-            cacheService = getService(CacheService.class);
+            boolean initializeFacs = false;
+            if (cacheService == null) {
+                cacheService = getService(CacheService.class);
+                initializeFacs = true;
+            }
+            if (registry == null) {
+                registry = getService(MessagingServiceRegistry.class);
+                initializeFacs = true;
+            }
 
             if (!allAvailable()) {
                 return;
             }
 
-            AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-            MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-            ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
+            if (initializeFacs) {
+                AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+                MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
+                ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
+            }
 
             if (servletRegistrations.isEmpty()) {
                 servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
