@@ -151,8 +151,6 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     private final boolean httpOnly;
 
-    byte errormessage[];
-
     /**
      * Initializes a new {@link HttpServletResponseWrapper}
      * 
@@ -487,24 +485,36 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
     public final void sendError(final int status, final String statusMsg) throws IOException {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(status) : statusMsg;
-        if (errormessage == null) {
-            String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
-            if (HttpServletResponse.SC_NOT_FOUND == status) {
-                desc = String.format(desc, request.getServletPath());
-            }
-            String errorMsgStr = ERROR_PAGE_TEMPL;
-            errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
-                "#STATUS_DESC#",
-                desc);
-            synchronized (HEADER_DATE_FORMAT) {
-                errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
-            }
-            errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
-            setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
-            errormessage = errorMsgStr.getBytes(getCharacterEncoding());
-            setContentLength(errormessage.length);
-            servletOutputStream.write(errormessage);
+        servletOutputStream.write(getErrorMessage());
+    }
+
+    /**
+     * Gets the default error page.
+     * 
+     * @return The default error page
+     * @throws IOException If an I/O error occurs
+     */
+    public byte[] getErrorMessage() throws IOException {
+        String desc = STATUS_DESC.containsKey(this.status) ? STATUS_DESC.get(this.status) : ERR_DESC_NOT_AVAILABLE;
+        if (HttpServletResponse.SC_NOT_FOUND == status) {
+            desc = String.format(desc, request.getServletPath());
         }
+        String errorMsgStr = ERROR_PAGE_TEMPL;
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+            "#STATUS_DESC#",
+            desc);
+        synchronized (HEADER_DATE_FORMAT) {
+            errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
+        }
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        String encoding = getCharacterEncoding();
+        if (null == encoding) {
+            encoding = "UTF-8";
+        }
+        setContentType(new StringBuilder("text/html; charset=").append(encoding).toString());
+        final byte[] errormessage = errorMsgStr.getBytes(encoding);
+        setContentLength(errormessage.length);
+        return errormessage;
     }
 
     public void sendError(final int status) throws IOException {
