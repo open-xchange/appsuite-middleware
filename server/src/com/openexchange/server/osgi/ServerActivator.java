@@ -549,8 +549,14 @@ public final class ServerActivator extends DeferredActivator {
             registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounterImpl(), null));
             registrationList.add(context.registerService(MailIdleCounter.class.getName(), new MailIdleCounterImpl(), null));
         }
-        registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
-            ImageService.class), null));
+        {
+            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+            if (null == imageService) {
+                LOG.warn("Missing service: " + ImageService.class.getName());
+            } else {
+                registrationList.add(context.registerService(ImageService.class.getName(), imageService, null));
+            }
+        }
         {
             // Register ImageSessionEventHandler 
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
