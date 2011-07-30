@@ -242,7 +242,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
                     }
                     /*-
-                     * Write dummy response
+                     * Write error response
                      * 
                      * Send response headers
                      */
