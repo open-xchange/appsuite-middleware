@@ -245,8 +245,18 @@ final class ListLsubCollection {
                 parent.removeChild(entry);
             }
             for (final ListLsubEntry child : entry.getChildrenSet()) {
-                removeFrom(child.getFullName(), map);
+                removeFromMap(child.getFullName(), map);
             }
+        }
+    }
+
+    private static void removeFromMap(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+        final ListLsubEntryImpl entry = map.remove(fullName);
+        if (null == entry) {
+            return;
+        }
+        for (final ListLsubEntry child : entry.getChildrenSet()) {
+            removeFromMap(child.getFullName(), map);
         }
     }
 
