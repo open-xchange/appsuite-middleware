@@ -1018,7 +1018,7 @@ public final class IMAPException extends OXException {
      * @return The new OXException
      */
     public static OXException create(final Code code, final IMAPConfig imapConfig, final Session session, final Throwable cause, final Object... messageArgs) {
-        if (IMAPException.Code.NO_ACCESS.equals(code)) {
+        if (IMAPException.Code.NO_ACCESS.equals(code) && messageArgs[0] != null) {
             final String fullName = messageArgs[0].toString();
             if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
                 ListLsubCache.removeCachedEntry(fullName, imapConfig.getAccountId(), session);
