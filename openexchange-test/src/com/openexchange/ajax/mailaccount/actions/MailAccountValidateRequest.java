@@ -166,6 +166,10 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public String getName() {
                 return acc.getName();
             }
+            
+            public String getReplyTo() {
+                return acc.getReplyTo();
+            }
 
             public String getPassword() {
                 return acc.getPassword();
