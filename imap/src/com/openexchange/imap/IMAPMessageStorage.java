@@ -856,6 +856,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             imapFolderStorage.removeFromCache(fullName);
             if (hardDelete || usm.isHardDeleteMsgs()) {
                 blockwiseDeletion(msgUIDs, false, null);
+                notifyIMAPFolderModification(fullName);
                 return;
             }
             final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
@@ -869,6 +870,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean backup = (!(fullName.startsWith(trashFullname)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
             IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
+            notifyIMAPFolderModification(fullName);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
