@@ -100,8 +100,10 @@ public final class MailAccountServletInit implements Initialization {
         if (!started.compareAndSet(true, false)) {
             return;
         }
-        final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class, true);
-        httpService.unregister(ALIAS);
+        final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister(ALIAS);
+        }
         LOG.info("Mail account servlet successfully unregistered.");
     }
 }
