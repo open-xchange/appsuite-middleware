@@ -108,8 +108,10 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         final List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
-        for (final String scope : searchPath) {
-            p.add(providers.get(scope));
+        if (null != searchPath) {
+            for (final String scope : searchPath) {
+                p.add(providers.get(scope));
+            }
         }
         return path = p;
     }

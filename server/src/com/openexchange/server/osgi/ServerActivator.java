@@ -724,7 +724,10 @@ public final class ServerActivator extends DeferredActivator {
              * Clear service registry
              */
             ServerServiceRegistry.getInstance().clearRegistry();
-            secretService.close();
+            if (null != secretService) {
+                secretService.close();
+                secretService = null;
+            }
         } finally {
             started.set(false);
             adminBundleInstalled = null;
