@@ -231,25 +231,26 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             }
             ajpRequest.processRequest(this);
         } catch (final AJPv13Exception e) {
-            clearInput();
+            clearBuffers();
             throw e;
         } catch (final IOException e) {
-            clearInput();
+            clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } catch (final RuntimeException e) {
-            clearInput();
+            clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
             ajpConblocker.release();
         }
     }
 
-    private void clearInput() {
+    private void clearBuffers() {
         try {
             ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
         } catch (final IOException e1) {
             LOG.warn("Error clearing AJP input stream", e1);
         }
+        ajpCon.dropOutstandingData();
     }
 
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
