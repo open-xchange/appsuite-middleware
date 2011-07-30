@@ -122,7 +122,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.trace(message);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -131,7 +131,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.trace(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, null == message ? null : message.toString(), t));
         }
     }
 
@@ -140,7 +140,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.debug(message);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -149,7 +149,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.debug(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, null == message ? null : message.toString(), t));
         }
     }
 
@@ -158,7 +158,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.info(message);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.INFO, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -167,7 +167,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.info(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.INFO, delegate, null == message ? null : message.toString(), t));
         }
     }
 
@@ -176,7 +176,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.warn(message);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -185,7 +185,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.warn(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, null == message ? null : message.toString(), t));
         }
     }
 
@@ -194,7 +194,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.error(message);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -203,7 +203,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.error(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, null == message ? null : message.toString(), t));
         }
     }
 
@@ -212,7 +212,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.fatal(message);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, message.toString()));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, null == message ? null : message.toString()));
         }
     }
 
@@ -221,7 +221,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.fatal(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, message.toString(), t));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, null == message ? null : message.toString(), t));
         }
     }
 
