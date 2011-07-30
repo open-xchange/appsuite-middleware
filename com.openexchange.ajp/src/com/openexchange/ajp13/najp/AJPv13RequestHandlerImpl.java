@@ -50,6 +50,7 @@
 package com.openexchange.ajp13.najp;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -151,6 +152,27 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         this.ajpConblocker = ajpConblocker;
     }
 
+    private static final byte[] ERROR_SEND_HEADERS;
+
+    private static final byte[] ERROR_SEND_BODY;
+
+    static {
+        byte[] hdrs = null;
+        byte[] body = null;
+        try {
+            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            hdrs = AJPv13Response.getSendHeadersBytes(response);
+            body = AJPv13Response.getSendBodyChunkBytes(response.getErrorMessage());
+        } catch (final AJPv13Exception e) {
+            // Cannot occur
+        } catch (final IOException e) {
+            // Cannot occur
+        }
+        ERROR_SEND_HEADERS = hdrs;
+        ERROR_SEND_BODY = body;
+    }
+
     /**
      * Processes an incoming AJP package from web server. If first package of an AJP cycle is processed its prefix code determines further
      * handling. Any subsequent packages are treated as data-only packages.
@@ -221,6 +243,22 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
                         ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
                     }
+                    /*-
+                     * Write dummy response
+                     * 
+                     * Send response headers
+                     */
+                    final OutputStream out = ajpCon.getOutputStream();
+                    out.write(ERROR_SEND_HEADERS);
+                    out.flush();
+                    /*
+                     * Send response body
+                     */
+                    out.write(ERROR_SEND_BODY);
+                    out.flush();
+                    /*
+                     * Throw exception
+                     */
                     throw ajpExc;
                 }
             } else {
