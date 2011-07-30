@@ -71,7 +71,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class ConfigCascadeActivator extends HousekeepingActivator{
 
-    private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
+    // private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
     
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigCascadeActivator.class));
 
@@ -79,11 +79,11 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     private ConfigCascade configCascade;
 
-    private final int INFINITY = 10;
+    // private final int INFINITY = 10;
     
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class<?>[0];
     }
 
     @Override
