@@ -271,16 +271,21 @@ public final class DownloadUtility {
         }
         if (null != baseCT) {
             if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+                if (!hasExtension(fileName) && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
                     tmp.append(".txt");
                 }
             } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+                if (!hasExtension(fileName) && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
                     tmp.append(".html");
                 }
             }
         }
         return tmp.toString();
+    }
+
+    private static boolean hasExtension(final String fileName) {
+        final int pos = fileName.lastIndexOf('.');
+        return pos > 0 && pos < fileName.length() - 1;
     }
 
     /**
