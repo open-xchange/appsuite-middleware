@@ -97,4 +97,11 @@ public interface Loggable {
      * @return The caller's stack trace
      */
     public StackTraceElement[] getCallerTrace();
+
+    /**
+     * Checks if loggable.
+     * 
+     * @return <code>true</code> if loggable; otherwise <code>false</code>
+     */
+    public boolean isLoggable();
 }

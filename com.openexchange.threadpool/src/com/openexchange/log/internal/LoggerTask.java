@@ -89,6 +89,10 @@ final class LoggerTask extends AbstractTask<Object> {
         public StackTraceElement[] getCallerTrace() {
             return null;
         }
+
+        public boolean isLoggable() {
+            return false;
+        }
     };
 
     private final BlockingQueue<Loggable> queue;
@@ -149,7 +153,7 @@ final class LoggerTask extends AbstractTask<Object> {
                     for (final Loggable loggable : loggables) {
                         final Throwable t = loggable.getThrowable();
                         final Log log = loggable.getLog();
-                        final String message = loggable.getMessage();
+                        final String message = null == loggable.getMessage() ? "" : loggable.getMessage();
                         switch (loggable.getLevel()) {
                         case FATAL:
                             if (log.isFatalEnabled()) {
@@ -246,7 +250,11 @@ final class LoggerTask extends AbstractTask<Object> {
                         sb.append(')');
                     }
                 }
-                return sb.append("\n").append(message).toString();
+                sb.append("\n");
+                if (null != message) {
+                    sb.append(message);
+                }
+                return sb.toString();
             }
         }
         return message;

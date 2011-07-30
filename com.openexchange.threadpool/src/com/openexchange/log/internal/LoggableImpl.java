@@ -49,7 +49,6 @@
 
 package com.openexchange.log.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.Loggable;
 
@@ -64,7 +63,7 @@ public final class LoggableImpl implements Loggable {
 
     private final Log log;
 
-    private final AtomicReference<String> message;
+    private final String message;
 
     private final Throwable throwable;
 
@@ -82,7 +81,7 @@ public final class LoggableImpl implements Loggable {
         super();
         this.level = level;
         this.log = log;
-        this.message = new AtomicReference<String>(message);
+        this.message = message;
         this.throwable = throwable;
         this.callerTrace = callerTrace;
     }
@@ -96,7 +95,7 @@ public final class LoggableImpl implements Loggable {
     }
 
     public String getMessage() {
-        return message.get();
+        return message;
     }
 
     public Throwable getThrowable() {
@@ -105,6 +104,10 @@ public final class LoggableImpl implements Loggable {
 
     public StackTraceElement[] getCallerTrace() {
         return callerTrace.getStackTrace();
+    }
+
+    public boolean isLoggable() {
+        return null != message || null != throwable;
     }
 
     @Override
