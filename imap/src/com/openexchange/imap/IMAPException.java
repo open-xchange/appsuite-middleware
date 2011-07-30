@@ -57,10 +57,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.session.Session;
+import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPException} - Indicates an IMAP error.
@@ -1015,6 +1018,16 @@ public final class IMAPException extends OXException {
      * @return The new OXException
      */
     public static OXException create(final Code code, final IMAPConfig imapConfig, final Session session, final Throwable cause, final Object... messageArgs) {
+        if (IMAPException.Code.NO_ACCESS.equals(code)) {
+            final String fullName = messageArgs[0].toString();
+            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {
+                ListLsubCache.removeCachedEntry(fullName, imapConfig.getAccountId(), session);
+                final IMAPStore imapStore = imapConfig.optImapStore();
+                if (null != imapStore) {
+                    IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
+                }
+            }
+        }
         final IMAPCode imapCode = code.getImapCode();
         if (null != imapConfig && null != session) {
             final IMAPCode extendedCode = IMAPCode.getExtendedCode(imapCode);
