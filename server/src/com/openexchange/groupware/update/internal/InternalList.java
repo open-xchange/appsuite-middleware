@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointme
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -391,6 +392,9 @@ public final class InternalList {
 
         // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
         // NULL. This task corrects this.
-        new CorrectOrganizerInAppointments()
+        new CorrectOrganizerInAppointments(),
+
+        // Add "replyTo" column to mail/transport account table
+        new MailAccountAddReplyToTask(),
     };
 }
