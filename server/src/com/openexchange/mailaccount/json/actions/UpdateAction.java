@@ -109,8 +109,10 @@ public final class UpdateAction extends AbstractMailAccountAction {
     private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(
         Attribute.ID_LITERAL,
         Attribute.PERSONAL_LITERAL,
+        Attribute.REPLY_TO_LITERAL,
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final JSONObject jData = (JSONObject) request.getData();
 
