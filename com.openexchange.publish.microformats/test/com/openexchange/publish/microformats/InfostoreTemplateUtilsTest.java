@@ -100,7 +100,7 @@ public class InfostoreTemplateUtilsTest extends TestCase {
 
 
 
-    private DocumentMetadata document = new DocumentMetadata(){
+    private final DocumentMetadata document = new DocumentMetadata(){
 
         public String getCategories() {
             // TODO Auto-generated method stub

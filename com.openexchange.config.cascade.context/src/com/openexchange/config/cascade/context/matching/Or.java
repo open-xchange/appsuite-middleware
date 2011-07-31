@@ -59,8 +59,8 @@ import java.util.Set;
  */
 public class Or extends ContextSetTerm {
 
-    private ContextSetTerm firstOperand;
-    private ContextSetTerm otherOperand;
+    private final ContextSetTerm firstOperand;
+    private final ContextSetTerm otherOperand;
 
     public Or(ContextSetTerm firstOperand, ContextSetTerm otherOperand) {
         this.firstOperand = firstOperand;

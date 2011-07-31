@@ -69,7 +69,7 @@ import com.openexchange.templating.TemplateService;
 
 public class PublicationServicesActivator implements BundleActivator {
 
-    private List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
+    private final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
 
     private OXMFPublicationService contactPublisher;
 

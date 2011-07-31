@@ -541,7 +541,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private static final class FilePartPageCharSet extends FilePart {
         private KeyDataPair pairWithFile_;
         private WebClient webClient_;
-        private String pageCharset_;
+        private final String pageCharset_;
 
         private FilePartPageCharSet(final String name, final ByteArrayPartSource byteArrayPartSource,
             final String contentType, final String charset) {

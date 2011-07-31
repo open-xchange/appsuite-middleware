@@ -62,8 +62,8 @@ import com.openexchange.webdav.protocol.WebdavProperty;
  */
 public abstract class SinglePropertyMixin implements PropertyMixin {
 
-    private String namespace;
-    private String name;
+    private final String namespace;
+    private final String name;
 
     public SinglePropertyMixin(String namespace, String name) {
         super();

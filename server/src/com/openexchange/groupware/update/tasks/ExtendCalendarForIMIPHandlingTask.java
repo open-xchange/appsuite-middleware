@@ -75,8 +75,8 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class));
 
-    private String[] TABLES = { "prg_dates", "del_dates" };
-    private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
+    private final String[] TABLES = { "prg_dates", "del_dates" };
+    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
     private static final String DATES_EXTERNAL_CREATE =
         "CREATE TABLE dateExternal (" +

@@ -64,7 +64,7 @@ import java.sql.SQLXML;
  */
 public class JDBC4ResultSetWrapper extends JDBC3ResultSetWrapper {
 
-    private ResultSet delegate;
+    private final ResultSet delegate;
 
     public JDBC4ResultSetWrapper(ResultSet delegate, JDBC3StatementWrapper stmt) {
         super(delegate, stmt);

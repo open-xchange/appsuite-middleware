@@ -64,7 +64,7 @@ public class StringScanner extends Scanner {
 
     private int pos;
 
-    private Scanner scanner;
+    private final Scanner scanner;
 
     /**
      * Creates a scanner for a string.

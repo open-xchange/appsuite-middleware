@@ -66,7 +66,7 @@ public class DynamicSim implements InvocationHandler{
     private Object retval;
     private boolean wasCalled;
 
-    private Expectation expectation;
+    private final Expectation expectation;
     private Block block;
 
     public DynamicSim(Expectation expectation) {
@@ -121,7 +121,7 @@ public class DynamicSim implements InvocationHandler{
     }
 
     private static final class SequenceInvocationHandler implements InvocationHandler {
-        private InvocationHandler[] invocationHandlers;
+        private final InvocationHandler[] invocationHandlers;
         private int index = 0;
 
         public SequenceInvocationHandler(InvocationHandler[] handlers) {

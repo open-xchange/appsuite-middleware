@@ -45,8 +45,8 @@ public class WbxmlParser implements XmlPullParser {
     private InputStream in;
 
 	private int TAG_TABLE;
-	private int ATTR_START_TABLE = 1;
-	private int ATTR_VALUE_TABLE = 2;
+	private final int ATTR_START_TABLE = 1;
+	private final int ATTR_VALUE_TABLE = 2;
 
     private String[] attrStartTable;
     private String[] attrValueTable;
@@ -63,7 +63,7 @@ public class WbxmlParser implements XmlPullParser {
     private String[] attributes = new String[16];
 	private int nextId = -2;
 
-	private List<String[]> tables = new ArrayList<String[]>();
+	private final List<String[]> tables = new ArrayList<String[]>();
 
     int version;
     int publicIdentifierId;

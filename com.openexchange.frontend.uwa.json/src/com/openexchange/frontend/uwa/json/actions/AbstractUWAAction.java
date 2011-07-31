@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractUWAAction extends AbstractActionPrototype<UWAWidget> {
 
-    private UWAWidgetServiceFactory factory;
+    private final UWAWidgetServiceFactory factory;
 
     public AbstractUWAAction(UWAWidgetServiceFactory factory) {
         super(new UWAWidgetParser(), new UWAWidgetWriter());

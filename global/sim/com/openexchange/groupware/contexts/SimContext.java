@@ -64,8 +64,8 @@ import java.util.Set;
  */
 public class SimContext implements Context {
 
-    private int id;
-    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final int id;
+    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public SimContext(int id) {
         super();

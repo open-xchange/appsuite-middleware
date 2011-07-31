@@ -67,7 +67,7 @@ import com.openexchange.tools.file.external.FileStorage;
  */
 public class CompositingFileStorage implements FileStorage {
 
-    private Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
+    private final Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
 
     private FileStorage standardFS;
 

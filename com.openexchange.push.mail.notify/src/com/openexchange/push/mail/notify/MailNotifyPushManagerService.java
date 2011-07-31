@@ -62,9 +62,9 @@ public final class MailNotifyPushManagerService implements PushManagerService {
 
     private final String name;
 
-    private boolean useOXLogin;
+    private final boolean useOXLogin;
 
-    private boolean useEmailAddress;
+    private final boolean useEmailAddress;
 
     /**
      * Initializes a new {@link MailNotifyPushManagerService}.

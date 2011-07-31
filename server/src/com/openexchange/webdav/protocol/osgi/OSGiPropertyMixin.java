@@ -68,9 +68,9 @@ public class OSGiPropertyMixin implements PropertyMixin {
 
     private ServiceTracker mixinTracker = null;
 
-    private ServiceTracker factoryTracker;
+    private final ServiceTracker factoryTracker;
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
     public OSGiPropertyMixin(BundleContext context, SessionHolder sessionHolder) {
         this.sessionHolder = sessionHolder;

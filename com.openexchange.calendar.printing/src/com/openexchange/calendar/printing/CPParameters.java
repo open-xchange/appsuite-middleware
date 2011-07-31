@@ -83,9 +83,9 @@ public class CPParameters {
 
     private int folder;
 
-    private List<String> missingMandatoryFields = new LinkedList<String>();
+    private final List<String> missingMandatoryFields = new LinkedList<String>();
 
-    private List<String> missingOptionalFields = new LinkedList<String>();
+    private final List<String> missingOptionalFields = new LinkedList<String>();
 
     private List<String> unparseableFields = new LinkedList<String>();
 

@@ -63,7 +63,7 @@ import com.openexchange.publish.json.Hostname;
  */
 public class HostnameServiceTracker extends ServiceTracker {
 
-    private Hostname hostname;
+    private final Hostname hostname;
 
     public HostnameServiceTracker(BundleContext context, Hostname hostname) {
         super(context, HostnameService.class.getName(), null);

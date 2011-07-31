@@ -66,7 +66,7 @@ public class SubscriptionJSONParser {
 
     private static final FormContentParser formParser = new FormContentParser();
 
-    private SubscriptionSourceDiscoveryService discovery;
+    private final SubscriptionSourceDiscoveryService discovery;
 
     /**
      * Initializes a new {@link SubscriptionJSONParser}.

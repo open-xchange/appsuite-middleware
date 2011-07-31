@@ -126,7 +126,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private volatile WebDAVFileStorageFileAccess fileAccess;
 
-    private FileStorageService service;
+    private final FileStorageService service;
 
     /**
      * Initializes a new {@link WebDAVFileStorageAccountAccess}.

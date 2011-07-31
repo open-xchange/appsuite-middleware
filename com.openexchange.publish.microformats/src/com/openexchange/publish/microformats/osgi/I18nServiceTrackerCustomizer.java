@@ -62,9 +62,9 @@ import com.openexchange.i18n.I18nService;
  */
 public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, StringTranslator {
 
-    private Map<Locale, I18nService> services;
+    private final Map<Locale, I18nService> services;
 
-    private BundleContext context;
+    private final BundleContext context;
 
     public I18nServiceTrackerCustomizer(BundleContext context) {
         this.context = context;

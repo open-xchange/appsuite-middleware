@@ -56,7 +56,7 @@ package com.openexchange.webdav.directory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PathRegistration {
-    private String[] paths;
+    private final String[] paths;
 
     public PathRegistration(String...paths) {
         this.paths = paths;

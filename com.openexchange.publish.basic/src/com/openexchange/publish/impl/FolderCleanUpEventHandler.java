@@ -61,7 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderCleanUpEventHandler extends EntityCleanUpEventHandler<FolderObject> {
 
-    private int moduleInt;
+    private final int moduleInt;
 
     public FolderCleanUpEventHandler(EntityCleanUp entityCleanUp,String module,int moduleInt, ContextService contexts) {
         super(entityCleanUp, module, contexts);

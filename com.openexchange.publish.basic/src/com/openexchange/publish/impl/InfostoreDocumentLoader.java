@@ -69,11 +69,11 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
-    private InfostoreFacade infostore;
+    private final InfostoreFacade infostore;
 
-    private UserService users;
+    private final UserService users;
 
-    private UserConfigurationService userConfigs;
+    private final UserConfigurationService userConfigs;
 
     /**
      * Initializes a new {@link InfostoreDocumentLoader}.

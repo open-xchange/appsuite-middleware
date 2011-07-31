@@ -60,7 +60,7 @@ public class CPToolTest extends AbstractDateTest {
 
     private CPTool tool;
 
-    private CPType[] nonBlockTypes = new CPType[] { CPType.DAYVIEW, CPType.WEEKVIEW, CPType.MONTHLYVIEW, CPType.YEARLYVIEW };
+    private final CPType[] nonBlockTypes = new CPType[] { CPType.DAYVIEW, CPType.WEEKVIEW, CPType.MONTHLYVIEW, CPType.YEARLYVIEW };
 
     @Override
     protected void setUp() throws Exception {

@@ -64,7 +64,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class RemoveDuplicateContactsStep extends AbstractStep<Contact[], Contact[]> {
 
-    private HashMap<String, Contact> map = new HashMap<String, Contact>();
+    private final HashMap<String, Contact> map = new HashMap<String, Contact>();
 
     public RemoveDuplicateContactsStep(){
 

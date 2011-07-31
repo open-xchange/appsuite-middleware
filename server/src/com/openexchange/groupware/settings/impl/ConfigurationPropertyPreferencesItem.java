@@ -67,11 +67,11 @@ import com.openexchange.session.Session;
  */
 public class ConfigurationPropertyPreferencesItem implements PreferencesItemService {
 
-    private ConfigurationService config;
+    private final ConfigurationService config;
 
-    private String[] path;
+    private final String[] path;
 
-    private String key;
+    private final String key;
 
     public ConfigurationPropertyPreferencesItem(String key, ConfigurationService config, String... path) {
         super();

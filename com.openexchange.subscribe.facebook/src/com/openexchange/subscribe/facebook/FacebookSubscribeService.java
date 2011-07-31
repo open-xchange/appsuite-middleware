@@ -76,9 +76,9 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
     private final SubscriptionSource source = new SubscriptionSource();
 
-    private OAuthServiceMetaData facebookMetaData;
+    private final OAuthServiceMetaData facebookMetaData;
 
-    private FacebookService facebookService;
+    private final FacebookService facebookService;
 
     public FacebookSubscribeService(OAuthServiceMetaData facebookMetaData, FacebookService facebookService) {
         this.facebookMetaData = facebookMetaData;

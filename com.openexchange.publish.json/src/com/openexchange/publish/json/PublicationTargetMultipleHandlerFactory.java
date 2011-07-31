@@ -62,7 +62,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class PublicationTargetMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
-    private PublicationTargetDiscoveryService discoverer;
+    private final PublicationTargetDiscoveryService discoverer;
 
     public PublicationTargetMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer) {
         this.discoverer = discoverer;

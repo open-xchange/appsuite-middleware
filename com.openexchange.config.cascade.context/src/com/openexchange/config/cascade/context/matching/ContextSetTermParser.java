@@ -141,7 +141,7 @@ public class ContextSetTermParser {
 
     private static class Lexer {
 
-        private String string;
+        private final String string;
 
         private int index;
 

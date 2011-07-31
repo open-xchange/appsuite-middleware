@@ -73,11 +73,11 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     protected CleanUp<T> cleanUp;
 
-    private SessiondSessionSpecificRetrievalService manager;
+    private final SessiondSessionSpecificRetrievalService manager;
 
-    private String name;
+    private final String name;
 
-    private Lifecycle lifecycle;
+    private final Lifecycle lifecycle;
 
     public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp, SessiondSessionSpecificRetrievalService manager) {
         this.initial = initial;

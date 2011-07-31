@@ -58,9 +58,9 @@ import java.util.Set;
  */
 public class And extends ContextSetTerm {
 
-    private ContextSetTerm firstOperand;
+    private final ContextSetTerm firstOperand;
 
-    private ContextSetTerm otherOperand;
+    private final ContextSetTerm otherOperand;
 
     public And(ContextSetTerm firstOperand, ContextSetTerm otherOperand) {
         this.firstOperand = firstOperand;

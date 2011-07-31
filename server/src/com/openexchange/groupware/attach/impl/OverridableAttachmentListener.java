@@ -64,7 +64,7 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public class OverridableAttachmentListener implements AttachmentListener {
 
-    private SpecificServiceChooser<AttachmentListener> chooser;
+    private final SpecificServiceChooser<AttachmentListener> chooser;
 
     public OverridableAttachmentListener(SpecificServiceChooser<AttachmentListener> chooser) {
         this.chooser = chooser;

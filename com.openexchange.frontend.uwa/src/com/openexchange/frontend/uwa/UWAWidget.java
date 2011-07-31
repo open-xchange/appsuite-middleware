@@ -158,7 +158,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         PROTECTED(Boolean.class),
         PARAMETERS(String.class);
 
-        private Class type;
+        private final Class type;
 
         Field(Class type) {
             this.type = type;
@@ -219,8 +219,8 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
     private static final class UWAWidgetMetadata implements Metadata<UWAWidget> {
 
-        private List<Attribute<UWAWidget>> allFields;
-        private List<Attribute<UWAWidget>> persistentFields;
+        private final List<Attribute<UWAWidget>> allFields;
+        private final List<Attribute<UWAWidget>> persistentFields;
 
         public UWAWidgetMetadata() {
             allFields = new LinkedList<Attribute<UWAWidget>>();

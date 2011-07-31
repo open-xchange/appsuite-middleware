@@ -3,8 +3,8 @@
 package org.apache.jsieve.parser.generated;
 
 class JJTSieveParserState {
-  private java.util.Stack nodes;
-  private java.util.Stack marks;
+  private final java.util.Stack nodes;
+  private final java.util.Stack marks;
 
   private int sp;		// number of nodes on stack
   private int mk;		// current mark

@@ -73,7 +73,7 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 
     private static final String ALIAS = "servlet/easylogin";
 
-    private BundleContext context;
+    private final BundleContext context;
 
     private final Lock lock = new ReentrantLock();
 

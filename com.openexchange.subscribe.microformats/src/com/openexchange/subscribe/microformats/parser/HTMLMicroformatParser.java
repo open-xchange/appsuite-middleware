@@ -79,8 +79,8 @@ public class HTMLMicroformatParser implements OXMFParser {
     private static final String IMG = "img";
     private static final String ANCHOR = "a";
 
-    private Set<String> containerClasses = new HashSet<String>();
-    private Set<String> prefixes = new HashSet<String>();
+    private final Set<String> containerClasses = new HashSet<String>();
+    private final Set<String> prefixes = new HashSet<String>();
 
     public void addAttributePrefix(String prefix) {
         prefixes.add(prefix);

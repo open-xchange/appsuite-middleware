@@ -62,7 +62,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "calendar-user-address-set";
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
     public CalendarUserAddressSet(SessionHolder sessionHolder) {
         super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);

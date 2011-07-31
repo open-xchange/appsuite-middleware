@@ -63,7 +63,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
  */
 public class OXMFForm extends DynamicFormDescription {
 
-    private Map<String, String> metaInfo = new HashMap<String, String>();
+    private final Map<String, String> metaInfo = new HashMap<String, String>();
     private String action;
     private FormElement displayNameField;
 

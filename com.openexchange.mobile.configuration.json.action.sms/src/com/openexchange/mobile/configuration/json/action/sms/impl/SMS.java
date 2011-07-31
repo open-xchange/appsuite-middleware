@@ -20,8 +20,8 @@ public class SMS {
 	private String text = ""; // Please go to %u blalal
 	private String serverUrl = ""; // https://samurai.sipgate.net/RPC2
 
-	private boolean replaceleadingzero = true;
-	private boolean replaceleadingzerozero = true;
+	private final boolean replaceleadingzero = true;
+	private final boolean replaceleadingzerozero = true;
 
 	public String getServerUrl() {
 		return serverUrl;

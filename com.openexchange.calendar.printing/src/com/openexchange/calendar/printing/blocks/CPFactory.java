@@ -64,7 +64,7 @@ public class CPFactory {
 
     private CPCalendar calendar;
 
-    private List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
+    private final List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
 
     public void setTypeToProduce(CPType type) {
         this.type = type;

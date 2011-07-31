@@ -70,7 +70,7 @@ public class FormDescriptionWriterTest extends TestCase{
 
     private DynamicFormDescription form;
 
-    private TestTranslator translator = new TestTranslator();
+    private final TestTranslator translator = new TestTranslator();
 
     @Override
     public void setUp() throws Exception {

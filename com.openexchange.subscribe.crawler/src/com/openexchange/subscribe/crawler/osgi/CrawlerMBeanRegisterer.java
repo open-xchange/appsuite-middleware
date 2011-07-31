@@ -81,7 +81,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
     private ConfigurationService configurationService;
 
-    private Activator activator;
+    private final Activator activator;
 
     private final Lock lock = new ReentrantLock();
 

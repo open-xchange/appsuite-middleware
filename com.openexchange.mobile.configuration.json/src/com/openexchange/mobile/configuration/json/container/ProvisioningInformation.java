@@ -67,8 +67,8 @@ public class ProvisioningInformation {
 	private String urlEncoding;
 	private String mailFrom;
 
-	private HashMap<String, ProvisioningEmailMessage> provisioningEmailMessages;
-	private HashMap<String, ProvisioningSMSMessage> provisioningSMSMessages;
+	private final HashMap<String, ProvisioningEmailMessage> provisioningEmailMessages;
+	private final HashMap<String, ProvisioningSMSMessage> provisioningSMSMessages;
 
 	private ServerSession session;
 	private Context ctx;

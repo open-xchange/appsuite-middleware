@@ -70,11 +70,11 @@ import com.openexchange.publish.json.types.EntityMap;
  */
 public class PublicationParser {
 
-    private PublicationTargetDiscoveryService discovery;
+    private final PublicationTargetDiscoveryService discovery;
 
     private static final FormContentParser formParser = new FormContentParser();
 
-    private Map<String, EntityType> entityTypes = new EntityMap();
+    private final Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationParser(PublicationTargetDiscoveryService discovery) {
         super();

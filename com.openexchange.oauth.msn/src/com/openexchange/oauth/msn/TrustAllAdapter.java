@@ -70,7 +70,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class TrustAllAdapter implements ProtocolSocketFactory {
 
-    private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
+    private final TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
 
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);

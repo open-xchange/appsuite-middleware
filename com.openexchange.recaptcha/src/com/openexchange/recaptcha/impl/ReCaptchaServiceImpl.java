@@ -64,8 +64,8 @@ import com.openexchange.recaptcha.ReCaptchaService;
  */
 public class ReCaptchaServiceImpl implements ReCaptchaService {
 
-    private Properties props;
-    private Properties options;
+    private final Properties props;
+    private final Properties options;
 
     private static final String INVALID_CAPTCHA_ERROR = "incorrect-captcha-sol";
 

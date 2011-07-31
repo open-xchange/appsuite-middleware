@@ -678,7 +678,7 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     }
   }
 
-  private java.util.Vector jj_expentries = new java.util.Vector();
+  private final java.util.Vector jj_expentries = new java.util.Vector();
   private int[] jj_expentry;
   private int jj_kind = -1;
 

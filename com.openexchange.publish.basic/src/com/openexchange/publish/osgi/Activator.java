@@ -59,7 +59,7 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
  */
 public class Activator extends CompositeBundleActivator {
 
-    private BundleActivator[] ACTIVATORS = {
+    private final BundleActivator[] ACTIVATORS = {
         new DiscovererActivator(),
         new LoaderActivator(),
         new CleanUpActivator(),

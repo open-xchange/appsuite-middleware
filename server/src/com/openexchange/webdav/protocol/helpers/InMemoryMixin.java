@@ -64,7 +64,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
  */
 public class InMemoryMixin implements PropertyMixin {
 
-    private Map<String, WebdavProperty> properties = new HashMap<String, WebdavProperty>();
+    private final Map<String, WebdavProperty> properties = new HashMap<String, WebdavProperty>();
 
     private PropertyMixin mixin = null;
 

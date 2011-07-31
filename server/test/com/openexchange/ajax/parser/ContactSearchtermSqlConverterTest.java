@@ -12,7 +12,7 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 
 public class ContactSearchtermSqlConverterTest extends TestCase {
 
-	private String folderFieldName = ContactField.FOLDER_ID.getAjaxName();
+	private final String folderFieldName = ContactField.FOLDER_ID.getAjaxName();
 
 	protected void assertEquals(List<SQLInjector> actual, String...expected){
 		assertEquals("Should have same amount of elements", actual.size(), expected.length);

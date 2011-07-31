@@ -79,8 +79,8 @@ public class FacebookServiceImpl implements FacebookService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class));
 
-    private com.openexchange.oauth.OAuthService oAuthService;
-    private OAuthServiceMetaDataFacebookImpl facebookMetaData;
+    private final com.openexchange.oauth.OAuthService oAuthService;
+    private final OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
     public FacebookServiceImpl(com.openexchange.oauth.OAuthService oAuthService, OAuthServiceMetaDataFacebookImpl facebookMetaData) {
         this.oAuthService = oAuthService;

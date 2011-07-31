@@ -85,7 +85,7 @@ public class OXMFVisitor extends HCardVisitor {
 
     private Map<String, String> oxmfElement;
 
-    private List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
+    private final List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
 
     public static final String OXMF_PREFIX = "ox_";
 

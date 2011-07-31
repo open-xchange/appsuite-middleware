@@ -60,7 +60,7 @@ import junit.framework.TestCase;
  */
 public class ContextSetTermParserTest extends TestCase {
 
-    private ContextSetTermParser parser = new ContextSetTermParser();
+    private final ContextSetTermParser parser = new ContextSetTermParser();
 
     public void testParseSingleTag() {
         String term = "green";

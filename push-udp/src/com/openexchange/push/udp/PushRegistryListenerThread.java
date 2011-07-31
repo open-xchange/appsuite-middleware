@@ -69,7 +69,7 @@ public class PushRegistryListenerThread extends Thread {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRegistryListenerThread.class));
 
-    private DatagramSocket datagramSocket;
+    private final DatagramSocket datagramSocket;
 
     private boolean running;
 

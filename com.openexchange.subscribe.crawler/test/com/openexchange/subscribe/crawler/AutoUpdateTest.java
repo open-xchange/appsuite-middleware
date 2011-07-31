@@ -72,12 +72,12 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
 public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
 
     private SimConfigurationService configurationService;
-    private String allCrawlersRepositoryPath = "local_only/crawler_repository/";
-    private File allCrawlersRepositoryDirectory = new File(allCrawlersRepositoryPath);
+    private final String allCrawlersRepositoryPath = "local_only/crawler_repository/";
+    private final File allCrawlersRepositoryDirectory = new File(allCrawlersRepositoryPath);
     private String installedDirectoryPath;
     private File installedDirectory;
-    private String availableUpdatesPath = "/Users/karstenwill/Sites/crawlers/files/";
-    private File availableUpdatesDirectory = new File(availableUpdatesPath);
+    private final String availableUpdatesPath = "/Users/karstenwill/Sites/crawlers/files/";
+    private final File availableUpdatesDirectory = new File(availableUpdatesPath);
     private Activator activator;
 
     @Override

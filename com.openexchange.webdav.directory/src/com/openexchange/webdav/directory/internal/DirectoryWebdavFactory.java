@@ -68,9 +68,9 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
 
     public static final Protocol PROTOCOL = new Protocol();
 
-    private Node ROOT = new Node("");
+    private final Node ROOT = new Node("");
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
 
 

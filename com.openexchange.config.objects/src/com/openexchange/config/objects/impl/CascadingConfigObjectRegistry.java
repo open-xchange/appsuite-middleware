@@ -63,8 +63,8 @@ import com.openexchange.exception.OXException;
  */
 public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
 
-    private ConfigView view;
-    private ConfigurationService config;
+    private final ConfigView view;
+    private final ConfigurationService config;
 
     private Map<String, String> pathMapping = null;
 

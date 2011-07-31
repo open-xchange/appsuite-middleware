@@ -65,14 +65,14 @@ import com.openexchange.push.udp.PushRequest;
  */
 public class PeerServerListener {
 
-    private InetAddress remoteAddress;
-    private int remotePort;
+    private final InetAddress remoteAddress;
+    private final int remotePort;
 
-    private InetAddress myAddress;
-    private int myPort;
+    private final InetAddress myAddress;
+    private final int myPort;
 
 
-    private DatagramSocket mySocket;
+    private final DatagramSocket mySocket;
 
     public PeerServerListener(String remoteHost, String remotePort, String myHost, String myPort) throws SocketException, UnknownHostException {
 

@@ -59,7 +59,7 @@ public class Constant extends Value {
 
     public static final Constant WILDCARD = new Constant("%");
 
-    private Object value;
+    private final Object value;
 
     public Constant(Object value) {
         super();

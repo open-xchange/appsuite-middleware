@@ -10,7 +10,7 @@ import com.openexchange.server.ServiceLookup;
 
 public class PollActionFactory implements AJAXActionServiceFactory {
 
-	private Map<String, PollAction> ACTIONS = new HashMap<String, PollAction>();
+	private final Map<String, PollAction> ACTIONS = new HashMap<String, PollAction>();
 
 	public PollActionFactory(ServiceLookup services) {
 		ACTIONS.put("new", new CreateAction(services));

@@ -61,8 +61,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CustomizableDelta<T> implements Delta<T>{
-    private Delta<T> delta;
-    private Customizer<T> customizer;
+    private final Delta<T> delta;
+    private final Customizer<T> customizer;
 
     public CustomizableDelta(Delta<T> delta, Customizer<T> customizer) {
         super();

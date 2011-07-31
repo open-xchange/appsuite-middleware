@@ -72,8 +72,8 @@ public class CPParameterTest extends TestCase {
 
     private class MockRequest implements HttpServletRequest {
 
-        private Map<String, Object> attributes = new HashMap<String, Object>();
-        private Map<String, String> parameters = new HashMap<String, String>();
+        private final Map<String, Object> attributes = new HashMap<String, Object>();
+        private final Map<String, String> parameters = new HashMap<String, String>();
 
         public String getAuthType() {
             return null;

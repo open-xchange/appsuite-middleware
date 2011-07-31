@@ -76,7 +76,7 @@ public class ContextImpl implements ContextExtended {
     private boolean enabled = true;
     private boolean updating = false;
     private boolean readOnly = false;
-    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public ContextImpl(final int contextId) {
         this.contextId = contextId;

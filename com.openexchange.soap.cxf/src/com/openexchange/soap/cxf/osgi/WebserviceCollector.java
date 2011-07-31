@@ -72,9 +72,9 @@ public class WebserviceCollector implements ServiceListener {
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
-    private ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
+    private final ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
 
-    private BundleContext context;
+    private final BundleContext context;
 
     private boolean open;
 

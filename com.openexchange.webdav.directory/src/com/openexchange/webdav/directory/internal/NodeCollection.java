@@ -73,9 +73,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  */
 public class NodeCollection extends AbstractCollection {
 
-    private Node node;
-    private DirectoryWebdavFactory factory;
-    private WebdavPath url;
+    private final Node node;
+    private final DirectoryWebdavFactory factory;
+    private final WebdavPath url;
 
     public NodeCollection(Node node, DirectoryWebdavFactory factory, WebdavPath url) {
         super();

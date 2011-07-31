@@ -84,9 +84,9 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
 
     private class FileSaverThread extends Thread {
 
-        private String prefix;
+        private final String prefix;
 
-        private Map<String, String> dataMap = new HashMap<String, String>();
+        private final Map<String, String> dataMap = new HashMap<String, String>();
 
         public FileSaverThread(String prefix) {
             this.prefix = prefix;

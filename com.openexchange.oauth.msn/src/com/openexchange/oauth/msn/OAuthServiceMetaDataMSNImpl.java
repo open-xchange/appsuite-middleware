@@ -84,7 +84,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private static final Object REFRESH_TOKEN_KEY = "wrap_refresh_token";
 
-    private DeferringURLService deferrer;
+    private final DeferringURLService deferrer;
 
     public OAuthServiceMetaDataMSNImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
         setId("com.openexchange.oauth.msn");

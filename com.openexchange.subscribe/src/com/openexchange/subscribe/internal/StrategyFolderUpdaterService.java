@@ -66,7 +66,7 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
 
-    private Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
 
     private final FolderUpdaterStrategy<T> strategy;
 

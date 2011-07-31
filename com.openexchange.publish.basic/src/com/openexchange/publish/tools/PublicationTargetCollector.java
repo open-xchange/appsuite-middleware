@@ -68,7 +68,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class PublicationTargetCollector implements PublicationTargetDiscoveryService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private final Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
 
     public PublicationTarget getTarget(String id) {
         return targets.get(id);

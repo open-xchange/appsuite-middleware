@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class DELETE extends ModifyCommand {
-	private FROM from;
+	private final FROM from;
 	private WHERE where;
 
 	public DELETE() {

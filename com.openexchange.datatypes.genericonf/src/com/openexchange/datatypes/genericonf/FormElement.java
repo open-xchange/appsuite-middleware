@@ -64,7 +64,7 @@ public class FormElement {
     public static enum Widget {
         INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text"), CUSTOM("custom");
 
-        private String keyword;
+        private final String keyword;
 
 
         private Widget(String keyword) {
@@ -130,7 +130,7 @@ public class FormElement {
 
     private boolean mandatory;
 
-    private Map<String, String> options = new HashMap<String, String>();
+    private final Map<String, String> options = new HashMap<String, String>();
 
     public String getName() {
         return name;

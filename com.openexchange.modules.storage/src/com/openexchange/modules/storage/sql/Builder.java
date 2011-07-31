@@ -69,7 +69,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class Builder<T extends Model<T>> {
 
-    private Metadata<T> metadata;
+    private final Metadata<T> metadata;
     private String tableName = null;
 
     public Builder(Metadata<T> metadata) {

@@ -79,13 +79,13 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private OXMFDataSource mfSource;
 
-    private List<String> containers = new LinkedList<String>();
+    private final List<String> containers = new LinkedList<String>();
 
-    private List<String> prefixes = new LinkedList<String>();
+    private final List<String> prefixes = new LinkedList<String>();
 
     private SubscriptionSource source;
 
-    private List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
+    private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
     public Collection getContent(Subscription subscription) throws OXException {
         Reader htmlData = mfSource.getData(subscription);

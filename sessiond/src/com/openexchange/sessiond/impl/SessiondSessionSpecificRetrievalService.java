@@ -65,8 +65,8 @@ import com.openexchange.sessiond.event.SessiondEventListener;
  */
 public class SessiondSessionSpecificRetrievalService implements SessionSpecificContainerRetrievalService, SessiondEventListener {
 
-    private ConcurrentHashMap<String, SessionScopedContainerImpl<?>> containers = new ConcurrentHashMap<String, SessionScopedContainerImpl<?>>();
-    private ConcurrentHashMap<String, RandomTokenContainerImpl<?>> randomTokenContainer = new ConcurrentHashMap<String, RandomTokenContainerImpl<?>>();
+    private final ConcurrentHashMap<String, SessionScopedContainerImpl<?>> containers = new ConcurrentHashMap<String, SessionScopedContainerImpl<?>>();
+    private final ConcurrentHashMap<String, RandomTokenContainerImpl<?>> randomTokenContainer = new ConcurrentHashMap<String, RandomTokenContainerImpl<?>>();
 
     public <T> SessionScopedContainer<T> getContainer(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp) {
         if (containers.containsKey(name)) {

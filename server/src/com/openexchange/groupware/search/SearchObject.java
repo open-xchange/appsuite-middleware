@@ -78,7 +78,7 @@ public abstract class SearchObject {
 
     private int folder = NO_FOLDER;
 
-    private Set<Integer> folders = new HashSet<Integer>();
+    private final Set<Integer> folders = new HashSet<Integer>();
 
     private String pattern = NO_PATTERN;
 

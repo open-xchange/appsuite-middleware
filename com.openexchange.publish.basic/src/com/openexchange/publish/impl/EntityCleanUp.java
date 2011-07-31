@@ -63,7 +63,7 @@ import com.openexchange.publish.PublicationStorage;
  *
  */
 public class EntityCleanUp {
-    private PublicationStorage storage;
+    private final PublicationStorage storage;
 
     public EntityCleanUp(PublicationStorage storage) {
         this.storage = storage;

@@ -81,7 +81,7 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private List<ServiceTracker> serviceTrackerList;
+    private final List<ServiceTracker> serviceTrackerList;
 
     private ServiceRegistration serviceRegistration;
 

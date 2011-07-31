@@ -74,14 +74,14 @@ import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService
  */
 public class OSGiPublicationTargetDiscovererCollector implements PublicationTargetDiscoveryService, ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
+    private final BundleContext context;
+    private final ServiceTracker tracker;
 
-    private Set<PublicationTargetDiscoveryService> blacklist = new HashSet<PublicationTargetDiscoveryService>();
+    private final Set<PublicationTargetDiscoveryService> blacklist = new HashSet<PublicationTargetDiscoveryService>();
 
-    private CompositePublicationTargetDiscoveryService delegate = new CompositePublicationTargetDiscoveryService();
+    private final CompositePublicationTargetDiscoveryService delegate = new CompositePublicationTargetDiscoveryService();
 
-    private List<ServiceReference> references = new LinkedList<ServiceReference>();
+    private final List<ServiceReference> references = new LinkedList<ServiceReference>();
     private boolean grabbedAll = false;
 
 

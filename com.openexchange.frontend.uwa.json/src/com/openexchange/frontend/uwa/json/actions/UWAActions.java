@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class UWAActions implements AJAXActionServiceFactory {
 
-    private Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
 
     public UWAActions(UWAWidgetServiceFactory factory) {
         super();

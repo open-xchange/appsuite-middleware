@@ -70,7 +70,7 @@ import com.openexchange.exception.OXException;
  */
 public class TrackingProvider implements ConfigProviderService {
 
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
     /**
      * Initializes a new {@link TrackingProvider}.

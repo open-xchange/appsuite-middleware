@@ -60,7 +60,7 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData{
 
-    private Activator activator;
+    private final Activator activator;
 
     public OAuthServiceMetaDataLinkedInImpl(Activator activator){
         super();

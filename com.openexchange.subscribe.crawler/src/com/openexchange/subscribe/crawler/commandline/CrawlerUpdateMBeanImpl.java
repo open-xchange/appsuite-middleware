@@ -65,9 +65,9 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  */
 public final class CrawlerUpdateMBeanImpl extends StandardMBean implements CrawlerUpdateMBean{
 
-    private ConfigurationService configurationService;
+    private final ConfigurationService configurationService;
 
-    private Activator activator;
+    private final Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateMBeanImpl.class));
 

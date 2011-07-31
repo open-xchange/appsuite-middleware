@@ -52,8 +52,8 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class Assignment extends Expression {
-	private Expression leftExpression;
-	private Expression rightExpression;
+	private final Expression leftExpression;
+	private final Expression rightExpression;
 
 	public Assignment(Expression left, Expression right) {
 		super();

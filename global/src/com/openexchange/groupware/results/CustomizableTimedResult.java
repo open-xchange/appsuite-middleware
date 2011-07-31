@@ -61,8 +61,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CustomizableTimedResult<T> implements TimedResult<T>{
-    private TimedResult<T> result;
-    private Customizer<T> customizer;
+    private final TimedResult<T> result;
+    private final Customizer<T> customizer;
 
     public CustomizableTimedResult(TimedResult<T> result, Customizer<T> customizer) {
         super();

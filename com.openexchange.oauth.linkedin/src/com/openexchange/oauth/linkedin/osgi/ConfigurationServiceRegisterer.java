@@ -62,8 +62,8 @@ import com.openexchange.config.ConfigurationService;
  */
 public class ConfigurationServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private Activator activator;
+    private final BundleContext context;
+    private final Activator activator;
 
     public ConfigurationServiceRegisterer(BundleContext context, Activator activator) {
         super();

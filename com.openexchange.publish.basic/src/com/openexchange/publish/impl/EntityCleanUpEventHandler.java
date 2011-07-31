@@ -67,11 +67,11 @@ public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EntityCleanUpEventHandler.class));
 
-    private String module;
+    private final String module;
 
-    private EntityCleanUp entityCleanUp;
+    private final EntityCleanUp entityCleanUp;
 
-    private ContextService contexts;
+    private final ContextService contexts;
 
     public EntityCleanUpEventHandler(EntityCleanUp entityCleanUp, String module, ContextService contexts) {
         this.entityCleanUp = entityCleanUp;

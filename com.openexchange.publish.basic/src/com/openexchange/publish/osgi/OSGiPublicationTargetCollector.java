@@ -77,12 +77,12 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiPublicationTargetCollector.class));
 
-    private BundleContext context;
-    private ServiceTracker tracker;
+    private final BundleContext context;
+    private final ServiceTracker tracker;
 
-    private PublicationTargetCollector delegate = new PublicationTargetCollector();
+    private final PublicationTargetCollector delegate = new PublicationTargetCollector();
 
-    private List<ServiceReference> references = new LinkedList<ServiceReference>();
+    private final List<ServiceReference> references = new LinkedList<ServiceReference>();
     private boolean grabbedAll = false;
 
     public OSGiPublicationTargetCollector(BundleContext context) {

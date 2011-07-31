@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class Column extends Value {
-	private String name;
+	private final String name;
 
 	public Column(String name) {
 		super();

@@ -69,7 +69,7 @@ public class InsertIterator implements MapIterator<String, Object> {
 
     private SQLException exception;
 
-    private Map<Class, PreparedStatement> statementMap = new HashMap<Class, PreparedStatement>();
+    private final Map<Class, PreparedStatement> statementMap = new HashMap<Class, PreparedStatement>();
 
     public void prepareStatements(TX tx) throws SQLException {
 

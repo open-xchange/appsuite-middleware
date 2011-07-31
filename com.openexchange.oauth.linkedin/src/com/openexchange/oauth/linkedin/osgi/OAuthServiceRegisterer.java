@@ -62,8 +62,8 @@ import com.openexchange.oauth.OAuthService;
  */
 public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private Activator activator;
+    private final BundleContext context;
+    private final Activator activator;
 
     public OAuthServiceRegisterer(BundleContext context, Activator activator) {
         super();

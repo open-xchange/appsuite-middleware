@@ -54,7 +54,7 @@ import java.util.List;
 
 public final class Node {
     private String name = null;
-    private List<Node> children = new ArrayList<Node>();
+    private final List<Node> children = new ArrayList<Node>();
 
     public Node(String name) {
         this.name = name;

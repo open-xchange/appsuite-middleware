@@ -60,7 +60,7 @@ public class Credentials {
 
     private String password;
 
-    private int userid;
+    private final int userid;
 
     private final int contextid;
 

@@ -65,7 +65,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
  */
 public class InfostoreFile extends AbstractFile implements File {
 
-    private DocumentMetadata document;
+    private final DocumentMetadata document;
 
     public InfostoreFile(DocumentMetadata documentMetadata) {
         this.document = documentMetadata;

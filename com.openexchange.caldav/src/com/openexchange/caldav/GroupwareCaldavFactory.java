@@ -329,7 +329,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
 
         private final Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
 
-        private Set<Integer> patchGuard = new HashSet<Integer>();
+        private final Set<Integer> patchGuard = new HashSet<Integer>();
 
         public void cacheFolder(final int folderId) {
             cacheFolderFast(folderId); // Switch this to the other method, once it loads participants

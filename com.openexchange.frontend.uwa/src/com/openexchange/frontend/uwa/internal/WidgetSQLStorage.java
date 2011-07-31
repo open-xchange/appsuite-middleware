@@ -89,7 +89,7 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
 
     };
 
-    private List<Attribute<UWAWidget>> attributes = new ArrayList<Attribute<UWAWidget>>(Field.values().length-4);
+    private final List<Attribute<UWAWidget>> attributes = new ArrayList<Attribute<UWAWidget>>(Field.values().length-4);
 
     public WidgetSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, userId, ctxId);

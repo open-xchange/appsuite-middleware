@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
  */
 public class SimOAuthServiceMetaDataRegistry implements OAuthServiceMetaDataRegistry {
 
-    private Map<String, OAuthServiceMetaData> map = new HashMap<String, OAuthServiceMetaData>();
+    private final Map<String, OAuthServiceMetaData> map = new HashMap<String, OAuthServiceMetaData>();
 
     public boolean containsService(String id) {
         return map.containsKey(id);

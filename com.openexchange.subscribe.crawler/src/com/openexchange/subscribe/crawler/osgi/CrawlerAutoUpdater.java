@@ -74,7 +74,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
 
     private ScheduledTimerTask scheduledTimerTask;
 
-    private Activator activator;
+    private final Activator activator;
 
     private final Lock lock = new ReentrantLock();
 

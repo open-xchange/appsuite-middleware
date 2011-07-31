@@ -66,7 +66,7 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public class OverridableAttachmentAuthorization implements AttachmentAuthorization {
 
-    private SpecificServiceChooser<AttachmentAuthorization> chooser;
+    private final SpecificServiceChooser<AttachmentAuthorization> chooser;
 
     public OverridableAttachmentAuthorization(SpecificServiceChooser<AttachmentAuthorization> chooser) {
         super();

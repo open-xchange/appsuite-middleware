@@ -76,7 +76,7 @@ import com.openexchange.tx.TransactionException;
  */
 public class SimInfostoreFacade implements InfostoreFacade {
 
-    private Map<Integer, byte[]> files = new HashMap<Integer, byte[]>();
+    private final Map<Integer, byte[]> files = new HashMap<Integer, byte[]>();
 
     /* (non-Javadoc)
      * @see com.openexchange.groupware.infostore.InfostoreFacade#countDocuments(long, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)

@@ -10,7 +10,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class PollAction implements AJAXActionService {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 
 	public PollAction(ServiceLookup services) {
 		this.services = services;

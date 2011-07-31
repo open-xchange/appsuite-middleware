@@ -58,7 +58,7 @@ import java.util.Set;
  */
 public class HasTag extends ContextSetTerm {
 
-    private String tag;
+    private final String tag;
 
     public HasTag(String tag) {
         this.tag = tag;

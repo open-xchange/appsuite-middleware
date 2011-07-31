@@ -72,7 +72,7 @@ import com.openexchange.subscribe.linkedin.osgi.Activator;
  */
 public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
-    private Activator activator;
+    private final Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInSubscribeService.class));
 

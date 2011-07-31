@@ -64,7 +64,7 @@ import java.util.List;
  */
 public abstract class TX {
     private Connection connection;
-    private List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
+    private final List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
 
     public abstract Object perform() throws SQLException;
 

@@ -165,7 +165,7 @@ public class MockUser implements User {
 
     private Locale locale;
 
-    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public MockUser(int id) {
         super();

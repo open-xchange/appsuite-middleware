@@ -64,9 +64,9 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class PublicationMultipleHandlerFactory implements MultipleHandlerFactoryService {
 
-    private PublicationTargetDiscoveryService discoverer;
-    private ConfigurationService config;
-    private Map<String, EntityType> entityMap;
+    private final PublicationTargetDiscoveryService discoverer;
+    private final ConfigurationService config;
+    private final Map<String, EntityType> entityMap;
 
     public PublicationMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer, Map<String, EntityType> entityMap, ConfigurationService config) {
         this.discoverer = discoverer;

@@ -60,7 +60,7 @@ import java.io.Writer;
  *
  */
 public class UncloseableWriter extends Writer {
-    private Writer delegate;
+    private final Writer delegate;
 
 
     public UncloseableWriter(Writer delegate) {

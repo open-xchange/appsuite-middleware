@@ -54,9 +54,9 @@ package com.openexchange.crypto;
  */
 public class EncryptedData {
 
-    private String data;
+    private final String data;
 
-    private byte[] salt;
+    private final byte[] salt;
 
     public EncryptedData(String data, byte[] salt) {
         super();

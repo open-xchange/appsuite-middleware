@@ -62,8 +62,8 @@ import com.openexchange.oauth.linkedin.LinkedInService;
  */
 public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private Activator activator;
+    private final BundleContext context;
+    private final Activator activator;
 
     public LinkedInServiceRegisterer(BundleContext context, Activator activator){
         this.context = context;

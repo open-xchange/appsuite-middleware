@@ -74,8 +74,8 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
-    private String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
+    private final String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
+    private final String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
 
     @Override
     public void setUp(){

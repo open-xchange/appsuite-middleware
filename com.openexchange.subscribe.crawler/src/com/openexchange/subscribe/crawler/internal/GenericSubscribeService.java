@@ -87,7 +87,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private final Activator activator;
 
-    private boolean enableJavascript;
+    private final boolean enableJavascript;
 
     private int module = FolderObject.CONTACT;
 

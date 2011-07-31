@@ -66,7 +66,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class WhiteboadPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
     public WhiteboadPublicationTargetDiscoveryService(BundleContext context) {
         this.tracker = new ServiceTracker(context, PublicationTargetDiscoveryService.class.getName(), null);

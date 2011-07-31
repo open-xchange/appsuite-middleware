@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultConverterTest extends TestCase {
 
-    private DefaultConverter converter = new DefaultConverter();
+    private final DefaultConverter converter = new DefaultConverter();
 
     public void testSingleStepConversion() {
         TestConverter tc = new TestConverter("A", "B", Quality.GOOD);
@@ -144,11 +144,11 @@ public class DefaultConverterTest extends TestCase {
 
     public static class TestConverter implements ResultConverter {
 
-        private String input;
+        private final String input;
 
-        private String output;
+        private final String output;
 
-        private Quality quality;
+        private final Quality quality;
 
         public TestConverter(String input, String output, Quality quality) {
             super();

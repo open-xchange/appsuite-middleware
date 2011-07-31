@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CopyLinksForChangeExceptions implements CalendarListener {
 
-    private LinkSQLInterface links;
+    private final LinkSQLInterface links;
 
     public CopyLinksForChangeExceptions(LinkSQLInterface links) {
         this.links = links;

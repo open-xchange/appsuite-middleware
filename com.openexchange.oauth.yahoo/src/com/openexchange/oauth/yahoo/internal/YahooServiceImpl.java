@@ -79,7 +79,7 @@ import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
  */
 public class YahooServiceImpl implements YahooService {
 
-    private YahooOAuthActivator activator;
+    private final YahooOAuthActivator activator;
 
     private static final String ALL_CONTACT_IDS_URL = "http://social.yahooapis.com/v1/user/GUID/contacts?format=json";
 

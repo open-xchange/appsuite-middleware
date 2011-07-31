@@ -66,7 +66,7 @@ import com.openexchange.publish.PublicationErrorMessage;
  */
 public class CompositeLoaderService implements PublicationDataLoaderService {
 
-    private Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
+    private final Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
 
     public Collection<? extends Object> load(Publication publication) throws OXException {
         return getSubLoader(publication.getModule()).load(publication);

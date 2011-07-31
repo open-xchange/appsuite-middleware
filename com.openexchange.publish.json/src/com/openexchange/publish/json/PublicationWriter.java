@@ -79,7 +79,7 @@ public class PublicationWriter {
 
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
-    private Map<String, EntityType> entityTypes = new EntityMap();
+    private final Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationWriter() {
     }

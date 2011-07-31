@@ -121,7 +121,7 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
         }
     }
 
-    private List<Privilege> privileges;
+    private final List<Privilege> privileges;
 
     public CurrentUserPrivilegeSet(Permission permission) {
         this.privileges = Privilege.getApplying(permission);

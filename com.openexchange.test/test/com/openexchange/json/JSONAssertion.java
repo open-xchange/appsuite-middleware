@@ -76,7 +76,7 @@ public class JSONAssertion implements JSONCondition {
 
     private Stack<JSONAssertion> stack = new Stack<JSONAssertion>();
 
-    private List<JSONCondition> conditions = new LinkedList<JSONCondition>();
+    private final List<JSONCondition> conditions = new LinkedList<JSONCondition>();
     private String key;
 
     private String complaint;
@@ -224,7 +224,7 @@ public class JSONAssertion implements JSONCondition {
 
     private static final class IsOfType implements JSONCondition{
         private String complaint;
-        private Class type;
+        private final Class type;
 
         public IsOfType(Class type) {
             this.type = type;
@@ -243,7 +243,7 @@ public class JSONAssertion implements JSONCondition {
     }
 
     private static final class HasKey implements JSONCondition {
-        private String key;
+        private final String key;
         private String complaint;
         private JSONObject object;
 
@@ -270,7 +270,7 @@ public class JSONAssertion implements JSONCondition {
     }
 
     private static final class HasIndex implements JSONCondition {
-        private int index;
+        private final int index;
 
         public HasIndex(int index) {
             this.index = index;
@@ -287,8 +287,8 @@ public class JSONAssertion implements JSONCondition {
     }
 
     private static final class KeyValuePair implements JSONCondition {
-        private String key;
-        private Object value;
+        private final String key;
+        private final Object value;
         private String complaint;
 
         public KeyValuePair(String key, Object value) {
@@ -334,8 +334,8 @@ public class JSONAssertion implements JSONCondition {
 
     private static final class ValueObject implements JSONCondition {
 
-        private String key;
-        private JSONAssertion assertion;
+        private final String key;
+        private final JSONAssertion assertion;
 
         public ValueObject(String key, JSONAssertion assertion) {
             this.key = key;
@@ -359,8 +359,8 @@ public class JSONAssertion implements JSONCondition {
 
     private static final class ValueArray implements JSONCondition {
 
-        private String key;
-        private JSONAssertion assertion;
+        private final String key;
+        private final JSONAssertion assertion;
 
         public ValueArray(String key, JSONAssertion assertion) {
             this.key = key;
@@ -383,7 +383,7 @@ public class JSONAssertion implements JSONCondition {
     }
 
     private static final class WithValues implements JSONCondition {
-        private Object[] values;
+        private final Object[] values;
         private String complaint;
 
         public boolean ignoreOrder = false;

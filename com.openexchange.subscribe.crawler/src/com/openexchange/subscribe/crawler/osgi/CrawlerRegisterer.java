@@ -62,8 +62,8 @@ import com.openexchange.config.ConfigurationService;
  */
 public class CrawlerRegisterer implements ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private Activator activator;
+    private final BundleContext context;
+    private final Activator activator;
 
     public CrawlerRegisterer(BundleContext context, Activator activator) {
         super();

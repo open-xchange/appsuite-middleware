@@ -67,7 +67,7 @@ public class ExcludedList implements UpdateTaskList<String> {
 
     private static final String CONFIG_FILE_NAME = "excludedupdatetasks.properties";
 
-    private List<String> taskList = new ArrayList<String>();
+    private final List<String> taskList = new ArrayList<String>();
 
     private ExcludedList() {
         super();

@@ -92,23 +92,23 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private FileStorageFileAccess files;
 
-    private SimBuilder fileAccess = new SimBuilder();
+    private final SimBuilder fileAccess = new SimBuilder();
 
     private String accountId;
 
-    private FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
+    private final FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
 
-    private FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
+    private final FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
 
     private String serviceId2;
 
     private String accountId2;
 
-    private FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
+    private final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
 
-    private FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
+    private final FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
 
-    private IDSetter setId = new IDSetter(fileId.getFileId());
+    private final IDSetter setId = new IDSetter(fileId.getFileId());
 
 
 

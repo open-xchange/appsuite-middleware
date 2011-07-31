@@ -66,9 +66,9 @@ import com.openexchange.tools.update.Tools;
  */
 public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
 
-    private DatabaseService dbService;
-    private String tableName;
-    private Column column;
+    private final DatabaseService dbService;
+    private final String tableName;
+    private final Column column;
 
     /**
      *

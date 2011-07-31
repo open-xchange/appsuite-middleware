@@ -70,8 +70,8 @@ public class HTTPServletRegistration extends ServiceTracker{
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
 
-    private Servlet servlet;
-    private String alias;
+    private final Servlet servlet;
+    private final String alias;
 
 
     public HTTPServletRegistration(BundleContext context, String alias, Servlet servlet) {

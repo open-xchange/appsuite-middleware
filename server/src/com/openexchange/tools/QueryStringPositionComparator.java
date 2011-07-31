@@ -60,7 +60,7 @@ import java.util.Comparator;
  */
 public class QueryStringPositionComparator implements Comparator<String> {
 
-    private String queryString;
+    private final String queryString;
 
     public QueryStringPositionComparator(String queryString) {
         this.queryString = queryString;

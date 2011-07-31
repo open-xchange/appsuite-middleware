@@ -62,7 +62,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class InfostoreSearchIterator implements SearchIterator<File> {
 
-    private SearchIterator<DocumentMetadata> delegate;
+    private final SearchIterator<DocumentMetadata> delegate;
 
     /**
      * Initializes a new {@link InfostoreSearchIterator}.

@@ -60,7 +60,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
  */
 public class DocumentMetadataMatcher {
     private DocumentMetadata bestMatch;
-    private String name;
+    private final String name;
     private int score;
 
     public DocumentMetadataMatcher(String name) {

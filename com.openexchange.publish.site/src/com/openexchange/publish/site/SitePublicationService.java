@@ -83,9 +83,9 @@ public class SitePublicationService extends AbstractPublicationService implement
 
     public static final String INFOSTORE = "infostore";
 
-    private PublicationTarget target;
+    private final PublicationTarget target;
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public SitePublicationService() {
         super();

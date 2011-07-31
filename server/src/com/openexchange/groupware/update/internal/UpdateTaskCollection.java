@@ -77,7 +77,7 @@ class UpdateTaskCollection {
 
     private int version;
 
-    private AtomicBoolean versionDirty = new AtomicBoolean(true);
+    private final AtomicBoolean versionDirty = new AtomicBoolean(true);
 
     private UpdateTaskCollection() {
         super();

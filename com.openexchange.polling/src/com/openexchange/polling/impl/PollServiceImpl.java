@@ -69,7 +69,7 @@ public class PollServiceImpl implements PollService {
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger(1);
 
-    private Map<Integer, Poll> polls = new ConcurrentHashMap<Integer, Poll>();
+    private final Map<Integer, Poll> polls = new ConcurrentHashMap<Integer, Poll>();
 
     public void createPoll(Poll poll, int cid) {
         int newID = ID_COUNTER.incrementAndGet();

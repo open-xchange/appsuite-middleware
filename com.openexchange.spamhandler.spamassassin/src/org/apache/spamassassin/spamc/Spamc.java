@@ -90,7 +90,7 @@ public class Spamc {
     public class SpamdResponse {
 
 	/** The entire spamd response in its raw form */
-	private String rawResponse;
+	private final String rawResponse;
 
 	/** The protocol version used by the spamd server */
 	private String protocolVersion;
@@ -107,10 +107,10 @@ public class Spamc {
 	private String responseMessage;
 
 	/** All of the headers returned */
-	private Map headers = new HashMap();
+	private final Map headers = new HashMap();
 
 	/** Contents of the e-mail message after processing */
-	private String processedMessage;
+	private final String processedMessage;
 
 	/** Expected regular expression pattern for the first line */
 	private final Pattern firstLinePattern = Pattern
@@ -1759,9 +1759,9 @@ public class Spamc {
 
 	private String shortName;
 
-	private String longName;
+	private final String longName;
 
-	private boolean hasArgument;
+	private final boolean hasArgument;
 
 	protected AbstractOption(final String longName,
 		final boolean hasArgument) {

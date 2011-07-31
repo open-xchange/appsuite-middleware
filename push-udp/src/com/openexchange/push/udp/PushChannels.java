@@ -79,7 +79,7 @@ public class PushChannels {
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;
 
-    private List<PushRegistryListenerThread> listeners = new LinkedList<PushRegistryListenerThread>();
+    private final List<PushRegistryListenerThread> listeners = new LinkedList<PushRegistryListenerThread>();
 
     public PushChannels(PushConfiguration config) throws OXException {
         final int serverRegisterPort = config.getRegisterPort();

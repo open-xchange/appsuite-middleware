@@ -62,7 +62,7 @@ import com.openexchange.modules.model.Model;
  */
 public class UserScopedStorage<T extends Model<T>> extends BasicStorage<T>{
 
-    private int userId;
+    private final int userId;
 
     public UserScopedStorage(Metadata<T> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, ctxId);

@@ -68,9 +68,9 @@ public class Day implements Comparable<Day> {
     private final Date time;
     private final CPCalendar cal;
     private final boolean outOfRange;
-    private List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
-    private SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
-    private List<SortedSet<CPAppointment>> columns = new ArrayList<SortedSet<CPAppointment>>();
+    private final List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
+    private final SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
+    private final List<SortedSet<CPAppointment>> columns = new ArrayList<SortedSet<CPAppointment>>();
 
     public Day(Date time, CPCalendar cal, boolean outOfRange) {
         super();

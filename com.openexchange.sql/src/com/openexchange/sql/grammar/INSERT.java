@@ -56,8 +56,8 @@ import com.openexchange.sql.builder.IStatementBuilder;
 
 public class INSERT extends ModifyCommand {
 	private INTO into;
-	private List<String> columns;
-	private List<List<Expression>> values;
+	private final List<String> columns;
+	private final List<List<Expression>> values;
 	private SELECT subSelect;
 
 	public INSERT() {

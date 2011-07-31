@@ -67,8 +67,8 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class WhiteboardContextService implements ServiceTrackerCustomizer, ContextService {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
+    private final BundleContext context;
+    private final ServiceTracker tracker;
     private ContextService delegate;
 
     public WhiteboardContextService(BundleContext context) {

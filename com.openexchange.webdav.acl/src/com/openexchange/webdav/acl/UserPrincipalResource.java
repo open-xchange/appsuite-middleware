@@ -72,9 +72,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class UserPrincipalResource extends AbstractResource {
 
-    private PrincipalWebdavFactory factory;
-    private User user;
-    private WebdavPath url;
+    private final PrincipalWebdavFactory factory;
+    private final User user;
+    private final WebdavPath url;
 
     public UserPrincipalResource(PrincipalWebdavFactory factory, User u, WebdavPath url) {
         this.factory = factory;

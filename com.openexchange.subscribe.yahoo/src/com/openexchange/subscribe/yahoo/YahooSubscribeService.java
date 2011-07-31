@@ -72,7 +72,7 @@ import com.openexchange.subscribe.yahoo.osgi.Activator;
  */
 public class YahooSubscribeService extends AbstractSubscribeService{
 
-private Activator activator;
+private final Activator activator;
 
     private final SubscriptionSource source = new SubscriptionSource();
 

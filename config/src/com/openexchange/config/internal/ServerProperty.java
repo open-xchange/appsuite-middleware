@@ -68,7 +68,7 @@ public class ServerProperty implements BasicProperty {
 
     private boolean defined;
 
-    private Map<String, String> metadata = new HashMap<String, String>();
+    private final Map<String, String> metadata = new HashMap<String, String>();
 
     public String get() {
         return value;

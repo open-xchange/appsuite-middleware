@@ -62,12 +62,12 @@ public class SessionControl {
     /**
      * Time stamp when this session control was created.
      */
-    private long creationTime;
+    private final long creationTime;
 
     /**
      * The associated session.
      */
-    private SessionImpl session;
+    private final SessionImpl session;
 
     /**
      * Initializes a new {@link SessionControl}

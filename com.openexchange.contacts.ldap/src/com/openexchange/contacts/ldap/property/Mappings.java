@@ -488,9 +488,9 @@ public class Mappings {
 
     public static class CheckStringPropertyParameter {
 
-        private Properties m_props;
+        private final Properties m_props;
 
-        private String m_mappingfile;
+        private final String m_mappingfile;
 
         public CheckStringPropertyParameter(Properties props, String mappingfile) {
             m_props = props;

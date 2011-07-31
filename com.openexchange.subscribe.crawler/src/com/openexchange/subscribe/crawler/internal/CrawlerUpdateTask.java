@@ -76,7 +76,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  */
 public class CrawlerUpdateTask implements Runnable {
 
-    private ConfigurationService configurationService;
+    private final ConfigurationService configurationService;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateTask.class));
 
@@ -84,7 +84,7 @@ public class CrawlerUpdateTask implements Runnable {
 
     private static final String LAST_UPDATED_FILE_PROPERTY = "com.openexchange.subscribe.crawler.updatedfile";
 
-    private Activator activator;
+    private final Activator activator;
 
     public CrawlerUpdateTask(ConfigurationService configurationService, Activator activator) {
         this.configurationService = configurationService;

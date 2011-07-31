@@ -106,7 +106,7 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     private static final class JSONParserHandler extends AbstractFileFieldHandler {
 
-        private FileFieldSet set = new FileFieldSet();
+        private final FileFieldSet set = new FileFieldSet();
 
         public Object handle(Field field, Object... args) {
             File md = md(args);

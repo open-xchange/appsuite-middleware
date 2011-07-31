@@ -364,7 +364,7 @@ public class TestCommand extends Command {
 
     private final List<TestCommand> testcommands;
 
-    private int indexOfComparator = -1;
+    private final int indexOfComparator = -1;
 
 
     /**

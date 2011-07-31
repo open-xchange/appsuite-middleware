@@ -66,8 +66,8 @@ import com.openexchange.groupware.search.Order;
 public class CollationContactComparator implements Comparator<Contact>{
 
 	private int orderDir;
-	private ContactField orderBy;
-	private RuleBasedCollator collator;
+	private final ContactField orderBy;
+	private final RuleBasedCollator collator;
 
 	public CollationContactComparator(ContactField orderBy, Order order, Locale locale) {
 	    super();

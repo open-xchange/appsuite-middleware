@@ -76,7 +76,7 @@ public class AppointmentWriter extends CalendarWriter {
 
     private CalendarCollectionService calColl;
 
-    private boolean forTesting;
+    private final boolean forTesting;
 
     /**
      * Initializes a new {@link AppointmentWriter}

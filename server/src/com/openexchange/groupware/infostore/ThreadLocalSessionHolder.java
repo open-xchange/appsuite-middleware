@@ -66,7 +66,7 @@ public class ThreadLocalSessionHolder implements SessionHolder {
 
     private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
 
-    private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
+    private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
     public void setSession(ServerSession serverSession) {
         session.set(serverSession);

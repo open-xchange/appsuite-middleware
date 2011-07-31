@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class INTO extends Element {
-	private String tableName;
+	private final String tableName;
 
 	public INTO(String tableName) {
 		this.tableName = tableName;

@@ -64,7 +64,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
  */
 public class FileMetadata implements DocumentMetadata {
 
-    private File file;
+    private final File file;
     private String fileSpool;
 
     public FileMetadata(File document) {

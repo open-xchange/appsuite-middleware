@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class ContextProperties {
 
-    private List<FolderProperties> folderproperties;
+    private final List<FolderProperties> folderproperties;
 
     /**
      * Initializes a new {@link ContextProperties}.

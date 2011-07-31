@@ -67,8 +67,8 @@ import org.apache.commons.logging.LogFactory;
 public class PreparedStatementHolder {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreparedStatementHolder.class));
 
-    private Connection writeConnection;
-    private Map<String, PreparedStatement> statements = new HashMap<String, PreparedStatement>();
+    private final Connection writeConnection;
+    private final Map<String, PreparedStatement> statements = new HashMap<String, PreparedStatement>();
 
     public PreparedStatementHolder(Connection writeConnection) {
         this.writeConnection = writeConnection;

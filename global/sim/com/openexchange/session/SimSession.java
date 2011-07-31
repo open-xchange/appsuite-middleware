@@ -62,7 +62,7 @@ public class SimSession implements Session {
     private String loginName;
     private String randomToken;
     private String sessionId;
-    private Map<String, Object> parameters = new HashMap<String, Object>();
+    private final Map<String, Object> parameters = new HashMap<String, Object>();
     private int contextId;
     private int userId;
     private String password;

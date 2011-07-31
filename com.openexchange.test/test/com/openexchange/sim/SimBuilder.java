@@ -62,7 +62,7 @@ import java.util.List;
  *
  */
 public class SimBuilder {
-    private List<DynamicSim> expectedCalls = new ArrayList<DynamicSim>();
+    private final List<DynamicSim> expectedCalls = new ArrayList<DynamicSim>();
     private DynamicSim last = null;
 
 

@@ -57,8 +57,8 @@ package com.openexchange.sessiond.impl;
  */
 public class IPRange {
 
-    private int[] start;
-    private int[] end;
+    private final int[] start;
+    private final int[] end;
 
     public IPRange(int[] start, int[] end) {
         super();

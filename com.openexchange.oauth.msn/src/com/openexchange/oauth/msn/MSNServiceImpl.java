@@ -81,7 +81,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class MSNServiceImpl implements MSNService {
 
-    private MSNOAuthActivator activator;
+    private final MSNOAuthActivator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
 

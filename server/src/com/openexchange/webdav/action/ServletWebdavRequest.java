@@ -71,7 +71,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
-	private ApacheURLDecoder decoder = new ApacheURLDecoder();
+	private final ApacheURLDecoder decoder = new ApacheURLDecoder();
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletWebdavRequest.class));
 
