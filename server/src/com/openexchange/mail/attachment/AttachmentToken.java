@@ -91,6 +91,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private String client;
 
+    private String userAgent;
+
     /**
      * Initializes a new {@link AttachmentToken}.
      */
@@ -119,6 +121,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
         this.userId = session.getUserId();
         this.clientIp = session.getLocalIp();
         this.client = session.getClient();
+        this.userAgent = (String) session.getParameter("user-agent");
         return this;
     }
 
@@ -193,6 +196,15 @@ public final class AttachmentToken implements AttachmentTokenConstants {
             mailAccess.close(true);
             mailAccess = null;
         }
+    }
+
+    /**
+     * Gets the user agent identifier.
+     * 
+     * @return The user agent identifier
+     */
+    public String getUserAgent() {
+        return userAgent;
     }
 
     /**
