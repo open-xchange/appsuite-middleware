@@ -225,4 +225,22 @@ public final class AttachmentToken implements AttachmentTokenConstants {
         return client;
     }
 
+    /**
+     * Gets the contextId
+     * 
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the userId
+     * 
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
+    }
+
 }
