@@ -294,7 +294,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
              */
             try {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
-                token.setAccessInfo(accountId, session.getUserId(), session.getContextId());
+                token.setAccessInfo(accountId, session);
                 token.setAttachmentInfo(
                     this.jsonObject.getString(FolderChildFields.FOLDER_ID),
                     this.jsonObject.getString(DataFields.ID),
