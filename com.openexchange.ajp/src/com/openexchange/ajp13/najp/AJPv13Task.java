@@ -456,7 +456,14 @@ public final class AJPv13Task implements Task<Object> {
                     monitor.incrementNumRequests();
                     processing = false;
                     flush();
-                } while (!t.isInterrupted() && client != null && !client.isClosed()); // End of loop processing an AJP socket's data
+                } while (!t.isInterrupted() && client != null && !client.isClosed());
+                /*-
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ------------------------------------ End of loop processing AJP socket's data ---------------------------------------
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 */
             } catch (final AJPv13SocketClosedException e) {
                 /*
                  * Just as debug info
@@ -660,8 +667,8 @@ public final class AJPv13Task implements Task<Object> {
                 control = null;
             }
         } catch (final Exception e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
+            if (DEBUG_ENABLED) {
+                LOG.debug(e.getMessage(), e);
             }
         }
     }
@@ -670,8 +677,8 @@ public final class AJPv13Task implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            if (DEBUG_ENABLED) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
             }
         }
     }
