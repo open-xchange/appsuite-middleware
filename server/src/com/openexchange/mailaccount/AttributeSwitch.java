@@ -96,4 +96,5 @@ public interface AttributeSwitch {
     public Object pop3DeleteWriteThrough();
     public Object pop3Storage();
     public Object pop3Path();
+    public Object replyTo();
 }

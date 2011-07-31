@@ -102,156 +102,199 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return getUpdateQuery();
     }
 
+    @Override
     public Object name() {
         bob.append("name = ?,");
         return null;
     }
 
+    @Override
     public Object login() {
         return null;
     }
 
+    @Override
     public Object password() {
         return null;
     }
 
+    @Override
     public Object transportURL() {
         bob.append("url = ?,");
         return null;
     }
 
+    @Override
     public Object primaryAddress() {
         bob.append("send_addr = ?,");
         return null;
     }
 
+    @Override
     public Object personal() {
         bob.append("personal = ?,");
         return null;
     }
 
+    @Override
+    public Object replyTo() {
+        bob.append("replyTo = ?,");
+        return null;
+    }
+
+    @Override
     public Object confirmedHam() {
         return null;
     }
 
+    @Override
     public Object confirmedSpam() {
         return null;
     }
 
+    @Override
     public Object drafts() {
         return null;
     }
 
+    @Override
     public Object id() {
         return null;
     }
 
+    @Override
     public Object mailURL() {
         return null;
     }
 
+    @Override
     public Object sent() {
         return null;
     }
 
+    @Override
     public Object spam() {
         return null;
     }
 
+    @Override
     public Object spamHandler() {
         return null;
     }
 
+    @Override
     public Object trash() {
         return null;
     }
 
+    @Override
     public Object mailPort() {
         return null;
     }
 
+    @Override
     public Object mailProtocol() {
         return null;
     }
 
+    @Override
     public Object mailSecure() {
         return null;
     }
 
+    @Override
     public Object mailServer() {
         return null;
     }
 
+    @Override
     public Object transportPort() {
         return null;
     }
 
+    @Override
     public Object transportProtocol() {
         return null;
     }
 
+    @Override
     public Object transportSecure() {
         return null;
     }
 
+    @Override
     public Object transportServer() {
         return null;
     }
 
+    @Override
     public Object transportLogin() {
         bob.append("login = ?,");
         return null;
     }
 
+    @Override
     public Object transportPassword() {
         bob.append("password = ?,");
         return null;
     }
 
+    @Override
     public Object unifiedINBOXEnabled() {
         return null;
     }
 
+    @Override
     public Object confirmedHamFullname() {
         return null;
     }
 
+    @Override
     public Object confirmedSpamFullname() {
         return null;
     }
 
+    @Override
     public Object draftsFullname() {
         return null;
     }
 
+    @Override
     public Object sentFullname() {
         return null;
     }
 
+    @Override
     public Object spamFullname() {
         return null;
     }
 
+    @Override
     public Object trashFullname() {
         return null;
     }
 
+    @Override
     public Object pop3DeleteWriteThrough() {
         return null;
     }
 
+    @Override
     public Object pop3ExpungeOnQuit() {
         return null;
     }
 
+    @Override
     public Object pop3RefreshRate() {
         return null;
     }
 
+    @Override
     public Object pop3Path() {
         return null;
     }
 
+    @Override
     public Object pop3Storage() {
         return null;
     }

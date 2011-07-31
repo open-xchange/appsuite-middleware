@@ -144,6 +144,8 @@ public enum Attribute {
             return switcher.primaryAddress();
         case PERSONAL_LITERAL:
             return switcher.personal();
+        case REPLY_TO_LITERAL:
+            return switcher.replyTo();
         case SPAM_HANDLER_LITERAL:
             return switcher.spamHandler();
         case TRASH_LITERAL:
