@@ -106,6 +106,8 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     protected String personal;
 
+    protected String replyTo;
+
     protected int userId;
 
     protected String spamHandler;
@@ -156,62 +158,82 @@ public abstract class AbstractMailAccount implements MailAccount {
         mailProtocol = mailProvider == null ? "imap" : mailProvider;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public String getMailServer() {
         return mailServer;
     }
 
+    @Override
     public int getMailPort() {
         return mailPort;
     }
 
+    @Override
     public String getMailProtocol() {
         return mailProtocol;
     }
 
+    @Override
     public boolean isMailSecure() {
         return mailSecure;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
 
+    @Override
     public String getPrimaryAddress() {
         return primaryAddress;
     }
 
+    @Override
     public String getPersonal() {
         return personal;
     }
 
+    @Override
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    @Override
     public String getTransportServer() {
         return transportServer;
     }
 
+    @Override
     public int getTransportPort() {
         return transportPort;
     }
 
+    @Override
     public String getTransportProtocol() {
         return transportProtocol;
     }
 
+    @Override
     public boolean isTransportSecure() {
         return transportSecure;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
@@ -271,6 +293,15 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
+     * Sets the reply-to address
+     * 
+     * @param replyTo The reply-to address
+     */
+    public void setReplyTo(final String replyTo) {
+        this.replyTo = replyTo;
+    }
+
+    /**
      * Sets the user ID.
      * 
      * @param userId The user ID
@@ -279,30 +310,37 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.userId = userId;
     }
 
+    @Override
     public String getDrafts() {
         return drafts;
     }
 
+    @Override
     public String getSent() {
         return sent;
     }
 
+    @Override
     public String getSpam() {
         return spam;
     }
 
+    @Override
     public String getTrash() {
         return trash;
     }
 
+    @Override
     public String getConfirmedHam() {
         return confirmedHam;
     }
 
+    @Override
     public String getConfirmedSpam() {
         return confirmedSpam;
     }
 
+    @Override
     public String getSpamHandler() {
         return spamHandler;
     }
@@ -450,6 +488,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.transportSecure = transportSecure;
     }
 
+    @Override
     public String generateMailServerURL() {
         if (null != mailServerUrl) {
             return mailServerUrl;
@@ -542,6 +581,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
     }
 
+    @Override
     public String generateTransportServerURL() {
         if (null != transportServerUrl) {
             return transportServerUrl;
@@ -569,6 +609,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      * 
      * @return The optional transport login
      */
+    @Override
     public String getTransportLogin() {
         if (null == transportLogin) {
             return getLogin();
@@ -581,6 +622,7 @@ public abstract class AbstractMailAccount implements MailAccount {
      * 
      * @return The optional transport password
      */
+    @Override
     public String getTransportPassword() {
         if (null == transportPassword) {
             return getPassword();
@@ -606,6 +648,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.transportPassword = transportPassword;
     }
 
+    @Override
     public boolean isUnifiedINBOXEnabled() {
         return unifiedINBOXEnabled;
     }
@@ -619,6 +662,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.unifiedINBOXEnabled = unifiedINBOXEnabled;
     }
 
+    @Override
     public String getTrashFullname() {
         return trashFullname;
     }
@@ -632,6 +676,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.trashFullname = trashFullname;
     }
 
+    @Override
     public String getSentFullname() {
         return sentFullname;
     }
@@ -645,6 +690,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.sentFullname = sentFullname;
     }
 
+    @Override
     public String getDraftsFullname() {
         return draftsFullname;
     }
@@ -658,6 +704,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.draftsFullname = draftsFullname;
     }
 
+    @Override
     public String getSpamFullname() {
         return spamFullname;
     }
@@ -671,6 +718,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.spamFullname = spamFullname;
     }
 
+    @Override
     public String getConfirmedSpamFullname() {
         return confirmedSpamFullname;
     }
@@ -684,6 +732,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.confirmedSpamFullname = confirmedSpamFullname;
     }
 
+    @Override
     public String getConfirmedHamFullname() {
         return confirmedHamFullname;
     }
@@ -697,6 +746,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         this.confirmedHamFullname = confirmedHamFullname;
     }
 
+    @Override
     public Map<String, String> getProperties() {
         if (properties.isEmpty()) {
             return Collections.emptyMap();
@@ -722,6 +772,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         }
     }
 
+    @Override
     public void addProperty(final String name, final String value) {
         if (properties.isEmpty()) {
             properties = new HashMap<String, String>();
