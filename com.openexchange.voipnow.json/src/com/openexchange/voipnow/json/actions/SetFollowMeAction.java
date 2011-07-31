@@ -200,12 +200,15 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 
     private boolean isFollowRule(Rules rule) {
 		Transfer transfer = rule.getTransfer();
-		if(transfer == null)
-			return false;
-		if(transfer.getNumber() == null)
-			return false;
-		if(transfer.getToNumbers() == null)
-			return false;
+		if(transfer == null) {
+            return false;
+        }
+		if(transfer.getNumber() == null) {
+            return false;
+        }
+		if(transfer.getToNumbers() == null) {
+            return false;
+        }
 		return true;
 	}
 

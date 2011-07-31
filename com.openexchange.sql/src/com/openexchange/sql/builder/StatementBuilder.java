@@ -226,8 +226,9 @@ public class StatementBuilder implements IStatementBuilder {
 	public void buildDELETE(DELETE delete) {
 		append("DELETE");
 		delete.getFrom().build(this);
-		if (delete.getWhere() != null)
-			delete.getWhere().build(this);
+		if (delete.getWhere() != null) {
+            delete.getWhere().build(this);
+        }
 	}
 
 	public void buildINSERT(INSERT insert) {
@@ -263,8 +264,9 @@ public class StatementBuilder implements IStatementBuilder {
 		    appendList(select.getColumns());
 		}
 		select.getFrom().build(this);
-		if (select.getWhere() != null)
-			select.getWhere().build(this);
+		if (select.getWhere() != null) {
+            select.getWhere().build(this);
+        }
 	}
 
 	public void buildUPDATE(UPDATE update) {
@@ -272,8 +274,9 @@ public class StatementBuilder implements IStatementBuilder {
 		append(update.getTableName());
 		append(" SET ");
 		buildElementList(update.getAssignments());
-		if (update.getWhere() != null)
-			update.getWhere().build(this);
+		if (update.getWhere() != null) {
+            update.getWhere().build(this);
+        }
 	}
 
 	/*
@@ -319,13 +322,13 @@ public class StatementBuilder implements IStatementBuilder {
 	}
 
 	public void buildConstant(Constant constant) {
-		if (constant == Constant.PLACEHOLDER)
-			append("?");
-		else if (constant == Constant.ASTERISK)
-		    append("*");
-		else if (constant.getValue() == null)
-			append("NULL");
-		else {
+		if (constant == Constant.PLACEHOLDER) {
+            append("?");
+        } else if (constant == Constant.ASTERISK) {
+            append("*");
+        } else if (constant.getValue() == null) {
+            append("NULL");
+        } else {
 			Object value = constant.getValue();
 			if (value instanceof String || value instanceof Character
 					|| value instanceof Time || value instanceof Date

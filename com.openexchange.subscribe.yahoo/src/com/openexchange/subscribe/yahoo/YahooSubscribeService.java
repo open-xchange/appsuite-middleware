@@ -130,7 +130,9 @@ private Activator activator;
         String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId){
             Integer accountIdInt = Integer.parseInt(accountId);
-            if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
+            if (null != accountIdInt) {
+                subscription.getConfiguration().put("account",accountIdInt);
+            }
             String displayName = null;
             if(subscription.getSecret() != null) {
                 displayName = activator.getYahooService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));

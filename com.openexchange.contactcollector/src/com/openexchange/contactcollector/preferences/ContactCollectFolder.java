@@ -95,10 +95,11 @@ public class ContactCollectFolder implements PreferencesItemService {
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 Integer value;
                 try {
-                    if (setting.getSingleValue() == null)
+                    if (setting.getSingleValue() == null) {
                         value = null;
-                    else
+                    } else {
                         value = new Integer(String.valueOf(setting.getSingleValue()));
+                    }
                 } catch (final NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue(), "contactCollectFolder");
                 }

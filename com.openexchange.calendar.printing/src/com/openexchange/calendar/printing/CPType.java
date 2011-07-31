@@ -92,8 +92,9 @@ public enum CPType {
      */
     public static CPType getByNumber(int number) {
         for (CPType type : values()) {
-            if (type.getNumber() == number)
+            if (type.getNumber() == number) {
                 return type;
+            }
         }
         return null;
     }
@@ -103,23 +104,26 @@ public enum CPType {
      */
     public static CPType getByName(String name) {
         for (CPType type : values()) {
-            if (name.equalsIgnoreCase(type.getName()))
+            if (name.equalsIgnoreCase(type.getName())) {
                 return type;
+            }
         }
         return null;
     }
 
     public static CPType getByTemplateName(String string) {
         Matcher matcher = Pattern.compile("cp_([^_]+)_.+$").matcher(string);
-        if(! matcher.find())
+        if(! matcher.find()) {
             return null;
+        }
         CPType find;
 
         String identifier = matcher.group(1);
         find = getByName(identifier);
         try {
-        if(find == null)
+        if(find == null) {
             find = getByNumber(Integer.valueOf(identifier).intValue());
+        }
         } catch(NumberFormatException e){
             return null;
         }

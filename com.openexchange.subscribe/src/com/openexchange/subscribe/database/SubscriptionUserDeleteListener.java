@@ -73,8 +73,9 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
     private SubscriptionSourceDiscoveryService discoveryService;
 
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if(event.getType() != DeleteEvent.TYPE_USER)
+        if(event.getType() != DeleteEvent.TYPE_USER) {
             return;
+        }
         try {
             getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
         } catch (OXException e) {

@@ -99,25 +99,30 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     }
 
     private void recurse(Node node) {
-        if(node == null)
+        if(node == null) {
             return;
+        }
         extractInformation(node);
             
         NodeList children = node.getChildNodes();
         
-        if(children != null && children.getLength() != 0)
-            for(int i = 0, length =children.getLength(); i < length; i++)
+        if(children != null && children.getLength() != 0) {
+            for(int i = 0, length =children.getLength(); i < length; i++) {
                 recurse(children.item(i));
+            }
+        }
     }
 
     private void extractInformation(Node node) {
-        if(node.getNodeType() != Node.ELEMENT_NODE)
+        if(node.getNodeType() != Node.ELEMENT_NODE) {
             return;
+        }
         Element elem = (Element) node;
         
         List<String> classes = getClasses(elem);
-        if(classes == null)
+        if(classes == null) {
             return;
+        }
                 
         String name = node.getNodeName();
         
@@ -126,8 +131,9 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
             value = elem.getAttribute("title");
         }
         
-        if(value == null)
+        if(value == null) {
             value = elem.getTextContent();
+        }
         
         storeInformation(elem, value);
     }
@@ -135,18 +141,24 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     private void storeInformation(Element elem, String value){
         List<String> classes = getClasses(elem);
         for(String classname: classes){
-            if("vevent".equalsIgnoreCase(classname))
+            if("vevent".equalsIgnoreCase(classname)) {
                 calendarData.add(new Appointment());
-            if(value == null)
+            }
+            if(value == null) {
                 continue;
-            if("location".equalsIgnoreCase(classname))
+            }
+            if("location".equalsIgnoreCase(classname)) {
                 last().setLocation(value);
-            if("summary".equalsIgnoreCase(classname))
+            }
+            if("summary".equalsIgnoreCase(classname)) {
                 last().setNote(value);
-            if("dtstart".equalsIgnoreCase(classname))
+            }
+            if("dtstart".equalsIgnoreCase(classname)) {
                 last().setStartDate(parseDate(value));
-            if("dtend".equalsIgnoreCase(classname))
+            }
+            if("dtend".equalsIgnoreCase(classname)) {
                 last().setEndDate(parseDate(value));
+            }
         }
     }
     
@@ -175,7 +187,9 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     
     private Appointment last() {
         if(calendarData == null || calendarData.size() == 0)
+         {
             return new Appointment(); //no one cares about this, it will be dropped
+        }
         
         return calendarData.get(calendarData.size() - 1);
     }

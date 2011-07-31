@@ -250,8 +250,9 @@ public class CPToolTest extends AbstractDateTest {
         app.setEndDate(cal.getTime());
         
         List<Appointment> apps = tool.splitIntoSingleDays(app);
-        for(Appointment temp: apps)
+        for(Appointment temp: apps) {
             System.out.println(temp.getStartDate() + " / " + temp.getEndDate());
+        }
         assertEquals("Should produce three appointments", 3, apps.size());
     }
 

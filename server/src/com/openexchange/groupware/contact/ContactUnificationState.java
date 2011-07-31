@@ -69,9 +69,11 @@ public enum ContactUnificationState {
     }
     
     public static ContactUnificationState getByNumber(int num){
-        for(ContactUnificationState state: values())
-            if(state.getNumber() == num)
+        for(ContactUnificationState state: values()) {
+            if(state.getNumber() == num) {
                 return state;
+            }
+        }
         return null;
     }
 }

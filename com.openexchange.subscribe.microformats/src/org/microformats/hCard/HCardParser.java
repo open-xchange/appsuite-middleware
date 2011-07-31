@@ -47,7 +47,9 @@ public class HCardParser {
 		if ( args.length == 0 ) {
 			System.out.println("Supply any number of resources as parameters to parse them for hCards and print the results.");
 			System.out.println("A resource can be straight HTML, a file name, or a URL.");
-		} else display(args);
+		} else {
+            display(args);
+        }
 	}
 
 	/**
@@ -71,8 +73,11 @@ public class HCardParser {
 	 */
 	public static HCard parseOne(String source, URI defaultBase) throws ParserException {
 		List<HCard> parsed = parse(source, defaultBase, 1);
-		if ( parsed.isEmpty() ) return null;
-		else return parsed.get(0);
+		if ( parsed.isEmpty() ) {
+            return null;
+        } else {
+            return parsed.get(0);
+        }
 	}
 	
 	/**
@@ -104,13 +109,19 @@ public class HCardParser {
 		String anchor = null;
 		try {
 			String url = p.getURL();
-			if ( url != null ) try {
-				defaultBase = new URI(url);
-				int idx = url.indexOf('#');
-				if ( idx > -1 ) anchor = url.substring(idx +1);
-			} catch ( Exception ignore ) {}
+			if ( url != null ) {
+                try {
+                	defaultBase = new URI(url);
+                	int idx = url.indexOf('#');
+                	if ( idx > -1 ) {
+                        anchor = url.substring(idx +1);
+                    }
+                } catch ( Exception ignore ) {}
+            }
 			OXMFVisitor v = new OXMFVisitor(limit, defaultBase);
-			if ( anchor != null ) v.ignoreUntilAnchor(anchor);
+			if ( anchor != null ) {
+                v.ignoreUntilAnchor(anchor);
+            }
 			
 			try {
 				p.visitAllNodesWith(v);
@@ -155,14 +166,19 @@ public class HCardParser {
 		for ( String url : urls ) {
 			System.out.printf("For URL %s: ", url);
 			List<HCard> cards = parseMany(url);
-			if ( cards.size() == 0 ) System.out.println("no hCards found.");
-			else if ( cards.size() == 1 ) System.out.printf("\n%s\n", cards.get(0));
-			else {
+			if ( cards.size() == 0 ) {
+                System.out.println("no hCards found.");
+            } else if ( cards.size() == 1 ) {
+                System.out.printf("\n%s\n", cards.get(0));
+            } else {
 				System.out.printf("%d hCards found:\n", cards.size());
 				boolean first = true;
 				for ( HCard card : cards ) {
-					if ( first ) first = false;
-					else System.out.println("--------------------------------");
+					if ( first ) {
+                        first = false;
+                    } else {
+                        System.out.println("--------------------------------");
+                    }
 					System.out.println(card);
 				}
 			}
@@ -211,7 +227,9 @@ public class HCardParser {
 		}
 		
 		void toValueExcerptMode(String value) {
-			if ( !isBeingExcerpted ) sb.setLength(0);
+			if ( !isBeingExcerpted ) {
+                sb.setLength(0);
+            }
 			isBeingExcerpted = true;
 			sb.append(value);
 		}
@@ -233,7 +251,9 @@ public class HCardParser {
 		private static URI convert(String url) {
 			try {
 				URI uri = new URI(url);
-				if ( !uri.isAbsolute() ) return null;
+				if ( !uri.isAbsolute() ) {
+                    return null;
+                }
 				return uri;
 			} catch ( Exception ignore ) {}
 			return null;
@@ -286,8 +306,11 @@ public class HCardParser {
 		
 		protected HCardVisitor(int toParse, URI defaultBase) {
 			this.defaultBase = defaultBase;
-			if ( toParse < 1 ) this.toParse = -1;
-			else this.toParse = toParse;
+			if ( toParse < 1 ) {
+                this.toParse = -1;
+            } else {
+                this.toParse = toParse;
+            }
 		}
 		
 		protected void ignoreUntilAnchor(String anchor) {
@@ -298,17 +321,29 @@ public class HCardParser {
 			String name = tag.getTagName();
 			
 			Base top = baseStack.peek();
-			if ( top != null && top.isXML && name.equals(top.tagName) && --top.depth == 0 ) baseStack.poll();
+			if ( top != null && top.isXML && name.equals(top.tagName) && --top.depth == 0 ) {
+                baseStack.poll();
+            }
 			
 			if ( "BASE".equals(name) ) {
 				top = baseStack.peek();
-				if ( top != null && !top.isXML ) baseStack.poll();
+				if ( top != null && !top.isXML ) {
+                    baseStack.poll();
+                }
 			}
 			
-			if ( "PRE".equals(name) ) inPre = false;
-			if ( "DEL".equals(name) ) inDel = false;
+			if ( "PRE".equals(name) ) {
+                inPre = false;
+            }
+			if ( "DEL".equals(name) ) {
+                inDel = false;
+            }
 			
-			for ( Marker m : stack ) if ( m.tagName.equals(name) ) m.count--;
+			for ( Marker m : stack ) {
+                if ( m.tagName.equals(name) ) {
+                    m.count--;
+                }
+            }
 			
 			if ( hCardTagName != null && hCardTagName.equals(name) ) {
 				if ( --hCardTagNameLevel == 0 ) {
@@ -322,37 +357,57 @@ public class HCardParser {
 			int count = stack.size();
 			for ( ListIterator<Marker> i = stack.listIterator(stack.size()) ; i.hasPrevious() ; ) {
 				Marker m = i.previous();
-				if ( m.count == 0 ) break;
-				else count--;
+				if ( m.count == 0 ) {
+                    break;
+                } else {
+                    count--;
+                }
 			}
 			
 			if ( count > 0 ) {
-				while ( count-- > 0 ) finalizeTag();
+				while ( count-- > 0 ) {
+                    finalizeTag();
+                }
 				return;
 			}
 			
 			Appendable sb = getBuildersOnStack();
 			if ( sb != null ) {
-				if ( "DT".equals(name) ) sb.append('\n');
-				else if ( name.matches("^H[123456]$") ) sb.appendSoftLineBreak().append('\n');
-				else if ( "P".equals(name) ) sb.appendSoftLineBreak().append('\n');
-				else if ( "Q".equals(name) ) sb.append('"');
-				else if ( "SUB".equals(name) ) sb.append(')');
-				else if ( "SUP".equals(name) ) sb.append(']');
-				else if ( "TD".equals(name) || "TH".equals(name) ) sb.append(" \t");
-				else if ( CONVERT_CLOSE_TAG_TO_SOFT_BREAK.contains(name) ) sb.appendSoftLineBreak();
+				if ( "DT".equals(name) ) {
+                    sb.append('\n');
+                } else if ( name.matches("^H[123456]$") ) {
+                    sb.appendSoftLineBreak().append('\n');
+                } else if ( "P".equals(name) ) {
+                    sb.appendSoftLineBreak().append('\n');
+                } else if ( "Q".equals(name) ) {
+                    sb.append('"');
+                } else if ( "SUB".equals(name) ) {
+                    sb.append(')');
+                } else if ( "SUP".equals(name) ) {
+                    sb.append(']');
+                } else if ( "TD".equals(name) || "TH".equals(name) ) {
+                    sb.append(" \t");
+                } else if ( CONVERT_CLOSE_TAG_TO_SOFT_BREAK.contains(name) ) {
+                    sb.appendSoftLineBreak();
+                }
 			}
 		}
 		
 		public @Override void visitStringNode(Text textNode) {
-			if ( inDel || hCardTagName == null ) return;
+			if ( inDel || hCardTagName == null ) {
+                return;
+            }
 			Appendable sb = getBuildersOnStack();
 			
 			if ( sb != null ) {
 				String text = textNode.getText();
-				if ( textNode.getText().equals("\n\t\t") ) System.err.println("WHUH");
+				if ( textNode.getText().equals("\n\t\t") ) {
+                    System.err.println("WHUH");
+                }
 				
-				if ( text.length() == 0 ) return;
+				if ( text.length() == 0 ) {
+                    return;
+                }
 				
 				if ( !inPre ) {
 					text = collapseWhitespace(text);
@@ -370,24 +425,40 @@ public class HCardParser {
 			String name = tag.getTagName();
 			String hClass = tag.getAttribute("class");
 			
-			if ( "BASE".equals(name) && !tag.isEndTag() ) baseStack.addFirst(Base.forHTML(tag.getAttribute("href")));
-			else {
+			if ( "BASE".equals(name) && !tag.isEndTag() ) {
+                baseStack.addFirst(Base.forHTML(tag.getAttribute("href")));
+            } else {
 				String baseUrl = tag.getAttribute("xml:base");
-				if ( baseUrl != null ) baseStack.addFirst(Base.forXML(name, baseUrl));
-				else {
+				if ( baseUrl != null ) {
+                    baseStack.addFirst(Base.forXML(name, baseUrl));
+                } else {
 					Base top = baseStack.peek();
-					if ( top != null && top.isXML && !tag.isEndTag() && name.equals(top.tagName) ) top.depth++;
+					if ( top != null && top.isXML && !tag.isEndTag() && name.equals(top.tagName) ) {
+                        top.depth++;
+                    }
 				}
 			}
 			
-			for ( Marker m : stack ) if ( m.tagName.equals(name) ) m.count++;
+			for ( Marker m : stack ) {
+                if ( m.tagName.equals(name) ) {
+                    m.count++;
+                }
+            }
 			
-			if ( "PRE".equals(name) && !tag.isEndTag() ) inPre = true;
-			if ( "DEL".equals(name) && !tag.isEndTag() ) inDel = true;
+			if ( "PRE".equals(name) && !tag.isEndTag() ) {
+                inPre = true;
+            }
+			if ( "DEL".equals(name) && !tag.isEndTag() ) {
+                inDel = true;
+            }
 			
-			if ( ignoreUntilAnchor != null && "A".equals(name) && ignoreUntilAnchor.equals(tag.getAttribute("name")) ) ignoreUntilAnchor = null;
+			if ( ignoreUntilAnchor != null && "A".equals(name) && ignoreUntilAnchor.equals(tag.getAttribute("name")) ) {
+                ignoreUntilAnchor = null;
+            }
 			
-			if ( inDel || ignoreUntilAnchor != null ) return;
+			if ( inDel || ignoreUntilAnchor != null ) {
+                return;
+            }
 			
 			if ( hCardTagName == null ) {
 				if ( "vcard".equalsIgnoreCase(hClass) ) {
@@ -397,17 +468,25 @@ public class HCardParser {
 				return;
 			}
 			
-			if ( hCardTagName.equals(name) ) hCardTagNameLevel++;
+			if ( hCardTagName.equals(name) ) {
+                hCardTagNameLevel++;
+            }
 			
 			List<HCardProperty> properties = new LinkedList<HCardProperty>();
 			
 			boolean isValueClass = false;
 			
-			if ( hClass != null ) for ( String hClassElement : hClass.split("\\s+") ) {
-				if ( "value".equals(hClassElement) ) isValueClass = true;
-				HCardProperty property = HCardProperty.fromClassAttribute(stack.isEmpty() ? null : stack.peek().properties, hClassElement);
-				if ( property != null ) properties.add(property);
-			}
+			if ( hClass != null ) {
+                for ( String hClassElement : hClass.split("\\s+") ) {
+                	if ( "value".equals(hClassElement) ) {
+                        isValueClass = true;
+                    }
+                	HCardProperty property = HCardProperty.fromClassAttribute(stack.isEmpty() ? null : stack.peek().properties, hClassElement);
+                	if ( property != null ) {
+                        properties.add(property);
+                    }
+                }
+            }
 			
 			int pSize = properties.size();
 			boolean treatAsEndTag = false;
@@ -415,76 +494,119 @@ public class HCardParser {
 			if ( pSize == 0 && isValueClass && !stack.isEmpty() ) {
 				properties.addAll(stack.peek().properties);
 				pSize = properties.size();
-			} else isValueClass = false;
+			} else {
+                isValueClass = false;
+            }
 			
 			if ( pSize > 0 ) {
 				List<String> values = new LinkedList<String>();
 				if ( "ABBR".equals(name) ) {
 					String abbrTitle = tag.getAttribute("title");
 					if ( abbrTitle != null ) {
-						for ( int i = 0 ; i < pSize ; i++ ) values.add(abbrTitle);
+						for ( int i = 0 ; i < pSize ; i++ ) {
+                            values.add(abbrTitle);
+                        }
 						treatAsEndTag = true;
 					}
 				} else if ( "BR".equals(name) || "HR".equals(name) ) {
-					for ( int i = 0 ; i < pSize ; i++ ) values.add("");
+					for ( int i = 0 ; i < pSize ; i++ ) {
+                        values.add("");
+                    }
 					treatAsEndTag = true;
 				} else if ( "AREA".equals(name) ) {
 					treatAsEndTag = true;
 					String areaHref = tag.getAttribute("href");
 					String areaAlt = tag.getAttribute("alt");
-					if ( areaAlt == null ) areaAlt = "";
+					if ( areaAlt == null ) {
+                        areaAlt = "";
+                    }
 					
 					for ( HCardProperty property : properties ) {
-						if ( areaHref != null && property.isUrl() ) values.add(areaHref);
-						else values.add(areaAlt);
+						if ( areaHref != null && property.isUrl() ) {
+                            values.add(areaHref);
+                        } else {
+                            values.add(areaAlt);
+                        }
 					}
 				}
 				else if ( "A".equals(name) ) {
 					String aHref = tag.getAttribute("href");
-					if ( aHref != null ) for ( HCardProperty property : properties ) values.add(property.isUrl() ? aHref : null);
+					if ( aHref != null ) {
+                        for ( HCardProperty property : properties ) {
+                            values.add(property.isUrl() ? aHref : null);
+                        }
+                    }
 				} else if ( "OBJECT".equals(name) ) {
 					String objectData = tag.getAttribute("data");
 					if ( objectData != null ) {
 						String url = objectData;
-						for ( HCardProperty property : properties ) values.add(property.isUrl() ? url : null);
+						for ( HCardProperty property : properties ) {
+                            values.add(property.isUrl() ? url : null);
+                        }
 					}
 				} else if ( "IMG".equals(name) ) {
 					treatAsEndTag = true;
 					String imgSrc = tag.getAttribute("src");
 					String imgAlt = tag.getAttribute("alt");
-					if ( imgAlt == null ) imgAlt = "";
+					if ( imgAlt == null ) {
+                        imgAlt = "";
+                    }
 					
 					for ( HCardProperty property : properties ) {
-						if ( imgSrc != null && property.isUrl() ) values.add(imgSrc);
-						else values.add(imgAlt);
+						if ( imgSrc != null && property.isUrl() ) {
+                            values.add(imgSrc);
+                        } else {
+                            values.add(imgAlt);
+                        }
 					}
 				} 
 				
 				boolean buildText = false;
-				if ( values.isEmpty() ) for ( int i = 0 ; i < pSize ; i++ ) values.add(null);
-				for ( String value : values ) if ( value == null ) {
-					buildText = true;
-					break;
-				}
+				if ( values.isEmpty() ) {
+                    for ( int i = 0 ; i < pSize ; i++ ) {
+                        values.add(null);
+                    }
+                }
+				for ( String value : values ) {
+                    if ( value == null ) {
+                    	buildText = true;
+                    	break;
+                    }
+                }
 				
 				Marker marker = new Marker(properties, values, buildText, tag.getTagName(), tag.getAttribute("rel"));
-				if ( isValueClass ) marker.valueExcerpt = true;
-				else openResults.addAll(marker.results);
+				if ( isValueClass ) {
+                    marker.valueExcerpt = true;
+                } else {
+                    openResults.addAll(marker.results);
+                }
 				stack.addFirst(marker);
 				
-				if ( treatAsEndTag || tag.isEndTag() || tag.getAttributeEx("/") != null ) finalizeTag();
+				if ( treatAsEndTag || tag.isEndTag() || tag.getAttributeEx("/") != null ) {
+                    finalizeTag();
+                }
 			} else {
 				Appendable sb = getBuildersOnStack();
 				if ( sb != null ) {
-					if ( "BR".equals(name) ) sb.append("\n");
-					else if ( "LI".equals(name) ) sb.appendSoftLineBreak().append(" * ");
-					else if ( "DD".equals(name) ) sb.appendSoftLineBreak().append("  ");
-					else if ( name.matches("^H[123456]$") ) sb.appendSoftLineBreak().append('\n');
-					else if ( "P".equals(name) ) sb.appendSoftLineBreak().append('\n');
-					else if ( "Q".equals(name) ) sb.append('"');
-					else if ( "SUB".equals(name) ) sb.append('(');
-					else if ( "SUP".equals(name) ) sb.append('[');
-					else if ( CONVERT_OPEN_TAG_TO_SOFT_BREAK.contains(name) ) sb.appendSoftLineBreak();
+					if ( "BR".equals(name) ) {
+                        sb.append("\n");
+                    } else if ( "LI".equals(name) ) {
+                        sb.appendSoftLineBreak().append(" * ");
+                    } else if ( "DD".equals(name) ) {
+                        sb.appendSoftLineBreak().append("  ");
+                    } else if ( name.matches("^H[123456]$") ) {
+                        sb.appendSoftLineBreak().append('\n');
+                    } else if ( "P".equals(name) ) {
+                        sb.appendSoftLineBreak().append('\n');
+                    } else if ( "Q".equals(name) ) {
+                        sb.append('"');
+                    } else if ( "SUB".equals(name) ) {
+                        sb.append('(');
+                    } else if ( "SUP".equals(name) ) {
+                        sb.append('[');
+                    } else if ( CONVERT_OPEN_TAG_TO_SOFT_BREAK.contains(name) ) {
+                        sb.appendSoftLineBreak();
+                    }
 				}
 			}
 		}
@@ -492,13 +614,18 @@ public class HCardParser {
 		private URI fixUrl(String relativeUrl) {
 			try {
 				URI base = defaultBase;
-				for ( Base potentialBase : baseStack ) if ( potentialBase.uri != null && potentialBase.uri.isAbsolute() ) {
-					base = potentialBase.uri;
-					break;
-				}
+				for ( Base potentialBase : baseStack ) {
+                    if ( potentialBase.uri != null && potentialBase.uri.isAbsolute() ) {
+                    	base = potentialBase.uri;
+                    	break;
+                    }
+                }
 				
-				if ( base == null || !base.isAbsolute() ) return new URI(relativeUrl);
-				else return base.resolve(relativeUrl);
+				if ( base == null || !base.isAbsolute() ) {
+                    return new URI(relativeUrl);
+                } else {
+                    return base.resolve(relativeUrl);
+                }
 			} catch ( URISyntaxException e ) {
 				return null;
 			} catch ( Exception e ) {
@@ -518,38 +645,57 @@ public class HCardParser {
 			}
 			
 			Appendable append(String s) {
-				for ( StringBuilder sb : builders ) sb.append(s);
+				for ( StringBuilder sb : builders ) {
+                    sb.append(s);
+                }
 				return this;
 			}
 			
 			Appendable append(char c) {
-				for ( StringBuilder sb : builders ) sb.append(c);
+				for ( StringBuilder sb : builders ) {
+                    sb.append(c);
+                }
 				return this;
 			}
 			
 			Appendable appendSoftSpace() {
-				for ( StringBuilder sb : builders )
-					if ( sb.length() > 0 && !Character.isWhitespace(sb.charAt(sb.length() -1)) ) sb.append(' ');
+				for ( StringBuilder sb : builders ) {
+                    if ( sb.length() > 0 && !Character.isWhitespace(sb.charAt(sb.length() -1)) ) {
+                        sb.append(' ');
+                    }
+                }
 				return this;
 			}
 			
 			Appendable appendSoftLineBreak() {
-				for ( StringBuilder sb : builders )
-					if ( sb.length() == 0 || sb.charAt(sb.length() -1) != '\n' ) sb.append('\n');
+				for ( StringBuilder sb : builders ) {
+                    if ( sb.length() == 0 || sb.charAt(sb.length() -1) != '\n' ) {
+                        sb.append('\n');
+                    }
+                }
 				return this;
 			}
 		}
 		
 		private Appendable getBuildersOnStack() {
 			List<StringBuilder> list = new ArrayList<StringBuilder>();
-			for ( Marker m : stack ) if ( m.sb != null && !m.isBeingExcerpted ) list.add(m.sb);
-			if ( list.size() == 0 ) return null;
-			else return new Appendable(list);
+			for ( Marker m : stack ) {
+                if ( m.sb != null && !m.isBeingExcerpted ) {
+                    list.add(m.sb);
+                }
+            }
+			if ( list.size() == 0 ) {
+                return null;
+            } else {
+                return new Appendable(list);
+            }
 		}
 		
 		private void finalizeTag() {
 			Marker marker = stack.poll();
-			if ( marker == null ) return;
+			if ( marker == null ) {
+                return;
+            }
 			
 			if ( marker.valueExcerpt ) {
 				stack.peek().toValueExcerptMode(marker.sb.toString());
@@ -567,17 +713,22 @@ public class HCardParser {
 				HCardProperty property = properties.next();
 				Result result = tagResults.next();
 				String value = presets.next();
-				if ( value == null ) value = text.trim();
+				if ( value == null ) {
+                    value = text.trim();
+                }
 				result.value = value.trim();
 				result.uri = property.isUrl() ? fixUrl(result.value.trim()) : null;
 				
-				if ( property.isTopLevel() ) results.add(result);
-				else {
+				if ( property.isTopLevel() ) {
+                    results.add(result);
+                } else {
 					HCardProperty parent = property.parent();
 					for ( int i = openResults.size()-1 ; i >= 0 ; i-- ) {
 						Result pRes = openResults.get(i);
 						if ( pRes.property == parent ) {
-							if ( pRes.subResults == null ) pRes.subResults = new ArrayList<Result>();
+							if ( pRes.subResults == null ) {
+                                pRes.subResults = new ArrayList<Result>();
+                            }
 							pRes.subResults.add(result);
 							break;
 						}
@@ -587,14 +738,18 @@ public class HCardParser {
 		}
 		
 		private void finalizeHCard() {
-			while ( !stack.isEmpty() ) finalizeTag();
+			while ( !stack.isEmpty() ) {
+                finalizeTag();
+            }
 			
 			hCardTagName = null;
 			hCards.add(HCardCreator.createHCard(results));
 			this.hCardTagNameLevel = 0;
 			this.results.clear();
 			this.stack.clear();
-			if ( hCards.size() == toParse ) throw new HCardFound();
+			if ( hCards.size() == toParse ) {
+                throw new HCardFound();
+            }
 		}
 	}
 	

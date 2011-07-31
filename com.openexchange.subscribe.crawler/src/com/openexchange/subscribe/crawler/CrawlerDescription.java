@@ -82,9 +82,15 @@ public class CrawlerDescription {
 
     public void finishUp (List<Step> steps){
         Workflow workflow = new Workflow(steps);
-        if (mobileUserAgentEnabled) workflow.setMobileUserAgent(true);  
-        if (javascriptEnabled) workflow.setEnableJavascript(true);
-        if (quirkyCookieQuotes) workflow.setQuirkyCookieQuotes(true);
+        if (mobileUserAgentEnabled) {
+            workflow.setMobileUserAgent(true);
+        }  
+        if (javascriptEnabled) {
+            workflow.setEnableJavascript(true);
+        }
+        if (quirkyCookieQuotes) {
+            workflow.setQuirkyCookieQuotes(true);
+        }
         this.setWorkflowString(Yaml.dump(workflow));
     }
     

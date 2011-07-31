@@ -21,7 +21,9 @@ import org.microformats.hCard.HCardParser.Result;
 
 class HCardCreator {
 	static HCard.Name createName(Result result) {
-		if ( result.property != HCardProperty.N ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.N ) {
+            throw new IllegalArgumentException();
+        }
 		
 		String familyName = null;
 		String givenName = null;
@@ -30,25 +32,33 @@ class HCardCreator {
 		List<String> honorificPrefixes = new ArrayList<String>();
 		List<String> honorificSuffixes = new ArrayList<String>();
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case N__FAMILY_NAME:
-				if ( familyName == null ) familyName = sub.value;
-				break;
-			case N__GIVEN_NAME:
-				if ( givenName == null ) givenName = sub.value;
-				break;
-			case N__ADDITIONAL_NAME: additionalNames.add(sub.value); break;
-			case N__HONORIFIC_PREFIX: honorificPrefixes.add(sub.value); break;
-			case N__HONORIFIC_SUFFIX: honorificSuffixes.add(sub.value); break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case N__FAMILY_NAME:
+            		if ( familyName == null ) {
+                        familyName = sub.value;
+                    }
+            		break;
+            	case N__GIVEN_NAME:
+            		if ( givenName == null ) {
+                        givenName = sub.value;
+                    }
+            		break;
+            	case N__ADDITIONAL_NAME: additionalNames.add(sub.value); break;
+            	case N__HONORIFIC_PREFIX: honorificPrefixes.add(sub.value); break;
+            	case N__HONORIFIC_SUFFIX: honorificSuffixes.add(sub.value); break;
+            	}
+            }
+        }
 		
 		return new HCard.Name(familyName, givenName, additionalNames, honorificPrefixes, honorificSuffixes);
 	}
 	
 	static HCard.Address createAddress(Result result) {
-		if ( result.property != HCardProperty.ADR ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.ADR ) {
+            throw new IllegalArgumentException();
+        }
 		
 		List<String> types = new ArrayList<String>();
 		String postOfficeBox = null;
@@ -59,34 +69,52 @@ class HCardCreator {
 		String postalCode = null;
 		String countryName = null;
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case ADR__COUNTRY_NAME:
-				if ( countryName == null ) countryName = sub.value;
-				break;
-			case ADR__EXTENDED_ADDRESS:
-				if ( extendedAddress == null ) extendedAddress = sub.value;
-				break;
-			case ADR__LOCALITY:
-				if ( locality == null ) locality = sub.value;
-				break;
-			case ADR__POST_OFFICE_BOX:
-				if ( postalCode == null ) postOfficeBox = sub.value;
-				break;
-			case ADR__POSTAL_CODE:
-				if ( postalCode == null ) postalCode = sub.value;
-				break;
-			case ADR__REGION:
-				if ( region == null ) region = sub.value;
-				break;
-			case ADR__STREET_ADDRESS:
-				if ( streetAddress == null ) streetAddress = sub.value;
-				break;
-			case ADR__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case ADR__COUNTRY_NAME:
+            		if ( countryName == null ) {
+                        countryName = sub.value;
+                    }
+            		break;
+            	case ADR__EXTENDED_ADDRESS:
+            		if ( extendedAddress == null ) {
+                        extendedAddress = sub.value;
+                    }
+            		break;
+            	case ADR__LOCALITY:
+            		if ( locality == null ) {
+                        locality = sub.value;
+                    }
+            		break;
+            	case ADR__POST_OFFICE_BOX:
+            		if ( postalCode == null ) {
+                        postOfficeBox = sub.value;
+                    }
+            		break;
+            	case ADR__POSTAL_CODE:
+            		if ( postalCode == null ) {
+                        postalCode = sub.value;
+                    }
+            		break;
+            	case ADR__REGION:
+            		if ( region == null ) {
+                        region = sub.value;
+                    }
+            		break;
+            	case ADR__STREET_ADDRESS:
+            		if ( streetAddress == null ) {
+                        streetAddress = sub.value;
+                    }
+            		break;
+            	case ADR__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
+            	}
+            }
+        }
 		
-		if ( types.isEmpty() ) types = HCard.Address.DEFAULT_TYPE_LIST;
+		if ( types.isEmpty() ) {
+            types = HCard.Address.DEFAULT_TYPE_LIST;
+        }
 		
 		return new HCard.Address(types, streetAddress, extendedAddress, locality, postOfficeBox, region, postalCode, countryName);
 	}
@@ -98,34 +126,52 @@ class HCardCreator {
 		if ( result.uri != null && TEL_URL_SCHEMES.contains(result.uri.getScheme()) ) {
 			value = result.uri.getSchemeSpecificPart();
 			int idx = value.indexOf(';');
-			if ( idx != -1 ) value = value.substring(0, idx);
-		}
-		else value = result.value;
+			if ( idx != -1 ) {
+                value = value.substring(0, idx);
+            }
+		} else {
+            value = result.value;
+        }
 		
-		if ( value != null ) value = value.trim();
+		if ( value != null ) {
+            value = value.trim();
+        }
 		return value;
 	}
 	
 	static HCard.Tel createTel(Result result) {
-		if ( result.property != HCardProperty.TEL ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.TEL ) {
+            throw new IllegalArgumentException();
+        }
 		
 		List<String> types = new ArrayList<String>();
 		String value = null;
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case TEL__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
-			case TEL__VALUE:
-				if ( value == null ) value = getTelValueFrom(sub);
-				break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case TEL__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
+            	case TEL__VALUE:
+            		if ( value == null ) {
+                        value = getTelValueFrom(sub);
+                    }
+            		break;
+            	}
+            }
+        }
 		
-		if ( types.isEmpty() ) types = HCard.Tel.DEFAULT_TYPE_LIST;
-		if ( value == null ) value = getTelValueFrom(result);
+		if ( types.isEmpty() ) {
+            types = HCard.Tel.DEFAULT_TYPE_LIST;
+        }
+		if ( value == null ) {
+            value = getTelValueFrom(result);
+        }
 		
-		if ( value == null || value.length() == 0 ) return null;
-		else return new HCard.Tel(value, types.toArray(new String[0]));
+		if ( value == null || value.length() == 0 ) {
+            return null;
+        } else {
+            return new HCard.Tel(value, types.toArray(new String[0]));
+        }
 	}
 	
 	private static String getEmailValueFrom(Result result) {
@@ -133,52 +179,78 @@ class HCardCreator {
 		
 		if ( result.uri != null && "mailto".equals(result.uri.getScheme()) ) {
 			value = result.uri.getSchemeSpecificPart();
-			if ( value.indexOf("?") > -1 ) value = value.substring(0, value.indexOf("?"));
-		}
-		else value = result.value;
+			if ( value.indexOf("?") > -1 ) {
+                value = value.substring(0, value.indexOf("?"));
+            }
+		} else {
+            value = result.value;
+        }
 		
-		if ( value != null ) value = value.trim();
+		if ( value != null ) {
+            value = value.trim();
+        }
 		return value;
 	}
 	
 	static HCard.Email createEmail(Result result) {
-		if ( result.property != HCardProperty.EMAIL ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.EMAIL ) {
+            throw new IllegalArgumentException();
+        }
 		
 		List<String> types = new ArrayList<String>();
 		String value = null;
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case EMAIL__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
-			case EMAIL__VALUE:
-				if ( value == null ) value = getEmailValueFrom(sub);
-				break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case EMAIL__TYPE: types.add(sub.value.toLowerCase(Locale.ENGLISH)); break;
+            	case EMAIL__VALUE:
+            		if ( value == null ) {
+                        value = getEmailValueFrom(sub);
+                    }
+            		break;
+            	}
+            }
+        }
 		
-		if ( types.isEmpty() ) types = HCard.Email.DEFAULT_TYPE_LIST;
-		if ( value == null ) value = getEmailValueFrom(result);
+		if ( types.isEmpty() ) {
+            types = HCard.Email.DEFAULT_TYPE_LIST;
+        }
+		if ( value == null ) {
+            value = getEmailValueFrom(result);
+        }
 		
-		if ( value == null || value.length() == 0 ) return null;
-		else return new HCard.Email(value, types.toArray(new String[0]));
+		if ( value == null || value.length() == 0 ) {
+            return null;
+        } else {
+            return new HCard.Email(value, types.toArray(new String[0]));
+        }
 	}
 	
 	static HCard.Geolocation createGeolocation(Result result) {
-		if ( result.property != HCardProperty.GEO ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.GEO ) {
+            throw new IllegalArgumentException();
+        }
 		
 		String latitude = null;
 		String longitude = null;
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case GEO__LATITUDE:
-				if ( latitude == null ) latitude = sub.value;
-				break;
-			case GEO__LONGITUDE:
-				if ( longitude == null ) longitude = sub.value;
-				break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case GEO__LATITUDE:
+            		if ( latitude == null ) {
+                        latitude = sub.value;
+                    }
+            		break;
+            	case GEO__LONGITUDE:
+            		if ( longitude == null ) {
+                        longitude = sub.value;
+                    }
+            		break;
+            	}
+            }
+        }
 		
 		if ( latitude == null && longitude == null && result.value != null ) {
 			String[] elems = result.value.split(";");
@@ -198,27 +270,39 @@ class HCardCreator {
 	}
 	
 	static HCard.Organization createOrganization(Result result) {
-		if ( result.property != HCardProperty.ORG ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.ORG ) {
+            throw new IllegalArgumentException();
+        }
 		
 		String unit = null;
 		String name = null;
 		
-		if ( result.subResults != null ) for ( Result sub : result.subResults ) {
-			switch ( sub.property ) {
-			case ORG__ORGANIZATION_NAME:
-				if ( name == null ) name = sub.value;
-				break;
-			case ORG__ORGANIZATION_UNIT:
-				if ( unit == null ) unit = sub.value;
-				break;
-			}
-		}
+		if ( result.subResults != null ) {
+            for ( Result sub : result.subResults ) {
+            	switch ( sub.property ) {
+            	case ORG__ORGANIZATION_NAME:
+            		if ( name == null ) {
+                        name = sub.value;
+                    }
+            		break;
+            	case ORG__ORGANIZATION_UNIT:
+            		if ( unit == null ) {
+                        unit = sub.value;
+                    }
+            		break;
+            	}
+            }
+        }
 		
 		if ( unit == null && name == null ) {
 			name = result.value;
-			if ( name == null ) name = "";
+			if ( name == null ) {
+                name = "";
+            }
 			name = name.trim();
-			if ( name.length() == 0 ) return null;
+			if ( name.length() == 0 ) {
+                return null;
+            }
 			unit = "";
 		}
 		
@@ -226,12 +310,18 @@ class HCardCreator {
 	}
 	
 	static HCard.XFNURL createXFNURL(Result result) {
-		if ( result.property != HCardProperty.URL ) throw new IllegalArgumentException();
+		if ( result.property != HCardProperty.URL ) {
+            throw new IllegalArgumentException();
+        }
 		
 		URI url = result.uri;
-		if ( result.rel == null || result.rel.length() == 0 ) return new HCard.XFNURL(url, null);
+		if ( result.rel == null || result.rel.length() == 0 ) {
+            return new HCard.XFNURL(url, null);
+        }
 		List<XFNRelationship> list = new ArrayList<XFNRelationship>();
-		for ( String rel : result.rel.split("\\s+") ) list.add(XFNRelationship.create(rel));
+		for ( String rel : result.rel.split("\\s+") ) {
+            list.add(XFNRelationship.create(rel));
+        }
 		return new HCard.XFNURL(url, list);
 	}
 	
@@ -267,104 +357,158 @@ class HCardCreator {
 			switch ( result.property ) {
 			case ADR:
 				HCard.Address adr = createAddress(result);
-				if ( adr != null ) adrs.add(adr);
+				if ( adr != null ) {
+                    adrs.add(adr);
+                }
 				break;
 			case AGENT:
 				URI agent = result.uri;
-				if ( agent != null ) agents.add(agent);
+				if ( agent != null ) {
+                    agents.add(agent);
+                }
 				break;
 			case BDAY:
-				if ( bday == null ) bday = parseDate(result.value);
+				if ( bday == null ) {
+                    bday = parseDate(result.value);
+                }
 				break;
 			case CATEGORY:
 				String category = result.value;
-				if ( category != null ) categories.add(category);
+				if ( category != null ) {
+                    categories.add(category);
+                }
 				break;
 			case CLASS:
-				if ( accessClass == null ) accessClass = result.value;
+				if ( accessClass == null ) {
+                    accessClass = result.value;
+                }
 				break;
 			case EMAIL:
 				HCard.Email email = createEmail(result);
-				if ( email != null ) emails.add(email);
+				if ( email != null ) {
+                    emails.add(email);
+                }
 				break;
 			case FN:
-				if ( fn == null ) fn = result.value;
+				if ( fn == null ) {
+                    fn = result.value;
+                }
 				break;
 			case GEO:
-				if ( geo == null ) geo = createGeolocation(result);
+				if ( geo == null ) {
+                    geo = createGeolocation(result);
+                }
 				break;
 			case KEY:
 				String key = result.value;
-				if ( key != null ) keys.add(key);
+				if ( key != null ) {
+                    keys.add(key);
+                }
 				break;
 			case LABEL:
 				String label = result.value;
-				if ( label != null ) labels.add(label);
+				if ( label != null ) {
+                    labels.add(label);
+                }
 				break;
 			case LOGO:
 				URI logo = result.uri;
-				if ( logo != null ) logos.add(logo);
+				if ( logo != null ) {
+                    logos.add(logo);
+                }
 				break;
 			case MAILER:
 				String mailer = result.value;
-				if ( mailer != null ) mailers.add(mailer);
+				if ( mailer != null ) {
+                    mailers.add(mailer);
+                }
 				break;
 			case N:
-				if ( n == null ) n = createName(result);
+				if ( n == null ) {
+                    n = createName(result);
+                }
 				break;
 			case NICKNAME:
 				String nickname = result.value;
-				if ( nickname != null ) nicknames.add(nickname);
+				if ( nickname != null ) {
+                    nicknames.add(nickname);
+                }
 				break;
 			case NOTE:
 				String note = result.value;
-				if ( note != null ) notes.add(note);
+				if ( note != null ) {
+                    notes.add(note);
+                }
 				break;
 			case ORG:
 				HCard.Organization org = createOrganization(result);
-				if ( org != null ) orgs.add(org);
+				if ( org != null ) {
+                    orgs.add(org);
+                }
 				break;
 			case PHOTO:
 				URI photo = result.uri;
-				if ( photo != null ) photos.add(photo);
+				if ( photo != null ) {
+                    photos.add(photo);
+                }
 				break;
 			case REV:
-				if ( rev == null ) rev = parseDate(result.value);
+				if ( rev == null ) {
+                    rev = parseDate(result.value);
+                }
 				break;
 			case ROLE:
 				String role = result.value;
-				if ( role != null ) roles.add(role);
+				if ( role != null ) {
+                    roles.add(role);
+                }
 				break;
 			case SORT_STRING:
-				if ( sortString == null ) sortString = result.value;
+				if ( sortString == null ) {
+                    sortString = result.value;
+                }
 				break;
 			case SOUND:
 				URI sound = result.uri;
-				if ( sound != null ) sounds.add(sound);
+				if ( sound != null ) {
+                    sounds.add(sound);
+                }
 				break;
 			case TEL:
 				HCard.Tel tel = createTel(result);
-				if ( tel != null ) tels.add(tel);
+				if ( tel != null ) {
+                    tels.add(tel);
+                }
 				break;
 			case TITLE:
 				String title = result.value;
-				if ( title != null ) titles.add(title);
+				if ( title != null ) {
+                    titles.add(title);
+                }
 				break;
 			case TZ:
-				if ( tz == null ) tz = parseTimezone(result.value);
+				if ( tz == null ) {
+                    tz = parseTimezone(result.value);
+                }
 				break;
 			case UID:
-				if ( uid == null ) uid = result.value;
+				if ( uid == null ) {
+                    uid = result.value;
+                }
 				break;
 			case URL:
 				HCard.XFNURL url = createXFNURL(result);
-				if ( url != null ) urls.add(url);
+				if ( url != null ) {
+                    urls.add(url);
+                }
 				break;
 			}
 		}
 		
 		//No fn means this is not a (valid) hCard.
-		if ( fn == null ) return null;
+		if ( fn == null ) {
+            return null;
+        }
 		
 		boolean isOrg = orgs.size() == 1 && fn.equals(orgs.get(0).name);
 		
@@ -378,10 +522,14 @@ class HCardCreator {
 		}
 		
 		// ---- Organization Contact Info - always has an empty 'N' value.
-		if ( isOrg ) n = new HCard.Name(null, null, null, null, null);
+		if ( isOrg ) {
+            n = new HCard.Name(null, null, null, null, null);
+        }
 		
 		// ---- Implied "n" optimization
-		if ( n == null && !isOrg ) n = impliedFN2N(fn);
+		if ( n == null && !isOrg ) {
+            n = impliedFN2N(fn);
+        }
 		
 		return new HCard(fn, n, nicknames, photos, bday, adrs, labels, tels, emails, mailers, tz, geo, titles, roles, logos,
 				agents, orgs, categories, notes, rev, sortString, sounds, uid, urls, accessClass, keys);
@@ -404,7 +552,9 @@ class HCardCreator {
 			}
 			
 			return new HCard.Name(family, given, null, null, null);
-		} else return null;
+		} else {
+            return null;
+        }
 	}
 	
 	private static Long parseDate(String value) {
@@ -420,13 +570,17 @@ class HCardCreator {
 	private static Long parseTimezone(String value) {
 		try {
 			Matcher matcher = TIMEZONE_REGEX.matcher(value);
-			if ( !matcher.matches() ) return null;
+			if ( !matcher.matches() ) {
+                return null;
+            }
 			boolean negative = matcher.group(1).charAt(0) == '-';
 			int hours = Integer.parseInt(matcher.group(2));
 			int minutes = matcher.groupCount() > 2 ? Integer.parseInt(matcher.group(3)) : 0;
 			
 			long millis = ((hours * 60L) + minutes) * 60L * 1000L;
-			if ( negative ) millis = -millis;
+			if ( negative ) {
+                millis = -millis;
+            }
 			return millis;
 		} catch ( Exception e ) {
 			return null;

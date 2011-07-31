@@ -217,20 +217,26 @@ public class ParticipantParser {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             JSONParticipant other = (JSONParticipant) obj;
             if (emailAddress == null) {
-                if (other.emailAddress != null)
+                if (other.emailAddress != null) {
                     return false;
-            } else if (!emailAddress.equals(other.emailAddress))
+                }
+            } else if (!emailAddress.equals(other.emailAddress)) {
                 return false;
-            if (type != other.type)
+            }
+            if (type != other.type) {
                 return false;
+            }
             return true;
         }
 

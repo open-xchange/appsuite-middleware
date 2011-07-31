@@ -52,7 +52,9 @@ public final class XFNRelationship {
 	}
 	
 	@Override public boolean equals(Object o) {
-		if ( !(o instanceof XFNRelationship) ) return false;
+		if ( !(o instanceof XFNRelationship) ) {
+            return false;
+        }
 		return ((XFNRelationship)o).rel.equals(rel);
 	}
 	
@@ -65,7 +67,9 @@ public final class XFNRelationship {
 	}
 	
 	public static XFNRelationship create(String rel) {
-		if ( rel == null ) throw new NullPointerException();
+		if ( rel == null ) {
+            throw new NullPointerException();
+        }
 		return lookup(new XFNRelationship(rel));
 	}
 	
@@ -77,8 +81,12 @@ public final class XFNRelationship {
 		synchronized ( VALUES ) {
 			WeakReference<XFNRelationship> weak = VALUES.get(xfn);
 			XFNRelationship xfn2 = null;
-			if ( weak != null ) xfn2 = weak.get();
-			if ( xfn2 != null ) return xfn2;
+			if ( weak != null ) {
+                xfn2 = weak.get();
+            }
+			if ( xfn2 != null ) {
+                return xfn2;
+            }
 			VALUES.put(xfn, new WeakReference<XFNRelationship>(xfn));
 			return xfn;
 		}

@@ -180,12 +180,14 @@ public final class Collections {
         for(T hay: haystack){
             for(T needle: needles){
                 if(needle == null){
-                    if(hay == null)
+                    if(hay == null) {
                         return true;
+                    }
                     continue;
                 }
-                if(needle.equals(hay))
+                if(needle.equals(hay)) {
                     return true;
+                }
             }
         }
         return false;

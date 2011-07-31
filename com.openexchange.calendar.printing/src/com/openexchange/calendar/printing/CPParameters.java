@@ -264,9 +264,9 @@ public class CPParameters {
 
     private Date extractOptionalDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingOptionalFields.add(parameter);
-        else {
+        } else {
             try {
                 long time = Long.parseLong(val);
                 int offset = zone.getOffset(time);
@@ -281,9 +281,9 @@ public class CPParameters {
 
     private Date extractMandatoryDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingMandatoryFields.add(parameter);
-        else {
+        } else {
             try {
                 long time = Long.parseLong(val);
                 int offset = zone.getOffset(time);
@@ -298,9 +298,9 @@ public class CPParameters {
 
     private int extractOptionalIntParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingOptionalFields.add(parameter);
-        else {
+        } else {
             try {
                 return Integer.parseInt(val);
             } catch (NumberFormatException e) {
@@ -313,9 +313,9 @@ public class CPParameters {
 
     private int extractMandatoryIntParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingMandatoryFields.add(parameter);
-        else {
+        } else {
             try {
                 return Integer.valueOf(val).intValue();
             } catch (NumberFormatException e) {
@@ -328,9 +328,9 @@ public class CPParameters {
 
     private TimeZone extractOptionalTimezoneParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingOptionalFields.add(parameter);
-        else {
+        } else {
             try {
                 return TimeZone.getTimeZone(val);
             } catch (NumberFormatException e) {
@@ -343,15 +343,17 @@ public class CPParameters {
 
     private String extractOptionalStringParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingOptionalFields.add(parameter);
+        }
         return val;
     }
     
     private String extractMandatoryStringParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
-        if (val == null)
+        if (val == null) {
             missingMandatoryFields.add(parameter);
+        }
         return val;
     }
 

@@ -90,8 +90,9 @@ public class I18nServiceTrackerCustomizer implements ServiceTrackerCustomizer, S
     }
 
     public String translate(Locale locale, String translateMe) {
-        if(services.containsKey(locale))
+        if(services.containsKey(locale)) {
             return services.get(locale).getLocalized(translateMe);
+        }
         return translateMe;
     }
 }

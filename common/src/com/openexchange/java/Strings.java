@@ -122,19 +122,22 @@ public class Strings {
 		
 		byte[] bytes = str.getBytes();
 		for(byte[] bom: byteOrderMarks){
-			if(bom.length > bytes.length)
-				continue;
+			if(bom.length > bytes.length) {
+                continue;
+            }
 			
 			String pattern = new String(bom);
-			if(! str.startsWith(pattern))
-				continue;
+			if(! str.startsWith(pattern)) {
+                continue;
+            }
 			
 			int bomLen = new String(bom).getBytes().length; //sadly the BOM got encoded meanwhile
 			
 			int len = bytes.length-bomLen;
 			byte[] trimmed = new byte[len];
-			for(int i = 0; i < len; i++)
-				trimmed[i] = bytes[i+bomLen];
+			for(int i = 0; i < len; i++) {
+                trimmed[i] = bytes[i+bomLen];
+            }
 			return new String(trimmed);
 		}
 		

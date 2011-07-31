@@ -61,10 +61,11 @@ public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverte
 	@Override
     public String translateFromJSONtoDB(String fieldname) {
 		ContactField field = ContactField.getByAjaxName(fieldname);
-		if((field != null) && (field.getFieldName() != null))
-			return field.getFieldName();
-		else
-			return fieldname;
+		if((field != null) && (field.getFieldName() != null)) {
+            return field.getFieldName();
+        } else {
+            return fieldname;
+        }
 	}
 	
 	/**

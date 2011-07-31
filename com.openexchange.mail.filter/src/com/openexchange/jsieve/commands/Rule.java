@@ -145,8 +145,9 @@ public class Rule implements Comparable<Rule> {
     }
 
     public final ArrayList<Command> getCommands() {
-        if(commands == null)
+        if(commands == null) {
             commands = new ArrayList<Command>();
+        }
         return commands;
     }
 

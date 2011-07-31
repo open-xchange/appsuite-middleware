@@ -23,8 +23,9 @@ public class CalendarRequest {
     
     protected void convertExternalToInternalUsersIfPossible(CalendarObject appointmentObj, Context ctx, Log log){
 		Participant[] participants = appointmentObj.getParticipants();
-		if(participants == null)
-			return;
+		if(participants == null) {
+            return;
+        }
 		
 		UserService us = ServerServiceRegistry.getInstance().getService(UserService.class);
 		
@@ -34,8 +35,9 @@ public class CalendarRequest {
 				User foundUser;
 				try {
 					foundUser = us.searchUser(part.getEmailAddress(), ctx);
-					if(foundUser == null)
-						continue;
+					if(foundUser == null) {
+                        continue;
+                    }
 					participants[pos] = new UserParticipant(foundUser.getId());
 				} catch (OXException e) {
 					log.error(e); //...and continue doing this for the remaining users

@@ -99,82 +99,99 @@ public enum SuperCollator {
 		SuperCollator result = null;
 
 		result = getBySqlCollation(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getBySqlCharset(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getByJavaLocale(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getByName(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 		
 		return result;
 	}
 
 	public static SuperCollator getByJavaLocale(String something) {
-		if(something == null)
-			return null;
+		if(something == null) {
+            return null;
+        }
 		
 		String[] parts = something.split("_");
 
 		String lang = null, country = null, variant = null;
 		Locale javaLocale;
 
-		if (parts.length > 0)
-			lang = parts[0];
-		if (parts.length > 1)
-			country = parts[1];
-		if (parts.length > 2)
-			variant = parts[2];
+		if (parts.length > 0) {
+            lang = parts[0];
+        }
+		if (parts.length > 1) {
+            country = parts[1];
+        }
+		if (parts.length > 2) {
+            variant = parts[2];
+        }
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
 			if (javaLocale.getVariant().equalsIgnoreCase(variant)
 				&& javaLocale.getCountry().equalsIgnoreCase(country)
-				&& javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+				&& javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
 			if (javaLocale.getCountry().equalsIgnoreCase(country)
-				&& javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+				&& javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
-			if (javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+			if (javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		return null;
 	}
 
 	public static SuperCollator getBySqlCollation(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getSqlCollation().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getSqlCollation().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
 
 	public static SuperCollator getBySqlCharset(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getSqlCharset().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getSqlCharset().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
 	
 	public static SuperCollator getByName(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getName().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getName().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
 

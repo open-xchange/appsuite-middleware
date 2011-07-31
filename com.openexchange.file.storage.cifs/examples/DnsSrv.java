@@ -22,8 +22,9 @@ public class DnsSrv {
                 ret = nnfe;
             }
             int dot = name.indexOf('.');
-            if (dot == -1)
+            if (dot == -1) {
                 break;
+            }
             name = name.substring(dot + 1);
         }
 

@@ -132,7 +132,9 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         if (null != accountId){
             try {
                 Integer accountIdInt = Integer.parseInt(accountId);
-                if (null != accountIdInt) subscription.getConfiguration().put("account",accountIdInt);
+                if (null != accountIdInt) {
+                    subscription.getConfiguration().put("account",accountIdInt);
+                }
             } catch (NumberFormatException x) {
                 // Invalid account, but at least allow people to delete it.
             }

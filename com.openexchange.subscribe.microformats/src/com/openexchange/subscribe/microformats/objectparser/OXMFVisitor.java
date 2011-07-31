@@ -102,8 +102,9 @@ public class OXMFVisitor extends HCardVisitor {
         super.visitTag(tag);
         String hClass = tag.getAttribute("class");
 
-        if (hClass == null)
+        if (hClass == null) {
             return;
+        }
 
         if (hClass.equalsIgnoreCase("vcard")) {
             readingHCardNow = true;
@@ -145,14 +146,17 @@ public class OXMFVisitor extends HCardVisitor {
     public void visitStringNode(Text string) {
         super.visitStringNode(string);
 
-        if (!readingHCardNow)
+        if (!readingHCardNow) {
             return;
+        }
 
-        if (!readingSeparateValueNow && !readingElementValueNow)
+        if (!readingSeparateValueNow && !readingElementValueNow) {
             return;
+        }
 
-        if (attributeName == null)
+        if (attributeName == null) {
             throw new IllegalStateException("Reading an ox value without an ox element?");
+        }
 
         oxmfElement.put(attributeName, string.getText());
     }

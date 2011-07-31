@@ -154,12 +154,13 @@ public abstract class BaseContactSearchtermConverter {
 	}
 
 	protected <T> void traverseViaInOrder(SearchTerm<T> term) {
-		if(term instanceof SingleSearchTerm)
-			traverseViaInorder((SingleSearchTerm) term);
-		else if(term instanceof CompositeSearchTerm)
-			traverseViaInorder((CompositeSearchTerm) term);
-		else
-			System.err.println("Got a search term that was neither Composite nor Single. How?");
+		if(term instanceof SingleSearchTerm) {
+            traverseViaInorder((SingleSearchTerm) term);
+        } else if(term instanceof CompositeSearchTerm) {
+            traverseViaInorder((CompositeSearchTerm) term);
+        } else {
+            System.err.println("Got a search term that was neither Composite nor Single. How?");
+        }
 	}
 
 	protected void traverseViaInorder(SingleSearchTerm term) {
@@ -171,8 +172,9 @@ public abstract class BaseContactSearchtermConverter {
 		for(int i = 0; i < operands.length; i++){
 			Operand<?> o = operands[i];
 			
-			if(operation.getPosition() == OperationPosition.BEFORE)
-				bob.append(operation.getSqlRepresentation());
+			if(operation.getPosition() == OperationPosition.BEFORE) {
+                bob.append(operation.getSqlRepresentation());
+            }
 
 			if(o.getType() == Operand.Type.COLUMN){
 				String value = (String) o.getValue();
@@ -192,12 +194,15 @@ public abstract class BaseContactSearchtermConverter {
 				bob.append(handleCharset("?"));
 			}
 			
-			if(operation.getPosition() == OperationPosition.AFTER)
-				bob.append(" ").append(operation.getSqlRepresentation());
+			if(operation.getPosition() == OperationPosition.AFTER) {
+                bob.append(" ").append(operation.getSqlRepresentation());
+            }
 			
-			if(operation.getPosition() == OperationPosition.BETWEEN)
-				if((i+1) < operands.length) //don't place an operator after the last operand here
-					bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
+			if(operation.getPosition() == OperationPosition.BETWEEN) {
+                if((i+1) < operands.length) {
+                    bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
+                }
+            }
 			
 		}
 		bob.append(" ) ");
@@ -209,17 +214,21 @@ public abstract class BaseContactSearchtermConverter {
 		
 		bob.append(" ( ");
 		
-		if(operation.getPosition() == OperationPosition.BEFORE)
-			bob.append(operation.getSqlRepresentation());
+		if(operation.getPosition() == OperationPosition.BEFORE) {
+            bob.append(operation.getSqlRepresentation());
+        }
 
 		for(int i = 0; i < operands.length; i++){
 			traverseViaInOrder(operands[i]);
 			
-			if(operation.getPosition() == OperationPosition.AFTER)
-				bob.append(" ").append(operation.getSqlRepresentation());
-			if(operation.getPosition() == OperationPosition.BETWEEN)
-				if((i+1) < operands.length) //don't place an operator after the last operand
-					bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
+			if(operation.getPosition() == OperationPosition.AFTER) {
+                bob.append(" ").append(operation.getSqlRepresentation());
+            }
+			if(operation.getPosition() == OperationPosition.BETWEEN) {
+                if((i+1) < operands.length) {
+                    bob.append(" ").append(operation.getSqlRepresentation()).append("    ");
+                }
+            }
 		}
 		bob.append(" ) ");
 		
@@ -230,8 +239,9 @@ public abstract class BaseContactSearchtermConverter {
 	 * extract these separately because our access system works folder-based.
 	 */
 	protected void handleFolder(Operand<?> o) {
-		if(o.getType() == Operand.Type.COLUMN && o.getValue().equals(FOLDER_AJAXNAME))
-				nextIsFolder = true;
+		if(o.getType() == Operand.Type.COLUMN && o.getValue().equals(FOLDER_AJAXNAME)) {
+            nextIsFolder = true;
+        }
 		
 		if(o.getType() == Operand.Type.CONSTANT && nextIsFolder){
 				folders.add((String) o.getValue());
@@ -248,8 +258,9 @@ public abstract class BaseContactSearchtermConverter {
 	 * @return the value reformatted for SQL use (means: with some % in most cases)
 	 */
 	protected String handlePatternMatching(String value) {
-		if(!value.contains("*"))
-			return value;
+		if(!value.contains("*")) {
+            return value;
+        }
 			
 		value = value.replaceAll("\\*", "%");
 
@@ -263,8 +274,9 @@ public abstract class BaseContactSearchtermConverter {
 	 * Writes a CONVERT statement around the field in case there was a charset given
 	 */
 	protected String handleCharset(String field) {
-		if(charset == null)
-			return field;
+		if(charset == null) {
+            return field;
+        }
 		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(")").toString(); 
 	}
 
@@ -272,8 +284,9 @@ public abstract class BaseContactSearchtermConverter {
 	 * Adds a prefix to the field - if set.
 	 */
 	protected String handlePrefix(String field) {
-		if(getPrefix() == null)
-			return field;
+		if(getPrefix() == null) {
+            return field;
+        }
 		return new StringBuilder(getPrefix()).append(".").append(field).toString();
 	}
 	

@@ -116,7 +116,9 @@ public String getMessage() {
     String retval = "Encountered \"";
     Token tok = currentToken.next;
     for (int i = 0; i < maxSize; i++) {
-      if (i != 0) retval += " ";
+      if (i != 0) {
+        retval += " ";
+    }
       if (tok.kind == 0) {
         retval += tokenImage[0];
         break;

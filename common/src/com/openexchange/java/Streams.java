@@ -10,8 +10,9 @@ public class Streams {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		int buff;
 		
-		while((buff = is.read()) != -1)
-			bos.write(buff);
+		while((buff = is.read()) != -1) {
+            bos.write(buff);
+        }
 		
 		return bos.toByteArray(); 
 	}

@@ -74,16 +74,18 @@ public class HCardToContactTransformer {
 
     public List<Contact> transform(List<HCard> hcards){
         LinkedList<Contact> results = new LinkedList<Contact>();
-        for(HCard hcard: hcards)
+        for(HCard hcard: hcards) {
             results.add(transform(hcard));
+        }
         return results;
     }
 
 
     private Contact transform(HCard hcard) {
         Contact contact = new Contact();
-        if(hcard == null)
+        if(hcard == null) {
             return contact;
+        }
         
         handleName(hcard, contact);
         handleCompany(hcard, contact);
@@ -97,12 +99,14 @@ public class HCardToContactTransformer {
     }
 
     private void handleAdditionalInfo(HCard hcard, Contact c) {
-        if(hcard.bday != null)
-            c.setBirthday(new Date(hcard.bday)); 
+        if(hcard.bday != null) {
+            c.setBirthday(new Date(hcard.bday));
+        } 
 //        if( hcard.urls != null && hcard.urls.size() > 0)
 //            c.setURL(hcard.urls.get(0).toString());
-        if( hcard.notes != null && hcard.notes.size() > 0)
+        if( hcard.notes != null && hcard.notes.size() > 0) {
             c.setNote(hcard.notes.get(0));
+        }
     }
 
 
@@ -190,8 +194,9 @@ public class HCardToContactTransformer {
 
 
     private void handleImage(HCard hcard, Contact c) {
-        if(hcard.photos == null || hcard.photos.size() == 0)
+        if(hcard.photos == null || hcard.photos.size() == 0) {
             return;
+        }
         URI uri = hcard.photos.get(0);
         if("data".equalsIgnoreCase( uri.getScheme() ) ){
             String info = uri.getSchemeSpecificPart();
@@ -222,12 +227,14 @@ public class HCardToContactTransformer {
                 postponed.add(email);
             }
         }
-        for(Email email : postponed)
-            for(int field = Contact.EMAIL1; field <= Contact.EMAIL3; field++)
+        for(Email email : postponed) {
+            for(int field = Contact.EMAIL1; field <= Contact.EMAIL3; field++) {
                 if(!c.contains(field)){
                     c.set(field, email.value);
                     continue;
                 }
+            }
+        }
     }
 
 
@@ -278,19 +285,23 @@ public class HCardToContactTransformer {
                 postponed.add(tel);
             }
         }
-        for(Tel tel : postponedFax)
-            for(int field: new int[]{Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER})
+        for(Tel tel : postponedFax) {
+            for(int field: new int[]{Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER}) {
                 if(!c.contains(field)){
                     c.set(field, tel.value);
                     continue;
                 }
+            }
+        }
         
-        for(Tel tel : postponed)
-            for(int field = Contact.TELEPHONE_BUSINESS1; field <= Contact.FAX_OTHER ; field++)
+        for(Tel tel : postponed) {
+            for(int field = Contact.TELEPHONE_BUSINESS1; field <= Contact.FAX_OTHER ; field++) {
                 if(!c.contains(field)){
                     c.set(field, tel.value);
                     continue;
                 }
+            }
+        }
     }
 
 
@@ -298,19 +309,25 @@ public class HCardToContactTransformer {
         
         c.setGivenName(hcard.n.givenName);
         c.setSurName(hcard.n.familyName);
-        if(exist(hcard.n.additionalNames))
+        if(exist(hcard.n.additionalNames)) {
             c.setMiddleName( Strings.join( hcard.n.additionalNames, " "));
-        if(exist(hcard.titles))
+        }
+        if(exist(hcard.titles)) {
             c.setTitle( Strings.join( hcard.titles, " "));
-        if(exist(hcard.n.honorificPrefixes))
-            if(c.containsTitle())
+        }
+        if(exist(hcard.n.honorificPrefixes)) {
+            if(c.containsTitle()) {
                 c.setTitle(c.getTitle() + " " + Strings.join( hcard.n.honorificSuffixes, " "));
-            else
+            } else {
                 c.setTitle( Strings.join( hcard.n.honorificSuffixes, " "));
-        if(exist(hcard.n.honorificSuffixes))
+            }
+        }
+        if(exist(hcard.n.honorificSuffixes)) {
             c.setSuffix( Strings.join( hcard.n.honorificSuffixes, " "));
-        if(exist(hcard.nicknames))
+        }
+        if(exist(hcard.nicknames)) {
             c.setDisplayName( Strings.join(hcard.nicknames, ","));
+        }
     }
 
 
@@ -321,10 +338,12 @@ public class HCardToContactTransformer {
 
 
     private void handleCompany(HCard hcard, Contact c) {
-        if(exist(hcard.orgs))
+        if(exist(hcard.orgs)) {
             c.setCompany(Strings.join(hcard.orgs, ","));
-        if(exist(hcard.roles))
+        }
+        if(exist(hcard.roles)) {
             c.setPosition(Strings.join(hcard.roles, ","));
+        }
     }
 
 

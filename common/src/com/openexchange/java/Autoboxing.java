@@ -245,8 +245,9 @@ public final class Autoboxing {
     public static int[] Coll2i(Collection<Integer> collection){
     	int[] results = new int[collection.size()];
     	int position = 0;
-    	for(Integer value : collection)
-    		results[position++] = value.intValue();
+    	for(Integer value : collection) {
+            results[position++] = value.intValue();
+        }
     	return results;
     }
     

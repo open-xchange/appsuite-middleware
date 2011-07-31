@@ -84,8 +84,9 @@ public class KeyValueHolder {
 
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
-        for (Integer key : getMap().keySet())
+        for (Integer key : getMap().keySet()) {
             json.append(key.toString(), getMap().get(key));
+        }
         return json;
     }
 

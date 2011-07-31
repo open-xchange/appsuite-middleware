@@ -101,8 +101,9 @@ public abstract class ImportExport extends SessionServlet {
 
     @Override
     public void init() {
-        if (importerExporter != null)
+        if (importerExporter != null) {
             return;
+        }
         
         importerExporter = new ImporterExporter();
         
@@ -140,8 +141,9 @@ public abstract class ImportExport extends SessionServlet {
 
             int mapperAmount = 0;
             for (File file : files) {
-                if (!file.getName().endsWith(".properties"))
+                if (!file.getName().endsWith(".properties")) {
                     continue;
+                }
                 Properties props = new Properties();
                 props.load(new FileInputStream(file));
                 PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);

@@ -151,10 +151,14 @@ public class LinkedInServiceImpl implements LinkedInService{
                     contact.setGivenName(getTextValue(person, "first-name"));
                     contact.setSurName(getTextValue(person, "last-name"));
                     //System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
-                    if (null != getTextValue(person, "main-address")) contact.setNote(getTextValue(person, "main-address"));                   
+                    if (null != getTextValue(person, "main-address")) {
+                        contact.setNote(getTextValue(person, "main-address"));
+                    }                   
                     try {
                         String imageUrl = getTextValue(person, "picture-url");
-                        if (null != imageUrl) OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                        if (null != imageUrl) {
+                            OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                        }
                     } catch (ConverterException e) {
                         LOG.error(e);
                     }

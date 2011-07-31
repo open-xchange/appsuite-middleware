@@ -163,8 +163,9 @@ public class SMS {
 			boolean charIsAllowed = false;
 			// each character in the entry has to be valid
 			for (int k = 0; k < allowedCharsInNumber.length(); k++) {
-				if (to.charAt(j) == allowedCharsInNumber.charAt(k))
-					charIsAllowed = true;
+				if (to.charAt(j) == allowedCharsInNumber.charAt(k)) {
+                    charIsAllowed = true;
+                }
 			}
 
 			if (charIsAllowed) {

@@ -156,8 +156,9 @@ public class JSONAssertion implements JSONCondition {
 
     
     public JSONAssertion hasNoMoreKeys() {
-        if(!stack.isEmpty())
+        if(!stack.isEmpty()) {
             stack.pop();
+        }
         return this;
     }
     

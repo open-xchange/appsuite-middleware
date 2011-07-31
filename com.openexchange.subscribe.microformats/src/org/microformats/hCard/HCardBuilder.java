@@ -74,7 +74,9 @@ public class HCardBuilder {
 		}
 		
 		public XFNURLBuilder addXFNRelationship(XFNRelationship rel) {
-			if ( !rels.contains(rel) ) rels.add(rel);
+			if ( !rels.contains(rel) ) {
+                rels.add(rel);
+            }
 			return this;
 		}
 		
@@ -139,12 +141,16 @@ public class HCardBuilder {
 		
 		public AddressBuilder addType(String type) {
 			type = type.toLowerCase();
-			if ( !types.contains(type) ) types.add(type);
+			if ( !types.contains(type) ) {
+                types.add(type);
+            }
 			return this;
 		}
 		
 		public HCard.Address done() {
-			if ( types.size() == 0 ) types.addAll(HCard.Address.DEFAULT_TYPE_LIST);
+			if ( types.size() == 0 ) {
+                types.addAll(HCard.Address.DEFAULT_TYPE_LIST);
+            }
 			return new HCard.Address(types, streetAddress, extendedAddress, locality, postOfficeBox, region, postalCode, countryName);
 		}
 	}
@@ -182,14 +188,20 @@ public class HCardBuilder {
 	
 	public HCard done() {
 		boolean isOrg = orgs.size() == 1 && fn.equals(orgs.get(0).name);
-		if ( n == null && isOrg ) n = new HCard.Name(null, null, null, null, null);
+		if ( n == null && isOrg ) {
+            n = new HCard.Name(null, null, null, null, null);
+        }
 		
 		if ( !isOrg && (n == null || n.isEmpty()) && fn.matches("^\\w+$") ) {
 			nicknames.add(0, fn);
-			if ( n == null ) n = new HCard.Name(null, null, null, null, null);
+			if ( n == null ) {
+                n = new HCard.Name(null, null, null, null, null);
+            }
 		}
 		
-		if ( n == null ) n = HCardCreator.impliedFN2N(fn);
+		if ( n == null ) {
+            n = HCardCreator.impliedFN2N(fn);
+        }
 		
 		return new HCard(fn, n, nicknames, photos, bday, adrs, labels, tels,
 				emails, mailers, tz, geo, titles, roles, logos, agents, orgs, categories, notes, rev, sortString, sounds, uid, urls, accessClass, keys);
@@ -201,13 +213,17 @@ public class HCardBuilder {
 	}
 	
 	public HCardBuilder addNickname(String nickname) {
-		if ( nickname == null ) throw new NullPointerException();
+		if ( nickname == null ) {
+            throw new NullPointerException();
+        }
 		this.nicknames.add(nickname);
 		return this;
 	}
 	
 	public HCardBuilder addPhoto(URI photo) {
-		if ( photo == null ) throw new NullPointerException();
+		if ( photo == null ) {
+            throw new NullPointerException();
+        }
 		this.photos.add(photo);
 		return this;
 	}
@@ -218,19 +234,25 @@ public class HCardBuilder {
 	}
 	
 	public HCardBuilder addAdr(HCard.Address adr) {
-		if ( adr == null ) throw new NullPointerException();
+		if ( adr == null ) {
+            throw new NullPointerException();
+        }
 		this.adrs.add(adr);
 		return this;
 	}
 	
 	public HCardBuilder addLabel(String label) {
-		if ( label == null ) throw new NullPointerException();
+		if ( label == null ) {
+            throw new NullPointerException();
+        }
 		this.labels.add(label);
 		return this;
 	}
 	
 	public HCardBuilder addTel(HCard.Tel tel) {
-		if ( tel == null ) throw new NullPointerException();
+		if ( tel == null ) {
+            throw new NullPointerException();
+        }
 		this.tels.add(tel);
 		return this;
 	}
@@ -239,37 +261,51 @@ public class HCardBuilder {
 	 * Adds a telephone number with multiple types (labels)
 	 */
 	public HCardBuilder addTel(String value, String... types) {
-		if ( value == null ) throw new NullPointerException();
+		if ( value == null ) {
+            throw new NullPointerException();
+        }
 		
 		String[] t;
 		
-		if ( types == null || types.length == 0 ) t = HCard.Tel.DEFAULT_TYPE_LIST.toArray(new String[0]);
-		else t = types;
+		if ( types == null || types.length == 0 ) {
+            t = HCard.Tel.DEFAULT_TYPE_LIST.toArray(new String[0]);
+        } else {
+            t = types;
+        }
 		
 		addTel(new HCard.Tel(value, t));
 		return this;
 	}
 	
 	public HCardBuilder addEmail(HCard.Email email) {
-		if ( email == null ) throw new NullPointerException();
+		if ( email == null ) {
+            throw new NullPointerException();
+        }
 		this.emails.add(email);
 		return this;
 	}
 	
 	public HCardBuilder addEmail(String value, String... types) {
-		if ( value == null ) throw new NullPointerException();
+		if ( value == null ) {
+            throw new NullPointerException();
+        }
 		
 		String[] t;
 		
-		if ( types == null || types.length == 0 ) t = HCard.Email.DEFAULT_TYPE_LIST.toArray(new String[0]);
-		else t = types;
+		if ( types == null || types.length == 0 ) {
+            t = HCard.Email.DEFAULT_TYPE_LIST.toArray(new String[0]);
+        } else {
+            t = types;
+        }
 		
 		addEmail(new HCard.Email(value, t));
 		return this;
 	}
 	
 	public HCardBuilder addMailer(String mailer) {
-		if ( mailer == null ) throw new NullPointerException();
+		if ( mailer == null ) {
+            throw new NullPointerException();
+        }
 		this.mailers.add(mailer);
 		return this;
 	}
@@ -295,62 +331,84 @@ public class HCardBuilder {
 	}
 	
 	public HCardBuilder addTitle(String title) {
-		if ( title == null ) throw new NullPointerException();
+		if ( title == null ) {
+            throw new NullPointerException();
+        }
 		this.titles.add(title);
 		return this;
 	}
 	
 	public HCardBuilder addRole(String role) {
-		if ( role == null ) throw new NullPointerException();
+		if ( role == null ) {
+            throw new NullPointerException();
+        }
 		this.roles.add(role);
 		return this;
 	}
 	
 	public HCardBuilder addLogo(URI logo) {
-		if ( logo == null ) throw new NullPointerException();
+		if ( logo == null ) {
+            throw new NullPointerException();
+        }
 		this.logos.add(logo);
 		return this;
 	}
 	
 	public HCardBuilder addAgent(URI agent) {
-		if ( agent == null ) throw new NullPointerException();
+		if ( agent == null ) {
+            throw new NullPointerException();
+        }
 		this.agents.add(agent);
 		return this;
 	}
 	
 	public HCardBuilder addOrganization(HCard.Organization org) {
-		if ( org == null ) throw new NullPointerException();
+		if ( org == null ) {
+            throw new NullPointerException();
+        }
 		this.orgs.add(org);
 		return this;
 	}
 	
 	public HCardBuilder addOrganization(String orgName) {
-		if ( orgName == null ) throw new NullPointerException();
+		if ( orgName == null ) {
+            throw new NullPointerException();
+        }
 		this.orgs.add(new HCard.Organization(orgName, ""));
 		return this;
 	}
 	
 	public HCardBuilder addOrganization(String orgName, String orgUnit) {
-		if ( orgName == null ) throw new NullPointerException();
-		if ( orgUnit == null ) orgUnit = "";
+		if ( orgName == null ) {
+            throw new NullPointerException();
+        }
+		if ( orgUnit == null ) {
+            orgUnit = "";
+        }
 		this.orgs.add(new HCard.Organization(orgName, orgUnit));
 		return this;
 	}
 	
 	public HCardBuilder addCategory(String category) {
-		if ( category == null ) throw new NullPointerException();
+		if ( category == null ) {
+            throw new NullPointerException();
+        }
 		this.categories.add(category);
 		return this;
 	}
 	
 	public HCardBuilder addNote(String note) {
-		if ( note == null ) throw new NullPointerException();
+		if ( note == null ) {
+            throw new NullPointerException();
+        }
 		this.notes.add(note);
 		return this;
 	}
 	
 	public HCardBuilder addKey(String key) {
-		if ( key == null ) throw new NullPointerException();
+		if ( key == null ) {
+            throw new NullPointerException();
+        }
 		this.keys.add(key);
 		return this;
 	}
@@ -379,7 +437,9 @@ public class HCardBuilder {
 	 * Adds a URL to the hCard, with no relationship information.
 	 */
 	public HCardBuilder addURL(URI url) {
-		if ( url == null ) throw new NullPointerException();
+		if ( url == null ) {
+            throw new NullPointerException();
+        }
 		this.urls.add(new HCard.XFNURL(url, null));
 		return this;
 	}
@@ -388,13 +448,17 @@ public class HCardBuilder {
 	 * Adds a URL with XFN Relationship data to the hCard.
 	 */
 	public HCardBuilder addURL(HCard.XFNURL url) {
-		if ( url == null ) throw new NullPointerException();
+		if ( url == null ) {
+            throw new NullPointerException();
+        }
 		this.urls.add(url);
 		return this;
 	}
 	
 	public HCardBuilder addSound(URI sound) {
-		if ( sound == null ) throw new NullPointerException();
+		if ( sound == null ) {
+            throw new NullPointerException();
+        }
 		this.sounds.add(sound);
 		return this;
 	}

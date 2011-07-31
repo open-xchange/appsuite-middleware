@@ -100,8 +100,9 @@ public class Group implements Cloneable {
 		
 		public static Field getByColumnNumber(int num){
 			for(Field val: values()){
-				if(val.getColNumber() == num)
-					return val;
+				if(val.getColNumber() == num) {
+                    return val;
+                }
 			}
 			return null;
 		}
@@ -109,8 +110,9 @@ public class Group implements Cloneable {
 		public static int[] intValues(){
 			Field[] vals = values();
 			int[] retVal = new int[vals.length];
-			for(int i = 0; i< vals.length; i++)
-				retVal[i] = vals[i].getColNumber();
+			for(int i = 0; i< vals.length; i++) {
+                retVal[i] = vals[i].getColNumber();
+            }
 			return retVal;
 		}
 		
@@ -321,16 +323,21 @@ public class Group implements Cloneable {
     }
 
     public Object get(Group.Field field){
-    	if(field == Field.FULL_NAME)
-    		return getDisplayName();
-    	if(field == Field.SIMPLE_NAME)
-    		return getSimpleName();
-    	if(field == Field.ID)
-    		return getIdentifier();
-    	if(field == Field.LAST_MODIFIED)
-    		return getLastModified();
-    	if(field == Field.MEMBERS)
-    		return getMember();
+    	if(field == Field.FULL_NAME) {
+            return getDisplayName();
+        }
+    	if(field == Field.SIMPLE_NAME) {
+            return getSimpleName();
+        }
+    	if(field == Field.ID) {
+            return getIdentifier();
+        }
+    	if(field == Field.LAST_MODIFIED) {
+            return getLastModified();
+        }
+    	if(field == Field.MEMBERS) {
+            return getMember();
+        }
     	return null;
     }
     /**

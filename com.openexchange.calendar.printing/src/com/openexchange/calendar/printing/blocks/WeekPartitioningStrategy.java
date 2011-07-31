@@ -77,8 +77,9 @@ public class WeekPartitioningStrategy extends AbstractWeekPartitioningStrategy {
         CPPartition blocks = new CPPartition();
         for (int i = 0, length = appointments.size(); i < length; i++) {
             CPAppointment appointment = appointments.get(i);
-            if (i > 0)
+            if (i > 0) {
                 lastStoredAppointment = appointments.get(i - 1);
+            }
 
             int pointer = blocks.getAppointments().size();
 
@@ -108,12 +109,17 @@ public class WeekPartitioningStrategy extends AbstractWeekPartitioningStrategy {
             blocks.addAppointment(appointment);
 
             if (isOnTwoDays(appointment) || isInTwoWeeks(appointment))
+             {
                 blocks.addAppointment(appointment); // store again for use in second block
+            }
 
-            if (i == length - 1)
-                if (!getCalendar().isOnLastDayOfWeek(appointment.getStartDate()))
-                    for (Date day : getMissingDaysInbetween(appointment, null))
+            if (i == length - 1) {
+                if (!getCalendar().isOnLastDayOfWeek(appointment.getStartDate())) {
+                    for (Date day : getMissingDaysInbetween(appointment, null)) {
                         addDayBreak(blocks, ++pointer, day);
+                    }
+                }
+            }
         }
         return blocks;
     }
@@ -149,8 +155,9 @@ public class WeekPartitioningStrategy extends AbstractWeekPartitioningStrategy {
             cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
             cal.add(Calendar.DAY_OF_WEEK, -1);
             firstDate = cal.getTime();
-        } else
+        } else {
             firstDate = first.getStartDate();
+        }
         return isMissingDaysInbetween(firstDate, second.getStartDate());
     }
 

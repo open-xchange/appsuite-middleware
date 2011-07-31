@@ -36,8 +36,9 @@ public class SmbThreadTest extends Thread {
         }
         SmbFile[] l = null;
         try {
-            if (f.exists())
+            if (f.exists()) {
                 l = f.listFiles();
+            }
         } catch (SmbAuthException ae) {
             System.err.println("SAE: " + ae.getMessage());
             ae.printStackTrace( System.err );

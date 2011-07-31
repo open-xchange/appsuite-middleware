@@ -113,8 +113,9 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { app1, app2 }));
         boolean foundWeekBreak = false;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1)
+            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1) {
                 foundWeekBreak = true;
+            }
         }
         assertTrue("Two consecutive days, Wednesday and Thursday, should not have any week break info between them", !foundWeekBreak);
         assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());
@@ -145,10 +146,12 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         assertEquals("Should contain two elements", 2, partitions.getAppointments().size());
         boolean daybreakFound = false, weekbreakFound = false;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
                 daybreakFound = true;
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            }
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 weekbreakFound = true;
+            }
         }
         assertTrue("Should contain a day break after the first element", daybreakFound);
         assertTrue("Should contain a week break after the first element", weekbreakFound);
@@ -257,13 +260,15 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         int encounters = 0;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
             if (info.getType() == 0) {
-                if (foundDaybreak)
+                if (foundDaybreak) {
                     fail("Encountered daybreak info twice without dayname info inbetween");
+                }
                 foundDaybreak = true;
             }
             if (info.getType() == 10) {
-                if (foundDayname)
+                if (foundDayname) {
                     fail("Encountered dayname info twice without daybreak info inbetween");
+                }
                 foundDayname = true;
                 dayname = (Integer) info.getAdditionalInformation();
             }
@@ -297,10 +302,12 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         boolean rightPos = false, wrongPos = false;
 
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 rightPos = true;
-            if(info.getPosition() > 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            }
+            if(info.getPosition() > 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 wrongPos = true;
+            }
         }
         assertEquals("Should leave only two appointments, Thursday and Monday", 2, partitions.getAppointments().size());
         assertTrue("Should find weekbreak right before position of Monday date", rightPos);
@@ -315,8 +322,9 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         int days = 5;
         int weekCounter = 0;
         for(CPFormattingInformation info : infos){
-            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
                 days++;
+            }
             if(info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK){
                 weekCounter++;
                 assertEquals("Should contain 5 days within each week, but not in week #"+weekCounter, 5, days);
@@ -344,8 +352,9 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         int days = 5;
         int weekCounter = 0;
         for(CPFormattingInformation info : infos){
-            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+            if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
                 days++;
+            }
             if(info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK){
                 weekCounter++;
                 assertEquals("Should contain 5 days within each week, but not in week #"+weekCounter, 5, days);
@@ -409,8 +418,9 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
             
             int dayBreaksAfterLastDate = 0;
             for(CPFormattingInformation info:infos){
-                if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK && info.getPosition() == 2)
+                if(info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK && info.getPosition() == 2) {
                     dayBreaksAfterLastDate++;
+                }
             }
             assertEquals("Should not have added daybreaks after last appointment on 2009-10-"+day, 0, dayBreaksAfterLastDate);
         }
@@ -438,13 +448,17 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         int daysBeforeWednesday = 0, daysAfterWednesday = 0;
         boolean startCounting = false;
         for(CPFormattingInformation info: infos){
-            if(info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            if(info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 startCounting = true;
-            if(startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
-                if(info.getPosition() == 1)
+            }
+            if(startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
+                if(info.getPosition() == 1) {
                     daysBeforeWednesday ++;
-                if(info.getPosition() == 2)
+                }
+            }
+                if(info.getPosition() == 2) {
                     daysAfterWednesday ++;
+                }
         }
         assertEquals("Should find 3 daybreaks in week before Wednesday", 3, daysBeforeWednesday);
         assertEquals("Should find 2 daybreaks in week after Wednesday", 2, daysAfterWednesday);
@@ -490,10 +504,12 @@ public class WorkWeekPartitioningTest extends AbstractDateTest {
         
         for(CPAppointment app : partitions.getAppointments()){
             calendar.setTime(app.getStartDate());
-            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY)
+            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY) {
                 foundWednesday = true;
-            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY)
+            }
+            if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) {
                 foundThursday = true;
+            }
         }
         assertTrue("Wednesday should be in there", foundWednesday);
         assertTrue("Thursday should be in there", foundThursday);

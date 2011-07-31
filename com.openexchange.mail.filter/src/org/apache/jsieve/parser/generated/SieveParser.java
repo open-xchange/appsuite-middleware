@@ -41,7 +41,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
     jjtreeCloseNodeScope(jjtn000);
-    {if (true) return jjtn000;}
+    {if (true) {
+        return jjtn000;
+    }}
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -50,12 +52,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -93,12 +101,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -141,12 +155,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -174,12 +194,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
        jjtree.popNode();
      }
      if (jjte000 instanceof RuntimeException) {
-       {if (true) throw (RuntimeException)jjte000;}
+       {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
      }
      if (jjte000 instanceof ParseException) {
-       {if (true) throw (ParseException)jjte000;}
+       {if (true) {
+        throw (ParseException)jjte000;
+    }}
      }
-     {if (true) throw (Error)jjte000;}
+     {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
@@ -240,12 +266,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -283,10 +315,11 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jjtc000 = false;
     jjtreeCloseNodeScope(jjtn000);
     Argument value = null;
-    if (null != number)
-       value = new NumberArgument(number);
-    else if (null != tag)
-       value = new TagArgument(tag);
+    if (null != number) {
+        value = new NumberArgument(number);
+    } else if (null != tag) {
+        value = new TagArgument(tag);
+    }
     jjtn000.setValue(value);
     } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -296,12 +329,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -332,12 +371,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -378,12 +423,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -415,10 +466,11 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
     jjtreeCloseNodeScope(jjtn000);
-    if (null != quoted_string)
-      jjtn000.setValue(quoted_string.image);
-    else if (null != multi_line)
-      jjtn000.setValue(multi_line.image);
+    if (null != quoted_string) {
+        jjtn000.setValue(quoted_string.image);
+    } else if (null != multi_line) {
+        jjtn000.setValue(multi_line.image);
+    }
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -472,12 +524,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
       jjtree.popNode();
     }
     if (jjte000 instanceof RuntimeException) {
-      {if (true) throw (RuntimeException)jjte000;}
+      {if (true) {
+        throw (RuntimeException)jjte000;
+    }}
     }
     if (jjte000 instanceof ParseException) {
-      {if (true) throw (ParseException)jjte000;}
+      {if (true) {
+        throw (ParseException)jjte000;
+    }}
     }
-    {if (true) throw (Error)jjte000;}
+    {if (true) {
+        throw (Error)jjte000;
+    }}
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
@@ -511,7 +569,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(java.io.InputStream stream) {
@@ -521,7 +581,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   public SieveParser(java.io.Reader stream) {
@@ -530,7 +592,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(java.io.Reader stream) {
@@ -540,7 +604,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   public SieveParser(SieveParserTokenManager tm) {
@@ -548,7 +614,9 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   public void ReInit(SieveParserTokenManager tm) {
@@ -557,13 +625,18 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 11; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 11; i++) {
+        jj_la1[i] = -1;
+    }
   }
 
   final private Token jj_consume_token(int kind) throws ParseException {
     Token oldToken;
-    if ((oldToken = token).next != null) token = token.next;
-    else token = token.next = token_source.getNextToken();
+    if ((oldToken = token).next != null) {
+        token = token.next;
+    } else {
+        token = token.next = token_source.getNextToken();
+    }
     jj_ntk = -1;
     if (token.kind == kind) {
       jj_gen++;
@@ -575,8 +648,11 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
   }
 
   final public Token getNextToken() {
-    if (token.next != null) token = token.next;
-    else token = token.next = token_source.getNextToken();
+    if (token.next != null) {
+        token = token.next;
+    } else {
+        token = token.next = token_source.getNextToken();
+    }
     jj_ntk = -1;
     jj_gen++;
     return token;
@@ -585,17 +661,21 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
   final public Token getToken(int index) {
     Token t = token;
     for (int i = 0; i < index; i++) {
-      if (t.next != null) t = t.next;
-      else t = t.next = token_source.getNextToken();
+      if (t.next != null) {
+        t = t.next;
+    } else {
+        t = t.next = token_source.getNextToken();
+    }
     }
     return t;
   }
 
   final private int jj_ntk() {
-    if ((jj_nt=token.next) == null)
-      return (jj_ntk = (token.next=token_source.getNextToken()).kind);
-    else
-      return (jj_ntk = jj_nt.kind);
+    if ((jj_nt=token.next) == null) {
+        return (jj_ntk = (token.next=token_source.getNextToken()).kind);
+    } else {
+        return (jj_ntk = jj_nt.kind);
+    }
   }
 
   private java.util.Vector jj_expentries = new java.util.Vector();

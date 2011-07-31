@@ -78,18 +78,27 @@ enum HCardProperty {
 	}
 	
 	static HCardProperty fromClassAttribute(Collection<HCardProperty> contexts, String hClass) {
-		if ( hClass == null ) return null;
+		if ( hClass == null ) {
+            return null;
+        }
 		List<String> enumNames = new ArrayList<String>(contexts == null ? 1 : contexts.size() + 1);
 		String baseName = hClass.toUpperCase(Locale.ENGLISH).replaceAll("-", "_");
 		enumNames.add(baseName);
-		if ( contexts != null ) for ( HCardProperty context : contexts )
-			enumNames.add(String.format("%s__%s", context.name(), baseName));
+		if ( contexts != null ) {
+            for ( HCardProperty context : contexts ) {
+                enumNames.add(String.format("%s__%s", context.name(), baseName));
+            }
+        }
 		
 		Collections.reverse(enumNames);
-		for ( String enumName : enumNames ) try {
-			HCardProperty p = HCardProperty.valueOf(enumName);
-			if ( p != null ) return p;
-		} catch ( Exception ignore ) {}
+		for ( String enumName : enumNames ) {
+            try {
+            	HCardProperty p = HCardProperty.valueOf(enumName);
+            	if ( p != null ) {
+                    return p;
+                }
+            } catch ( Exception ignore ) {}
+        }
 		
 		return null;
 	}
