@@ -116,6 +116,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         properties.setProperty("url", confService.getProperty("writeUrl"));
     }
 
+    @Override
     public void setUp() throws Exception {
         Init.startServer();
         PublicationErrorMessage.EXCEPTIONS.setApplicationId("com.openexchange.publish");
@@ -198,6 +199,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         storage = new PublicationSQLStorage(getDBProvider(), new SimConfigurationStorageService(), discoveryService);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (publicationsToDelete.size() > 0) {
             List<Expression> placeholder = new ArrayList<Expression>();

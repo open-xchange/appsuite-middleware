@@ -292,6 +292,6 @@ public class SessiondTest extends TestCase {
             }
         });
         sessiondCon.refreshSession(sessionId);
-        final Session session = sessiondCon.getSession(sessionId);
+        sessiondCon.getSession(sessionId);
     }
 }

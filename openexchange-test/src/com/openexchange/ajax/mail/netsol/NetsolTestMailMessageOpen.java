@@ -109,7 +109,7 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 		/*
 		 * Put single mail into "Sent" folder
 		 */
-		final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(), new NetsolSendRequest(
+		final NetsolSendResponse response = Executor.execute(getSession(), new NetsolSendRequest(
 				mailObject_25kb.toString()));
 		final FolderAndID mailPath = new FolderAndID(response.getFolderAndID()[0], response.getFolderAndID()[1]);
 
@@ -120,8 +120,8 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 			/*
 			 * "Open" 25kb mail
 			 */
-			final NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
-					new NetsolGetRequest(mailPath)));
+			final NetsolGetResponse resp = Executor.execute(getSession(),
+					new NetsolGetRequest(mailPath));
 			assertTrue("Get failed", resp.getMail(getTimeZone()) != null);
 			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
 			requestTracker.addDuration(resp.getRequestDuration());

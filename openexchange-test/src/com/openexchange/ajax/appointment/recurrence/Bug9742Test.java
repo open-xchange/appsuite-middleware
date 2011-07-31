@@ -125,6 +125,6 @@ public class Bug9742Test extends AbstractAJAXSession {
 		assertEquals("unexpected appointments size", 4, appointmentCounter);
 		
 		final DeleteRequest deleteRequest = new DeleteRequest(objectId, appointmentFolderId, modified);
-		final CommonDeleteResponse deleteResponse = Executor.execute(ajaxSession, deleteRequest);
+		Executor.execute(ajaxSession, deleteRequest);
 	}
 }

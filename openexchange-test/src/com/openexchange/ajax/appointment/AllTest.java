@@ -179,7 +179,7 @@ public class AllTest extends AppointmentTest {
 		
 		final int cols[] = new int[]{ Appointment.OBJECT_ID };
 		
-		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
+		listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, false, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
@@ -188,7 +188,7 @@ public class AllTest extends AppointmentTest {
 		
 		final int cols[] = new int[]{ Appointment.OBJECT_ID };
 		
-		final Appointment[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
+		listAppointment(getWebConversation(), appointmentFolderId, cols, start, end, timeZone, true, PROTOCOL + getHostName(), getSessionId());
 	}
 	
 	public void testShowFullTimeAppointments() throws Exception {

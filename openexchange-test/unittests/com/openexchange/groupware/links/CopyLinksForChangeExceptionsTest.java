@@ -90,6 +90,7 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
 
     private LinkSQLInterface links;
     
+    @Override
     public void setUp() throws Exception {
         Init.startServer();
         links = new RdbLinkSQLInterface();
@@ -114,6 +115,7 @@ public class CopyLinksForChangeExceptionsTest extends TestCase {
 
     }
 
+    @Override
     public void tearDown() throws Exception {
         appointments.removeAll(user, clean);
         Init.stopServer();

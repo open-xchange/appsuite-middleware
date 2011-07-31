@@ -90,7 +90,7 @@ public class Bug15229Test extends AbstractVCardImportTest {
         InputStream is = new ByteArrayInputStream(bug.getBytes());
         byte[] buf = new byte[1024];
         is.read(buf);
-        List<String> folders = new ArrayList<String>();
+        new ArrayList<String>();
 
         ImportResult[] importResult = importVCard(
                 getWebConversation(),

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
@@ -96,7 +94,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		TimeZone tz = client.getValues().getTimeZone();
 		
 		ICalImportRequest request = new ICalImportRequest(fid, ical);
-		ICalImportResponse response = client.execute(request);
+		client.execute(request);
 		
 		AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, D("2010-02-03 00:00", tz), D("2010-02-04 00:00", tz), tz, false);
 		CommonAllResponse response2 = client.execute(allRequest);
@@ -175,7 +173,7 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
 		TimeZone tz = client.getValues().getTimeZone();
 		
 		ICalImportRequest request = new ICalImportRequest(fid, ical);
-		ICalImportResponse response = client.execute(request);
+		client.execute(request);
 		
 		AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, start, end, tz, false);
 		CommonAllResponse response2 = client.execute(allRequest);

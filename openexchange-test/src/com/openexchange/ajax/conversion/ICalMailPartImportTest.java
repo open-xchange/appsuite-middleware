@@ -129,7 +129,7 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
 				/*
 				 * Perform send
 				 */
-				final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
+				final NetsolSendResponse response = Executor.execute(getSession(),
 						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII",
 								"ical.ics"));
 				assertTrue("Send failed", response.getFolderAndID() != null);
@@ -148,8 +148,8 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
 				 * Get previously sent mail
 				 */
 				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-				final NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
-						new NetsolGetRequest(mailPath, true)));
+				final NetsolGetResponse resp = Executor.execute(getSession(),
+						new NetsolGetRequest(mailPath, true));
 				final JSONObject mailObject = (JSONObject) resp.getData();
 				final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
 				final int len = attachments.length();

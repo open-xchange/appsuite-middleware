@@ -77,6 +77,7 @@ public class CopyTest extends AbstractMailTest {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         /*
@@ -93,6 +94,7 @@ public class CopyTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
+    @Override
     public void tearDown() throws Exception {
         /*
          * Clean everything
@@ -128,8 +130,7 @@ public class CopyTest extends AbstractMailTest {
         }
         assertEquals("There should be no messages in the destination folder", 0, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
 
-        // Send the copy request
-        CopyResponse cr = Executor.execute(getSession(), new CopyRequest(mailID, getInboxFolder(), destinationFolderID));
+        Executor.execute(getSession(), new CopyRequest(mailID, getInboxFolder(), destinationFolderID));
         // String newMailID = cr.getID();
         // System.out.println("***** newMailID : " + newMailID);
         //

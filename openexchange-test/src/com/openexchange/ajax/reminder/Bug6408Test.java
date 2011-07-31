@@ -18,7 +18,7 @@ public class Bug6408Test extends ReminderTest {
 	}
 	
 	public void testBug6408() throws Exception {
-		final int userId = ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
+		ConfigTools.getUserId(getWebConversation(), getHostName(), getSessionId());
 		final TimeZone timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 		
 		final Calendar c = Calendar.getInstance();

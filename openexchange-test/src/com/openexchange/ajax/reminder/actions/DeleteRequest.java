@@ -4,13 +4,9 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Reminder;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.ReminderFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.reminder.ReminderObject;
 
 

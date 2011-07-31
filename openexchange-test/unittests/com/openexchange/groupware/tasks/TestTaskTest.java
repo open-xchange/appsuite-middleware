@@ -20,7 +20,8 @@ public class TestTaskTest extends TestCase {
 		return newTask;
 	}
 	
-	@Before public void setUp(){
+	@Override
+    @Before public void setUp(){
 		task = new TestTask();
 		task.setTimezone(timezone);
 	}

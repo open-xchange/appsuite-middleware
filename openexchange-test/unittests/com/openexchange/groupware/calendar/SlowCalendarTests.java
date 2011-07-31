@@ -59,7 +59,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.container.Appointment;

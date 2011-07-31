@@ -3,6 +3,7 @@ package com.openexchange.groupware.container;
 import static com.openexchange.groupware.container.FolderChildObject.*;
 
 public class FolderChildObjectTest extends DataObjectTest {
+    @Override
     public void testFindDifferingFields() {
         FolderChildObject dataObject = getFolderChildObject();
         FolderChildObject otherDataObject = getFolderChildObject();
@@ -12,6 +13,7 @@ public class FolderChildObjectTest extends DataObjectTest {
 
     }
     
+    @Override
     public void testAttrAccessors() {
         FolderChildObject object = new FolderChildObject(){};
         // FOLDER_ID

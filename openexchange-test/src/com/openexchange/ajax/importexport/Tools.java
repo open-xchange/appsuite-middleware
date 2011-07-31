@@ -92,7 +92,7 @@ public final class Tools {
     public static CSVImportResponse importCSV(final AJAXClient client,
         final CSVImportRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (CSVImportResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static ICalImportResponse importICal(final AJAXClient client,
@@ -104,7 +104,7 @@ public final class Tools {
     public static VCardImportResponse importVCard(final AJAXClient client,
         final VCardImportRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (VCardImportResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static OutlookCSVImportResponse importOutlookCSV(final AJAXClient client,

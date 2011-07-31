@@ -97,7 +97,7 @@ public class UpdatePublicationTest extends AbstractPublicationTest {
         UpdatePublicationResponse updResp = getClient().execute(updReq);
         
         assertFalse("Should contain no error after updating", updResp.hasError());
-        assertEquals("Should return 1 in case of success", I(1), (Integer) updResp.getData());
+        assertEquals("Should return 1 in case of success", I(1), updResp.getData());
     }
 
     public void testShouldBeAbleToUpdateExistingPublicationsSiteName() throws AjaxException, IOException, SAXException, JSONException, PublicationException, PublicationJSONException{

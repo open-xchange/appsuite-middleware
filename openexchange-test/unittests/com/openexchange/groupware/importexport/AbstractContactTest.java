@@ -60,8 +60,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.mail.Session;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -79,7 +77,6 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;

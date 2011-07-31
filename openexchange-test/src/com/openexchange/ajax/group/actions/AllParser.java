@@ -4,7 +4,6 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 public class AllParser extends AbstractAJAXParser<AllResponse> {
 

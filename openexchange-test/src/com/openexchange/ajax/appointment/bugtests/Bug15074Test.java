@@ -59,7 +59,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 
 /**
  * {@link Bug15074Test}

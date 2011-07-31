@@ -105,7 +105,7 @@ public class MailPlainTextStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE);
 

@@ -56,7 +56,6 @@ import java.net.URI;
 import java.sql.Connection;
 import java.util.Random;
 import junit.framework.TestCase;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;

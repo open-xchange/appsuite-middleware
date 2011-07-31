@@ -117,6 +117,6 @@ public class Bug8653 extends AbstractICalImportTest {
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
 		final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-		final List<ImportResult> res = performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
+		performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
 	}
 }

@@ -90,7 +90,7 @@ public final class PasswordChangeUpdateAJAXTest extends AbstractPasswordChangeAJ
 		 * Perform update request
 		 */
 		final String oldPassword = AJAXConfig.getProperty(Property.PASSWORD);
-		final PasswordChangeUpdateResponse updateResponse = (PasswordChangeUpdateResponse) Executor.execute(
+		Executor.execute(
 				getSession(), new PasswordChangeUpdateRequest(oldPassword, oldPassword, true));
 	}
 }

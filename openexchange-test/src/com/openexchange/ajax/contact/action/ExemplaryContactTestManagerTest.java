@@ -103,7 +103,8 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         contactManager.newAction(contactObject2);
 	}
 	
-	public void tearDown() throws Exception {
+	@Override
+    public void tearDown() throws Exception {
 		contactManager.cleanUp();
 		folderManager.cleanUp();
 	}

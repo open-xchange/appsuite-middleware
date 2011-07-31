@@ -149,7 +149,7 @@ public class MailNestedMessageStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(MP_NESTED_MESSAGE);
 

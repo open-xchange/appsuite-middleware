@@ -50,11 +50,7 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Random;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.SetResponse;
@@ -62,7 +58,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.tools.RandomString;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Tests resulting from bug reports.

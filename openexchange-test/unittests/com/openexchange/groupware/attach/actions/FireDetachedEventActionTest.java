@@ -18,7 +18,8 @@ public class FireDetachedEventActionTest extends AbstractAttachmentEventActionTe
 	private final MockAttachmentListener listener = new MockAttachmentListener();
 	private MockDBProvider provider = null;
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 	    super.setUp();
 	    provider = new MockDBProvider(new DBPoolProvider());
 	}

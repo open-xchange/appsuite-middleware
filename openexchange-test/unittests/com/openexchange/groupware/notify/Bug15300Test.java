@@ -1,14 +1,9 @@
 package com.openexchange.groupware.notify;
 
-import java.util.Date;
 import java.util.List;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.groupware.notify.ParticipantNotifyTest.Message;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 public class Bug15300Test extends ParticipantNotifyTest {

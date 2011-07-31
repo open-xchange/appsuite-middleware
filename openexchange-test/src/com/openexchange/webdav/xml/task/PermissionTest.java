@@ -40,7 +40,7 @@ public class PermissionTest extends TaskTest {
 		taskObj.setParentFolderID(parentFolderId);
 		
 		try {
-			final int taskObjectId = insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
@@ -71,7 +71,7 @@ public class PermissionTest extends TaskTest {
 		taskObj.setParentFolderID(parentFolderId);
 		
 		try {
-			final int taskObjectId = insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertTask(getSecondWebConversation(), taskObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);

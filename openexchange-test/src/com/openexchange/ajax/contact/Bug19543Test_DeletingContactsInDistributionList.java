@@ -1,26 +1,10 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
-import java.util.TimeZone;
-
-import org.json.JSONArray;
-
-import com.openexchange.ajax.contact.action.AllRequest;
-import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.contact.action.ListRequest;
-import com.openexchange.ajax.contact.action.UpdateRequest;
-import com.openexchange.ajax.contact.action.UpdateResponse;
-import com.openexchange.ajax.contact.action.UpdatesRequest;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
-import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.groupware.search.Order;
 
 public class Bug19543Test_DeletingContactsInDistributionList extends
 		AbstractManagedContactTest {

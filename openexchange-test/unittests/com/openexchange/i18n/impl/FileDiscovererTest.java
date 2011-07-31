@@ -60,6 +60,7 @@ import java.util.Locale;
 public class FileDiscovererTest extends TestCase {
     private FileDiscoverer fileDiscoverer;
 
+    @Override
     public void setUp() throws FileNotFoundException {
         fileDiscoverer = new FileDiscoverer(new File("/tmp"));
     }

@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import java.util.Set;
-import junit.framework.TestCase;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static com.openexchange.groupware.container.Appointment.*;
 
@@ -62,10 +60,11 @@ public class AppointmentObjectTest extends CalendarObjectTest {
     public void testCloneShouldNotChangeContainsStatus() {
         Appointment a = new Appointment();
         assertFalse(a.containsShownAs());
-        Appointment b = (Appointment) a.clone();
+        Appointment b = a.clone();
         assertFalse(b.containsShownAs());
     }
 
+    @Override
     public void testFindDifferingFields() {
         Appointment dataObject = getAppointmentObject();
         Appointment otherDataObject = getAppointmentObject();
@@ -116,6 +115,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
 
     }
     
+    @Override
     public void testAttrAccessors() {
         Appointment object = new Appointment();
         

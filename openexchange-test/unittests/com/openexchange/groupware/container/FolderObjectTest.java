@@ -9,6 +9,7 @@ import static com.openexchange.groupware.container.FolderObject.*;
 
 public class FolderObjectTest extends FolderChildObjectTest {
 
+    @Override
     public void testFindDifferingFields() {
         FolderObject dataObject = getFolderObject();
         FolderObject otherDataObject = getFolderObject();

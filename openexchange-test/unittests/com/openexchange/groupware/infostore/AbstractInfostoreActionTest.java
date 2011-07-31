@@ -22,7 +22,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tx.TransactionException;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 

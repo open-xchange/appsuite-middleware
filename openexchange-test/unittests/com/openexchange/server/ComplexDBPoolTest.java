@@ -28,7 +28,7 @@ public class ComplexDBPoolTest extends TestCase {
 	protected void setUp() throws Exception {        
         super.setUp();
         Init.startServer();
-        final String user = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+        AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
     }
     
     @Override

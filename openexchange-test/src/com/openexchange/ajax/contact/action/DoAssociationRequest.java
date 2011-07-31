@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.contact.action;
 
-import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -57,7 +56,6 @@ import com.openexchange.ajax.FinalContactConstants;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.container.Contact;
 
 
@@ -116,6 +114,7 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
 
     public AbstractAJAXParser<? extends DoAssociationResponse> getParser() {
         return new AbstractAJAXParser<DoAssociationResponse>(true){
+            @Override
             public DoAssociationResponse createResponse(final Response response){
                 return new DoAssociationResponse(response);
             }

@@ -10,7 +10,6 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.AbstractOXException;
@@ -26,7 +25,6 @@ import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractCalendarTest extends TestCase {

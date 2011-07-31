@@ -1,14 +1,11 @@
 package com.openexchange.ajax.importexport;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.Date;
 
-import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.ajax.task.ManagedTaskTest;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalTaskExportTest extends ManagedTaskTest {
 

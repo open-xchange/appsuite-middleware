@@ -329,7 +329,7 @@ public final class MailForwardTest extends AbstractMailTest {
     public void testForwardMultiple() {
         try {
 
-            final Context ctx = new ContextImpl(getCid());
+            new ContextImpl(getCid());
             final SessionObject session = getSession();
 
             final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);

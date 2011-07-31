@@ -53,7 +53,6 @@ import com.openexchange.ajax.appointment.action.*;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.AttachmentClient;
-import com.openexchange.ajax.links.actions.*;
 import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
 import com.openexchange.ajax.container.Response;
@@ -69,7 +68,6 @@ import com.openexchange.api2.OXException;
 import com.meterware.httpunit.WebConversation;
 import org.json.JSONException;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -96,6 +94,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         file = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
@@ -106,6 +105,7 @@ public class Bug12377Test extends AbstractAJAXSession {
         addLink();
     }
 
+    @Override
     public void tearDown() throws Exception {
         removeAppointment(appointment);
         removeAppointment(linkedAppointment);

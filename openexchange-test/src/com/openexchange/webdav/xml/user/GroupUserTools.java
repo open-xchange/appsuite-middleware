@@ -54,7 +54,6 @@ import java.util.Map;
 
 import org.jdom.JDOMException;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.TestException;

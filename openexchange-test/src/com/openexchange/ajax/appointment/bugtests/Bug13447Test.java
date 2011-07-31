@@ -73,6 +73,7 @@ public class Bug13447Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -119,6 +120,7 @@ public class Bug13447Test extends AbstractAJAXSession {
         appointment.setLastModified(response.getTimestamp());
     }
 
+    @Override
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
         

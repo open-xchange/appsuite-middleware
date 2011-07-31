@@ -51,8 +51,6 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

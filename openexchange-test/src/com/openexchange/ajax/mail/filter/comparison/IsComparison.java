@@ -87,7 +87,8 @@ public class IsComparison extends AbstractComparison {
 		return true;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("name: " + name);
 		

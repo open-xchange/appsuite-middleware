@@ -98,13 +98,13 @@ public final class AttachmentTest extends AbstractMailTest {
 				/*
 				 * Insert mail through a send request
 				 */
-				folderAndID = ((SendResponse) Executor.execute(getSession(), new SendRequest(mailObject_25kb)))
+				folderAndID = Executor.execute(getSession(), new SendRequest(mailObject_25kb))
 						.getFolderAndID();
 			}
 			/*
 			 * Perform action=get
 			 */
-			final GetResponse response = (GetResponse) Executor.execute(getSession(), new GetRequest(folderAndID[0],
+			final GetResponse response = Executor.execute(getSession(), new GetRequest(folderAndID[0],
 					folderAndID[1]));
 			/*
 			 * Get mail's JSON representation

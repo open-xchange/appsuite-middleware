@@ -17,7 +17,7 @@ public class PermissionTest extends FolderTest {
 	}
 	
 	public void testInsertPrivateFolderWithoutPermission() throws Exception {
-		final int secondUserId = GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertPrivateFolderWithoutPermission" + System.currentTimeMillis());
@@ -46,7 +46,7 @@ public class PermissionTest extends FolderTest {
 	}
 	
 	public void testInsertPublicFolderWithoutPermission() throws Exception {
-		final int secondUserId = GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+		GroupUserTest.getUserId(getSecondWebConversation(), PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testInsertPublicFolderWithoutPermission" + System.currentTimeMillis());

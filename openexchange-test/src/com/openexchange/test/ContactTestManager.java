@@ -83,7 +83,6 @@ import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
@@ -206,7 +205,6 @@ public class ContactTestManager implements TestManager {
      */
     public static Contact generateFullContact(int folderID){
     	Contact contact = new Contact();
-    	int i = 100;
     	for(int field: Contact.ALL_COLUMNS){
     		try {
     			contact.set(field, new Integer(field));

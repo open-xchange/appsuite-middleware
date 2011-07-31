@@ -145,7 +145,7 @@ public class MailMultipartMixedStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(MP_MIXED);
 

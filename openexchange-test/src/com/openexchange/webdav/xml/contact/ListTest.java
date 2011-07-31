@@ -66,7 +66,7 @@ public class ListTest extends ContactTest {
 		final int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		try {
-			final Contact loadContact = loadContact(webCon, (objectId+1000), contactFolderId, PROTOCOL + hostName, login, password);
+			loadContact(webCon, (objectId+1000), contactFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);

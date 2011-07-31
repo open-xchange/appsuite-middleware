@@ -338,6 +338,7 @@ public class Bug12264Test extends AbstractAJAXSession {
             super(appointmentObj, timeZone);
         }
         
+        @Override
         public JSONObject getBody() throws JSONException {
             final JSONObject json = super.getBody();
             json.put(AppointmentFields.UNTIL, JSONObject.NULL);

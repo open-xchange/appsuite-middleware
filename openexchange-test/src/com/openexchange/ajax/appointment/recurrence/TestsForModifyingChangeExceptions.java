@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.helper.OXError;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;

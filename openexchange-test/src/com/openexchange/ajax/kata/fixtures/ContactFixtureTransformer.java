@@ -6,7 +6,6 @@ import com.openexchange.ajax.kata.contacts.ContactCreateStep;
 import com.openexchange.ajax.kata.contacts.ContactDeleteStep;
 import com.openexchange.ajax.kata.contacts.ContactUpdateStep;
 import com.openexchange.ajax.kata.contacts.ContactVerificationStep;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.Fixture;
 

@@ -100,7 +100,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE);
 
@@ -112,13 +112,11 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
 
             // System.out.println(jsonMailObject.toString(2));
 
-            final JSONObject jsonBodyObject;
             {
                 final Object bodyObject = jsonMailObject.opt("body");
                 assertNotNull("Missing mail body.", bodyObject);
 
                 assertTrue("Body object is not a JSON object.", (bodyObject instanceof JSONObject));
-                jsonBodyObject = (JSONObject) bodyObject;
             }
 
             final JSONObject headers = jsonMailObject.getJSONObject("headers");
@@ -132,7 +130,7 @@ public class MailUUEncodedStructureTest extends AbstractMailTest {
 
     public void testMIMEStructureWithParsedUUEncodedParts() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE);
 

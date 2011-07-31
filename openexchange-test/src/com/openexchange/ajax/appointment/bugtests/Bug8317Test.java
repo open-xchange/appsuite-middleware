@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.Appointment;

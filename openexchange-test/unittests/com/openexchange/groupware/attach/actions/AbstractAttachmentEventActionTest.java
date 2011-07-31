@@ -12,7 +12,6 @@ import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tx.TransactionException;
 
 public abstract class AbstractAttachmentEventActionTest extends AbstractAttachmentActionTest {
 

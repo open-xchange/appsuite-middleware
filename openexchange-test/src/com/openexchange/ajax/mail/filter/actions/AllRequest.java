@@ -102,7 +102,8 @@ public class AllRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String getServletPath() {
+	@Override
+    public String getServletPath() {
 		return servletPath;
 	}
 

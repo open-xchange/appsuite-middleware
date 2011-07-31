@@ -58,6 +58,7 @@ public enum TestMailField {
         this.fitnesse = fitnesse;
     }
 
+    @Override
     public String toString() {
         return fitnesse;
     }

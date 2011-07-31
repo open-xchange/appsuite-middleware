@@ -51,12 +51,10 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 public class Bug11803Test extends CalendarSqlTest {

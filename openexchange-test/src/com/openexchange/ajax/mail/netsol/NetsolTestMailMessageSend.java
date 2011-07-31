@@ -111,7 +111,7 @@ public final class NetsolTestMailMessageSend extends AbstractNetsolTest {
 			/*
 			 * Perform send
 			 */
-			final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
+			final NetsolSendResponse response = Executor.execute(getSession(),
 					new NetsolSendRequest(mailObject_25kb.toString()));
 			assertTrue("Send failed", response.getFolderAndID() != null);
 			assertTrue("Duration corrupt", response.getRequestDuration() > 0);

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;

@@ -85,7 +85,6 @@ import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.java.Strings;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.tools.servlet.AjaxException;
 
@@ -292,7 +291,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
                 continue;
             }
             if( column == CalendarObject.FOLDER_ID){
-                assertEquals(name + " Column: " + column, Integer.valueOf(expectedFolderId), (Integer) row[i]);
+                assertEquals(name + " Column: " + column, Integer.valueOf(expectedFolderId), row[i]);
                 continue;
             }
             if (appointment.contains(column)) {

@@ -56,7 +56,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom.JDOMException;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;

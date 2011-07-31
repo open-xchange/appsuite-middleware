@@ -513,8 +513,6 @@ public class ConflictTest extends AppointmentTest {
 			String host, final String session) throws Exception, OXConflictException {
 		host = appendPrefix(host);
 		
-		int objectId = 0;
-		
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final PrintWriter pw = new PrintWriter(baos, true);
 
@@ -525,7 +523,7 @@ public class ConflictTest extends AppointmentTest {
 		pw.print(jsonObj.toString());		
 		pw.flush();
 		
-		final byte b[] = baos.toByteArray();
+		baos.toByteArray();
 		
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -547,7 +545,7 @@ public class ConflictTest extends AppointmentTest {
 		
 		final JSONObject data = (JSONObject) response.getData();
 		if (data.has(DataFields.ID)) {
-			objectId = data.getInt(DataFields.ID);
+			data.getInt(DataFields.ID);
 		}
 		
 		if (data.has("conflicts")) {

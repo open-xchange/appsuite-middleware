@@ -157,7 +157,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
             toDelete[i][1] = clean.get(i);
         }
 
-        final int[] notDeleted = delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, toDelete);
+        delete(getWebConversation(),getHostName(),sessionId, Long.MAX_VALUE, toDelete);
 
         clean.clear();
     }

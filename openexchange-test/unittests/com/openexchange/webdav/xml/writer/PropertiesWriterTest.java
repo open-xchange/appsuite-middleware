@@ -157,14 +157,12 @@ public class PropertiesWriterTest extends TestCase {
 		
 		assertHref(response, "/"+testCollection+"test.txt");
 		
-		int count = 0;
 		for(final Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
 			assertStatus(element, "HTTP/1.1 200 OK");
 			assertProp(element, DAV_NS, "resourcetype", "");
-			count++;
 		}
 	}
 	
@@ -181,14 +179,12 @@ public class PropertiesWriterTest extends TestCase {
 		
 		assertHref(response, "/"+testCollection+"test.txt");
 		
-		int count = 0;
 		for(final Element element : (List<Element>)response.getChildren()) {
 			if(!element.getName().equals("propstat")) {
 				continue;
 			}
 			assertStatus(element, "HTTP/1.1 200 OK");
 			assertProp(element, DAV_NS, "displayname", "<&>");
-			count++;
 		}
 	}
 

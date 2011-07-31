@@ -19,6 +19,7 @@ public class FireAttachedEventActionTest extends AbstractAttachmentEventActionTe
 
     private MockDBProvider provider = null;
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         provider = new MockDBProvider(new DBPoolProvider());

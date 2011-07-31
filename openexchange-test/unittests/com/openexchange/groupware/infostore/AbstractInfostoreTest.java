@@ -108,7 +108,7 @@ public class AbstractInfostoreTest extends TestCase{
         TestInit.loadTestProperties();
         Init.startServer();
         
-        final ContextStorage ctxstor = ContextStorage.getInstance();
+        ContextStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
         
         final TestConfig config = new TestConfig();

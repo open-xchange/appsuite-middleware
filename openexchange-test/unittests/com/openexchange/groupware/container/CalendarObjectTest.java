@@ -51,8 +51,6 @@ package com.openexchange.groupware.container;
 
 import static com.openexchange.groupware.container.CalendarObject.*;
 
-import junit.framework.TestCase;
-import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -118,6 +116,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
+    @Override
     public void setUp() {
         int masterId = 12;
         int singleId = 14;
@@ -151,6 +150,7 @@ public class CalendarObjectTest extends CommonObjectTest {
         single.setRecurrenceType(0);
     }
 
+    @Override
     public void testFindDifferingFields() {
 
         CalendarObject dataObject = getCalendarObject();
@@ -518,6 +518,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
     
+    @Override
     public void testAttrAccessors() {
         
         CalendarObject object = new TestCalendarObject();

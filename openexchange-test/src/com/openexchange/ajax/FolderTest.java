@@ -812,7 +812,7 @@ public class FolderTest extends AbstractAJAXTest {
             -1,
             true);
         final Calendar cal = GregorianCalendar.getInstance();
-        FolderObject fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
         updateFolder(
             getWebConversation(),
             getHostName(),
@@ -822,7 +822,7 @@ public class FolderTest extends AbstractAJAXTest {
             fuid,
             cal.getTimeInMillis(),
             true);
-        fo = getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
+        getFolder(getWebConversation(), getHostName(), getSessionId(), "" + fuid, cal, true);
         deleteFolders(getWebConversation(), getHostName(), getSessionId(), new int[] { fuid }, cal.getTimeInMillis(), true);
     }
 

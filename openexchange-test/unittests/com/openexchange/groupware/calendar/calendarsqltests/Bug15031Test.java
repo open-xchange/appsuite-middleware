@@ -51,7 +51,6 @@ package com.openexchange.groupware.calendar.calendarsqltests;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 

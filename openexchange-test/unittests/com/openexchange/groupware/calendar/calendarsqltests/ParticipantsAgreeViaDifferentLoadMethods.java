@@ -49,15 +49,12 @@
 
 package com.openexchange.groupware.calendar.calendarsqltests;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 
 public class ParticipantsAgreeViaDifferentLoadMethods extends CalendarSqlTest {

@@ -62,7 +62,6 @@ import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
 import com.openexchange.ajax.links.actions.DeleteRequest;
 import com.openexchange.ajax.links.actions.InsertRequest;
-import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
@@ -96,8 +95,8 @@ public final class FunctionTests extends AbstractAJAXSession {
             co.setDisplayName("Meier, Herbert");
             co.setParentFolderID(fid1);
             final com.openexchange.ajax.contact.action.InsertResponse response =
-                (InsertResponse) Executor.execute(client,
-                new com.openexchange.ajax.contact.action.InsertRequest(co));
+                Executor.execute(client,
+            new com.openexchange.ajax.contact.action.InsertRequest(co));
             oid1 = response.getId();
         }
         final int fid2 = client.getValues().getPrivateAppointmentFolder();
@@ -141,7 +140,7 @@ public final class FunctionTests extends AbstractAJAXSession {
         lo.setSecondType(com.openexchange.groupware.Types.APPOINTMENT);
 
         final InsertRequest request = new InsertRequest(lo);
-        final CommonInsertResponse response = LinkTools.insert(client, request);
+        LinkTools.insert(client, request);
     }
 
     /**
@@ -167,18 +166,18 @@ public final class FunctionTests extends AbstractAJAXSession {
             contact.setDisplayName("Link contact and task test.");
             contact.setParentFolderID(contactFolder);
             final com.openexchange.ajax.contact.action.InsertResponse response =
-                (com.openexchange.ajax.contact.action.InsertResponse) Executor
-                .execute(client, new com.openexchange.ajax.contact.action
-                .InsertRequest(contact));
+                Executor
+            .execute(client, new com.openexchange.ajax.contact.action
+            .InsertRequest(contact));
             contact.setObjectID(response.getId());
             // We have to get the contact because the insert response does not
             // contain the timestamp.
             final TimeZone tz = client.getValues().getTimeZone();
 
             final com.openexchange.ajax.contact.action.GetResponse gResponse =
-                (com.openexchange.ajax.contact.action.GetResponse) Executor
-                .execute(client, new com.openexchange.ajax.contact.action
-                .GetRequest(contactFolder, response, tz));
+                Executor
+            .execute(client, new com.openexchange.ajax.contact.action
+            .GetRequest(contactFolder, response, tz));
             contact.setLastModified(gResponse.getTimestamp());
         }
         try {

@@ -131,7 +131,7 @@ public class DetachTest extends InfostoreAJAXTest {
 		clean.add(id2);
 		
 		try {
-			final int[] nd = detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
+			detach(getWebConversation(), getHostName(), sessionId, Long.MAX_VALUE, clean.get(0), new int[]{5});
 			fail("Expected Exception.");
 		} catch (final IOException x) {
 			assertTrue(true);

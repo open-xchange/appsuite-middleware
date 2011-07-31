@@ -75,18 +75,21 @@ public class InsertDocumentIntoDelTableActionTest extends AbstractInfostoreActio
 		super.tearDown();
 	}
 
+    @Override
     protected void verifyPerformed() throws Exception {
         for(final DocumentMetadata doc : getDocuments()) {
             assertResult("SELECT 1 FROM del_infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
         }
     }
 
+    @Override
     protected void verifyUndone() throws Exception {
         for(final DocumentMetadata doc : getDocuments()) {
             assertNoResult("SELECT 1 FROM del_infostore WHERE cid = ? and id = ?", getContext().getContextId(), doc.getId());
         }
     }
 
+    @Override
     protected UndoableAction getAction() throws Exception {
         final InsertDocumentIntoDelTableAction action = new InsertDocumentIntoDelTableAction();
 		action.setProvider(getProvider());

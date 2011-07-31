@@ -50,11 +50,7 @@
 package com.openexchange.test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.server.impl.OCLPermission;
 import static com.openexchange.server.impl.OCLPermission.*;
 

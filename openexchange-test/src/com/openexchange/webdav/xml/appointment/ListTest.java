@@ -199,7 +199,7 @@ public class ListTest extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 
-        final Appointment loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+        loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 
         final int[][] objectIdAndFolderId = { { objectId ,appointmentFolderId } };
         deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
@@ -211,7 +211,7 @@ public class ListTest extends AppointmentTest {
         final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 
         try {
-            final Appointment loadAppointment = loadAppointment(webCon, (objectId+1000), appointmentFolderId, PROTOCOL + hostName, login, password);
+            loadAppointment(webCon, (objectId+1000), appointmentFolderId, PROTOCOL + hostName, login, password);
             fail("object not found exception expected!");
         } catch (final TestException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);

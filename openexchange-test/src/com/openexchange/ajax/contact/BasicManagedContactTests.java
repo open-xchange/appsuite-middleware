@@ -49,18 +49,13 @@
 
 package com.openexchange.ajax.contact;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-
-import org.json.JSONException;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

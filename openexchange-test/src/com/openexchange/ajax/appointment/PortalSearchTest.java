@@ -68,7 +68,7 @@ public class PortalSearchTest extends AppointmentTest {
 		
 		final AJAXSession ajaxSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
 		final NewAppointmentSearchRequest request = new NewAppointmentSearchRequest(start, end, 10000, timeZone, columns);
-		final NewAppointmentSearchResponse response = (NewAppointmentSearchResponse)Executor.execute(ajaxSession, request);
+		final NewAppointmentSearchResponse response = Executor.execute(ajaxSession, request);
 		
 		if (response.hasError()) {
 			throw new Exception("json error: " + response.getResponse().getErrorMessage());

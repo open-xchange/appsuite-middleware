@@ -132,8 +132,6 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     public void testCreatedFoldersAppearInListRequest() throws Exception {
         boolean found1 = false;
         boolean found2 = false;
-        int[] firstFolder = new int[] { folderObject1.getParentFolderID(), folderObject1.getObjectID() };
-        int[] secondFolder = new int[] { folderObject2.getParentFolderID(), folderObject2.getObjectID() };
         FolderObject[] allFolders = manager.listFoldersOnServer(client.getValues().getPrivateInfostoreFolder());
         for (int i = 0; i < allFolders.length; i++) {
             FolderObject fo = allFolders[i];

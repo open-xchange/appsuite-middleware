@@ -191,7 +191,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
@@ -242,7 +242,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");
@@ -290,7 +290,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractFolderRequest.FOLDER_URL, bais, "text/javascript");

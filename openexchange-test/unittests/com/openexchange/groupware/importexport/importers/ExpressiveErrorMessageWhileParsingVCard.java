@@ -50,14 +50,11 @@
 package com.openexchange.groupware.importexport.importers;
 
 import java.io.ByteArrayInputStream;
-import java.util.TimeZone;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.versit.VCard;
 import com.openexchange.tools.versit.VersionedObjectDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.VersitDefinition.Reader;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import junit.framework.TestCase;
 
 
@@ -105,7 +102,7 @@ public class ExpressiveErrorMessageWhileParsingVCard extends TestCase {
         //from string to VersitObject
         try {
             Reader reader = def.getReader(stream, charset);
-            VersitObject versitObject = def.parse(reader);
+            def.parse(reader);
             fail("Should not parse this.");
         } catch(VersitException e){
             String msg = e.getMessage();

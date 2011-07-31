@@ -50,7 +50,6 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;

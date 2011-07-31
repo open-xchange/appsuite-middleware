@@ -147,7 +147,7 @@ public final class LinkTools extends Assert {
     public static AllResponse all(final AJAXClient client,
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (AllResponse) Executor.execute(client, request);
+        return Executor.execute(client, request);
     }
 
     public static CommonDeleteResponse delete(final AJAXClient client,

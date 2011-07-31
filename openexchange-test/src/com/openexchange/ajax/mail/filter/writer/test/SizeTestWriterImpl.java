@@ -54,7 +54,6 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.mail.filter.test.AbstractTest;
 import com.openexchange.ajax.mail.filter.test.SizeTest;
-import com.openexchange.ajax.mail.filter.writer.comparison.ComparisonWriter;
 
 
 /**
@@ -66,7 +65,7 @@ public class SizeTestWriterImpl implements TestWriter {
 	
 	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
-		final SizeTest sizeTest = (SizeTest)abstractTest;
+		
 		
 		// TODO: write comparison
 		//final ComparisonWriter comparisonWriter = ComparisonWriterFactory.getWriter(test.getName());

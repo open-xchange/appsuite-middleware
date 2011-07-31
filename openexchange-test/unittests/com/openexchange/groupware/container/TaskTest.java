@@ -8,6 +8,7 @@ import static com.openexchange.groupware.tasks.Task.*;
 
 public class TaskTest extends CalendarObjectTest {
 
+    @Override
     public void testFindDifferingFields() {
         Task dataObject = getTask();
         Task otherDataObject = getTask();
@@ -178,6 +179,7 @@ public class TaskTest extends CalendarObjectTest {
 
     }
     
+    @Override
     public void testAttrAccessors() {
         Task object = new Task();
         

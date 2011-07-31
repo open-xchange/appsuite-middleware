@@ -50,7 +50,6 @@
 package com.openexchange.webdav.xml.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
-import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.webdav.xml.AppointmentTest;
@@ -95,7 +94,7 @@ public class Bug15491Test extends AppointmentTest {
     }
     
     public void testRead() throws Exception {
-        long now = System.currentTimeMillis();
+        System.currentTimeMillis();
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
 
         Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
@@ -118,7 +117,7 @@ public class Bug15491Test extends AppointmentTest {
     }
     
     public void testWrite() throws Exception {
-        long now = System.currentTimeMillis();
+        System.currentTimeMillis();
         appointment.setUid("ichbineineuid");
         objectId = insertAppointment(getWebConversation(), appointment, PROTOCOL + getHostName(), getLogin(), getPassword());
 

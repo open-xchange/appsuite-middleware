@@ -53,7 +53,6 @@ import java.util.Arrays;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpState;
 import com.openexchange.ajax.Login;
-import com.openexchange.ajax.simple.AbstractSimpleClientTest;
 
 /**
  * {@link AutologinTest}

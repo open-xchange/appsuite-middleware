@@ -61,10 +61,12 @@ import com.openexchange.groupware.update.tasks.CreateGenconfTablesTask;
  */
 public class CreateGenconfTablesTaskTest extends UpdateTest {
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
     }
     
+    @Override
     public void tearDown() throws Exception {
         execSafe("DROP TABLE genconf_attributes_strings");
         execSafe("DROP TABLE genconf_attributes_bools");

@@ -102,6 +102,6 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
         GetSubscriptionResponse getResp = getClient().execute(getReq);
         
         assertTrue("Should fail trying to get subcription afte deletion", getResp.hasError());
-        assertEquals("Should return 1 in case of success", Autoboxing.I(1), (Integer) delResp.getData());
+        assertEquals("Should return 1 in case of success", Autoboxing.I(1), delResp.getData());
     }
 }

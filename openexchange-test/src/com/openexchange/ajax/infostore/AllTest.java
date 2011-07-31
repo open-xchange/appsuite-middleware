@@ -5,15 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.test.TestInit;
 

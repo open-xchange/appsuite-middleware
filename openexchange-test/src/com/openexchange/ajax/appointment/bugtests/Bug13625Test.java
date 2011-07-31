@@ -76,6 +76,7 @@ public class Bug13625Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -111,6 +112,7 @@ public class Bug13625Test extends AbstractAJAXSession {
         assertTrue("Appointment not found", found);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (appointment != null && appointment.getObjectID() != 0) {
             getClient().execute(

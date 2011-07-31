@@ -1,10 +1,8 @@
 package com.openexchange.groupware.results;
 
 import java.util.ArrayList;
-import com.openexchange.api2.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import junit.framework.TestCase;
 
 
@@ -37,6 +35,7 @@ public class AbstractTimedResultTest extends TestCase{
         }
     }
     
+    @Override
     public void setUp() {
         SearchIterator<Thing> iterator = new SearchIteratorAdapter<Thing>(new ArrayList<Thing>() {{
             add(new Thing(1));

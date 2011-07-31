@@ -72,6 +72,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
             this.str = str;
         }
 
+        @Override
         public String toString() {
             return this.str;
         }

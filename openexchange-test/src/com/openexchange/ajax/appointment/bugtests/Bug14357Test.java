@@ -78,6 +78,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -111,6 +112,7 @@ public class Bug14357Test extends AbstractAJAXSession {
         checkYear(10, 2019, 4);
     }
 
+    @Override
     public void tearDown() throws Exception {
         DeleteRequest appointmentDeleteRequest = new DeleteRequest(appointment);
         getClient().execute(appointmentDeleteRequest);
@@ -166,6 +168,7 @@ public class Bug14357Test extends AbstractAJAXSession {
             this.createdBy = createdBy;
         }
 
+        @Override
         public Object getBody() throws JSONException {
             JSONArray array = new JSONArray();
             JSONObject json = new JSONObject();

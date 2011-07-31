@@ -66,7 +66,7 @@ public class ListTest extends TaskTest {
     public void testPropFindWithModified() throws Exception {
         final Task taskObj = createTask("testPropFindWithModified");
         final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
-        final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+        insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 
         // prevent master/slave problem
         Thread.sleep(1000);
@@ -103,7 +103,7 @@ public class ListTest extends TaskTest {
         final Task taskObj = createTask("testPropFindWithObjectId");
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 
-        final Task loadTask = loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password);
+        loadTask(webCon, objectId, taskFolderId, PROTOCOL + hostName, login, password);
     }
 
     public void testObjectNotFound() throws Exception {
@@ -111,7 +111,7 @@ public class ListTest extends TaskTest {
         final int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 
         try {
-            final Task loadTask = loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password);
+            loadTask(webCon, (objectId+1000), taskFolderId, PROTOCOL + hostName, login, password);
             fail("object not found exception expected!");
         } catch (final TestException exc) {
             assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);

@@ -69,8 +69,6 @@ public class FreeBusyTest extends AppointmentTest {
 		c.set(Calendar.MILLISECOND, 0);
 		
 		final long newStartTime = c.getTimeInMillis();
-		final long newEndTime = newStartTime + dayInMillis;
-		
 		final Appointment appointmentObj = new Appointment();
 		appointmentObj.setTitle("testFullTimeUserParticipant");
 		appointmentObj.setStartDate(new Date(startTime));

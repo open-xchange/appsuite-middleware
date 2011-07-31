@@ -3,6 +3,7 @@ package com.openexchange.groupware.container;
 import static com.openexchange.groupware.container.CommonObject.*;
 
 public class CommonObjectTest extends FolderChildObjectTest {
+    @Override
     public void testFindDifferingFields() {
         CommonObject dataObject = getCommonObject();
         CommonObject otherDataObject = getCommonObject();
@@ -25,6 +26,7 @@ public class CommonObjectTest extends FolderChildObjectTest {
 
     }
     
+    @Override
     public void testAttrAccessors() {
         
         CommonObject object = new CommonObject() {};

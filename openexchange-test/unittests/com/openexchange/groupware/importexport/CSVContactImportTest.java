@@ -317,7 +317,7 @@ public class CSVContactImportTest extends AbstractContactTest {
     @Test public void dontImportIfDisplayNameCanBeFormedAtAll() throws Exception{
         final String file = ContactField.COUNTRY_BUSINESS.getReadableName() + "\nNo one likes an empty entry with a country field only";
         try {
-            final List<ImportResult> results = importStuff(file);
+            importStuff(file);
             fail("Should throw exception");
         } catch (ImportExportException e){
             assertEquals("Should throw exception for missing fields to build a display name" , 807, e.getDetailNumber());

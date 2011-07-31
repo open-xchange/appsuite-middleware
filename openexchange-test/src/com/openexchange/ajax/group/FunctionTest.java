@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.group;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +77,6 @@ import com.openexchange.ajax.group.actions.SearchResponse;
 import com.openexchange.ajax.group.actions.UpdatesRequest;
 import com.openexchange.ajax.group.actions.UpdatesResponse;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.container.Contact;
 
 /**
  *

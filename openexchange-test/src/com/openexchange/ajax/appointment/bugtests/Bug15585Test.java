@@ -110,7 +110,7 @@ public class Bug15585Test extends AbstractAJAXSession {
         InsertRequest request = new InsertRequest(appointment2, timeZone);
         AppointmentInsertResponse response = client.execute(request);
         assertTrue("Resource hard conflict expected.", response.hasConflicts());
-        List<ConflictObject> conflicts = response.getConflicts();
+        response.getConflicts();
         ConflictObject conflict = ConflictTools.findById(response.getConflicts(), appointment.getObjectID());
         assertEquals("Title of my appointment is not readable.", appointment.getTitle(), conflict.getTitle());
     }

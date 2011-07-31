@@ -74,6 +74,7 @@ public abstract class SQLTestCase extends TestCase {
 
     protected Properties properties;
 
+    @Override
     public void setUp() throws Exception {
         loadProperties();
         dbProvider = new ConfigurableDBProvider();

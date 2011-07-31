@@ -93,7 +93,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req.selectFile("file", "contacts.csv", is, format.getMimeType());
 			WebResponse webRes = webconv.getResource(req);
 			
-			final JSONObject response = extractFromCallback( webRes.getText() );
+			extractFromCallback( webRes.getText() );
 			
 			//test: export
 			webconv =  getWebConversation();
@@ -199,7 +199,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
             webRes = webconv.getResource(req);
         
             
-            final JSONObject response = extractFromCallback( webRes.getText() );
+            extractFromCallback( webRes.getText() );
             
             //test: export
             webconv =  getWebConversation();

@@ -51,9 +51,7 @@ package com.openexchange.groupware.importexport;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -64,7 +62,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.tools.versit.Parameter;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;

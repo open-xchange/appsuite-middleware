@@ -67,6 +67,7 @@ public class AllParser extends AbstractAJAXParser {
         super(failOnError);
     }
 
+    @Override
     protected AllResponse createResponse(final Response response)
         throws JSONException {
         final AllResponse retval = instanciateResponse(response);

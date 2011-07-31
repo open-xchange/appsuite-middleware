@@ -49,24 +49,9 @@
 
 package com.openexchange.ajax.contact;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-import com.openexchange.ajax.contact.action.GetContactByUIDRequest;
-import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contact.ContactUnificationState;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.test.AggregatingContactTestManager;
 import com.openexchange.test.FolderTestManager;
 

@@ -62,7 +62,6 @@ import java.net.URISyntaxException;
 import junit.framework.TestCase;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.Parameter;
-import com.openexchange.tools.versit.ParameterValue;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;

@@ -11,7 +11,6 @@ import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.attach.SimpleAttachmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.OXTestToolkit;
 
 public class SaveAsTest extends InfostoreAJAXTest {

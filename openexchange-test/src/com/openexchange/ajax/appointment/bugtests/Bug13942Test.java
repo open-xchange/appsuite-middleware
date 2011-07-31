@@ -88,6 +88,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         
@@ -118,6 +119,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         updateAppointment.setAlarm(30);
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (appointment != null && appointment.getObjectID() != 0) {
             DeleteRequest delete = new DeleteRequest(appointment);

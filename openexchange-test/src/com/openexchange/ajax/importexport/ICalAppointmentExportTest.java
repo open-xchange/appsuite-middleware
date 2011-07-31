@@ -54,11 +54,7 @@ import java.util.Date;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.webdav.xml.AppointmentTest;
-import com.openexchange.webdav.xml.TaskTest;
 
 public class ICalAppointmentExportTest extends ManagedAppointmentTest {
 

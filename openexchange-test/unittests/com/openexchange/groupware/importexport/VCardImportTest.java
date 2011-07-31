@@ -124,6 +124,6 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Should have no error" , null, res.getException() );
 
 		final ContactSQLInterface contacts = new RdbContactSQLImpl(sessObj);
-		final Contact co = contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
+		contacts.getObjectById(Integer.parseInt( res.getObjectId()), Integer.parseInt( res.getFolder() ) );
 	}
 }

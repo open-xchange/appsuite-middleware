@@ -60,10 +60,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.AbstractOXException.ProblematicAttribute;
-import com.openexchange.groupware.AbstractOXException.Truncated;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.servlet.AjaxException;
 

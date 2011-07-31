@@ -5,7 +5,6 @@ import java.util.TimeZone;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Params;
 
 public class GetContactForUserRequest extends AbstractContactRequest<GetResponse> {

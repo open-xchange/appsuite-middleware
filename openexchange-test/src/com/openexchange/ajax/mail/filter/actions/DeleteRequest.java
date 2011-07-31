@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import java.util.Date;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

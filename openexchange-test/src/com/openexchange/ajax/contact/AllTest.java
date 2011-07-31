@@ -73,7 +73,7 @@ public class AllTest extends ContactTest {
     public void testAll() throws Exception {
 		final int cols[] = new int[]{ Contact.OBJECT_ID };
 		
-		final Contact[] contactArray = listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
+		listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 	}
 
     // Node 2652

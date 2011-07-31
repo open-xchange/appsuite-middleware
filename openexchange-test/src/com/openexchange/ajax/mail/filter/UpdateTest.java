@@ -20,7 +20,8 @@ public class UpdateTest extends AbstractMailFilterTest {
 		super(name);
 	}
 
-	protected void setUp() throws Exception {
+	@Override
+    protected void setUp() throws Exception {
 		super.setUp();
 	}
 
@@ -30,7 +31,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 
 	public void testUpdate() throws Exception {
 		final AJAXSession ajaxSession = getSession();
-		final AJAXClient ajaxClient = getClient();
+		getClient();
 		
 		String forUser = null;
 		
@@ -61,7 +62,7 @@ public class UpdateTest extends AbstractMailFilterTest {
 	
 	public void _notestMove() throws Exception {
 		final AJAXSession ajaxSession = getSession();
-		final AJAXClient ajaxClient = getClient();
+		getClient();
 		
 		String forUser = null;
 		

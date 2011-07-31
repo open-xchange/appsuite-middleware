@@ -127,9 +127,7 @@ public class CalendarPerformanceTests extends TestCase {
     	final LineNumberReader lnr = new LineNumberReader(r);
     	String line; 
     	long all = 0L;
-    	int counter = 0;
     	long high = 0L;
-    	String shigh = "";
     	final long all_start = System.currentTimeMillis();
     	final HashMap<String, Integer> count_cid = new HashMap<String, Integer>();
     	while ((line = lnr.readLine()) != null){
@@ -159,19 +157,16 @@ public class CalendarPerformanceTests extends TestCase {
     	        cdao.setStartDate(sdate);
     	        cdao.setEndDate(edate);
     	        new CalendarCollection().fillDAO(cdao);
-    	        final RecurringResultsInterface rss = new CalendarCollection().calculateRecurring(cdao, 0L, 5709135600000L, 0);    	        
+    	        new CalendarCollection().calculateRecurring(cdao, 0L, 5709135600000L, 0);    	        
     	        final long end = System.currentTimeMillis();
     	        final long duration = end-start;
     	        all = all + duration;
-    	        counter ++;
     	        if (duration > high) {
     	        	high = duration;
-    	        	shigh = recstring;
     	        }
     		}
     	}
     	final long all_end = System.currentTimeMillis();
-    	final long total = all_end - all_start;
     	final Iterator it = count_cid.keySet().iterator();
     	int hit = 0;
     	while(it.hasNext()) {

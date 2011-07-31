@@ -103,7 +103,7 @@ public final class ResourceUpdateAJAXTest extends AbstractResourceTest {
 			 */
 			resource.setIdentifier(id);
 			resource.setMail("my.resource1337@domain.tdl");
-			final ResourceUpdateResponse updateResponse = (ResourceUpdateResponse) Executor.execute(getSession(),
+			Executor.execute(getSession(),
 					new ResourceUpdateRequest(resource, clientLastModified, true));
 
 		} finally {

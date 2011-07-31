@@ -53,7 +53,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.group.actions.AbstractGroupResponse;
 import com.openexchange.ajax.group.actions.ListRequest;
 import com.openexchange.ajax.group.actions.SearchRequest;

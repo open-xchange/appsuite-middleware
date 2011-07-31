@@ -62,7 +62,8 @@ public class JChronicLongTransformator extends JChronicDateTransformator {
 		super(fixtureLoader);
 	}
 
-	public Object transform(final String value) throws FixtureException {
+	@Override
+    public Object transform(final String value) throws FixtureException {
     	final Date date = (Date)super.transform(value);
     	return date.getTime();
     }

@@ -23,7 +23,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 	}
 	
 	public void testBug8447() throws Exception {
-		final Date modified = new Date();
+		new Date();
 
 		final Date startDate = simpleDateFormatUTC.parse("2007-06-01 00:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-06-02 00:00:00");
@@ -67,7 +67,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());		
 		
 		try {
-			final Appointment loadAppointment = loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+			loadAppointment(webCon, exceptionObjectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 			fail("object not found exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.OBJECT_NOT_FOUND_STATUS);

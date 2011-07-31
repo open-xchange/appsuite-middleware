@@ -71,10 +71,12 @@ public class ReplyAllRequest extends ReplyRequest {
         this(folderAndID[0], folderAndID[1]);
     }
     
+    @Override
     public String getAction(){
         return Mail.ACTION_REPLYALL;
     }
 
+    @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ReplyAllResponse>(failOnError) {
             @Override

@@ -255,8 +255,7 @@ public final class Bug11865Test extends AbstractAJAXSession {
         //Try to delete the appointment
         deleteRequest = new DeleteRequest(appointment.getObjectID(), folderId, appointment.getLastModified());
         try {
-            final CommonDeleteResponse deleteResponse = client.execute(deleteRequest);
-            final String test = "123";
+            client.execute(deleteRequest);
         } catch (final Exception e) {
             fail("Exception during deletion of corrupted appointment.");
         }

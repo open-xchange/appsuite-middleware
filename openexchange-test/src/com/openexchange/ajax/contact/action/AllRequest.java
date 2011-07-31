@@ -54,7 +54,6 @@ import java.util.List;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.tools.arrays.Arrays;

@@ -76,7 +76,6 @@ public class SimpleDBPoolTest extends TestCase {
         
         for (int a = 0; a < con.length; a++) {
             try {                
-                final Connection tc = con[a];
                 assertTrue(con != null);
             } catch(final Exception e) {
                 e.printStackTrace();

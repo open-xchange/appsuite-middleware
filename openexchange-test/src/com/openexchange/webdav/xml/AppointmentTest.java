@@ -222,7 +222,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
@@ -282,7 +282,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");
@@ -358,7 +358,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
     }
 
     public static int[] deleteAppointment(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password) throws Exception {
-        final ArrayList failed = new ArrayList();
+        new ArrayList();
 
         for (int a = 0; a < objectIdAndFolderId.length; a++) {
             deleteAppointment(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);
@@ -399,7 +399,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/xml");
@@ -453,7 +453,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         final XMLOutputter xo = new XMLOutputter();
         xo.output(doc, baos);
 
-        final byte b[] = baos.toByteArray();
+        baos.toByteArray();
 
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final WebRequest req = new PutMethodWebRequest(host + AbstractAppointmentRequest.URL, bais, "text/javascript");

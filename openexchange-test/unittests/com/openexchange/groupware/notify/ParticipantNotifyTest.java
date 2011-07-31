@@ -98,7 +98,6 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.resource.Resource;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.oxfolder.OXFolderAccess;

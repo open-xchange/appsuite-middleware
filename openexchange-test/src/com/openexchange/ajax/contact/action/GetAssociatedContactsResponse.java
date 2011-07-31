@@ -57,10 +57,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.parser.ContactParser;
-import com.openexchange.groupware.contact.ContactException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.servlet.OXJSONException;
 
 
 /**

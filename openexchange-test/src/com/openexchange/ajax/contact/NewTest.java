@@ -69,7 +69,7 @@ public class NewTest extends ContactTest {
 
     public void testNew() throws Exception {
         final Contact contactObj = createContactObject("testNew");
-        final int objectId = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
+        insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
     }
 
     public void testNewWithDistributionList() throws Exception {
@@ -78,7 +78,7 @@ public class NewTest extends ContactTest {
         final int contactId = insertContact(getWebConversation(), contactEntry, PROTOCOL + getHostName(), getSessionId());
         contactEntry.setObjectID(contactId);
 
-        final int objectId = createContactWithDistributionList("testNewWithDistributionList", contactEntry);
+        createContactWithDistributionList("testNewWithDistributionList", contactEntry);
     }
 
     public void testNewWithLinks() throws Exception {
@@ -89,7 +89,7 @@ public class NewTest extends ContactTest {
         final int linkId2 = insertContact(getWebConversation(), link2, PROTOCOL + getHostName(), getSessionId());
         link2.setObjectID(linkId2);
 
-        final int objectId = createContactWithLinks("testNewWithLinks", link1, link2);
+        createContactWithLinks("testNewWithLinks", link1, link2);
     }
 
     public void testNewContactWithAttachment() throws Exception {
@@ -106,11 +106,11 @@ public class NewTest extends ContactTest {
         attachmentObj.setFileMIMEType("plain/text");
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
-        final int attachmentId1 = com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
         contactObj.setNumberOfAttachments(1);
 
         byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-        final int attachmentId2 = com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+        com.openexchange.webdav.xml.AttachmentTest.insertAttachment(getWebConversation(), attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
         contactObj.setNumberOfAttachments(2);
 
         final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, PROTOCOL, getHostName(), getSessionId());

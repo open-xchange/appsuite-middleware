@@ -65,6 +65,7 @@ public enum MailContentType {
         this.text = text;
     }
 
+    @Override
     public String toString() {
         return this.text;
     }

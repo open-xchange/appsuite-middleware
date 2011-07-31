@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.api2.OXException;

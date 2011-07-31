@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import com.openexchange.ajax.appointment.helper.OXError;
-import com.openexchange.ajax.helper.ParamContainerException.Code;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;

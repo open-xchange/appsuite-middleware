@@ -248,7 +248,7 @@ public class SearchTest extends InfostoreAJAXTest {
         final JSONArray rows = (JSONArray) res.getData();
         for(int i = 0, size = rows.length(); i < size; i++) {
             final JSONArray row = rows.getJSONArray(i);
-            final int id = row.getInt(0);
+            row.getInt(0);
             final int numberOfVersions = row.getInt(1);
 
             assertEquals(1, numberOfVersions);

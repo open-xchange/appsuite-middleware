@@ -222,7 +222,8 @@ public class Document {
 		return datapath;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return containsPath() ? getPath() : super.toString();
 	}
 	

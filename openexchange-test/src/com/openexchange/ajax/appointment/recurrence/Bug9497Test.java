@@ -46,7 +46,7 @@ public class Bug9497Test extends AbstractRecurrenceTest {
 		appointmentObj.setIgnoreConflicts(true);
 		objectId  = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 		appointmentObj.setObjectID(objectId);
-		final Appointment loadAppointment = loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
+		loadAppointment(getWebConversation(), objectId, 39,  appointmentFolderId, timeZone, PROTOCOL + getHostName(), getSessionId());
 	}
 
     @Override

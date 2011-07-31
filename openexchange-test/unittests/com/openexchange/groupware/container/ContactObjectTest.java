@@ -7,6 +7,7 @@ import static com.openexchange.groupware.container.Contact.*;
 
 public class ContactObjectTest extends CommonObjectTest {
 
+    @Override
     public void testFindDifferingFields() {
 
         Contact dataObject = getContact();
@@ -5514,6 +5515,7 @@ public class ContactObjectTest extends CommonObjectTest {
 
     }
 
+    @Override
     public void testAttrAccessors() {
         Contact object = new Contact();
         // POSTAL_CODE_HOME

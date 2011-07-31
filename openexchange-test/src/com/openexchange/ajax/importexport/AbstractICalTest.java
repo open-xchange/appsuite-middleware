@@ -239,8 +239,6 @@ public class AbstractICalTest extends AbstractAJAXTest {
     public Task[] exportTask(final WebConversation webCon, final int inFolder, final String mailaddress, final TimeZone timeZone, String host, final String session, final Context ctx) throws Exception, TestException {
         host = appendPrefix(host);
 
-        final String contentType = "text/calendar";
-
         final URLParameter parameter = new URLParameter(true);
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter("action", Format.ICAL.getConstantName());

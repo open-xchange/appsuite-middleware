@@ -35,7 +35,7 @@ public class ChangeExceptionTest extends AbstractRecurrenceTest {
             exception.setStartDate(startDateException);
             exception.setEndDate(endDateException);
             exception.setIgnoreConflicts(true);
-            final int exceptionId = updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+            updateAppointment(getWebConversation(), exception, objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
         } finally {
             if (objectId != 0) {
                 deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());

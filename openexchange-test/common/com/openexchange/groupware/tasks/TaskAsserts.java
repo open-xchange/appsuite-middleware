@@ -24,7 +24,7 @@ public class TaskAsserts extends TestCase{
 			assertTrue(
 				"The following field should be equal in both Tasks: " 
 				+ "[" + getReadableName(mapping) + "], expected: "
-				+ (Date)expectedValue + ", but was: " + (Date)comparedValue,
+				+ expectedValue + ", but was: " + comparedValue,
 				TaskAsserts.checkOXDatesAreEqual((Date)expectedValue, (Date)comparedValue));
 		} else 
 			assertEquals(

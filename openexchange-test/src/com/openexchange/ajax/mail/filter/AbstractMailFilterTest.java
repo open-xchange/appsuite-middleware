@@ -203,12 +203,12 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
     public static void updateRule(final Rule rule, final String forUser, final AJAXSession ajaxSession) throws Exception {
         final UpdateRequest updateRequest = new UpdateRequest(rule, forUser);
-        final UpdateResponse updateResponse = (UpdateResponse) Executor.execute(ajaxSession, updateRequest);
+        Executor.execute(ajaxSession, updateRequest);
     }
 
     public static void deleteRule(final String id, final String forUser, final AJAXSession ajaxSession) throws Exception {
         final DeleteRequest deleteRequest = new DeleteRequest(id);
-        final DeleteResponse deleteResponse = (DeleteResponse) Executor.execute(ajaxSession, deleteRequest);
+        Executor.execute(ajaxSession, deleteRequest);
     }
 
     public static String[] getIdArray(final String forUser, final AJAXSession ajaxSession) throws Exception {

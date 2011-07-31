@@ -71,11 +71,13 @@ public class MailAccountAllTest extends AbstractMailAccountTest {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         createMailAccount();
     }
 
+    @Override
     public void tearDown() throws Exception {
         if (null != mailAccountDescription && 0 != mailAccountDescription.getId()) {
             deleteMailAccount();

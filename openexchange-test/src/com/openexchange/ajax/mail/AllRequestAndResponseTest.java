@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.mail.actions.AllRequest;

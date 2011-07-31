@@ -44,10 +44,10 @@ public class NewTest extends ContactTest {
 		
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("t1".getBytes());
 		
-		final int attachmentId1 = AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
 		byteArrayInputStream = new ByteArrayInputStream("t2".getBytes());
-		final int attachmentId2 = AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		AttachmentTest.insertAttachment(webCon, attachmentObj, byteArrayInputStream, getHostName(), getLogin(), getPassword());
 		
 		final Contact loadContact = ContactTest.loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
 		compareObject(contactObj, loadContact);	

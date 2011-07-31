@@ -58,10 +58,12 @@ import com.openexchange.groupware.update.tasks.CreateSubscribeTableTask;
  */
 public class CreateSubscribeTableTest extends UpdateTest {
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
     }
     
+    @Override
     public void tearDown() throws Exception {
         execSafe("DROP TABLE subscriptions");
         execSafe("DROP TABLE sequence_subscriptions");

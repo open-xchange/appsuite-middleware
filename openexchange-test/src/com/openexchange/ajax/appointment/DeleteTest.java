@@ -26,7 +26,7 @@ public class DeleteTest extends AppointmentTest {
     public void testDelete() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testDelete");
 		appointmentObj.setIgnoreConflicts(true);
-        final int objectId = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
+        insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         final int id = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
         
         deleteAppointment(getWebConversation(), id, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());

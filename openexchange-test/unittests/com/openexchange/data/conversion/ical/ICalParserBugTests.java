@@ -50,10 +50,6 @@
 package com.openexchange.data.conversion.ical;
 
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -315,7 +311,7 @@ public class ICalParserBugTests extends AbstractICalParserTest {
                     + "END:VEVENT\n"
                     + "END:VCALENDAR\n";
 
-        Appointment appointment = parseAppointment(ical);
+        parseAppointment(ical);
     }
     
     public void testBug16613() throws Exception{

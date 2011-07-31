@@ -1057,7 +1057,7 @@ public class FolderTest extends TestCase {
                 AppointmentSQLInterface csql = getAppointmentHandler();
                 csql.insertAppointmentObject(cdao);
                 final int object_id = cdao.getObjectID();
-                final CalendarDataObject testobject = csql.getObjectById(object_id, fuid);
+                csql.getObjectById(object_id, fuid);
 
                 /*
                  * Clean folder
@@ -1091,9 +1091,7 @@ public class FolderTest extends TestCase {
         final long endcalc = 3600000;
         long mod = s % 3600000;
         s = s - mod;
-        final long saves = s;
         final long e = s + endcalc;
-        final long savee = e;
         long u = s + (Constants.MILLI_DAY * 10);
         mod = u % Constants.MILLI_DAY;
         u = u - mod;

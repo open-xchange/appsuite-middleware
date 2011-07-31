@@ -113,13 +113,13 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 			/*
 			 * "Put" into "Sent" folder through a send request
 			 */
-			final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
+			final NetsolSendResponse response = Executor.execute(getSession(),
 					new NetsolSendRequest(mailObject_25kb.toString()));
 			final FolderAndID mailPath = new FolderAndID(response.getFolderAndID()[0], response.getFolderAndID()[1]);
 			/*
 			 * Delete previously added mail
 			 */
-			final NetsolDeleteRequest.NetsolDeleteResponse delResponse = (NetsolDeleteResponse) Executor.execute(
+			final NetsolDeleteRequest.NetsolDeleteResponse delResponse = Executor.execute(
 					getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, false));
 			assertTrue("Delete failed", delResponse.getFailed().length() == 0);
 			assertTrue("Duration corrupt", delResponse.getRequestDuration() > 0);

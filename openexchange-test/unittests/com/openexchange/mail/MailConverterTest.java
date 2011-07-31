@@ -477,7 +477,7 @@ public class MailConverterTest extends AbstractMailTest {
 
 	public void testMIMEConverter() {
 		try {
-			final SessionObject session = getSession();
+			getSession();
 			
 			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
 			

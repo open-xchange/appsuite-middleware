@@ -69,6 +69,7 @@ public class Bug10941Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         taskManager = new TaskTestManager(getClient());
@@ -93,6 +94,7 @@ public class Bug10941Test extends AbstractAJAXSession {
         assertEquals(null, saved.getEndDate());
     }
 
+    @Override
     public void tearDown() throws Exception {
         taskManager.cleanUp();
         super.tearDown();

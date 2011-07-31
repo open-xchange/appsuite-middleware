@@ -100,7 +100,7 @@ public class CreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         expected.setFolderId(folder.getObjectID());
         expected.setTitle("InfostoreCreateDeleteTest File");
         expected.setLastModified(new Date());
-        File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 
         infoMgr.newAction(expected);//TODO, upload);
         assertFalse("Creating an entry should work", infoMgr.getLastResponse().hasError());

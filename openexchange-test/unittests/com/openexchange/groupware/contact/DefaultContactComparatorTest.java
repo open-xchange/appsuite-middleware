@@ -62,6 +62,7 @@ public class DefaultContactComparatorTest extends TestCase {
     private Contact c1;
     private Contact c2;
 
+    @Override
     public void setUp() {
         c1 = new Contact();
         c2 = new Contact();

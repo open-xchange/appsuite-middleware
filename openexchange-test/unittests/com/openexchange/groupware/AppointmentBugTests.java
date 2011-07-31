@@ -338,7 +338,7 @@ public class AppointmentBugTests extends TestCase {
 
         boolean test_exists = false;
         try {
-            final CalendarDataObject cdao_test_exists = csql2.getObjectById(object_id, fid2);
+            csql2.getObjectById(object_id, fid2);
         } catch(final OXException oxe) {
             test_exists = true;
         }
@@ -361,9 +361,9 @@ public class AppointmentBugTests extends TestCase {
         final String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
         final int userid2 = resolveUser(user2);
         final int fid = getPrivateFolder(userid);
-        final int fid2 = getPrivateFolder(userid2);
+        getPrivateFolder(userid2);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
-        final SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
+        SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
 
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -742,7 +742,6 @@ public class AppointmentBugTests extends TestCase {
      */
 
     public void testBug5010() throws Throwable {
-        final RecurringResultsInterface m = null;
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
 
@@ -788,7 +787,6 @@ public class AppointmentBugTests extends TestCase {
      */
 
     public void testBug5012() throws Throwable {
-        final RecurringResultsInterface m = null;
         final int fid = getPrivateFolder(userid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestIdentifier");
 
@@ -972,7 +970,7 @@ public class AppointmentBugTests extends TestCase {
         csql2.deleteAppointmentObject(delete, fid2, new Date());
 
         try {
-            final CalendarDataObject testobject = csql2.getObjectById(object_id, fid2);
+            csql2.getObjectById(object_id, fid2);
             fail("User should get an OXPermissionException ");
         } catch(final OXPermissionException ope) {
             // Excellent
@@ -1130,7 +1128,7 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Check correct folder", shared_folder_id, testobject2.getParentFolderID());
 
 
-            final CalendarDataObject testobject3 = csql2.getObjectById(object_id, shared_folder_id);
+            csql2.getObjectById(object_id, shared_folder_id);
             up = testobject2.getUsers();
             assertEquals("Check that only user 1 is participant", 1, up.length);
             assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
@@ -1161,7 +1159,7 @@ public class AppointmentBugTests extends TestCase {
     */
     public void testBug5222AND5171() throws Throwable {
         deleteAllAppointments();
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = getPrivateFolder(userid);
 
@@ -1244,7 +1242,7 @@ public class AppointmentBugTests extends TestCase {
     Create a new appointment, whole-day, spaning 2 days (22.01.2007 - 24.01.2007)
     */
     public void testBug4987() throws Throwable {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = getPrivateFolder(userid);
         final CalendarSql csql = new CalendarSql(so);
@@ -1290,10 +1288,10 @@ public class AppointmentBugTests extends TestCase {
     }
 
     public void testBug5306() throws Throwable {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = getPrivateFolder(userid);
-        final CalendarSql csql = new CalendarSql(so);
+        new CalendarSql(so);
 
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -1319,8 +1317,8 @@ public class AppointmentBugTests extends TestCase {
         super_start_test = super_start_test+new CalendarCollection().MILLI_DAY;
         super_end_test = super_end_test+new CalendarCollection().MILLI_DAY;
 
-        final Date s = new Date(super_start_test);
-        final Date e = new Date(super_end_test);
+        new Date(super_start_test);
+        new Date(super_end_test);
 
         final RecurringResultsInterface m2 = new CalendarCollection().calculateRecurring(cdao, super_start_test, super_end_test, 0);
 
@@ -1538,8 +1536,8 @@ public class AppointmentBugTests extends TestCase {
             final CalendarDataObject testobject = csql.getObjectById(object_id, subfolder_id);
 
 
-            final Date save_start = testobject.getStartDate();
-            final Date save_end = testobject.getEndDate();
+            testobject.getStartDate();
+            testobject.getEndDate();
 
 
             final CalendarDataObject update = new CalendarDataObject();
@@ -1552,7 +1550,7 @@ public class AppointmentBugTests extends TestCase {
 
             try {
                 csql.updateAppointmentObject(update, subfolder_id, new Date());
-                final int object_id_exception = update.getObjectID();
+                update.getObjectID();
                 fail("Test failed. An exception can not be moved into a different folder.");
             } catch(final OXCalendarException e) {
                 // Must fail
@@ -1561,7 +1559,6 @@ public class AppointmentBugTests extends TestCase {
 
 
         } finally {
-            final int x = 0;
             try {
                 if (subfolder_id > 0) {
                     oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
@@ -1666,7 +1663,6 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Check that no alarm is set (update)", false, up_update[0].containsAlarm());
 
         } finally {
-            final int x = 0;
             try {
                 if (subfolder_id > 0) {
                     oxma.deleteFolder(new FolderObject(subfolder_id), true, System.currentTimeMillis());
@@ -1768,7 +1764,7 @@ public class AppointmentBugTests extends TestCase {
         final CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
         final int object_id = cdao.getObjectID();
-        final Date last = cdao.getLastModified();
+        cdao.getLastModified();
 
         final CalendarDataObject update = new CalendarDataObject();
         update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
@@ -2027,7 +2023,7 @@ public class AppointmentBugTests extends TestCase {
      */
     public void testBug7064() throws Throwable {
         final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
 
         final int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
 
@@ -2039,8 +2035,6 @@ public class AppointmentBugTests extends TestCase {
 
         final long startdate = 1175421600000L; // 01.04.2007 10:00 UTC
         final long enddate = 1175425200000L; // 01.04.2007 11:00 UTC
-        final long until = 1272664800000L; // 01.05.2010 00:00 GMT+2
-
         final long testmatrix[] = { 1176804000000L, 1208253600000L, 1240308000000L, 1271757600000L };
 
         cdao.setStartDate(new Date(startdate));
@@ -2160,7 +2154,7 @@ public class AppointmentBugTests extends TestCase {
         deleteAllAppointments();
 
         final Context context = new ContextImpl(contextid);
-        final SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
+        SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
 
         final int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
 
@@ -2344,8 +2338,6 @@ public class AppointmentBugTests extends TestCase {
             try {
                 csql2.updateAppointmentObject(update, shared_folder_id, new Date());
             } catch(final OXPermissionException oxpe) {
-                // wunderbar, das m\u00f6chten wir
-                final int x = 0;
             }
 
             boolean found = false;
@@ -2414,7 +2406,7 @@ public class AppointmentBugTests extends TestCase {
         FolderObject fo = new FolderObject();
 
         final CalendarSql csql = new CalendarSql(so);
-        final CalendarSql csql2 = new CalendarSql(so2);
+        new CalendarSql(so2);
 
 
         final OCLPermission oclp1 = new OCLPermission();
@@ -2457,8 +2449,6 @@ public class AppointmentBugTests extends TestCase {
                 csql.updateAppointmentObject(move, fid, new Date());
                 fail("Move not allowed");
             } catch(final OXCalendarException oxce) {
-                // perfect
-                final int x = 0;
             } catch(final Exception e) {
                 fail("Noooo "+e.getMessage());
             }
@@ -2648,7 +2638,7 @@ public class AppointmentBugTests extends TestCase {
             final int object_id = cdao.getObjectID();
             assertTrue("Object was created", object_id > 0);
 
-            final CalendarDataObject load = csql2.getObjectById(object_id, shared_folder_id);
+            csql2.getObjectById(object_id, shared_folder_id);
 
             final CalendarDataObject move = new CalendarDataObject();
             move.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
@@ -2762,7 +2752,7 @@ public class AppointmentBugTests extends TestCase {
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final Connection readcon = DBPool.pickup(context);
         final Connection writecon = DBPool.pickupWriteable(context);
-        final int fid = AppointmentBugTests.getPrivateFolder(userid);
+        AppointmentBugTests.getPrivateFolder(userid);
         final OXFolderManager oxma = OXFolderManager.getInstance(so, readcon, writecon);
         FolderObject fo = new FolderObject();
         final CalendarSql csql = new CalendarSql(so);
@@ -2770,7 +2760,7 @@ public class AppointmentBugTests extends TestCase {
         oclp1.setEntity(userid);
         oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         oclp1.setFolderAdmin(true);
-        final OCLPermission oclp2 = new OCLPermission();
+        new OCLPermission();
         fo.setFolderName("testPublicFolder9089 - "+System.currentTimeMillis());
         fo.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         fo.setModule(FolderObject.CALENDAR);
@@ -2841,7 +2831,7 @@ public class AppointmentBugTests extends TestCase {
     visible and not lost.
     */
     public void testBug9599() throws Throwable {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
 
@@ -3040,7 +3030,7 @@ public class AppointmentBugTests extends TestCase {
     5. Check if the cdao contains only one participant
     */
     public void testBug10717() throws Throwable {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
 
@@ -3110,7 +3100,7 @@ public class AppointmentBugTests extends TestCase {
      * @throws Exception If an error occurs
      */
     public void testBug10663() throws Exception {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
                 "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
@@ -3161,7 +3151,7 @@ public class AppointmentBugTests extends TestCase {
      * @throws Exception If an error occurs
      */
     public void testBug8516() throws Exception {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
                 "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);
@@ -3203,7 +3193,7 @@ public class AppointmentBugTests extends TestCase {
      * @throws Exception If an error occurs
      */
     public void testBug9823() throws Exception {
-        final Context context = new ContextImpl(contextid);
+        new ContextImpl(contextid);
         final SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(),
                 "myTestSearch");
         final int fid = AppointmentBugTests.getPrivateFolder(userid);

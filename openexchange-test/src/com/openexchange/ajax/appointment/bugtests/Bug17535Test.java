@@ -61,8 +61,6 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * {@link Bug17535Test}

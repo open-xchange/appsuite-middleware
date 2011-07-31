@@ -215,7 +215,7 @@ public class IMipImportTest extends AbstractConversionTest {
         
         UnsynchronizedByteArrayInputStream in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
     
-        NetsolSendResponse response = (NetsolSendResponse) Executor.execute(c.getSession(), new NetsolSendRequest(mail.toString(), in, "text/calendar; charset=US-ASCII", "ical.ics"));
+        NetsolSendResponse response = Executor.execute(c.getSession(), new NetsolSendRequest(mail.toString(), in, "text/calendar; charset=US-ASCII", "ical.ics"));
         assertTrue("Send failed", response.getFolderAndID() != null);
         assertTrue("Duration corrupt", response.getRequestDuration() > 0);
         String[] mailFolderAndMailID = response.getFolderAndID();
@@ -227,7 +227,7 @@ public class IMipImportTest extends AbstractConversionTest {
     
     protected String getSequenceIdForMail(AJAXClient c, String[] mailFolderAndMailID) throws Exception {
         FolderAndID fai = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-        NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(c.getSession(), new NetsolGetRequest(fai, true)));
+        NetsolGetResponse resp = Executor.execute(c.getSession(), new NetsolGetRequest(fai, true));
         JSONObject mailObject = (JSONObject) resp.getData();
         JSONArray att = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
         int len = att.length();

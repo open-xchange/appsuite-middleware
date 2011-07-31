@@ -50,7 +50,6 @@
 package com.openexchange.ajax.contact.action;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 
 /**

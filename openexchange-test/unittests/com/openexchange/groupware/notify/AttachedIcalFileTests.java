@@ -53,7 +53,6 @@ import java.util.Calendar;
 import java.util.Date;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.notify.ParticipantNotifyTest.TestMailObject;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.test.Asserts;
 

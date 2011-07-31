@@ -625,7 +625,7 @@ public class MailSimpleStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE);
 
@@ -662,7 +662,7 @@ public class MailSimpleStructureTest extends AbstractMailTest {
 
     public void testMIMEStructure2() {
         try {
-            final SessionObject session = getSession();
+            getSession();
 
             final MailMessage mail = MIMEMessageConverter.convertMessage(SIMPLE2);
 

@@ -75,9 +75,7 @@ public class PoolRunner implements Runnable {
     private void simpleAction(final Connection con) throws SQLException {
         if (con != null && !con.isClosed()) {
             final ResultSet rs = con.createStatement().executeQuery(TEST_QUERY);
-            int counter = 0;
             while (rs.next()) {
-                counter++;
             }
         }
     }

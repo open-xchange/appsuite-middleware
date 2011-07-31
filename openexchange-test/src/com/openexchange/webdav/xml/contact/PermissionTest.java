@@ -38,7 +38,7 @@ public class PermissionTest extends ContactTest {
 		contactObj.setParentFolderID(parentFolderId);
 		
 		try {
-			final int contactObjectId = insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
@@ -67,7 +67,7 @@ public class PermissionTest extends ContactTest {
 		contactObj.setParentFolderID(parentFolderId);
 		
 		try {
-			final int contactObjectId = insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertContact(getSecondWebConversation(), contactObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);

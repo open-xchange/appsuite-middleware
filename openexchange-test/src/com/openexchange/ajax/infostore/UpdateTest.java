@@ -8,7 +8,6 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.test.TestInit;

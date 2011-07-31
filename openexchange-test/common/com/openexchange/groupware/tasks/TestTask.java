@@ -449,6 +449,7 @@ public class TestTask extends Task {
         this.setParentFolderID(originalTask.getParentFolderID());
         return this;
     }
+    @Override
     public TestTask clone(){
         TestTask newTask = new TestTask();
         //copy all fields of Task

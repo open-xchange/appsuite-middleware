@@ -49,22 +49,16 @@
 
 package com.openexchange.ajax.mail.actions;
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 /**
 * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>

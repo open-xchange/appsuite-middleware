@@ -53,10 +53,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.actions.GetRequest;
-import com.openexchange.ajax.mail.actions.GetResponse;
-import com.openexchange.ajax.mail.actions.MoveMailRequest;
-import com.openexchange.ajax.mail.actions.UpdateMailResponse;
 import com.openexchange.tools.servlet.AjaxException;
 
 
@@ -97,7 +93,7 @@ public class CopyMailTest extends AbstractMailTest {
         String destination = values.getDraftsFolder();
         
         TestMail myMail = new TestMail( getFirstMailInFolder( origin) );
-        String oldID = myMail.getId();
+        myMail.getId();
         
         TestMail copiedMail = manager.copy(myMail, destination);
         String newID = copiedMail.getId();

@@ -35,6 +35,7 @@ public class GroupwareTests extends AJAXTest {
     
     private static final String LOGIN_URL = "/ajax/login";
 
+    @Override
     public WebconversationAndSessionID login() throws MalformedURLException, IOException, SAXException, JSONException {
         HttpUnitOptions.setDefaultCharacterSet("UTF-8");
         HttpUnitOptions.setScriptingEnabled(false);

@@ -56,7 +56,6 @@ import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdateRequest;
-import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 

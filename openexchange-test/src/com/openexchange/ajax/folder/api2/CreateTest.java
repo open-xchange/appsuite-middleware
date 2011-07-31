@@ -104,7 +104,7 @@ public class CreateTest extends AbstractAJAXSession {
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
             final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
-            final InsertResponse response = (InsertResponse) client.execute(request);
+            final InsertResponse response = client.execute(request);
 
             newId = (String) response.getResponse().getData();
             assertNotNull("New ID must not be null!", newId);

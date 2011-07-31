@@ -57,7 +57,7 @@ public class ICalTest extends AbstractWebdavTest {
 		final VersitObject ical = OXContainerConverter.newCalendar("2.0");
 		def.writeProperties(w, ical);
 		final VersitDefinition eventDef = def.getChildDef("VEVENT");
-		final VersitDefinition taskDef = def.getChildDef("VTODO");
+		def.getChildDef("VTODO");
 		
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter(TimeZone.getDefault(), "t@t.de");
 		

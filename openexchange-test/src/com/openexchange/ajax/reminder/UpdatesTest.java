@@ -61,7 +61,6 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;

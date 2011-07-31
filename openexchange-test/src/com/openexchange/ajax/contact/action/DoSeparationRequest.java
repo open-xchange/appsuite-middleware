@@ -115,6 +115,7 @@ public class DoSeparationRequest extends AbstractContactRequest<DoSeparationResp
 
     public AbstractAJAXParser<? extends DoSeparationResponse> getParser() {
         return new AbstractAJAXParser<DoSeparationResponse>(true){
+            @Override
             public DoSeparationResponse createResponse(final Response response){
                 return new DoSeparationResponse(response);
             }

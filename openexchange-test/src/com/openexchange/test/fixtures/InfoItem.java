@@ -94,25 +94,30 @@ public class InfoItem extends DocumentMetadataImpl {
 	 * overrides
 	 */
 
-	public String getFileName() {
+	@Override
+    public String getFileName() {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? null : currentVersion.getFile().getName();
 	}
 	
-	public long getFileSize() {
+	@Override
+    public long getFileSize() {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? 0 : currentVersion.getSize();
 	}
 	
-	public int getVersion() {
+	@Override
+    public int getVersion() {
 		return containsVersions() ? 1 + super.getVersion() : 0;
 	}
 	
-	public void setVersion(int version) {
+	@Override
+    public void setVersion(int version) {
 		super.setVersion(version - 1);
 	}
 
-	public String getFileMIMEType() {
+	@Override
+    public String getFileMIMEType() {
 		final Document currentVersion = getCurrentVersion();
 		return null == currentVersion ? null : currentVersion.getMimeType();
 	}	

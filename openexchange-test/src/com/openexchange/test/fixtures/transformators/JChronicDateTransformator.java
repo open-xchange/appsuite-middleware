@@ -48,15 +48,11 @@
  */
 package com.openexchange.test.fixtures.transformators;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.mdimension.jchronic.Chronic;
-import com.mdimension.jchronic.utils.Span;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.test.fixtures.FixtureException;
 import com.openexchange.test.fixtures.FixtureLoader;

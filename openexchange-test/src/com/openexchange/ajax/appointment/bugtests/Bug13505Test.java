@@ -50,9 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
@@ -81,6 +79,7 @@ public class Bug13505Test extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
 
@@ -126,6 +125,7 @@ public class Bug13505Test extends AbstractAJAXSession {
         assertFalse("No days values expected", loadA.containsDays());
     }
 
+    @Override
     public void tearDown() throws Exception {
         getClient().execute(new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), appointment.getLastModified()));
         
@@ -146,6 +146,7 @@ public class Bug13505Test extends AbstractAJAXSession {
             super(originFolder, appointment, timezone, failOnError);
         }
         
+        @Override
         public JSONObject getBody() throws JSONException {
             JSONObject retval = super.getBody();
             if (retval.has("days")) {

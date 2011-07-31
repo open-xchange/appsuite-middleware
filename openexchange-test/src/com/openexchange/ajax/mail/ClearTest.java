@@ -80,7 +80,8 @@ public class ClearTest extends AbstractMailTest {
 		super(name);
 	}
 	
-	public void setUp() throws Exception{
+	@Override
+    public void setUp() throws Exception{
 		super.setUp();
 		/*
 		 * Clean everything
@@ -95,7 +96,8 @@ public class ClearTest extends AbstractMailTest {
 		mailObject_25kb = createSelfAddressed25KBMailObject().toString();
 	}
 	
-	public void tearDown() throws Exception{
+	@Override
+    public void tearDown() throws Exception{
 		/*
 		 * Clean everything
 		 */

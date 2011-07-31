@@ -13,7 +13,6 @@ import com.openexchange.ajax.contact.action.AdvancedSearchRequest;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Strings;
 import com.openexchange.test.ContactTestManager;
 
 public class AdvancedSearchTest extends AbstractManagedContactTest{

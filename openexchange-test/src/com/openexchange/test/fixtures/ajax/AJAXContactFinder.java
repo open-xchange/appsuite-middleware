@@ -51,12 +51,8 @@ package com.openexchange.test.fixtures.ajax;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;

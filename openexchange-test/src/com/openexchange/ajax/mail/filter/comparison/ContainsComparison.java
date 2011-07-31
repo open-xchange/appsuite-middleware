@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.comparison;
 
-import java.util.Arrays;
-
 /**
  * ContainsComparison
  *
@@ -89,7 +87,8 @@ public class ContainsComparison extends AbstractComparison {
 		return true;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		final StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append("name: " + name);
 		

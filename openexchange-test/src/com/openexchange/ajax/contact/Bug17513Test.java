@@ -2,7 +2,6 @@ package com.openexchange.ajax.contact;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 
 public class Bug17513Test extends AbstractManagedContactTest {

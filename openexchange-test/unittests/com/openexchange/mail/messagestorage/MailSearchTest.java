@@ -126,7 +126,7 @@ public final class MailSearchTest extends AbstractMailTest {
 			try {
 
 				SearchTerm<?> term = new HeaderTerm(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
-				long start = System.currentTimeMillis();
+				System.currentTimeMillis();
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL,
 						null, null, term, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
@@ -134,7 +134,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				}
 
 				term = new FlagTerm(MailMessage.FLAG_SEEN, false);
-				start = System.currentTimeMillis();
+				System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
@@ -149,7 +149,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				 * All >= 1KB (1024bytes)
 				 */
 				term = new SizeTerm(ComparisonType.GREATER_THAN, 1023);
-				start = System.currentTimeMillis();
+				System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_EVEN_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
@@ -180,7 +180,7 @@ public final class MailSearchTest extends AbstractMailTest {
 				for (int i = 0; i < size; i++) {
 					final Map.Entry<String, String> e = iter.next();
 					term = new HeaderTerm(MessageHeaders.HDR_MESSAGE_ID, e.getValue());
-					start = System.currentTimeMillis();
+					System.currentTimeMillis();
 					final MailMessage[] searchedMails = mailAccess.getMessageStorage().searchMessages("INBOX",
 							IndexRange.NULL, null, null, term, FIELDS_ID_AND_HEADER);
 					assertTrue("Search failed: No result", null != searchedMails);

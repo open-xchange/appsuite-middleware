@@ -42,7 +42,7 @@ public class PermissionTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		try {
-			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);
@@ -75,7 +75,7 @@ public class PermissionTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		try {
-			final int appointmentObjectId = insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
+			insertAppointment(getSecondWebConversation(), appointmentObj, PROTOCOL + getHostName(), getSecondLogin(), getPassword());
 			fail("permission exception expected!");
 		} catch (final TestException exc) {
 			assertExceptionMessage(exc.getMessage(), XmlServlet.PERMISSION_STATUS);

@@ -78,6 +78,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         super(name);
     }
     
+    @Override
     public void setUp() throws Exception{
         super.setUp();
         manager = new TaskTestManager(getClient());
@@ -91,6 +92,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
        
     }
     
+    @Override
     public void tearDown() throws Exception {
         task.setLastModified(new Date(Long.MAX_VALUE));
         manager.cleanUp();

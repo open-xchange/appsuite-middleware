@@ -52,8 +52,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.transformators.BooleanTransformator;
 import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformator;
 import com.openexchange.test.fixtures.transformators.DistributionListTransformator;
-import com.openexchange.test.fixtures.transformators.DocumentsTransformator;
-
 import java.util.Comparator;
 import java.util.Map;
 import java.util.HashMap;
@@ -101,7 +99,8 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             apply(contact,values);
 
             final Fixture<Contact> fixture = new Fixture<Contact>(contact, values.keySet().toArray(new String[values.size()]), values) {
-            	public Comparator getComparator(final String field) {
+            	@Override
+                public Comparator getComparator(final String field) {
             		if("birthday".equals(field) || "anniversary".equals(field)) {
             			return new DayOnlyDateComparator();
             		}

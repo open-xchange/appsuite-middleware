@@ -2,7 +2,6 @@
 package com.openexchange.ajax;
 
 import java.io.ByteArrayInputStream;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
@@ -56,7 +55,7 @@ public class ResourceTest extends AbstractAJAXTest {
             PROTOCOL + getHostName(),
             getSessionId());
         assertTrue("resource array size is not > 0", resources.length > 0);
-        final com.openexchange.resource.Resource r = loadResource(
+        loadResource(
             getWebConversation(),
             resources[0].getIdentifier(),
             PROTOCOL + getHostName(),

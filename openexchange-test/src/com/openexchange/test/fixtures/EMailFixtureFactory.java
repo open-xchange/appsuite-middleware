@@ -124,7 +124,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
                 throw new FixtureException("Mandatory value \"eml\" missing in entry " + entryName);
             }
             
-            final File mailpath =  new File(new File(dataPath, "emails"), (String) values.get("eml"));
+            final File mailpath =  new File(new File(dataPath, "emails"), values.get("eml"));
             
             final MailMessage mail;
             
@@ -275,11 +275,11 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
     				 */
     				sessionProperties = ((Properties) (System.getProperties().clone()));
     				/*
-    				 * A connected IMAPStore maintains a pool of IMAP protocol
+    				 * A connected AccessedIMAPStore maintains a pool of IMAP protocol
     				 * objects for use in communicating with the IMAP server. The
-    				 * IMAPStore will create the initial AUTHENTICATED connection
+    				 * AccessedIMAPStore will create the initial AUTHENTICATED connection
     				 * and seed the pool with this connection. As folders are opened
-    				 * and new IMAP protocol objects are needed, the IMAPStore will
+    				 * and new IMAP protocol objects are needed, the AccessedIMAPStore will
     				 * provide them from the connection pool, or create them if none
     				 * are available. When a folder is closed, its IMAP protocol
     				 * object is returned to the connection pool if the pool is not

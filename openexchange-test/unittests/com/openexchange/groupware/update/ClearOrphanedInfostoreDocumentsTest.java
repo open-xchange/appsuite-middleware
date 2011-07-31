@@ -49,7 +49,6 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.database.DBPoolingException;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.update.tasks.ClearOrphanedInfostoreDocuments;
@@ -65,7 +64,6 @@ import java.sql.SQLException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.SortedSet;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -74,6 +72,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
     private List<String> paths = new ArrayList<String>();
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         Connection con = getProvider().getWriteConnection(ctx);
@@ -92,6 +91,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
     }
 
+    @Override
     public void tearDown() throws SQLException, DBPoolingException, FileStorageException, FilestoreException, DBPoolingException {
         exec("DELETE FROM infostore_document WHERE infostore_id = ?", 100000);
         exec("DELETE FROM del_infostore_document WHERE infostore_id = ?", 100001);

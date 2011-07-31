@@ -91,6 +91,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
     private User userObject;
     private UserConfiguration userConfig;
 
+    @Override
     public void setUp() throws Exception {
         Init.startServer();
         attachments = new AttachmentBaseImpl(new DBPoolProvider());
@@ -115,6 +116,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
 
     }
 
+    @Override
     public void tearDown() throws Exception {
         appointments.removeAll(user, clean);
         Init.stopServer();

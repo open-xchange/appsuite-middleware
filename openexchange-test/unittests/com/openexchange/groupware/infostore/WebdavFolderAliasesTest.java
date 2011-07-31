@@ -67,6 +67,7 @@ public class WebdavFolderAliasesTest extends TestCase {
     private int parent2 = 2017;
 
 
+    @Override
     public void setUp() {
         aliases = new InMemoryAliases();
         aliases.registerNameWithIDAndParent(alias1, id1, parent1);

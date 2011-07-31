@@ -57,7 +57,7 @@ public class MultipleTest extends ContactTest {
 		final DeleteRequest deleteRequest2 = new DeleteRequest(contactFolderId, objectId2, modified);
 		final DeleteRequest deleteRequest3 = new DeleteRequest(contactFolderId, objectId3, modified);
 
-		final MultipleRequest multipleDeleteInsertRequest = MultipleRequest.create(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
+		MultipleRequest.create(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
 		final MultipleResponse multipleDeleteResponse = Executor.execute(ajaxSession, multipleInsertRequest);
 		
 		assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError()); 

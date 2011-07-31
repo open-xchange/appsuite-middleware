@@ -52,8 +52,6 @@ package com.openexchange.ajax.mail;
 import java.io.IOException;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.SendRequest;
@@ -66,7 +64,6 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * Title of Bug: The option "Delivery receipt" is no longer checked when editing a draft
@@ -103,7 +100,7 @@ public class Bug12409Test extends AbstractMailTest {
 		// convert it to a string for the SaveRequest
 		final String mailObject_string = mailObject.toString();
 		
-		folderAndID = ((SendResponse) client.execute(new SendRequest(mailObject_string))).getFolderAndID();
+		folderAndID = client.execute(new SendRequest(mailObject_string)).getFolderAndID();
 		
 		
 	}
@@ -122,7 +119,7 @@ public class Bug12409Test extends AbstractMailTest {
 		final AJAXClient client = getClient();
 		// load the email to edit it again
 		GetResponse response;
-		response = (GetResponse) client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
+		response = client.execute(new GetRequest(folderAndID[0], folderAndID[1]));
 		// verify that the delivery receipt option is still set
 		assertTrue("Disposition notification was not saved.", response.getMail(getTimeZone()).getDispositionNotification().toString().equals("testmail@example.invalid"));
 	}

@@ -4,7 +4,6 @@ import java.sql.SQLException;
 
 import com.openexchange.database.DBPoolingException;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
-import com.openexchange.tx.TransactionException;
 import com.openexchange.tx.UndoableAction;
 
 public class CreateDocumentActionTest extends AbstractInfostoreActionTest {

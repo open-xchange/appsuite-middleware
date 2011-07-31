@@ -232,7 +232,7 @@ public class ICalImportTest extends AbstractICalTest {
 		assertTrue("server errors of server", importResult[1].hasError());
 		assertTrue("server errors of server", importResult[2].isCorrect());
 		
-		final Appointment[] appointmentArray = exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
+		exportAppointment(getWebConversation(), appointmentFolderId, timeZone, getHostName(), getSessionId(), null);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[0].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());
 		AppointmentTest.deleteAppointment(getWebConversation(), Integer.parseInt(importResult[2].getObjectId()), appointmentFolderId, getHostName(), getLogin(), getPassword());

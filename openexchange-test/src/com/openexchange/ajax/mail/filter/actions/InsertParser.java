@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
@@ -81,7 +80,7 @@ public class InsertParser extends AbstractAJAXParser {
     @Override
     protected InsertResponse createResponse(final Response response) throws JSONException {
         final InsertResponse retval = new InsertResponse(response);
-        final JSONObject jsonRespones = (JSONObject) response.getJSON();
+        final JSONObject jsonRespones = response.getJSON();
         if (failOnError) {
             if (jsonRespones.has("data")) {
                 final String objectId = jsonRespones.getString("data");

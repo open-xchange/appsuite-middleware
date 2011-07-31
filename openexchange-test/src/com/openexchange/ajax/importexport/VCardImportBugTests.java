@@ -206,7 +206,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
         assertTrue("Two import attempts", importResult.length == 2);
         assertFalse("No error on first attempt?", importResult[0].hasError());
         assertTrue("Error on second attempt?", importResult[1].hasError());
-        final AbstractOXException ex = importResult[1].getException();
+        importResult[1].getException();
 
         // following line was removed since test environment cannot relay correct error messages from server
         // assertEquals("Correct error code?", "I_E-0605",ex.getErrorCode());

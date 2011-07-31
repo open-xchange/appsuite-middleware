@@ -297,7 +297,7 @@ public class TasksTest extends AbstractAJAXTest {
         final Response response = getAllTasksInFolder(getWebConversation(),
             getHostName(), getSessionId(), folderId, columns,
             Task.TITLE, "asc");
-        final JSONArray array = (JSONArray) response.getData();
+        response.getData();
         // TODO parse JSON array
         final Date lastModified = response.getTimestamp();
         for (final int[] folderAndTask : tasks) {

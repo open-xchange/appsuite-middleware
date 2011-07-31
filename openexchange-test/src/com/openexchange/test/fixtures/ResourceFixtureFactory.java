@@ -87,7 +87,7 @@ public class ResourceFixtureFactory implements FixtureFactory<Resource> {
             }
             final Resource resource = new Resource();
             apply(resource, values);
-            final Fixture<Resource> fixture = new Fixture<Resource>(resource, (String[]) values.keySet().toArray(new String[values.size()]), values);
+            final Fixture<Resource> fixture = new Fixture<Resource>(resource, values.keySet().toArray(new String[values.size()]), values);
             resourceMap.put(entryName, fixture);
             return fixture;
         }

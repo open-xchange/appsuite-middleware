@@ -50,8 +50,6 @@
 package com.openexchange.test;
 
 
-import com.openexchange.ajax.contact.AdvancedSearchTest;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

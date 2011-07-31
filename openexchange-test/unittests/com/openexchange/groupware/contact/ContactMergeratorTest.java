@@ -49,18 +49,12 @@
 
 package com.openexchange.groupware.contact;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import junit.framework.TestCase;
-
-import static com.openexchange.groupware.calendar.TimeTools.D;
 
 
 /**

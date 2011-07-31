@@ -52,7 +52,6 @@ package com.openexchange.webdav.infostore.integration;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.AbstractInfostoreTest;
@@ -66,7 +65,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -88,12 +86,14 @@ public class LockExpiryTest extends AbstractInfostoreTest {
 
     private InfostoreWebdavFactory factory = null;
     
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         factory = (InfostoreWebdavFactory) TestWebdavFactoryBuilder.buildFactory();
         factory.beginRequest();
     }
     
+    @Override
     public void tearDown() throws WebdavProtocolException {
         resolveFolder(testCollection).delete();
         factory.endRequest(200);

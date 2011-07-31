@@ -2,8 +2,6 @@ package com.openexchange.ajax.importexport.actions;
 
 import java.io.InputStream;
 
-import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
-
 public abstract class AbstractFacebookImportRequest extends
 		AbstractImportRequest<FacebookFriendsImportResponse> {
 

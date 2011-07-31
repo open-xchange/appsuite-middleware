@@ -57,7 +57,6 @@ import org.apache.commons.httpclient.methods.EntityEnclosingMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.jdom.JDOMException;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.configuration.WebDAVConfig;
 import com.openexchange.configuration.WebDAVConfig.Property;
 import com.openexchange.groupware.AbstractOXException;

@@ -56,7 +56,6 @@ import static junit.framework.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;

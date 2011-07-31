@@ -104,9 +104,6 @@ public class MailFolderTest extends AbstractMailTest {
 				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
 
 				for (int i = 0; i < flds.length; i++) {
-					final String lala = flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed()
-							+ " HasSubfolders=" + flds[i].hasSubfolders() + " HasSUbscribedSubfodlers="
-							+ flds[i].hasSubscribedSubfolders();
 				}
 
 			} finally {

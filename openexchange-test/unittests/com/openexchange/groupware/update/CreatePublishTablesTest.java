@@ -58,10 +58,12 @@ import com.openexchange.groupware.update.tasks.CreatePublicationTablesTask;
  */
 public class CreatePublishTablesTest extends UpdateTest {
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
     }
 
+    @Override
     public void tearDown() throws Exception {
         execSafe("DROP TABLE publications");
         execSafe("DROP TABLE sequence_publications");

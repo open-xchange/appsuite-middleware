@@ -133,7 +133,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				/*
 				 * Perform send
 				 */
-				final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
+				final NetsolSendResponse response = Executor.execute(getSession(),
 						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/x-vcard; charset=US-ASCII",
 								"vcard.vcf"));
 				assertTrue("Send failed", response.getFolderAndID() != null);
@@ -169,8 +169,8 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 				 * Get previously sent mail
 				 */
 				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-				final NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
-						new NetsolGetRequest(mailPath, true)));
+				final NetsolGetResponse resp = Executor.execute(getSession(),
+						new NetsolGetRequest(mailPath, true));
 				final JSONObject mailObject = (JSONObject) resp.getData();
 				final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
 				final int len = attachments.length();
@@ -201,8 +201,6 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 
 				assertFalse("Missing response on action=convert", sa == null);
 				assertTrue("Unexpected response length", sa.length == 1);
-
-				final String[] folderAndId = sa[0];
 			} finally {
 				if (mailFolderAndMailID != null) {
 					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);

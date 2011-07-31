@@ -71,7 +71,7 @@ public class ResourceTest extends AbstractResourceTest{
 		WebdavResource res = createResource();
 		
 		final Date lastModified = res.getLastModified();
-		final Date creationDate = res.getCreationDate();
+		res.getCreationDate();
 		
 		final WebdavProperty prop = new WebdavProperty();
 		prop.setName("myvalue");

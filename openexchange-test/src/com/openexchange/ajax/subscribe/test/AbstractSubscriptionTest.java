@@ -84,12 +84,14 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
         super.tearDown();
     }
 
+    @Override
     protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws AjaxException, IOException, SAXException, JSONException {
         Subscription sub = generateOXMFSubscription(formDescription);
         sub.setFolderId(folderID);
         return sub;
     }
 
+    @Override
     protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws AjaxException, IOException, SAXException, JSONException {
         Subscription subscription = new Subscription();
 

@@ -153,7 +153,7 @@ public abstract class ReminderTest extends AbstractAJAXTest {
         final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
         final WebRequest webRequest = new PutMethodWebRequest(host + REMINDER_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse webResponse = webConversation.getResponse(webRequest);
-        final JSONObject jsonobject = new JSONObject(webResponse.getText());
+        new JSONObject(webResponse.getText());
 
         assertEquals(200, webResponse.getResponseCode());
 

@@ -50,14 +50,10 @@
 package com.openexchange.ajax.kata.fixtures;
 
 import com.openexchange.ajax.kata.Step;
-import com.openexchange.ajax.kata.appointments.AppointmentCreateStep;
-import com.openexchange.ajax.kata.appointments.AppointmentUpdateStep;
-import com.openexchange.ajax.kata.appointments.AppointmentVerificationStep;
 import com.openexchange.ajax.kata.tasks.TaskCreateStep;
 import com.openexchange.ajax.kata.tasks.TaskDeleteStep;
 import com.openexchange.ajax.kata.tasks.TaskUpdateStep;
 import com.openexchange.ajax.kata.tasks.TaskVerificationStep;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.fixtures.Fixture;
 

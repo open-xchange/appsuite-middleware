@@ -74,6 +74,7 @@ public class Bug12380RecoveryParserTest extends TestCase {
     private SimICalParser parser;
     private ExtraneousSeriesMasterRecoveryParser bugParser;
 
+    @Override
     public void setUp() {
         parser = new SimICalParser();
         ServerServiceRegistry registry = ServerServiceRegistry.getInstance();

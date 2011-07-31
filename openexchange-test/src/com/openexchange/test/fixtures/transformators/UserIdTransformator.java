@@ -63,7 +63,8 @@ public class UserIdTransformator extends CredentialsTransformator {
 		super(fixtureLoader);
 	}
 
-	public Object transform(final String value) throws FixtureException {
+	@Override
+    public Object transform(final String value) throws FixtureException {
 		return ((SimpleCredentials)super.transform(value)).getUserId();
     }
 }

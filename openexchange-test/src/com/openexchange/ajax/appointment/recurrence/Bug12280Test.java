@@ -111,7 +111,7 @@ public final class Bug12280Test extends AbstractAJAXSession {
         final AJAXClient client = getClient();
         final GetRequest request = new GetRequest(appointment);
         final GetResponse response = client.execute(request);
-        final Appointment load = response.getAppointment(tz);
+        response.getAppointment(tz);
         
     }
 

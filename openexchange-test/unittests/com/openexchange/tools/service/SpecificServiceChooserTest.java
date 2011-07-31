@@ -62,6 +62,7 @@ public class SpecificServiceChooserTest extends TestCase {
     
     private SpecificServiceChooser<TestService> specificServiceChooser;
 
+    @Override
     public void setUp() {
         specificServiceChooser = new SpecificServiceChooser<TestService>();
     }

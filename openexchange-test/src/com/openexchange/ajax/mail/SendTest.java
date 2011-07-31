@@ -111,7 +111,7 @@ public final class SendTest extends AbstractMailTest {
         /*
          * Perform send request
          */
-        final SendResponse response = (SendResponse) Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+        final SendResponse response = Executor.execute(getSession(), new SendRequest(mailObject_25kb));
         assertTrue("Send request failed", response.getFolderAndID() != null && response.getFolderAndID().length > 0);
         /*
          * Clean everything

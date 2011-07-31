@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.importexport;
 
-import static com.openexchange.groupware.calendar.TimeTools.D;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;

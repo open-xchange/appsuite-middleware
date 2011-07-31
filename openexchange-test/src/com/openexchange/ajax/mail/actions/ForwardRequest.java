@@ -71,10 +71,12 @@ public class ForwardRequest extends ReplyRequest {
         this(folderAndId[0], folderAndId[1]);
     }
     
+    @Override
     public String getAction(){
         return Mail.ACTION_FORWARD;
     }
 
+    @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ForwardResponse>(failOnError) {
             @Override

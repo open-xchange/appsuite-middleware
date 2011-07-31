@@ -65,6 +65,7 @@ public class Messaging extends DefaultMessagingAccount {
         super();
     }
 
+    @Override
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
@@ -74,6 +75,7 @@ public class Messaging extends DefaultMessagingAccount {
      * 
      * @param configuration The configuration to set
      */
+    @Override
     public void setConfiguration(final Map<String, Object> configuration) {
         this.configuration = configuration;
     }

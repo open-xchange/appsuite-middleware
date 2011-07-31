@@ -365,7 +365,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		final XMLOutputter xo = new XMLOutputter();
 		xo.output(doc, baos);
 		
-		final byte b[] = baos.toByteArray();
+		baos.toByteArray();
 		
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		final WebRequest req = new PutMethodWebRequest(host + CONTACT_URL, bais, "text/javascript");
@@ -393,7 +393,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteContact(final WebConversation webCon, final int[][] objectIdAndFolderId, final String host, final String login, final String password) throws Exception {
-		final ArrayList failed = new ArrayList();
+		new ArrayList();
 		
 		for (int a = 0; a < objectIdAndFolderId.length; a++) {
 			deleteContact(webCon, objectIdAndFolderId[a][0], objectIdAndFolderId[a][1], host, login, password);

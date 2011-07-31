@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.mail.filter.test.AbstractTest;
-import com.openexchange.ajax.mail.filter.test.NotTest;
 import com.openexchange.ajax.mail.filter.test.TrueTest;
 
 
