@@ -724,6 +724,7 @@ public class Login extends AJAXServlet {
         LoginResult result = null;
         try {
             result = LoginPerformer.getInstance().doLogin(request);
+            result.getSession().setParameter("user-agent", req.getHeader("user-agent"));
             // Write response
             final JSONObject json = new JSONObject();
             final Session session = result.getSession();
