@@ -620,9 +620,8 @@ public final class AJPv13Task implements Task<Object> {
                 try {
                     if (closeOrderly && !s.isClosed()) {
                         final AJPv13RequestHandler requestHandler = ajpCon.getAjpRequestHandler();
-                        OutputStream out = null;
                         if (!requestHandler.isHeadersSent()) {
-                            out = s.getOutputStream();
+                            final OutputStream out = s.getOutputStream();
                             final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
                             final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
                             // Write headers
@@ -631,11 +630,11 @@ public final class AJPv13Task implements Task<Object> {
                             // Write error message
                             out.write(AJPv13Response.getSendBodyChunkBytes(errMsg));
                             out.flush();
-                        }
-                        if (!requestHandler.isEndResponseSent()) {
-                            if (null == out) {
-                                out = s.getOutputStream();
-                            }
+                            // Write end-response
+                            out.write(AJPv13Response.getEndResponseBytes(true));
+                            out.flush();
+                        } else if (!requestHandler.isEndResponseSent()) {
+                            final OutputStream out = s.getOutputStream();
                             /*
                              * Send end-response
                              */
