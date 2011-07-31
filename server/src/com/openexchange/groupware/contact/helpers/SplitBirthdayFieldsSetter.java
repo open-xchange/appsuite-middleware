@@ -65,17 +65,17 @@ public class SplitBirthdayFieldsSetter extends AbstractContactSwitcherWithDelega
     private int month = NOT_SET;
     private int day = NOT_SET;
     private int year = NOT_SET;
-    
+
     @Override
-    public boolean _unknownfield(final Contact contact, final String fieldname, final Object value2, final Object... objects) throws OXException{        
-        if(! ExtendedContactFields.BIRTHDAY_DAY.equals(fieldname) 
-            && !ExtendedContactFields.BIRTHDAY_MONTH.equals(fieldname) 
+    public boolean _unknownfield(final Contact contact, final String fieldname, final Object value2, final Object... objects) throws OXException{
+        if(! ExtendedContactFields.BIRTHDAY_DAY.equals(fieldname)
+            && !ExtendedContactFields.BIRTHDAY_MONTH.equals(fieldname)
             && !ExtendedContactFields.BIRTHDAY_YEAR.equals(fieldname)) {
             return delegate._unknownfield(contact, fieldname, value2, objects);
         }
-        
+
         final int value = ((Integer)value2).intValue();
-        
+
         if(ExtendedContactFields.BIRTHDAY_DAY.equals(fieldname)) {
             day = value;
         }
@@ -85,11 +85,11 @@ public class SplitBirthdayFieldsSetter extends AbstractContactSwitcherWithDelega
         if(ExtendedContactFields.BIRTHDAY_YEAR.equals(fieldname)) {
             year = value;
         }
-        
+
         if(day != NOT_SET && month != NOT_SET && year != NOT_SET) {
             contact.setBirthday( calculateBirthday() );
         }
-        
+
         return new Boolean(true);
     }
 

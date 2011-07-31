@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; defaultseparator</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultSeparator implements PreferencesItemService {

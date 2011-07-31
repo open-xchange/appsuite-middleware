@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailMessagingFolderAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -87,7 +87,7 @@ public final class MailMessagingFolderAccess implements MessagingFolderAccess {
 
     /**
      * Initializes a new {@link MailMessagingFolderAccess}.
-     * 
+     *
      * @param mailAccess The mail folder storage
      * @param accountId The account ID
      * @param caps The capabilities

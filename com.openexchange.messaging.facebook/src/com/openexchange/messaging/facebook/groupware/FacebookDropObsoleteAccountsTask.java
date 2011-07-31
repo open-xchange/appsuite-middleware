@@ -68,7 +68,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FacebookDropObsoleteAccountsTask} - Drops obsolete Facebook messaging accounts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FacebookDropObsoleteAccountsTask extends UpdateTaskAdapter {

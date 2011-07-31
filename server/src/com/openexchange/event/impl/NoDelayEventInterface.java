@@ -52,9 +52,9 @@ package com.openexchange.event.impl;
 /**
  * {@link NoDelayEventInterface} - Empty interface to mark an implementing event
  * listener to have no delay for immediate execution.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface NoDelayEventInterface {
 	// Empty interface

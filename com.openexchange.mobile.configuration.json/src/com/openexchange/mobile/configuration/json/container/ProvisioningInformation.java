@@ -56,20 +56,20 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ProvisioningInformation {
-	
+
 	private String target;
 	private String url;
 	private String urlEncoding;
 	private String mailFrom;
-	
+
 	private HashMap<String, ProvisioningEmailMessage> provisioningEmailMessages;
 	private HashMap<String, ProvisioningSMSMessage> provisioningSMSMessages;
-	
+
 	private ServerSession session;
 	private Context ctx;
 	private User user;
@@ -96,39 +96,39 @@ public class ProvisioningInformation {
 	public String getTarget() {
 		return target;
 	}
-	
+
 	public void setTarget(String target) {
 		this.target = target;
 	}
-	
+
 	public String getUrl() {
 		return url;
 	}
-	
+
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
+
 	public String getUrlEncoding() {
 		return urlEncoding;
 	}
-	
+
 	public void setUrlEncoding(String urlEncoding) {
 		this.urlEncoding = urlEncoding;
 	}
-	
+
 	public String getMailFrom() {
 		return mailFrom;
 	}
-	
+
 	public void setMailFrom(String mailFrom) {
 		this.mailFrom = mailFrom;
 	}
-	
+
 	public ServerSession getSession() {
 		return session;
 	}
-	
+
 	public void setSession(ServerSession session) {
 		this.session = session;
 	}
@@ -148,21 +148,21 @@ public class ProvisioningInformation {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
 	public boolean containsProvisioningEmailMessage(String locale) {
 		return provisioningEmailMessages.containsKey(locale);
 	}
-	
+
 	public ProvisioningEmailMessage getProvisioningEmailMessage(String locale) {
 		return provisioningEmailMessages.get(locale);
 	}
-	
+
 	public boolean containsProvisioningSMSMessage(String locale) {
 		return provisioningSMSMessages.containsKey(locale);
 	}
-	
+
 	public ProvisioningSMSMessage getProvisioningSMSMessage(String locale) {
 		return provisioningSMSMessages.get(locale);
 	}
-	
+
 }

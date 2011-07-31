@@ -75,7 +75,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
     private static final String SERVLET_PATH = "/ajax/login";
-    
+
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 

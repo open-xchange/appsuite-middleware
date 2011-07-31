@@ -98,10 +98,10 @@ public interface CalendarFields extends CommonFields {
     public static final String USERS = "users";
 
     public static final String CONFIRMATIONS = "confirmations";
-    
+
     public static final String ORGANIZER = "organizer";
-    
+
     public static final String UID = "uid";
-    
+
     public static final String SEQUENCE = "sequence";
 }

@@ -400,7 +400,7 @@ public class InfostoreQueryCatalog {
             Metadata.VERSION_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
         return delete.toString();
     }
-    
+
     public String getAllVersionsDelete(final Table t) {
         switch (t) {
         default:

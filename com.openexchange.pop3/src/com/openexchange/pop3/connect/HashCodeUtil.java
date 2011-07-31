@@ -53,7 +53,7 @@ import java.lang.reflect.Array;
 
 /**
  * {@link HashCodeUtil} - Collected methods which allow easy implementation of <code>hashCode</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HashCodeUtil {

@@ -52,9 +52,9 @@ import java.util.List;
 
 /**
  * A class representing an if command in a sieve script
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class IfCommand extends IfOrElseIfCommand {
     public IfCommand() {

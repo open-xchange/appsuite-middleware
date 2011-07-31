@@ -55,9 +55,9 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMTPDocumentPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPDocumentPart extends InfostoreDocumentMailPart {
 
@@ -65,7 +65,7 @@ public final class SMTPDocumentPart extends InfostoreDocumentMailPart {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param documentId
 	 *            The document's unique ID
 	 * @param session

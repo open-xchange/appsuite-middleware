@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DetachAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DetachAction extends AbstractAttachmentAction {

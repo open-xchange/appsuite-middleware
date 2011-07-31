@@ -85,7 +85,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         } else {
             return;
         }
-        
+
         key = "client:" + key;
         final Context ctx = login.getContext();
         if (ctx.isReadOnly()) {

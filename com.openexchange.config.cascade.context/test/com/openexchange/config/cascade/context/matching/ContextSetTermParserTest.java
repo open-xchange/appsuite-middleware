@@ -55,7 +55,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link ContextSetTermParserTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextSetTermParserTest extends TestCase {

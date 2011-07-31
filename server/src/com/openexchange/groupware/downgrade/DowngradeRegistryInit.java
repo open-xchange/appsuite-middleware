@@ -54,9 +54,9 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link DowngradeRegistryInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DowngradeRegistryInit implements Initialization {
 

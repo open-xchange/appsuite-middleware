@@ -60,7 +60,7 @@ import com.openexchange.modules.model.Model;
 
 /**
  * {@link ModelParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ModelParser<T extends Model<T>> {
@@ -71,12 +71,12 @@ public class ModelParser<T extends Model<T>> {
     public void setMetadata(Metadata<T> metadata) {
         this.metadata = metadata;
     }
-    
+
     public void setOverrides(AttributeHandler<T> overrides) {
         this.overrides = overrides;
     }
-    
-    
+
+
     public T parse(JSONObject json, List<Attribute<T>> attributesToParse) throws JSONException {
         T thing = metadata.create();
         for (Attribute<T> attribute : attributesToParse) {

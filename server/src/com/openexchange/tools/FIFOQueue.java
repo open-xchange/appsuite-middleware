@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * If this queue is created with enabled synchronization mechanism a <code>{@link ReadWriteLock}</code> is used for mutually exclusive
  * access
- * 
+ *
  * @see ReadWriteLock
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -79,7 +79,7 @@ public class FIFOQueue<T> {
     /**
      * Constructor which invokes {@link #FIFOQueue(int, boolean)} with last <code>boolean</code> parameter (<code>isSynchronized</code>) set
      * to <code>true</code>
-     * 
+     *
      * @param maxsize The max. size of this queue
      * @see #FIFOQueue(Class, int, boolean)
      */
@@ -89,7 +89,7 @@ public class FIFOQueue<T> {
 
     /**
      * Constructor
-     * 
+     *
      * @param maxsize The max. size of this queue
      * @param isSynchronized Whether this queue is synchronized (mutually exclusive) for multiple threads accessing this queue
      */
@@ -135,7 +135,7 @@ public class FIFOQueue<T> {
 
     /**
      * Checks if this queue is empty
-     * 
+     *
      * @return <code>true</code> if queue is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -156,7 +156,7 @@ public class FIFOQueue<T> {
 
     /**
      * Checks if this queue is full
-     * 
+     *
      * @return <code>true</code> if queue is full; otherwise <code>false</code>
      */
     public boolean isFull() {
@@ -170,7 +170,7 @@ public class FIFOQueue<T> {
 
     /**
      * Gets the number of contained objects in queue
-     * 
+     *
      * @return The number of contained objects
      */
     public int size() {
@@ -190,7 +190,7 @@ public class FIFOQueue<T> {
 
     /**
      * Enqueues given object to queue's tail
-     * 
+     *
      * @param obj The object to enqueue
      */
     public void enqueue(final T obj) {
@@ -209,7 +209,7 @@ public class FIFOQueue<T> {
 
     /**
      * Dequeues the first object (head) in queue
-     * 
+     *
      * @return The dequeued object
      */
     public T dequeue() {
@@ -233,7 +233,7 @@ public class FIFOQueue<T> {
 
     /**
      * Peeks (and does not remove) the first object (head) in queue
-     * 
+     *
      * @return The first object
      */
     public T get() {

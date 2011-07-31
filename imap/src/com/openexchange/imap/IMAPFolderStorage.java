@@ -117,7 +117,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link IMAPFolderStorage} - The IMAP folder storage implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced {
@@ -148,7 +148,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Initializes a new {@link IMAPFolderStorage}
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
@@ -166,7 +166,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the associated session.
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -175,7 +175,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the associated context.
-     * 
+     *
      * @return The context
      */
     public Context getContext() {
@@ -184,7 +184,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the associated IMAP configuration.
-     * 
+     *
      * @return The IMAP configuration
      */
     public IMAPConfig getImapConfig() {
@@ -193,7 +193,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the IMAP access.
-     * 
+     *
      * @return The IMAP access
      */
     public IMAPAccess getImapAccess() {
@@ -202,7 +202,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the associated IMAP store.
-     * 
+     *
      * @return The IMAP store
      */
     public IMAPStore getImapStore() {
@@ -211,7 +211,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Gets the associated account identifier.
-     * 
+     *
      * @return The account identifier
      */
     public int getAccountId() {
@@ -228,7 +228,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Removes the IMAP folder denoted by specified full name.
-     * 
+     *
      * @param modifiedFullname The full name of the folder which has been modified
      */
     public void removeFromCache(final String modifiedFullname) {
@@ -238,7 +238,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Decrements unread message counter from cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      */
     public void decrementUnreadMessageCount(final String fullName) {
@@ -247,7 +247,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Updates the cached IMAP folder if message has changed.
-     * 
+     *
      * @param fullName The full name
      * @param total The message count
      * @return <code>true</code> if updated; otherwise <code>false</code>
@@ -271,7 +271,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Updates the cached IMAP folder if message has changed.
-     * 
+     *
      * @param fullName The full name
      */
     public void updateCacheIfDiffer(final String fullName) {
@@ -303,7 +303,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Removes the IMAP folders denoted by specified set of full names.
-     * 
+     *
      * @param modifiedFullnames The full names of the folders which have been modified
      */
     public void removeFromCache(final Set<String> modifiedFullnames) {
@@ -727,7 +727,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Checks if given full name matches a namespace folder
-     * 
+     *
      * @param fullName The folder's full name
      * @return The corresponding namespace folder or <code>null</code>
      * @throws MessagingException
@@ -1115,7 +1115,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
                 /*-
                  * Perform rename operation
-                 * 
+                 *
                  * Rename can only be invoked on a closed folder
                  */
                 if (renameMe.isOpen()) {
@@ -2139,7 +2139,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                         /*-
                          * TODO: Why check DELETE access when requesting quota?
-                         * 
+                         *
                         if (!imapConfig.getACLExtension().canDeleteMailbox(myrights)) {
                             throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, fullName);
                         }
@@ -2219,11 +2219,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /*-
      * Get the QUOTA resource with the highest usage-per-limitation value
-     * 
+     *
      * @param resources The QUOTA resources
      * @return The QUOTA resource with the highest usage to limitation relation
-     * 
-     * 
+     *
+     *
      * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
      *     final Resource maxUsageResource;
      *     {
@@ -2244,7 +2244,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     /**
      * Get the ACL list of specified folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The ACL list or <code>null</code> if any error occurred
      */
@@ -2660,7 +2660,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      * Determines if <i>altNamespace</i> is enabled for mailbox. If <i>altNamespace</i> is enabled all folder which are logically located
      * below INBOX folder are represented as INBOX's siblings in IMAP folder tree. Dependent on IMAP server's implementation the INBOX
      * folder is then marked with attribute <code>\NoInferiors</code> meaning it no longer allows subfolders.
-     * 
+     *
      * @param imapStore - the IMAP store (mailbox)
      * @return <code>true</code> if altNamespace is enabled; otherwise <code>false</code>
      * @throws MessagingException - if IMAP's NAMESPACE command fails
@@ -2676,7 +2676,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     /**
      * Checks id specified folder name is allowed to be used on folder creation. The folder name is valid if the separator character does
      * not appear or provided that MBox format is enabled may only appear at name's end.
-     * 
+     *
      * @param name The folder name to check.
      * @param separator The separator character.
      * @param mboxEnabled <code>true</code> If MBox format is enabled; otherwise <code>false</code>

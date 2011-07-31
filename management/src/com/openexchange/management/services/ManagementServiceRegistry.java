@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link ManagementServiceRegistry} - The service registry for management bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementServiceRegistry {
@@ -62,7 +62,7 @@ public final class ManagementServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

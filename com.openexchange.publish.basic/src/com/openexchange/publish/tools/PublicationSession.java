@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PublicationSession}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 /**
@@ -68,7 +68,7 @@ public class PublicationSession implements Session {
 
     /**
      * Initializes a new {@link PublicationSession}.
-     * 
+     *
      * @param publication
      */
     public PublicationSession(final Publication publication) {

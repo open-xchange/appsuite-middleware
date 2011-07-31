@@ -53,14 +53,14 @@ import java.util.Collection;
 
 /**
  * {@link SearchService} - The search service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchService {
 
     /**
      * Tests if specified candidate satisfies given search term.
-     * 
+     *
      * @param candidate The candidate to check
      * @param searchTerm The search term to satisfy
      * @param attributeFetcher The attribute fetcher for specified candidate
@@ -70,7 +70,7 @@ public interface SearchService {
 
     /**
      * Filters specified candidates by given search term.
-     * 
+     *
      * @param candidates The candidates to check
      * @param searchTerm The search term to used as filter
      * @param attributeFetcher The attribute fetcher for specified candidates

@@ -61,36 +61,36 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
  * ReminderConfigImpl
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
 public class ReminderConfigImpl extends AbstractConfigWrapper implements ReminderConfig {
-	
+
 	private boolean isReminderEnabled = false;
-	
+
 	private int reminderInterval = 3600000;
-	
+
 	private boolean isInit = false;
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderConfigImpl.class));
-	
+
 	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {
 			return ;
 		}
-		
+
 		if (propfile == null) {
 			LOG.error("missing propfile");
 			return ;
 		}
 		Properties prop = null;
-		
+
 		try {
 			if(LOG.isDebugEnabled()) {
 				LOG.debug("try to load propfile: " + propfile);
 			}
-			
+
 			prop = new Properties();
 			FileInputStream fis = null;
 			try {
@@ -110,7 +110,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 		} catch (final IOException exc) {
 			LOG.error("Cannot read propfile: " + propfile, exc);
 		}
-		
+
 		isReminderEnabled = parseProperty(prop, "com.openexchange.groupware.reminder.isReminderEnabled", isReminderEnabled);
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled=" + isReminderEnabled);
@@ -120,10 +120,10 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval=" + reminderInterval);
 		}
-		
+
 		isInit = true;
 	}
-	
+
 	@Override
     public boolean isReminderEnabled() {
 		return isReminderEnabled;

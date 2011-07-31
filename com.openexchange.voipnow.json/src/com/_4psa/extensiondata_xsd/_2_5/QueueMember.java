@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Queue member data
- * 
+ *
  * <p>Java class for QueueMember complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="QueueMember">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "QueueMember", propOrder = {
@@ -50,11 +50,11 @@ public class QueueMember {
 
     /**
      * Gets the value of the queueID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getQueueID() {
         return queueID;
@@ -62,11 +62,11 @@ public class QueueMember {
 
     /**
      * Sets the value of the queueID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setQueueID(BigInteger value) {
         this.queueID = value;
@@ -74,11 +74,11 @@ public class QueueMember {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -86,11 +86,11 @@ public class QueueMember {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -98,11 +98,11 @@ public class QueueMember {
 
     /**
      * Gets the value of the supervisor property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSupervisor() {
         return supervisor;
@@ -110,11 +110,11 @@ public class QueueMember {
 
     /**
      * Sets the value of the supervisor property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSupervisor(Boolean value) {
         this.supervisor = value;
@@ -122,11 +122,11 @@ public class QueueMember {
 
     /**
      * Gets the value of the penalty property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPenalty() {
         return penalty;
@@ -134,11 +134,11 @@ public class QueueMember {
 
     /**
      * Sets the value of the penalty property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPenalty(BigInteger value) {
         this.penalty = value;
@@ -146,11 +146,11 @@ public class QueueMember {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -158,11 +158,11 @@ public class QueueMember {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;

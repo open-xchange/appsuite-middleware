@@ -64,7 +64,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CreateGenconfTablesTask implements UpdateTask {
-    
+
     private static final String STRING_TABLE_CREATE = "CREATE TABLE `genconf_attributes_strings` ( "+
    "`cid` int(10) unsigned NOT NULL,"+
    "`id` int(10) unsigned NOT NULL,"+
@@ -72,7 +72,7 @@ public class CreateGenconfTablesTask implements UpdateTask {
    "`value` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "KEY (`cid`,`id`,`name`)"+
    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String BOOL_TABLE_CREATE = "CREATE TABLE `genconf_attributes_bools` ("+
     "`cid` int(10) unsigned NOT NULL,"+
    "`id` int(10) unsigned NOT NULL,"+
@@ -80,15 +80,15 @@ public class CreateGenconfTablesTask implements UpdateTask {
    "`value` tinyint(1) COLLATE utf8_unicode_ci DEFAULT NULL,"+
    "KEY (`cid`,`id`,`name`)"+
    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String SEQUENCE_TABLE_CREATE = "CREATE TABLE `sequence_genconf` ("+
     "`cid` int(10) unsigned NOT NULL,"+
     "`id` int(10) unsigned NOT NULL,"+
     "PRIMARY KEY (`cid`)"+
     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
+
     private static final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_genconf (cid, id) VALUES (?, 0)";
-    
+
     @Override
     public int addedWithVersion() {
         return 44;

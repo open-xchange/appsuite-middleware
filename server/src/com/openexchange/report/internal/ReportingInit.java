@@ -69,7 +69,7 @@ public class ReportingInit implements Initialization {
 
     /**
      * Default constructor.
-     * @param managementService 
+     * @param managementService
      */
     public ReportingInit(ManagementService managementService) {
         super();

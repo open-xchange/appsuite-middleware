@@ -65,7 +65,7 @@ import com.openexchange.sql.grammar.SELECT;
 
 /**
  * {@link PublicationUserDeleteListenerTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLStorageTest {
@@ -83,14 +83,14 @@ public class PublicationUserDeleteListenerTest extends AbstractPublicationSQLSto
         super.setUp();
 
         this.user = new MockUser(userId);
-        
+
         this.listener = new PublicationUserDeleteListener() {
             @Override
             protected PublicationStorage getStorage(Connection writeCon) {
                 return storage;
             }
         };
-        
+
         this.writeCon = getDBProvider().getWriteConnection(ctx);
         this.readCon = getDBProvider().getReadConnection(ctx);
     }

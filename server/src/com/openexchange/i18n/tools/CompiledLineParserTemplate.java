@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
  * {@link CompiledLineParserTemplate} - Compiles a template as per
  * LineParserUtility syntax, with a simple substitution of [variables]. Allows
  * escaping via \
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

@@ -54,7 +54,7 @@ import com.openexchange.log.Loggable.Level;
 
 /**
  * {@link Log} - The <code>org.apache.commons.logging.Log</code> using {@link LogService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Log implements org.apache.commons.logging.Log {
@@ -63,7 +63,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Sets the log service.
-     * 
+     *
      * @param logService The log service
      */
     public static void set(final LogService logService) {
@@ -72,7 +72,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Gets the appropriate {@link Log} for specified {@link org.apache.commons.logging.Log} instance.
-     * 
+     *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance
      */

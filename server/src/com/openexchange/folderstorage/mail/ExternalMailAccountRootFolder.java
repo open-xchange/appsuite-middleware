@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExternalMailAccountRootFolder} - A mail folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ExternalMailAccountRootFolder extends AbstractFolder {
@@ -82,7 +82,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
      * Initializes a new {@link ExternalMailAccountRootFolder} from given mail account.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param mailAccount The underlying mail account
      * @param mailConfig The mail configuration
      * @param session The session

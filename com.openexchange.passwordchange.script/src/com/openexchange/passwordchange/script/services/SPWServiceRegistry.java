@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link SPWServiceRegistry} - A registry for services
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  */
 public final class SPWServiceRegistry {
@@ -62,7 +62,7 @@ public final class SPWServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

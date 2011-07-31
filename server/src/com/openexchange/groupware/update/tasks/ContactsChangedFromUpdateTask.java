@@ -100,7 +100,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final String STR_INFO = "Performing update task 'ContactsChangedFromUpdateTask'";
 
-    private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL"; 
+    private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL";
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {

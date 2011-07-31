@@ -59,7 +59,7 @@ import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 
 /**
  * {@link ConversionEngineCustomizer} - The service tracker customizer for conversion engine.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversionEngineCustomizer implements ServiceTrackerCustomizer {
@@ -73,7 +73,7 @@ public final class ConversionEngineCustomizer implements ServiceTrackerCustomize
 
     /**
      * Initializes a new {@link ConversionEngineCustomizer}
-     * 
+     *
      * @param context The bundle context
      */
     public ConversionEngineCustomizer(final BundleContext context) {

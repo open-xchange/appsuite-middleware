@@ -566,9 +566,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         action = a;
         action.perform();
         addUndoable(action);
-        
+
         attachment.setFilesize(fs.getFileSize(action.getId())); // Definitive!
-        
+
         return action.getId();
     }
 

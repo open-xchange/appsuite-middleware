@@ -83,7 +83,7 @@ import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3StoreConnector} - Connects an instance of {@link POP3Store}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3StoreConnector {
@@ -128,7 +128,7 @@ public final class POP3StoreConnector {
 
         /**
          * Sets the connected {@link POP3Store} instance.
-         * 
+         *
          * @param pop3Store The connected {@link POP3Store} instance.
          */
         protected void setPop3Store(final POP3Store pop3Store) {
@@ -137,7 +137,7 @@ public final class POP3StoreConnector {
 
         /**
          * Adds given warnings.
-         * 
+         *
          * @param warning The warning to add
          */
         protected void addWarning(final OXException warning) {
@@ -146,7 +146,7 @@ public final class POP3StoreConnector {
 
         /**
          * Gets the warnings occurred during establishing a connection to POP3 server.
-         * 
+         *
          * @return The warnings
          */
         public Collection<OXException> getWarnings() {
@@ -155,7 +155,7 @@ public final class POP3StoreConnector {
 
         /**
          * Gets the connected {@link POP3Store} instance.
-         * 
+         *
          * @return The connected {@link POP3Store} instance.
          */
         public POP3Store getPop3Store() {
@@ -164,7 +164,7 @@ public final class POP3StoreConnector {
 
         /**
          * Gets the POP3 server's capabilities.
-         * 
+         *
          * @return The POP3 server's capabilities.
          */
         public String getCapabilities() {
@@ -173,7 +173,7 @@ public final class POP3StoreConnector {
 
         /**
          * Checks if this result contains one or more warnings.
-         * 
+         *
          * @return <code>true</code> if this result contains one or more warnings; otherwsie <code>false</code>
          */
         public boolean containsWarnings() {
@@ -211,7 +211,7 @@ public final class POP3StoreConnector {
 
     /**
      * Gets a connected instance of {@link POP3Store}.
-     * 
+     *
      * @param pop3Config The POP3 configuration providing credentials and server settings
      * @param pop3Properties Optional additional POP3 properties applied to POP3 session (may be <code>null</code>)
      * @param monitorFailedAuthentication <code>true</code> to monitor failed authentication; otherwise <code>false</code>
@@ -292,7 +292,7 @@ public final class POP3StoreConnector {
             }
             /*
              * Check if a secure POP3 connection should be established.
-             * 
+             *
              * With JavaMail v1.4.3 the JavaMail POP3 provider supports to start in plain text mode and
              * switch the connection into TLS mode using the STLS command.
              */

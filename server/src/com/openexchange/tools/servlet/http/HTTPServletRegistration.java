@@ -67,12 +67,12 @@ import org.osgi.util.tracker.ServiceTracker;
  *
  */
 public class HTTPServletRegistration extends ServiceTracker{
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPServletRegistration.class));
-    
+
     private Servlet servlet;
     private String alias;
-    
+
 
     public HTTPServletRegistration(BundleContext context, String alias, Servlet servlet) {
         super(context, HttpService.class.getName(), null);
@@ -80,7 +80,7 @@ public class HTTPServletRegistration extends ServiceTracker{
         this.servlet = servlet;
         open();
     }
-    
+
     @Override
     public Object addingService(ServiceReference reference) {
         HttpService service = (HttpService) super.addingService(reference);
@@ -93,14 +93,14 @@ public class HTTPServletRegistration extends ServiceTracker{
         }
         return service;
     }
-    
+
     @Override
     public void removedService(ServiceReference reference, Object service) {
         HttpService httpService = (HttpService)service;
         httpService.unregister(alias);
         super.removedService(reference, service);
     }
-    
+
     public void unregister() {
         close();
         if(getService() != null) {

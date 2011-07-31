@@ -71,13 +71,13 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AttachmentCountUpdateTask}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
-    
+
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentCountUpdateTask.class));
-    
+
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
      */
@@ -86,7 +86,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
             "ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
             "GROUP BY pd.cid,pd.intfield01 " +
             "HAVING count!=realCount";
-    
+
     private static final String REPAIR = "UPDATE prg_dates SET intfield08 = ? WHERE cid = ? AND intfield01 = ?";
 
     @Override
@@ -103,7 +103,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         ResultSet rs = null;
         try {
             con.setAutoCommit(false);
-            
+
             rs = con.createStatement().executeQuery(SELECT);
             repairStmt = con.prepareStatement(REPAIR);
             while (rs.next()) {
@@ -116,8 +116,8 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
                 repairStmt.setInt(2, cid);
                 repairStmt.setInt(3, id);
                 repairStmt.addBatch();
-                
-                LOG.info("Fixed appointment " + cid + "/" + id + " (cid/id) old count: " + count + " new count: " + realCount); 
+
+                LOG.info("Fixed appointment " + cid + "/" + id + " (cid/id) old count: " + count + " new count: " + realCount);
             }
             repairStmt.executeBatch();
             con.commit();

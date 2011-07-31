@@ -179,7 +179,7 @@ public class MockUser implements User {
 
     /**
      * Getter for userPassword.
-     * 
+     *
      * @return Password.
      */
     @Override
@@ -189,7 +189,7 @@ public class MockUser implements User {
 
     /**
      * Getter for uid.
-     * 
+     *
      * @return User identifier.
      */
     @Override
@@ -199,7 +199,7 @@ public class MockUser implements User {
 
     /**
      * Setter for userPassword.
-     * 
+     *
      * @param userPassword Password.
      */
     public void setUserPassword(final String userPassword) {
@@ -208,7 +208,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mailEnabled.
-     * 
+     *
      * @return <code>true</code> if user is enabled.
      */
     @Override
@@ -218,7 +218,7 @@ public class MockUser implements User {
 
     /**
      * Setter for mailEnabled.
-     * 
+     *
      * @param mailEnabled <code>true</code> to enable user.
      */
     public void setMailEnabled(final boolean mailEnabled) {
@@ -227,7 +227,7 @@ public class MockUser implements User {
 
     /**
      * Getter for shadowLastChange.
-     * 
+     *
      * @return Days since Jan 1, 1970 that password was last changed.
      */
     @Override
@@ -237,7 +237,7 @@ public class MockUser implements User {
 
     /**
      * Setter for shadowLastChange.
-     * 
+     *
      * @param shadowLastChange Days since Jan 1, 1970 that password was last changed.
      */
     public void setShadowLastChange(final int shadowLastChange) {
@@ -246,7 +246,7 @@ public class MockUser implements User {
 
     /**
      * Setter for imapServer.
-     * 
+     *
      * @param imapServer IMAP server.
      */
     public void setImapServer(final String imapServer) {
@@ -255,7 +255,7 @@ public class MockUser implements User {
 
     /**
      * Getter for imapServer.
-     * 
+     *
      * @return IMAP server.
      */
     @Override
@@ -265,7 +265,7 @@ public class MockUser implements User {
 
     /**
      * Setter for smtpServer.
-     * 
+     *
      * @param smtpServer SMTP server.
      */
     public void setSmtpServer(final String smtpServer) {
@@ -274,7 +274,7 @@ public class MockUser implements User {
 
     /**
      * Getter for smtpServer.
-     * 
+     *
      * @return SMTP server.
      */
     @Override
@@ -284,7 +284,7 @@ public class MockUser implements User {
 
     /**
      * Setter for mailDomain.
-     * 
+     *
      * @param mailDomain mail domain.
      */
     public void setMailDomain(final String mailDomain) {
@@ -293,7 +293,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mailDomain.
-     * 
+     *
      * @return mail domain.
      */
     @Override
@@ -303,7 +303,7 @@ public class MockUser implements User {
 
     /**
      * Setter for givenName.
-     * 
+     *
      * @param givenName given name.
      */
     public void setGivenName(final String givenName) {
@@ -312,7 +312,7 @@ public class MockUser implements User {
 
     /**
      * Getter for givenName.
-     * 
+     *
      * @return given name.
      */
     @Override
@@ -322,7 +322,7 @@ public class MockUser implements User {
 
     /**
      * Setter for sure name.
-     * 
+     *
      * @param sureName sure name.
      */
     public void setSurname(final String sureName) {
@@ -331,7 +331,7 @@ public class MockUser implements User {
 
     /**
      * Getter for sure name.
-     * 
+     *
      * @return sure name.
      */
     @Override
@@ -341,7 +341,7 @@ public class MockUser implements User {
 
     /**
      * Setter for mail.
-     * 
+     *
      * @param mail Mail address.
      */
     public void setMail(final String mail) {
@@ -350,7 +350,7 @@ public class MockUser implements User {
 
     /**
      * Getter for mail.
-     * 
+     *
      * @return mail address.
      */
     @Override
@@ -377,7 +377,7 @@ public class MockUser implements User {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -386,7 +386,7 @@ public class MockUser implements User {
 
     /**
      * Getter for displayName.
-     * 
+     *
      * @return Display name.
      */
     @Override
@@ -396,7 +396,7 @@ public class MockUser implements User {
 
     /**
      * Setter for timeZone.
-     * 
+     *
      * @param timeZone Timezone.
      */
     public void setTimeZone(final String timeZone) {
@@ -405,7 +405,7 @@ public class MockUser implements User {
 
     /**
      * Getter for timeZone.
-     * 
+     *
      * @return Timezone.
      */
     @Override
@@ -415,7 +415,7 @@ public class MockUser implements User {
 
     /**
      * Setter for appointmentDays.
-     * 
+     *
      * @param appointmentDays Portal show appointments for this number of days.
      */
     public void setAppointmentDays(final int appointmentDays) {
@@ -424,7 +424,7 @@ public class MockUser implements User {
 
     /**
      * Getter for appointmentDays.
-     * 
+     *
      * @return Portal show appointments for this number of days.
      */
     public int getAppointmentDays() {
@@ -433,7 +433,7 @@ public class MockUser implements User {
 
     /**
      * Setter for taskDays.
-     * 
+     *
      * @param taskDays Portal show tasks for this number of days.
      */
     public void setTaskDays(final int taskDays) {
@@ -442,7 +442,7 @@ public class MockUser implements User {
 
     /**
      * Getter for taskDays.
-     * 
+     *
      * @return Portal show tasks for this number of days.
      */
     public int getTaskDays() {
@@ -451,7 +451,7 @@ public class MockUser implements User {
 
     /**
      * Setter for preferredLanguage.
-     * 
+     *
      * @param preferredLanguage Preferred language.
      */
     public void setPreferredLanguage(final String preferredLanguage) {
@@ -461,7 +461,7 @@ public class MockUser implements User {
     /**
      * Getter for preferredLanguage. The preferred language of the user. According to RFC 2798 and 2068 it should be something like de-de,
      * en-gb or en.
-     * 
+     *
      * @return Preferred Language.
      */
     @Override
@@ -471,7 +471,7 @@ public class MockUser implements User {
 
     /**
      * Getter for groups.
-     * 
+     *
      * @return the groups this user is member of.
      */
     @Override
@@ -481,7 +481,7 @@ public class MockUser implements User {
 
     /**
      * Setter for groups.
-     * 
+     *
      * @param groups the groups this user is member of.
      */
     public void setGroups(final int[] groups) {
@@ -490,7 +490,7 @@ public class MockUser implements User {
 
     /**
      * Adds the group identifier for all groups and users.
-     * 
+     *
      * @param groups groups of the user.
      * @return groups of the user and 0 will be added if it is missing.
      */

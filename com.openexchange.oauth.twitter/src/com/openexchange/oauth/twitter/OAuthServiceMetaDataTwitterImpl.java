@@ -54,7 +54,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData {

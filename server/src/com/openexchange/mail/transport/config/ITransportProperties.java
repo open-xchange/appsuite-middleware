@@ -54,7 +54,7 @@ public interface ITransportProperties {
 
     /**
      * Gets the referencedPartLimit
-     * 
+     *
      * @return the referencedPartLimit
      */
     public int getReferencedPartLimit();

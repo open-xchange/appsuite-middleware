@@ -59,7 +59,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link CopyIMAPCommand} - Copies messages from given folder to given destination folder just using their sequence numbers/UIDs
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
@@ -87,7 +87,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
     /**
      * Constructor using sequence numbers and performs a fast <code>COPY</code> command; meaning optional <i>COPYUID</i> response is
      * discarded.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param startSeqNum - the starting sequence number of the messages that shall be copied
      * @param endSeqNum - the ending sequence number of the messages that shall be copied
@@ -101,7 +101,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
     /**
      * Constructor using sequence numbers and performs a fast <code>COPY</code> command; meaning optional <i>COPYUID</i> response is
      * discarded.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param seqNums - the sequence numbers of the messages that shall be copied
      * @param destFolderName - the destination folder fullname
@@ -114,7 +114,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     /**
      * Constructor using UIDs and consequently performs a <code>UID COPY</code> command
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param uids - the UIDs of the messages that shall be copied
      * @param destFolderName - the destination folder fullname
@@ -159,7 +159,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
      * Constructor to copy all messages of given folder to given destination folder by performing a <code>COPY 1:*</code> command.
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param destFolderName - the destination folder
      * @throws MessagingException If a messaging error occurs
@@ -223,9 +223,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         final String resp = response.toString().toLowerCase(Locale.ENGLISH);
         /*-
          * Parse response:
-         * 
+         *
          * OK [COPYUID 1184051486 10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053:11558 1024:2544] Completed
-         * 
+         *
          * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
          */
         int pos = resp.indexOf(COPYUID);
@@ -253,7 +253,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         if (sa.length >= 3) {
             /*-
              * Array contains atoms like:
-             * 
+             *
              * "1167880112", "11937", "11939]", "Completed"
              */
             copyuidResp.src = sa[1];
@@ -289,7 +289,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
         /**
          * Fills given <code>retval</code> with UIDs from destination folder while keeping order of source UIDs in <code>uids</code>
-         * 
+         *
          * @param uids The source UIDs
          * @param retval The destination UIDs to fill
          */
@@ -317,17 +317,17 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
         /**
          * Turns a sequence of UIDs to a corresponding array of <code>long</code>.
-         * 
+         *
          * <pre>
          * 7,32,44:49
          * </pre>
-         * 
+         *
          * would be
-         * 
+         *
          * <pre>
          * [7,32,44,46,47,48,49]
          * </pre>
-         * 
+         *
          * @param uidSet The sequence of UIDs
          * @return The corresponding array of <code>long</code>.
          */

@@ -69,7 +69,7 @@ import org.apache.commons.logging.LogFactory;
  * The service is acquired through {@link #getService()} and must be released afterwards via {@link #ungetService(Object)}
  * <p>
  * A security mechanism keeps track of acquired services and forces an "unget" after a certain timeout
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ServiceHolder<S> {
@@ -174,7 +174,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Enables the service usage inspection
-     * 
+     *
      * @param serviceUsageTimeout the service usage timeout
      */
     static void enableServiceUsageInspection(final int serviceUsageTimeout) {
@@ -229,7 +229,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Add a service holder listener
-     * 
+     *
      * @param listener The listener
      * @throws Exception If listener cannot be added
      */
@@ -246,7 +246,7 @@ public abstract class ServiceHolder<S> {
     /**
      * Gets the service or <code>null</code> if service is not active, yet<br>
      * <b>Note:</b> Don't forget to unget the service via {@link #ungetService()}
-     * 
+     *
      * <pre>
      * ...
      * final Service s = myServiceHolder.getService();
@@ -257,7 +257,7 @@ public abstract class ServiceHolder<S> {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @return The bundle service instance or <code>null</code> if none available
      */
     public final S getService() {
@@ -299,7 +299,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Removes the service from this service holder
-     * 
+     *
      * @throws Exception If service cannot be properly removed
      */
     public final void removeService() throws Exception {
@@ -337,7 +337,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Removes the listener by given class
-     * 
+     *
      * @param clazz Listener class
      */
     public final void removeServiceHolderListenerByClass(final Class<? extends ServiceHolderListener<S>> clazz) {
@@ -346,7 +346,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Removes the listener by given class name
-     * 
+     *
      * @param className Listener class name
      */
     public final void removeServiceHolderListenerByName(final String className) {
@@ -355,7 +355,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Removes the listener by given listener reference
-     * 
+     *
      * @param listener Listener reference
      */
     public final void removeServiceHolderListenerByRef(final ServiceHolderListener<S> listener) {
@@ -375,7 +375,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Sets the service of this service holder
-     * 
+     *
      * @param service The service
      * @throws Exception If service cannot be applied
      */
@@ -393,7 +393,7 @@ public abstract class ServiceHolder<S> {
 
     /**
      * Ungets the given bundle service instance
-     * 
+     *
      * @param service The bundle service instance
      */
     public final void ungetService(final S service) {

@@ -57,7 +57,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * {@link ConfigFileStorageAccountManagerProvider} - The config account manager provider.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */

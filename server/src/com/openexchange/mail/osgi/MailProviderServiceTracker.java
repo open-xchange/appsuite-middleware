@@ -58,7 +58,7 @@ import com.openexchange.mail.api.MailProvider;
 
 /**
  * Service tracker for mail providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailProviderServiceTracker implements ServiceTrackerCustomizer {

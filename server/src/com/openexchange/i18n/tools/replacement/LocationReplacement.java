@@ -54,15 +54,15 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link LocationReplacement} - The replacement for location.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class LocationReplacement extends FormatLocalizedStringReplacement {
 
     /**
      * Initializes a new {@link LocationReplacement}.
-     * 
+     *
      * @param location The location as a string.
      */
     public LocationReplacement(final String location) {

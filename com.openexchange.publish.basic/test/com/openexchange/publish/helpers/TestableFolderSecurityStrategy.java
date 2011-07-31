@@ -67,10 +67,10 @@ public class TestableFolderSecurityStrategy extends FolderSecurityStrategy {
        super(null);
        this.permission = permission;
     }
-    
+
     @Override
     public OCLPermission loadFolderPermission(Publication publication) {
         return permission;
     }
-    
+
 }

@@ -76,7 +76,7 @@ import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelp
  * In case of context's admin, every reference located in any folder or permission table (working & backup) are removed, that either points
  * to admin himself or point to virtual group 'All Groups & Users'
  * </p>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXFolderDeleteListener implements DeleteListener {

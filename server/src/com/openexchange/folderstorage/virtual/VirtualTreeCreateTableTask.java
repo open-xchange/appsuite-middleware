@@ -63,7 +63,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support virtual folder trees.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VirtualTreeCreateTableTask implements UpdateTask {
@@ -144,7 +144,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
 
     /**
      * Check a table's existence
-     * 
+     *
      * @param tableName The table name to check
      * @param dbmd The database's meta data
      * @return <code>true</code> if table exists; otherwise <code>false</code>

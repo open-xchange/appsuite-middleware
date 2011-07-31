@@ -58,7 +58,7 @@ import com.openexchange.webdav.protocol.Protocol;
 
 /**
  * The {@link CaldavProtocol} contains constants useful for our caldav implementation
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavProtocol extends Protocol {
@@ -70,12 +70,12 @@ public class CaldavProtocol extends Protocol {
     public static final String CAL_NAMESPACE = "CAL:";
 
     public static final String CALENDAR = "<CAL:calendar />";
-    
+
     @Override
     public List<Namespace> getAdditionalNamespaces() {
         return ADDITIONAL_NAMESPACES;
     }
-    
+
     @Override
     public WebdavAction getReportAction(String ns, String name) {
         if (ns.equals(CaldavMultigetReport.NAMESPACE) && name.equals(CaldavMultigetReport.NAME)) {

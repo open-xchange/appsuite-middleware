@@ -70,7 +70,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * {@link GenericSubscribeService}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeService extends AbstractSubscribeService {
@@ -84,11 +84,11 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     private final DynamicFormDescription FORM = new DynamicFormDescription();
 
     private final String workflowString;
-    
+
     private final Activator activator;
-    
+
     private boolean enableJavascript;
-    
+
     private int module = FolderObject.CONTACT;
 
     public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
@@ -145,7 +145,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         } catch (final OXException e) {
         }
         workflow.setActivator(activator);
-        
+
         return workflow;
     }
 

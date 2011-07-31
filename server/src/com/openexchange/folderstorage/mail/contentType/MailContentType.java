@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link MailContentType} - The folder storage content type for mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailContentType implements ContentType {
@@ -62,7 +62,7 @@ public class MailContentType implements ContentType {
 
     /**
      * Gets the {@link MailContentType} instance.
-     * 
+     *
      * @return The {@link MailContentType} instance
      */
     public static MailContentType getInstance() {

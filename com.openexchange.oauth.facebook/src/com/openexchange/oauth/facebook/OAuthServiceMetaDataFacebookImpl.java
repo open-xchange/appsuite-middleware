@@ -70,11 +70,11 @@ import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link OAuthServiceMetaDataFacebookImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {    
-    
+public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {
+
     private final ConfigurationService configurationService;
     private final DeferringURLService deferrer;
 
@@ -84,7 +84,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
      */
     public OAuthServiceMetaDataFacebookImpl(final ConfigurationService configurationService, final DeferringURLService deferrer) {
         super();
-        this.configurationService=configurationService;        
+        this.configurationService=configurationService;
         this.deferrer = deferrer;
     }
 
@@ -99,12 +99,12 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String getAPIKey() {                
+    public String getAPIKey() {
         return configurationService.getProperty("com.openexchange.facebook.apiKey");
     }
 
     @Override
-    public String getAPISecret() {        
+    public String getAPISecret() {
         return configurationService.getProperty("com.openexchange.facebook.secretKey");
     }
 
@@ -117,7 +117,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public String getScope() {
         return "offline_access,publish_stream,read_stream,status_update,friends_birthday,friends_work_history,friends_about_me,friends_hometown";
     }
-    
+
     @Override
     public String modifyCallbackURL(final String callbackUrl) {
         if (deferrer == null) {
@@ -191,12 +191,12 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             }
         }
     }
-    
+
     private static final Pattern EXTRACTOR = Pattern.compile("access_token=(.*?)&?");
 
     private OAuthToken parseResponse(final String string) {
         final Matcher matcher = EXTRACTOR.matcher(string);
-        String token = null; 
+        String token = null;
         if(matcher.matches()) {
             token = matcher.group(1);
         }

@@ -60,7 +60,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ContactInterface} - The contact interface.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface ContactInterface {
@@ -83,7 +83,7 @@ public interface ContactInterface {
 
     /**
      * Determines the number of contacts a certain private or public folder.
-     * 
+     *
      * @param folderId - The Folder ID
      * @param readCon - The Readable Connection To DB
      * @return Amount of contacts as an <code>int</code>
@@ -93,7 +93,7 @@ public interface ContactInterface {
 
     /**
      * List contacts in a folder
-     * 
+     *
      * @param folderId The Folder ID
      * @param from Start position in list
      * @param to End position in list
@@ -108,7 +108,7 @@ public interface ContactInterface {
 
     /**
      * Lists all contacts that match the given search
-     * 
+     *
      * @param searchObject The SearchObject
      * @param cols fields that will be added to the data object
      * @return A SearchIterator contains ContactObject
@@ -119,7 +119,7 @@ public interface ContactInterface {
     public <T>SearchIterator<Contact> getContactsByExtendedSearch(SearchTerm<T> searchterm, int orderBy, Order order, String collation, int[] cols) throws OXException;
     /**
      * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
-     * 
+     *
      * @param searchpattern The searchpattern
      * @param folderId folder id where to search
      * @param cols fields that will be added to the data object
@@ -130,7 +130,7 @@ public interface ContactInterface {
 
     /**
      * Loads one contact by the given ID
-     * 
+     *
      * @param objectId The Object ID
      * @return return the ContactObject
      * @throws OXException, OXPermissionException
@@ -139,7 +139,7 @@ public interface ContactInterface {
 
     /**
      * Loads the contact of the given user id
-     * 
+     *
      * @param userId The User ID
      * @return User's contact
      * @throws OXException If loading the user fails
@@ -148,7 +148,7 @@ public interface ContactInterface {
 
     /**
      * Loads the contact of the given user id
-     * 
+     *
      * @param userId The User ID
      * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
      * @return User's contact
@@ -158,7 +158,7 @@ public interface ContactInterface {
 
     /**
      * Loads the contacts of the given user identifier.
-     * 
+     *
      * @param userIds The user IDs
      * @param performReadCheck <code>true</code> to perform read check; otherwise <code>false</code>
      * @return User's contacts
@@ -168,7 +168,7 @@ public interface ContactInterface {
 
     /**
      * Lists all modified objects in a folder
-     * 
+     *
      * @param folderID The Folder ID
      * @param since all modification >= since
      * @return A SearchIterator containing ContactObjects
@@ -178,7 +178,7 @@ public interface ContactInterface {
 
     /**
      * Lists all deleted objects in a folder
-     * 
+     *
      * @param folderID The Folder ID
      * @param since all modification >= since
      * @return A SearchIterator containing ContactObjects
@@ -190,7 +190,7 @@ public interface ContactInterface {
 
     /**
      * Loads a range of contacts by the given IDs
-     * 
+     *
      * @param objectIdAndInFolder[] array with two dimensions. First dimension contains a seond array with two values. 1. value is object_id
      *            2. value if folder_id
      * @param cols The columns filled to the dataobject
@@ -201,21 +201,21 @@ public interface ContactInterface {
 
     /**
      * Gets the folder ID.
-     * 
+     *
      * @return The folder ID
      */
     public int getFolderId();
 
     /**
      * Gets the LDAP server.
-     * 
+     *
      * @return The LDAP server
      */
     public LdapServer getLdapServer();
 
     /**
      * Sets the session instance.
-     * 
+     *
      * @param s The session instance to set
      * @throws OXException If applying given session instance fails
      */

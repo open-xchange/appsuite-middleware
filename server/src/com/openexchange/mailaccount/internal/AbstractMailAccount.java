@@ -65,7 +65,7 @@ import com.openexchange.tools.net.URITools;
 
 /**
  * {@link AbstractMailAccount} - Abstract mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAccount implements MailAccount {
@@ -240,7 +240,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the account ID.
-     * 
+     *
      * @param id The account ID
      */
     public void setId(final int id) {
@@ -249,7 +249,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the login.
-     * 
+     *
      * @param login The login
      */
     public void setLogin(final String login) {
@@ -258,7 +258,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the password.
-     * 
+     *
      * @param password The password
      */
     public void setPassword(final String password) {
@@ -267,7 +267,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the account name.
-     * 
+     *
      * @param name The account name
      */
     public void setName(final String name) {
@@ -276,7 +276,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the primary email address.
-     * 
+     *
      * @param primaryAddress The primary email address
      */
     public void setPrimaryAddress(final String primaryAddress) {
@@ -285,7 +285,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the personal.
-     * 
+     *
      * @param personal The personal
      */
     public void setPersonal(final String personal) {
@@ -294,7 +294,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the reply-to address
-     * 
+     *
      * @param replyTo The reply-to address
      */
     public void setReplyTo(final String replyTo) {
@@ -303,7 +303,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the user ID.
-     * 
+     *
      * @param userId The user ID
      */
     public void setUserId(final int userId) {
@@ -347,7 +347,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default trash folder's name.
-     * 
+     *
      * @param trash The default trash folder's name
      */
     public void setTrash(final String trash) {
@@ -356,7 +356,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default sent folder's name.
-     * 
+     *
      * @param trash The default sent folder's name
      */
     public void setSent(final String sent) {
@@ -365,7 +365,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default drafts folder's name.
-     * 
+     *
      * @param trash The default drafts folder's name
      */
     public void setDrafts(final String drafts) {
@@ -374,7 +374,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default spam folder's name.
-     * 
+     *
      * @param trash The default spam folder's name
      */
     public void setSpam(final String spam) {
@@ -383,7 +383,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default confirmed-spam folder's name.
-     * 
+     *
      * @param trash The default confirmed-spam folder's name
      */
     public void setConfirmedSpam(final String confirmedSpam) {
@@ -392,7 +392,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the default confirmed-ham folder's name.
-     * 
+     *
      * @param trash The default confirmed-ham folder's name
      */
     public void setConfirmedHam(final String confirmedHam) {
@@ -401,7 +401,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the spam handler name.
-     * 
+     *
      * @param trash The spam handler name
      */
     public void setSpamHandler(final String spamHandler) {
@@ -410,7 +410,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the mail server name.
-     * 
+     *
      * @param mailServer The mail server name to set
      */
     public void setMailServer(final String mailServer) {
@@ -420,7 +420,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the mail server port.
-     * 
+     *
      * @param mailPort The mail server port to set
      */
     public void setMailPort(final int mailPort) {
@@ -430,7 +430,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the mail server protocol.
-     * 
+     *
      * @param mailProtocol The mail server protocol to set
      */
     public void setMailProtocol(final String mailProtocol) {
@@ -440,7 +440,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets whether to establish a secure connection to mail server.
-     * 
+     *
      * @param mailSecure Whether to establish a secure connection to mail server
      */
     public void setMailSecure(final boolean mailSecure) {
@@ -450,7 +450,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the transport server name.
-     * 
+     *
      * @param transportServer The transport server name to set
      */
     public void setTransportServer(final String transportServer) {
@@ -460,7 +460,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the transport server port.
-     * 
+     *
      * @param transportPort The transport server port to set
      */
     public void setTransportPort(final int transportPort) {
@@ -470,7 +470,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the transport server protocol
-     * 
+     *
      * @param transportProtocol The transport server protocol to set
      */
     public void setTransportProtocol(final String transportProtocol) {
@@ -480,7 +480,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets whether to establish a secure connection to transport server.
-     * 
+     *
      * @param transportSecure Whether to establish a secure connection to transport server
      */
     public void setTransportSecure(final boolean transportSecure) {
@@ -513,7 +513,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Parses specified mail server URL.
-     * 
+     *
      * @param mailServerURL The mail server URL to parse
      * @throws OXException if parsing the URL fails.
      */
@@ -545,7 +545,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Parses specified transport server URL.
-     * 
+     *
      * @param mailServerURL The transport server URL to parse
      * @throws OXException if parsing the URL fails.
      */
@@ -606,7 +606,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Gets the optional transport login.
-     * 
+     *
      * @return The optional transport login
      */
     @Override
@@ -619,7 +619,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Gets the optional transport password.
-     * 
+     *
      * @return The optional transport password
      */
     @Override
@@ -632,7 +632,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the optional transport login.
-     * 
+     *
      * @param transportLogin The optional transport login
      */
     public void setTransportLogin(final String transportLogin) {
@@ -641,7 +641,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the optional transport password.
-     * 
+     *
      * @param transportLogin The optional transport password
      */
     public void setTransportPassword(final String transportPassword) {
@@ -655,7 +655,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets if this mail account is enabled for Unified INBOX.
-     * 
+     *
      * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
      */
     public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
@@ -669,7 +669,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the trash fullname
-     * 
+     *
      * @param trashFullname The trash fullname to set
      */
     public void setTrashFullname(final String trashFullname) {
@@ -683,7 +683,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the sent fullname
-     * 
+     *
      * @param sentFullname The sent fullname to set
      */
     public void setSentFullname(final String sentFullname) {
@@ -697,7 +697,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the drafts fullname
-     * 
+     *
      * @param draftsFullname The drafts fullname to set
      */
     public void setDraftsFullname(final String draftsFullname) {
@@ -711,7 +711,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the spam fullname
-     * 
+     *
      * @param spamFullname The spam fullname to set
      */
     public void setSpamFullname(final String spamFullname) {
@@ -725,7 +725,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the confirmed-spam fullname
-     * 
+     *
      * @param confirmedSpamFullname The confirmed-spam fullname to set
      */
     public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
@@ -739,7 +739,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the confirmed-ham fullname
-     * 
+     *
      * @param confirmedHamFullname The confirmed-ham fullname to set
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
@@ -758,7 +758,7 @@ public abstract class AbstractMailAccount implements MailAccount {
 
     /**
      * Sets the properties.
-     * 
+     *
      * @param properties The properties to set
      */
     public void setProperties(final Map<String, String> properties) {

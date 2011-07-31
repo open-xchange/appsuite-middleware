@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * CallerID received in call information
- * 
+ *
  * <p>Java class for PhoneCallerIDInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PhoneCallerIDInfo">
  *   &lt;complexContent>
@@ -54,8 +54,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PhoneCallerIDInfo", propOrder = {
@@ -97,11 +97,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the sendCallerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSendCallerID() {
         return sendCallerID;
@@ -109,11 +109,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the sendCallerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSendCallerID(String value) {
         this.sendCallerID = value;
@@ -121,11 +121,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the callerName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerName() {
         return callerName;
@@ -133,11 +133,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the callerName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerName(String value) {
         this.callerName = value;
@@ -145,11 +145,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the sendCallerNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSendCallerNo() {
         return sendCallerNo;
@@ -157,11 +157,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the sendCallerNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSendCallerNo(String value) {
         this.sendCallerNo = value;
@@ -169,11 +169,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the callerNumber property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerNumber() {
         return callerNumber;
@@ -181,11 +181,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the callerNumber property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerNumber(String value) {
         this.callerNumber = value;
@@ -193,11 +193,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the defaultCallerIDRef property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDefaultCallerIDRef() {
         return defaultCallerIDRef;
@@ -205,11 +205,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the defaultCallerIDRef property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDefaultCallerIDRef(BigInteger value) {
         this.defaultCallerIDRef = value;
@@ -217,25 +217,25 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the callerIDRefs property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the callerIDRefs property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCallerIDRefs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getCallerIDRefs() {
         if (callerIDRefs == null) {
@@ -246,11 +246,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the anonymous property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnonymous() {
         return anonymous;
@@ -258,11 +258,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the anonymous property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnonymous(Boolean value) {
         this.anonymous = value;
@@ -270,11 +270,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the callerIDInternal property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallerIDInternal() {
         return callerIDInternal;
@@ -282,11 +282,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the callerIDInternal property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallerIDInternal(Boolean value) {
         this.callerIDInternal = value;
@@ -294,11 +294,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the callerIDOnTransfer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallerIDOnTransfer() {
         return callerIDOnTransfer;
@@ -306,11 +306,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the callerIDOnTransfer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallerIDOnTransfer(Boolean value) {
         this.callerIDOnTransfer = value;
@@ -318,11 +318,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Gets the value of the sipIdentity property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSIPIdentity() {
         return sipIdentity;
@@ -330,11 +330,11 @@ public class PhoneCallerIDInfo {
 
     /**
      * Sets the value of the sipIdentity property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSIPIdentity(Boolean value) {
         this.sipIdentity = value;

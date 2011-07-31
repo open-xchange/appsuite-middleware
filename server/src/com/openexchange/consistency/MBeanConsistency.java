@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Proxy for an MBean provided ConsistencyMBean
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 final class MBeanConsistency implements ConsistencyMBean {

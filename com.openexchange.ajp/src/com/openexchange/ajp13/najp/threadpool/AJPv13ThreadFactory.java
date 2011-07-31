@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link AJPv13ThreadFactory} - A thread factory for AJP threads taking a custom name prefix for created threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {

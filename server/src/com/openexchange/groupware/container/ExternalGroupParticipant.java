@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link ExternalGroupParticipant} - Represent an external group participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ExternalGroupParticipant implements Participant, Comparable<Participant> {
@@ -66,7 +66,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
-     * 
+     *
      * @param emailAddress unique email address of the external group participant.
      */
     public ExternalGroupParticipant(final String emailAddress) {

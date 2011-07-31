@@ -67,7 +67,7 @@ public class PublicationTargetMultipleHandlerFactory implements MultipleHandlerF
     public PublicationTargetMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer) {
         this.discoverer = discoverer;
     }
-    
+
     public MultipleHandler createMultipleHandler() {
         return new PublicationTargetMultipleHandler(discoverer);
     }

@@ -367,7 +367,7 @@ public class CPParameterTest extends TestCase {
         public void setAttribute(String name, Object o) {
             attributes.put(name, o);
         }
-        
+
 
         public void setParameter(String key, String value) {
             parameters.put(key,value);

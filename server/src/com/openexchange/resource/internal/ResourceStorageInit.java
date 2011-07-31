@@ -59,7 +59,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceStorageInit implements Initialization {

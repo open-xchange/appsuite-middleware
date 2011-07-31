@@ -8,7 +8,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for the file storage exception.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum FileStorageCodes implements OXExceptionCode {
@@ -49,12 +49,12 @@ public enum FileStorageCodes implements OXExceptionCode {
      * Detail number of the exception.
      */
     private final int number;
-    
+
     private final boolean display;
 
     /**
      * Default constructor.
-     * 
+     *
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
@@ -85,7 +85,7 @@ public enum FileStorageCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
@@ -93,7 +93,7 @@ public enum FileStorageCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -102,7 +102,7 @@ public enum FileStorageCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -112,7 +112,7 @@ public enum FileStorageCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

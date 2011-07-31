@@ -68,11 +68,11 @@ public class Activator implements BundleActivator {
     private Whiteboard whiteboard;
     private ServiceDependentRegistration<TemplateServiceImpl> serviceRegistration;
 
-    
+
     public void start(final BundleContext context) throws Exception {
         whiteboard = new Whiteboard(context);
-        
-        
+
+
         this.serviceRegistration = new ServiceDependentRegistration<TemplateServiceImpl>(context, TemplateService.class.getName(), whiteboard) {
             private ConfigurationService config;
 
@@ -85,20 +85,20 @@ public class Activator implements BundleActivator {
                 templates.setInfostoreHelper(integration);
                 return templates;
             }
-            
+
             @Override
             public boolean validateServices() {
                 final boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
                 if(!hasProperty) {
                     final IllegalStateException exception = new IllegalStateException("Missing Property "+TemplateServiceImpl.PATH_PROPERTY);
                     exception.fillInStackTrace();
-                    
+
                     LOG.error(TemplateServiceImpl.PATH_PROPERTY+" is not set. Templating will remain inactive.",exception);
                 }
                 return hasProperty;
             }
         };
-        
+
         serviceRegistration.start();
     }
 

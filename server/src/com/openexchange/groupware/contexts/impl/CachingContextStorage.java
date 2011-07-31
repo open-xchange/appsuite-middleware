@@ -179,7 +179,7 @@ public class CachingContextStorage extends ContextStorage {
         persistantImpl.shutDown();
         started = false;
     }
-    
+
     @Override
     public void invalidateContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);

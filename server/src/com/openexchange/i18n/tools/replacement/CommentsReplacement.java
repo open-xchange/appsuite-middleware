@@ -54,15 +54,15 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link CommentsReplacement} - The replacement for comments.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class CommentsReplacement extends FormatLocalizedStringReplacement {
 
     /**
      * Initializes a new {@link CommentsReplacement}.
-     * 
+     *
      * @param notes The comments as a string.
      */
     public CommentsReplacement(final String notes) {

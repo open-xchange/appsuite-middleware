@@ -68,17 +68,17 @@ import com.openexchange.modules.storage.sql.engines.UserScopedStorage;
 public class PositionSQLStorage extends UserScopedStorage<UWAWidget> {
 
     private List<Attribute<UWAWidget>> attributes = new ArrayList<Attribute<UWAWidget>>(Field.values().length-4);
-    
+
     public PositionSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, userId, ctxId);
         for(Field f : EnumSet.of(Field.ID, Field.ADJ)) {
             attributes.add(f);
         }
-        
+
         builder.setTableName("uwaWidgetPosition");
-        
+
     }
-    
+
     @Override
     protected List<Attribute<UWAWidget>> getAttributes() {
         return attributes;

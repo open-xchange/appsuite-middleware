@@ -53,7 +53,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link TwitterMailFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMailFolder extends MailFolder {

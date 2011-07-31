@@ -5,9 +5,9 @@
  * The ASF licenses this file to you under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at:
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,7 +52,7 @@ import java.util.zip.Deflater;
  * title="daemonized version of spamassassin" target="_">spamd</a> server and
  * check whether a particular message is spam. There are also commands for
  * learning and reporting.
- * 
+ *
  * @author Nick Radov
  * @see <a href="http://svn.apache.org/viewvc/spamassassin/trunk/spamc/"
  *      title="Apache SVN" target="_">spamc C source code</a>
@@ -119,7 +119,7 @@ public class Spamc {
 	/**
          * Construct a response object by parsing the response received from the
          * spamd server.
-         * 
+         *
          * @param response
          *                the raw response received from Spamd
          * @throws IllegalArgumentException
@@ -151,7 +151,7 @@ public class Spamc {
 	/**
          * Extract the protocol version, response code, and response message
          * from the first line of the spamd response.
-         * 
+         *
          * @param firstLine
          *                first line of the response
          */
@@ -165,7 +165,7 @@ public class Spamc {
 
 	/**
          * Parse out all of the headers and store them for later use
-         * 
+         *
          * @param lines
          *                the spamd response split out into individual lines
          * @return line index after all of the headers (should be the start of
@@ -192,7 +192,7 @@ public class Spamc {
 
 	/**
          * Get the protocol version from the first line of the spamd response.
-         * 
+         *
          * @return protocol version, which should be &quot;1.3&quot; as of
          *         SpamAssassin 3.1.8.
          */
@@ -203,7 +203,7 @@ public class Spamc {
 	/**
          * Get the raw, unparsed spamd response including all headers and body
          * content.
-         * 
+         *
          * @return spamd response
          */
 	public CharSequence getRawResponse() {
@@ -213,7 +213,7 @@ public class Spamc {
 	/**
          * Get the response code from the first line of the response. It should
          * equal one of the fields defined in {@link ExitCodes}.
-         * 
+         *
          * @return response code
          */
 	public int getResponseCode() {
@@ -222,7 +222,7 @@ public class Spamc {
 
 	/**
          * Get a description of the error, if any.
-         * 
+         *
          * @return response message
          */
 	public CharSequence getResponseMessage() {
@@ -234,7 +234,7 @@ public class Spamc {
          * options set or command issued, it may include a complete report or
          * just the names of the tests that hit. This value may be empty if an
          * error occurred.
-         * 
+         *
          * @return processed message
          */
 	public String getProcessedMessage() {
@@ -243,7 +243,7 @@ public class Spamc {
 
 	/**
          * Get all of headers returned by spamd.
-         * 
+         *
          * @see Headers
          * @return collection of headers; for each map entry the key will be the
          *         header name and the value will be the header value
@@ -254,7 +254,7 @@ public class Spamc {
 
 	/**
          * Get the value of the {@link Headers#SPAM Spam} header.
-         * 
+         *
          * @return header value
          */
 	private String getSpamHeaderValue() {
@@ -263,7 +263,7 @@ public class Spamc {
 
 	/**
          * Check whether the processed message is spam.
-         * 
+         *
          * @return <code>true</code> if the Spam header value starts with the
          *         word &quot;True&quot;, otherwise <code>False</code>
          */
@@ -277,7 +277,7 @@ public class Spamc {
 
 	/**
          * Get the spam score for the processed message.
-         * 
+         *
          * @return spam score
          * @throws NumberFormatException
          *                 if spamd returned a response that couldn't be
@@ -304,7 +304,7 @@ public class Spamc {
 
 	/**
          * Get the threshold score for a message to be considered as spam.
-         * 
+         *
          * @return theshold score
          * @throws NumberFormatException
          *                 if spamd returned a response that couldn't be
@@ -418,7 +418,7 @@ public class Spamc {
 
     /**
          * Create a new object.
-         * 
+         *
          */
     public Spamc() {
 	super();
@@ -426,7 +426,7 @@ public class Spamc {
 
     /**
          * Create a new object and set the list of spamd hosts.
-         * 
+         *
          * @see #setHosts(List)
          * @param hosts
          *                collection of {@link java.lang.String}} objects
@@ -439,7 +439,7 @@ public class Spamc {
 
     /**
          * Set a single spamd destination host.
-         * 
+         *
          * @param host
          *                host name or IP address
          */
@@ -454,7 +454,7 @@ public class Spamc {
 
     /**
          * Set the list of spamd hosts.
-         * 
+         *
          * @param hosts
          *                collection of {@link java.lang.String}} objects
          *                containing host names and/or IP addresses
@@ -465,7 +465,7 @@ public class Spamc {
 
     /**
          * Set the list of spamd hosts.
-         * 
+         *
          * @param hosts
          *                array containing host names and/or IP addresses
          */
@@ -484,7 +484,7 @@ public class Spamc {
 
     /**
          * Get the current list of spamd destination hosts.
-         * 
+         *
          * @return collection of {@link java.lang.String} objects containing
          *         host names and/or IP addresses
          */
@@ -495,7 +495,7 @@ public class Spamc {
     /**
          * Set whether the order of spamd destination hosts should be randomized
          * for load balancing.
-         * 
+         *
          * @see RandomizeOption
          * @param randomize
          *                <code>true</code> for load balancing or
@@ -509,7 +509,7 @@ public class Spamc {
     /**
          * Get whether the order of spamd destination hosts should be randomized
          * for load balancing.
-         * 
+         *
          * @return <code>true</code> for load balancing or <code>false</code>
          *         to try hosts in the order specified
          */
@@ -524,7 +524,7 @@ public class Spamc {
     /**
          * Set the TCP port to use when connecting to the spamd server (defaults
          * to <code>783</code>).
-         * 
+         *
          * @param port
          *                TCP port number
          * @throws IllegalArgumentException
@@ -549,7 +549,7 @@ public class Spamc {
     /**
          * Set whether to use Unix sockets instead of TCP sockets when
          * connecting to the spamd server.
-         * 
+         *
          * @param useUnixSockets
          *                <code>true</code> to use Unix sockets,
          *                <code>false</code> (default) to use TCP sockets
@@ -568,7 +568,7 @@ public class Spamc {
 
     /**
          * Set whether to assume the message is in BSMTP format.
-         * 
+         *
          * @param bsmtp
          *                <code>true</code> to assume BSMTP format,
          *                <code>false</code> (default) to assume standard <a
@@ -637,7 +637,7 @@ public class Spamc {
 
     /**
          * Set whether to use SSL when connecting to the spamd server.
-         * 
+         *
          * @param useSsl
          *                <code>true</code> to use SSL, <code>false</code>
          *                (default) to send the network traffic in the clear
@@ -652,7 +652,7 @@ public class Spamc {
 
     /**
          * Set the amount of time to wait for the spamd server to respond.
-         * 
+         *
          * @param timeoutSeconds
          *                timeout in seconds.
          */
@@ -662,7 +662,7 @@ public class Spamc {
 
     /**
          * Get the amount of time to wait for the spamd server to respond.
-         * 
+         *
          * @return timeout in seconds
          */
     public long getTimeout() {
@@ -671,7 +671,7 @@ public class Spamc {
 
     /**
          * Get the user name that will be sent to the spamd server.
-         * 
+         *
          * @see Headers#USER
          * @param userName
          *                user name
@@ -682,7 +682,7 @@ public class Spamc {
 
     /**
          * Get the user name that will be sent to the spamd server.
-         * 
+         *
          * @return user name (defaults to the current user)
          */
     public String getUserName() {
@@ -723,7 +723,7 @@ public class Spamc {
     /**
          * Check whether the current protocol version is the same or newer as
          * some other protocol version.
-         * 
+         *
          * @see #getProtocolVersion()
          * @param protocolVersion
          *                protocol version to check, which should be a field
@@ -760,7 +760,7 @@ public class Spamc {
          * This method should be removed once Java 1.4 compatibility is no
          * longer needed and the {@link Class#getSimpleName()} method can be
          * used instead.
-         * 
+         *
          * @return name of the current class
          */
     private static String getSimpleClassName() {
@@ -772,7 +772,7 @@ public class Spamc {
     /**
          * Set the current protocol version. As a side effect, compression will
          * be automatically disabled if it is not supported for the new version.
-         * 
+         *
          * @see #setCompress(boolean)
          * @param protocolVersion
          *                protocol version, which should be a field from
@@ -797,7 +797,7 @@ public class Spamc {
 
     /**
          * Get the protocol version.
-         * 
+         *
          * @return protocol version, which should be a field from
          *         {@link ProtocolVersions}
          */
@@ -808,7 +808,7 @@ public class Spamc {
     /**
          * Set whether to compress the message body with Zlib. The default is
          * <code>false</code>.
-         * 
+         *
          * @param compress
          * @throws IllegalArgumentException
          *                 if <code>compress</code> is <code>true</code> and
@@ -826,7 +826,7 @@ public class Spamc {
 
     /**
          * Get whether message bodies will be compressed using Zlib.
-         * 
+         *
          * @return <code>true</code> if message bodies will be compressed,
          *         otherwise <code>false</code>
          */
@@ -866,7 +866,7 @@ public class Spamc {
 
     /**
          * Send a command to the spamd server with no message.
-         * 
+         *
          * @param command
          *                command to send, which should be a field from
          *                {@link Commands}
@@ -882,7 +882,7 @@ public class Spamc {
     /**
          * Send a command to the spamd server with a message to be checked,
          * learned, and/or reported.
-         * 
+         *
          * @param command
          *                command to send, which should be a field from
          *                {@link Commands}
@@ -903,7 +903,7 @@ public class Spamc {
 
     /**
          * Construct the query that will be sent to the spamd server.
-         * 
+         *
          * @param command
          *                command to send, which should be a field from
          *                {@link Commands}
@@ -941,7 +941,7 @@ public class Spamc {
 
 	// set the Content-length header
 	newHeaders.put(Headers.CONTENT_LENGTH, Long.toString(message != null ? message.getBytes().length : 0));
-	
+
 	// append all of the headers to the query;
 	final Iterator iterator = newHeaders.entrySet().iterator();
 	Map.Entry entry;
@@ -952,7 +952,7 @@ public class Spamc {
 	    query.append((String) entry.getValue());
 	    query.append("\r\n");
 	}
-	
+
 	long contentLength;
 	if (message != null && message.length() > 0) {
 	    query.append("\r\n");
@@ -987,7 +987,7 @@ public class Spamc {
          * host may have multiple addresses. If the randomization option is
          * turned on then the array entries will be rearranged in pseudo-random
          * order.
-         * 
+         *
          * @see #getRandomize()
          * @return list of {@link java.let.InetAddress} objects
          * @throws IllegalStateException
@@ -1034,7 +1034,7 @@ public class Spamc {
          * Set up a connection to a spamd server. It iterates through the list
          * of available addresses and retries until it either succeeds, or
          * reaches the limit or retries.
-         * 
+         *
          * @return connection to a spamd server
          * @throws IOException
          * @throws UnknownHostException
@@ -1141,7 +1141,7 @@ public class Spamc {
 
     /**
          * Get the response to a query from a spamd server.
-         * 
+         *
          * @param query
          *                complete query, including all headers and possibly a
          *                message
@@ -1185,7 +1185,7 @@ public class Spamc {
 
     /**
          * Just check if the passed message is spam or not.
-         * 
+         *
          * @param message
          * @return
          */
@@ -1197,7 +1197,7 @@ public class Spamc {
     /**
          * Check if message is spam or not, and return score plus list of
          * symbols hit
-         * 
+         *
          * @param message
          * @return
          */
@@ -1208,7 +1208,7 @@ public class Spamc {
 
     /**
          * Check if message is spam or not, and return score plus report.
-         * 
+         *
          * @param message
          * @return
          */
@@ -1220,7 +1220,7 @@ public class Spamc {
     /**
          * Check if message is spam or not, and return score plus report if the
          * message is spam.
-         * 
+         *
          * @param message
          * @return
          */
@@ -1233,7 +1233,7 @@ public class Spamc {
          * Ignore this message -- client opened connection then changed its
          * mind. (This method should not generally be used, but is included for
          * completeness.)
-         * 
+         *
          * @param message
          * @return
          */
@@ -1243,7 +1243,7 @@ public class Spamc {
     }
 
     /**
-         * 
+         *
          * @return
          * @throws UnknownHostException
          * @throws IOException
@@ -1261,7 +1261,7 @@ public class Spamc {
          * Tell what type of we are to process and what should be done with that
          * message. This includes setting or removing a local or a remote
          * database (learning, reporting, forgetting, revoking).
-         * 
+         *
          * @param message
          *                message contents
          * @param spam
@@ -1335,7 +1335,7 @@ public class Spamc {
          * Command line utility for checking whether a message is spam. It takes
          * the same arguments as the standard <code>spamc</code> program.
          * However, some arguments are currently not supported.
-         * 
+         *
          * @param args
          *                command-line arguments; for a full description see
          *                {@link #printUsage()}
@@ -1482,7 +1482,7 @@ public class Spamc {
     /**
          * Combine the arguments passed on the command line with those included
          * in the configuration file (if it exists).
-         * 
+         *
          * @param userConfig
          * @param args
          * @return
@@ -1806,7 +1806,7 @@ public class Spamc {
          * Check whether we should continue running after processing this
          * option. For some options, like those that print usage and version
          * information, we need to immediately stop.
-         * 
+         *
          * @return <code>true</code>
          */
 	protected boolean keepRunning() {
@@ -2242,7 +2242,7 @@ public class Spamc {
 
 	/**
          * Stop running after printing version information.
-         * 
+         *
          * @return <code>false</code>
          */
 	@Override
@@ -2266,7 +2266,7 @@ public class Spamc {
 
 	/**
          * Stop running after printing usage information.
-         * 
+         *
          * @return <code>false</code>
          */
 	@Override
@@ -2469,7 +2469,7 @@ public class Spamc {
          * Values from <code>sysexits.h</code>, plus some additional values
          * defined for SpamAsassin. One of these should be included in the spamd
          * response.
-         * 
+         *
          * @see SpamdResponse#getResponseCode()
          */
     public static class ExitCodes {

@@ -58,7 +58,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link DefaultSpamHandler} - The default spam handler which copies/moves spam/ham mails as they are.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultSpamHandler extends SpamHandler {
@@ -74,7 +74,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     /**
      * Gets the singleton instance of {@link DefaultSpamHandler}
-     * 
+     *
      * @return The singleton instance of {@link DefaultSpamHandler}
      */
     public static DefaultSpamHandler getInstance() {

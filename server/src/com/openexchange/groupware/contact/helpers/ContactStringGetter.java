@@ -57,7 +57,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * Makes strings out of given objects
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -68,11 +68,11 @@ public class ContactStringGetter implements ContactSwitcher {
 	static {
 	    DATE_FORMAT.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
 	}
-	
+
 	/**
-	 * This method makes a string out of an object. 
+	 * This method makes a string out of an object.
 	 * Opposed to toString, it does not break in case of null pointers.
-	 *  
+	 *
 	 * @param obj a given object
 	 * @return an empty string if <code>obj == null</code>, otherwise the result of <code>obj.toString()</obj>;
 	 */
@@ -82,21 +82,21 @@ public class ContactStringGetter implements ContactSwitcher {
 		}
 		return obj.toString();
 	}
-	
+
 	public static final String stringifyDate(final Date date) {
 	    if(date == null) {
 	        return "";
 	    }
 	    return DATE_FORMAT.format(date);
 	}
-	
+
 	public static final String stringifyTimestamp(final Date date) {
 	    if (date == null) {
 	        return "";
 	    }
 	    return String.valueOf(date.getTime());
 	}
-	
+
 	/* DELEGATE */
 	public ContactSwitcher getDelegate() {
 		return delegate;
@@ -105,7 +105,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	public void setDelegate(final ContactSwitcher delegate) {
 		this.delegate = delegate;
 	}
-	
+
 	/* INTERFACE */
 	@Override
     public Object anniversary(final Object... objects) throws OXException {

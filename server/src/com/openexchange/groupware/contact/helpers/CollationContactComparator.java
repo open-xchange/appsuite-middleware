@@ -57,10 +57,10 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
 /**
- * Compares two contacts based on the value of one of their fields. 
+ * Compares two contacts based on the value of one of their fields.
  * Uses a collation for a locale to do that. Recommended for languages
  * that do not follow a standard western sorting (read: nearly all).
- * 
+ *
  * @author tobiasp
  */
 public class CollationContactComparator implements Comparator<Contact>{
@@ -68,7 +68,7 @@ public class CollationContactComparator implements Comparator<Contact>{
 	private int orderDir;
 	private ContactField orderBy;
 	private RuleBasedCollator collator;
-	
+
 	public CollationContactComparator(ContactField orderBy, Order order, Locale locale) {
 	    super();
 		this.orderBy = orderBy;
@@ -85,7 +85,7 @@ public class CollationContactComparator implements Comparator<Contact>{
 		}
 		this.collator = (RuleBasedCollator)Collator.getInstance(locale);
 	}
-	
+
 	@Override
     public int compare(Contact o1, Contact o2) {
         if(o1 == o2 || orderDir == 0) {
@@ -97,7 +97,7 @@ public class CollationContactComparator implements Comparator<Contact>{
         if(o2 == null) {
             return 1;
         }
-        
+
         Object f1 = o1.get(orderBy.getNumber());
         Object f2 = o2.get(orderBy.getNumber());
         if(f1 == f2) {

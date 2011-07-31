@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReminderFactoryService} - Factory service for reminder module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReminderFactoryService implements MultipleHandlerFactoryService {

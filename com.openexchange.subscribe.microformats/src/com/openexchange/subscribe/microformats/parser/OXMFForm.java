@@ -78,7 +78,7 @@ public class OXMFForm extends DynamicFormDescription {
     public String getAction() {
         return action;
     }
-    
+
     public void setAction(String action) {
         this.action = action;
     }
@@ -86,7 +86,7 @@ public class OXMFForm extends DynamicFormDescription {
     public FormElement getDisplayNameField() {
         return displayNameField;
     }
-    
+
     public void setDisplayNameField(FormElement displayNameField) {
         this.displayNameField = displayNameField;
     }

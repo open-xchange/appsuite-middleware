@@ -61,7 +61,7 @@ public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
 
     private static final String[] CREATED_TABLES = { "updateTask" };
 
-    static final String[] CREATES = { 
+    static final String[] CREATES = {
         // Using full index is not possible to convert to a primary key because two different tasks may have same beginning letters that
         // fit into the index and causing a collision.
         "CREATE TABLE updateTask (cid INT4 UNSIGNED NOT NULL,taskName VARCHAR(1024) NOT NULL,successful BOOLEAN NOT NULL," +

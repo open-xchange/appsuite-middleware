@@ -72,7 +72,7 @@ import com.openexchange.tools.strings.StringParser;
 public class ConfigCascadeActivator extends HousekeepingActivator{
 
     // private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
-    
+
     static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigCascadeActivator.class));
 
     private boolean configured = false;
@@ -80,7 +80,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     private ConfigCascade configCascade;
 
     // private final int INFINITY = 10;
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[0];
@@ -89,9 +89,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         configCascade = new ConfigCascade();
-        
+
         final ServiceTracker stringParsers = track(StringParser.class);
-        
+
         configCascade.setStringParser(new StringParser() {
 
             public <T> T parse(final String s, final Class<T> t) {
@@ -103,9 +103,9 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 final StringParser parser = (StringParser) service;
                 return parser.parse(s, t);
             }
-            
+
         });
-        
+
         final ServiceTracker serverProviders = track(createFilter("server"), new ServiceTrackerCustomizer() {
 
             public Object addingService(final ServiceReference reference) {
@@ -124,29 +124,29 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             }
 
             public void removedService(final ServiceReference reference, final Object service) {
-            
+
             }
-            
+
         });
-        
+
 
         openTrackers();
 
 
-        
+
     }
-    
-    
+
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
     }
-    
+
     boolean isServerProvider(final ServiceReference reference) {
         final Object scope = reference.getProperty("scope");
         return scope != null && scope.equals("server");
     }
-    
+
     String getScopes(final ConfigProviderService config) {
         try {
             return config.get("com.openexchange.config.cascade.scopes", ConfigProviderService.NO_CONTEXT, ConfigProviderService.NO_USER).get();
@@ -155,7 +155,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         }
         return null;
     }
-    
+
     void configure(String scopes, final ConfigCascade cascade) {
         if(configured) {
             return;
@@ -164,21 +164,21 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             scopes = "user, context, server";
         }
         configured = true;
-        
+
         final String[] searchPath = scopes.split("\\s*,\\s*");
         cascade.setSearchPath(searchPath);
-   
+
         for (final String scope : searchPath) {
             if(scope.equals("server")) {
                 continue;
             }
-            
+
             final ServiceTracker tracker = track(createFilter(scope));
             cascade.setProvider(scope, new TrackingProvider(tracker));
             tracker.open();
         }
     }
-    
+
     Filter createFilter(final String scope) {
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");

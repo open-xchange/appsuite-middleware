@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link SSOServiceRegistry} - A service registry for single sign-on bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SSOServiceRegistry extends AbstractServiceRegistry {
@@ -66,7 +66,7 @@ public class SSOServiceRegistry extends AbstractServiceRegistry {
 
     /**
      * Gets the service registry instance.
-     * 
+     *
      * @return The service registry instance
      */
     public static SSOServiceRegistry getInstance() {

@@ -71,12 +71,12 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LinkedInConnectionTest extends TestCase {
-    
+
     private LinkedInServiceImpl linkedIn;
-    
+
     private String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
     private String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
-    
+
     @Override
     public void setUp(){
         Activator activator = new Activator();
@@ -85,16 +85,16 @@ public class LinkedInConnectionTest extends TestCase {
         linkedIn = new LinkedInServiceImpl(activator);
         activator.setOauthService(new MockOAuthService());
     }
-    
+
     @Override
     public void tearDown(){
-        
-    }    
-    
+
+    }
+
     public void testAccountCreation(){
         // This is basically scribes example
-        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();        
-        
+        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
+
         System.out.println("=== LinkedIn's OAuth Workflow ===");
         System.out.println();
 
@@ -107,7 +107,7 @@ public class LinkedInConnectionTest extends TestCase {
         DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
         oAuthToken.setToken(requestToken.getToken());
         oAuthToken.setSecret(requestToken.getSecret());
-        
+
         System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
         System.out.println("And paste the verifier here");
         System.out.print(">>");
@@ -123,17 +123,17 @@ public class LinkedInConnectionTest extends TestCase {
         System.out.println("(if your curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
         System.out.println();
     }
-    
+
     public void testUsageOfExistingAccount(){
         List<Contact> contacts = linkedIn.getContacts("password",1,1,1);
         for (Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
         }
     }
-    
+
     public void testXMLParsing(){
-                       
-        try {            
+
+        try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
             String string = "";
             String line;
@@ -155,7 +155,7 @@ public class LinkedInConnectionTest extends TestCase {
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }                       
+        }
     }
 
 }

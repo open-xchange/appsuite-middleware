@@ -69,15 +69,15 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object> {
-    
+
     private String url;
-    
+
     private Map<String, String> parameters;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlAndParametersMapStep.class));
-    
+
     public PageByUrlAndParametersMapStep(){
-        
+
     }
 
     @Override
@@ -102,24 +102,24 @@ public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object
         }
     }
 
-    
+
     public String getUrl() {
         return url;
     }
 
-    
+
     public void setUrl(String url) {
         this.url = url;
     }
 
-    
+
     public Map<String, String> getParameters() {
         return parameters;
     }
 
-    
+
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }
-        
+
 }

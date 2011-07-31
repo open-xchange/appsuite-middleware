@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Disk space data
- * 
+ *
  * <p>Java class for diskSpace complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="diskSpace">
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "diskSpace", propOrder = {
@@ -40,11 +40,11 @@ public class DiskSpace {
 
     /**
      * Gets the value of the used property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUsed() {
         return used;
@@ -52,11 +52,11 @@ public class DiskSpace {
 
     /**
      * Sets the value of the used property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUsed(String value) {
         this.used = value;
@@ -64,11 +64,11 @@ public class DiskSpace {
 
     /**
      * Gets the value of the total property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUString }
-     *     
+     *
      */
     public UnlimitedUString getTotal() {
         return total;
@@ -76,11 +76,11 @@ public class DiskSpace {
 
     /**
      * Sets the value of the total property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUString }
-     *     
+     *
      */
     public void setTotal(UnlimitedUString value) {
         this.total = value;

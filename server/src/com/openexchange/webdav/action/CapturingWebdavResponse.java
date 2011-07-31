@@ -58,7 +58,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public class CapturingWebdavResponse implements WebdavResponse {
 	private final WebdavResponse delegate;
 	private CapturingOutputStream stream;
-	
+
 	public CapturingWebdavResponse(final WebdavResponse delegate) {
 		this.delegate = delegate;
 	}
@@ -85,11 +85,11 @@ public class CapturingWebdavResponse implements WebdavResponse {
     public void setStatus(final int status) {
 		delegate.setStatus(status);
 	}
-	
+
 	private static final class CapturingOutputStream extends OutputStream {
 		private final OutputStream delegate;
 		private final ByteArrayOutputStream capture;
-		
+
 		public CapturingOutputStream(final OutputStream delegate) {
 			this.delegate = delegate;
 			this.capture = new UnsynchronizedByteArrayOutputStream();
@@ -109,7 +109,7 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		public void flush() throws IOException {
 			delegate.flush();
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return delegate.hashCode();
@@ -137,7 +137,7 @@ public class CapturingWebdavResponse implements WebdavResponse {
 			delegate.write(arg0);
 			capture.write(arg0);
 		}
-		
+
 		public ByteArrayOutputStream getCapture() {
 			return capture;
 		}

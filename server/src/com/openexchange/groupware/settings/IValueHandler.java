@@ -96,7 +96,7 @@ public interface IValueHandler {
      * If the value should be written simply to the database and read from there a unique identifier must be returned instead of
      * implementing methods {@link #getValue(Session, Context, User, UserConfiguration, Setting)} and
      * {@link #writeValue(Context, User, Setting)}.
-     * 
+     *
      * @return the unique identifier of the value in the database.
      */
     int getId();

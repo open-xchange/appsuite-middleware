@@ -60,7 +60,7 @@ import com.openexchange.i18n.Translator;
 
 /**
  * {@link FormDescriptionWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormDescriptionWriter {
@@ -72,7 +72,7 @@ public class FormDescriptionWriter {
     public static final String DISPLAY_NAME = "displayName";
 
     private static final String MANDATORY = "mandatory";
-    
+
     private static final String OPTIONS = "options";
 
     private static final String DEFAULT_VALUE = "defaultValue";
@@ -106,7 +106,7 @@ public class FormDescriptionWriter {
         } else {
             object.put(WIDGET, formElement.getCustomWidget());
         }
-        
+
         Map<String, String> options = formElement.getOptions();
         if(options != null && !options.isEmpty()) {
             JSONObject jsonOptions = new JSONObject();
@@ -115,7 +115,7 @@ public class FormDescriptionWriter {
             }
             object.put(OPTIONS, jsonOptions);
         }
-        
+
         object.put(NAME, formElement.getName());
         object.put(DISPLAY_NAME, translator.translate(formElement.getDisplayName()));
         object.put(MANDATORY, formElement.isMandatory());

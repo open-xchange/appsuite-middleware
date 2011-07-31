@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionObject} - Implements {@link com.openexchange.session.Session}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -103,7 +103,7 @@ public class SessionObject implements Session {
 
     /**
      * Initializes a new {@link SessionObject}.
-     * 
+     *
      * @param sessionId The session identifier
      */
     public SessionObject(final String sessionId) {

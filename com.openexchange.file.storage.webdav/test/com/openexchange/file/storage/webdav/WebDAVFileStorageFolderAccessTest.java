@@ -76,7 +76,7 @@ public final class WebDAVFileStorageFolderAccessTest extends AbstractWebDAVFileS
         accountAccess.connect();
         try {
             final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-            
+
             final DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
             final String name = "TestFolder" + System.currentTimeMillis();
             folder.setName(name);
@@ -174,5 +174,5 @@ public final class WebDAVFileStorageFolderAccessTest extends AbstractWebDAVFileS
             accountAccess.close();
         }
     }
-    
+
 }

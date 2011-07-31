@@ -66,7 +66,7 @@ import com.sun.mail.imap.Rights.Right;
  * <p>
  * If a client includes the "c" right in a rights list, then it MUST be treated as if the client had included every member of the "create"
  * right.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 class RFC4314ACLExtension extends AbstractACLExtension {

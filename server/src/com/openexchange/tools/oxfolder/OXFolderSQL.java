@@ -85,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Contains useful SQL-related helper methods for folder operations
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderSQL {
@@ -103,7 +103,7 @@ public final class OXFolderSQL {
 
     /**
      * Gets the non-existing parents in specified context.
-     * 
+     *
      * @param ctx The context
      * @return The non-existing parents in specified context
      * @throws OXException If operation fails
@@ -119,7 +119,7 @@ public final class OXFolderSQL {
 
     /**
      * Gets the non-existing parents in specified context.
-     * 
+     *
      * @param ctx The context
      * @param con The connection to user; <b>must not be <code>null</code></b>
      * @return The non-existing parents in specified context
@@ -149,7 +149,7 @@ public final class OXFolderSQL {
 
     /**
      * Determines the ID of the user who is defined as admin for given context or <code>-1</code> if none found
-     * 
+     *
      * @param ctx The context
      * @param readConArg A readable connection or <code>null</code> to fetch a new one from connection pool
      * @return The ID of context admin or <code>-1</code> if none found
@@ -183,7 +183,7 @@ public final class OXFolderSQL {
 
     /**
      * Gets the specified user's default folder of given module
-     * 
+     *
      * @param userId The user ID
      * @param module The module
      * @param readCon A connection with read capability
@@ -220,7 +220,7 @@ public final class OXFolderSQL {
 
     /**
      * Gets all private folders of specified owner which are shared to other users.
-     * 
+     *
      * @param owner The owner's ID
      * @param readConArg A readable connection or <code>null</code> to fetch a new one from connection pool
      * @param ctx The context
@@ -261,7 +261,7 @@ public final class OXFolderSQL {
 
     /**
      * Updates the last modified timestamp of the folder whose ID matches given parameter <code>folderId</code>.
-     * 
+     *
      * @param folderId The folder ID
      * @param lastModified The new last-modified timestamp to set
      * @param modifiedBy The user who shall be inserted as modified-by
@@ -294,7 +294,7 @@ public final class OXFolderSQL {
 
     /**
      * Updates the last modified timestamp of the folder whose ID matches given parameter <code>folderId</code>.
-     * 
+     *
      * @param folderId The folder ID
      * @param lastModified The new last-modified timestamp to set
      * @param writeConArg A writable connection or <code>null</code> to fetch a new one from pool
@@ -325,7 +325,7 @@ public final class OXFolderSQL {
 
     /**
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
-     * 
+     *
      * @param folderId The folder ID
      * @param newName The new name to set
      * @param lastModified The last modified timestamp
@@ -397,13 +397,13 @@ public final class OXFolderSQL {
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-        
+
         return folderList;
     }
-    
+
     /**
      * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
-     * 
+     *
      * @return folder id or <tt>-1</tt> if none found
      */
     public static int lookUpFolder(final int parent, final String folderName, final int module, final Connection readConArg, final Context ctx) throws OXException, SQLException {
@@ -412,7 +412,7 @@ public final class OXFolderSQL {
 
     /**
      * Checks for a duplicate folder in parental folder. A folder is treated as a duplicate if name and module are equal.
-     * 
+     *
      * @param folderId The ID of the folder whose is equal to given folder name (used on update). Set this parameter to <code>-1</code> to
      *            ignore.
      * @param parent The parent folder whose subfolders shall be looked up
@@ -457,7 +457,7 @@ public final class OXFolderSQL {
 
     /**
      * Checks if underlying storage contains a folder whose ID matches given ID
-     * 
+     *
      * @return <tt>true</tt> if folder exists, otherwise <tt>false</tt>
      */
     public static boolean exists(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
@@ -482,7 +482,7 @@ public final class OXFolderSQL {
 
     /**
      * Checks if underlying storage contains a folder whose ID matches given ID
-     * 
+     *
      * @return <tt>true</tt> if folder exists, otherwise <tt>false</tt>
      */
     public static boolean exists(final int folderId, final Connection readConArg, final Context ctx, final String table) throws OXException, SQLException {
@@ -510,7 +510,7 @@ public final class OXFolderSQL {
 
     /**
      * Updates a single folder permission and updates folder's last-modified time stamp
-     * 
+     *
      * @param folderId The folder ID
      * @param permissionId The entity ID; either user or group ID
      * @param folderPermission The folder permission to set
@@ -560,7 +560,7 @@ public final class OXFolderSQL {
 
     /**
      * Inserts a single folder permission.
-     * 
+     *
      * @param folderId The folder ID
      * @param permissionId The entity ID; either user or group ID
      * @param isGroup <code>true</code> if permission ID denotes a group; otherwise <code>false</code>
@@ -607,7 +607,7 @@ public final class OXFolderSQL {
 
     /**
      * Deletes a single system permission
-     * 
+     *
      * @param folderId The folder ID
      * @param permissionId The entity ID; either user or group ID
      * @param writeCon A connection with write capability; may be <code>null</code> to fetch from pool
@@ -640,7 +640,7 @@ public final class OXFolderSQL {
 
     /**
      * Deletes all system permission from specified folder
-     * 
+     *
      * @param folderId The folder ID
      * @param writeCon A writable connection
      * @param ctx The context
@@ -670,7 +670,7 @@ public final class OXFolderSQL {
 
     /**
      * Creates a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
-     * 
+     *
      * @return a <tt>TIntArrayList</tt> instance containing all subfolder IDs of given folder
      */
     public static TIntArrayList getSubfolderIDs(final int folderId, final Connection readConArg, final Context ctx) throws OXException, SQLException {
@@ -1356,7 +1356,7 @@ public final class OXFolderSQL {
     private static final String SQL_RESTORE_OT = "INSERT INTO oxfolder_tree SELECT * FROM del_oxfolder_tree WHERE cid = ? AND fuid = ?";
 
     private static final String SQL_RESTORE_OP = "INSERT INTO oxfolder_permissions SELECT * FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
-    
+
     public static void restore(final int folderId, final Context ctx, final Connection writeConArg) throws OXException, SQLException {
         Connection writeCon = writeConArg;
         boolean closeWriteCon = false;
@@ -1427,7 +1427,7 @@ public final class OXFolderSQL {
     /**
      * Fetches an unique id from underlying storage. NOTE: This method assumes that given writable connection is set to auto-commit! In any
      * case the <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT mechanisms will be canceled.
-     * 
+     *
      * @param ctx The context
      * @param callWriteConArg A writable connection
      * @return A unique folder id from underlying storage
@@ -1554,7 +1554,7 @@ public final class OXFolderSQL {
 
     /**
      * Drops all system-permissions belonging to specified entity in given context
-     * 
+     *
      * @param entity The entity
      * @param permTable The permission table
      * @param writeConArg The writable connection

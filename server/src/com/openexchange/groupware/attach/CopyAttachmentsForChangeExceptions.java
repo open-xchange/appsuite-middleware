@@ -86,14 +86,14 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
             if(folderId == 0) {
                 folderId = inFolder;
             }
-            
+
             while(iterator.hasNext()) {
                 final AttachmentMetadata attachment = (AttachmentMetadata) iterator.next();
                 final AttachmentMetadata copy = new AttachmentImpl(attachment);
                 copy.setId(AttachmentBase.NEW);
                 copy.setFileId(null);
                 copy.setAttachedId(exception.getObjectID());
-                
+
                 copy.setFolderId(folderId);
                 copy.setModuleId(Types.APPOINTMENT);
 

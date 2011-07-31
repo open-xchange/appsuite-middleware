@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link TransportPropertiesInit} - Initializes global configuration implementation for transport system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportPropertiesInit implements Initialization {

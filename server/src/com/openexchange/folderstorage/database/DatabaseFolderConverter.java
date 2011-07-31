@@ -75,7 +75,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader;
 
 /**
  * {@link DatabaseFolderConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderConverter {
@@ -165,7 +165,7 @@ public final class DatabaseFolderConverter {
 
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
-     * 
+     *
      * @param fo The {@link FolderObject} instance
      * @param user The user
      * @param userConfiguration The user configuration
@@ -309,7 +309,7 @@ public final class DatabaseFolderConverter {
                         } else {
                             final List<String> tmp = new ArrayList<String>(subfolderIds.size());
                             subfolderIds.forEach(new TIntProcedure() {
-                                
+
                                 @Override
                                 public boolean execute(final int id) {
                                     tmp.add(String.valueOf(id));

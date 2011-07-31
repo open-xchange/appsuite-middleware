@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.CommonObject;
 
 /**
  * {@link CommonWriter} - Writer for common fields
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -69,7 +69,7 @@ public class CommonWriter extends FolderChildWriter {
 
     /**
      * Initializes a new {@link CommonWriter}
-     * 
+     *
      * @param tz
      *            The user time zone
      * @param jsonwriter
@@ -81,7 +81,7 @@ public class CommonWriter extends FolderChildWriter {
 
     /**
      * Writes common field from given {@link CommonObject} instance to specified {@link JSONObject}
-     * 
+     *
      * @param commonObj The common object
      * @param jsonObj The JSON object
      * @throws JSONException If a JSON error occurs

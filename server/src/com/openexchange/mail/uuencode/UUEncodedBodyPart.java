@@ -134,7 +134,7 @@ public class UUEncodedBodyPart {
 
     /**
      * Gets the fileName attribute of the UUEncodedBodyPart object
-     * 
+     *
      * @return The fileName value
      */
     public String getFileName() {
@@ -143,7 +143,7 @@ public class UUEncodedBodyPart {
 
     /**
      * Gets the inputStream attribute of the UUEncodedBodyPart object
-     * 
+     *
      * @return The inputStream value
      */
     public InputStream getInputStream() {
@@ -152,7 +152,7 @@ public class UUEncodedBodyPart {
 
     /**
      * Gets the file size attribute of the UUEncodedBodyPart object
-     * 
+     *
      * @return The file size value
      */
     public int getFileSize() {

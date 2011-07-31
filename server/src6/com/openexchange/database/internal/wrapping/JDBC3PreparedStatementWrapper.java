@@ -77,12 +77,12 @@ import org.apache.commons.logging.LogFactory;
 public abstract class JDBC3PreparedStatementWrapper extends JDBC3StatementWrapper implements PreparedStatement {
 
     private final PreparedStatement delegate;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JDBC3PreparedStatementWrapper.class));
 
     /**
      * Initializes a new {@link JDBC3PreparedStatementWrapper}.
-     * 
+     *
      * @param delegate The delegate statement
      * @param con The connection returner instance
      */

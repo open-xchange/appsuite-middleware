@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -62,11 +62,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -74,11 +74,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -86,11 +86,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -98,11 +98,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -110,11 +110,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the folderID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getFolderID() {
         return folderID;
@@ -122,11 +122,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the folderID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setFolderID(BigInteger value) {
         this.folderID = value;
@@ -134,11 +134,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the languageID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getLanguageID() {
         return languageID;
@@ -146,11 +146,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the languageID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setLanguageID(BigInteger value) {
         this.languageID = value;
@@ -158,11 +158,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the musicOnHold property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMusicOnHold() {
         return musicOnHold;
@@ -170,11 +170,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the musicOnHold property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMusicOnHold(BigInteger value) {
         this.musicOnHold = value;
@@ -182,11 +182,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the system property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSystem() {
         return system;
@@ -194,11 +194,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the system property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSystem(BigInteger value) {
         this.system = value;
@@ -206,11 +206,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getStatus() {
         return status;
@@ -218,11 +218,11 @@ public class GetOwnedSoundsRequest {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setStatus(BigInteger value) {
         this.status = value;

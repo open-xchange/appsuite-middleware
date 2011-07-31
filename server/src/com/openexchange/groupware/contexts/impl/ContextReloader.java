@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Context object delegator that reloads the backed delegate newly into cache if it times out.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 final class ContextReloader extends Refresher<ContextExtended> implements ContextExtended {

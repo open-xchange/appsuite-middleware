@@ -57,7 +57,7 @@ import com.openexchange.ajp13.servlet.ServletConfigLoader;
 /**
  * {@link FiFoServletQueue} - The servlet queue backed by a {@link FIFOQueue fi-fo queue} and capable to create new servlet instances on
  * demand.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements ServletQueue {
@@ -72,7 +72,7 @@ public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements Se
 
     /**
      * Initializes a new concurrent {@link FiFoServletQueue}
-     * 
+     *
      * @param maxsize The max. size
      * @param servletConstructor The servlet constructor to create new servlet instances on demand
      * @param singleton <code>true</code> to mark passed servlet instance as a singleton; otherwise <code>false</code>
@@ -84,7 +84,7 @@ public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements Se
 
     /**
      * Initializes a new {@link FiFoServletQueue}
-     * 
+     *
      * @param maxsize The max. size
      * @param isSynchronized <code>true</code> for a concurrent queue; otherwise <code>false</code>
      * @param servletConstructor The servlet constructor to create new servlet instances on demand

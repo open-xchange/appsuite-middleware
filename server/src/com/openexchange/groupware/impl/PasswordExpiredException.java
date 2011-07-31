@@ -61,23 +61,23 @@ package com.openexchange.groupware.impl;
 public class PasswordExpiredException extends Exception
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -5921811122390022440L;
 
 	public PasswordExpiredException() {
 		super();
 	}
-	
+
 	public PasswordExpiredException(final String message) {
 		super(message);
 	}
-	
+
 	public PasswordExpiredException(final String message, final Exception exc) {
 		super(message, exc);
 	}
-	
+
 	public PasswordExpiredException(final Exception exc) {
 		super(exc);
-	}	
+	}
 }

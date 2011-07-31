@@ -58,7 +58,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * {@link SessionCacheConfiguration} - Configures the session cache
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionCacheConfiguration implements Initialization {
@@ -76,7 +76,7 @@ public final class SessionCacheConfiguration implements Initialization {
 
     /**
      * Gets the singleton instance of {@link SessionCacheConfiguration}
-     * 
+     *
      * @return The singleton instance of {@link SessionCacheConfiguration}
      */
     public static SessionCacheConfiguration getInstance() {

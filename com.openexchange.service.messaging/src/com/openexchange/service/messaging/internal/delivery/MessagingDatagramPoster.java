@@ -80,7 +80,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link MessagingDatagramPoster}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingDatagramPoster {
@@ -98,7 +98,7 @@ public final class MessagingDatagramPoster {
 
     /**
      * Initializes a new {@link MessagingDatagramPoster}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public MessagingDatagramPoster(final DatagramSocket datagramSocket) throws OXException {
@@ -115,7 +115,7 @@ public final class MessagingDatagramPoster {
 
     /**
      * Posts the passed message.
-     * 
+     *
      * @throws OXException If posting fails
      */
     public void post(final Message message) throws OXException {
@@ -302,11 +302,11 @@ public final class MessagingDatagramPoster {
 
     /**
      * Calculates the number of consumed bytes of the first package without payload data.
-     * 
+     *
      * <pre>
      * &lt;magic&gt;&lt;uuid&gt;&lt;prefix-code&gt;&lt;continuation-flag&gt;&lt;topic&gt;
      * </pre>
-     * 
+     *
      * @param topicByteCount The number of bytes needed for topic string
      * @return The number of consumed bytes
      */

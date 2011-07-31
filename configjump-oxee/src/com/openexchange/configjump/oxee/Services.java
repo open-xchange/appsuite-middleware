@@ -73,7 +73,7 @@ public final class Services {
     private final Lock registrationLock = new ReentrantLock();
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
     public Services(final BundleContext context) {
         super();

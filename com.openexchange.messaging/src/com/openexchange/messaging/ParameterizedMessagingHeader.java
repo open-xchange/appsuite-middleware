@@ -53,7 +53,7 @@ import java.util.Iterator;
 
 /**
  * {@link ParameterizedMessagingHeader} - A {@link MessagingHeader header} which is capable to hold parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -61,7 +61,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
-     * 
+     *
      * @param key The parameter name
      * @param value The parameter value to add
      */
@@ -69,7 +69,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Sets the given parameter. Existing value is overwritten.
-     * 
+     *
      * @param key The parameter name
      * @param value The parameter value
      */
@@ -77,7 +77,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Gets specified parameter's value
-     * 
+     *
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -85,7 +85,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Removes specified parameter and returns its value
-     * 
+     *
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -93,7 +93,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Checks if parameter is present
-     * 
+     *
      * @param key the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
@@ -101,7 +101,7 @@ public interface ParameterizedMessagingHeader extends MessagingHeader {
 
     /**
      * Gets all parameter names wrapped in an {@link Iterator}
-     * 
+     *
      * @return All parameter names wrapped in an {@link Iterator}
      */
     public Iterator<String> getParameterNames();

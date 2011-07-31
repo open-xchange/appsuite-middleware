@@ -98,12 +98,12 @@ public class WebdavDirectoryPerformer implements SessionHolder {
     private static final Log LOG = LogFactory.getLog(WebdavDirectoryPerformer.class);
 
     private static WebdavDirectoryPerformer INSTANCE = null;
-    
+
     private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
-    
+
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static WebdavDirectoryPerformer getInstance() {
@@ -253,7 +253,7 @@ public class WebdavDirectoryPerformer implements SessionHolder {
     public DirectoryWebdavFactory getFactory() {
         return factory;
     }
-    
+
     public void setGlobalMixins(PropertyMixin...mixins) {
         factory.setGlobalMixins(mixins);
     }

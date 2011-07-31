@@ -64,7 +64,7 @@ public abstract class SinglePropertyMixin implements PropertyMixin {
 
     private String namespace;
     private String name;
-    
+
     public SinglePropertyMixin(String namespace, String name) {
         super();
         this.namespace = namespace;

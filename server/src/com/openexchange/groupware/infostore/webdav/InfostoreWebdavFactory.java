@@ -282,7 +282,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-   
+
 
     private Set<TransactionAware> services(){
         return this.services;

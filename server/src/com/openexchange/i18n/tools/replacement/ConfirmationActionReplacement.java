@@ -56,9 +56,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 /**
  * {@link ConfirmationActionReplacement} - Replacement for a confirmation
  * status.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ConfirmationActionReplacement extends LocalizedStringReplacement {
 
@@ -73,7 +73,7 @@ public final class ConfirmationActionReplacement extends LocalizedStringReplacem
 
     /**
      * Initializes a new {@link ConfirmationActionReplacement}
-     * 
+     *
      * @param confirmationAction The confirmation action; supposed to be either
      *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
      *            {@link #ACTION_TENTATIVELY_ACCEPTED}
@@ -84,7 +84,7 @@ public final class ConfirmationActionReplacement extends LocalizedStringReplacem
 
     /**
      * Initializes a new {@link ConfirmationActionReplacement}
-     * 
+     *
      * @param confirmationAction The confirmation action; supposed to be either
      *            {@link #ACTION_ACCEPTED}, {@link #ACTION_DECLINED}, or
      *            {@link #ACTION_TENTATIVELY_ACCEPTED}

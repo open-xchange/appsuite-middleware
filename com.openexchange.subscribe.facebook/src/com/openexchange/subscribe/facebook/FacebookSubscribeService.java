@@ -67,7 +67,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 
 /**
  * {@link FacebookSubscribeService}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookSubscribeService extends AbstractSubscribeService {
@@ -75,9 +75,9 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookSubscribeService.class));
 
     private final SubscriptionSource source = new SubscriptionSource();
-    
+
     private OAuthServiceMetaData facebookMetaData;
-    
+
     private FacebookService facebookService;
 
     public FacebookSubscribeService(OAuthServiceMetaData facebookMetaData, FacebookService facebookService) {

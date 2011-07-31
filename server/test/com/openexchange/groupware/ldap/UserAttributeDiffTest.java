@@ -131,7 +131,7 @@ public class UserAttributeDiffTest {
         RdbUserStorage.calculateDifferences(oldAttributes, newAttributes, added, removed, changed);
         assertValues(added, N(), MV());
         assertValues(removed, N(), MV());
-        // We don't know in which order the diff algorithm will generate the change of values. So test both ones. 
+        // We don't know in which order the diff algorithm will generate the change of values. So test both ones.
         try {
             assertChanges(changed, N("alias"), MC(S(C("mk@premium", "mr@premium"), C("ma@premium", "mc@premium"))));
         } catch (AssertionFailedError e) {

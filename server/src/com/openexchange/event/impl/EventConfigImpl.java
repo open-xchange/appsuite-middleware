@@ -59,7 +59,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 
 /**
  * {@link EventConfigImpl}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class EventConfigImpl extends AbstractConfigWrapper implements EventConfig {
@@ -79,7 +79,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
     public EventConfigImpl(final String propfile) {
         /*-
          * This if statement always yields false
-         * 
+         *
         if (isInit) {
             return;
         }
@@ -125,7 +125,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
         /*-
          * Field "isInit" is never used
-         * 
+         *
         isInit = true;
         */
     }

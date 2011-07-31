@@ -66,7 +66,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link HttpSessionWrapper} - A wrapper class for {@link HttpSession}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpSessionWrapper implements HttpSession {
@@ -98,7 +98,7 @@ public class HttpSessionWrapper implements HttpSession {
 
     /**
      * Initializes a new {@link HttpSessionWrapper}.
-     * 
+     *
      * @param id The HTTP session identifier
      */
     public HttpSessionWrapper(final String id) {
@@ -121,10 +121,10 @@ public class HttpSessionWrapper implements HttpSession {
         creationTime = lastAccessedTime = System.currentTimeMillis();
         this.id = id;
     }
- 
+
     /**
      * Touches this session's last-accessed time stamp.
-     * 
+     *
      * @return This session with last-accessed time stamp updated
      */
     public HttpSessionWrapper touch() {

@@ -62,7 +62,7 @@ import com.openexchange.mail.cache.PooledMailAccess;
  * {@link MailAccessQueueImpl} - A {@link Queue} additionally providing {@link #pollDelayed()} method to obtain expired elements.
  * <p>
  * <b>Note</b>: This queue is not thread-safe!
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessQueueImpl implements MailAccessQueue {
@@ -84,7 +84,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
 
     /**
      * Creates a new <tt>MailAccessQueue</tt> that is initially empty.
-     * 
+     *
      * @param capacity The queue's capacity or <code>-1</code> if unbounded
      */
     public MailAccessQueueImpl(final int capacity) {
@@ -104,7 +104,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
 
     /**
      * Checks if this queue is marked as deprecated.
-     * 
+     *
      * @return <code>true</code> if this queue is marked as deprecated; otherwise <code>false</code>
      */
     @Override
@@ -114,7 +114,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
 
     /**
      * Retrieves and removes the head of this queue, or <tt>null</tt> if head has not expired, yet.
-     * 
+     *
      * @return The head of this queue or <tt>null</tt> if head has not expired, yet.
      */
     @Override

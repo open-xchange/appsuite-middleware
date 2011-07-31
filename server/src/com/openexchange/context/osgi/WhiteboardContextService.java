@@ -76,11 +76,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         this.tracker = new ServiceTracker(context, ContextService.class.getName(), this);
         tracker.open();
     }
-    
+
     public void close() {
         tracker.close();
     }
-    
+
     @Override
     public Object addingService(ServiceReference reference) {
         delegate = (ContextService) context.getService(reference);
@@ -139,6 +139,6 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         return (ContextService) context.getService(serviceReference);
     }
 
-    
+
 
 }

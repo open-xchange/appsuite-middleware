@@ -56,9 +56,9 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMTPDataPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPDataPart extends DataMailPart {
 
@@ -66,7 +66,7 @@ public final class SMTPDataPart extends DataMailPart {
 
     /**
 	 * Initializes a new {@link SMTPDataPart}
-	 * 
+	 *
 	 * @param data
 	 *            The data
 	 * @param dataProperties

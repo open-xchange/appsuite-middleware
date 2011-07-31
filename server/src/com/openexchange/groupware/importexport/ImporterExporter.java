@@ -58,12 +58,12 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-/** 
+/**
  * Selects the appropriate importer or exporter for an import or export.
- * 
+ *
  * The list of importers and exports is usually loaded via Spring in the
- * ImportServlet or ExportServlet, but this might be changed in the future. 
- * 
+ * ImportServlet or ExportServlet, but this might be changed in the future.
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class ImporterExporter {
@@ -110,10 +110,10 @@ public class ImporterExporter {
     }
 
     //--- PROPER METHODS ---//-
-    
+
     /**
      * Imports data to one or more folders
-     * 
+     *
      * @param sessObj: Session object used to determine access rights
      * @param format: Format the imported data is in
      * @param is: InputStream containing the data to be imported
@@ -131,14 +131,14 @@ public class ImporterExporter {
 
     /**
      * Exports data of one folder
-     * 
+     *
      * @param sessObj Session object used to determine access rights
      * @param format Format the exported data should be in
      * @param folder Folder that is to be exported
      * @param fieldsToBeExported Fields of certain data that are to be exported. Convention: If this is empty, all fields are exported
      * @param optionalParams Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
      * @return InputStream containing the exported data in given format
-     * @throws OXException in case of a missing exporter for that kind of data 
+     * @throws OXException in case of a missing exporter for that kind of data
      */
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         for (final Exporter exp : getExporters()) {
@@ -151,7 +151,7 @@ public class ImporterExporter {
 
     /**
      * Exports the data of one object in one folder
-     * 
+     *
      * @param sessObj
      * @param format
      * @param folder
@@ -172,15 +172,15 @@ public class ImporterExporter {
     }
 
     /**
-     * Lists all formats a folder (which in OX is always of a certain type) 
+     * Lists all formats a folder (which in OX is always of a certain type)
      * can be converted into.
-     * 
+     *
      * @param sessObj: Session object used to determine access rights
      * @param folder: Identifier of a certain folder within the OX
      * @param type: Type of the folder as defined in class Types
      * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
      * @return A set of possible formats this folder can be exported to
-     * @throws OXException 
+     * @throws OXException
      */
     public Set<Format> getPossibleExportFormats(final ServerSession sessObj, final String folder, final Map<String, String[]> optionalParams) throws OXException {
         final Set<Format> res = new HashSet<Format>();
@@ -195,7 +195,7 @@ public class ImporterExporter {
         }
         return res;
     }
-    
+
     /**
      * Lists all formats a folder can import data from
      *
@@ -203,7 +203,7 @@ public class ImporterExporter {
      * @param folderMapping: Identifier of a certain folder (plus its type as defined in class Type) within the OX
      * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
      * @return A set of possible formats this folder can import
-     * @throws OXException 
+     * @throws OXException
      */
     public Set<Format> getPossibleImportFormats(final ServerSession sessObj, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         final Set<Format> res = new HashSet<Format>();

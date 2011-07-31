@@ -76,7 +76,7 @@ public final class SQLStrings {
 
     public static final Map<StorageType, String> INSERT_GROUP =
         new EnumMap<StorageType, String>(StorageType.class);
-    
+
     static {
         GROUP_TABLES.put(ACTIVE, "groups");
         GROUP_TABLES.put(DELETED, "del_groups");

@@ -60,7 +60,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HttpSessionManagement} - Management for HTTP sessions
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpSessionManagement {
@@ -113,7 +113,7 @@ public final class HttpSessionManagement {
 
     /**
      * Gets the HTTP session whose unique ID matches given <code>sessionId</code>.
-     * 
+     *
      * @param sessionId The session ID
      * @return The HTTP session whose unique ID matches given <code>sessionId</code>.
      */
@@ -124,7 +124,7 @@ public final class HttpSessionManagement {
 
     /**
      * Puts specified HTTP session into this management
-     * 
+     *
      * @param httpSession The HTTP session to add
      */
     public static void putHttpSession(final HttpSessionWrapper httpSession) {
@@ -133,7 +133,7 @@ public final class HttpSessionManagement {
 
     /**
      * Checks if this management contains a HTTP session whose unique ID matches given <code>sessionId</code>.
-     * 
+     *
      * @param sessionId The session ID
      * @return <code>true</code> if this management contains a HTTP session whose unique ID matches given <code>sessionId</code>, otherwise
      *         <code>false</code>.
@@ -144,7 +144,7 @@ public final class HttpSessionManagement {
 
     /**
      * Removes HTTP session whose unique ID matches given <code>sessionId</code> .
-     * 
+     *
      * @param sessionId The session ID
      */
     public static void removeHttpSession(final String sessionId) {
@@ -153,7 +153,7 @@ public final class HttpSessionManagement {
 
     /**
      * Creates and gets a new HTTP session with given unique ID
-     * 
+     *
      * @param uniqueId The unique ID to apply to HTTP session
      * @return The new HTTP session
      */
@@ -171,7 +171,7 @@ public final class HttpSessionManagement {
 
     /**
      * Creates a new HTTP session with given unique ID
-     * 
+     *
      * @param uniqueId The unique ID to apply to HTTP session
      */
     public static void createHttpSession(final String uniqueId) {
@@ -192,7 +192,7 @@ public final class HttpSessionManagement {
 
     /**
      * Checks if given HTTP session has expired; meaning its last accessed timestamp exceeds max. inactive interval
-     * 
+     *
      * @param httpSession The HTTP session to check
      * @return <code>true</code> if given HTTP session has expired; otherwise <code>false</code>
      */
@@ -209,7 +209,7 @@ public final class HttpSessionManagement {
 
     /**
      * Checks if HTTP session referenced by specified sessionId is valid
-     * 
+     *
      * @param sessionId The HTTP session ID
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
@@ -236,7 +236,7 @@ public final class HttpSessionManagement {
 
     /**
      * Creates a unique ID
-     * 
+     *
      * @return The unique ID
      */
     public static String getNewUniqueId() {

@@ -54,7 +54,7 @@ import java.io.IOException;
 
 /**
  * {@link UnsynchronizedByteArrayInputStream} - A simple unsynchronized byte array input stream.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStream {
@@ -63,7 +63,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * Creates a <code>UnsynchronizedByteArrayInputStream</code> so that it uses <code>buf</code> as its buffer array. The buffer array is
      * not copied. The initial value of <code>pos</code> is <code>0</code> and the initial value of <code>count</code> is the length of
      * <code>buf</code>.
-     * 
+     *
      * @param buf The input buffer.
      */
     public UnsynchronizedByteArrayInputStream(final byte buf[]) {
@@ -74,7 +74,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * Creates <code>UnsynchronizedByteArrayInputStream</code> that uses <code>buf</code> as its buffer array. The initial value of
      * <code>pos</code> is <code>offset</code> and the initial value of <code>count</code> is the minimum of <code>offset+length</code> and
      * <code>buf.length</code>. The buffer array is not copied. The buffer's mark is set to the specified offset.
-     * 
+     *
      * @param buf The input buffer.
      * @param offset The offset in the buffer of the first byte to read.
      * @param length The maximum number of bytes to read from the buffer.
@@ -88,7 +88,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * <code>255</code>. If no byte is available because the end of the stream has been reached, the value <code>-1</code> is returned.
      * <p>
      * This <code>read</code> method cannot block.
-     * 
+     *
      * @return The next byte of data, or <code>-1</code> if the end of the stream has been reached.
      */
     @Override
@@ -104,7 +104,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * <code>System.arraycopy</code>. The value <code>k</code> is added into <code>pos</code> and <code>k</code> is returned.
      * <p>
      * This <code>read</code> method cannot block.
-     * 
+     *
      * @param b The buffer into which the data is read.
      * @param off The start offset in the destination array <code>b</code>
      * @param len The maximum number of bytes read.
@@ -139,7 +139,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * Skips <code>n</code> bytes of input from this input stream. Fewer bytes might be skipped if the end of the input stream is reached.
      * The actual number <code>k</code> of bytes to be skipped is equal to the smaller of <code>n</code> and <code>count-pos</code>. The
      * value <code>k</code> is added into <code>pos</code> and <code>k</code> is returned.
-     * 
+     *
      * @param n The number of bytes to be skipped.
      * @return The actual number of bytes skipped.
      */
@@ -159,7 +159,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
      * Returns the number of remaining bytes that can be read (or skipped over) from this input stream.
      * <p>
      * The value returned is <code>count&nbsp;- pos</code>, which is the number of bytes remaining to be read from the input buffer.
-     * 
+     *
      * @return The number of remaining bytes that can be read (or skipped over) from this input stream without blocking.
      */
     @Override
@@ -208,7 +208,7 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
 
     /**
      * Gets this <tt>ByteArrayInputStream</tt>'s current position.
-     * 
+     *
      * @return The position
      */
     public int getPosition() {

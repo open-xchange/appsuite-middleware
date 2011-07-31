@@ -61,9 +61,9 @@ import com.openexchange.mobile.configuration.json.container.ProvisioningResponse
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
- * 
+ *
  */
 public class ActionSMS implements ActionService {
 
@@ -99,7 +99,7 @@ public class ActionSMS implements ActionService {
 			LOG.debug("Using API URL: "+getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url") +" ");
 			LOG.debug("Using API Username: "+getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username") +" ");
 		}
-		
+
 		// set prov. URL in SMS
 		smssend.setText(provisioningInformation.getUrl());
 
@@ -125,8 +125,8 @@ public class ActionSMS implements ActionService {
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
 		}
-		
-		
+
+
 		return provisioningResponse;
 	}
 

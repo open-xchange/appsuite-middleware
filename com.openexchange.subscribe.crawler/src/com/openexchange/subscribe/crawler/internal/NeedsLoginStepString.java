@@ -51,7 +51,7 @@ package com.openexchange.subscribe.crawler.internal;
 
 /**
  * {@link NeedsLoginStepString}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public interface NeedsLoginStepString {

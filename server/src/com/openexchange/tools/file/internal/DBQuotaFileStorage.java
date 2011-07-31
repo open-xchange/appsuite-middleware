@@ -93,7 +93,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Initializes the QuotaFileStorage
-     * 
+     *
      * @param context Context for the Quota.
      * @param fs The physical FileStorage.
      * @param db The DatabaseService.
@@ -131,7 +131,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Increases the QuotaUsage.
-     * 
+     *
      * @param usage by that the QuotaUsage has to be increased
      * @return true if Quota is full
      * @throws OXException on Database errors
@@ -181,7 +181,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Decreases the QuotaUsage.
-     * 
+     *
      * @param usage by that the Quota has to be decreased
      * @throws OXException
      */
@@ -338,7 +338,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
         PreparedStatement stmt = null;
         final ResultSet result = null;
-        
+
         try {
             stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
             stmt.setLong(1, entireFileSize);

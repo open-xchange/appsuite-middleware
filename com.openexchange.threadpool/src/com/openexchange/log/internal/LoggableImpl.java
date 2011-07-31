@@ -54,7 +54,7 @@ import com.openexchange.log.Loggable;
 
 /**
  * {@link LoggableImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LoggableImpl implements Loggable {
@@ -71,7 +71,7 @@ public final class LoggableImpl implements Loggable {
 
     /**
      * Initializes a new {@link LoggableImpl}.
-     * 
+     *
      * @param level
      * @param log
      * @param message

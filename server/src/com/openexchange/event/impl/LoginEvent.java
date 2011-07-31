@@ -65,27 +65,27 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  */
 public class LoginEvent {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginEvent.class));
-    
+
     public static final String TOPIC = "com/openexchange/login";
-    
+
     private static final String USER_KEY = "USER";
     private static final String CONTEXT_KEY = "CONTEXT";
     private static final String SESSION_KEY = "SESSION";
-    
-    
+
+
     private final int userId;
     private final int contextId;
     private final String sessionId;
-    
+
     public LoginEvent(int userId, int contextId, String sessionId) {
         super();
         this.userId = userId;
         this.contextId = contextId;
         this.sessionId = sessionId;
     }
-    
+
     public LoginEvent(Event event) {
         if(!TOPIC.equals(event.getTopic())) {
             throw new IllegalArgumentException("Can only handle events with topic "+TOPIC);
@@ -93,24 +93,24 @@ public class LoginEvent {
         this.userId = (Integer) event.getProperty(USER_KEY);
         this.contextId = (Integer) event.getProperty(CONTEXT_KEY);
         this.sessionId = (String) event.getProperty(SESSION_KEY);
-        
+
     }
 
-    
+
     public int getUserId() {
         return userId;
     }
 
-    
+
     public int getContextId() {
         return contextId;
     }
 
-    
+
     public String getSessionId() {
         return sessionId;
     }
-    
+
     public void post() {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if(eventAdmin == null) {
@@ -121,10 +121,10 @@ public class LoginEvent {
         ht.put(USER_KEY, userId);
         ht.put(CONTEXT_KEY, contextId);
         ht.put(SESSION_KEY, sessionId);
-        
+
         Event event = new Event(TOPIC, ht);
 
         eventAdmin.postEvent(event);
     }
-    
+
 }

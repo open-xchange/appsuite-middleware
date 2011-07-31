@@ -71,16 +71,16 @@ import com.openexchange.subscribe.yahoo.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class YahooSubscribeService extends AbstractSubscribeService{
-    
+
 private Activator activator;
-    
+
     private final SubscriptionSource source = new SubscriptionSource();
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooSubscribeService.class));
-    
+
     public YahooSubscribeService(Activator activator){
         this.activator = activator;
-        
+
         source.setDisplayName("Yahoo");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.yahoo");
@@ -94,7 +94,7 @@ private Activator activator;
 
         source.setFormDescription(form);
     }
-    
+
     public Collection<?> getContent(Subscription subscription) throws OXException {
         return activator.getYahooService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
@@ -108,23 +108,23 @@ private Activator activator;
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws OXException {                
+    public void modifyIncoming(Subscription subscription) throws OXException {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
                 if (subscription.getConfiguration().get("account") != null){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());                    
-                }                
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());
+                }
             } else {
-                LOG.error("subscription.getConfiguration() is null");            
+                LOG.error("subscription.getConfiguration() is null");
             }
         } else {
             LOG.error("subscription is null");
         }
     }
-    
+
     @Override
     public void modifyOutgoing(Subscription subscription) throws OXException {
         String accountId = (String) subscription.getConfiguration().get("account");
@@ -142,11 +142,11 @@ private Activator activator;
             } else {
                 subscription.setDisplayName("Yahoo");
             }
-            
-        }        
+
+        }
         super.modifyOutgoing(subscription);
     }
-    
+
     public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));

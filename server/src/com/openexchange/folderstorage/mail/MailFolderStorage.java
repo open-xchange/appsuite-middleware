@@ -124,7 +124,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailFolderStorage} - The mail folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderStorage implements FolderStorage {
@@ -188,7 +188,7 @@ public final class MailFolderStorage implements FolderStorage {
             final MailFolder rootFolder = mailAccess.getRootFolder();
             folders.add(rootFolder);
             /*
-             * Start recursive iteration 
+             * Start recursive iteration
              */
             addSubfolders(MailFolder.DEFAULT_FOLDER_ID, folders, mailAccess.getFolderStorage());
             /*
@@ -638,7 +638,7 @@ public final class MailFolderStorage implements FolderStorage {
                             if (pop3StorageFolders.contains(mf.getFullname())) {
                                 it.remove();
                             }
-                        }            
+                        }
                     }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
@@ -807,7 +807,7 @@ public final class MailFolderStorage implements FolderStorage {
                     if (pop3StorageFolders.contains(mailFolder.getFullname())) {
                         it.remove();
                     }
-                }            
+                }
             }
             addWarnings(mailAccess, storageParameters);
             /*
@@ -1153,7 +1153,7 @@ public final class MailFolderStorage implements FolderStorage {
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
         /*-
-         * 
+         *
         // Ensure flags
         final String[] arr = new String[1];
         for (int i = 0; i < msgs.length; i++) {

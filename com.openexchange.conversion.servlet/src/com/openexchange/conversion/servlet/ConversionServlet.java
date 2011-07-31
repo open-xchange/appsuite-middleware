@@ -69,7 +69,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ConversionServlet} - The conversion servlet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversionServlet extends SessionServlet {

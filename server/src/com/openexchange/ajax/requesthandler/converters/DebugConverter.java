@@ -81,7 +81,7 @@ public class DebugConverter implements ResultConverter {
             out.append("<tr><th>").append(paramName).append("</th><td>").append(request.getParameter(paramName)).append("</td></tr>");
         }
         out.append("</table>");
-        
+
         Object data = request.getData();
         if (data != null) {
             if (data instanceof JSONObject) {
@@ -99,20 +99,20 @@ public class DebugConverter implements ResultConverter {
             }
         }
         out.append("<h1>Response</h1>");
-        
+
         try {
             converter.convert(result.getFormat(), "apiResponse", request, result, session);
             Response response = (Response) result.getResultObject();
             JSONObject json = new JSONObject();
             ResponseWriter.write(response, json);
             out.append("<h2>Response:</h2><pre>").append((json).toString(4));
-            
-            
+
+
         } catch (Exception e) {
             out.append("Can't render response: "+e.toString());
         }
         out.append("</body></html>");
-        
+
         result.setHeader("Content-Type", "text/html");
         result.setResultObject(out.toString());
     }

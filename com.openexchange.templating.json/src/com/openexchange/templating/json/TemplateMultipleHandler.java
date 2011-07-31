@@ -75,19 +75,19 @@ import com.openexchange.tools.session.ServerSession;
 public class TemplateMultipleHandler implements MultipleHandler {
 
     private static ServiceLookup services = null;
-    
+
     public static void setServices(ServiceLookup lookup) {
         services = lookup;
     }
-    
+
     private static enum Action {
         names
     }
-    
+
     private static enum Param {
         only
     }
-    
+
     public void close() {
 
     }
@@ -109,15 +109,15 @@ public class TemplateMultipleHandler implements MultipleHandler {
     }
 
     private JSONArray names(JSONObject jsonObject, ServerSession session) throws JSONException, OXException {
-        
+
         boolean onlyBasic = false;
         boolean onlyUser = false;
         String[] filter = null;
-        
+
         if(jsonObject.has(Param.only.name())) {
             Set<String> only = new HashSet<String>(Arrays.asList(jsonObject.getString(Param.only.name()).split("\\s*,\\s*")));
-            
-            
+
+
             if(only.contains("basic")) {
                 onlyBasic = true;
                 only.remove("basic");
@@ -127,20 +127,20 @@ public class TemplateMultipleHandler implements MultipleHandler {
             }
             filter = only.toArray(new String[only.size()]);
         }
-        
+
         TemplateService templates = services.getService(TemplateService.class);
-        
+
         if(onlyBasic) {
             return ARRAY(templates.getBasicTemplateNames(filter));
         }
-        
+
         if(onlyUser) {
             List<String> basicTemplateNames = templates.getBasicTemplateNames(filter);
             List<String> templateNames = templates.getTemplateNames(session, filter);
             templateNames.removeAll(basicTemplateNames);
             return ARRAY(templateNames);
         }
-        
+
         return ARRAY(templates.getTemplateNames(session, filter));
     }
 

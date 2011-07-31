@@ -58,9 +58,9 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class DocumentMetadataImpl implements DocumentMetadata {
-	
+
 	private static final long serialVersionUID = 954199261404066624L;
-	
+
 	private Date lastModified;
 	private Date creationDate;
 	private int modifiedBy;
@@ -96,7 +96,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     public DocumentMetadataImpl(){
 		super();
 	}
-	
+
 	/**
 	 * Initializes a new {@link DocumentMetadataImpl}.
 	 * @param id The document ID
@@ -105,7 +105,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	    super();
 		this.id = id;
 	}
-	
+
 	public DocumentMetadataImpl(final DocumentMetadata dm){
 		final SetSwitch setSwitch = new SetSwitch(this);
 		final GetSwitch getSwitch = new GetSwitch(dm);
@@ -114,7 +114,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 			attr.doSwitch(setSwitch);
 		}
 	}
-	
+
 	@Override
     public String getProperty(final String key) {
 		return properties.get(key);
@@ -124,7 +124,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     public Set<String> getPropertyNames() {
 		return properties.keySet();
 	}
-	
+
 	@Override
     public Date getCreationDate() {
 		return creationDate;
@@ -158,7 +158,7 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	public int hashCode(){
 		return getId();
 	}
-	
+
 	@Override
 	public boolean equals(final Object o){
 		if (o instanceof DocumentMetadata) {
@@ -201,17 +201,17 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     public void setVersion(final int version) {
 		this.version = version;
 	}
-	
+
 	@Override
     public String getContent(){
 		return content;
 	}
-	
+
 	@Override
     public int getId(){
 		return id;
 	}
-	
+
 	@Override
     public long getFileSize(){
 		return contentLength;
@@ -305,17 +305,17 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	public void setSequenceNumber(final long sequenceNumber) {
 	    // Nothing to do, yet
 	}
-	
+
 	@Override
     public void setCategories(final String categories) {
 		this.categories = categories;
 	}
-	
+
 	@Override
     public String getCategories(){
 		return this.categories;
 	}
-	
+
 	@Override
     public Date getLockedUntil() {
 		return lockedUntil;
@@ -325,21 +325,21 @@ public class DocumentMetadataImpl implements DocumentMetadata {
     public void setLockedUntil(final Date lockedUntil) {
 		this.lockedUntil = lockedUntil;
 	}
-	
+
 	@Override
     public void setFileMD5Sum(final String sum){
 		this.md5 = sum;
 	}
-	
+
 	@Override
     public String getFileMD5Sum(){
 		return this.md5;
 	}
-	
+
 	protected void setFileSpoolPath(final String filespoolPath){
 		this.filespoolPath = filespoolPath;
 	}
-	
+
 	protected String getFileSpoolPath(){
 		return this.filespoolPath;
 	}

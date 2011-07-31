@@ -11,15 +11,15 @@ import com.openexchange.server.ServiceLookup;
 public class PollActionFactory implements AJAXActionServiceFactory {
 
 	private Map<String, PollAction> ACTIONS = new HashMap<String, PollAction>();
-	
+
 	public PollActionFactory(ServiceLookup services) {
 		ACTIONS.put("new", new CreateAction(services));
 		ACTIONS.put("get", new GetAction(services));
 	}
-	
+
 	public AJAXActionService createActionService(String action)
 			throws OXException {
-		
+
 		return ACTIONS.get(action);
 	}
 

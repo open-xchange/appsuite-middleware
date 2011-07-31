@@ -71,7 +71,7 @@ public class SQLTools {
             } catch (SQLException x) {
                 sqle = x;
             }
-        } 
+        }
         if (stmt != null) {
             try {
                 stmt.close();

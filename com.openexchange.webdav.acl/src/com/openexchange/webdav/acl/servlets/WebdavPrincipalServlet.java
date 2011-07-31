@@ -195,9 +195,9 @@ public class WebdavPrincipalServlet extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

@@ -56,7 +56,7 @@ import com.openexchange.messaging.BinaryContent;
 
 /**
  * {@link MailBinaryContent} - A mail {@link BinaryContent binary content}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -69,7 +69,7 @@ public class MailBinaryContent implements BinaryContent {
 
     /**
      * Initializes a new {@link MailBinaryContent}.
-     * 
+     *
      * @param part The mail part
      */
     public MailBinaryContent(final MailPart part) {

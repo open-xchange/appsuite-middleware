@@ -70,7 +70,7 @@ import com.openexchange.ajp13.servlet.http.SingletonServletQueue;
 
 /**
  * {@link AbstractHttpServletManager} - Abstract {@link IHttpServletManager}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractHttpServletManager implements IHttpServletManager {
@@ -94,7 +94,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * Creates a new {@link AbstractHttpServletManager}.
      * <p>
      * Initializes static servlet instances and puts them into servlet pool.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map from which to initialize static servlet instances
      */
     protected AbstractHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
@@ -235,14 +235,14 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 final ServletQueue previous = servletPool.put(path, servletQueue);
                 if (null != previous) {
                     /*-
-                     * 
+                     *
                     final String canonicalName = previous.get().getClass().getCanonicalName();
                     configLoader.removeConfig(canonicalName);
                     if (LOG.isInfoEnabled()) {
                         LOG.info(new StringBuilder(64).append("Previous servlet \"").append(canonicalName).append("\" unregistered from \"").append(
                             path).append('"'));
                     }
-                     * 
+                     *
                      */
                     /*
                      * Park queue
@@ -316,7 +316,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
 
     /**
      * Ensures specified path starts with "/" character.
-     * 
+     *
      * @param path The path
      * @return The path starting with "/" character
      */
@@ -332,7 +332,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * If <code>true</code>:<br>
      * <code>"path/sub*"</code> implies <code>"path/sub/anysub"</code><br>
      * If <code>false</code> the whitespace character is not necessary.
-     * 
+     *
      * @param implier The path which might imply
      * @param path The path which might be implied
      * @param forceWhitespaceNotation <code>true</code> to enforce whitespace notation for implication; otherwise <code>false</code>
@@ -370,7 +370,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
 
     /**
      * Gets the servlet instance bound to given path.
-     * 
+     *
      * @param servletQueue The servlet queue
      * @param path The servlet path
      * @return The servlet instance dequeued from pool or newly created

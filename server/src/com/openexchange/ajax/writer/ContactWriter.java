@@ -69,7 +69,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link ContactWriter} - The writer for contacts
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -79,7 +79,7 @@ public class ContactWriter extends CommonWriter {
 
     /**
      * Initializes a new {@link ContactWriter}
-     * 
+     *
      * @param timeZone The user time zone
      * @param ctx The context
      */
@@ -98,17 +98,17 @@ public class ContactWriter extends CommonWriter {
         writeCommonFields(contact, json);
         /* TODO: Refactoring - this can be done with ContactGetter rather easily. sadly not now when 50% of our tests are broken due to the big HttpUnit/HttpClient rewrite
         EXAMPLE:
-        
+
         Iterator<String> keys = json.keys();
         ContactSetter cs = new ContactSetter();
         //extend: We'll need to nest several specialized setters here, e.g. one for dates
         while(keys.hasNext()){
-        	String jsonKey = keys.next(); 
+        	String jsonKey = keys.next();
         	ContactField field = ContactField.getByAjaxName(jsonKey);
         	field.doSwitch(cs, contact, json.get(jsonKey));
         }
-        */	
-        
+        */
+
         writeParameter(ContactFields.LAST_NAME, contact.getSurName(), json);
         writeParameter(ContactFields.FIRST_NAME, contact.getGivenName(), json);
         writeParameter(ContactFields.ANNIVERSARY, contact.getAnniversary(), json);
@@ -321,7 +321,7 @@ public class ContactWriter extends CommonWriter {
 
         /**
          * Writes this writer's value taken from specified contact object to given JSON array
-         * 
+         *
          * @param contactObject The contact object
          * @param jsonArray The JSON array
          * @param session TODO
@@ -388,7 +388,7 @@ public class ContactWriter extends CommonWriter {
                 writeValue(contactObject.getSurName(), jsonArray);
             }
         });
-        
+
         m.put(Contact.YOMI_FIRST_NAME, new ContactFieldWriter() {
 
             @Override

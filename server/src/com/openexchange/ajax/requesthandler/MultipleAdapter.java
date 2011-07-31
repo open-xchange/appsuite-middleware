@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link MultipleAdapter} maps the {@link MultipleHandler} to several {@link AJAXActionService}s. This class is not thread safe because it
  * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession, boolean)} and
  * {@link #getTimestamp()} methods.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -78,7 +78,7 @@ public class MultipleAdapter implements MultipleHandler {
 
     /**
      * Initializes a new {@link MultipleAdapter}.
-     * 
+     *
      * @param factory The factory used to create {@link AJAXActionService} instances
      */
     public MultipleAdapter(final AJAXActionServiceFactory factory) {
@@ -86,14 +86,14 @@ public class MultipleAdapter implements MultipleHandler {
         this.factory = factory;
         result = new AtomicReference<AJAXRequestResult>();
     }
-    
+
     public static AJAXRequestData parse(final String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
-        
+
         request.setHostname(jsonObject.getString(HOSTNAME));
         request.setRoute(jsonObject.getString(ROUTE));
-        
+
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             final String name = entry.getKey();
             if (RequestConstants.DATA.equals(name)) {
@@ -108,7 +108,7 @@ public class MultipleAdapter implements MultipleHandler {
 
         return request;
     }
-    
+
     @Override
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);

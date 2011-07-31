@@ -65,7 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ResourceCreate} - Performs insertion of a {@link Resource resource}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceCreate {
@@ -82,7 +82,7 @@ public final class ResourceCreate {
 
     /**
      * Initializes a new {@link ResourceCreate}
-     * 
+     *
      * @param ctx The context
      * @param resource The resource to insert
      */
@@ -102,7 +102,7 @@ public final class ResourceCreate {
      * <li>Then the transaction-bounded insert into storage takes place</li>
      * <li>At last, the insert is propagated to system (cache invalidation, etc.)</li>
      * </ol>
-     * 
+     *
      * @throws OXException If insert fails
      */
     void perform() throws OXException {
@@ -114,7 +114,7 @@ public final class ResourceCreate {
 
     /**
      * Check permission
-     * 
+     *
      * @throws OXException If permission is not granted
      */
     private void allow() throws OXException {
@@ -137,7 +137,7 @@ public final class ResourceCreate {
     /**
      * Check permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
      * {@link BundleAccessSecurityService security service}
-     * 
+     *
      * @throws OXException If permission is not granted
      */
     // private void checkBySecurityService() throws OXException {
@@ -157,7 +157,7 @@ public final class ResourceCreate {
     // }
     /**
      * This method performs all necessary checks before creating a resource.
-     * 
+     *
      * @throws OXException if a problem was detected during checks.
      */
     private void check() throws OXException {
@@ -197,7 +197,7 @@ public final class ResourceCreate {
 
     /**
      * Inserts all data for the resource into the database.
-     * 
+     *
      * @throws OXException
      */
     private void insert() throws OXException {
@@ -228,7 +228,7 @@ public final class ResourceCreate {
 
     /**
      * This method calls the plain insert methods.
-     * 
+     *
      * @param con writable database connection in transaction or not.
      * @throws OXException if some problem occurs.
      */

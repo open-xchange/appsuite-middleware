@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FolderServiceImpl} - The {@link FolderService} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderServiceImpl implements FolderService {
@@ -94,7 +94,7 @@ public final class FolderServiceImpl implements FolderService {
     public void checkConsistency(final String treeId, final User user, final Context context) throws OXException {
         new ConsistencyPerformer(user, context).doConsistencyCheck(treeId);
     }
-    
+
     @Override
     public void checkConsistency(final String treeId, final Session session) throws OXException {
         try {

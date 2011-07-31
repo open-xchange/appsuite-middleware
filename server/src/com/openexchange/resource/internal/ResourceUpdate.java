@@ -64,7 +64,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ResourceUpdate} - Performs update of a {@link Resource resource}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceUpdate {
@@ -85,7 +85,7 @@ public final class ResourceUpdate {
 
     /**
      * Initializes a new {@link ResourceUpdate}
-     * 
+     *
      * @param ctx The context
      * @param resource The resource to update
      * @param clientLastModified The client last-modified timestamp; may be <code>null</code> to omit timestamp comparison
@@ -117,7 +117,7 @@ public final class ResourceUpdate {
      * <li>Then the transaction-bounded update in storage takes place</li>
      * <li>At last, the update is propagated to system (cache invalidation, etc.)</li>
      * </ol>
-     * 
+     *
      * @throws OXException If update fails
      */
     void perform() throws OXException {
@@ -129,7 +129,7 @@ public final class ResourceUpdate {
 
     /**
      * Checks permission
-     * 
+     *
      * @throws OXException If permission is denied
      */
     private void allow() throws OXException {
@@ -152,7 +152,7 @@ public final class ResourceUpdate {
     /**
      * Checks permission: Invoke {@link BundleAccessSecurityService#checkPermission(String[], String) checkPermission()} on
      * {@link BundleAccessSecurityService security service}
-     * 
+     *
      * @throws OXException If permission is not granted
      */
     // private void checkBySecurityService() throws OXException {
@@ -172,7 +172,7 @@ public final class ResourceUpdate {
     // }
     /**
      * This method performs all necessary checks before updating a resource.
-     * 
+     *
      * @throws OXException If a problem was detected during checks.
      */
     private void check() throws OXException {
@@ -234,7 +234,7 @@ public final class ResourceUpdate {
 
     /**
      * Updates all data for the resource in database.
-     * 
+     *
      * @throws OXException
      */
     private void update() throws OXException {
@@ -265,7 +265,7 @@ public final class ResourceUpdate {
 
     /**
      * This method calls the plain update methods.
-     * 
+     *
      * @param con writable database connection in transaction or not.
      * @throws OXException if some problem occurs.
      */

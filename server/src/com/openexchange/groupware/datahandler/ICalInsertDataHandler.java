@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 /**
  * {@link ICalInsertDataHandler} - The data handler to insert appointments and
  * tasks parsed from an ICal input stream.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ICalInsertDataHandler extends ICalDataHandler {
@@ -120,9 +120,9 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         } catch (final NumberFormatException e) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
         }
-        
+
         final Confirm confirm = parseConfirmation(dataArguments);
-        
+
         final Context ctx;
         try {
             ctx = ContextStorage.getStorageContext(session);

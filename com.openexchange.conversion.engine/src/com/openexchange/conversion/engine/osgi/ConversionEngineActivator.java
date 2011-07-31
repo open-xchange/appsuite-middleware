@@ -64,7 +64,7 @@ import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
 
 /**
  * {@link ConversionEngineActivator} - Activator for conversion engine
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversionEngineActivator implements BundleActivator {

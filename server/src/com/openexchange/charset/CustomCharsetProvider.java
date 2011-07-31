@@ -65,7 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link CustomCharsetProvider} - A custom charset provider which maps unknown charset names to supported charsets.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomCharsetProvider extends CharsetProvider {
@@ -131,7 +131,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
      * <p>
      * If charset look-up for given <tt>delegateName</tt> throws an {@link IllegalCharsetNameException} or an
      * {@link UnsupportedCharsetException}, <code>false</code> is returned and exception is logged.
-     * 
+     *
      * @param delegateName The name of the delegate charset; e.g. <code>&quot;UTF-8&quot;</code>
      * @param canonicalName The canonical name of the alias charset; e.g. <code>&quot;UTF_8&quot;</code>
      * @param aliases The aliases of the alias charset
@@ -156,7 +156,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
 
     /**
      * Adds an {@link AliasCharset alias charset} to this charset provider.
-     * 
+     *
      * @param delegate The delegate charset
      * @param canonicalName The canonical name of the alias charset; e.g. <code>&quot;UTF_8&quot;</code>
      * @param aliases The aliases of the alias charset
@@ -198,7 +198,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
      * <p>
      * If charset look-up for given <tt>delegateName</tt> throws an {@link IllegalCharsetNameException} or an
      * {@link UnsupportedCharsetException}, <code>false</code> is returned and exception is logged.
-     * 
+     *
      * @param delegateName The name of the delegate charset; e.g. <code>&quot;UTF-8&quot;</code>
      * @param startsWithName The starts-with name of the starts-with charset; e.g. <code>&quot;UTF_8&quot;</code>
      * @return <code>true</code> if an appropriate starts-with charset could be added to this provider; otherwise <code>false</code>
@@ -222,7 +222,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
 
     /**
      * Adds a {@link StartsWithCharset starts-with charset} to this charset provider.
-     * 
+     *
      * @param delegate The delegate charset
      * @param startsWithName The starts-with name of the starts-with charset; e.g. <code>&quot;UTF_8&quot;</code>
      * @return <code>true</code> if an appropriate starts-with charset could be added to this provider; otherwise <code>false</code>
@@ -238,7 +238,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
 
     /**
      * Retrieves a charset for the given charset name.
-     * 
+     *
      * @param charsetName The name of the requested charset; may be either a canonical name or an alias
      * @return A charset object for the named charset, or <tt>null</tt> if the named charset is not supported by this provider
      */
@@ -277,7 +277,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
     /**
      * Creates an iterator that iterates over the charsets supported by this provider. This method is used in the implementation of the
      * {@link java.nio.charset.Charset#availableCharsets Charset.availableCharsets} method.
-     * 
+     *
      * @return The new iterator with the <tt>remove()</tt> functionality stripped.
      */
     @Override
@@ -299,7 +299,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
      * <p>
      * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
      * method is called.
-     * 
+     *
      * @param iterator The iterator to turn into an unmodifiable iterator.
      * @return An iterator with no remove functionality.
      */

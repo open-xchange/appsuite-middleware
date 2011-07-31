@@ -59,7 +59,7 @@ import com.openexchange.ajp13.monitoring.AJPv13TaskMonitorMBean;
 
 /**
  * {@link AJPv13TaskMonitor} - The task monitor MBean implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonitorMBean {
@@ -100,7 +100,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
 
     /**
      * Initializes a new {@link AJPv13TaskMonitor}.
-     * 
+     *
      * @throws NotCompliantMBeanException If MBean is not compliant
      */
     public AJPv13TaskMonitor() throws NotCompliantMBeanException {

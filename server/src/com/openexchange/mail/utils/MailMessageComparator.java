@@ -64,7 +64,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 
 /**
  * {@link MailMessageComparator} - A {@link Comparator comparator} for {@link MailMessage messages}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailMessageComparator implements Comparator<MailMessage> {
@@ -99,7 +99,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     /**
      * Initializes a new {@link MailMessageComparator} sorting by header <code>Date</code> (a.k.a. sent date).
-     * 
+     *
      * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
      * @param locale The locale
      */
@@ -109,7 +109,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     /**
      * Initializes a new {@link MailMessageComparator}.
-     * 
+     *
      * @param sortField The sort field
      * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
      * @param locale The locale

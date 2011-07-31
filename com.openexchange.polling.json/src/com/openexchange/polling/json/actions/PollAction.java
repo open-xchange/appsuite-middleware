@@ -15,7 +15,7 @@ public abstract class PollAction implements AJAXActionService {
 	public PollAction(ServiceLookup services) {
 		this.services = services;
 	}
-	
+
 	public AJAXRequestResult perform(AJAXRequestData request,
 			ServerSession session) throws OXException {
 		PollRequest req = new PollRequest(request, session);
@@ -23,7 +23,7 @@ public abstract class PollAction implements AJAXActionService {
 	}
 
 	protected abstract AJAXRequestResult perform(PollRequest req) throws OXException;
-	
+
 	protected PollService getPollService() {
 		return services.getService(PollService.class);
 	}

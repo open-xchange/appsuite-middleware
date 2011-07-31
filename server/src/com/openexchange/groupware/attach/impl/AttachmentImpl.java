@@ -54,31 +54,31 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.AttachmentToolkit;
 
 public class AttachmentImpl implements AttachmentMetadata {
-	
+
 	private Date creationDate;
 	private int createdBy;
-	
+
 	private int attachedId;
 	private int moduleId;
-	
+
 	private String filename;
 	private String fileMIMEType;
 	private long filesize;
-	
+
 	private boolean rtfFlag;
 
 	private int id;
-	
+
 	private int folderId;
-	
+
 	private String comment;
-	
+
 	private String fileId;
-	
+
 	public AttachmentImpl(final AttachmentMetadata a) {
 		AttachmentToolkit.copy(a,this);
 	}
-	
+
 	public AttachmentImpl() {
 	}
 
@@ -161,22 +161,22 @@ public class AttachmentImpl implements AttachmentMetadata {
     public void setModuleId(final int moduleId) {
 		this.moduleId = moduleId;
 	}
-	
+
 	@Override
     public int getId(){
 		return id;
 	}
-	
+
 	@Override
     public void setId(final int id){
 		this.id=id;
 	}
-	
+
 	@Override
 	public int hashCode(){
 		return id%1000;
 	}
-	
+
 	@Override
 	public boolean equals(final Object o) {
 		return o instanceof AttachmentMetadata && ((AttachmentMetadata)o).getId() == id;
@@ -211,6 +211,6 @@ public class AttachmentImpl implements AttachmentMetadata {
     public void setFileId(final String fileId) {
 		this.fileId = fileId;
 	}
-	
-	
+
+
 }

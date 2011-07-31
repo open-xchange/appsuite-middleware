@@ -72,7 +72,7 @@ import com.openexchange.ajp13.servlet.http.SingletonServletQueue;
 
 /**
  * {@link ConcurrentHttpServletManager} - A HTTP servlet manager using a {@link ReadWriteLock concurrent read-write lock}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentHttpServletManager extends AbstractHttpServletManager {
@@ -87,7 +87,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
 
     /**
      * Initializes a new {@link ConcurrentHttpServletManager}.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map from which to initialize static servlet instances
      */
     public ConcurrentHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {

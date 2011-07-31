@@ -58,7 +58,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link UserConfigurationServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserConfigurationServiceImpl implements UserConfigurationService {

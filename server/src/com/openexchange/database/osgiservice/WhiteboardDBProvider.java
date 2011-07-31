@@ -61,12 +61,12 @@ import com.openexchange.tools.global.OXCloseable;
 
 /**
  * {@link WhiteboardDBProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardDBProvider implements DBProvider{
 
-    
+
     public static class Factory implements WhiteboardFactoryService<DBProvider> {
 
         @Override

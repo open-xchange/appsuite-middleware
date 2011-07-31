@@ -81,7 +81,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link OutlookFolderStorageActivator} - {@link BundleActivator Activator} for MS outlook folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {

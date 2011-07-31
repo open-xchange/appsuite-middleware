@@ -50,7 +50,7 @@ package com.openexchange.jsieve.export.exceptions;
 
 /**
  * {@link OXSieveHandlerException}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -64,7 +64,7 @@ public class OXSieveHandlerException extends Exception {
 
 	/**
 	 * Initializes a new {@link OXSieveHandlerException}
-	 * 
+	 *
 	 * @param message
 	 *            The message
 	 * @param sieveHost
@@ -80,7 +80,7 @@ public class OXSieveHandlerException extends Exception {
 
 	/**
 	 * Gets the name of the sieve host for which this exception was thrown
-	 * 
+	 *
 	 * @return The name of the sieve host for which this exception was thrown
 	 */
 	public String getSieveHost() {
@@ -89,7 +89,7 @@ public class OXSieveHandlerException extends Exception {
 
 	/**
 	 * Gets the port of the sieve host for which this exception was thrown
-	 * 
+	 *
 	 * @return The port of the sieve host for which this exception was thrown
 	 */
 	public int getSieveHostPort() {

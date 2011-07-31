@@ -75,7 +75,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link MessagingDatagramHandler} - A handler for received packages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingDatagramHandler {
@@ -110,7 +110,7 @@ public class MessagingDatagramHandler {
 
     /**
      * Handles given datagram in a separate task.
-     * 
+     *
      * @param datagramPacket The received datagram packet
      */
     public void handle(final DatagramPacket datagramPacket) {
@@ -140,7 +140,7 @@ public class MessagingDatagramHandler {
 
         /**
          * Initializes a new {@link MSSocketHandlerTask}.
-         * 
+         *
          * @param datagramPacket The received datagram packet
          */
         public MSSocketHandlerTask(final DatagramPacket datagramPacket, final MessageHandlerTracker handlers, final ThreadPoolService threadPool, final ConcurrentMap<Key, MessagingContiguousMessage> truncated, final ConcurrentMap<Key, LockAndCondition> locks, final Log logger) {
@@ -194,7 +194,7 @@ public class MessagingDatagramHandler {
 
         /**
          * Parses given datagram to a message.
-         * 
+         *
          * @return The parsed message or <code>null</code> if a contiguous package was passed
          * @throws OXException If parsing fails
          */
@@ -323,7 +323,7 @@ public class MessagingDatagramHandler {
 
         /**
          * Initializes a new {@link Key}.
-         * 
+         *
          * @param socketAddress
          * @param uuid
          */

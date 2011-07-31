@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * CalendarObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class CalendarObject extends CommonObject {
@@ -107,11 +107,11 @@ public abstract class CalendarObject extends CommonObject {
      * Attribute number indicating the times an object in a recurrence has to occur.
      */
     public static final int RECURRENCE_COUNT = 222;
-    
+
     public static final int UID = 223;
 
     public static final int ORGANIZER = 224;
-    
+
     public static final int SEQUENCE = 225;
 
     public static final int CONFIRMATIONS = 226;
@@ -207,11 +207,11 @@ public abstract class CalendarObject extends CommonObject {
     protected int confirm;
 
     protected String confirmMessage;
-    
+
     protected String uid;
-    
+
     protected String organizer;
-    
+
     protected int sequence;
 
     protected boolean b_title;
@@ -262,11 +262,11 @@ public abstract class CalendarObject extends CommonObject {
     protected boolean b_confirmMessage;
 
     protected boolean b_occurrence;
-    
+
     protected boolean b_uid;
-    
+
     protected boolean b_organizer;
-    
+
     protected boolean b_sequence;
 
     // GET METHODS
@@ -357,15 +357,15 @@ public abstract class CalendarObject extends CommonObject {
     public int getOccurrence() {
         return occurrence;
     }
-    
+
     public String getUid() {
         return uid;
     }
-    
+
     public String getOrganizer() {
         return organizer;
     }
-    
+
     public int getSequence() {
         return this.sequence;
     }
@@ -491,17 +491,17 @@ public abstract class CalendarObject extends CommonObject {
         this.occurrence = occurrence;
         b_occurrence = true;
     }
-    
+
     public void setUid(String uid) {
         this.uid = uid;
         b_uid = true;
     }
-    
+
     public void setOrganizer(String organizer) {
         this.organizer = organizer;
         b_organizer = true;
     }
-    
+
     public void setSequence(int sequence) {
         this.sequence = sequence;
         b_sequence = true;
@@ -602,17 +602,17 @@ public abstract class CalendarObject extends CommonObject {
         occurrence = 0;
         b_occurrence = false;
     }
-    
+
     public void removeUid() {
         uid = null;
         b_uid = false;
     }
-    
+
     public void removeOrganizer() {
         organizer = null;
         b_organizer = false;
     }
-    
+
     public void removeSequence() {
         sequence = 0;
         b_sequence = false;
@@ -699,15 +699,15 @@ public abstract class CalendarObject extends CommonObject {
         this.participants = participants;
         b_participants = true;
     }
-    
+
     public boolean containsUid() {
         return b_uid;
     }
-    
+
     public boolean containsOrganizer() {
         return b_organizer;
     }
-    
+
     public boolean containsSequence() {
         return b_sequence;
     }
@@ -869,7 +869,7 @@ public abstract class CalendarObject extends CommonObject {
      * Tests if this event is either a recurring event or a part of a recurring event (change exception).
      * <p>
      * This test checks if recurrence ID is different to zero.
-     * 
+     *
      * @return <code>true</code> if this event is either a recurring event or a part of a recurring event (change exception); otherwise
      *         <code>false</code>
      */
@@ -879,7 +879,7 @@ public abstract class CalendarObject extends CommonObject {
 
     /**
      * Tests if this event denotes a specific occurrence within a recurring event.
-     * 
+     *
      * @return <code>true</code> if this event denotes a specific occurrence within a recurring event; otherwise <code>false</code>
      */
     public boolean isSpecificOcurrence() {
@@ -888,7 +888,7 @@ public abstract class CalendarObject extends CommonObject {
 
     /**
      * Tests if this event denotes a change exception.
-     * 
+     *
      * @return <code>true</code> if this event denotes a change exception; otherwise <code>false</code>
      */
     public boolean isException() {
@@ -897,7 +897,7 @@ public abstract class CalendarObject extends CommonObject {
 
     /**
      * Tests if this event denotes a recurring event (and <b>not</b> a change exception).
-     * 
+     *
      * @return <code>true</code> if this event denotes a recurring event (and <b>not</b> a change exception); otherwise <code>false</code>
      */
     public boolean isMaster() {
@@ -908,7 +908,7 @@ public abstract class CalendarObject extends CommonObject {
      * Tests if this event is neither a recurring event nor a part of a recurring event (change exception).
      * <p>
      * This test checks if recurrence ID is equal to zero.
-     * 
+     *
      * @return <code>true</code> if this event is a single event; otherwise <code>false</code>
      */
     public boolean isSingle() {
@@ -1021,15 +1021,15 @@ public abstract class CalendarObject extends CommonObject {
             other.getUsers())))) {
             differingFields.add(USERS);
         }
-        
+
         if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid() && (getUid() == null || !getUid().equals(other.getUid())))) {
             differingFields.add(UID);
         }
-        
+
         if ((!containsOrganizer() && other.containsOrganizer()) || (containsOrganizer() && other.containsOrganizer() && getOrganizer() != other.getOrganizer() && (getOrganizer() == null || !getOrganizer().equals(other.getOrganizer())))) {
             differingFields.add(ORGANIZER);
         }
-        
+
         if ((!containsSequence() && other.containsSequence()) || (containsSequence() && other.containsSequence() && getSequence() != other.getSequence())) {
             differingFields.add(SEQUENCE);
         }
@@ -1396,7 +1396,7 @@ public abstract class CalendarObject extends CommonObject {
 
         }
     }
-    
+
     @Override
     public String toString() {
         return "[" + this.getObjectID() + "] " + this.getTitle();

@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CIFSAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSAccountAccess implements FileStorageAccountAccess {
@@ -117,7 +117,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
 
     /**
      * Gets the name of the CIFS/SMB user.
-     * 
+     *
      * @return The name of the CIFS/SMB user
      */
     public String getUser() {
@@ -126,7 +126,7 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess {
 
     /**
      * Gets the associated session
-     * 
+     *
      * @return The session
      */
     public Session getSession() {

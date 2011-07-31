@@ -51,7 +51,7 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13TimeoutException} - The AJP runtime exception thrown to immediately close socket connection.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13TimeoutException extends RuntimeException {
@@ -67,7 +67,7 @@ public final class AJPv13TimeoutException extends RuntimeException {
 
     /**
      * Initializes a new {@link AJPv13TimeoutException}.
-     * 
+     *
      * @param message The error message
      */
     public AJPv13TimeoutException(final String message) {
@@ -76,7 +76,7 @@ public final class AJPv13TimeoutException extends RuntimeException {
 
     /**
      * Initializes a new {@link AJPv13TimeoutException}.
-     * 
+     *
      * @param cause The init cause
      */
     public AJPv13TimeoutException(final Throwable cause) {
@@ -85,7 +85,7 @@ public final class AJPv13TimeoutException extends RuntimeException {
 
     /**
      * Initializes a new {@link AJPv13TimeoutException}.
-     * 
+     *
      * @param message The error message
      * @param cause The init cause
      */

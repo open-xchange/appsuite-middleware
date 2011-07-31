@@ -74,7 +74,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionHandler} - Provides access to sessions
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -109,7 +109,7 @@ public final class SessionHandler {
 
     /**
      * Initializes the {@link SessionHandler session handler}
-     * 
+     *
      * @param newConfig The appropriate configuration
      */
     public static void init(final SessiondConfigInterface newConfig) {
@@ -132,7 +132,7 @@ public final class SessionHandler {
 
     /**
      * Removes all sessions associated with given user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
@@ -158,7 +158,7 @@ public final class SessionHandler {
 
     /**
      * Gets all sessions associated with given user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The wrapper objects for sessions
@@ -169,7 +169,7 @@ public final class SessionHandler {
 
     /**
      * Adds a new session containing given attributes to session container(s)
-     * 
+     *
      * @param userId The user ID
      * @param loginName The user's login name
      * @param password The user's password
@@ -211,7 +211,7 @@ public final class SessionHandler {
 
     /**
      * Refreshes the session's last-accessed time stamp
-     * 
+     *
      * @param sessionid The session ID denoting the session
      * @return <code>true</code> if a refreshing last-accessed time stamp was successful; otherwise <code>false</code>
      */
@@ -224,7 +224,7 @@ public final class SessionHandler {
 
     /**
      * Clears the session denoted by given session ID from session container(s)
-     * 
+     *
      * @param sessionid The session ID
      * @return <code>true</code> if a session could be removed; otherwise <code>false</code>
      */
@@ -240,7 +240,7 @@ public final class SessionHandler {
 
     /**
      * Changes the password stored in session denoted by given session ID
-     * 
+     *
      * @param sessionid The session ID
      * @param newPassword The new password
      * @throws OXException If changing the password fails
@@ -281,7 +281,7 @@ public final class SessionHandler {
 
     /**
      * Gets the session associated with given session ID
-     * 
+     *
      * @param sessionId The session ID
      * @return The session associated with given session ID; otherwise <code>null</code> if expired or none found
      */
@@ -315,7 +315,7 @@ public final class SessionHandler {
      * Gets (and removes) the session bound to given session identifier in cache.
      * <p>
      * Session is going to be added to local session containers on a cache hit.
-     * 
+     *
      * @param sessionId The session identifier
      * @return A wrapping instance of {@link SessionControl} or <code>null</code>
      */
@@ -342,7 +342,7 @@ public final class SessionHandler {
 
     /**
      * Gets all available instances of {@link SessionControl}
-     * 
+     *
      * @return All available instances of {@link SessionControl}
      */
     public static List<SessionControl> getSessions() {

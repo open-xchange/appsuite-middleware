@@ -60,17 +60,17 @@ import com.openexchange.groupware.ldap.User;
 public interface SubscribeService {
 
     public SubscriptionSource getSubscriptionSource();
-    
+
     public boolean handles(int folderModule);
-    
+
     public void subscribe(Subscription subscription) throws OXException;
 
     public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
-    
+
     public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
 
     public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
-    
+
     public void unsubscribe(Subscription subscription) throws OXException;
 
     public void update(Subscription subscription) throws OXException;
@@ -82,5 +82,5 @@ public interface SubscribeService {
     public String checkSecretCanDecryptPasswords(Context context, User user, String secret) throws OXException;
 
     public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-    
+
 }

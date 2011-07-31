@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OXMFPublicationServiceTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXMFPublicationServiceTest extends TestCase {
@@ -96,11 +96,11 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.setFolderType("bananas");
         publicationService.setTargetId("com.openexchange.publish.microformats.contacts.online");
         publicationService.setTargetDisplayName("Banana Publications!");
-        
+
         publicationService.setTemplateService(new FindEverythingTemplateService());
-        
+
         oldPublication.setTarget(publicationService.getTarget());
-        
+
     }
 
     public void testModule() throws OXException {
@@ -109,21 +109,21 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertNotNull("Target was null", target);
         assertEquals("Module differs", "bananas", target.getModule());
     }
-    
+
     public void testId() throws OXException {
         final PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("id differs", "com.openexchange.publish.microformats.contacts.online", target.getId());
     }
-    
+
     public void testDisplayNameOfTarget() throws OXException {
         final PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
         assertEquals("Display Name differs", "Banana Publications!", target.getDisplayName());
     }
-    
+
     public void testModifyOutgoingShouldSetDisplayNameToSiteName() throws OXException{
         final Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
@@ -137,13 +137,13 @@ public class OXMFPublicationServiceTest extends TestCase {
         final PublicationTarget target = publicationService.getTarget();
 
         assertNotNull("Target was null", target);
-        
+
         final DynamicFormDescription description = target.getFormDescription();
-        
-        
+
+
         assertNotNull(description.getField("siteName"));
         assertNotNull(description.getField("protected"));
-        
+
         assertNotNull(description);
     }
 
@@ -241,7 +241,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         publication.setId(42);
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("siteName", "existingSite");
-        
+
         try {
             publicationService.modifyIncoming(publication);
             fail("Could create double site");
@@ -250,7 +250,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         }
 
     }
-    
+
     public void testSubmittingUnchangingSiteNameIsAccepted() throws OXException {
         final Publication publication = new Publication();
         publication.setId(23);
@@ -258,7 +258,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         publication.getConfiguration().put("siteName", "existingSite");
         publicationService.modifyIncoming(publication);
     }
-    
+
     public void testNormalizedSiteName() throws OXException {
         final Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
@@ -266,7 +266,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         publicationService.modifyIncoming(publication);
         assertEquals("path/with/tooMany/slashes", publication.getConfiguration().get("siteName"));
     }
-        
+
     public void assertSecret(final Publication publication) {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
     }
@@ -279,7 +279,7 @@ public class OXMFPublicationServiceTest extends TestCase {
         assertTrue("Secret was unset!", publication.getConfiguration().containsKey("secret"));
         assertTrue("Secret was not null explicitely!", publication.getConfiguration().get("secret") == null);
     }
-    
+
     private static final class FindEverythingTemplateService implements TemplateService {
 
         public OXTemplate loadTemplate(final String templateName) throws OXException {

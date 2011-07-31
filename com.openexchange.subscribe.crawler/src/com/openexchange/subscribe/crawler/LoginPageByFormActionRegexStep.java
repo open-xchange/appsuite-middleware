@@ -71,17 +71,17 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * This Step logs into a website via a form requiring username and password. The form is specified by its action.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
 
     private int numberOfForm;
-    
+
     private Page loginPage;
 
     public LoginPageByFormActionRegexStep() {
@@ -103,7 +103,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
 
     @Override
     public void execute(final WebClient webClient) throws OXException {
-        HtmlPage loginPage;        
+        HtmlPage loginPage;
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
             loginPage = webClient.getPage(url);
@@ -139,7 +139,7 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
 //                        openPageInBrowser(output);
 //                    }
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-                    
+
                 }
                 executedSuccessfully = true;
             }
@@ -237,10 +237,10 @@ public class LoginPageByFormActionRegexStep extends AbstractStep<HtmlPage, Objec
         this.baseUrl = baseUrl;
     }
 
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
-    
-    
+
+
 }

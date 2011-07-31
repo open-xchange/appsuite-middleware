@@ -57,14 +57,14 @@ import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link PooledMailAccess} - A simple wrapper for a {@link MailAccess} instance providing {@link Delayed} methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PooledMailAccess implements Delayed {
 
     /**
      * Gets the pooled value for specified mailAccess carrying given time-to-live milliseconds.
-     * 
+     *
      * @param mailAccess The mail access
      * @param ttlMillis The time-to-live milliseconds
      * @return The pooled value
@@ -79,7 +79,7 @@ public final class PooledMailAccess implements Delayed {
 
     /**
      * Initializes a new {@link PooledMailAccess}.
-     * 
+     *
      * @param mailAccess The mail access
      * @param ttlMillis The time-to-live milliseconds
      */
@@ -105,7 +105,7 @@ public final class PooledMailAccess implements Delayed {
 
     /**
      * Gets the mail access.
-     * 
+     *
      * @return The mail access
      */
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() {

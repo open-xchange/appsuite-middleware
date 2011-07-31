@@ -56,9 +56,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link ModuleReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ModuleReplacement implements TemplateReplacement {
 
@@ -76,7 +76,7 @@ public final class ModuleReplacement implements TemplateReplacement {
 
     /**
      * Initializes a new {@link ModuleReplacement}
-     * 
+     *
      * @param module The module; supposed to be either {@link #MODULE_CALENDAR}
      *            or {@link #MODULE_TASK}
      */

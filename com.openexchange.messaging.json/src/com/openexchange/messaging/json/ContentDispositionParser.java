@@ -67,7 +67,7 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
  * &nbsp;&nbsp;or<br>
  * <code>
  * "attachment;filename=somefile.dat"
- * </code> 
+ * </code>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * CommonObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -407,5 +407,5 @@ public abstract class CommonObject extends FolderChildObject implements Cloneabl
         }
 
     }
-    
+
 }

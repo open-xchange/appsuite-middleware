@@ -81,7 +81,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link MailPartHandler} - Looks for a certain mail part by sequence ID
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPartHandler implements MailMessageHandler {
@@ -177,7 +177,7 @@ public final class MailPartHandler implements MailMessageHandler {
      * Sets sequence ID.
      * <p>
      * Remaining mail part is set to <code>null</code>
-     * 
+     *
      * @param id The sequence ID
      */
     public void setSequenceId(final String id) {
@@ -492,7 +492,7 @@ public final class MailPartHandler implements MailMessageHandler {
 
     /**
      * Gets the identified mail part or <code>null</code> if none found matching given sequence ID
-     * 
+     *
      * @return The identified mail part or <code>null</code> if none found matching given sequence ID
      */
     public MailPart getMailPart() {

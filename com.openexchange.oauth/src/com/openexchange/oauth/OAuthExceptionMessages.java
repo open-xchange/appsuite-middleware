@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link OAuthExceptionMessages} - Exception messages that needs to be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */

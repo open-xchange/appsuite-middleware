@@ -58,7 +58,7 @@ import com.openexchange.groupware.results.Delta;
 
 /**
  * {@link UpdatesAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UpdatesAction extends AbstractFileAction {
@@ -77,7 +77,7 @@ public class UpdatesAction extends AbstractFileAction {
             request.getSortingField(),
             request.getSortingOrder(),
             request.getIgnore().contains("deleted"));
-        
+
 
         return result(delta, request);
     }

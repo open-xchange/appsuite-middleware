@@ -82,7 +82,7 @@ public abstract class ContextStorage {
 
     /**
      * Creates an instance implementing the context storage.
-     * 
+     *
      * @return an instance implementing the context storage.
      */
     public static ContextStorage getInstance() {
@@ -92,7 +92,7 @@ public abstract class ContextStorage {
     /**
      * Instantiates an implementation of the context interface and fill its attributes according to the needs to be able to separate
      * contexts.
-     * 
+     *
      * @param loginContextInfo the login info for the context.
      * @return the unique identifier of the context or <code>-1</code> if no matching context exists.
      * @throws OXException if an error occurs.
@@ -105,7 +105,7 @@ public abstract class ContextStorage {
 
     /**
      * Creates a context implementation for the given context unique identifier.
-     * 
+     *
      * @param contextId unique identifier of the context.
      * @return an implementation of the context or <code>null</code> if the context with the given identifier can't be found.
      * @throws OXException if an error occurs.
@@ -122,7 +122,7 @@ public abstract class ContextStorage {
 
     /**
      * Loads the context object.
-     * 
+     *
      * @param contextId unique identifier of the context to load.
      * @return the context object.
      * @throws OXException if loading the context fails.
@@ -131,7 +131,7 @@ public abstract class ContextStorage {
 
     /**
      * Invalidates the context object in cache(s).
-     * 
+     *
      * @param contextId unique identifier of the context to invalidate
      * @throws OXException if invalidating the context fails
      */
@@ -143,7 +143,7 @@ public abstract class ContextStorage {
 
     /**
      * Invalidates a login information in the cache.
-     * 
+     *
      * @param loginContextInfo login information to invalidate.
      * @throws OXException if invalidating the login information fails.
      */
@@ -155,7 +155,7 @@ public abstract class ContextStorage {
 
     /**
      * Gives a list of all context ids which are stored in the config database.
-     * 
+     *
      * @return the list of context ids
      * @throws OXException if reading the contexts fails.
      */
@@ -163,21 +163,21 @@ public abstract class ContextStorage {
 
     /**
      * Internal start-up routine invoked in {@link #start()}
-     * 
+     *
      * @throws OXException If an error occurs
      */
     protected abstract void startUp() throws OXException;
 
     /**
      * Internal shut-down routine invoked in {@link #stop()}
-     * 
+     *
      * @throws OXException If an error occurs
      */
     protected abstract void shutDown() throws OXException;
 
     /**
      * Initialization.
-     * 
+     *
      * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws OXException {
@@ -203,7 +203,7 @@ public abstract class ContextStorage {
 
     /**
      * Convenience method for getting the context.
-     * 
+     *
      * @param session The session providing the context ID
      * @return the context data object or null if the context with the given identifier can't be found.
      * @throws OXException if getting the context fails.
@@ -214,7 +214,7 @@ public abstract class ContextStorage {
 
     /**
      * Convenience method for getting the context.
-     * 
+     *
      * @param contextId unique identifier of the context.
      * @return the context data object or null if the context with the given identifier can't be found.
      * @throws OXException if getting the context fails.

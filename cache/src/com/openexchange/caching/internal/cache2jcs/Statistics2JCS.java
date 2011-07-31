@@ -57,7 +57,7 @@ import com.openexchange.caching.internal.jcs2cache.JCSStatElementDelegator;
 
 /**
  * {@link Statistics2JCS} - The {@link Statistics} implementation backed by a {@link IStats} object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Statistics2JCS implements Statistics {
@@ -68,7 +68,7 @@ public class Statistics2JCS implements Statistics {
 
     /**
      * Initializes a new {@link Statistics2JCS}
-     * 
+     *
      * @param stats The {@link IStats} object to delegate to
      */
     public Statistics2JCS(final IStats stats) {

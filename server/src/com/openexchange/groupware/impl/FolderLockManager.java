@@ -67,7 +67,7 @@ public interface FolderLockManager extends LockManager{
 	List<FolderLock> findFolderLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	List<FolderLock> findAllLocks(int entity, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
+
 	Map<Integer, List<FolderLock>> loadOwnLocks(List<Integer> name, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 }

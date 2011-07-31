@@ -60,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 
 /**
  * {@link MailFolderStorage} - Abstract implementation of {@link IMailFolderStorage}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailFolderStorage implements IMailFolderStorage {
@@ -79,7 +79,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * <p>
      * This is a convenience method that invokes {@link #getFolder(String)} with its parameter set to {@link MailFolder#DEFAULT_FOLDER_ID}.
      * It may be overridden if a faster way can be achieved by specific implementation.
-     * 
+     *
      * @return The mailbox's root folder
      * @throws OXException If mailbox's default folder cannot be delivered
      */
@@ -107,11 +107,11 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * necessary.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.path.to.newfolder
      * </pre>
-     * 
+     *
      * @param fullname The folder fullname
      * @param newName The new name
      * @return The new fullname
@@ -185,7 +185,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * Gets the prefix (incl. separator character) for default folders.
      * <p>
      * By now a compound full name is assumed. Override if not appropriate.
-     * 
+     *
      * @return The prefix
      * @throws OXException If a mail error occurs
      */

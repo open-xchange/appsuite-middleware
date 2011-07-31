@@ -63,7 +63,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * This step takes a pattern of url and offset and returns all pages reachable by links meeting the specified criteria
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TextPagesByLinkStep extends AbstractStep<List<TextPage>, HtmlPage>{

@@ -68,48 +68,48 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
     public void setUp() {
         publicationService = new InfostoreDocumentPublicationService();
     }
-    
+
 
     public void testAddSecretBeforeCreate() throws OXException {
         Publication publication = new Publication();
         publicationService.beforeCreate(publication);
-        
+
         Object secret1 = publication.getConfiguration().get("secret");
-        
+
         publicationService.beforeCreate(publication);
-        
+
         Object secret2 = publication.getConfiguration().get("secret");
-        
+
         assertNotNull("No secret added", secret1);
         assertNotNull("No secret added second time around", secret2);
-        
+
         assertFalse(secret1.equals(secret2));
     }
-    
+
     public void testAddURLToOutgoingPublications() throws OXException {
-        
+
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("secret", "theSecret");
         publicationService.modifyOutgoing(publication);
-        
+
         String url = (String) publication.getConfiguration().get("url");
-        
-        assertNotNull("No URL added", url);      
+
+        assertNotNull("No URL added", url);
         assertTrue("URL should contain prefix", url.contains(InfostoreDocumentPublicationService.PREFIX));
         assertTrue("URL should contain secret", url.contains("theSecret"));
         assertTrue("URL should contain cid", url.contains("1337"));
-        
+
     }
-    
+
 public void testRemoveSecretFromOutgoingPublications() throws OXException {
-        
+
         Publication publication = new Publication();
         publication.setContext(new SimContext(1337));
         publication.getConfiguration().put("secret", "theSecret");
         publicationService.modifyOutgoing(publication);
-        
+
         assertFalse("Secret still set", publication.getConfiguration().containsKey("secret"));
-        
+
     }
 }

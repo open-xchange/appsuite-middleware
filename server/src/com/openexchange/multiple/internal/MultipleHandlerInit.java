@@ -67,7 +67,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * {@link MultipleHandlerInit} - Initialization for multiple handlers.
  * <p>
  * Should be done in activator if refactored to reside in own package.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleHandlerInit implements Initialization {

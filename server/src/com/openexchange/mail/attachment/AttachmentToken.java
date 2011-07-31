@@ -62,7 +62,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link AttachmentToken}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AttachmentToken implements AttachmentTokenConstants {
@@ -122,7 +122,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Sets the access information.
-     * 
+     *
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -137,7 +137,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Sets the attachment information.
-     * 
+     *
      * @param mailId The mail identifier
      * @param attachmentId The attachment identifier
      * @return This token with access attachment applied
@@ -151,7 +151,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Touches this token.
-     * 
+     *
      * @return This token with elapse timeout reseted
      */
     public AttachmentToken touch() {
@@ -164,7 +164,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Gets the token identifier.
-     * 
+     *
      * @return The token identifier
      */
     public String getId() {
@@ -173,7 +173,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     /**
      * Checks if this token is expired.
-     * 
+     *
      * @return <code>true</code> if this token is expired; otherwise <code>false</code>
      */
     public boolean isExpired() {
@@ -184,7 +184,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      * Gets the associated attachment.
      * <p>
      * <b>Note</b>: After calling this method {@link #close()} needs to be called!
-     * 
+     *
      * @return The associated attachment
      * @throws MailException
      * @see {@link #close()}

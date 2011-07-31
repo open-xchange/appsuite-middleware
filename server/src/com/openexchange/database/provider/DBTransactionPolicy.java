@@ -79,9 +79,9 @@ public interface DBTransactionPolicy {
         public void setAutoCommit(Connection con, boolean autoCommit) {
             // Don't do a thing
         }
-        
+
     };
-    
+
     /**
      * Partake in transaction handling normally. Just delegates to the corresponding methods on the connection.
      */
@@ -101,9 +101,9 @@ public interface DBTransactionPolicy {
         public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException {
             con.setAutoCommit(autoCommit);
         }
-        
+
     };
-    
+
     public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException;
     public void commit(Connection con) throws SQLException;
     public void rollback(Connection con) throws SQLException;

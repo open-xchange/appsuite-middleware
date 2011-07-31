@@ -59,13 +59,13 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.webdav.action.WebdavRequest;
 
 public class RequestSpecificBehaviourRegistry {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestSpecificBehaviourRegistry.class));
-	
-	
+
+
 	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?
 	private final Map<Class<? extends Object>, List<Behaviour>> registry = new HashMap<Class<? extends Object>, List<Behaviour>>();
-	
+
 	public void add(final Behaviour behaviour) {
 		for(final Class<? extends Object> clazz : behaviour.provides()) {
 			List<Behaviour> behaviours = registry.get(clazz);
@@ -76,11 +76,11 @@ public class RequestSpecificBehaviourRegistry {
 			behaviours.add(behaviour);
 		}
 	}
-	
+
 	public void addAll(final Collection<Behaviour> behaviours) {
 		for(final Behaviour behaviour : behaviours) { add (behaviour); }
 	}
-	
+
 	public void setBehaviours(final Collection<Behaviour> behaviours) {
 		registry.clear();
 		addAll(behaviours);
@@ -107,7 +107,7 @@ public class RequestSpecificBehaviourRegistry {
 			}
 			LOG.info("Using "+sum+" overrides for WebDAV");
 		}
-		
+
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");
 			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {

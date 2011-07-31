@@ -59,19 +59,19 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
  * {@link WhiteboardSubscriptionSourceDiscoveryService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
-    
-    
+
+
     private final ServiceTracker tracker;
 
     public WhiteboardSubscriptionSourceDiscoveryService(final BundleContext context) {
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), null);
         tracker.open();
     }
-    
+
     public void close() {
         tracker.close();
     }
@@ -95,11 +95,11 @@ public class WhiteboardSubscriptionSourceDiscoveryService implements Subscriptio
     public boolean knowsSource(final String identifier) {
         return getDelegate().knowsSource(identifier);
     }
-    
+
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return getDelegate().filter(user, context);
     }
-    
+
     private SubscriptionSourceDiscoveryService getDelegate() {
         return (SubscriptionSourceDiscoveryService) tracker.getService();
     }

@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailAccountAction} - An abstract folder action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAccountAction implements AJAXActionService {
@@ -106,7 +106,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the default tree identifier to use if request does not provide any.
-     * 
+     *
      * @return The default tree identifier
      */
     protected static String getDefaultTreeIdentifier() {
@@ -115,7 +115,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the default allowed modules.
-     * 
+     *
      * @return The default allowed modules
      */
     protected static List<ContentType> getDefaultAllowedModules() {
@@ -124,7 +124,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code>
@@ -142,7 +142,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
@@ -163,7 +163,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified optional parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
@@ -204,7 +204,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the secret string for specified session.
-     * 
+     *
      * @param session The session
      * @return The secret string
      * @throws OXException If secret string cannot be returned
@@ -219,7 +219,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks if specified {@link MailAccount} is considered as default aka primary account.
-     * 
+     *
      * @param mailAccount The mail account to examine
      * @return <code>true</code> if specified {@link MailAccount} is considered as defaul account; otherwise <code>false</code>
      */
@@ -229,7 +229,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
-     * 
+     *
      * @param mailAccount The mail account description to examine
      * @return <code>true</code> if specified {@link MailAccountDescription} is considered as defaul account; otherwise <code>false</code>
      */
@@ -239,7 +239,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses the attributes from passed comma-separated list.
-     * 
+     *
      * @param colString The comma-separated list
      * @return The parsed attributes
      */
@@ -261,7 +261,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the appropriate {@link MailAccess} instance for specified mail account description and session.
-     * 
+     *
      * @param accountDescription The mail account description
      * @param session The session providing needed user information
      * @return The appropriate {@link MailAccess} instance
@@ -310,7 +310,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks for presence of default folder full names and creates them if absent.
-     * 
+     *
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information

@@ -59,7 +59,7 @@ public class DocumentMetadataValidation {
 
 	Map<Metadata,String> errors = new HashMap<Metadata, String>();
 	List<Metadata> errorFields = new ArrayList<Metadata>();
-	
+
 	public boolean isValid() {
 		return errors.isEmpty();
 	}

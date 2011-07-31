@@ -51,7 +51,7 @@ package com.openexchange.mailaccount.internal;
 
 /**
  * {@link CustomMailAccount} - Represents a custom mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomMailAccount extends AbstractMailAccount {

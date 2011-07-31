@@ -72,16 +72,16 @@ import com.openexchange.subscribe.msn.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MSNSubscribeService  extends AbstractSubscribeService {
-    
+
     private Activator activator;
-    
+
     private final SubscriptionSource source = new SubscriptionSource();
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNSubscribeService.class));
-    
+
     public MSNSubscribeService(Activator activator){
         this.activator = activator;
-        
+
         source.setDisplayName("Windows Live / MSN");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.socialplugin.msn");
@@ -95,7 +95,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
 
         source.setFormDescription(form);
     }
-    
+
     public Collection<?> getContent(Subscription subscription) throws OXException {
         return activator.getMsnService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
@@ -109,23 +109,23 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws OXException {                
+    public void modifyIncoming(Subscription subscription) throws OXException {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
                 if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals("null")){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
-                    throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");               
-                }                
+                    throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
+                }
             } else {
-                LOG.error("subscription.getConfiguration() is null");            
+                LOG.error("subscription.getConfiguration() is null");
             }
         } else {
             LOG.error("subscription is null");
         }
     }
-    
+
     @Override
     public void modifyOutgoing(Subscription subscription) throws OXException {
         String accountId = (String) subscription.getConfiguration().get("account");
@@ -147,11 +147,11 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
             } else {
                 subscription.setDisplayName("Windows Live / MSN");
             }
-            
-        }        
+
+        }
         super.modifyOutgoing(subscription);
     }
-    
+
     public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));

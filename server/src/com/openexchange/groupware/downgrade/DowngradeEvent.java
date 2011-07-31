@@ -58,9 +58,9 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 /**
  * {@link DowngradeEvent} - The event thrown to perform deletion of unused data
  * remaining from a user downgrade.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DowngradeEvent {
 
@@ -76,7 +76,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Initializes a new {@link DowngradeEvent}
-	 * 
+	 *
 	 * @param newUserConfiguration
 	 *            The new user configuration reflecting the user's downgrade
 	 * @param readCon
@@ -96,7 +96,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Initializes a new {@link DowngradeEvent}
-	 * 
+	 *
 	 * @param newUserConfiguration
 	 *            The new user configuration reflecting the user's downgrade
 	 * @param con
@@ -114,7 +114,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Gets the new user configuration
-	 * 
+	 *
 	 * @return the new user configuration
 	 */
 	public UserConfiguration getNewUserConfiguration() {
@@ -123,7 +123,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Gets the context
-	 * 
+	 *
 	 * @return The context
 	 */
 	public Context getContext() {
@@ -132,7 +132,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Gets the readable connection
-	 * 
+	 *
 	 * @return The readable connection
 	 */
 	public Connection getReadCon() {
@@ -141,7 +141,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Gets the writable connection
-	 * 
+	 *
 	 * @return The writable connection
 	 */
 	public Connection getWriteCon() {
@@ -150,7 +150,7 @@ public final class DowngradeEvent {
 
 	/**
 	 * Getter for the instance of {@link Session} belonging to context's admin
-	 * 
+	 *
 	 * @return an instance of {@link Session} belonging to context's admin
 	 */
 	public Session getSession() {

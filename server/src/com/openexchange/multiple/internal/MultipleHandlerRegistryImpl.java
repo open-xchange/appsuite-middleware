@@ -56,7 +56,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link MultipleHandlerRegistryImpl} - Implementation backed by a {@link ConcurrentMap concurrent map}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleHandlerRegistryImpl implements com.openexchange.multiple.internal.MultipleHandlerRegistry {

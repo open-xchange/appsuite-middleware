@@ -55,7 +55,7 @@ import com.sun.mail.imap.Rights;
  * {@link NoACLExtension} - Represents no ACL support and therefore no access restrictions, except on {@link #canGetACL(Rights)} and
  * {@link #canSetACL(Rights)} since corresponding commands SETACL, DELETEACL, GETACL, and LISTRIGHTS are not supported on missing ACL
  * capability.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NoACLExtension implements ACLExtension {
@@ -64,7 +64,7 @@ public final class NoACLExtension implements ACLExtension {
 
     /**
      * Gets the {@link ACLExtension} for no ACL support.
-     * 
+     *
      * @return The {@link ACLExtension} for no ACL support.
      */
     public static ACLExtension getInstance() {
@@ -140,7 +140,7 @@ public final class NoACLExtension implements ACLExtension {
 
     /**
      * Creates an empty rights object.
-     * 
+     *
      * @return An empty rights object.
      */
     public Rights getFullRights() {

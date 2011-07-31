@@ -71,15 +71,15 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalDAV extends OXServlet {
 
     private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
-    
+
     private static ServiceLookup services;
-    
+
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -224,13 +224,13 @@ public class CalDAV extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
     }
 
-   
+
 }

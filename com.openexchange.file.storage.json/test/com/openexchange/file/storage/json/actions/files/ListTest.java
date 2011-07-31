@@ -74,17 +74,17 @@ public class ListTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException, JSONException {
         request()
             .param("columns", "1,700,702") // id, title and filename
             .param("timezone", "Europe/Berlin").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
-        
+
         final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.FOLDER_ID);
-        fileAccess().expectCall("getDocuments", Arrays.asList("id1", "id2"), columns).andReturn(Results.emptyTimedResult()); 
-        
+        fileAccess().expectCall("getDocuments", Arrays.asList("id1", "id2"), columns).andReturn(Results.emptyTimedResult());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

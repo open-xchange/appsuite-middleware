@@ -58,7 +58,7 @@ import com.openexchange.folderstorage.FolderStorage;
 /**
  * {@link OutlookFolderStorageServiceTracker} - A {@link ServiceTrackerCustomizer customizer} for MS Outlook folder storage which tracks
  * real folder storages; meaning those storages which indicate to handle the {@link FolderStorage#REAL_TREE_ID} tree identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorageServiceTracker implements ServiceTrackerCustomizer {

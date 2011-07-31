@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link PrivateType} - The private type for a database folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PrivateType implements Type {
@@ -62,7 +62,7 @@ public final class PrivateType implements Type {
 
     /**
      * Gets the {@link PrivateType} instance.
-     * 
+     *
      * @return The {@link PrivateType} instance
      */
     public static PrivateType getInstance() {

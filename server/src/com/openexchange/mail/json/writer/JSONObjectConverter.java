@@ -79,7 +79,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONObjectConverter} - Converts a raw JSON mail representation into a user-sensitive JSON mail representation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONObjectConverter {
@@ -104,7 +104,7 @@ public final class JSONObjectConverter {
 
     /**
      * Initializes a new {@link JSONObjectConverter}.
-     * 
+     *
      * @param rawJSONMailObject The raw JSON mail representation to convert
      * @param displayMode The request-specific display mode
      * @param session The session providing needed user information
@@ -141,7 +141,7 @@ public final class JSONObjectConverter {
 
     /**
      * Converts this converter's raw JSON mail representation into a user-sensitive JSON mail representation.
-     * 
+     *
      * @return The user-sensitive JSON mail representation
      * @throws OXException If conversion fails
      */
@@ -509,7 +509,7 @@ public final class JSONObjectConverter {
 
     /**
      * Checks if specified string starts with either of passed prefixes.
-     * 
+     *
      * @param s The string to check
      * @param prefixes The prefixes
      * @return <code>true</code> if specified string starts with either of passed prefixes; otherwise <code>false</code>
@@ -524,7 +524,7 @@ public final class JSONObjectConverter {
 
     /**
      * Creates a dummy JSON object for an empty plain text mail body.
-     * 
+     *
      * @return A dummy JSON object for an empty plain text mail body
      * @throws JSONException If a JSON error occurs
      */
@@ -540,7 +540,7 @@ public final class JSONObjectConverter {
     /**
      * (Shallow) Copies the value associated with given key from source JSON object to destination JSON object if present and not
      * {@link JSONObject#NULL NULL}.
-     * 
+     *
      * @param key The key
      * @param src The source JSON object
      * @param dst The destination JSON object

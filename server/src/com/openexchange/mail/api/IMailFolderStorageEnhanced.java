@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link IMailFolderStorageEnhanced}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
 
     /**
      * Gets the number of unread mails for specified folder.
-     * 
+     *
      * @param fullName The folder's full name
      * @return The unread counter
      * @throws OXException If an error occurs
@@ -69,7 +69,7 @@ public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
 
     /**
      * Gets the number of new mails for specified folder (since last access to folder).
-     * 
+     *
      * @param fullName The folder's full name
      * @return The new counter
      * @throws OXException If an error occurs
@@ -78,7 +78,7 @@ public interface IMailFolderStorageEnhanced extends IMailFolderStorage {
 
     /**
      * Gets the total number of mails for specified folder.
-     * 
+     *
      * @param fullName The folder's full name
      * @return The total counter
      * @throws OXException If an error occurs

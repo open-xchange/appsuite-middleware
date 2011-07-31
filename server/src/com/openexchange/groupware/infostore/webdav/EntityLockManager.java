@@ -56,9 +56,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface EntityLockManager extends LockManager{
-	
+
 	void transferLocks(Context ctx, int from_user, int to_user) throws OXException;
-	
+
 	@Override
     void unlock(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException ;
 

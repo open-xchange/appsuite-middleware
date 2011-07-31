@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultDispatcher}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDispatcher implements Dispatcher {
@@ -82,7 +82,7 @@ public class DefaultDispatcher implements Dispatcher {
     public void end(final AJAXState state) {
         state.close();
     }
-    
+
     @Override
     public boolean handles(final String module) {
         return actionFactories.containsKey(module);
@@ -92,14 +92,14 @@ public class DefaultDispatcher implements Dispatcher {
     public AJAXRequestResult perform(AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
-        
+
         for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
             final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
             if(customizer != null) {
                 todo.add(customizer);
             }
         }
-        
+
         while(!todo.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
             while(iterator.hasNext()) {
@@ -117,9 +117,9 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
         }
-        
+
         final AJAXActionServiceFactory factory = lookupFactory(request.getModule());
-        
+
         if (factory == null) {
             throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
         }
@@ -128,7 +128,7 @@ public class DefaultDispatcher implements Dispatcher {
             throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
         }
         final Action actionMetadata = getActionMetadata(action);
-        
+
         if (actionMetadata != null) {
             if (request.getFormat() == null) {
                 request.setFormat(actionMetadata.defaultFormat());
@@ -152,12 +152,12 @@ public class DefaultDispatcher implements Dispatcher {
         AJAXRequestResult result = action.perform(
             request,
             session);
-        
+
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
         while(!outgoing.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
-            
+
             while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
@@ -170,7 +170,7 @@ public class DefaultDispatcher implements Dispatcher {
                     // Remains in list and is therefore retried
                 }
             }
-            
+
         }
         return result;
     }

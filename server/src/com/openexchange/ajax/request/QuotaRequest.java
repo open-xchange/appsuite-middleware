@@ -80,7 +80,7 @@ public class QuotaRequest {
 
     /**
      * Initializes a new {@link QuotaRequest}.
-     * 
+     *
      * @param session The session
      */
     public QuotaRequest(final ServerSession session) {
@@ -96,7 +96,7 @@ public class QuotaRequest {
 
     /**
      * Performs specified action
-     * 
+     *
      * @param action The action to perform
      * @return The result
      * @throws OXException If action fails

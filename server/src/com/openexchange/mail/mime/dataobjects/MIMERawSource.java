@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MIMERawSource} - Provides access to raw data with any Content-Transfer-Encoding intact.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MIMERawSource {
@@ -63,7 +63,7 @@ public interface MIMERawSource {
      * Gets an {@link InputStream} to the raw data with any Content-Transfer-Encoding intact. This method is useful if the
      * "Content-Transfer-Encoding" header is incorrect or corrupt. In such a case the application may use this method and attempt to decode
      * the raw data itself.
-     * 
+     *
      * @return The raw input stream
      * @throws OXException If an error occurs
      */

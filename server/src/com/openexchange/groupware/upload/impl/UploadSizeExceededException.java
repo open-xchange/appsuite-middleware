@@ -54,7 +54,7 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 /**
  * {@link UploadSizeExceededException} - The upload error with code MAX_UPLOAD_SIZE_EXCEEDED providing the possibility to convert bytes to a
  * human readable string; e.g. <code>88.3 MB</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UploadSizeExceededException extends UploadException {
@@ -70,7 +70,7 @@ public final class UploadSizeExceededException extends UploadException {
 
     /**
      * Initializes a new {@link UploadException} for exceeded upload size.
-     * 
+     *
      * @param size The actual size in bytes
      * @param maxSize The max. allowed size in bytes
      * @param humanReadable <code>true</code> to convert bytes to a human readable string; otherwise <code>false</code>

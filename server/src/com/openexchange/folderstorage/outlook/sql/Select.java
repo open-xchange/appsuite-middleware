@@ -76,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Select} - SQL to load a virtual folder or its subfolder identifiers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Select {
@@ -162,7 +162,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -185,7 +185,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains a parent denoted by given parent identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -221,7 +221,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -244,7 +244,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -280,7 +280,7 @@ public final class Select {
 
     /**
      * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -302,7 +302,7 @@ public final class Select {
 
     /**
      * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -337,7 +337,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -359,7 +359,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -402,7 +402,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -424,7 +424,7 @@ public final class Select {
 
     /**
      * Checks if the specified virtual tree contains any of the folders denoted by given folder identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -467,7 +467,7 @@ public final class Select {
 
     /**
      * Fills specified folder, does nothing if folder does not exist in tables.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -494,7 +494,7 @@ public final class Select {
 
     /**
      * Fills specified folder, does nothing if folder does not exist in tables.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -676,7 +676,7 @@ public final class Select {
 
     /**
      * Gets the sorted identifiers of the subfolders located below specified parent.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -700,7 +700,7 @@ public final class Select {
 
     /**
      * Gets the sorted identifiers of the subfolders located below specified parent.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

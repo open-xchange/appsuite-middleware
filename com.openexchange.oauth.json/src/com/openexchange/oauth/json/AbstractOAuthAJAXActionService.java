@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthAJAXActionService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOAuthAJAXActionService implements AJAXActionService {
@@ -66,7 +66,7 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
 
     /**
      * Sets the OAuth service
-     * 
+     *
      * @param oAuthService The OAuth service
      */
     public static void setOAuthService(final OAuthService oAuthService) {
@@ -75,17 +75,17 @@ public abstract class AbstractOAuthAJAXActionService implements AJAXActionServic
 
     /**
      * Gets the OAuth service
-     * 
+     *
      * @return The OAuth service
      */
     public static OAuthService getOAuthService() {
         return oAuthService;
     }
-    
+
     public static void setSecretService(SecretService secretService) {
         AbstractOAuthAJAXActionService.secretService = secretService;
     }
-    
+
     public static String secret(Session session) {
         return secretService.getSecret(session);
     }

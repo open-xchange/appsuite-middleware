@@ -92,7 +92,7 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
 
     /**
      * Gets the known file storage services.
-     * 
+     *
      * @return The known file storage services
      */
     protected abstract Collection<FileStorageService> getFileStorageServices();

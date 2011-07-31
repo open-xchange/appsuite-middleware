@@ -82,9 +82,9 @@ public abstract class AbstractUWAAction extends AbstractActionPrototype<UWAWidge
     protected AJAXRequestResult perform(RequestPrototype<UWAWidget> req) throws JSONException, OXException {
         return perform((UWAWidgetRequest)req, factory.getService(req.getSession().getUserId(), req.getSession().getContextId()));
     }
-    
+
     protected abstract AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException;
-    
+
     @Override
     protected UWAWidgetRequest createRequest(AJAXRequestData request, ModelParser<UWAWidget> modelParser, ServerSession session) {
         return new UWAWidgetRequest(request, modelParser, session);

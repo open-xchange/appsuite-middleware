@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbHeaderCacheProperties} - Database-backed implementation of {@link HeaderCacheProperties}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
@@ -76,7 +76,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     /**
      * Initializes a new {@link RdbHeaderCacheProperties}.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -92,7 +92,7 @@ public final class RdbHeaderCacheProperties implements HeaderCacheProperties {
 
     /**
      * Drops all properties related to specified account using given connection.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID

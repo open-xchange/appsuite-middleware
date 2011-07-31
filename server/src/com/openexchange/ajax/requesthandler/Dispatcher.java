@@ -63,7 +63,7 @@ public interface Dispatcher {
 
     /**
      * Performs given request.
-     * 
+     *
      * @param request The request to perform
      * @param state The state
      * @param session The session providing needed user data
@@ -71,10 +71,10 @@ public interface Dispatcher {
      * @throws OXException If an error occurs
      */
     AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
-    
+
     /**
      * Begins a dispatcher turn.
-     * 
+     *
      * @return The state
      * @throws OXException If start-up fails
      */
@@ -82,7 +82,7 @@ public interface Dispatcher {
 
     /**
      * Ends s dispatcher turn.
-     * 
+     *
      * @param state The state
      */
     void end(AJAXState state);

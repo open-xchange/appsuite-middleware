@@ -199,11 +199,11 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends DeferredActivator {
-	
+
 	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
 
         private final BundleContext context;
@@ -231,8 +231,8 @@ public final class ServerActivator extends DeferredActivator {
             return service;
         }
     }
-	
-	
+
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
@@ -401,13 +401,13 @@ public final class ServerActivator extends DeferredActivator {
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
             context,
-            ICalParser.class){ 
-            
+            ICalParser.class){
+
             @Override
             protected ICalParser customize(final ICalParser service) {
                 return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
-            
+
         }));
 
         // ICal Emitter
@@ -430,7 +430,7 @@ public final class ServerActivator extends DeferredActivator {
             context,
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
-        
+
         /*
          * Register EventHandler
          */
@@ -503,9 +503,9 @@ public final class ServerActivator extends DeferredActivator {
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
-            
+
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
-            
+
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
@@ -514,7 +514,7 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 FileMetadataParserService.class.getName(),
                 new ServiceAdderTrackerCustomizer(context)));
-            
+
             // Start up server the usual way
             starter.start();
         }
@@ -561,11 +561,11 @@ public final class ServerActivator extends DeferredActivator {
             }
         }
         {
-            // Register ImageSessionEventHandler 
+            // Register ImageSessionEventHandler
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrationList.add(context.registerService(EventHandler.class.getName(), new ImageSessionEventHandler(), serviceProperties));
-        }        
+        }
         // TODO: Register search service here until its encapsulated in an own bundle
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
@@ -660,7 +660,7 @@ public final class ServerActivator extends DeferredActivator {
 
         // Register AttachmentBase
         registrationList.add(context.registerService(AttachmentBase.class.getName(), Attachment.ATTACHMENT_BASE, null));
-        
+
         // Register ContactSQL
         registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));
 
@@ -676,13 +676,13 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-        
+
         // Fake bundle start
         activators.add(new FolderStorageActivator());
         for (final BundleActivator activator : activators) {
             activator.start(context);
         }
-        
+
         ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
 
@@ -691,7 +691,7 @@ public final class ServerActivator extends DeferredActivator {
          */
         if (!adminBundleInstalled.booleanValue()) {
             registerServlets(getService(HttpService.class));
-        }        
+        }
     }
 
     @Override
@@ -746,7 +746,7 @@ public final class ServerActivator extends DeferredActivator {
     /**
      * Determines if admin bundle is installed by iterating context's bundles whose status is set to {@link Bundle#INSTALLED} or
      * {@link Bundle#ACTIVE} and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
-     * 
+     *
      * @param context The bundle context
      * @return <code>true</code> if admin bundle is installed; otherwise <code>false</code>
      */

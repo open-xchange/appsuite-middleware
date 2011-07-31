@@ -58,7 +58,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
 /**
  * {@link NewAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NewAction extends AbstractWriteAction {

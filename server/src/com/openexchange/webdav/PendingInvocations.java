@@ -55,7 +55,7 @@ import java.util.Queue;
 
 /**
  * {@link PendingInvocations} - Meta object for handling pending invocations and considering last modified changes during a "transaction".
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @param <I>
  */
@@ -67,7 +67,7 @@ public class PendingInvocations<I> implements Queue<QueuedAction<I>> {
 
     /**
      * Initializes a new {@link PendingInvocations}.
-     * 
+     *
      * @param pendingInvocations The backing queue (or delegate queue)
      * @param lastModifiedCache The last-modified cache
      */
@@ -78,7 +78,7 @@ public class PendingInvocations<I> implements Queue<QueuedAction<I>> {
 
     /**
      * Gets the last-modified cache.
-     * 
+     *
      * @return The last-modified cache.
      */
     public LastModifiedCache getLastModifiedCache() {

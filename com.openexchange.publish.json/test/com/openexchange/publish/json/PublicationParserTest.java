@@ -76,59 +76,59 @@ public class PublicationParserTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         target = new PublicationTarget();
         target.setId("com.openexchange.publish.test");
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
         target.setFormDescription(form);
-        
-        
+
+
         discovery = new SimPublicationTargetDiscoveryService();
         discovery.addTarget(target);
-        
+
         object = new JSONObject();
-        
+
         object.put("id", 12);
-        
+
         JSONObject entity = new JSONObject();
         entity.put("id", 23);
         entity.put("folder", 42);
-        
+
         object.put("entity", entity);
         object.put("entityModule", "oranges");
         object.put("target", "com.openexchange.publish.test");
-        
-        
+
+
         JSONObject config = new JSONObject();
         config.put("siteName", "publication");
         config.put("protected", true);
-        
+
         object.put("com.openexchange.publish.test", config);
-    
+
         object.put("enabled", false);
-        
+
     }
-    
+
     public void testParse() throws JSONException, OXException, OXException {
         PublicationParser publicationParser = new PublicationParser(discovery);
         Publication publication = publicationParser.parse(object);
-        
+
         assertEquals("id was wrong", 12, publication.getId());
         assertEquals("entityId was wrong", "42", publication.getEntityId());
         assertEquals("entityModule was wrong", "oranges", publication.getModule());
 
         assertNotNull("target was null", publication.getTarget());
         assertEquals("wrong target", target, publication.getTarget());
-        
+
         Map<String, Object> config = publication.getConfiguration();
-        
+
         assertNotNull("config was null", config);
         assertEquals("siteName was wrong", "publication", config.get("siteName"));
 
         assertEquals("enabled was wrong", true, publication.containsEnabled());
         assertEquals("enabled was wrong", false, publication.isEnabled());
-    
+
     }
 }

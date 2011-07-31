@@ -75,7 +75,7 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
 
     /**
      * Gets the {@link MailAccountActionFactory} instance.
-     * 
+     *
      * @return The {@link MailAccountActionFactory} instance
      */
     public static final MailAccountActionFactory getInstance() {

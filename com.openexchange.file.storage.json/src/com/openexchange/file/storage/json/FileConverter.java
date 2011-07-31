@@ -68,11 +68,11 @@ import com.openexchange.tools.session.ServerSession;
 public class FileConverter implements ResultConverter {
 
     private static final FileMetadataWriter writer = new FileMetadataWriter();
-    
+
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(request, session);
         Object resultObject = result.getResultObject();
-        
+
         if (resultObject instanceof File) {
             resultObject = writer.write((File) resultObject, iReq.getTimezone());
         } else if (resultObject instanceof SearchIterator) {
@@ -80,7 +80,7 @@ public class FileConverter implements ResultConverter {
             final SearchIterator<File> iterator = (SearchIterator<File>) resultObject;
             resultObject = writer.write(iterator, iReq.getColumns(), iReq.getTimezone());
         }
-        
+
         result.setResultObject(resultObject);
     }
 

@@ -61,7 +61,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; allowhtmlimages</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllowHTMLImages implements PreferencesItemService {

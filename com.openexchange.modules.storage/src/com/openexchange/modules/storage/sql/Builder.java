@@ -68,14 +68,14 @@ import com.openexchange.sql.grammar.UPDATE;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Builder<T extends Model<T>> {
-    
+
     private Metadata<T> metadata;
     private String tableName = null;
-    
+
     public Builder(Metadata<T> metadata) {
         this.metadata = metadata;
     }
-    
+
     public INSERT insert(List<Attribute<T>> attributes, List<String> extraFields) {
         INSERT insert = new INSERT().INTO(getTableName());
         for (Attribute<T> attribute : attributes) {
@@ -86,7 +86,7 @@ public class Builder<T extends Model<T>> {
         }
         return insert;
     }
-    
+
     public UPDATE update(List<? extends Attribute<T>> attributes) {
         UPDATE update = new UPDATE(getTableName());
         for (Attribute<T> attribute : attributes) {
@@ -95,21 +95,21 @@ public class Builder<T extends Model<T>> {
         update.WHERE(matchOne());
         return update;
     }
-    
+
 
     public DELETE delete() {
         DELETE delete = new DELETE().FROM(getTableName());
         delete.WHERE(matchOne());
         return delete;
     }
-    
+
     public SELECT select(List<Attribute<T>> attributes) {
         SELECT select = selectWithoutWhere(attributes);
         select.WHERE(matchOne());
-        
+
         return select;
     }
-    
+
     public SELECT selectWithoutWhere(List<Attribute<T>> attributes) {
         SELECT select = new SELECT().FROM(getTableName());
         for (Attribute<T> attribute : attributes) {
@@ -125,12 +125,12 @@ public class Builder<T extends Model<T>> {
     public String getTableName() {
         if(tableName == null) {
             return metadata.getName();
-        } 
+        }
         return tableName;
     }
-    
+
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-    
+
 }

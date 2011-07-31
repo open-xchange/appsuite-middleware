@@ -57,9 +57,9 @@ import com.openexchange.security.internal.BundleAccessSecurityServiceImpl;
 
 /**
  * {@link SecurityActivator} - Activator for security bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SecurityActivator implements BundleActivator {
 

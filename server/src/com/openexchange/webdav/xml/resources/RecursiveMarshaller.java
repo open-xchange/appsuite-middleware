@@ -61,7 +61,7 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 
 	private final ResourceMarshaller delegate;
 	private final int depth;
-	
+
 	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
 		this.delegate = delegate;
 		this.depth = depth;
@@ -85,7 +85,7 @@ public class RecursiveMarshaller implements ResourceMarshaller {
                         }
 						return list;
 					}
-					
+
 				});
 			} catch (final OXException e) {
 				return list;

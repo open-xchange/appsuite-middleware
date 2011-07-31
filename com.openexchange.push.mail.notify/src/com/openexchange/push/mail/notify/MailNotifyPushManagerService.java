@@ -56,14 +56,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailNotifyPushManagerService} - The {@link PushManagerService} for primary mail account.
- * 
+ *
  */
 public final class MailNotifyPushManagerService implements PushManagerService {
 
     private final String name;
 
     private boolean useOXLogin;
-    
+
     private boolean useEmailAddress;
 
     /**
@@ -72,7 +72,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
     public MailNotifyPushManagerService(final boolean useOXLogin, final boolean useEmailAddress) {
         super();
         name = "Mail Push Manager";
-        
+
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
     }

@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * {@link CurrentUserPrivilegeSet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CurrentUserPrivilegeSet implements PropertyMixin {
@@ -104,15 +104,15 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
             if (permission.isAdmin()) {
                 applying.add(WRITE_ACL);
             }
-            
+
             if (permission.getFolderPermission() > Permission.CREATE_OBJECTS_IN_FOLDER) {
                 applying.add(BIND);
             }
-            
+
             if (permission.getDeletePermission() > Permission.DELETE_OWN_OBJECTS) {
                 applying.add(UNBIND);
             }
-         
+
             return applying;
         }
 

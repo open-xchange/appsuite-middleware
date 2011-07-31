@@ -87,7 +87,7 @@ import com.openexchange.tools.sql.SearchStrings;
 
 /**
  * SearchEngineImpl
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
@@ -122,7 +122,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
-        
+
         boolean addQuery = false;
         try {
             final int userId = user.getId();
@@ -188,7 +188,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             checkPatternLength(query);
             final boolean containsWildcard = query.contains("*");
             addQuery = true;
-            
+
             query = query.replaceAll("\\\\", "\\\\\\\\");
             query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
             query = query.replace('*', '%');

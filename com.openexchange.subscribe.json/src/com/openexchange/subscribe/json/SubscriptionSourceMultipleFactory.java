@@ -63,7 +63,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 public class SubscriptionSourceMultipleFactory implements MultipleHandlerFactoryService {
 
     private SubscriptionSourceDiscoveryService discoverer;
-    
+
     public SubscriptionSourceMultipleFactory(SubscriptionSourceDiscoveryService discoverer) {
         this.discoverer = discoverer;
     }

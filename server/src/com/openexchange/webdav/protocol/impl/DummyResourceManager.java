@@ -69,7 +69,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	public static DummyResourceManager getInstance(){
 		return INSTANCE;
 	}
-	
+
 	private DummyResourceManager(){
 		try {
 			resolveCollection("/").create();
@@ -78,11 +78,11 @@ public final class DummyResourceManager implements WebdavFactory {
 		} catch (final OXException e) {
 		    LOG.error("Can't resolve root", e);
         }
-		
+
 	}
-	
+
 	private static final Protocol PROTOCOL = new Protocol();
-	
+
 	private final Map<WebdavPath,WebdavResource> resources = new HashMap<WebdavPath,WebdavResource>();
 	private final Map<WebdavPath,DummyLockNull> lockNullResources = new HashMap<WebdavPath,DummyLockNull>();
 
@@ -163,13 +163,13 @@ public final class DummyResourceManager implements WebdavFactory {
 	@Override
     public void beginRequest() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
     public void endRequest(final int status) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

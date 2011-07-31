@@ -56,7 +56,7 @@ import com.openexchange.messaging.MultipartContent;
 
 /**
  * {@link MailMultipartContent}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -69,7 +69,7 @@ public class MailMultipartContent implements MultipartContent {
 
     /**
      * Initializes a new {@link MailMultipartContent}.
-     * 
+     *
      * @param multipart The multipart
      */
     public MailMultipartContent(final MailPart multipart) {
@@ -79,7 +79,7 @@ public class MailMultipartContent implements MultipartContent {
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     public String getSectionId() {
@@ -88,7 +88,7 @@ public class MailMultipartContent implements MultipartContent {
 
     /**
      * Sets the identifier.
-     * 
+     *
      * @param sectionId The identifier to set
      */
     public void setSectionId(final String sectionId) {

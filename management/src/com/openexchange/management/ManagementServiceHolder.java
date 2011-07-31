@@ -53,14 +53,14 @@ import com.openexchange.server.ServiceHolder;
 
 /**
  * {@link ManagementServiceHolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementServiceHolder extends ServiceHolder<ManagementService> {
 
     /**
      * Gets the management service instance.
-     * 
+     *
      * @return The management service instance.
      */
     public static ManagementServiceHolder newInstance() {

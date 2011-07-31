@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatesPerformer} - Serves the <code>UPDATES</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
@@ -96,7 +96,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link UpdatesPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -106,7 +106,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link UpdatesPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -117,7 +117,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link UpdatesPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -128,7 +128,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link UpdatesPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -140,7 +140,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Performs the <code>UPDATES</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param since The time stamp
      * @param ignoreDeleted <code>true</code> to ignore delete operations performed since given time stamp; otherwise <code>false</code> to

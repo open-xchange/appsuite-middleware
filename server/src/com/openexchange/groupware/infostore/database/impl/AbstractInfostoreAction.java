@@ -59,19 +59,19 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 public abstract class AbstractInfostoreAction extends AbstractDBAction {
 
 	private InfostoreQueryCatalog queries = null;
-	
+
 	protected final void fillStmt(final PreparedStatement stmt, final Metadata[] fields, final DocumentMetadata doc, final Object...additional) throws SQLException {
 		final GetSwitch get = new GetSwitch(doc);
 		int i = 1;
 		for(final Metadata m : fields) {
 			stmt.setObject(i++, process(m, m.doSwitch(get)));
 		}
-		
+
 		for(final Object o : additional) {
 			stmt.setObject(i++, o);
 		}
 	}
-	
+
 	private final Object process(final Metadata field, final Object value) {
 		switch(field.getId()) {
 		default : return value;
@@ -82,9 +82,9 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
 	public void setQueryCatalog(final InfostoreQueryCatalog queries){
 		this.queries = queries;
 	}
-	
+
 	public InfostoreQueryCatalog getQueryCatalog(){
 		return this.queries;
 	}
-	
+
 }

@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SpamHandler} - The abstract spam handler class used by mail module to handle spam-related actions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class SpamHandler {
@@ -111,7 +111,7 @@ public abstract class SpamHandler {
      * Default is <code>true</code>.
      * <p>
      * Implementations may override this method to change the default behavior.
-     * 
+     *
      * @return <code>true</code> to create the confirmed-spam folder during check for default mail folders; otherwise <code>false</code> to
      *         not create the folder
      */
@@ -125,7 +125,7 @@ public abstract class SpamHandler {
      * Default is <code>true</code>.
      * <p>
      * Implementations may override this method to change the default behavior.
-     * 
+     *
      * @return <code>true</code> to create the confirmed-ham folder during check for default mail folders; otherwise <code>false</code> to
      *         not create the folder
      */
@@ -138,7 +138,7 @@ public abstract class SpamHandler {
      * Default is <code>true</code>.
      * <p>
      * Implementations may override this method to change the default behavior.
-     * 
+     *
      * @return <code>true</code> to automatically unsubscribe the confirmed-spam/confirmed-ham folders; otherwise <code>false</code> to
      *         leave subscription status unchanged.
      */
@@ -151,7 +151,7 @@ public abstract class SpamHandler {
      * defined confirmed spam folder to properly teach the spam system to handle these mails as spam.
      * <p>
      * This method may be overridden if another spam handling is desired.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname of the folder containing spam messages
      * @param mailIDs The mail IDs
@@ -185,7 +185,7 @@ public abstract class SpamHandler {
 
     /**
      * Gets the spam handler name which is used on registration
-     * 
+     *
      * @return The spam handler name
      */
     public abstract String getSpamHandlerName();
@@ -196,7 +196,7 @@ public abstract class SpamHandler {
      * <p>
      * Dependent on the used spam system, the spam messages cannot be copied/moved as they are, but need to be parsed in the way the spam
      * system wraps spam messages. If spam system does not wrap original messages, then the default spam handler is supposed to be used.
-     * 
+     *
      * @param accountId The account ID
      * @param spamFullname The spam folder's fullname
      * @param mailIDs The mail IDs

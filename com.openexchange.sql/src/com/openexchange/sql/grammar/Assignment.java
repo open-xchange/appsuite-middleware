@@ -78,7 +78,7 @@ public class Assignment extends Expression {
     public String getSqlKeyword() {
 		return "=";
 	}
-	
+
 	public Expression getLeftExpression() {
 		return leftExpression;
 	}

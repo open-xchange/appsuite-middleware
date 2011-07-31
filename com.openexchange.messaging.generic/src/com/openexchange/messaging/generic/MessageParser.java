@@ -59,7 +59,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 /**
  * {@link MessageParser} - A call-back parser to parse instances of {@link MessagingMessage} by invoking the <code>handleXXX()</code>
  * methods of given {@link MessageHandler} object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageParser {
@@ -109,7 +109,7 @@ public final class MessageParser {
 
     /**
      * Switches the INLINE detector behavior.
-     * 
+     *
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
@@ -120,7 +120,7 @@ public final class MessageParser {
 
     /**
      * Resets this parser and returns itself
-     * 
+     *
      * @return The parser itself
      */
     public MessageParser reset() {
@@ -131,7 +131,7 @@ public final class MessageParser {
     /**
      * Parses specified message using given handler as call-back and given initial prefix for message part identifiers; e.g.
      * <code>&quot;1.1&quot;</code>.
-     * 
+     *
      * @param message The message to parse
      * @param handler The call-back handler
      * @throws OXException If parsing specified message fails
@@ -261,7 +261,7 @@ public final class MessageParser {
 
     /**
      * Checks if content type matches <code>multipart/*</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
      */
@@ -273,7 +273,7 @@ public final class MessageParser {
 
     /**
      * Checks if content type matches <code>message/rfc822</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */

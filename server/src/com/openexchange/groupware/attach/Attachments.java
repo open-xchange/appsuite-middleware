@@ -69,32 +69,32 @@ public abstract class Attachments {
     private static final TIntObjectHashMap<SpecificServiceChooser<AttachmentListener>> listener = new TIntObjectHashMap<SpecificServiceChooser<AttachmentListener>>(3);
 
     private static final AttachmentBaseImpl impl = new AttachmentBaseImpl(new DBPoolProvider());
-    
+
     static {
         try {
             final SpecificServiceChooser<AttachmentAuthorization> taskAuth = new SpecificServiceChooser<AttachmentAuthorization>();
             taskAuth.registerForEverything(new TaskAuthorization(), 0);
-        
+
             final SpecificServiceChooser<AttachmentAuthorization> contactAuth = new SpecificServiceChooser<AttachmentAuthorization>();
             contactAuth.registerForEverything(new ContactsAttachment(), 0);
-            
+
             final SpecificServiceChooser<AttachmentAuthorization> appointmentAuth = new SpecificServiceChooser<AttachmentAuthorization>();
             appointmentAuth.registerForEverything(new CalendarAttachments(), 0);
-            
+
             authz.put(Types.TASK, taskAuth);
             authz.put(Types.CONTACT, contactAuth);
             authz.put(Types.APPOINTMENT, appointmentAuth);
-            
-            
+
+
             final SpecificServiceChooser<AttachmentListener> taskListener = new SpecificServiceChooser<AttachmentListener>();
             taskListener.registerForEverything(new TaskAttachmentListener(), 0);
-            
+
             final SpecificServiceChooser<AttachmentListener> contactListener = new SpecificServiceChooser<AttachmentListener>();
             contactListener.registerForEverything(new ContactsAttachment(), 0);
-            
+
             final SpecificServiceChooser<AttachmentListener> appointmentListener = new SpecificServiceChooser<AttachmentListener>();
             appointmentListener.registerForEverything(new CalendarAttachments(), 0);
-            
+
             listener.put(Types.TASK, taskListener);
             listener.put(Types.CONTACT, contactListener);
             listener.put(Types.APPOINTMENT, appointmentListener);
@@ -106,17 +106,17 @@ public abstract class Attachments {
             impl.addAuthorization(new OverridableAttachmentAuthorization(appointmentAuth), Types.APPOINTMENT);
             impl.registerAttachmentListener(new OverridableAttachmentListener(appointmentListener),Types.APPOINTMENT);
 
-            
+
         } catch (final ServicePriorityConflictException e) {
             // Doesn't happen
             e.printStackTrace();
         }
     }
-    
+
     public static SpecificServiceChooser<AttachmentAuthorization> getAuthorizationChooserForModule(final int module) {
         return authz.get(module);
     }
-    
+
     public static SpecificServiceChooser<AttachmentListener> getListenerChooserForModule(final int module) {
         return listener.get(module);
     }

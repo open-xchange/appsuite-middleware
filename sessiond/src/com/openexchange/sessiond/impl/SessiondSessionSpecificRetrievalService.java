@@ -60,7 +60,7 @@ import com.openexchange.sessiond.event.SessiondEventListener;
 
 /**
  * {@link SessiondSessionSpecificRetrievalService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SessiondSessionSpecificRetrievalService implements SessionSpecificContainerRetrievalService, SessiondEventListener {
@@ -102,7 +102,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
             }
         }
     }
-    
+
     public <T> RandomTokenContainer<T> getRandomTokenContainer(String name, Lifecycle lifecycle, CleanUp<T> cleanUp) {
         if (randomTokenContainer.contains(name)) {
             return (RandomTokenContainer<T>) randomTokenContainer.get(name);
@@ -122,7 +122,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
         RandomTokenContainerImpl<?> container = randomTokenContainer.get(name);
         container.clear(cleanUp);
     }
-    
+
     // Event Handling
 
     public void handleContainerRemoval(Map<String, Session> sessions) {
@@ -150,7 +150,7 @@ public class SessiondSessionSpecificRetrievalService implements SessionSpecificC
     }
 
 
-  
+
 
 
 }

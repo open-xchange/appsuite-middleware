@@ -20,7 +20,7 @@ public class SieveParser/*@bgen(jjtree)*/implements SieveParserTreeConstants, Si
  * THE SIEVE LANGUAGE GRAMMAR STARTS HERE *
  ******************************************/
 
-// start = commands   
+// start = commands
   final public SimpleNode start() throws ParseException {
  /*@bgen(jjtree) start */
   ASTstart jjtn000 = new ASTstart(JJTSTART);

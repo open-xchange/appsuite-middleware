@@ -86,7 +86,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link MultipleMailPartHandler} - Looks for multiple mail parts by sequence IDs.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleMailPartHandler implements MailMessageHandler {
@@ -174,7 +174,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     /**
      * Initializes a new empty {@link MultipleMailPartHandler}.
-     * 
+     *
      * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
      */
     public MultipleMailPartHandler(final boolean errorOnAbsence) {
@@ -186,7 +186,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link MultipleMailPartHandler}.
-     * 
+     *
      * @param ids The sequence IDs to look for
      * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
      */
@@ -203,7 +203,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link MultipleMailPartHandler}.
-     * 
+     *
      * @param ids The sequence IDs to look for
      * @param errorOnAbsence <code>true</code> to throw an error if one or more parts could not be found; otherwise <code>false</code>
      */
@@ -222,7 +222,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
      * Sets sequence IDs.
      * <p>
      * Remaining mail parts are cleared.
-     * 
+     *
      * @param ids The sequence IDs
      */
     public void setSequenceIDs(final String[] ids) {
@@ -237,7 +237,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
      * Sets sequence IDs.
      * <p>
      * Remaining mail parts are cleared.
-     * 
+     *
      * @param ids The sequence IDs
      */
     public void setSequenceIDs(final Set<String> ids) {
@@ -454,7 +454,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
 
     /**
      * Gets the identified mail parts matching given sequence IDs
-     * 
+     *
      * @return The identified mail part matching given sequence IDs
      */
     public Map<String, MailPart> getMailParts() {

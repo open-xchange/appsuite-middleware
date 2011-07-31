@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AbstractWebDAVAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractWebDAVAccess {
@@ -95,7 +95,7 @@ public abstract class AbstractWebDAVAccess {
 
     /**
      * Closes specified HTTP method.
-     * 
+     *
      * @param httpMethod The HTTP method to close
      */
     protected static <M extends HttpMethod> void closeHttpMethod(final M httpMethod) {

@@ -61,7 +61,7 @@ public class Constants {
 
     /**
      * Gets the module string.
-     * 
+     *
      * @return The module string
      */
     public static String getModule() {

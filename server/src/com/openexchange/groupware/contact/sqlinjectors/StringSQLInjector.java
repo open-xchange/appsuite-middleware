@@ -87,7 +87,7 @@ public class StringSQLInjector implements SQLInjector {
             ps.setString(parameterIndex, value);
         }
     }
-    
+
 	@Override
 	public String toString() {
 		return value;

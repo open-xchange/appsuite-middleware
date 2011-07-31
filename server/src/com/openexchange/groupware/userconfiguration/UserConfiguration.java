@@ -59,7 +59,7 @@ import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserConfiguration implements Serializable, Cloneable {
@@ -212,18 +212,18 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * The permission bit for denied portal access.
      */
     public static final int DENIED_PORTAL = 1 << 28;
-    
+
     /**
      * The permission bit for caldav access. ATTENTION: This is actually handled by the config cascade!
      */
     public static final int CALDAV = 1 << 29;
-    
-    
+
+
     /**
      * The permission bit for carddav access. ATTENTION: This is actually handled by the config cascade!
      */
     public static final int CARDDAV = 1 << 30;
-    
+
 
     /*-
      * Field members
@@ -261,7 +261,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Initializes a new {@link UserConfiguration}.
-     * 
+     *
      * @param permissionBits The permissions' bit mask
      * @param userId The user ID
      * @param groups The user's group IDs
@@ -350,7 +350,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Gets this user configuration's bit pattern.
-     * 
+     *
      * @return the bit pattern as an <code>int</code>.
      */
     public int getPermissionBits() {
@@ -359,7 +359,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets this user configuration's bit pattern.
-     * 
+     *
      * @param permissionBits - the bit pattern.
      */
     public void setPermissionBits(final int permissionBits) {
@@ -369,7 +369,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows web mail access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>.
      */
     public boolean hasWebMail() {
@@ -378,7 +378,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables web mail access in user configuration.
-     * 
+     *
      * @param enableWebMail
      */
     public void setWebMail(final boolean enableWebMail) {
@@ -388,7 +388,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows calendar access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasCalendar() {
@@ -397,7 +397,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables calendar access in user configuration.
-     * 
+     *
      * @param enableCalender
      */
     public void setCalendar(final boolean enableCalender) {
@@ -407,7 +407,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows contact access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasContact() {
@@ -416,7 +416,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables contact access in user configuration.
-     * 
+     *
      * @param enableContact
      */
     public void setContact(final boolean enableContact) {
@@ -426,7 +426,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows task access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasTask() {
@@ -435,7 +435,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables task access in user configuration.
-     * 
+     *
      * @param enableTask
      */
     public void setTask(final boolean enableTask) {
@@ -445,7 +445,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows infostore access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
@@ -454,7 +454,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables infostore access in user configuration.
-     * 
+     *
      * @param enableInfostore
      */
     public void setInfostore(final boolean enableInfostore) {
@@ -464,7 +464,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows project access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasProject() {
@@ -473,7 +473,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables project access in user configuration.
-     * 
+     *
      * @param enableProject
      */
     public void setProject(final boolean enableProject) {
@@ -483,7 +483,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows forum access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasForum() {
@@ -492,7 +492,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables forum access in user configuration.
-     * 
+     *
      * @param enableForum
      */
     public void setForum(final boolean enableForum) {
@@ -501,7 +501,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows pinboard write access.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasPinboardWriteAccess() {
@@ -510,7 +510,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables pinboard write access in user configuration.
-     * 
+     *
      * @param enablePinboardWriteAccess
      */
     public void setPinboardWriteAccess(final boolean enablePinboardWriteAccess) {
@@ -519,7 +519,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows WebDAV XML.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAVXML() {
@@ -528,7 +528,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables WebDAV XML access in user configuration.
-     * 
+     *
      * @param enableWebDAVXML
      */
     public void setWebDAVXML(final boolean enableWebDAVXML) {
@@ -537,7 +537,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows WebDAV.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAV() {
@@ -546,7 +546,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables WebDAV access in user configuration.
-     * 
+     *
      * @param enableWebDAV
      */
     public void setWebDAV(final boolean enableWebDAV) {
@@ -555,7 +555,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows ICalendar.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasICal() {
@@ -564,7 +564,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables ICalendar access in user configuration.
-     * 
+     *
      * @param enableICal
      */
     public void setICal(final boolean enableICal) {
@@ -573,7 +573,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows VCard.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasVCard() {
@@ -582,7 +582,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables VCard access in user configuration.
-     * 
+     *
      * @param enableVCard
      */
     public void setVCard(final boolean enableVCard) {
@@ -591,7 +591,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows RSS bookmarks.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasRSSBookmarks() {
@@ -600,7 +600,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables RSS bookmarks access in user configuration.
-     * 
+     *
      * @param enableRSSBookmarks
      */
     public void setRSSBookmarks(final boolean enableRSSBookmarks) {
@@ -609,7 +609,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows RSS portal.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasRSSPortal() {
@@ -618,7 +618,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables RSS portal access in user configuration.
-     * 
+     *
      * @param enableRSSPortal
      */
     public void setRSSPortal(final boolean enableRSSPortal) {
@@ -627,7 +627,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows mobility functionality.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasSyncML() {
@@ -636,7 +636,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Enables/Disables mobility access in user configuration
-     * 
+     *
      * @param enableSyncML
      */
     public void setSyncML(final boolean enableSyncML) {
@@ -645,7 +645,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows PIM functionality (Calendar, Contact, and Task).
-     * 
+     *
      * @return <code>true</code> if PIM functionality (Calendar, Contact, and Task) is allowed; otherwise <code>false</code>
      */
     public boolean hasPIM() {
@@ -654,7 +654,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows team view.
-     * 
+     *
      * @return <code>true</code> if team view is allowed; otherwise <code>false</code>
      */
     public boolean hasTeamView() {
@@ -663,7 +663,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows free busy.
-     * 
+     *
      * @return <code>true</code> if free busy is allowed; otherwise <code>false</code>
      */
     public boolean hasFreeBusy() {
@@ -672,7 +672,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows conflict handling.
-     * 
+     *
      * @return <code>true</code> if conflict handling is allowed; otherwise <code>false</code>
      */
     public boolean hasConflictHandling() {
@@ -681,7 +681,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Calculates if the user configuration allows the participant dialog.
-     * 
+     *
      * @return <code>true</code> if the participant dialog should be shown.
      */
     public boolean hasParticipantsDialog() {
@@ -690,7 +690,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Detects if user configuration allows portal page in GUI.
-     * 
+     *
      * @return <code>true</code> if portal page is allowed; otherwise <code>false</code>
      */
     public boolean hasPortal() {
@@ -711,7 +711,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * <p>
      * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
      * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
-     * 
+     *
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
@@ -756,7 +756,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if user has access to given module.
-     * 
+     *
      * @param module The module carrying a value defined in constants <code>
      *            {@link FolderObject#TASK}</code> , <code>
      *            {@link FolderObject#CALENDAR}</code>
@@ -783,7 +783,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * If this permission is not granted, it is prohibited for the user to create or edit public folders. Existing public folders are
      * visible in any case.
-     * 
+     *
      * @return <code>true</code> full public folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullPublicFolderAccess() {
@@ -792,7 +792,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Set enableFullPublicFolderAccess.
-     * 
+     *
      * @param enableFullPublicFolderAccess
      */
     public void setFullPublicFolderAccess(final boolean enableFullPublicFolderAccess) {
@@ -802,7 +802,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * If this permission is not granted, neither folders are allowed to be shared nor shared folders are allowed to be seen by user.
      * Existing permissions are not removed if user loses this right, but the display of shared folders is suppressed.
-     * 
+     *
      * @return <code>true</code> full shared folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullSharedFolderAccess() {
@@ -811,7 +811,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Set enableFullSharedFolderAccess.
-     * 
+     *
      * @param enableFullSharedFolderAccess
      */
     public void setFullSharedFolderAccess(final boolean enableFullSharedFolderAccess) {
@@ -820,7 +820,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration allows to delegate tasks.
-     * 
+     *
      * @return <code>true</code> if user can delegate tasks; otherwise <code>false</code>
      */
     public boolean canDelegateTasks() {
@@ -829,7 +829,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets enableDelegateTasks.
-     * 
+     *
      * @param enableDelegateTasks
      */
     public void setDelegateTasks(final boolean enableDelegateTasks) {
@@ -838,7 +838,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to collect email addresses.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>
      */
     public boolean isCollectEmailAddresses() {
@@ -847,7 +847,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates to collect email addresses.
-     * 
+     *
      * @param collectEmailAddresses <code>true</code> if this user configuration indicates to collect email addresses; otherwise
      *            <code>false</code>
      */
@@ -857,7 +857,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to enable multiple mail accounts.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
@@ -866,7 +866,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates to enable multiple mail accounts.
-     * 
+     *
      * @param multipleMailAccounts <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise
      *            <code>false</code>
      */
@@ -876,7 +876,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to enable subscription.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
@@ -885,7 +885,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates to enable subscription.
-     * 
+     *
      * @param subscription <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public void setSubscription(final boolean subscription) {
@@ -895,7 +895,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates to enable publication.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
@@ -904,7 +904,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates to enable publication.
-     * 
+     *
      * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public void setPublication(final boolean publication) {
@@ -955,7 +955,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates that groups are allowed to be edited.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditGroup() {
@@ -964,7 +964,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates that groups are allowed to be edited.
-     * 
+     *
      * @param editGroup <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise
      *            <code>false</code>
      */
@@ -974,7 +974,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates that resources are allowed to be edited.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditResource() {
@@ -983,7 +983,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates that resources are allowed to be edited.
-     * 
+     *
      * @param editResource <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise
      *            <code>false</code>
      */
@@ -993,7 +993,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration indicates that user password is allowed to be edited.
-     * 
+     *
      * @return <code>true</code> if this user configuration indicates that user password is allowed to be edited; otherwise
      *         <code>false</code>
      */
@@ -1003,7 +1003,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Sets if this user configuration indicates that user password is allowed to be edited.
-     * 
+     *
      * @param editPassword <code>true</code> if this user configuration indicates that user password is allowed to be edited; otherwise
      *            <code>false</code>
      */
@@ -1013,7 +1013,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Checks if this user configuration enables specified permission bit.
-     * 
+     *
      * @param permission The permission bit to check
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
@@ -1030,7 +1030,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Gets the user ID.
-     * 
+     *
      * @return The user ID
      */
     public int getUserId() {
@@ -1039,7 +1039,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Gets the group IDs.
-     * 
+     *
      * @return The group IDs
      */
     public int[] getGroups() {
@@ -1053,7 +1053,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * Gets the context.
-     * 
+     *
      * @return The context
      */
     public Context getContext() {

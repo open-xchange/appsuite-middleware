@@ -97,7 +97,7 @@ public final class EmitterTools {
         if(tzid == null) {
             return toDateTime(date);
         }
-        
+
         net.fortuna.ical4j.model.TimeZone ical4jTimezone = timeZoneRegistry.getTimeZone(tzid);
         if(ical4jTimezone == null) {
             return toDateTime(date);
@@ -112,12 +112,12 @@ public final class EmitterTools {
     public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date) {
         return new UTCDate(date.getTime());
     }
-    
+
     public static net.fortuna.ical4j.model.Date toDate(final java.util.Date date, String tzid) {
     	if(tzid == null) {
             return toDate(date);
         }
-        return new TzDate(date.getTime(), tzid); 
+        return new TzDate(date.getTime(), tzid);
     }
 
     public static String extractTimezoneIfPossible(CalendarObject co){
@@ -154,7 +154,7 @@ public final class EmitterTools {
             setTime(time);
         }
     }
-    
+
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
@@ -178,7 +178,7 @@ public final class EmitterTools {
     public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
         EmitterTools.calendarCollection = calendarCollection;
     }
-    
+
     public static TimeZoneRegistry getTimeZoneRegistry() {
         return timeZoneRegistry;
     }

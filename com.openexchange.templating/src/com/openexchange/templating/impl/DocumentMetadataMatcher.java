@@ -66,9 +66,9 @@ public class DocumentMetadataMatcher {
     public DocumentMetadataMatcher(String name) {
         this.name = name;
         this.score = 0;
-        
+
     }
-    
+
     public boolean hasPerfectMatch() {
         return score > 10;
     }
@@ -76,7 +76,7 @@ public class DocumentMetadataMatcher {
     public DocumentMetadata getBestMatch() {
         return bestMatch;
     }
-    
+
     public void propose(DocumentMetadata document) {
         int newScore = 0;
         String fileName = document.getFileName();
@@ -89,12 +89,12 @@ public class DocumentMetadataMatcher {
                 newScore = 5;
             }
         }
-        
+
         if(document.getTitle().equals(name)) {
             newScore = 7;
         }
-        
-        
+
+
         if(newScore > score) {
             score = newScore;
             bestMatch = document;

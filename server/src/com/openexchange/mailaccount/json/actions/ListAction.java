@@ -109,5 +109,5 @@ public final class ListAction extends AbstractMailAccountAction {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
-    
+
 }

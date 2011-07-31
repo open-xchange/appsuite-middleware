@@ -81,7 +81,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link MailAccountMigrationTask} - Migrates mail account data kept in user table to mail account table.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountMigrationTask extends UpdateTaskAdapter {

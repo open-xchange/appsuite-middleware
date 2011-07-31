@@ -55,7 +55,7 @@ import com.openexchange.ajp13.AJPv13Config;
 
 /**
  * A request handler pool to hold pre-initialized instances of {@link AJPv13RequestHandlerImpl}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13RequestHandlerPool {
@@ -70,7 +70,7 @@ public class AJPv13RequestHandlerPool {
 
     /**
      * Checks if AJP request handler pool is initialized.
-     * 
+     *
      * @return <code>true</code> if initialized; otherwise <code>false</code>
      */
     static boolean isInitialized() {
@@ -108,7 +108,7 @@ public class AJPv13RequestHandlerPool {
     /**
      * Fetches an existing instance from pool or creates & returns a new one. The given connection is then assigned to the request handler
      * instance.
-     * 
+     *
      * @param ajpCon The AJP connection which is assigned to returned AJP request handler
      * @return A pooled or newly created AJP request handler
      */
@@ -123,7 +123,7 @@ public class AJPv13RequestHandlerPool {
 
     /**
      * Puts back the given request handler instance into pool if space available. Otherwise it is discarded.
-     * 
+     *
      * @param requestHandler The AJP request handler which shall be put back into pool
      * @return <code>true</code> if AJP request handler was successfully put back into pool; otherwise <code>false</code>
      */

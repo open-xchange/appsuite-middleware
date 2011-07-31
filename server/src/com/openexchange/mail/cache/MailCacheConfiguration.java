@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailCacheConfiguration} - Loads the configuration for mail caches.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailCacheConfiguration implements Initialization {
@@ -81,7 +81,7 @@ public final class MailCacheConfiguration implements Initialization {
 
     /**
      * Initializes the singleton instance of {@link MailCacheConfiguration}.
-     * 
+     *
      * @return The singleton instance of {@link MailCacheConfiguration}
      */
     public static MailCacheConfiguration getInstance() {
@@ -97,7 +97,7 @@ public final class MailCacheConfiguration implements Initialization {
             cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
                 SystemConfig.Property.MailCacheConfig.getPropertyName());
             if (cacheConfigFile == null) {
-                throw 
+                throw
                     ConfigurationExceptionCodes.PROPERTY_MISSING.create(
                     SystemConfig.Property.MailCacheConfig.getPropertyName());
             }
@@ -130,7 +130,7 @@ public final class MailCacheConfiguration implements Initialization {
 
     /**
      * Checks if mail cache configuration has been started, yet.
-     * 
+     *
      * @return <code>true</code> if mail cache configuration has been started; otherwise <code>false</code>
      */
     public boolean isStarted() {

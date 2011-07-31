@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 /**
  * {@link StringReplacement} - An implementation of a
  * {@link TemplateReplacement template replacement} with a fixed string.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class StringReplacement implements TemplateReplacement {
 
@@ -71,7 +71,7 @@ public class StringReplacement implements TemplateReplacement {
 
     /**
      * Initializes a new {@link StringReplacement}
-     * 
+     *
      * @param token The token
      * @param replacement The replacement
      */
@@ -81,7 +81,7 @@ public class StringReplacement implements TemplateReplacement {
 
     /**
      * Initializes a new {@link StringReplacement}
-     * 
+     *
      * @param token The token
      * @param replacement The replacement
      * @param changed <code>true</code> to prepend <i>modified</i> marker

@@ -390,7 +390,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     displayName = String.valueOf(userId);
                 }
                 lock.setOwner(displayName);
-                
+
             } catch (final OXException e) {
                 // Ignore, if lookup fails set no owner.
             }
@@ -519,7 +519,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         exists = b;
     }
 
-    // 
+    //
 
     @Override
     public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {

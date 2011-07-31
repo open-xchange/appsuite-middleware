@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.Contact;
 /**
  * This switcher enables us to get the values of a contact object. As convention, the first argument of a method represents the
  * ContactObject which value is to be retrieved. Note: This class was generated mostly - don't even try to keep this up to date by hand...
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class ContactGetter implements ContactSwitcher {

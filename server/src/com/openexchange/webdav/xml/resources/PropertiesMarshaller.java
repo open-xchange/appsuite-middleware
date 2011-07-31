@@ -76,7 +76,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 	protected static final Namespace DATE_NS = Namespace.getNamespace("b",  "urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/");
-	
+
 	private String uriPrefix;
 
 	private final String charset;
@@ -86,11 +86,11 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertiesMarshaller.class));
-	
+
 	public PropertiesMarshaller(final String charset){
 		this.charset = charset;
 	}
-	
+
 	public PropertiesMarshaller(final String uriPrefix, final String charset) {
 		this.uriPrefix = uriPrefix;
 		if(!this.uriPrefix.endsWith("/")) {
@@ -108,7 +108,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
 				final Element propstat = new Element("propstat",DAV_NS);
 				final Element prop = new Element("prop", DAV_NS);
-				
+
 				for(final WebdavProperty p : status.getAdditional()) {
 					if(p != null) {
 						prop.addContent(marshalProperty(p, resource.getProtocol()));
@@ -121,7 +121,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		}
 		return Arrays.asList(response);
 	}
-	
+
 	public Element marshalHREF(final WebdavPath uri, boolean trailingSlash) {
 		final Element href = new Element("href", DAV_NS);
         final StringBuilder builder = new StringBuilder(uriPrefix);
@@ -137,7 +137,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
         href.setText(builder.toString());
 		return href;
 	}
-	
+
 	private String escape(final String string) {
 		final PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
 		if(null != encoder) {
@@ -148,7 +148,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		} catch (final UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			return string;
-		} 
+		}
 	}
 
 	public Element marshalStatus(final int s) {

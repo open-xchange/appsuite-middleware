@@ -13,11 +13,11 @@ import com._4psa.resellermessages_xsd._2_5.EditResellerRequest;
 
 /**
  * Reseller account data
- * 
+ *
  * <p>Java class for ResellerInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ResellerInfo">
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import com._4psa.resellermessages_xsd._2_5.EditResellerRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ResellerInfo", propOrder = {
@@ -56,11 +56,11 @@ public class ResellerInfo
 
     /**
      * Gets the value of the channelRuleID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelRuleID() {
         return channelRuleID;
@@ -68,11 +68,11 @@ public class ResellerInfo
 
     /**
      * Sets the value of the channelRuleID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelRuleID(BigInteger value) {
         this.channelRuleID = value;
@@ -80,11 +80,11 @@ public class ResellerInfo
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -92,11 +92,11 @@ public class ResellerInfo
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -104,11 +104,11 @@ public class ResellerInfo
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -116,11 +116,11 @@ public class ResellerInfo
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;

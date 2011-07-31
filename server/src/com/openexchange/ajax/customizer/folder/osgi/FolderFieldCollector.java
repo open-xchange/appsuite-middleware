@@ -66,7 +66,7 @@ public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
     private final AdditionalFolderFieldList list;
     private final BundleContext context;
-    
+
     public FolderFieldCollector(final BundleContext context, final AdditionalFolderFieldList list) {
         super();
         this.list = list;

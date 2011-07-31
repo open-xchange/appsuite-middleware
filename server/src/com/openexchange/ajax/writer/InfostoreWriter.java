@@ -64,28 +64,28 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
-	
+
 	public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWriter.class));
-	
+
 	public InfostoreWriter(final JSONWriter w) {
 		super(w);
 	}
-	
+
 	public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, OXException {
 		jsonWriter.array();
-		
+
 		fillArray(iter,cols,tz);
 		jsonWriter.endArray();
-		
+
 	}
-	
-	
+
+
 	@Override
 	protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, OXException {
 		final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
-		
+
 		//The array contains one array for every DocumentMetadata, and filled according to the requested columns
-		
+
 		while (iter.hasNext()) {
 			sw.setDocumentMetadata(iter.next());
 			jsonWriter.array();
@@ -98,7 +98,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 
 	public void write(final DocumentMetadata dm, final TimeZone tz) throws JSONException {
 		jsonWriter.object();
-		
+
 		final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
 		w.setDocumentMetadata(dm);
 		for(final Metadata metadata : Metadata.HTTPAPI_VALUES) {
@@ -107,22 +107,22 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 		}
 		jsonWriter.endObject();
 	}
-	
+
 	private static final class WriterSwitch implements MetadataSwitcher{
-		
+
 		private DocumentMetadata dm;
 		private final JSONWriter writer;
 		private final TimeZone tz;
-		
+
 		public WriterSwitch(final JSONWriter writer, final TimeZone tz) {
 			this.writer = writer;
 			this.tz = tz;
 		}
-	
+
 		public void setDocumentMetadata(final DocumentMetadata dm) {
 			this.dm = dm;
 		}
-		
+
 		public void setMetadata(final Metadata current) {
 			try {
 				writer.key(current.getName());
@@ -130,97 +130,97 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				LOG.error("",e);
 			}
 		}
-	
+
 		@Override
         public Object lastModified() {
 			writeDate(dm.getLastModified());
 			return null;
 		}
-	
+
 		@Override
         public Object creationDate() {
 			writeDate(dm.getCreationDate());
 			return null;
 		}
-	
+
 		@Override
         public Object modifiedBy() {
 			writeId(dm.getModifiedBy());
 			return null;
 		}
-	
+
 		@Override
         public Object folderId() {
 			writeId(dm.getFolderId());
 			return null;
 		}
-	
+
 		@Override
         public Object title() {
 			writeString(dm.getTitle());
 			return null;
 		}
-		
+
 		@Override
         public Object version() {
 			writeInteger(dm.getVersion());
 			return null;
 		}
-	
+
 		@Override
         public Object content() {
 			writeString(dm.getContent());
 			return null;
 		}
-	
+
 		@Override
         public Object id() {
 			writeId(dm.getId());
 			return null;
 		}
-	
+
 		@Override
         public Object fileSize() {
 			writeInteger(dm.getFileSize());
 			return null;
 		}
-	
+
 		@Override
         public Object description() {
 			writeString(dm.getDescription());
 			return null;
 		}
-	
+
 		@Override
         public Object url() {
 			writeString(dm.getURL());
 			return null;
 		}
-	
+
 		@Override
         public Object createdBy() {
 			writeId(dm.getCreatedBy());
 			return null;
 		}
-	
+
 		@Override
         public Object fileName() {
 			writeString(dm.getFileName());
 			return null;
 		}
-	
+
 		@Override
         public Object fileMIMEType() {
 			writeString(dm.getFileMIMEType());
 			return null;
 		}
-	
+
 		@Override
         public Object sequenceNumber() {
 			return null;
-			
+
 		}
-	
+
 		@Override
         public Object categories() {
 			final String categoriesString = dm.getCategories();
@@ -234,7 +234,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				return null;
 			}
 			final String[] categoriesArray = categoriesString.split("\\s*,\\s*");
-			
+
 			try {
 				writer.array();
 				for(final String cat : categoriesArray) {
@@ -274,13 +274,13 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			}
 			return null;
 		}
-	
+
 		@Override
         public Object fileMD5Sum() {
 			writeString(dm.getFileMD5Sum());
 			return null;
 		}
-		
+
 		private void writeDate(final Date date) {
 			if (date == null) {
                 writeNull();
@@ -294,11 +294,11 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				writeInteger(time);
 			}
 		}
-		
+
 		private void writeId(final long id) {
 			writeString(String.valueOf(id));
 		}
-	
+
 		private void writeString(final String string) {
             if(string == null) {
                 writeNull();
@@ -310,7 +310,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				LOG.error("",e);
 			}
 		}
-	
+
 		private void writeInteger(final long l) {
 			try {
 				writer.value(l);
@@ -362,5 +362,5 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 	protected int getId(final Object object) {
 		return ((DocumentMetadata)object).getId();
 	}
-	
+
 }

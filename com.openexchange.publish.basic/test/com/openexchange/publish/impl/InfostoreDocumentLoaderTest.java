@@ -69,7 +69,7 @@ import com.openexchange.publish.services.SimInfostoreFacade;
  *
  */
 public class InfostoreDocumentLoaderTest extends TestCase {
-    
+
     private SimInfostoreFacade infostoreFacade;
     private int cid;
     private int folder;
@@ -81,44 +81,44 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     @Override
     public void setUp() {
         infostoreFacade = new SimInfostoreFacade();
-        
+
         cid = 1;
         folder = 12;
         id1 = 1337;
-        
+
         bytes1 = new byte[]{1,2,3};
-        
+
         infostoreFacade.simulateDocument(cid, folder, id1, "Document 1", bytes1);
-        
+
         publication = new Publication();
         publication.setContext(new SimContext(cid));
         publication.setEntityId("1337");
         publication.setModule("infostore");
-    
+
         loader = new InfostoreDocumentLoader(infostoreFacade, null, null) {
             @Override
             protected User loadUser(Context ctx, int userId) throws OXException {
                 return null;
             }
-            
+
             @Override
             protected UserConfiguration loadUserConfiguration(Context ctx, int userId) throws OXException {
                 return null;
             }
         };
     }
-    
+
     public void testLoadDocument() throws OXException, IOException {
         Collection<? extends Object> loaded = loader.load(publication);
         assertNotNull("Loaded was null!", loaded);
         assertEquals("Expected one document", 1, loaded.size());
         InputStream is = (InputStream) loaded.iterator().next();
-        
+
         assertEquals(1, is.read());
         assertEquals(2, is.read());
         assertEquals(3, is.read());
         assertEquals(-1, is.read());
 
     }
-    
+
 }

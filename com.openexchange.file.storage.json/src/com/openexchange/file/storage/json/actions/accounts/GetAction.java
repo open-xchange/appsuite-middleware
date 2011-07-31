@@ -80,13 +80,13 @@ public class GetAction extends AbstractFileStorageAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        
+
         final List<String> missingParameters = request.getMissingParameters(FileStorageAccountConstants.FILE_STORAGE_SERVICE, FileStorageAccountConstants.ID);
         if(!missingParameters.isEmpty()) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
         final String messagingServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
-        
+
         final String id = request.getParameter(FileStorageAccountConstants.ID);
         final FileStorageAccount account = registry.getFileStorageService(messagingServiceId).getAccountManager().getAccount(id, session);
         return new AJAXRequestResult(writer.write(account));

@@ -33,9 +33,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 // TODO: make some of the "direct" WBXML token writing methods public??
 
-/** 
- * A class for writing WBXML. 
- *  
+/**
+ * A class for writing WBXML.
+ *
  */
 
 
@@ -86,7 +86,7 @@ public class WbxmlSerializer implements XmlSerializer {
     public void comment (final String comment) {
     }
 
-    
+
     @Override
     public void docdecl (final String docdecl) {
         throw new RuntimeException ("Cannot write docdecl for WBXML");
@@ -97,7 +97,7 @@ public class WbxmlSerializer implements XmlSerializer {
     public void entityRef (final String er) {
         throw new RuntimeException ("EntityReference not supported for WBXML");
     }
-    
+
     @Override
     public int getDepth() {
     	return depth;
@@ -108,23 +108,23 @@ public class WbxmlSerializer implements XmlSerializer {
     public boolean getFeature (final String name) {
         return false;
     }
-    
+
 	@Override
     public String getNamespace() {
 		throw new RuntimeException(ERR_NYI);
 	}
-	
+
 	@Override
     public String getName() {
 		throw new RuntimeException(ERR_NYI);
 	}
-	
+
 	@Override
     public String getPrefix(final String nsp, final boolean create) {
         throw new RuntimeException (ERR_NYI);
     }
-    
-    
+
+
     @Override
     public Object getProperty (final String name) {
         return null;
@@ -133,7 +133,7 @@ public class WbxmlSerializer implements XmlSerializer {
     @Override
     public void ignorableWhitespace (final String sp) {
     }
-    
+
 
     @Override
     public void endDocument() throws IOException {
@@ -143,7 +143,7 @@ public class WbxmlSerializer implements XmlSerializer {
 
         out.write(stringTableBuf.toByteArray());
 
-        // write buf 
+        // write buf
 
         out.write(buf.toByteArray());
 
@@ -185,7 +185,7 @@ public class WbxmlSerializer implements XmlSerializer {
         		buf.write(0);
         		buf.write(tagPage);
         	}
-        	
+
             buf.write(
                 len == 0
                     ? (degenerated ? idx[1] : idx[1] | 64)
@@ -197,7 +197,7 @@ public class WbxmlSerializer implements XmlSerializer {
 
         for (int i = 0; i < len;) {
             idx = attrStartTable.get(attributes.get(i));
-            
+
             if (idx == null) {
                 buf.write(Wbxml.LITERAL);
                 writeStrT(attributes.get(i));
@@ -206,7 +206,7 @@ public class WbxmlSerializer implements XmlSerializer {
 				if(idx[0] != attrPage){
 					attrPage = idx[1];
 					buf.write(0);
-					buf.write(attrPage);					
+					buf.write(attrPage);
 				}
                 buf.write(idx[1]);
             }
@@ -219,7 +219,7 @@ public class WbxmlSerializer implements XmlSerializer {
 				if(idx[0] != attrPage){
 					attrPage = idx[1];
 					buf.write(0);
-					buf.write(attrPage);					
+					buf.write(attrPage);
 				}
                 buf.write(idx[1]);
             }
@@ -245,7 +245,7 @@ public class WbxmlSerializer implements XmlSerializer {
     public void setFeature(final String name, final boolean value) {
         throw new IllegalArgumentException ("unknown feature "+name);
     }
-        
+
 
 
     @Override
@@ -255,17 +255,17 @@ public class WbxmlSerializer implements XmlSerializer {
 
     @Override
     public void setOutput (final OutputStream out, final String encoding) throws IOException {
-        
+
         if (encoding != null) {
 			throw new IllegalArgumentException ("encoding not yet supported for WBXML");
 		}
-        
+
         this.out = out;
 
         buf = new UnsynchronizedByteArrayOutputStream();
         stringTableBuf = new UnsynchronizedByteArrayOutputStream();
 
-        // ok, write header 
+        // ok, write header
     }
 
 
@@ -279,7 +279,7 @@ public class WbxmlSerializer implements XmlSerializer {
         throw new IllegalArgumentException ("unknown property "+property);
     }
 
-    
+
     @Override
     public void startDocument(final String s, final Boolean b) throws IOException{
         out.write(0x01); // version
@@ -300,7 +300,7 @@ public class WbxmlSerializer implements XmlSerializer {
         checkPending(false);
         pending = name;
 		depth++;
-		
+
         return this;
     }
 
@@ -325,8 +325,8 @@ public class WbxmlSerializer implements XmlSerializer {
 
         return this;
     }
-    
-    
+
+
 
     @Override
     public XmlSerializer endTag(final String namespace, final String name) throws IOException {
@@ -388,11 +388,11 @@ public class WbxmlSerializer implements XmlSerializer {
         writeInt(buf, idx.intValue());
     }
 
-    /** 
+    /**
      * Sets the tag table for a given page.
      * The first string in the array defines tag 5, the second tag 6 etc.
      */
-    
+
     public void setTagTable(final int page, final String[] tagTable) {
         // clear entries in tagTable!
 		if (page != 0) {
@@ -407,16 +407,16 @@ public class WbxmlSerializer implements XmlSerializer {
         }
     }
 
-    /** 
+    /**
      * Sets the attribute start Table for a given page.
-     * The first string in the array defines attribute 
+     * The first string in the array defines attribute
      * 5, the second attribute 6 etc.
-     *  Please use the 
-     *  character '=' (without quote!) as delimiter 
-     *  between the attribute name and the (start of the) value 
+     *  Please use the
+     *  character '=' (without quote!) as delimiter
+     *  between the attribute name and the (start of the) value
      */
     public void setAttrStartTable(final int page, final String[] attrStartTable) {
-        
+
         for (int i = 0; i < attrStartTable.length; i++) {
             if (attrStartTable[i] != null) {
                 final int[] idx = new int[] {page, i + 5};
@@ -425,9 +425,9 @@ public class WbxmlSerializer implements XmlSerializer {
         }
     }
 
-    /** 
+    /**
      * Sets the attribute value Table for a given page.
-     * The first string in the array defines attribute value 0x85, 
+     * The first string in the array defines attribute value 0x85,
      * the second attribute value 0x86 etc.
      */
     public void setAttrValueTable(final int page, final String[] attrValueTable) {

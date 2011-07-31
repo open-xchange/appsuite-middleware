@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReCaptchaServlet}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ReCaptchaServlet extends DataServlet {
@@ -71,7 +71,7 @@ public class ReCaptchaServlet extends DataServlet {
     private static final transient Log LOG = LogFactory.getLog(ReCaptchaServlet.class);
 
     private static final String ACTION_HTML = "html";
-    
+
     private static final String ACTION_KEY = "key";
 
     @Override

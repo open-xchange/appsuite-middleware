@@ -54,7 +54,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link OutlookPermission} - A MS Outlook folder permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookPermission implements Permission {

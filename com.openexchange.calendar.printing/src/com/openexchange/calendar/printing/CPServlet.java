@@ -226,7 +226,7 @@ public class CPServlet extends PermissionServlet {
 
     /**
      * Write an exception message as HTML to the response
-     * @throws IOException 
+     * @throws IOException
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
         LOG.error(t.getMessage(), t);

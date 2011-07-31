@@ -75,7 +75,7 @@ import com.openexchange.mail.mime.ContentType;
 
 /**
  * {@link ServletRequestWrapper}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -128,7 +128,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Initializes a new {@link ServletRequestWrapper}.
-     * 
+     *
      * @throws AJPv13Exception If instantiation fails
      */
     public ServletRequestWrapper() throws AJPv13Exception {
@@ -142,7 +142,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the <code>Content-Length</code> header.
-     * 
+     *
      * @param contentLength The content length
      * @throws AJPv13Exception If setting <code>Content-Length</code> header fails
      */
@@ -152,7 +152,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the <code>Content-Type</code> header.
-     * 
+     *
      * @param contentType The content type
      * @throws AJPv13Exception If setting <code>Content-Type</code> header fails
      */
@@ -162,7 +162,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets a parameter.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      */
@@ -182,7 +182,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets a header value bound to given header name.
-     * 
+     *
      * @param name The header name
      * @param value The header value
      * @param isContentType <code>true</code> if <tt>name</tt> denotes the <code>Content-Type</code> header; otherwise <code>false</code>
@@ -251,7 +251,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Gets the header value associated with specified name.
-     * 
+     *
      * @param name The header name
      * @return The header name
      */
@@ -262,7 +262,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Checks if this servlet request contains a header associated with specified name.
-     * 
+     *
      * @param name The header name
      * @return <code>true</code> if this servlet request contains such a header; otherwise <code>false</code>
      */
@@ -272,7 +272,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Gets the header values associated with specified header name.
-     * 
+     *
      * @param name The header name
      * @return The header values as an {@link Enumeration}
      */
@@ -282,7 +282,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Gets the header names contained in this servlet request.
-     * 
+     *
      * @return The header names as an {@link Enumeration}
      */
     public Enumeration<?> getHeaderNames() {
@@ -291,7 +291,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets a parameter's values.
-     * 
+     *
      * @param name The parameter name to which the values shall be bound
      * @param values The parameter values
      */
@@ -327,7 +327,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Checks if this servlet request contains specified attribute.
-     * 
+     *
      * @param name The attribute name
      * @return <code>true</code> if this servlet request contains specified attribute; otherwise <code>false</code>
      */
@@ -384,7 +384,7 @@ public class ServletRequestWrapper implements ServletRequest {
     /**
      * Sets the protocol. The name and version of the protocol the request uses in the form <i>protocol/majorVersion.minorVersion</i>, for
      * example, HTTP/1.1.
-     * 
+     *
      * @param protocol The protocol to set
      */
     public void setProtocol(final String protocol) {
@@ -408,7 +408,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the servlet input stream of this servlet request.
-     * 
+     *
      * @param is The servlet input stream
      */
     public void setInputStream(final AJPv13ServletInputStream is) {
@@ -417,7 +417,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets/appends new data to this servlet request's input stream.
-     * 
+     *
      * @param newData The new data to set/append
      * @throws IOException If an I/O error occurs
      */
@@ -466,7 +466,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the remote address of this request.
-     * 
+     *
      * @param remoteAddr The remote address; either a machine name, such as "java.sun.com", or a textual representation of an IP address
      */
     public void setRemoteAddr(final String remoteAddr) {
@@ -480,7 +480,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the remote host; the fully qualified name of the client or the last proxy that sent the request.
-     * 
+     *
      * @param remoteHost The remote host denoting the fully qualified name of the client
      */
     public void setRemoteHost(final String remoteHost) {
@@ -509,7 +509,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the host name of the server to which the request was sent.
-     * 
+     *
      * @param serverName The host name of the server to which the request was sent
      */
     public void setServerName(final String serverName) {
@@ -519,7 +519,7 @@ public class ServletRequestWrapper implements ServletRequest {
     @Override
     public String getServerName() {
         String host = getFromHost();
-        
+
         return (host == null) ? serverName : host;
     }
 
@@ -537,7 +537,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the port number to which the request was sent.
-     * 
+     *
      * @param serverPort The server port
      */
     public void setServerPort(final int serverPort) {
@@ -551,7 +551,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets whether this request was made using a secure channel, such as HTTPS.
-     * 
+     *
      * @param secure <code>true</code> if this request uses a secure channel; otherwise <code>false</code>
      */
     public void setSecure(final boolean secure) {
@@ -565,7 +565,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Gets the first {@link String} element contained in given array or <code>null</code> if array is <code>null</code> or empty.
-     * 
+     *
      * @param values The array
      * @return The first {@link String} element or <code>null</code>
      */
@@ -578,7 +578,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Creates a new {@link Enumeration} for specified array.
-     * 
+     *
      * @param <T> The array's element type
      * @param array The array
      * @return A new {@link Enumeration}

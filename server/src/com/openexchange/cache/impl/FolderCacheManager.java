@@ -79,7 +79,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  * <p>
  * <b>NOTE:</b> Only cloned versions of {@link FolderObject} instances are put into or received from cache. That prevents the danger of
  * further working on and therefore changing cached instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderCacheManager {
@@ -96,7 +96,7 @@ public final class FolderCacheManager {
 
     /**
      * Initializes a new {@link FolderCacheManager}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private FolderCacheManager() throws OXException {
@@ -107,7 +107,7 @@ public final class FolderCacheManager {
 
     /**
      * Checks if folder cache has been initialized.
-     * 
+     *
      * @return <code>true</code> if folder cache has been initialized; otherwise <code>false</code>
      */
     public static boolean isInitialized() {
@@ -116,7 +116,7 @@ public final class FolderCacheManager {
 
     /**
      * Checks if folder cache is enabled (through configuration).
-     * 
+     *
      * @return <code>true</code> if folder cache is enabled; otherwise <code>false</code>
      */
     public static boolean isEnabled() {
@@ -125,7 +125,7 @@ public final class FolderCacheManager {
 
     /**
      * Initializes the singleton instance of folder cache {@link FolderCacheManager manager}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public static void initInstance() throws OXException {
@@ -140,7 +140,7 @@ public final class FolderCacheManager {
 
     /**
      * Gets the singleton instance of folder cache {@link FolderCacheManager manager}.
-     * 
+     *
      * @return The singleton instance of folder cache {@link FolderCacheManager manager}.
      * @throws OXException If initialization fails
      */
@@ -181,7 +181,7 @@ public final class FolderCacheManager {
 
     /**
      * Initializes cache reference.
-     * 
+     *
      * @throws OXException If initializing the cache reference fails
      */
     public void initCache() throws OXException {
@@ -193,7 +193,7 @@ public final class FolderCacheManager {
 
     /**
      * Releases cache reference.
-     * 
+     *
      * @throws OXException If clearing cache fails
      */
     public void releaseCache() throws OXException {
@@ -246,7 +246,7 @@ public final class FolderCacheManager {
      * <p>
      * <b>NOTE:</b> This method returns a clone of cached <code>FolderObject</code> instance. Thus any modifications made to the referenced
      * object will not affect cached version
-     * 
+     *
      * @throws OXException If a caching error occurs
      */
     public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx, final Connection readCon) throws OXException {
@@ -278,7 +278,7 @@ public final class FolderCacheManager {
      * <b>NOTE:</b> This method returns a clone of cached <code>FolderObject</code> instance. Thus any modifications made to the referenced
      * object will not affect cached version
      * </p>
-     * 
+     *
      * @return The matching <code>FolderObject</code> instance else <code>null</code>
      */
     public FolderObject getFolderObject(final int objectId, final Context ctx) {
@@ -306,7 +306,7 @@ public final class FolderCacheManager {
      * <p>
      * <b>NOTE:</b> This method returns a clone of cached <code>FolderObject</code> instance. Thus any modifications made to the referenced
      * object will not affect cached version
-     * 
+     *
      * @return The matching <code>FolderObject</code> instance fetched from storage else <code>null</code>
      * @throws OXException If a caching error occurs
      */
@@ -341,7 +341,7 @@ public final class FolderCacheManager {
     /**
      * Loads the folder object from underlying database storage whose id matches given parameter <code>folderId</code>.
      * <p>
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readCon A readable connection (<b>optional</b>), pass <code>null</code> to fetch a new one from connection pool
@@ -360,7 +360,7 @@ public final class FolderCacheManager {
      * <p>
      * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code> instance into cache. Thus any modifications made to the
      * referenced object will not affect cached version
-     * 
+     *
      * @param folderObj The folder object
      * @param ctx The context
      * @param elemAttribs The element's attributes (<b>optional</b>), pass <code>null</code> to use the default attributes
@@ -428,7 +428,7 @@ public final class FolderCacheManager {
      * <p>
      * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code> instance into cache. Thus any modifications made to the
      * referenced object will not affect cached version
-     * 
+     *
      * @param folderObj The folder object
      * @param ctx The context
      * @throws OXException If a caching error occurs
@@ -446,7 +446,7 @@ public final class FolderCacheManager {
      * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code> instance into cache. Thus any modifications made to the
      * referenced object will not affect cached version
      * </p>
-     * 
+     *
      * @param folderObj The folder object
      * @param ctx The context
      * @param overwrite <code>true</code> to overwrite; otherwise <code>false</code>
@@ -518,7 +518,7 @@ public final class FolderCacheManager {
 
     /**
      * Removes matching folder object from cache
-     * 
+     *
      * @param key The key
      * @param ctx The context
      * @throws OXException If a caching error occurs
@@ -555,7 +555,7 @@ public final class FolderCacheManager {
 
     /**
      * Removes matching folder objects from cache
-     * 
+     *
      * @param keys The keys
      * @param ctx The context
      * @throws OXException If a caching error occurs
@@ -603,7 +603,7 @@ public final class FolderCacheManager {
 
     /**
      * Removes all folder objects from this cache
-     * 
+     *
      * @throws OXException If folder cache cannot be cleared
      */
     public void clearAll() throws OXException {
@@ -625,7 +625,7 @@ public final class FolderCacheManager {
 
     /**
      * Returns default element attributes for this cache
-     * 
+     *
      * @return default element attributes for this cache or <code>null</code>
      * @throws OXException If a caching error occurs
      */

@@ -71,7 +71,7 @@ import com.openexchange.messaging.MessagingHeader;
 public class AddressHeaderParserTest extends TestCase {
     public void testResponsible() {
         final AddressHeaderParser parser = new AddressHeaderParser();
-        
+
         final List<String> headerNames = Arrays.asList(
             "From",
             "To",
@@ -86,81 +86,81 @@ public class AddressHeaderParserTest extends TestCase {
             "Resent-To",
             "Resent-Cc",
             "Resent-Bcc");
-        
+
         for (final String headerName : headerNames) {
             assertTrue(parser.handles(headerName, null));
         }
     }
-    
+
     public void testParseComplex() throws JSONException, OXException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
-        
+
         final AddressHeaderParser parser = new AddressHeaderParser();
-        
+
         final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", object);
-        
+
         assertTrue(headers.containsKey("From"));
-        
+
         final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
-        
+
         assertEquals(1, parsed.size());
-        
+
         final MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
-        
+
         assertEquals("Clark Kent", header.getPersonal());
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
-    
+
     public void testParseSimple() throws OXException, JSONException {
-        
+
         final AddressHeaderParser parser = new AddressHeaderParser();
-        
+
         final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", "Clark Kent <clark.kent@dailyplanet.com>");
-        
+
         assertTrue(headers.containsKey("From"));
-        
+
         final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
-        
+
         assertEquals(1, parsed.size());
-        
+
         final MessagingAddressHeader header = (MessagingAddressHeader) parsed.iterator().next();
-        
+
         assertEquals("Clark Kent", header.getPersonal());
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
     }
-    
+
     public void testParseList() throws OXException, JSONException {
         final JSONObject object = new JSONObject("{address : 'clark.kent@dailyplanet.com', personal : 'Clark Kent'}");
-        
+
         final JSONArray array = new JSONArray("['Lois Lane <lois.lane@dailyplanet.com>']");
         array.put(object);
-        
+
         final AddressHeaderParser parser = new AddressHeaderParser();
-        
+
         final HashMap<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         parser.parseAndAdd(headers, "From", array);
-        
+
         assertTrue(headers.containsKey("From"));
-        
+
         final Collection<MessagingHeader> parsed = headers.get("From");
         assertNotNull(parsed);
-        
+
         assertEquals(2, parsed.size());
-        
+
         final Iterator<MessagingHeader> iterator = parsed.iterator();
         MessagingAddressHeader header = (MessagingAddressHeader) iterator.next();
-        
+
         assertEquals("Lois Lane", header.getPersonal());
         assertEquals("lois.lane@dailyplanet.com", header.getAddress());
-        
+
         header = (MessagingAddressHeader) iterator.next();
-        
+
         assertEquals("Clark Kent", header.getPersonal());
         assertEquals("clark.kent@dailyplanet.com", header.getAddress());
-        
+
     }
 }

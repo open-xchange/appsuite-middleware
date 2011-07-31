@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageRegistry implements FolderStorageDiscoverer {
@@ -74,7 +74,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     /**
      * Gets the {@link FolderStorageRegistry} instance.
-     * 
+     *
      * @return The {@link FolderStorageRegistry} instance
      */
     public static FolderStorageRegistry getInstance() {
@@ -100,7 +100,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     /**
      * Associates specified folder storage to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to add
      * @return <code>true</code> If registration was successful; otherwise <code>false</code>
@@ -263,7 +263,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     /**
      * Removes specified folder storage bound to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to remove
      */

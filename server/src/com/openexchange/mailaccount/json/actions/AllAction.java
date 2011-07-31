@@ -103,5 +103,5 @@ public final class AllAction extends AbstractMailAccountAction {
 
         return new AJAXRequestResult(MailAccountWriter.writeArray(userMailAccounts, attributes));
     }
-    
+
 }

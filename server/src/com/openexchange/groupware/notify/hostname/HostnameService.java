@@ -51,32 +51,32 @@ package com.openexchange.groupware.notify.hostname;
 
 /**
  * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
- * 
+ *
  * <pre>
  * http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HostnameService {
 
     /**
      * The parameter name for host name.
-     * 
+     *
      * @type <code>java.lang.String</code>
      */
     public static final String PARAM_HOST_NAME = "com.openexchange.groupware.hostname";
 
     /**
      * The parameter name for port.
-     * 
+     *
      * @type <code>java.lang.Integer</code>
      */
     public static final String PARAM_PORT = "com.openexchange.groupware.port";
 
     /**
      * The parameter name for secure connection.
-     * 
+     *
      * @type <code>java.lang.Boolean</code>
      */
     public static final String PARAM_SECURE = "com.openexchange.groupware.secure";
@@ -85,7 +85,7 @@ public interface HostnameService {
      * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL
      * template defined by property &quot;object_link&quot; in properties file &quot;notification.properties&quot;. Additionally this
      * service may be used for the host name when generating direct links into the UI.
-     * 
+     *
      * @param userId The user ID or a value less than/equal to zero if not available
      * @param contextId The context ID or a value less than/equal to zero if not available
      * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not

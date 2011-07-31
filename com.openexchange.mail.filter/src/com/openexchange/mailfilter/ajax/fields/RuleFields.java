@@ -49,13 +49,13 @@
 package com.openexchange.mailfilter.ajax.fields;
 
 public class RuleFields {
-    
+
     public static final String ID = "id";
     public static final String POSITION = "position";
     public static final String RULENAME = "rulename";
-    public static final String ACTIVE = "active";    
+    public static final String ACTIVE = "active";
     public static final String FLAGS = "flags";
-    public static final String TEST = "test";    
+    public static final String TEST = "test";
     public static final String ACTIONCMDS = "actioncmds";
     public static final String TEXT = "text";
     public static final String ERRORMSG = "errormsg";

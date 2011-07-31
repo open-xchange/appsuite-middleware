@@ -56,7 +56,7 @@ import com.openexchange.i18n.I18nService;
 
 /**
  * {@link I18n} - Singleton for keeping references to {@link I18nService}s and for translating texts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class I18n {
@@ -75,7 +75,7 @@ public final class I18n {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static final I18n getInstance() {
@@ -84,7 +84,7 @@ public final class I18n {
 
     /**
      * Add specified i18n service.
-     * 
+     *
      * @param service The service to add
      * @return <code>true</code> on successful insertion to registry; otherwise <code>false</code>
      */
@@ -94,7 +94,7 @@ public final class I18n {
 
     /**
      * Removes specified i18n service.
-     * 
+     *
      * @param service The service to remove
      */
     public void removeI18nService(final I18nService service) {
@@ -103,7 +103,7 @@ public final class I18n {
 
     /**
      * Gets the i18n service for specified locale.
-     * 
+     *
      * @param locale The locale
      * @return The i18n service for specified locale or <code>null</code> if absent
      */
@@ -113,7 +113,7 @@ public final class I18n {
 
     /**
      * Translates specified string to given locale.
-     * 
+     *
      * @param locale The locale
      * @param translateMe The string to translate
      * @return The translated string

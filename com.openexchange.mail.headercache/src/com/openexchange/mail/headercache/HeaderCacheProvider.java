@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link HeaderCacheProvider} - The provider for header cache protocol.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheProvider extends AllMailProvider {
@@ -74,7 +74,7 @@ public final class HeaderCacheProvider extends AllMailProvider {
 
     /**
      * Gets the singleton instance of header cache provider.
-     * 
+     *
      * @return The singleton instance of header cache provider
      */
     public static HeaderCacheProvider getInstance() {

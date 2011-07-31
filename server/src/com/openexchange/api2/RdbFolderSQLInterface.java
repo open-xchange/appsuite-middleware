@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RdbFolderSQLInterface} - The (relational) database implementation of {@link FolderSQLInterface}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RdbFolderSQLInterface implements FolderSQLInterface {
@@ -115,7 +115,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 
     /**
      * Creates a new {@link Set set} containing the modules of those folders which might not be visible in hierarchical tree view.
-     * 
+     *
      * @return A new {@link Set set} containing the modules.
      */
     private static final Set<Integer> newNonTreeVisibleModules() {
@@ -441,7 +441,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 
     /**
      * Fills folder query cache with "non-tree-visible" folders which applies to given session
-     * 
+     *
      * @param session The session to which the query applies
      * @throws SearchIteratorException If iterator fails
      * @throws OXException If a caching error occurs

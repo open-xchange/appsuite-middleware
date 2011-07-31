@@ -7,7 +7,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Error codes for the configuration exception.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum ConfigurationExceptionCodes implements OXExceptionCode {
@@ -56,7 +56,7 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
     public int getNumber() {
         return detailNumber;
     }
-    
+
     @Override
     public String getMessage() {
         return message;
@@ -69,7 +69,7 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -78,7 +78,7 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -88,7 +88,7 @@ public enum ConfigurationExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

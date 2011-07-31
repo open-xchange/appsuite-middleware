@@ -75,18 +75,18 @@ import com.openexchange.tools.sql.DBUtils;
 public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     /**
-     * 
+     *
      */
     private static final String INFOSTORE_RESERVED_PATHS = "infostoreReservedPaths";
 
     private String getTableSQL() {
-        return "CREATE TABLE infostoreReservedPaths (" + 
+        return "CREATE TABLE infostoreReservedPaths (" +
         " cid INT4 unsigned NOT NULL," +
         " folder INT4 unsigned NOT NULL, " +
         " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL "+
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
     @Override
     protected String[] getCreateStatements() {
         return new String[] { getTableSQL() };

@@ -83,9 +83,9 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SyncServlet} - The AJAX servlet to serve SyncML requests
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class SyncServlet extends PermissionServlet {
 
@@ -317,7 +317,7 @@ public class SyncServlet extends PermissionServlet {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

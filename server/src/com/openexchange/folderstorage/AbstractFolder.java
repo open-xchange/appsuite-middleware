@@ -54,7 +54,7 @@ import java.util.Locale;
 
 /**
  * {@link AbstractFolder} - An abstract folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFolder implements Folder {
@@ -306,12 +306,12 @@ public abstract class AbstractFolder implements Folder {
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = subscribed;
     }
-   
+
     @Override
     public boolean hasSubscribedSubfolders() {
         return subscribedSubfolders;
     }
-    
+
     @Override
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         this.subscribedSubfolders = subscribedSubfolders;

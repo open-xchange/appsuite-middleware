@@ -9,11 +9,11 @@ import com._4psa.extensiondata_xsd._2_5.CallRecording;
 
 /**
  * Get phone terminal call recording settings: response type
- * 
+ *
  * <p>Java class for GetCallRecordingSettingsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCallRecordingSettingsResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.extensiondata_xsd._2_5.CallRecording;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCallRecordingSettingsResponseType")

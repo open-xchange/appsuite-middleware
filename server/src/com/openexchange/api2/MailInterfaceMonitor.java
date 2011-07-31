@@ -61,7 +61,7 @@ import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link MailInterfaceMonitor} - The mail module's MBean.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
@@ -272,7 +272,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 
     /**
      * Adds an occurrence of an unsupported encoding.
-     * 
+     *
      * @param encoding - the unsupported encoding
      */
     public void addUnsupportedEncodingExceptions(final String encoding) {

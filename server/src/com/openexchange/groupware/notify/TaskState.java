@@ -83,7 +83,7 @@ public class TaskState extends LinkableState {
 
 	/**
      * Initializes a new {@link TaskState}
-     * 
+     *
      * @param actionRepl The action replacement
      * @param messageTemplate The message template
      * @param type The notification type
@@ -94,7 +94,7 @@ public class TaskState extends LinkableState {
 
 	 /**
      * Initializes a new {@link TaskState}
-     * 
+     *
      * @param actionRepl The action replacement
      * @param confirmationActionRepl The confirmation action replacement (optional)
      * @param messageTemplate The message template
@@ -162,19 +162,19 @@ public class TaskState extends LinkableState {
     public Type getType() {
 		return type;
 	}
-	
+
 	private static final Set<Integer> FIELDS_TO_IGNORE = new HashSet<Integer>(Arrays.asList(
 	    Task.ALARM,
 	    Task.LAST_MODIFIED
 	));
-	
+
     @Override
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);
         return differingFields.isEmpty();
     }
-	
-	
+
+
 
 }

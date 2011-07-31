@@ -60,12 +60,12 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 public abstract class AbstractPathResolver extends DBService implements
 		PathResolver {
-	
+
 	protected final WebdavPath absolute(final int relativeToFolder, final WebdavPath path, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
 		return rel.dup().append(path);
 	}
-	
+
 	protected final WebdavPath relative(final int relativeToFolder, final WebdavPath absolute, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
 	    return absolute.subpath(rel.size());

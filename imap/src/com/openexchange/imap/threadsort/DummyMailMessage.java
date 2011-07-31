@@ -57,13 +57,13 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link DummyMailMessage} - A dummy mail message for thread-sort purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class DummyMailMessage extends MailMessage {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -541392246833470725L;
 

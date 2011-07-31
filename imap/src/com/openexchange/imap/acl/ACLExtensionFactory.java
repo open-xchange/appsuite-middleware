@@ -56,7 +56,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link ACLExtensionFactory} - Factory for ACL extension.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ACLExtensionFactory {
@@ -73,7 +73,7 @@ public final class ACLExtensionFactory {
 
     /**
      * Gets the factory instance.
-     * 
+     *
      * @return The factory instance.
      */
     public static ACLExtensionFactory getInstance() {
@@ -94,7 +94,7 @@ public final class ACLExtensionFactory {
 
     /**
      * Gets the appropriate ACL extension for the IMAP server denoted by specified IMAP configuration.
-     * 
+     *
      * @param imapConfig The IMAP configuration providing needed access data.
      * @return The appropriate ACL extension
      */
@@ -107,7 +107,7 @@ public final class ACLExtensionFactory {
 
     /**
      * Gets the appropriate ACL extension for the IMAP server denoted by specified IMAP configuration.
-     * 
+     *
      * @param capabilities The capabilities map
      * @param imapConfig The IMAP configuration providing needed access data.
      * @return The appropriate ACL extension
@@ -129,7 +129,7 @@ public final class ACLExtensionFactory {
 
     /**
      * Only invoked if auto-detection is turned off.
-     * 
+     *
      * @param singleton The singleton instance of {@link ACLExtension}
      */
     void setACLExtensionInstance(final ACLExtension singleton) {

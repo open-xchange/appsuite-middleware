@@ -53,7 +53,7 @@ import java.util.Date;
 
 /**
  * {@link UserParticipant} - Represents an internal user participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class UserParticipant implements Participant, Comparable<Participant> {
@@ -96,7 +96,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the user.
      */
     public UserParticipant(final int id) {

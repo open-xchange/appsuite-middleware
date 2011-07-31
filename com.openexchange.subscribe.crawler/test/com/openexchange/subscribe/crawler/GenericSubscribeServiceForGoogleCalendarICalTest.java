@@ -56,7 +56,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForGoogleCalendarICalTest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSubscribeServiceTestHelpers {
@@ -85,7 +85,7 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
             "Passwd",
             "logout",
             1,
-            "https://calendar.google.com"));      
+            "https://calendar.google.com"));
         steps.add(new GoogleCalendarICalStep("Call the url to get the calendar-export-file", "https://www.google.com/calendar/exporticalzip"));
 
         Workflow workflow = new Workflow(steps);
@@ -94,5 +94,5 @@ public class GenericSubscribeServiceForGoogleCalendarICalTest extends GenericSub
         findOutIfThereAreEventsForThisConfiguration(username, password, crawler, true, true);
         // uncomment this if the if the crawler description was updated to get the new config-files
         // dumpThis(crawler, crawler.getDisplayName());
-    }    
+    }
 }

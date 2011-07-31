@@ -53,7 +53,7 @@ import java.util.EnumSet;
 
 /**
  * {@link UserField} - Enumeration for user fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum UserField {
@@ -584,7 +584,7 @@ public enum UserField {
 
     /**
      * Gets the column or <code>-1</code> if none available.
-     * 
+     *
      * @return The column or <code>-1</code> if none available
      */
     public int getColumn() {
@@ -593,7 +593,7 @@ public enum UserField {
 
     /**
      * Gets the name or <code>null</code> if none available.
-     * 
+     *
      * @return The name or <code>null</code> if none available
      */
     public String getName() {
@@ -604,7 +604,7 @@ public enum UserField {
 
     /**
      * Gets the user-only field corresponding to given field number.
-     * 
+     *
      * @param field The field number
      * @return The user-only field or <code>null</code>
      */
@@ -616,13 +616,13 @@ public enum UserField {
         }
         return null;
     }
-    
+
     public static boolean isUserOnlyField(final int field) {
         return null != getUserOnlyField(field);
     }
 
     public static final EnumSet<UserField> UNPROTECTED_FIELDS = EnumSet.of(ID, DISPLAY_NAME, FIRST_NAME, LAST_NAME, SECOND_NAME, SUFFIX);
-    
+
     public static boolean isProtected(final int field) {
         for (final UserField uf : UNPROTECTED_FIELDS) {
             if(uf.getColumn() == field) {
@@ -631,7 +631,7 @@ public enum UserField {
         }
         return true;
     }
-    
+
     /**
      * The constant describing all fields of a user object.
      */

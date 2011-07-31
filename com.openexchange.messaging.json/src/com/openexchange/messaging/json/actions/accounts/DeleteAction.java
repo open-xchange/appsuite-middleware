@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  *  <dt>id</dt><dd>The id of the messaging service that is to be deleted</dd>
  * </dl>
  * Throws an exception upon an error or returns "1" on success.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -85,7 +85,7 @@ public class DeleteAction extends AbstractMessagingAccountAction {
             throw MessagingExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
         final String messagingServiceId = request.getParameter("messagingService");
-        
+
         int id = 0;
         final String idS = request.getParameter("id");
         try {
@@ -93,14 +93,14 @@ public class DeleteAction extends AbstractMessagingAccountAction {
         } catch (final NumberFormatException x) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
-        
+
         final MessagingService messagingService = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId());
-        
+
         final DefaultMessagingAccount messagingAccount = new DefaultMessagingAccount();
         messagingAccount.setMessagingService(messagingService);
         messagingAccount.setId(id);
         messagingService.getAccountManager().deleteAccount(messagingAccount, session);
-        
+
         return new AJAXRequestResult(1);
     }
 

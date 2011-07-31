@@ -82,7 +82,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * contacts
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class contacts extends XmlServlet<ContactInterface> {
@@ -218,14 +218,14 @@ public final class contacts extends XmlServlet<ContactInterface> {
         private final Date lastModified;
 
         private final int inFolder;
-        
+
         private LastModifiedCache lastModifiedCache;
 
         private final Session session;
 
         /**
          * Initializes a new {@link QueuedTask}
-         * 
+         *
          * @param contactObject The contact object
          * @param clientId The client ID
          * @param action The desired action
@@ -254,7 +254,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
             try {
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(inFolder, session);
-                
+
                 switch (action) {
                 case DataParser.SAVE:
                     if (contactObject.containsObjectID()) {

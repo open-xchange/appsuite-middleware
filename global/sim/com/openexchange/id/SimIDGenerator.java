@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 public class SimIDGenerator implements IDGeneratorService {
 
     private static final AtomicInteger id = new AtomicInteger(1);
-    
+
     public int getId(String type, int contextId) throws OXException {
         return id.getAndIncrement();
     }

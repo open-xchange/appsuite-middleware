@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountStorageInit} - Initialization for mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountStorageInit implements Initialization {
@@ -103,7 +103,7 @@ public final class MailAccountStorageInit implements Initialization {
 
     /**
      * Creates a new mail account storage service instance.
-     * 
+     *
      * @return A new mail account storage service instance
      */
     public static MailAccountStorageService newMailAccountStorageService() {
@@ -112,7 +112,7 @@ public final class MailAccountStorageInit implements Initialization {
 
     /**
      * Creates a new Unified INBOX management instance.
-     * 
+     *
      * @return A new Unified INBOX management instance
      */
     public static UnifiedINBOXManagement newUnifiedINBOXManagement() {

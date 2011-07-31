@@ -74,22 +74,22 @@ import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
 public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
 
     private final BundleContext context;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerMBeanRegisterer.class));
-    
+
     private ManagementService managementService;
-    
+
     private ConfigurationService configurationService;
-    
+
     private Activator activator;
-    
+
     private final Lock lock = new ReentrantLock();
-    
+
     public CrawlerMBeanRegisterer (BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
     }
-    
+
     public Object addingService(ServiceReference reference) {
         final Object obj = context.getService(reference);
         lock.lock();
@@ -118,20 +118,20 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
             } catch (NullPointerException e) {
                 LOG.error(e);
             }
-        }    
+        }
         return obj;
     }
 
-    
+
     public void modifiedService(ServiceReference reference, Object service) {
-        // nothing to do here        
+        // nothing to do here
     }
 
-    
+
     public void removedService(ServiceReference reference, Object service) {
         lock.lock();
         try {
-            if (service instanceof ManagementService) {                
+            if (service instanceof ManagementService) {
                 try {
                     managementService.unregisterMBean("CrawlerUpdateMBeanImpl");
                 } catch (OXException e) {
@@ -141,10 +141,10 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer{
             }
             if (service instanceof ConfigurationService) {
                 configurationService = null;
-            }            
+            }
         } finally {
             lock.unlock();
-        }        
+        }
         context.ungetService(reference);
     }
 

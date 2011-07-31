@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link UWAWidgetExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author Francisco Laguna <fla@synapps.de>
  */
 public final class UWAWidgetExceptionMessages implements LocalizableStrings {

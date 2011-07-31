@@ -65,40 +65,40 @@ public class UserAgentBehaviour implements Behaviour{
 
 	private Map<Class<? extends Object>, Object> classes = null;
 	private Pattern pattern;
-	
+
 	public UserAgentBehaviour(final String userAgentPattern, final Object...implementations) throws OXException {
 		setPattern(userAgentPattern);
 		setChanges(new HashSet<Object>(Arrays.asList(implementations)));
 	}
-	
+
 	public UserAgentBehaviour(){
-		
+
 	}
 
-	
+
 	public void setPattern(final String userAgentPattern) {
 		pattern = Pattern.compile(userAgentPattern);
 	}
-	
+
 	public void setChanges(final Set<Object> implementations) throws OXException {
 		classes = new HashMap<Class<? extends Object>, Object>();
-		
+
 		for(final Object object : implementations) {
-			
+
 			Class<? extends Object> addMe = object.getClass();
 			while(addMe != null) {
 				final Class[] interfaces = addMe.getInterfaces();
 				for(final Class<? extends Object> iFace : interfaces) {
 					if(classes.get(iFace) != null) {
 						throw ConsistencyExceptionCodes.REGISTRATION_FAILED.create("Two implemenations for "+iFace);
-					} 
+					}
 					classes.put(iFace, object);
 				}
 				addMe = addMe.getSuperclass();
 			}
 		}
 	}
-	
+
 	public void setChange(final Object implementation) throws OXException {
 		setChanges(new HashSet(Arrays.asList(implementation)));
 	}
@@ -120,7 +120,7 @@ public class UserAgentBehaviour implements Behaviour{
     public Set<Class<? extends Object>> provides() {
 		return classes.keySet();
 	}
-	
+
 	@Override
 	public String toString(){
 		return "UserAgent matcher: "+pattern.toString();

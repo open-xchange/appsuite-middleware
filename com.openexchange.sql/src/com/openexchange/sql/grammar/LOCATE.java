@@ -61,7 +61,7 @@ public class LOCATE extends TernaryFunction {
     public void build(IStatementBuilder builder) {
 		builder.buildLOCATE(this);
 	}
-	
+
 	@Override
     public String getSqlKeyword() {
 		return "LOCATE";

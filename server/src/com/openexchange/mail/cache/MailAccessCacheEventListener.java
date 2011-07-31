@@ -68,7 +68,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link MailAccessCacheEventListener} - Listens for removed session containers to dispose its cached mail access instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {

@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link OrderDirection} - The order driection.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -81,7 +81,7 @@ public enum OrderDirection {
 
     /**
      * Get the corresponding order direction
-     * 
+     *
      * @param order The order <code>int</code> value
      * @return The corresponding order direction
      */
@@ -94,6 +94,6 @@ public enum OrderDirection {
         }
         return null;
     }
-    
+
 
 }

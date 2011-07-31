@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FormStrings}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class FormStrings implements LocalizableStrings {

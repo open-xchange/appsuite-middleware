@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -39,8 +39,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -65,11 +65,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the channelID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelID() {
         return channelID;
@@ -77,11 +77,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the channelID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelID(BigInteger value) {
         this.channelID = value;
@@ -89,11 +89,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the inUse property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isInUse() {
         return inUse;
@@ -101,11 +101,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the inUse property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setInUse(Boolean value) {
         this.inUse = value;
@@ -113,11 +113,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -125,11 +125,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -137,11 +137,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the filter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFilter() {
         return filter;
@@ -149,11 +149,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the filter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFilter(String value) {
         this.filter = value;
@@ -161,11 +161,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -173,11 +173,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -185,11 +185,11 @@ public class GetPublicNoRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -197,11 +197,11 @@ public class GetPublicNoRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;

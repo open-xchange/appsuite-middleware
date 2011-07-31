@@ -52,52 +52,52 @@
 package com.openexchange.webdav.xml.fields;
 
 public interface CalendarFields extends CommonFields {
-	
+
 	public static final String TITLE = "title";
-	
+
 	public static final String START_DATE = "start_date";
-	
+
 	public static final String END_DATE = "end_date";
-	
+
 	public static final String NOTE = "note";
-	
+
 	public static final String ALARM = "alarm";
 
 	public static final String CONFIRM = "confirm";
 
 	public static final String CONFIRM_MESSAGE = "confirm_message";
-	
+
 	public static final String RECURRENCE_ID = "recurrence_id";
-		
+
 	public static final String RECURRENCE_POSITION = "recurrence_position";
-	
+
 	public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
-	
+
 	public static final String RECURRENCE_TYPE = "recurrence_type";
-	
+
 	public static final String CHANGE_EXCEPTIONS = "changeexceptions";
-	
+
 	public static final String DELETE_EXCEPTIONS = "deleteexceptions";
-	
+
 	public static final String DAYS = "days";
-	
+
 	public static final String DAY_IN_MONTH = "day_in_month";
-	
+
 	public static final String MONTH = "month";
-	
+
 	public static final String INTERVAL = "interval";
-	
+
 	public static final String UNTIL = "until";
-	
+
 	public static final String OCCURRENCES = "occurrences";
-	
+
 	public static final String NOTIFICATION = "notify_participants";
-	
+
 	public static final String RECURRENCE_CALCULATOR = "recurrence_calculator";
-	
+
 	public static final String ALARM_FLAG = "alarm_flag";
-	
+
 	public static final String PARTICIPANTS = "participants";
-	
+
 	public static final String USERS = "users";
 }

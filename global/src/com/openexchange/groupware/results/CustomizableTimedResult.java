@@ -63,7 +63,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class CustomizableTimedResult<T> implements TimedResult<T>{
     private TimedResult<T> result;
     private Customizer<T> customizer;
-    
+
     public CustomizableTimedResult(TimedResult<T> result, Customizer<T> customizer) {
         super();
         this.result = result;
@@ -76,5 +76,5 @@ public class CustomizableTimedResult<T> implements TimedResult<T>{
         return result.sequenceNumber();
     }
 
-    
+
 }

@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactDeleteListener} - The delete listener for contact module
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactDeleteListener implements DeleteListener {

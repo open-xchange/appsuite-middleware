@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class CalendarCallbacks implements CalendarListener {
     private final List<CalendarListener> listeners = new ArrayList<CalendarListener>();
     private List<CalendarListener> copyForReading = new ArrayList<CalendarListener>();
-    
+
     private static final CalendarCallbacks INSTANCE = new CalendarCallbacks();
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCallbacks.class));
 

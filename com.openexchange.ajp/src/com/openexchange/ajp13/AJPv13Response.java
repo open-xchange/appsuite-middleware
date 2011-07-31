@@ -63,7 +63,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link AJPv13Response} - Constructs AJP response packages for <code>END_RESPONSE</code>, <code>SEND_BODY_CHUNK</code>,
  * <code>SEND_HEADERS</code>, <code>GET_BODY_CHUNK</code>, etc.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13Response {
@@ -85,7 +85,7 @@ public class AJPv13Response {
     /**
      * The max. allowed chunk size in a SEND_BODY_CHUNK package, which is the max. package size of 8192 (8K) minus 8 bytes (MagicBytes (2) +
      * DataLength (2) + PrefixCode (1) + CunkLength (2) + TerminatingZeroByte (1))
-     * 
+     *
      * <pre>
      * 'A' 'B' Data-Length(2) Prefix-Code(1) Chunk-Length(2) [chunk bytes] '00'
      * </pre>
@@ -113,7 +113,7 @@ public class AJPv13Response {
 
     /**
      * Starting first 4 bytes:
-     * 
+     *
      * <pre>
      * 'A' + 'B' + [data length as 2 byte integer]
      * </pre>
@@ -159,7 +159,7 @@ public class AJPv13Response {
 
     /**
      * Initializes a new {@link AJPv13Response}.
-     * 
+     *
      * @param prefixCode The prefix code determining kind of response package
      */
     public AJPv13Response(final int prefixCode) {
@@ -169,7 +169,7 @@ public class AJPv13Response {
 
     /**
      * Constructor for <code>END_RESPONSE</code>.
-     * 
+     *
      * @param prefixCode - the <code>END_RESPONSE</code> prefix code
      * @param closeConnection - whether or not to signal to close the connection
      */
@@ -181,7 +181,7 @@ public class AJPv13Response {
 
     /**
      * Constructor for <code>SEND_BODY_CHUNK</code>.
-     * 
+     *
      * @param prefixCode - the <code>SEND_BODY_CHUNK</code> prefix code
      * @param responseDataChunk - the data chunk as array of <code>byte</code>
      */
@@ -194,7 +194,7 @@ public class AJPv13Response {
 
     /**
      * Constructor for <code>SEND_HEADERS</code>.
-     * 
+     *
      * @param prefixCode - the <code>SEND_HEADERS</code> prefix code
      * @param resp - the <code>HttpServletResponse</code> object containing http header data
      */
@@ -206,7 +206,7 @@ public class AJPv13Response {
 
     /**
      * Constructor for <code>GET_BODY_CHUNK</code>.
-     * 
+     *
      * @param prefixCode - the <code>GET_BODY_CHUNK</code> prefix code
      * @param requestedLength - the requested body chunk's length
      */
@@ -218,7 +218,7 @@ public class AJPv13Response {
 
     /**
      * Gets the response bytes corresponding to this AJP response.
-     * 
+     *
      * @return The response bytes
      * @throws AJPv13Exception If response bytes cannot be created
      */
@@ -245,7 +245,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>SEND_BODY_CHUNK</code> response bytes
-     * 
+     *
      * @param responseDataChunk - the data chunk
      * @return an array of <code>byte</code> containing the <code>SEND_BODY_CHUNK</code> response bytes
      * @throws AJPv13Exception If <code>SEND_BODY_CHUNK</code> response bytes cannot be created.
@@ -256,7 +256,7 @@ public class AJPv13Response {
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     * 
+     *
      * <pre>
      * prefix (1) + chunk_length (2) + terminating zero byte (1)
      * </pre>
@@ -265,7 +265,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>SEND_BODY_CHUNK</code> response bytes.
-     * 
+     *
      * @param responseDataChunk The data chunk
      * @param off The start offset in data chunk
      * @param len The number of bytes to write
@@ -294,7 +294,7 @@ public class AJPv13Response {
 
     /**
      * Data length of SEND_BODY_CHUNK:
-     * 
+     *
      * <pre>
      * prefix(1) + http_status_code(2) + http_status_msg(3) + num_headers(2)
      * </pre>
@@ -303,7 +303,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>SEND_HEADERS</code> response bytes.
-     * 
+     *
      * @param servletResponse - the <code>HttpServletResponse</code> object containing http header data
      * @return an array of <code>byte</code> containing the <code>SEND_HEADERS</code> response bytes
      * @throws AJPv13Exception If code>SEND_HEADERS</code> response bytes cannot be created.
@@ -367,7 +367,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>SEND_HEADERS</code> response bytes.
-     * 
+     *
      * @param servletResponse - the <code>HttpServletResponse</code> object containing http header data
      * @return an array of <code>byte</code> containing the <code>SEND_HEADERS</code> response bytes
      * @throws AJPv13Exception If code>SEND_HEADERS</code> response bytes cannot be created.
@@ -419,7 +419,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     * 
+     *
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
      * @throws AJPv13Exception If <code>END_RESPONSE</code> response bytes cannot be created.
      */
@@ -429,7 +429,7 @@ public class AJPv13Response {
 
     /**
      * Data length of END_RESPONSE:
-     * 
+     *
      * <pre>
      * prefix(1) + close_connection_boolean(1)
      * </pre>
@@ -438,7 +438,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>END_RESPONSE</code> response bytes.
-     * 
+     *
      * @param closeConnection - whether or not to signal connection closure
      * @return an array of <code>byte</code> containing the <code>END_RESPONSE</code> response bytes
      * @throws AJPv13Exception If <code>END_RESPONSE</code> response bytes cannot be created.
@@ -462,7 +462,7 @@ public class AJPv13Response {
 
     /**
      * Data length of GET_BODY_CHUNK:
-     * 
+     *
      * <pre>
      * prefix(1) + requested_size_as_integer(2)
      * </pre>
@@ -471,7 +471,7 @@ public class AJPv13Response {
 
     /**
      * Creates the <code>GET_BODY_CHUNK</code> response bytes.
-     * 
+     *
      * @param requestedLength - the requested chunk's size
      * @return an array of <code>byte</code> containing the <code>GET_BODY_CHUNK</code> response bytes
      * @throws AJPv13Exception If <code>GET_BODY_CHUNK</code> response bytes cannot be created.
@@ -488,7 +488,7 @@ public class AJPv13Response {
 
     /**
      * Creates the CPong response bytes.
-     * 
+     *
      * @return an array of <code>byte</code> containing the CPong response bytes
      */
     public static final byte[] getCPongBytes() {
@@ -602,7 +602,7 @@ public class AJPv13Response {
 //     * <li>The data length as an integer (takes two bytes)</li>
 //     * <li>The response's prefix code</li>
 //     * </ol>
-//     * 
+//     *
 //     * @throws AJPv13Exception If starting bytes cannot be written
 //     */
 //    private static final void fillStartBytes(final int prefixCode, final int dataLength, final ByteArrayOutputStream byteArray) throws AJPv13Exception {
@@ -625,7 +625,7 @@ public class AJPv13Response {
      * <li>The data length as an integer (takes two bytes)</li>
      * <li>The response's prefix code</li>
      * </ol>
-     * 
+     *
      * @throws AJPv13Exception If starting bytes cannot be written
      */
     private static final int fillStartBytes(final int prefixCode, final int dataLength, final byte[] byteArray) throws AJPv13Exception {

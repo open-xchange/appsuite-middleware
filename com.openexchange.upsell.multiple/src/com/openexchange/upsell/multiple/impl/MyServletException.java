@@ -56,25 +56,25 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MyServletException}
- * 
- * 
+ *
+ *
  */
 public final class MyServletException extends OXException {
 
     /**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 795504906963046646L;
 
 	public static enum Code implements OXExceptionCode {
 
-        
+
         API_COMMUNICATION_ERROR("An interface error occurred. action: \"%1$s\" ,response: \"%2$s\" " , Category.CATEGORY_ERROR, 1),
-        
+
         HTTP_COMMUNICATION_ERROR("Http communication error deteced. Details: \"%1$s\"" , Category.CATEGORY_ERROR, 1),
-        
+
         EMAIL_COMMUNICATION_ERROR("Upsell email communication error deteced.Details \"%1$s\"" , Category.CATEGORY_ERROR, 1);
-        
+
 
         private final String message;
 
@@ -102,12 +102,12 @@ public final class MyServletException extends OXException {
         public String getMessage() {
             return message;
         }
-        
+
         @Override
         public String getPrefix() {
             return "RES";
         }
-        
+
         @Override
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
@@ -115,7 +115,7 @@ public final class MyServletException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -124,7 +124,7 @@ public final class MyServletException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -134,7 +134,7 @@ public final class MyServletException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance

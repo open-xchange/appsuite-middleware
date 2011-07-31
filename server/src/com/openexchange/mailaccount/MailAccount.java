@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link MailAccount} - Provides all necessary information for a user's mail account like server, port, login, password, etc.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailAccount extends Serializable {
@@ -66,35 +66,35 @@ public interface MailAccount extends Serializable {
 
     /**
      * Gets the unique ID of this mail account.
-     * 
+     *
      * @return The unique ID of this mail account
      */
     public int getId();
 
     /**
      * Gets the ID of the user belonging to this mail account.
-     * 
+     *
      * @return The ID of the user
      */
     public int getUserId();
 
     /**
      * Gets the (display) name of this mail account; e.g. <code>&quot;My mail account&quot;</code>.
-     * 
+     *
      * @return The (display) name
      */
     public String getName();
 
     /**
      * Generates the mail server URL; e.g. <code>&quot;imap://imap.somewhere.com:4143&quot;</code>.
-     * 
+     *
      * @return The generated mail server URL
      */
     public String generateMailServerURL();
 
     /**
      * Generates the transport server URL; e.g. <code>&quot;smtp://smtp.somewhere.com:225&quot;</code>.
-     * 
+     *
      * @return The generated transport server URL
      */
     public String generateTransportServerURL();
@@ -104,28 +104,28 @@ public interface MailAccount extends Serializable {
      * <p>
      * The mail server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
      * address.
-     * 
+     *
      * @return The mail server name
      */
     public String getMailServer();
 
     /**
      * Gets the mail server port.
-     * 
+     *
      * @return The mail server port
      */
     public int getMailPort();
 
     /**
      * Gets the mail server protocol.
-     * 
+     *
      * @return The mail server protocol
      */
     public String getMailProtocol();
 
     /**
      * Checks if a secure connection to mail server shall be established.
-     * 
+     *
      * @return <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
      */
     public boolean isMailSecure();
@@ -135,35 +135,35 @@ public interface MailAccount extends Serializable {
      * <p>
      * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
      * address.
-     * 
+     *
      * @return The transport server name
      */
     public String getTransportServer();
 
     /**
      * Gets the transport server port.
-     * 
+     *
      * @return The transport server port
      */
     public int getTransportPort();
 
     /**
      * Gets the transport server protocol.
-     * 
+     *
      * @return The transport server protocol
      */
     public String getTransportProtocol();
 
     /**
      * Checks if a secure connection to transport server shall be established.
-     * 
+     *
      * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
      */
     public boolean isTransportSecure();
 
     /**
      * Gets the login.
-     * 
+     *
      * @return The login
      */
     public String getLogin();
@@ -173,7 +173,7 @@ public interface MailAccount extends Serializable {
      * <p>
      * Beware that password might be encoded when fetching from storage. Use one of the <code>decrypt()</code> methods of
      * {@link com.openexchange.mail.utils.MailPasswordUtil MailPasswordUtil} plus session password to obtain plain-text password.
-     * 
+     *
      * @return The encoded password
      */
     public String getPassword();
@@ -182,7 +182,7 @@ public interface MailAccount extends Serializable {
      * Gets the optional transport login.
      * <p>
      * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
-     * 
+     *
      * @return The optional transport login
      */
     public String getTransportLogin();
@@ -191,14 +191,14 @@ public interface MailAccount extends Serializable {
      * Gets the optional transport password.
      * <p>
      * <b>NOTE</b>:&nbsp;{@link #getPassword()} is returned if no separate transport password is available.
-     * 
+     *
      * @return The optional transport password
      */
     public String getTransportPassword();
 
     /**
      * Gets the primary email address.
-     * 
+     *
      * @return The primary email address
      */
     public String getPrimaryAddress();
@@ -206,28 +206,28 @@ public interface MailAccount extends Serializable {
     /**
      * Gets the personal part of primary email address; e.g.<br>
      * <code>Jane Doe &lt;jane.doe@somewhere.com&gt;</code>
-     * 
+     *
      * @return The personal
      */
     public String getPersonal();
 
     /**
      * Gets the reply-to address.
-     * 
+     *
      * @return The reply-to address
      */
     public String getReplyTo();
 
     /**
      * Checks if this mail account is a default account.
-     * 
+     *
      * @return <code>true</code> if this mail account is a default account; otherwise <code>false</code>
      */
     public boolean isDefaultAccount();
 
     /**
      * Gets the spam handler name for this mail account.
-     * 
+     *
      * @return The spam handler name
      */
     public String getSpamHandler();
@@ -236,7 +236,7 @@ public interface MailAccount extends Serializable {
      * Gets the name of the draft folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the draft folder
      */
     public String getDrafts();
@@ -245,7 +245,7 @@ public interface MailAccount extends Serializable {
      * Gets the name of the sent folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the sent folder
      */
     public String getSent();
@@ -254,7 +254,7 @@ public interface MailAccount extends Serializable {
      * Gets the name of the spam folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the spam folder
      */
     public String getSpam();
@@ -263,7 +263,7 @@ public interface MailAccount extends Serializable {
      * Gets the name of the trash folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the trash folder
      */
     public String getTrash();
@@ -272,7 +272,7 @@ public interface MailAccount extends Serializable {
      * Gets the name of the confirmed ham folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the confirmed ham folder
      */
     public String getConfirmedHam();
@@ -281,70 +281,70 @@ public interface MailAccount extends Serializable {
      * Gets the name of the confirmed spam folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the confirmed spam folder
      */
     public String getConfirmedSpam();
 
     /**
      * Checks if this mail account is enabled for Unified INBOX.
-     * 
+     *
      * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
      */
     public boolean isUnifiedINBOXEnabled();
 
     /**
      * Gets the trash fullname
-     * 
+     *
      * @return The trash fullname
      */
     public String getTrashFullname();
 
     /**
      * Gets the sent fullname
-     * 
+     *
      * @return The sent fullname
      */
     public String getSentFullname();
 
     /**
      * Gets the drafts fullname
-     * 
+     *
      * @return The drafts fullname
      */
     public String getDraftsFullname();
 
     /**
      * Gets the spam fullname
-     * 
+     *
      * @return The spam fullname
      */
     public String getSpamFullname();
 
     /**
      * Gets the confirmed-spam fullname
-     * 
+     *
      * @return The confirmed-spam fullname
      */
     public String getConfirmedSpamFullname();
 
     /**
      * Gets the confirmed-ham fullname
-     * 
+     *
      * @return The confirmed-ham fullname
      */
     public String getConfirmedHamFullname();
 
     /**
      * Gets this account's properties.
-     * 
+     *
      * @return Account's properties
      */
     public Map<String, String> getProperties();
 
     /**
      * Adds specified name-value-pair to properties.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */

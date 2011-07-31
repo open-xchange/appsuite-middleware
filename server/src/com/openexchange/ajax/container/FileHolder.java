@@ -58,11 +58,11 @@ import java.io.InputStream;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileHolder implements IFileHolder {
-    
+
     private InputStream is;
-    
+
     private long length;
-    
+
     private String contentType;
 
     private String name;
@@ -77,35 +77,35 @@ public class FileHolder implements IFileHolder {
         this.name = name;
     }
 
-    
+
     @Override
     public InputStream getStream() {
         return is;
     }
 
-    
+
     public void setStream(final InputStream is) {
         this.is = is;
     }
 
-    
+
     @Override
     public long getLength() {
         return length;
     }
 
-    
+
     public void setLength(final long length) {
         this.length = length;
     }
 
-    
+
     @Override
     public String getContentType() {
         return contentType;
     }
 
-    
+
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
@@ -115,11 +115,11 @@ public class FileHolder implements IFileHolder {
     public String getName() {
         return name;
     }
-    
+
     public void setName(final String name) {
         this.name = name;
     }
-    
+
     @Override
     public String getDisposition() {
         return disposition;
@@ -127,11 +127,11 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {
         this.disposition = disposition;
     }
-    
+
 }

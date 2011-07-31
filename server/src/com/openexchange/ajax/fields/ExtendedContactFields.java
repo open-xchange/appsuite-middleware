@@ -54,16 +54,16 @@ package com.openexchange.ajax.fields;
  * {@link ExtendedContactFields}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
- * 
+ *
  * Fields that are not OX-fields, but that in some kind of conversion contitute
  * parts of them (for example day, month and year becoming an OX date afterwards)
  */
 public interface ExtendedContactFields extends ContactFields {
-    
+
     public static final String BIRTHDAY_YEAR    = "birthday_year";
-    
+
     public static final String BIRTHDAY_MONTH   = "birthday_month";
-    
+
     public static final String BIRTHDAY_DAY     = "birthday_day";
 
 }

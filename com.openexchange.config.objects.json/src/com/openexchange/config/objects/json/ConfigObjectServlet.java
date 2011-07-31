@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ConfigObjectServlet extends MultipleAdapterServletNew {
 
     public static ConfigObjectActionFactory ACTIONS = null;
-    
+
     public ConfigObjectServlet() {
         super(ACTIONS);
     }

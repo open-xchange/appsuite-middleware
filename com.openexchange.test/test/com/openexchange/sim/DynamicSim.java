@@ -65,7 +65,7 @@ public class DynamicSim implements InvocationHandler{
     private Throwable exception;
     private Object retval;
     private boolean wasCalled;
-    
+
     private Expectation expectation;
     private Block block;
 
@@ -88,17 +88,17 @@ public class DynamicSim implements InvocationHandler{
         }
         return null;
     }
-    
+
     public <T> T become(Class<T> klass) {
         @SuppressWarnings("unchecked")
         T returnVal = (T) Proxy.newProxyInstance(klass.getClassLoader(), new Class[]{klass}, this);
         return returnVal;
     }
-    
+
     public static <T> T compose(Class<T> klass, DynamicSim...sims) {
         return compose(klass, new Class[0], sims);
     }
-    
+
     public static<T> T compose(Class<T> klass, List<DynamicSim> dynamicSims) {
         return compose(klass, new Class[0], dynamicSims);
     }
@@ -115,15 +115,15 @@ public class DynamicSim implements InvocationHandler{
         T retval = (T) Proxy.newProxyInstance(klass.getClassLoader(), classes, sequenceInvocationHandler);
         return retval;
     }
-    
+
     public static<T> T compose(Class<T> klass, Class<?>[] additionalClasses, List<DynamicSim> dynamicSims) {
         return compose(klass, additionalClasses, dynamicSims.toArray(new DynamicSim[dynamicSims.size()]));
     }
-    
+
     private static final class SequenceInvocationHandler implements InvocationHandler {
         private InvocationHandler[] invocationHandlers;
         private int index = 0;
-        
+
         public SequenceInvocationHandler(InvocationHandler[] handlers) {
             this.invocationHandlers = handlers;
         }
@@ -134,14 +134,14 @@ public class DynamicSim implements InvocationHandler{
             }
             return invocationHandlers[index++].invoke(proxy, method, args);
         }
-        
-        
+
+
     }
-    
+
     public boolean wasCalled() {
         return wasCalled;
     }
-    
+
 
     public void setReturnValue(Object retval) {
         this.retval = retval;
@@ -160,7 +160,7 @@ public class DynamicSim implements InvocationHandler{
     }
 
 
-    
-    
-    
+
+
+
 }

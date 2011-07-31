@@ -59,7 +59,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link TimeoutConcurrentSet} - A timed concurrent set.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimeoutConcurrentSet<E> {
@@ -80,7 +80,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Initializes a new {@link TimeoutConcurrentSet}.
-     * 
+     *
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @throws OXException If initialization fails due to missing {@link TimerService timer service}
      */
@@ -90,7 +90,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Initializes a new {@link TimeoutConcurrentSet}.
-     * 
+     *
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @param forceTimeout <code>true</code> to force initial time-out of contained elements even if they were "touched"; otherwise
      *            <code>false</code> to keep them alive as long as not timed-out
@@ -106,7 +106,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Checks if map is empty.
-     * 
+     *
      * @return <code>true</code> if map is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -144,7 +144,7 @@ public final class TimeoutConcurrentSet<E> {
     /**
      * Acts like all elements kept in this time-out map receive their time-out event. <br>
      * Furthermore the map is cleared.
-     * 
+     *
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public void timeoutAll() {
@@ -163,7 +163,7 @@ public final class TimeoutConcurrentSet<E> {
     /**
      * Acts like the element receives its time-out event. <br>
      * Furthermore the element is removed from map.
-     * 
+     *
      * @param element The element
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
@@ -179,7 +179,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Puts specified element into this time-out map with default time-out listener.
-     * 
+     *
      * @param element The element to put
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @return <code>true</code> if this set did not already contain the specified element
@@ -191,7 +191,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Adds specified key-value-pair into this time-out map.
-     * 
+     *
      * @param element The element to put
      * @param timeToLiveSeconds The value's time-to-live seconds
      * @param timeoutListener The value's time-out listener triggered on its time-out event
@@ -213,7 +213,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Checks if this time-out map contains specified element.
-     * 
+     *
      * @param element The element
      * @return <code>true</code> if this time-out map contains a mapping for specified key; otherwise <code>false</code>
      */
@@ -227,7 +227,7 @@ public final class TimeoutConcurrentSet<E> {
     /**
      * Returns an iterator over the elements in this set. The elements are returned in no particular order (unless this set is an instance
      * of some class that provides a guarantee).
-     * 
+     *
      * @return an iterator over the elements in this set.
      */
     public Iterator<E> iterator() {
@@ -239,7 +239,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Returns any of the elements in this set.
-     * 
+     *
      * @return Any element or <code>null</code> if this set is empty
      */
     public E getAny() {
@@ -255,7 +255,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Removes the element.
-     * 
+     *
      * @param element The element
      * @return <code>true</code> if the set contained the specified element.
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
@@ -269,7 +269,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Gets the default listener triggered on element timeout.
-     * 
+     *
      * @return The default listener triggered on element timeout
      */
     public TimeoutListener<E> getDefaultTimeoutListener() {
@@ -278,7 +278,7 @@ public final class TimeoutConcurrentSet<E> {
 
     /**
      * Sets the default listener triggered on element timeout.
-     * 
+     *
      * @param defaultTimeoutListener The default listener triggered on element timeout
      */
     public void setDefaultTimeoutListener(final TimeoutListener<E> defaultTimeoutListener) {

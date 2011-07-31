@@ -72,7 +72,7 @@ import com.openexchange.server.Initialization;
 /**
  * {@link MailInitialization} - Initializes whole mail implementation and therefore provides a central point for starting/stopping mail
  * implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
@@ -160,17 +160,17 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                 }
             }, startedStack);
             startUp(new Initialization() {
-                
+
                 @Override
                 public void stop() {
                     // Nothing to do
                 }
-                
+
                 @Override
                 public void start() {
                     /*-
                      * Add handlers for main MIME types
-                     * 
+                     *
                         #
                         #
                         # Default mailcap file for the JavaMail System.
@@ -261,7 +261,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the (possibly temporary) unavailability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches shut-down fails
      */
     public void shutDownCaches() throws OXException {
@@ -271,7 +271,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the re-availability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches start-up fails
      */
     public void startUpCaches() throws OXException {

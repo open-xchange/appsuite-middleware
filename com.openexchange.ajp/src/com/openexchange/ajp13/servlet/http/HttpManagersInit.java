@@ -71,7 +71,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link HttpManagersInit} - {@link Initialization} for HTTP servlet management.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpManagersInit implements Initialization {
@@ -91,7 +91,7 @@ public final class HttpManagersInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link HttpManagersInit}
-     * 
+     *
      * @return
      */
     public static HttpManagersInit getInstance() {
@@ -179,7 +179,7 @@ public final class HttpManagersInit implements Initialization {
 
     /**
      * Ensures that servlet path starts with "/" character.
-     * 
+     *
      * @param servletPath The servlet path
      * @return The prepared servlet path
      */

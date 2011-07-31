@@ -68,28 +68,28 @@ import com.openexchange.publish.SimPublicationService;
  *
  */
 public class PublicationTargetCollectorTest extends TestCase {
-    
-    
-    
+
+
+
     private PublicationTargetCollector collector;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         collector = new PublicationTargetCollector();
-        
+
         PublicationTarget target1 = new PublicationTarget();
         target1.setModule("Cookies");
         target1.setId("com.openexchange.publish.test1");
-        
+
         PublicationTarget target2 = new PublicationTarget();
         target2.setId("com.openexchange.publish.test2");
         target2.setModule("Vegetables");
-        
+
         SimPublicationService pubService1 = new SimPublicationService();
         pubService1.setTarget(target1);
         target1.setPublicationService(pubService1);
-        
+
         SimPublicationService pubService2 = new SimPublicationService() {
             @Override
             public boolean knows(Context ctx, int publicationId) {
@@ -98,34 +98,34 @@ public class PublicationTargetCollectorTest extends TestCase {
         };
         pubService2.setTarget(target2);
         target2.setPublicationService(pubService2);
-        
+
         collector.addPublicationService(pubService1);
         collector.addPublicationService(pubService2);
-        
+
     }
-    
+
     public void testList() {
         Collection<PublicationTarget> targets = collector.listTargets();
         assertNotNull("Targets was null", targets);
         assertEquals("Expected two publication targets", 2, targets.size());
         assertTargets(targets, "com.openexchange.publish.test1", "com.openexchange.publish.test2");
     }
-    
+
     public void testGetTarget() throws OXException {
         assertGettable(collector, "com.openexchange.publish.test1");
     }
-    
+
     public void testKnows() throws OXException {
         assertKnows(collector, "com.openexchange.publish.test1");
         assertDoesNotKnow(collector, "com.openexchange.publish.unknown");
     }
-    
+
     public void testGetTargetForEntity() throws OXException {
         PublicationTarget target = collector.getTarget(new SimContext(1), 12);
         assertNotNull("Target was null!", target);
         assertEquals("com.openexchange.publish.test2", target.getId());
     }
-    
+
     public void testGetTargetForModule() {
         Collection<PublicationTarget> targets = collector.getTargetsForEntityType("Cookies");
         assertNotNull("targets was null", targets);

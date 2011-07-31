@@ -76,14 +76,14 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     private final HashMap<String, ContactUnificationState> contactUnificationStates = new HashMap<String, ContactUnificationState>();
     private final HashMap<UUID, List<UUID>> associatedContacts = new HashMap<UUID, List <UUID>>();
     private final HashMap<UUID, Contact> contactsByUUID = new HashMap<UUID, Contact>();
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#deleteContactObject(int, int, java.util.Date)
      */
     @Override
     public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -92,7 +92,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     @Override
     public void insertContactObject(final Contact contactObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -100,12 +100,12 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
      */
     @Override
     public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException {
-        contactsByUUID.put(UUID.fromString(contactObj.getUserField20()), contactObj);        
+        contactsByUUID.put(UUID.fromString(contactObj.getUserField20()), contactObj);
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject, int, com.openexchange.groupware.search.Order, int[])
-     * 
+     *
      */
     @Override
     public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
@@ -224,7 +224,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     @Override
     public void updateUserContact(final Contact contact, final Date lastmodified) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -233,7 +233,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     @Override
     public void forceInsertContactObject(final Contact co) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -305,9 +305,9 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
      */
     @Override
     public void setUnificationStateForContacts(final Contact aggregator, final Contact contributor, final ContactUnificationState state) {
-        
+
     }
-    
+
     public void addContact(final Contact contact){
         contactsByUUID.put(UUID.fromString(contact.getUserField20()), contact);
     }

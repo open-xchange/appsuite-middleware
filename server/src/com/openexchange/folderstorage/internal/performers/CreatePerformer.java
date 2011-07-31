@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CreatePerformer} - Serves the <code>CREATE</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreatePerformer extends AbstractPerformer {
@@ -84,7 +84,7 @@ public final class CreatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link CreatePerformer}.
-     * 
+     *
      * @param session The session
      */
     public CreatePerformer(final ServerSession session) {
@@ -93,7 +93,7 @@ public final class CreatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link CreatePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -103,7 +103,7 @@ public final class CreatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link CreatePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -113,7 +113,7 @@ public final class CreatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link CreatePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -124,7 +124,7 @@ public final class CreatePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>CREATE</code> request.
-     * 
+     *
      * @param toCreate The object describing the folder to create
      * @throws OXException If creation fails
      */

@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetPerformer} - Serves the <code>GET</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetPerformer extends AbstractUserizedFolderPerformer {
@@ -76,7 +76,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link GetPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -86,7 +86,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link GetPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -97,7 +97,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link GetPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -108,7 +108,7 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link GetPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator

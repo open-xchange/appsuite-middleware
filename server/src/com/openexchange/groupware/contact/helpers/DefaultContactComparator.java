@@ -67,7 +67,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
         put(Contact.SPECIAL_SORTING, new SpecialAlphanumSortContactComparator());
         put(Contact.USE_COUNT_GLOBAL_FIRST, new UseCountGlobalFirstComparator());
     }};
-    
+
     private final int field;
     private final Order order;
 
@@ -90,7 +90,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
         final Object v2 = o2.get(field);
         return Order.DESCENDING.equals(order) ? -1 * internalCompare(v1, v2) : internalCompare(v1, v2);
     }
-    
+
     private int internalCompare(final Object v1, final Object v2) {
         if(v1 == v2) {
             return 0;

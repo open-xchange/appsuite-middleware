@@ -69,7 +69,7 @@ import com.openexchange.subscribe.helpers.FilteredSubscriptionSourceDiscoverySer
 public class CompositeSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
     private final List<SubscriptionSourceDiscoveryService> services = new ArrayList<SubscriptionSourceDiscoveryService>();
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscriptionSourceDiscoveryService#getSource(java.lang.String)
      */
@@ -107,11 +107,11 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
                     return o1.getDisplayName() == null ? -1 : 1;
                 }
             }
-            
+
         });
         return sources;
     }
-    
+
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
@@ -124,11 +124,11 @@ public class CompositeSubscriptionSourceDiscoveryService implements Subscription
         }
         return false;
     }
-    
+
     public void addSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         services.add(service);
     }
-    
+
     public void removeSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         services.remove(service);
     }

@@ -65,7 +65,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * {@link POP3CreateTableTask} - Inserts necessary tables to support missing POP3 features.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class POP3CreateTableTask implements UpdateTask {
@@ -83,28 +83,28 @@ public class POP3CreateTableTask implements UpdateTask {
     }
 
     private static final String getCreatePOP3IDsMapping() {
-        return "CREATE TABLE pop3_storage_ids (" + 
-        		"cid INT4 unsigned NOT NULL," + 
-        		"user INT4 unsigned NOT NULL," + 
-        		"id INT4 unsigned NOT NULL," + 
-        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"PRIMARY KEY (cid, user, id, uidl)," + 
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
+        return "CREATE TABLE pop3_storage_ids (" +
+        		"cid INT4 unsigned NOT NULL," +
+        		"user INT4 unsigned NOT NULL," +
+        		"id INT4 unsigned NOT NULL," +
+        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        		"fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        		"uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        		"PRIMARY KEY (cid, user, id, uidl)," +
+        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," +
+        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     private static final String getCreatePOP3DeletedContainer() {
-        return "CREATE TABLE pop3_storage_deleted (" + 
-        		"cid INT4 unsigned NOT NULL," + 
-        		"user INT4 unsigned NOT NULL," + 
-        		"id INT4 unsigned NOT NULL," + 
-        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        		"PRIMARY KEY (cid, user, id, uidl)," + 
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," + 
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" + 
+        return "CREATE TABLE pop3_storage_deleted (" +
+        		"cid INT4 unsigned NOT NULL," +
+        		"user INT4 unsigned NOT NULL," +
+        		"id INT4 unsigned NOT NULL," +
+        		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        		"PRIMARY KEY (cid, user, id, uidl)," +
+        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," +
+        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -148,7 +148,7 @@ public class POP3CreateTableTask implements UpdateTask {
 
     /**
      * Check a table's existence
-     * 
+     *
      * @param tableName The table name to check
      * @param dbmd The database's meta data
      * @return <code>true</code> if table exists; otherwise <code>false</code>

@@ -93,7 +93,7 @@ public class Activator extends DeferredActivator {
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
     private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
-    
+
     private MessagingServiceRegistry registry;
 
     private MessagingMessageParser parser;
@@ -126,7 +126,7 @@ public class Activator extends DeferredActivator {
             reg.close();
         }
         servletRegistrations.clear();
-        
+
         for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }

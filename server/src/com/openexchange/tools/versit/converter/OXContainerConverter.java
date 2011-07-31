@@ -119,7 +119,7 @@ import com.openexchange.tools.versit.values.RecurrenceValue.Weekday;
  * VCard, you're at the right place - but don't forget to do it in both directions.
  * <p>
  * <a href="http://tools.ietf.org/html/rfc2426">vCard MIME Directory Profile</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixing and refactoring)
  */
@@ -235,7 +235,7 @@ public class OXContainerConverter {
     public void setSendFloating(final boolean sendFloating) {
         this.sendFloating = sendFloating;
     }
-    
+
     /**
      * Gets the addDisplayName4DList
      *
@@ -244,7 +244,7 @@ public class OXContainerConverter {
     public boolean isAddDisplayName4DList() {
         return addDisplayName4DList;
     }
-    
+
     /**
      * Sets the addDisplayName4DList
      *
@@ -841,7 +841,7 @@ public class OXContainerConverter {
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     * 
+     *
      * @param contact The contact container to fill
      * @param url The URI parameter's value
      * @throws ConverterException If converting image's data fails
@@ -857,7 +857,7 @@ public class OXContainerConverter {
     /**
      * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
      * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
-     * 
+     *
      * @param contact The contact container to fill
      * @param url The image URL
      * @throws ConverterException If converting image's data fails
@@ -1043,7 +1043,7 @@ public class OXContainerConverter {
 
     /**
      * Finds out whether a user is internal, since internal users get treated differently when entering appointments or tasks.
-     * 
+     *
      * @param mail - Mail address as string
      * @return true if is internal user, false otherwise
      */
@@ -1552,7 +1552,7 @@ public class OXContainerConverter {
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_HOME, "fax" }, contact.getFaxHome());
             addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone1());
             addProperty(object, P_TEL, P_TYPE, new String[] { "cell", PARAM_VOICE }, contact.getCellularTelephone2());
-            
+
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, PARAM_VOICE }, contact.getTelephoneOther());
             addProperty(object, P_TEL, P_TYPE, new String[] { PARAM_OTHER, "fax" }, contact.getFaxOther());
             addProperty(object, P_TEL, P_TYPE, new String[] { "isdn" }, contact.getTelephoneISDN());

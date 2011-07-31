@@ -110,7 +110,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Contacts}
- * 
+ *
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
 public final class Contacts {
@@ -142,7 +142,7 @@ public final class Contacts {
 
     /**
      * Gets the SQL statement from specified {@link Statement} instance.
-     * 
+     *
      * @param statement The statement
      * @return The extracted SQL string
      */
@@ -446,7 +446,7 @@ public final class Contacts {
             if(override) {
                 insert = contactSql.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, session.getContextId(), id);
             }
-            
+
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
             for (int i = 2; i < 650; i++) {
@@ -1434,15 +1434,15 @@ public final class Contacts {
         if (null != dleos) {
             for (int i = 0; i < dleos.length; i++) { // this for;next goes to all new entries from the client
                 new_one = dleos[i];
-        
+
                 if (new_one.containsEntryID() && (new_one.getEntryID() > 0)) { // this is a real contact entry in the distributionlist
                     boolean actions = false;
-        
+
                     if (old_dleos != null) {
                         for (int u = 0; u < old_dleos.length; u++) { // this for;next goes to all old entries from the server
                             if (old_dleos[u] != null) { // maybe we have some empty entries here from previous checks
                                 old_one = old_dleos[u];
-        
+
                                 if (new_one.searchDlistObject(old_one)) { // this will search the current entry in the old dlist
                                     if (!new_one.compareDlistObject(old_one)) {
                                         // is this true the dlistentrie has not changed, is it false the dlistentry missmatches the old one
@@ -1710,11 +1710,11 @@ public final class Contacts {
             for (int i = 0; i < leos.length; i++) {
                 final LinkEntryObject new_leo = leos[i];
                 boolean action = false;
-    
+
                 if (original != null) {
                     for (int u = 0; u < original.length; u++) {
                         final LinkEntryObject old_leo = original[u];
-    
+
                         if (new_leo.compare(old_leo)) {
                             // found this link in the old ones
                             original[u] = null;
@@ -2511,7 +2511,7 @@ public final class Contacts {
 
     /**
      * Checks if specified strings are equal
-     * 
+     *
      * @param string The first string
      * @param other The second string
      * @return <code>true</code> if both strings are considered equal; otherwise <code>false</code>

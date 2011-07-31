@@ -109,7 +109,7 @@ public class DataWriter {
     /**
      * Puts given name-<code>String</code>-pair into specified JSON object provided that <code>String</code> value is not <code>null</code>
      * and not empty
-     * 
+     *
      * @param name The name to which the value is bound
      * @param value The <code>String</code> value
      * @param json The JSON object to put into
@@ -150,7 +150,7 @@ public class DataWriter {
 
     /**
      * Conditionally puts given <code>int</code> value into specified JSON object
-     * 
+     *
      * @param name The value's name
      * @param value The <code>int</code> value
      * @param json The JSON object to put into
@@ -516,7 +516,7 @@ public class DataWriter {
 
         /**
          * Writes this writer's value taken from specified data object to given JSON array.
-         * 
+         *
          * @param data the data object
          * @param json The JSON array
          * @throws JSONException If writing to JSON array fails

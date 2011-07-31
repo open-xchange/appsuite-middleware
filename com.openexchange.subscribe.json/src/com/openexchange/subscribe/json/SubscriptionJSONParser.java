@@ -59,7 +59,7 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
  * {@link SubscriptionJSONParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionJSONParser {
@@ -70,7 +70,7 @@ public class SubscriptionJSONParser {
 
     /**
      * Initializes a new {@link SubscriptionJSONParser}.
-     * 
+     *
      * @param discovery
      */
     public SubscriptionJSONParser(SubscriptionSourceDiscoveryService discovery) {

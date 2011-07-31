@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 /**
  * {@link FileStorageAccountManagerLookupService} - Performs a look-up for the appropriate {@link FileStorageAccountManager} for a certain
  * {@link FileStorageService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileStorageAccountManagerLookupService {
 
     /**
      * Gets the appropriate {@link FileStorageAccountManager account manager} for specified {@link FileStorageService file storage service}.
-     * 
+     *
      * @param service The file storage service
      * @return The appropriate account manager for specified file storage service.
      * @throws OXException If look-up fails

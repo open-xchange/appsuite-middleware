@@ -520,7 +520,7 @@ public class DatabaseImpl extends DBService {
 
         final StringBuilder updatedatabase = new StringBuilder(
             "UPDATE " + documentstable + " SET file_store_location=?,  description=?, file_mimetype=? " + "WHERE file_store_location=? AND cid=?");
-        
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -1199,8 +1199,8 @@ public class DatabaseImpl extends DBService {
 
             final List<String> files = new LinkedList<String>();
             holder = new PreparedStatementHolder(getProvider().getWriteConnection(session.getContext()));
-            
-            
+
+
             for (final FolderObject folder : foldersWithPrivateItems) {
                 clearFolder(folder, session, files, holder);
             }
@@ -1237,7 +1237,7 @@ public class DatabaseImpl extends DBService {
             discoverAllFiles(documentMetadata, session, files);
         }
         final InfostoreQueryCatalog queries = new InfostoreQueryCatalog();
-            
+
         final String parentDelete = queries.getSingleDelete(InfostoreQueryCatalog.Table.INFOSTORE);
         final String allChildrenDelete = queries.getAllVersionsDelete(InfostoreQueryCatalog.Table.INFOSTORE_DOCUMENT);
         final Integer contextId = Autoboxing.I(session.getContextId());
@@ -1246,9 +1246,9 @@ public class DatabaseImpl extends DBService {
             holder.execute(allChildrenDelete, id, contextId);
             holder.execute(parentDelete, id, contextId);
         }
-            
-        
-        
+
+
+
         final EventClient ec = new EventClient(session);
         for (final DocumentMetadata documentMetadata : parents) {
             try {

@@ -11,12 +11,12 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
 
 
 /**
- * Authorized Caller ID data 
- * 
+ * Authorized Caller ID data
+ *
  * <p>Java class for CallerIDInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallerIDInfo">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallerIDInfo", propOrder = {
@@ -55,11 +55,11 @@ public class CallerIDInfo {
 
     /**
      * Gets the value of the callerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerID() {
         return callerID;
@@ -67,11 +67,11 @@ public class CallerIDInfo {
 
     /**
      * Sets the value of the callerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerID(String value) {
         this.callerID = value;
@@ -79,11 +79,11 @@ public class CallerIDInfo {
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getPIN() {
         return pin;
@@ -91,11 +91,11 @@ public class CallerIDInfo {
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setPIN(BigDecimal value) {
         this.pin = value;
@@ -103,11 +103,11 @@ public class CallerIDInfo {
 
     /**
      * Gets the value of the credit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getCredit() {
         return credit;
@@ -115,11 +115,11 @@ public class CallerIDInfo {
 
     /**
      * Sets the value of the credit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setCredit(UnlimitedUFloat value) {
         this.credit = value;
@@ -127,11 +127,11 @@ public class CallerIDInfo {
 
     /**
      * Gets the value of the orderNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrderNo() {
         return orderNo;
@@ -139,11 +139,11 @@ public class CallerIDInfo {
 
     /**
      * Sets the value of the orderNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrderNo(String value) {
         this.orderNo = value;

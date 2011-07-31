@@ -102,7 +102,7 @@ public final class ConfirmTask {
     }
 
     // ===================== API methods =======================================
-    
+
     /**
      * This method loads all necessary data and prepares the objects for updating
      * the database.
@@ -140,7 +140,7 @@ public final class ConfirmTask {
         }
     }
 
-    
+
     void sentEvent(final Session session) throws OXException {
         final EventClient eventClient = new EventClient(session);
         switch (changedParticipant.getConfirm()) {

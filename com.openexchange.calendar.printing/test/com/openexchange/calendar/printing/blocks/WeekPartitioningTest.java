@@ -232,7 +232,7 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     }
 
     public void testShouldAlwaysContainSevenDaybreaksBetweenWeekBreaks() {
-        calendar.set(Calendar.YEAR, 2007); //1.1.2007 is a Monday, so we don't have to treat the first week differently: Other years might have only 4 days on the first week. 
+        calendar.set(Calendar.YEAR, 2007); //1.1.2007 is a Monday, so we don't have to treat the first week differently: Other years might have only 4 days on the first week.
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
         app1.setStartDate(calendar.getTime());
@@ -347,17 +347,17 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     public void testShouldWorkEvenWithDifferentWeekStart(){
         CPCalendar cal = CPCalendar.getCalendar();
         cal.setFirstDayOfWeek(Calendar.THURSDAY);
-        
+
         CPAppointment app1 = new CPAppointment();
         CPAppointment app2 = new CPAppointment();
         app1.setStartDate(WEDNESDAY());
         app1.setEndDate(plusOneHour(WEDNESDAY()));
         app2.setStartDate(THURSDAY());
         app2.setEndDate(plusOneHour(THURSDAY()));
-        
+
         strategy.setCalendar(cal);
         CPPartition partition = strategy.partition(Arrays.asList(app1,app2));
-        
+
         List<CPFormattingInformation> infos = partition.getFormattingInformation();
         boolean found = false;
         for(CPFormattingInformation info: infos){
@@ -367,7 +367,7 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         }
         assertTrue("Should place weekbreak between Wednesday and Thursday if first day of the week is set to the latter", found);
     }
-    
+
     public void testShouldInsertYearBreak() {
         // TODO
     }

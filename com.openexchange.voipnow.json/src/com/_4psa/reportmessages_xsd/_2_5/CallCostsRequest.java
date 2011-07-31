@@ -12,9 +12,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -48,8 +48,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -72,11 +72,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -84,11 +84,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -96,11 +96,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -108,11 +108,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -120,11 +120,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the interval property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallCostsRequest.Interval }
-     *     
+     *
      */
     public CallCostsRequest.Interval getInterval() {
         return interval;
@@ -132,11 +132,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the interval property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallCostsRequest.Interval }
-     *     
+     *
      */
     public void setInterval(CallCostsRequest.Interval value) {
         this.interval = value;
@@ -144,11 +144,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the year property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getYear() {
         return year;
@@ -156,11 +156,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the year property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setYear(Long value) {
         this.year = value;
@@ -168,11 +168,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the month property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getMonth() {
         return month;
@@ -180,11 +180,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the month property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setMonth(Long value) {
         this.month = value;
@@ -192,11 +192,11 @@ public class CallCostsRequest {
 
     /**
      * Gets the value of the prepareDelete property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPrepareDelete() {
         return prepareDelete;
@@ -204,11 +204,11 @@ public class CallCostsRequest {
 
     /**
      * Sets the value of the prepareDelete property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPrepareDelete(Boolean value) {
         this.prepareDelete = value;
@@ -217,9 +217,9 @@ public class CallCostsRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -232,8 +232,8 @@ public class CallCostsRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -249,11 +249,11 @@ public class CallCostsRequest {
 
         /**
          * Gets the value of the startDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getStartDate() {
             return startDate;
@@ -261,11 +261,11 @@ public class CallCostsRequest {
 
         /**
          * Sets the value of the startDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setStartDate(XMLGregorianCalendar value) {
             this.startDate = value;
@@ -273,11 +273,11 @@ public class CallCostsRequest {
 
         /**
          * Gets the value of the endDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getEndDate() {
             return endDate;
@@ -285,11 +285,11 @@ public class CallCostsRequest {
 
         /**
          * Sets the value of the endDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setEndDate(XMLGregorianCalendar value) {
             this.endDate = value;

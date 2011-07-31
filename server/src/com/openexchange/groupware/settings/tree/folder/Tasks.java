@@ -68,7 +68,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 public final class Tasks implements PreferencesItemService {
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
     public Tasks() {
         super();

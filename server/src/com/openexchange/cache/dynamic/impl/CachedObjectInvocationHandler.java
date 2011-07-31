@@ -110,7 +110,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * 
+     *
      * @throws OXException if loading or putting into cache fails.
      */
     private void refresh() throws OXException {

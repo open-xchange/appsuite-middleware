@@ -59,7 +59,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Abstract class for easily adding preferences item returning features enabled for a user. 
+ * Abstract class for easily adding preferences item returning features enabled for a user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractModules implements PreferencesItemService {

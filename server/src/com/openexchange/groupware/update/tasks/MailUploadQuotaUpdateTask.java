@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTask;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailUploadQuotaUpdateTask implements UpdateTask {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailUploadQuotaUpdateTask.class));
 
 	public MailUploadQuotaUpdateTask() {
@@ -76,7 +76,7 @@ public final class MailUploadQuotaUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
 	@Override
@@ -86,7 +86,7 @@ public final class MailUploadQuotaUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	@Override

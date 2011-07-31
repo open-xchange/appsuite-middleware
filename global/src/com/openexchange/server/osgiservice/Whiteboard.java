@@ -65,33 +65,33 @@ import com.openexchange.tools.global.OXCloseable;
  *
  */
 public class Whiteboard implements OXCloseable {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Whiteboard.class));
-    
+
     private final List<OXCloseable> closeables = new LinkedList<OXCloseable>();
 
     private final BundleContext context;
 
     private final DynamicWhiteboardFactory factory;
-    
+
     public Whiteboard(final BundleContext context) {
         this.context = context;
         factory = new DynamicWhiteboardFactory(context);
         closeables.add(factory);
     }
-    
+
     public <T> T getService(final Class<T> klass) {
         return factory.createWhiteboardService(context, klass, closeables, null);
     }
-    
+
     public <T> T getService(final Class<T> klass, final DynamicServiceStateListener listener) {
         return factory.createWhiteboardService(context, klass, closeables, listener);
     }
-    
+
     public boolean isActive(final Object o) {
         return factory.isActive(o);
     }
-    
+
     public void close() throws OXException {
         for(final OXCloseable closeable : closeables) {
             try {

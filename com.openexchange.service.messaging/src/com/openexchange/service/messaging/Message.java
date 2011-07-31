@@ -59,7 +59,7 @@ import java.util.Map.Entry;
 
 /**
  * {@link Message} - Messages are delivered to <code>MessageHandler</code> services which subscribe to the topic of the message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
@@ -82,7 +82,7 @@ public class Message {
 
     /**
      * Constructs an message.
-     * 
+     *
      * @param topic The topic of the message.
      * @param properties The message's properties (may be <code>null</code>). A property whose key is not of type <code>String</code> will
      *            be ignored.
@@ -109,7 +109,7 @@ public class Message {
 
     /**
      * Constructs an message.
-     * 
+     *
      * @param topic The topic of the message.
      * @param properties The message's properties (may be <code>null</code>). A property whose key is not of type <code>String</code> will
      *            be ignored.
@@ -143,7 +143,7 @@ public class Message {
 
     /**
      * Retrieves a property.
-     * 
+     *
      * @param name the name of the property to retrieve
      * @return The value of the property, or <code>null</code> if not found.
      */
@@ -153,7 +153,7 @@ public class Message {
 
     /**
      * Returns a list of this message's property names.
-     * 
+     *
      * @return A non-empty array with one element per property.
      */
     public final String[] getPropertyNames() {
@@ -162,7 +162,7 @@ public class Message {
 
     /**
      * Gets an unmodifiable view on this message's properties.
-     * 
+     *
      * @return An unmodifiable view on this message's properties
      */
     public final Map<String, Serializable> getProperties() {
@@ -171,7 +171,7 @@ public class Message {
 
     /**
      * Returns the topic of this message.
-     * 
+     *
      * @return The topic of this message.
      */
     public final String getTopic() {
@@ -180,7 +180,7 @@ public class Message {
 
     /**
      * Tests this message's properties against the given filter using a case sensitive match.
-     * 
+     *
      * @param filter The filter to test.
      * @return true If this message's properties match the filter, false otherwise.
      */
@@ -192,7 +192,7 @@ public class Message {
      * Compares this <code>Message</code> object to another object.
      * <p>
      * An message is considered to be <b>equal to</b> another message if the topic is equal and the properties are equal.
-     * 
+     *
      * @param object The <code>Message</code> object to be compared.
      * @return <code>true</code> if <code>object</code> is a <code>Message</code> and is equal to this object; <code>false</code> otherwise.
      */
@@ -212,7 +212,7 @@ public class Message {
 
     /**
      * Returns a hash code value for the object.
-     * 
+     *
      * @return An integer which is a hash code value for this object.
      */
     @Override
@@ -222,7 +222,7 @@ public class Message {
 
     /**
      * Returns the string representation of this message.
-     * 
+     *
      * @return The string representation of this message.
      */
     @Override
@@ -232,7 +232,7 @@ public class Message {
 
     /**
      * Called by the constructor to validate the topic name.
-     * 
+     *
      * @param topic The topic name to validate.
      * @throws IllegalArgumentException If the topic name is invalid.
      */

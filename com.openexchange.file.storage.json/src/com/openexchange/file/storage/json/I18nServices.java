@@ -58,7 +58,7 @@ import com.openexchange.i18n.I18nService;
 
 /**
  * {@link I18nServices} - A registry for all found {@link I18nService} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -70,7 +70,7 @@ public final class I18nServices {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static I18nServices getInstance() {
@@ -90,7 +90,7 @@ public final class I18nServices {
 
     /**
      * Adds the i18n service to this registry.
-     * 
+     *
      * @param service The i18n service
      */
     public void addService(final I18nService service) {
@@ -101,7 +101,7 @@ public final class I18nServices {
 
     /**
      * Removes the i18n service from this registry.
-     * 
+     *
      * @param service The i18n service
      */
     public void removeService(final I18nService service) {
@@ -112,7 +112,7 @@ public final class I18nServices {
 
     /**
      * Gets the i18n service for specified locale.
-     * 
+     *
      * @param locale The locale
      * @return The i18n service for specified locale or <code>null</code> if missing
      */

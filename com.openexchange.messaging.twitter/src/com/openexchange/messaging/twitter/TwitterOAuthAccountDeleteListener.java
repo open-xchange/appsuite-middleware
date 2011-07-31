@@ -64,7 +64,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
  * {@link TwitterOAuthAccountDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
@@ -173,7 +173,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
 
     /**
      * Closes the ResultSet.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      */
     private static void closeSQLStuff(final ResultSet result) {
@@ -188,7 +188,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
 
     /**
      * Closes the {@link Statement}.
-     * 
+     *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     private static void closeSQLStuff(final Statement stmt) {
@@ -203,7 +203,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
 
     /**
      * Closes the ResultSet and the Statement.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      * @param stmt <code>null</code> or a Statement to close.
      */

@@ -60,14 +60,14 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
 public class Activator extends CompositeBundleActivator {
 
     private final BundleActivator[] ACTIVATORS = {
-        new DiscoveryActivator(), 
-        new CleanUpActivator(), 
+        new DiscoveryActivator(),
+        new CleanUpActivator(),
         new CreateTableActivator(),
         new FolderFieldActivator(),
         new TrackerActivator(),
         new UpdateTaskActivator(),
         new FilterActivator()};
-    
+
     @Override
     protected BundleActivator[] getActivators() {
         return ACTIVATORS;

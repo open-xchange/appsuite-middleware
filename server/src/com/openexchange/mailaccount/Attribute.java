@@ -58,7 +58,7 @@ import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link Attribute}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum Attribute {
@@ -211,7 +211,7 @@ public enum Attribute {
 
     /**
      * Gets the attribute name.
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -220,7 +220,7 @@ public enum Attribute {
 
     /**
      * Gets the field identifier associated with this attribute.
-     * 
+     *
      * @return The field identifier
      */
     public int getId() {
@@ -237,7 +237,7 @@ public enum Attribute {
 
     /**
      * Gets the attribute by given field identifier.
-     * 
+     *
      * @param col The field identifier
      * @return The attribute by given field identifier or <code>null</code> if no such attribute is present
      */

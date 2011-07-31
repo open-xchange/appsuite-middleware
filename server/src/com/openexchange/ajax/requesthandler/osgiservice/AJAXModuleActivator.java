@@ -65,14 +65,14 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
     public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
     }
-    
+
     public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, false);
     }
 
     private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
+
         properties.put("module", module);
         properties.put("multiple", new Boolean(multiple).toString());
         registerService(AJAXActionServiceFactory.class, factory, properties);

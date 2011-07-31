@@ -62,7 +62,7 @@ import com.openexchange.pop3.storage.mailaccount.util.StorageDeleteListener;
 
 /**
  * {@link MailAccountPOP3StorageProvider} - Primary mail account POP3 storage provider.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountPOP3StorageProvider implements POP3StorageProvider {

@@ -1,5 +1,5 @@
 /* Test the following file operations:
- * 
+ *
  * canRead
  *     false - a target that is already open by another process
  *     false - the target does not exist

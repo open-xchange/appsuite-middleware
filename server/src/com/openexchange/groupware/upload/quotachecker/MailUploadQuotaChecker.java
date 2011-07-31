@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailUploadQuotaChecker} - Quota checker for mail module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
@@ -73,7 +73,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
     /**
      * Initializes a new {@link MailUploadQuotaChecker}.
-     * 
+     *
      * @param session The session
      * @param ctx The context
      */

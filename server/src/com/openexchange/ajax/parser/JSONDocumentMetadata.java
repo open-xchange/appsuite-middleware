@@ -63,23 +63,23 @@ import com.openexchange.groupware.infostore.utils.URLHelper;
 public class JSONDocumentMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = -5016635593135118691L;
-    
+
     private static final URLHelper helper = new URLHelper();
-    
-    
+
+
     private final JSONObject jsonObject;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSONDocumentMetadata.class));
     private static final String DEFAULT_MIMETYPE = "application/octet-stream";
     //private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(JSONDocumentMetadata.class);
-    
+
     public JSONDocumentMetadata(){
         this.jsonObject = new JSONObject();
     }
-    
+
     public JSONDocumentMetadata(final String json) throws JSONException {
         this.jsonObject = new JSONObject(json);
-        
+
         //Test parsing of complex objects
         if(jsonObject.has(Metadata.URL_LITERAL.getName())) {
             String url = jsonObject.getString(Metadata.URL_LITERAL.getName());
@@ -89,7 +89,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             }
         }
     }
-    
+
     @Override
     public String getProperty(final String key) {
         if(Metadata.get(key) == null) {
@@ -143,7 +143,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             return -1;
         }
         return jsonObject.optInt(Metadata.MODIFIED_BY_LITERAL.getName());
-    
+
     }
 
     @Override
@@ -177,7 +177,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         if(!jsonObject.has(Metadata.TITLE_LITERAL.getName())) {
             return null;
         }
-        return jsonObject.optString(Metadata.TITLE_LITERAL.getName());    
+        return jsonObject.optString(Metadata.TITLE_LITERAL.getName());
     }
 
     @Override
@@ -388,7 +388,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             LOG.error("",e);
         }
     }
-    
+
     @Override
     public int getColorLabel() {
         return jsonObject.optInt(Metadata.COLOR_LABEL_LITERAL.getName());
@@ -433,12 +433,12 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             LOG.error("",e);
         }
     }
-    
+
     @Override
     public String toString(){
         return jsonObject.toString();
     }
-    
+
     public String toJSONString(){
         return jsonObject.toString();
     }
@@ -461,7 +461,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
             LOG.error("",e);
         }
     }
-    
+
     @Override
     public void setNumberOfVersions(final int numberOfVersions) {
         try {

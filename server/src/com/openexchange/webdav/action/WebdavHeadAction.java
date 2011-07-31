@@ -59,7 +59,7 @@ public class WebdavHeadAction extends AbstractAction {
 			throws OXException {
 		head(res,req.getResource(),-1);
 	}
-	
+
 	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws OXException {
 		if(resource == null) {
 			return;

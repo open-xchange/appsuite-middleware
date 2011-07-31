@@ -66,7 +66,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MockOAuthService implements OAuthService {
-    
+
     private String token, tokenSecret;
 
     /* (non-Javadoc)
@@ -121,7 +121,7 @@ public class MockOAuthService implements OAuthService {
             public String getToken() {
                 return token;
             }
-            
+
         };
     }
 
@@ -172,12 +172,12 @@ public class MockOAuthService implements OAuthService {
         // TODO Auto-generated method stub
         return null;
     }
-    
+
     public void setToken(String string){
         this.token = string;
     }
 
-    public void setSecret(String tokenSecret) {        
+    public void setSecret(String tokenSecret) {
         this.tokenSecret = tokenSecret;
     }
 

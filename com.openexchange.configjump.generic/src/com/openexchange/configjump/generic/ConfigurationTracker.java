@@ -68,7 +68,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
 
     /**
      * Default constructor.
-     * @param services 
+     * @param services
      */
     public ConfigurationTracker(final BundleContext context,
         final Services services) {

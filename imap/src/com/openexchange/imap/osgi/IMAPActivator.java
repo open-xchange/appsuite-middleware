@@ -84,7 +84,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPActivator extends DeferredActivator {
@@ -144,7 +144,7 @@ public final class IMAPActivator extends DeferredActivator {
                         registry.addService(classes[i], service);
                     }
                 }
-                
+
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
@@ -168,7 +168,7 @@ public final class IMAPActivator extends DeferredActivator {
                 final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
                 registrations.add(context.registerService(EventHandler.class.getName(), new EventHandler() {
-                    
+
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {

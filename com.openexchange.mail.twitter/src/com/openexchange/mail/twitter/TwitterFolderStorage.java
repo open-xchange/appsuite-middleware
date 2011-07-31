@@ -66,7 +66,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link TwitterFolderStorage} - The twitter folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterFolderStorage extends MailFolderStorage {
@@ -79,7 +79,7 @@ public final class TwitterFolderStorage extends MailFolderStorage {
 
     /**
      * Initializes a new {@link TwitterFolderStorage}.
-     * 
+     *
      * @param session The session
      * @throws OXException If initialization fails
      */
@@ -95,7 +95,7 @@ public final class TwitterFolderStorage extends MailFolderStorage {
 
     /**
      * Gets session user.
-     * 
+     *
      * @return The session user
      * @throws OXException If retrieving user fails
      */

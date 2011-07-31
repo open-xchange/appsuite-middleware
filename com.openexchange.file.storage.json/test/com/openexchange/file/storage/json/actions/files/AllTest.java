@@ -67,7 +67,7 @@ import com.openexchange.groupware.results.Results;
  */
 
 public class AllTest extends FileActionTest {
-    
+
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -76,33 +76,33 @@ public class AllTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request()
             .param("folder", "12")
             .param("columns", "1,700,702") // id, title and filename
             .param("sort", "700")
             .param("order", "desc");
-        
+
         final List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult()); 
-        
+        fileAccess().expectCall("getDocuments", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 
     @Override
     public AbstractFileAction createAction() {
         return new AllAction() {
-            
+
             @Override
             protected FileMetadataWriter getWriter() {
                 return writer();
             }
         };
     }
-    
-    
-    
+
+
+
 }

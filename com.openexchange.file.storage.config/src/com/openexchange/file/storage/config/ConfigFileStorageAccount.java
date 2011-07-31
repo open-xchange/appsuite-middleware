@@ -56,7 +56,7 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 
 /**
  * {@link ConfigFileStorageAccount} - The configuration {@link FileStorageAccount} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -75,7 +75,7 @@ public class ConfigFileStorageAccount extends DefaultFileStorageAccount implemen
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     public String getServiceId() {
@@ -84,7 +84,7 @@ public class ConfigFileStorageAccount extends DefaultFileStorageAccount implemen
 
     /**
      * Sets the service identifier.
-     * 
+     *
      * @param serviceId The service identifier to set
      */
     public void setServiceId(final String serviceId) {

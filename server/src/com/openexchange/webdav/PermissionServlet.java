@@ -62,7 +62,7 @@ import com.openexchange.tools.webdav.OXServlet;
 public abstract class PermissionServlet extends OXServlet {
 
     /**
-	 * 
+	 *
 	 */
     private static final long serialVersionUID = 2572228529208334966L;
 

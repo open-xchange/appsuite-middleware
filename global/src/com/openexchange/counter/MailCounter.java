@@ -59,9 +59,9 @@ public interface MailCounter extends Counter {
 
     /**
      * Gets the current count for mail module.
-     * 
+     *
      * @return The count
      */
     int getCount();
-    
+
 }

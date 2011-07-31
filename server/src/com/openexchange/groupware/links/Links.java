@@ -95,7 +95,7 @@ public class Links {
 
         /**
          * Checks if denoted item is readable by specified user in given folder.
-         * 
+         *
          * @param oid The item's unique ID
          * @param folder The associated folder
          * @param user The user ID
@@ -109,7 +109,7 @@ public class Links {
 
         /**
          * Checks if denoted item is readable by specified user.
-         * 
+         *
          * @param oid The item's unique ID
          * @param user The user ID
          * @param group The user's group IDs
@@ -126,7 +126,7 @@ public class Links {
         /**
          * Tests if {@link #isReadableByID(int, int, int[], Session)} is
          * supported.
-         * 
+         *
          * @return <code>true</code> if
          *         {@link #isReadableByID(int, int, int[], Session)} is
          *         supported; otherwise <code>false</code>.
@@ -135,7 +135,7 @@ public class Links {
 
         /**
          * Checks if specified user has appropriate module access.
-         * 
+         *
          * @param so The session
          * @return <code>true</code> if specified user has appropriate module
          *         access; otherwise <code>false</code>
@@ -504,7 +504,7 @@ public class Links {
 
     /**
      * Deletes all links whose objects references the specified folder ID
-     * 
+     *
      * @param folderId The folder ID
      * @param cid The context ID
      * @param writecon A connection with write capability

@@ -73,15 +73,15 @@ public interface AppointmentSQLInterface {
      * @return
      */
     void setIncludePrivateAppointments(boolean include);
-    
+
     /**
      * @return TRUE if relevant methods will include other people's private appointments when returning data, FALSE otherwise (default case)
      */
     boolean getIncludePrivateAppointments();
-    
+
     /**
      * Lists all appointment that match the given search.
-     * 
+     *
      * @param folderId The folder ID
      * @param cols fields that will be added to the data object
      * @param start The given start date
@@ -93,7 +93,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all appointment that match the given search.
-     * 
+     *
      * @param folderId The folder ID
      * @param cols fields that will be added to the data object
      * @param start The given start date
@@ -117,7 +117,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all modified objects in a folder.
-     * 
+     *
      * @param folderID The Folder ID
      * @param cols fields that will be added to the data object
      * @param since all modification >= since
@@ -128,7 +128,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all modified objects where the user is participant.
-     * 
+     *
      * @param userId The user ID
      * @param start The start date
      * @param end The end date
@@ -141,7 +141,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all modified objects in a folder.
-     * 
+     *
      * @param folderID The Folder ID
      * @param start The start date
      * @param end The end date
@@ -156,7 +156,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all deleted objects in a folder.
-     * 
+     *
      * @param folderID The Folder ID
      * @param cols fields that will be added to the data object
      * @param since all modification >= since
@@ -175,7 +175,7 @@ public interface AppointmentSQLInterface {
      * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
      */
     public SearchIterator<Appointment> getAppointmentsByExtendedSearch(AppointmentSearchObject searchObject, int orderBy, Order orderDir, int cols[]) throws OXException, SQLException;
-    
+
     /**
      * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
      * @param searchObj The {@link AppointmentSearchObject}.
@@ -186,7 +186,7 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int[] cols) throws OXException;
-    
+
     /**
      * Loads one appointment by the given ID
      * @param objectId
@@ -298,10 +298,10 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     Date setUserConfirmation(int object_id, int folderId, int user_id, int confirm, String confirm_message) throws OXException;
-    
+
     /**
      * Sets the confirmation of an appointment for an external user, identified with his mail address.
-     * 
+     *
      * @param oid
      * @param folderId
      * @param mail
@@ -348,7 +348,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists of all appointments where the user will participate between start and end.
-     * 
+     *
      * @param user_id The user_id
      * @param start The given start date
      * @param end The given end date
@@ -359,7 +359,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists of all appointments in all folders where the user will participate between start and end.
-     * 
+     *
      * @param user_id The user_id
      * @param start The given start date
      * @param end The given end date
@@ -371,16 +371,16 @@ public interface AppointmentSQLInterface {
 
     /**
      * Resolves the given uid.
-     * 
+     *
      * @param uid
      * @return the object id of the corresponding object, if it exists, 0 otherwise.
      * @throws OXException
      */
     public int resolveUid(String uid) throws OXException;
-    
+
     /**
      * Returns the folder in which this appointment is located for the current user.
-     * 
+     *
      * @param objectId
      * @return
      * @throws OXException

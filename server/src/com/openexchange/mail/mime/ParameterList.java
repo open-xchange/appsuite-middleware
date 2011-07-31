@@ -68,7 +68,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link ParameterList} - Represents the parameter list of a parameterized header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParameterList implements Cloneable, Serializable, Comparable<ParameterList> {
@@ -115,7 +115,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Initializes a new parameter list from specified parameter list's string representation.
-     * 
+     *
      * @param parameterList The parameter list's string representation
      */
     public ParameterList(final String parameterList) {
@@ -129,7 +129,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      * <li>Ensures starting <code>';'</code> character</li>
      * <li>Turns any unquoted strings to quoted strings</li>
      * </ul>
-     * 
+     *
      * @param parameterList The parameter list's string representation to correct
      * @return The corrected parameter list's string representation.
      */
@@ -301,7 +301,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Sets the given parameter. Existing value is overwritten.
-     * 
+     *
      * @param name The sole parameter name
      * @param value The parameter value
      */
@@ -316,7 +316,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value to add
      */
@@ -340,7 +340,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Gets specified parameter's value
-     * 
+     *
      * @param name The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -357,7 +357,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Removes specified parameter and returns its value
-     * 
+     *
      * @param name The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -374,7 +374,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Checks if parameter is present
-     * 
+     *
      * @param name the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
@@ -391,7 +391,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Gets all parameter names wrapped in an {@link Iterator}
-     * 
+     *
      * @return All parameter names wrapped in an {@link Iterator}
      */
     public Iterator<String> getParameterNames() {
@@ -400,7 +400,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Appends the RFC2045 style (ASCII-only) string representation of this parameter list including empty parameters.
-     * 
+     *
      * @param sb The string builder to append to
      * @see #appendRFC2045String(StringBuilder, boolean)
      */
@@ -410,7 +410,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * Appends the RFC2045 style (ASCII-only) string representation of this parameter list.
-     * 
+     *
      * @param sb The string builder to append to
      * @param skipEmptyParam <code>true</code> to skip empty parameters; otherwise <code>false</code>
      */
@@ -512,7 +512,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     /**
      * {@link Parameter} - Inner class to represent a parameter.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
@@ -535,7 +535,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Initializes a new rfc2231 parameter.
-         * 
+         *
          * @param name The parameter name without asterix characters
          */
         public Parameter(final String name) {
@@ -547,7 +547,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Initializes a new rfc2047 parameter.
-         * 
+         *
          * @param name The parameter name
          * @param value The parameter value
          */
@@ -659,7 +659,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Gets the charset
-         * 
+         *
          * @return the charset
          */
         public String getCharset() {
@@ -668,7 +668,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Sets the charset
-         * 
+         *
          * @param charset the charset to set
          */
         public void setCharset(final String charset) {
@@ -677,7 +677,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Gets the language
-         * 
+         *
          * @return the language
          */
         public String getLanguage() {
@@ -686,7 +686,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
         /**
          * Sets the language
-         * 
+         *
          * @param language the language to set
          */
         public void setLanguage(final String language) {

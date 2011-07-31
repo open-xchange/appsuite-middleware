@@ -64,7 +64,7 @@ public interface LdapGetter {
 
     /**
      * Gets the value of the object with the given name
-     * 
+     *
      * @param attributename The name of the attribute
      * @return null if the attribute is not available
      * @throws OXException If something went wrong
@@ -73,16 +73,16 @@ public interface LdapGetter {
 
     /**
      * Gets the value of the object with the given name as Date
-     * 
+     *
      * @param birthday
      * @return null if the attribute is not available
      * @throws OXException If something went wrong
      */
     public Date getDateAttribute(final String attributename) throws OXException;
-    
+
     /**
      * Gets the value of the object with the given name as int
-     * 
+     *
      * @param attributename The name of the attribute
      * @return -1 if the attribute is not available
      * @throws OXException If something went wrong
@@ -92,27 +92,27 @@ public interface LdapGetter {
     /**
      * Gets an LdapGetter object for getting the attributes below the object with
      * the specified distinguished name.
-     * 
+     *
      * @param dn The dn for which the getter should be returned
      * @param attributes The attributes which should be fetched (not all are needed)
      * @return null if no such object was found
      * @throws OXException
      */
     public LdapGetter getLdapGetterForDN(final String dn, final String[] attributes) throws OXException;
-    
+
     /**
      * Gets the values of the object with the given name as array used
      * especially for multi-value attributes
-     * 
+     *
      * @param attributename
      * @return
      * @throws OXException
      */
     public List<String> getMultiValueAttribute(final String attributename) throws OXException;
-    
+
     /**
      * Gets the fullname of the object to which the attributes belong
-     * 
+     *
      * @return
      * @throws OXException
      */

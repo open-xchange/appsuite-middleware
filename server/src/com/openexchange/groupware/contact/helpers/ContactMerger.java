@@ -71,7 +71,7 @@ public class ContactMerger {
     /**
      * Merges the first object with the second one and returns a merged one. In case of conflicts: If <i>overwrite</i> is set, values from
      * the second object take precedence, otherwise the values from the first do.
-     * 
+     *
      * @param c1 first object to be merged. This one will be changed afterwards.
      * @param c2 second object to be merged. This one will not be changed at all.
      */

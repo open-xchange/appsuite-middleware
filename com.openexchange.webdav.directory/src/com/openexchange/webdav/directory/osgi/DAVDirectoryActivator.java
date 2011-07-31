@@ -30,9 +30,9 @@ public class DAVDirectoryActivator extends HousekeepingActivator {
 
             public void removed(ServiceReference ref, PathRegistration thing) {
                 // TODO Auto-generated method stub
-                
+
             }
-            
+
         });
         WebdavDirectoryPerformer.getInstance().getFactory().mkdirs("principals", "users");
         openTrackers();

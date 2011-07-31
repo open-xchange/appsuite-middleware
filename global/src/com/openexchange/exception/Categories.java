@@ -66,7 +66,7 @@ public final class Categories implements OXExceptionConstants {
 
     /**
      * Resolves specified name to a known category.
-     * 
+     *
      * @param name The category's name
      * @return The resolved category or {@link Category#CATEGORY_ERROR} if unresolveable
      */
@@ -76,7 +76,7 @@ public final class Categories implements OXExceptionConstants {
 
     /**
      * Resolves specified name to a known category.
-     * 
+     *
      * @param name The category's name
      * @param fallback The fall-back value to return
      * @return The resolved category or <code>fallback</code> if unresolveable

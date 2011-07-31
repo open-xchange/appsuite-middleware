@@ -53,18 +53,18 @@ import com.openexchange.search.SearchTerm.OperationPosition;
 
 /**
  * {@link Operation} - A search term operation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Operation {
 
     /**
      * Gets this operation's string representation.
-     * 
+     *
      * @return The operation's string representation.
      */
     public String getOperation();
-    
+
     /**
      * @return What the operation would look like in SQL
      */
@@ -72,12 +72,12 @@ public interface Operation {
 
     /**
      * Checks if specified string equals this operation's string representation.
-     * 
+     *
      * @param other The operation string to check for equality
      * @return <code>true</code> if specified string equals this operation's string representation; otherwise <code>false</code>.
      */
     public boolean equalsOperation(String other);
-    
+
     /**
      * tells you where the operator is positioned in relation to the operand(s)
      */

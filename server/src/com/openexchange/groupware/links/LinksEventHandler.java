@@ -74,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Links
- * 
+ *
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  */
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface,

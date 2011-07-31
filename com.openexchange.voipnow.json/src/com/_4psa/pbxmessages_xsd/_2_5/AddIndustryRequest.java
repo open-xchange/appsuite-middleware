@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -55,11 +55,11 @@ public class AddIndustryRequest {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -67,11 +67,11 @@ public class AddIndustryRequest {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -79,11 +79,11 @@ public class AddIndustryRequest {
 
     /**
      * Gets the value of the standardZoneCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStandardZoneCode() {
         return standardZoneCode;
@@ -91,11 +91,11 @@ public class AddIndustryRequest {
 
     /**
      * Sets the value of the standardZoneCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStandardZoneCode(String value) {
         this.standardZoneCode = value;
@@ -103,11 +103,11 @@ public class AddIndustryRequest {
 
     /**
      * Gets the value of the standardZoneHeight property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getStandardZoneHeight() {
         return standardZoneHeight;
@@ -115,11 +115,11 @@ public class AddIndustryRequest {
 
     /**
      * Sets the value of the standardZoneHeight property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setStandardZoneHeight(BigInteger value) {
         this.standardZoneHeight = value;
@@ -127,11 +127,11 @@ public class AddIndustryRequest {
 
     /**
      * Gets the value of the extendedZoneCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtendedZoneCode() {
         return extendedZoneCode;
@@ -139,11 +139,11 @@ public class AddIndustryRequest {
 
     /**
      * Sets the value of the extendedZoneCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtendedZoneCode(String value) {
         this.extendedZoneCode = value;
@@ -151,11 +151,11 @@ public class AddIndustryRequest {
 
     /**
      * Gets the value of the extendedZoneHeight property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtendedZoneHeight() {
         return extendedZoneHeight;
@@ -163,11 +163,11 @@ public class AddIndustryRequest {
 
     /**
      * Sets the value of the extendedZoneHeight property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtendedZoneHeight(BigInteger value) {
         this.extendedZoneHeight = value;

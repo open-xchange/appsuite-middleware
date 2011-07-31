@@ -60,7 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link FolderServiceDecorator} - The decorator for {@link FolderService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderServiceDecorator {
@@ -84,7 +84,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Gets the list of allowed content types or an empty list if all are allowed.
-     * 
+     *
      * @return The list of allowed content types
      */
     public List<ContentType> getAllowedContentTypes() {
@@ -93,7 +93,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Sets the list of allowed content types or an empty list if all are allowed.
-     * 
+     *
      * @param allowedContentTypes The list of allowed content types
      * @return This decorator with allowed content types applied
      */
@@ -105,7 +105,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Gets the time zone.
-     * 
+     *
      * @return The time zone or <code>null</code>
      */
     public TimeZone getTimeZone() {
@@ -114,7 +114,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Sets the time zone.
-     * 
+     *
      * @param timeZone The time zone to set
      * @return This decorator with time zone applied
      */
@@ -125,7 +125,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Gets the locale.
-     * 
+     *
      * @return The locale or <code>null</code>
      */
     public Locale getLocale() {
@@ -134,7 +134,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Sets the locale.
-     * 
+     *
      * @param locale The locale to set
      * @return This decorator with locale applied
      */
@@ -145,7 +145,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Checks for existence of specified property.
-     * 
+     *
      * @param propertyName The property name
      * @return <code>true</code> if such a property exists; otherwsie <code>false</code>
      */
@@ -155,7 +155,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propertyName The property name
      * @param propertyValue The property value
      * @return This decorator with property put
@@ -170,7 +170,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Removes specified property.
-     * 
+     *
      * @param propertyName The property name
      * @return This decorator with property removed
      */
@@ -181,7 +181,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Puts specified properties.
-     * 
+     *
      * @param properties The properties to put
      * @return This decorator with properties put
      */
@@ -194,7 +194,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Gets the named property.
-     * 
+     *
      * @param propertyName The property name
      * @return The property value or <code>null</code>
      */
@@ -204,7 +204,7 @@ public final class FolderServiceDecorator {
 
     /**
      * Gets this decorator's properties.
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> getProperties() {

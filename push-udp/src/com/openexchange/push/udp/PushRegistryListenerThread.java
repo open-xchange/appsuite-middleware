@@ -59,16 +59,16 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link PushRegistryListenerThread}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 // Refactored from PushSocket
 public class PushRegistryListenerThread extends Thread {
-    
+
     private static final AtomicInteger instances = new AtomicInteger(0);
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRegistryListenerThread.class));
-    
+
     private DatagramSocket datagramSocket;
 
     private boolean running;
@@ -77,7 +77,7 @@ public class PushRegistryListenerThread extends Thread {
         this.datagramSocket = socket;
         setName("PushRegistryListenerThread-"+instances.getAndIncrement());
     }
-    
+
     @Override
     public void run() {
         running = true;

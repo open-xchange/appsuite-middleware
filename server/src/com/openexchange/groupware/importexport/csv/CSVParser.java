@@ -59,7 +59,7 @@ import com.openexchange.groupware.importexport.ImportExportExceptionCodes;
  * This class represents a combined parser and lexer for CSV files. It is designed rather simple with speed in mind. Note: Proper CSV files
  * should have the dimensions M x N. If this parser encounters a line that has not as many columns as the others, it would not be right, but
  * the behaviour can be switched to be strict or not. Note: See also RFC 4180
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public class CSVParser {
@@ -100,7 +100,7 @@ public class CSVParser {
 
     /**
      * Sets the parser to behave tolerant to broken CSV formats
-     * 
+     *
      * @param isTolerant
      */
     public void setTolerant(final boolean isTolerant) {
@@ -109,7 +109,7 @@ public class CSVParser {
 
     /**
      * Convenience method, combines setContent() and parse().
-     * 
+     *
      * @param str - CSV to be parsed
      * @return
      * @throws OXException

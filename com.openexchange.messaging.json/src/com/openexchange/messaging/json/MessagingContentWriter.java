@@ -57,7 +57,7 @@ import com.openexchange.messaging.MessagingPart;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * A MessagingContentWriter feels responsible for certain MessagingContents and can turn them into a JSON representation. By implementing
  * a MessagingContentWriter (and correspondingly a {@link MessagingContentParser} and registering it with a {@link MessagingMessageParser},
  * one can add special handling for special messaging contents.

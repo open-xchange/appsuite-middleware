@@ -80,7 +80,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link LinkedInServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LinkedInServiceImpl implements LinkedInService{
@@ -131,7 +131,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
     public void setActivator(Activator activator) {
         this.activator = activator;
-    }  
+    }
 
     public List<Contact> parseIntoContacts(String body) {
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -153,7 +153,7 @@ public class LinkedInServiceImpl implements LinkedInService{
                     //System.out.println("Current contact : " + contact.getGivenName() + " " + contact.getSurName());
                     if (null != getTextValue(person, "main-address")) {
                         contact.setNote(getTextValue(person, "main-address"));
-                    }                   
+                    }
                     try {
                         String imageUrl = getTextValue(person, "picture-url");
                         if (null != imageUrl) {
@@ -174,19 +174,19 @@ public class LinkedInServiceImpl implements LinkedInService{
                             contact.setCompany(getTextValue(company, "name"));
                         }
                     }
-                    
+
                     // get the first IM-account
                     NodeList imAccounts = person.getElementsByTagName("im-account");
                     if (null != imAccounts && imAccounts.getLength() > 0 ){
                         Element imAccount = (Element) imAccounts.item(0);
                         contact.setInstantMessenger1(getTextValue(imAccount, "im-account-name") + " ("+getTextValue(imAccount, "im-account-type")+")");
                     }
-                    
+
                     // parse the phone numbers, saving the first occurrence of "home" and "work"
                     NodeList phoneNumbers = person.getElementsByTagName("phone-number");
                     if (null != phoneNumbers && phoneNumbers.getLength() > 0 ){
                         for (int p = 0; p < phoneNumbers.getLength(); p++){
-                            Element phoneNumber = (Element) phoneNumbers.item(p); 
+                            Element phoneNumber = (Element) phoneNumbers.item(p);
                             if (null != getTextValue(phoneNumber, "phone-type")){
                                 if (getTextValue(phoneNumber, "phone-type").equals("work")) {
                                     contact.setTelephoneBusiness1(getTextValue(phoneNumber, "phone-number"));
@@ -194,10 +194,10 @@ public class LinkedInServiceImpl implements LinkedInService{
                                 else if (getTextValue(phoneNumber, "phone-type").equals("home")){
                                     contact.setTelephoneHome1(getTextValue(phoneNumber, "phone-number"));
                                 }
-                            }     
+                            }
                         }
                     }
-                    
+
                     // get the birthdate
                     NodeList dateOfBirths = person.getElementsByTagName("date-of-birth");
                     if (null != dateOfBirths && dateOfBirths.getLength() > 0){
@@ -208,15 +208,15 @@ public class LinkedInServiceImpl implements LinkedInService{
                         }
                         int month = 0;
                         if (null != getTextValue(dateOfBirth, "month")){
-                            month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;                            
+                            month = Integer.parseInt(getTextValue(dateOfBirth, "month")) -1;
                         }
                         int date = 0;
                         if (null != getTextValue(dateOfBirth, "day")){
-                            date = Integer.parseInt(getTextValue(dateOfBirth, "day"));                            
+                            date = Integer.parseInt(getTextValue(dateOfBirth, "day"));
                         }
                         contact.setBirthday(new Date(year, month, date));
                     }
-                    
+
                     contacts.add(contact);
                 }
             }

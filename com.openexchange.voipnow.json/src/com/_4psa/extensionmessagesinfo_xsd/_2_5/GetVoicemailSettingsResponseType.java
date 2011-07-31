@@ -9,11 +9,11 @@ import com._4psa.extensiondata_xsd._2_5.Voicemail;
 
 /**
  * Get phone terminal voicemail settings: response type
- * 
+ *
  * <p>Java class for GetVoicemailSettingsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetVoicemailSettingsResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.extensiondata_xsd._2_5.Voicemail;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetVoicemailSettingsResponseType")

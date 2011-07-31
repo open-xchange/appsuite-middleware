@@ -63,7 +63,7 @@ import com.openexchange.threadpool.internal.CustomThreadFactory;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPools {
@@ -81,7 +81,7 @@ public final class ThreadPools {
 
         /**
          * Gets the exception's type.
-         * 
+         *
          * @return The exception's type
          */
         Class<E> getType();
@@ -91,7 +91,7 @@ public final class ThreadPools {
          * <p>
          * Passed {@link Throwable} instance is either a {@link IllegalStateException} wrapping a {@link Throwable} or a
          * {@link InterruptedException}
-         * 
+         *
          * @param t The unexpected (checked) exception
          * @return A new exception
          */
@@ -101,7 +101,7 @@ public final class ThreadPools {
 
     /**
      * Polls given completion service and returns its results as a list.
-     * 
+     *
      * @param <R> The result type
      * @param <E> The exception type
      * @param completionService The completion service to poll
@@ -141,7 +141,7 @@ public final class ThreadPools {
 
     /**
      * Takes from given completion service and returns its results as a list.
-     * 
+     *
      * @param <R> The result type
      * @param <E> The exception type
      * @param completionService The completion service to take from
@@ -176,7 +176,7 @@ public final class ThreadPools {
      * Handles given {@link Throwable} in a safe way.
      * <p>
      * This method is helpful when dealing with {@link ExecutionException}:
-     * 
+     *
      * <pre>
      * public void myMethod throws MyException {
      *  ...
@@ -189,7 +189,7 @@ public final class ThreadPools {
      *  ...
      * }
      * </pre>
-     * 
+     *
      * @param e The execution exception thrown by an asynchronous computation
      * @param expectedExceptionType The expected exception type or <code>null</code> if nothing is expected
      * @return The laundered exception
@@ -214,7 +214,7 @@ public final class ThreadPools {
     /**
      * Returns a {@link Task} object that, when called, runs the given task and returns the given result. This can be useful when applying
      * methods requiring a <tt>Task</tt> to an otherwise resultless action.
-     * 
+     *
      * @param task The task to run
      * @param result The result to return
      * @throws NullPointerException If task is <code>null</code>
@@ -229,7 +229,7 @@ public final class ThreadPools {
 
     /**
      * Returns a {@link Task} object that, when called, runs the given task and returns <tt>null</tt>.
-     * 
+     *
      * @param task The task to run
      * @return A {@link Task} object
      * @throws NullPointerException If task is <code>null</code>
@@ -243,7 +243,7 @@ public final class ThreadPools {
 
     /**
      * Returns a {@link Task} object that, when called, runs the given task, renames thread's prefix and returns <tt>null</tt>.
-     * 
+     *
      * @param task The task to run
      * @param prefix The thread's prefix
      * @return A {@link Task} object
@@ -258,7 +258,7 @@ public final class ThreadPools {
 
     /**
      * Returns a {@link Task} object that, when called, returns the given task's result.
-     * 
+     *
      * @param task The task to run
      * @return A {@link Task} object
      * @throws NullPointerException If task is <code>null</code>
@@ -272,7 +272,7 @@ public final class ThreadPools {
 
     /**
      * Returns a {@link Task} object that, when called, returns the given task's result.
-     * 
+     *
      * @param task The task to run
      * @param prefix The thread's prefix
      * @return A {@link Task} object
@@ -287,7 +287,7 @@ public final class ThreadPools {
 
     /**
      * Initializes a new {@link ThreadFactory}.
-     * 
+     *
      * @param namePrefix The name prefix for created threads; e.g. "MyWorker-"
      */
     public static ThreadFactory newThreadFactory(final String namePrefix) {

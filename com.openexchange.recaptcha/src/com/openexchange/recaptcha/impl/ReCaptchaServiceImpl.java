@@ -59,14 +59,14 @@ import com.openexchange.recaptcha.ReCaptchaService;
 
 /**
  * {@link ReCaptchaServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ReCaptchaServiceImpl implements ReCaptchaService {
 
     private Properties props;
     private Properties options;
-    
+
     private static final String INVALID_CAPTCHA_ERROR = "incorrect-captcha-sol";
 
     /**

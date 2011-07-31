@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * A ReferenceContent represents a reference to a large message content that should be requested separately.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -70,7 +70,7 @@ public class ReferenceContent implements SimpleContent<String> {
 
     /**
      * Initializes a new {@link ReferenceContent}.
-     * 
+     *
      * @param refId The reference identifier
      */
     public ReferenceContent(final String refId) {
@@ -84,7 +84,7 @@ public class ReferenceContent implements SimpleContent<String> {
 
     /**
      * Sets the reference identifier.
-     * 
+     *
      * @param id The reference identifier
      */
     public void setId(final String id) {
@@ -93,7 +93,7 @@ public class ReferenceContent implements SimpleContent<String> {
 
     /**
      * Gets the reference identifier.
-     * 
+     *
      * @return The reference identifier
      */
     public String getId() {

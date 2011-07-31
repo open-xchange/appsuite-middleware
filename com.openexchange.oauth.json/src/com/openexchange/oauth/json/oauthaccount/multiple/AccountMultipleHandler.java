@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AccountMultipleHandler} - The multiple handler for OAuth account module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AccountMultipleHandler implements MultipleHandler {

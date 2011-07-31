@@ -66,7 +66,7 @@ public class AuditFilter implements Filter {
 				&& record.getLevel() != Level.SEVERE) {
 			return false;
 		}
-		
+
 		return true;
 	}
 

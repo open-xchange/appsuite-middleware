@@ -71,7 +71,7 @@ import com.openexchange.ajp13.xajp.request.XAJPv13RequestBody;
 
 /**
  * {@link XAJPv13DataHandler} - The multi-threaded handler of an AJP package's content dependent on current package number.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Execution(Execution.MULTITHREADED)
@@ -81,28 +81,28 @@ public final class XAJPv13DataHandler implements IDataHandler {
 
     /**
      * Starts the request handle cycle with following data.
-     * 
+     *
      * @value 2
      */
     public static final int FORWARD_REQUEST_PREFIX_CODE = 2;
 
     /**
      * Web Server asks to shut down the Servlet Container.
-     * 
+     *
      * @value 7
      */
     public static final int SHUTDOWN_PREFIX_CODE = 7;
 
     /**
      * Web Server asks the Servlet Container to take control (secure login phase).
-     * 
+     *
      * @value 8
      */
     public static final int PING_PREFIX_CODE = 8;
 
     /**
      * Web Server asks the Servlet Container to respond quickly with a CPong.
-     * 
+     *
      * @value 10
      */
     public static final int CPING_PREFIX_CODE = 10;
@@ -179,7 +179,7 @@ public final class XAJPv13DataHandler implements IDataHandler {
 
     /**
      * Handle specified data source by feeding its data to an appropriate {@link XAJPv13Request AJP request} for processing purpose.
-     * 
+     *
      * @param dataSource The data source
      * @param session The AJP session
      * @return The {@link XAJPv13Request AJP request} which processed the data source.
@@ -221,7 +221,7 @@ public final class XAJPv13DataHandler implements IDataHandler {
 
     /**
      * Writes the END-RESPONSE package which terminates an AJP cycle and marks specified session as terminated.
-     * 
+     *
      * @param connection The AJP connection to write to
      * @param session The AJP session to reset
      * @throws AJPv13Exception If END-RESPONSE package's bytes cannot be created
@@ -234,7 +234,7 @@ public final class XAJPv13DataHandler implements IDataHandler {
 
     /**
      * (Silently) Closes the specified connection through throwing an I/O exception.
-     * 
+     *
      * @param connection The non-blocking connection to close
      * @param cause The exception causing connection's closure
      * @throws IOException The actually closing I/O exception which is caught and handled in xSocket library
@@ -264,7 +264,7 @@ public final class XAJPv13DataHandler implements IDataHandler {
 
     /**
      * Writes the END-RESPONSE package which terminates an AJP cycle.
-     * 
+     *
      * @param connection The AJP connection to write to
      * @param closeConnection Whether to let the client close or keep the established connection
      * @throws AJPv13Exception If END-RESPONSE package's bytes cannot be created

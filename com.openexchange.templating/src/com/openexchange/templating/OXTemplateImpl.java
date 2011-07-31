@@ -61,7 +61,7 @@ public class OXTemplateImpl implements OXTemplate{
 
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;
-   
+
     public Template getTemplate() {
         return template;
     }
@@ -83,7 +83,7 @@ public class OXTemplateImpl implements OXTemplate{
     public TemplateLevel getLevel() {
         return level;
     }
-    
+
     public void setLevel(final TemplateLevel level) {
         this.level = level;
     }

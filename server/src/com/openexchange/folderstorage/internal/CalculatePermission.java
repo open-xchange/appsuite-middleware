@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalculatePermission} - Utility class to obtain an effective permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalculatePermission {
@@ -86,7 +86,7 @@ public final class CalculatePermission {
 
     /**
      * Calculates the effective user permissions for given folder.
-     * 
+     *
      * @param folder The folder whose effective user permissions shall be calculated
      * @param context The context
      */
@@ -155,7 +155,7 @@ public final class CalculatePermission {
 
     /**
      * Calculates the effective permission for given user in given folder.
-     * 
+     *
      * @param folder The folder
      * @param user The user
      * @param context The context
@@ -291,7 +291,7 @@ public final class CalculatePermission {
 
     /**
      * Calculates the effective permission for given session's user in given folder.
-     * 
+     *
      * @param folder The folder
      * @param session The session
      * @param allowedContentTypes The allowed content types; an empty list indicates all are allowed

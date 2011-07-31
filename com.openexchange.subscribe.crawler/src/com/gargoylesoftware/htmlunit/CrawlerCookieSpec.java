@@ -64,17 +64,17 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerCookieSpec extends CookieSpecBase {
-    
+
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpec.class));
-    
+
     public CrawlerCookieSpec(){
     }
 
     @Override
-    public void validate(String host, int port, String path, 
-        boolean secure, final Cookie cookie) 
+    public void validate(String host, int port, String path,
+        boolean secure, final Cookie cookie)
         throws MalformedCookieException {
-            
+
         LOG.trace("enter CrawlerCookieSpec.validate("
             + "String, port, path, boolean, Cookie)");
         if (host == null) {
@@ -98,17 +98,17 @@ public class CrawlerCookieSpec extends CookieSpecBase {
         host = host.toLowerCase();
         // check version
         if (cookie.getVersion() < 0) {
-            throw new MalformedCookieException ("Illegal version number " 
+            throw new MalformedCookieException ("Illegal version number "
                 + cookie.getValue());
         }
 
         // security check... we musn't allow the server to give us an
         // invalid domain scope
 
-        // Validate the cookies domain attribute.  NOTE:  Domains without 
-        // any dots are allowed to support hosts on private LANs that don't 
-        // have DNS names.  Since they have no dots, to domain-match the 
-        // request-host and domain must be identical for the cookie to sent 
+        // Validate the cookies domain attribute.  NOTE:  Domains without
+        // any dots are allowed to support hosts on private LANs that don't
+        // have DNS names.  Since they have no dots, to domain-match the
+        // request-host and domain must be identical for the cookie to sent
         // back to the origin-server.
         if (host.indexOf(".") >= 0) {
             // Not required to have at least two dots.  RFC 2965.
@@ -120,18 +120,18 @@ public class CrawlerCookieSpec extends CookieSpecBase {
                 if (s.startsWith(".")) {
                     s = s.substring(1, s.length());
                 }
-//                if (!host.equals(s)) { 
+//                if (!host.equals(s)) {
 //                    throw new MalformedCookieException(
-//                        "Illegal domain attribute \"" + cookie.getDomain() 
+//                        "Illegal domain attribute \"" + cookie.getDomain()
 //                        + "\". Domain of origin: \"" + host + "\"");
 //                }
             }
-        } 
+        }
 //        if (cookie.getName().equals("s_leo_auth_token") && cookie.getValue().equals("delete me")){
-//            throw new MalformedCookieException ("Not accepting this cookie because it has a value of delete_me: " 
+//            throw new MalformedCookieException ("Not accepting this cookie because it has a value of delete_me: "
 //                + cookie);
 //        }
-        // setting expiry date to one year in the future for all cookies that have none 
+        // setting expiry date to one year in the future for all cookies that have none
         if (null == cookie.getExpiryDate()){
             Calendar calendar = Calendar.getInstance();
             Date date = calendar.getTime();
@@ -142,7 +142,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
 //        else {
 //            if (!host.equals(cookie.getDomain())) {
 //                throw new MalformedCookieException(
-//                    "Illegal domain attribute \"" + cookie.getDomain() 
+//                    "Illegal domain attribute \"" + cookie.getDomain()
 //                    + "\". Domain of origin: \"" + host + "\"");
 //            }
 //        }
@@ -152,9 +152,9 @@ public class CrawlerCookieSpec extends CookieSpecBase {
 
 //        if (!path.startsWith(cookie.getPath())) {
 //            throw new MalformedCookieException(
-//                "Illegal path attribute \"" + cookie.getPath() 
+//                "Illegal path attribute \"" + cookie.getPath()
 //                + "\". Path of origin: \"" + path + "\"");
 //        }
     }
-    
+
 }

@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NewAction extends AbstractMailAccountAction {
@@ -92,7 +92,7 @@ public final class NewAction extends AbstractMailAccountAction {
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw 
+                throw
                     MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

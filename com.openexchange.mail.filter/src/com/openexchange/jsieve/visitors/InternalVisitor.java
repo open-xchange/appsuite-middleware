@@ -76,9 +76,9 @@ import com.openexchange.jsieve.commands.TestCommand;
 /**
  * This class is used to convert the JJTree Objects into the internal
  * representation via the visitor pattern
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class InternalVisitor implements SieveParserVisitor {
 

@@ -53,7 +53,7 @@ import java.util.HashMap;
 
 /**
  * GlobalConfig
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>

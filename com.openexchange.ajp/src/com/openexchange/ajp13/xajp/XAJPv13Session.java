@@ -66,14 +66,14 @@ import com.openexchange.configuration.ServerConfig;
 
 /**
  * {@link XAJPv13Session} - An AJP session holding several status information about the on-going AJP cycle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13Session {
 
     /**
      * The value for a missing <i>Content-Length</i> header
-     * 
+     *
      * @value -1
      */
     public static final int NOT_SET = -1;
@@ -159,7 +159,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the protocol handler.
-     * 
+     *
      * @return The protocol handler.
      */
     public XAJPv13ProtocolHandler getProtocolHandler() {
@@ -179,7 +179,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the package number.
-     * 
+     *
      * @return The package number.
      */
     public int getPackageNumber() {
@@ -195,7 +195,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets this request hander's servlet reference to the one bound to given path argument
-     * 
+     *
      * @param pathArg The request path
      */
     public void setServletInstance(final String pathArg) {
@@ -238,7 +238,7 @@ public final class XAJPv13Session {
      * <p>
      * This request handler is then marked to have the service() method called; meaning {@link #isServiceMethodCalled()} will return
      * <code>true</code>.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      * @throws ServletException If a servlet error occurs
      */
@@ -250,7 +250,7 @@ public final class XAJPv13Session {
 
     /**
      * Flushes the response to output stream
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void doResponseFlush() throws IOException {
@@ -262,7 +262,7 @@ public final class XAJPv13Session {
 
     /**
      * Writes the HTTP headers to specified connection if not already written.
-     * 
+     *
      * @param out The connection
      * @throws AJPv13Exception If composing the <code>SEND_HEADERS</code> package fails
      * @throws IOException If an I/O error occurs
@@ -278,7 +278,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the response output stream's data and clears it
-     * 
+     *
      * @return The response output stream's data
      * @throws IOException If an I/O error occurs
      */
@@ -293,7 +293,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets/appends new data to servlet request's input stream
-     * 
+     *
      * @param newData The new data to set
      * @throws IOException If an I/O error occurs
      */
@@ -307,7 +307,7 @@ public final class XAJPv13Session {
 
     /**
      * Parses given form's data into servlet request
-     * 
+     *
      * @param contentBytes The content bytes representing a form's data
      * @throws UnsupportedEncodingException If encoding is not supported
      */
@@ -321,7 +321,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets the servlet request
-     * 
+     *
      * @param request The servlet request
      */
     public void setServletRequest(final HttpServletRequestWrapper request) {
@@ -331,7 +331,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets the servlet response
-     * 
+     *
      * @param response The servlet response
      */
     public void setServletResponse(final HttpServletResponseWrapper response) {
@@ -340,7 +340,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the content length
-     * 
+     *
      * @return The content length
      */
     public long getContentLength() {
@@ -356,7 +356,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets the request's content length
-     * 
+     *
      * @param contentLength The content length
      */
     public void setContentLength(final long contentLength) {
@@ -366,7 +366,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the total requested content length
-     * 
+     *
      * @return The total requested content length
      */
     public long getTotalRequestedContentLength() {
@@ -375,7 +375,7 @@ public final class XAJPv13Session {
 
     /**
      * Increases the total requested content length by specified argument
-     * 
+     *
      * @param increaseBy The value by which the total requested content length is increased
      */
     public void increaseTotalRequestedContentLength(final long increaseBy) {
@@ -384,7 +384,7 @@ public final class XAJPv13Session {
 
     /**
      * Checks if the <code>service()</code> method has already been called
-     * 
+     *
      * @return <code>true</code> if <code>service()</code> method has already been called; otherwise <code>false</code>
      */
     public boolean isServiceMethodCalled() {
@@ -393,7 +393,7 @@ public final class XAJPv13Session {
 
     /**
      * Checks if AJP's end response package has been sent to web server
-     * 
+     *
      * @return <code>true</code> if AJP's end response package has been sent to web server; otherwise <code>false</code>
      */
     public boolean isEndResponseSent() {
@@ -410,7 +410,7 @@ public final class XAJPv13Session {
 
     /**
      * Indicates if request content type equals <code>application/x-www-form-urlencoded</code>
-     * 
+     *
      * @return <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise <code>false</code>
      */
     public boolean isFormData() {
@@ -419,7 +419,7 @@ public final class XAJPv13Session {
 
     /**
      * Marks that requests content type equals <code>application/x-www-form-urlencoded</code>
-     * 
+     *
      * @param isFormData <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise
      *            <code>false</code>
      */
@@ -429,7 +429,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the number of bytes that are left for being requested from web server
-     * 
+     *
      * @return The number of bytes that are left for being requested
      */
     public int getNumOfBytesToRequestFor() {
@@ -444,7 +444,7 @@ public final class XAJPv13Session {
      * Checks if amount of received data is equal to value of header 'Content-Length'.
      * <p>
      * This method will always return false if content-length is not set unless method {@link #makeEqual()} is invoked
-     * 
+     *
      * @return <code>true</code> if amount of received data is equal to value of header 'Content-Length'; otherwise <code>false</code>
      */
     public boolean isAllDataRead() {
@@ -459,7 +459,7 @@ public final class XAJPv13Session {
      * 'Content-Length'.
      * <p>
      * No empty data package received AND requested data length is still less than header 'Content-Length'.
-     * 
+     *
      * @return <code>true</code> if servlet container still expects data from web server; otherwise <code>false</code>
      */
     public boolean isMoreDataExpected() {
@@ -471,7 +471,7 @@ public final class XAJPv13Session {
 
     /**
      * Checks if header 'Content-Length' has not been set
-     * 
+     *
      * @return <code>true</code> if header 'Content-Length' has not been set; otherwise <code>false</code>
      */
     public boolean isNotSet() {
@@ -480,7 +480,7 @@ public final class XAJPv13Session {
 
     /**
      * Indicates if amount of received data exceeds value of header "content-length"
-     * 
+     *
      * @return
      */
     public boolean isMoreDataReadThanExpected() {
@@ -497,7 +497,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the HTTP session ID
-     * 
+     *
      * @return The HTTP session ID
      */
     public String getHttpSessionId() {
@@ -506,7 +506,7 @@ public final class XAJPv13Session {
 
     /**
      * Sets the HTTP session ID
-     * 
+     *
      * @param httpSessionId The HTTP session ID
      * @param join <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
      */
@@ -517,7 +517,7 @@ public final class XAJPv13Session {
 
     /**
      * Checks if the HTTP session has joined a previous HTTP session
-     * 
+     *
      * @return <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
      */
     public boolean isHttpSessionJoined() {
@@ -526,7 +526,7 @@ public final class XAJPv13Session {
 
     /**
      * Gets the servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
-     * 
+     *
      * @return The servlet path
      */
     public String getServletPath() {

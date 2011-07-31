@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 
 /**
  * {@link MemoryFolderImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryFolderImpl implements MemoryFolder {
@@ -88,7 +88,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         return subscribed;
     }
 
-    
+
     /**
      * Sets the subscribed
      *
@@ -105,7 +105,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the treeId
-     * 
+     *
      * @param treeId The treeId to set
      */
     public void setTreeId(String treeId) {
@@ -119,7 +119,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(String id) {
@@ -133,7 +133,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(String name) {
@@ -147,7 +147,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the parentId
-     * 
+     *
      * @param parentId The parentId to set
      */
     public void setParentId(String parentId) {
@@ -161,7 +161,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the permissions
-     * 
+     *
      * @param permissions The permissions to set
      */
     public void setPermissions(Permission[] permissions) {
@@ -175,7 +175,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the modifiedBy
-     * 
+     *
      * @param modifiedBy The modifiedBy to set
      */
     public void setModifiedBy(int modifiedBy) {
@@ -189,7 +189,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
 
     /**
      * Sets the lastModified
-     * 
+     *
      * @param lastModified The lastModified to set
      */
     public void setLastModified(Date lastModified) {

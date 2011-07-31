@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link UnifiedINBOXManagement} - Management for Unified INBOX accounts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UnifiedINBOXManagement {
@@ -71,7 +71,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Creates the Unified INBOX account for given user in specified context.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @throws OXException If creating the Unified INBOX account fails for given user in specified context
@@ -80,7 +80,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Creates the Unified INBOX account for given user in specified context.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection to use
@@ -90,7 +90,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Deletes the Unified INBOX account for given user in specified context.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @throws OXException If deleting the Unified INBOX account fails for given user in specified context
@@ -99,7 +99,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Deletes the Unified INBOX account for given user in specified context.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection to use
@@ -111,7 +111,7 @@ public interface UnifiedINBOXManagement {
      * Checks if the Unified INBOX account exists for given user in specified context.
      * <p>
      * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return <code>true</code> if the Unified INBOX account exists for given user in specified context; otherwise <code>false</code>
@@ -123,7 +123,7 @@ public interface UnifiedINBOXManagement {
      * Checks if the Unified INBOX account exists for given user in specified context.
      * <p>
      * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection to use
@@ -136,7 +136,7 @@ public interface UnifiedINBOXManagement {
      * Checks if the Unified INBOX account is enabled for given user in specified context.
      * <p>
      * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return <code>true</code> if the Unified INBOX account is enabled for given user in specified context; otherwise <code>false</code>
@@ -148,7 +148,7 @@ public interface UnifiedINBOXManagement {
      * Checks if the Unified INBOX account is enabled for given user in specified context.
      * <p>
      * The Unified INBOX account is considered to be enabled if at least one account indicates its subscription to Unified INBOX.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection to use
@@ -159,7 +159,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Gets the ID of the mail account denoting the Unified INBOX account.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The ID of the Unified INBOX account or <code>-1</code> if none found
@@ -169,7 +169,7 @@ public interface UnifiedINBOXManagement {
 
     /**
      * Gets the ID of the mail account denoting the Unified INBOX account.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection to use

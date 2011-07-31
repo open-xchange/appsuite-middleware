@@ -58,7 +58,7 @@ import com.openexchange.server.Initialization;
 /**
  * {@link TransportInitialization} - Initializes whole transport implementation and therefore provides a central point for starting/stopping
  * transport implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportInitialization implements Initialization {

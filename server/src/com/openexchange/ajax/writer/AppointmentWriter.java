@@ -87,7 +87,7 @@ public class AppointmentWriter extends CalendarWriter {
     public AppointmentWriter(final TimeZone timeZone) {
         this(timeZone, false);
     }
-    
+
     public AppointmentWriter(TimeZone timeZone, boolean forTesting) {
         super(timeZone, null);
         this.forTesting = forTesting;

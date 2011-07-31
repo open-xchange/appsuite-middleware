@@ -76,7 +76,7 @@ import com.openexchange.configuration.ServerConfig.Property;
  * com.openexchange.servlets.MyServlet.properties for the parameters. Additionally it will load all .properties files in some/path below the
  * given directory. Properties in some/path will override properties in the base file. The discovery mechanism will ignore all wildcards in
  * the paths (/some/path* will be regarded as /some/path).
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com>Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,7 +93,7 @@ public final class ServletConfigLoader {
 
     /**
      * Puts properties into map
-     * 
+     *
      * @param m - the destination map
      * @param props - the source properties
      */
@@ -105,7 +105,7 @@ public final class ServletConfigLoader {
 
     /**
      * Constructs a <code>ServletConfig</code> instance from given property map
-     * 
+     *
      * @param props - the property map
      * @return a <code>ServletConfig</code> instance containing all elements of given property map
      */
@@ -119,7 +119,7 @@ public final class ServletConfigLoader {
 
     /**
      * Gets the sole class name
-     * 
+     *
      * @param fullyQualifiedName The fully-qualified class name
      * @return The sole class name
      */
@@ -133,7 +133,7 @@ public final class ServletConfigLoader {
 
     /**
      * Gets the default instance
-     * 
+     *
      * @return The default instance
      */
     public static ServletConfigLoader getDefaultInstance() {
@@ -142,7 +142,7 @@ public final class ServletConfigLoader {
 
     /**
      * Removes all wildcard characters (<code>*</code> and <code>?</code>) from specified path
-     * 
+     *
      * @param path The path
      * @return The path with wildcard characters stripped off
      */
@@ -152,7 +152,7 @@ public final class ServletConfigLoader {
 
     /**
      * Initializes the default instance
-     * 
+     *
      * @param servletConfigDir The servlet config directory
      */
     public static void initDefaultInstance(final String servletConfigDir) {
@@ -169,7 +169,7 @@ public final class ServletConfigLoader {
 
     /**
      * Loads all properties files from specified directory
-     * 
+     *
      * @param dir The directory containing properties files
      * @return A map containing all properties
      */
@@ -187,7 +187,7 @@ public final class ServletConfigLoader {
 
     /**
      * Loads the properties file denoted by specified argument <code>propFile</code>
-     * 
+     *
      * @param propFile The properties file
      * @return A map containing the properties
      */
@@ -243,7 +243,7 @@ public final class ServletConfigLoader {
 
     private final File directory;
 
-    private final Map<String, String> globalProps; 
+    private final Map<String, String> globalProps;
 
     /**
      * Remembers failed lookups on path property files
@@ -257,7 +257,7 @@ public final class ServletConfigLoader {
 
     /**
      * Initializes a new servlet config loader
-     * 
+     *
      * @param directory The directory containing properties files
      */
     public ServletConfigLoader(final File directory) {
@@ -273,7 +273,7 @@ public final class ServletConfigLoader {
 
     /**
      * Initializes a new servlet config loader
-     * 
+     *
      * @param servletConfig The default servlet config
      * @param servletContext The default servlet context
      * @param directory The directory containing global property files
@@ -296,7 +296,7 @@ public final class ServletConfigLoader {
     /**
      * Gets the configuration for given servlet class and path. The returned configuration contains ONLY the single servlet's class
      * properties.
-     * 
+     *
      * @param clazz The servlet canonical class name
      * @return The servlet configuration
      */
@@ -311,7 +311,7 @@ public final class ServletConfigLoader {
     /**
      * Gets the configuration for given servlet class and path. The returned configuration contains both single servlet's class properties
      * and path properties.
-     * 
+     *
      * @param clazz The servlet canonical class name
      * @param pathArg The servlet's path without leading '/' character
      * @return The servlet configuration
@@ -327,7 +327,7 @@ public final class ServletConfigLoader {
 
     /**
      * Gets servlet's context
-     * 
+     *
      * @param clazz The servlet canonical class name
      * @return The servlet context
      */
@@ -341,7 +341,7 @@ public final class ServletConfigLoader {
 
     /**
      * Gets servlet's context whose servlet configuration contains both single servlet's class properties and path properties.
-     * 
+     *
      * @param clazz the servlet canonical class name
      * @param path The servlet's path without leading '/' character
      * @return The servlet context
@@ -357,7 +357,7 @@ public final class ServletConfigLoader {
 
     /**
      * Gets the directory in which all servlet configurations are kept
-     * 
+     *
      * @return The configurations' directory
      */
     public File getDirectory() {
@@ -464,7 +464,7 @@ public final class ServletConfigLoader {
 
     /**
      * Removes the configuration for given servlet class
-     * 
+     *
      * @param clazz The servlet canonical class name
      */
     public void removeConfig(final String clazz) {
@@ -473,7 +473,7 @@ public final class ServletConfigLoader {
 
     /**
      * Sets the configuration for given servlet class
-     * 
+     *
      * @param clazz The servlet canonical class name
      * @param initParams The servlet's init parameters
      */
@@ -490,7 +490,7 @@ public final class ServletConfigLoader {
 
     /**
      * Sets the default servlet configuration
-     * 
+     *
      * @param config The default configuration
      * @throws UnsupportedOperationException If this method is invoked on default instance obtained via {@link #getDefaultInstance()}
      */
@@ -503,7 +503,7 @@ public final class ServletConfigLoader {
 
     /**
      * Sets the default servlet context
-     * 
+     *
      * @param context The default context
      * @throws UnsupportedOperationException If this method is invoked on default instance obtained via {@link #getDefaultInstance()}
      */

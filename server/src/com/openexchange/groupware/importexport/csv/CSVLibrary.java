@@ -155,7 +155,7 @@ public final class CSVLibrary {
 
     public static String transformInputStreamToString(final InputStream is, final String encoding) throws OXException{
     	boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
-    	
+
         final InputStreamReader isr;
         try {
             isr = new InputStreamReader(is, encoding);
@@ -191,7 +191,7 @@ public final class CSVLibrary {
 
 	private static int lengthOfBOM(char[] buf) {
 		int length = buf.length;
-		
+
 		if(length > 3) {
             if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
 				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {

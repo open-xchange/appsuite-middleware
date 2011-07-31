@@ -71,23 +71,23 @@ import com.openexchange.tools.StringCollection;
  */
 
 public class CalendarAttachments implements  AttachmentListener, AttachmentAuthorization {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAttachments.class));
-    
+
     private static AppointmentSqlFactoryService appointmentSqlFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-    
+
     @Override
     public long attached(final AttachmentEvent e) throws Exception {
         final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), 1);
     }
-    
+
     @Override
     public long detached(final AttachmentEvent e) throws Exception {
         final AppointmentSQLInterface csql = appointmentSqlFactory.createAppointmentSql(null);
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), -(e.getDetached().length));
     }
-    
+
     @Override
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
@@ -105,12 +105,12 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 14);
         }
     }
-    
+
     @Override
     public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         checkMayAttach(folderId, objectId, user, userConfig, ctx);
     }
-    
+
     @Override
     public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         try {
@@ -128,5 +128,5 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, 15);
         }
     }
-    
+
 }

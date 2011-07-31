@@ -15,11 +15,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * SIP channel definition data
- * 
+ *
  * <p>Java class for SIPChannelInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="SIPChannelInfo">
  *   &lt;complexContent>
@@ -91,8 +91,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SIPChannelInfo", propOrder = {
@@ -176,11 +176,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -188,11 +188,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -200,11 +200,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the hostname property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getHostname() {
         return hostname;
@@ -212,11 +212,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the hostname property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setHostname(String value) {
         this.hostname = value;
@@ -224,25 +224,25 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the inviteIP property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the inviteIP property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInviteIP().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getInviteIP() {
         if (inviteIP == null) {
@@ -253,11 +253,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the login property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -265,11 +265,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the login property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -277,11 +277,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the password property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -289,11 +289,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the password property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -301,11 +301,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the register property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRegister() {
         return register;
@@ -313,11 +313,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the register property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRegister(Boolean value) {
         this.register = value;
@@ -325,11 +325,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the authUsername property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAuthUsername() {
         return authUsername;
@@ -337,11 +337,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the authUsername property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAuthUsername(String value) {
         this.authUsername = value;
@@ -349,11 +349,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the concurentCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigDecimal> getConcurentCalls() {
         return concurentCalls;
@@ -361,11 +361,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the concurentCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public void setConcurentCalls(JAXBElement<BigDecimal> value) {
         this.concurentCalls = value;
@@ -373,11 +373,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the paid property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPaid() {
         return paid;
@@ -385,11 +385,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the paid property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPaid(Boolean value) {
         this.paid = value;
@@ -397,11 +397,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the flow property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFlow() {
         return flow;
@@ -409,11 +409,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the flow property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFlow(String value) {
         this.flow = value;
@@ -421,11 +421,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the dtmf property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDtmf() {
         return dtmf;
@@ -433,11 +433,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the dtmf property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDtmf(String value) {
         this.dtmf = value;
@@ -445,11 +445,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the behindNAT property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isBehindNAT() {
         return behindNAT;
@@ -457,11 +457,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the behindNAT property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setBehindNAT(Boolean value) {
         this.behindNAT = value;
@@ -469,11 +469,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the callerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getCallerID() {
         return callerID;
@@ -481,11 +481,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the callerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setCallerID(BigDecimal value) {
         this.callerID = value;
@@ -493,11 +493,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the fromUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFromUser() {
         return fromUser;
@@ -505,11 +505,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the fromUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFromUser(String value) {
         this.fromUser = value;
@@ -517,11 +517,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the fromDomain property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFromDomain() {
         return fromDomain;
@@ -529,11 +529,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the fromDomain property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFromDomain(String value) {
         this.fromDomain = value;
@@ -541,11 +541,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the authExt property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAuthExt() {
         return authExt;
@@ -553,11 +553,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the authExt property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAuthExt(String value) {
         this.authExt = value;
@@ -565,11 +565,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the didFromInvite property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDidFromInvite() {
         return didFromInvite;
@@ -577,11 +577,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the didFromInvite property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDidFromInvite(String value) {
         this.didFromInvite = value;
@@ -589,11 +589,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the qualify property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigDecimal> getQualify() {
         return qualify;
@@ -601,11 +601,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the qualify property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public void setQualify(JAXBElement<BigDecimal> value) {
         this.qualify = value;
@@ -613,11 +613,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the prefixCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getPrefixCalls() {
         return prefixCalls;
@@ -625,11 +625,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the prefixCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setPrefixCalls(BigDecimal value) {
         this.prefixCalls = value;
@@ -637,11 +637,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the trusted property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTrusted() {
         return trusted;
@@ -649,11 +649,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the trusted property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTrusted(Boolean value) {
         this.trusted = value;
@@ -661,11 +661,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the trustRemotePartyID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTrustRemotePartyID() {
         return trustRemotePartyID;
@@ -673,11 +673,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the trustRemotePartyID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTrustRemotePartyID(Boolean value) {
         this.trustRemotePartyID = value;
@@ -685,11 +685,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the sendRemotePartyID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSendRemotePartyID() {
         return sendRemotePartyID;
@@ -697,11 +697,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the sendRemotePartyID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSendRemotePartyID(Boolean value) {
         this.sendRemotePartyID = value;
@@ -709,11 +709,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the sessionTimers property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSessionTimers() {
         return sessionTimers;
@@ -721,11 +721,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the sessionTimers property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSessionTimers(String value) {
         this.sessionTimers = value;
@@ -733,11 +733,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the sessionExpire property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSessionExpire() {
         return sessionExpire;
@@ -745,11 +745,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the sessionExpire property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSessionExpire(BigInteger value) {
         this.sessionExpire = value;
@@ -757,11 +757,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the sessionMinExpire property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSessionMinExpire() {
         return sessionMinExpire;
@@ -769,11 +769,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the sessionMinExpire property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSessionMinExpire(BigInteger value) {
         this.sessionMinExpire = value;
@@ -781,11 +781,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the sessionRefresher property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSessionRefresher() {
         return sessionRefresher;
@@ -793,11 +793,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the sessionRefresher property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSessionRefresher(String value) {
         this.sessionRefresher = value;
@@ -805,25 +805,25 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the codecs property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the codecs property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCodecs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getCodecs() {
         if (codecs == null) {
@@ -834,11 +834,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the useMD5 property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isUseMD5() {
         return useMD5;
@@ -846,11 +846,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the useMD5 property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUseMD5(Boolean value) {
         this.useMD5 = value;
@@ -858,11 +858,11 @@ public class SIPChannelInfo {
 
     /**
      * Gets the value of the notes property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotes() {
         return notes;
@@ -870,11 +870,11 @@ public class SIPChannelInfo {
 
     /**
      * Sets the value of the notes property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotes(String value) {
         this.notes = value;

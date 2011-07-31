@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TwitterMessagingAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagingAccess implements MessagingAccountAccess {
@@ -70,7 +70,7 @@ public final class TwitterMessagingAccountAccess extends AbstractTwitterMessagin
 
     /**
      * Initializes a new {@link TwitterMessagingAccountAccess}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public TwitterMessagingAccountAccess(final MessagingAccount account, final Session session) throws OXException {

@@ -54,7 +54,7 @@ import com.openexchange.mail.permission.MailPermission;
 
 /**
  * {@link MailPermissionImpl} - A mail folder permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPermissionImpl implements Permission {

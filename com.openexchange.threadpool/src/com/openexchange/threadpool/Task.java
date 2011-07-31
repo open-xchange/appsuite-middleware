@@ -54,7 +54,7 @@ import java.util.concurrent.Future;
 
 /**
  * {@link Task} - A task being submitted to thread pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Task<V> extends Callable<V> {
@@ -63,7 +63,7 @@ public interface Task<V> extends Callable<V> {
      * Sets an appropriate name for executing thread using given {@link ThreadRenamer} instance.
      * <p>
      * Implementations may leave this method empty if given thread needs not to be renamed.
-     * 
+     *
      * @param threadRenamer The thread renamer
      */
     void setThreadName(ThreadRenamer threadRenamer);
@@ -73,7 +73,7 @@ public interface Task<V> extends Callable<V> {
      * task, and may be used to re-initialize {@link ThreadLocal}s, or to perform logging.
      * <p>
      * Implementations may leave this method empty if nothing should be performed.
-     * 
+     *
      * @param t The thread that will run this task
      */
     void beforeExecute(Thread t);
@@ -83,7 +83,7 @@ public interface Task<V> extends Callable<V> {
      * {@link Throwable} is the uncaught exception that caused execution to terminate abruptly.
      * <p>
      * Implementations may leave this method empty if nothing should be performed.
-     * 
+     *
      * @param t The exception that caused termination, or <code>null</code> if execution completed normally
      */
     void afterExecute(Throwable t);
@@ -105,7 +105,7 @@ public interface Task<V> extends Callable<V> {
      * <li>Never hang on to the returned {@link Future} indiscriminately. This will prevent the {@link Task} and its return value from being
      * <tt>GC</tt>'ed.</li>
      * </ul>
-     * 
+     *
      * @return The computed result or <code>null</code>
      * @throws Exception If unable to compute a result
      */

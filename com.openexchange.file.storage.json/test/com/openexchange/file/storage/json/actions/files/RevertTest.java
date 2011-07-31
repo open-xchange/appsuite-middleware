@@ -74,19 +74,19 @@ public class RevertTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request().param("id", "12");
-        
+
         final DefaultFile f1 = new DefaultFile();
         f1.setVersion(0);
-        
+
         final DefaultFile f2 = new DefaultFile();
         f2.setVersion(3);
-        
+
         final DefaultFile f3 = new DefaultFile();
         f3.setVersion(4);
-        
+
         fileAccess().expectCall("getVersions", "12").andReturn(new TimedResult<File>() {
 
             public SearchIterator<File> results() throws OXException {
@@ -96,21 +96,21 @@ public class RevertTest extends FileActionTest {
             public long sequenceNumber() throws OXException {
                 return 0;
             }
-            
+
         });
-        
+
         fileAccess().expectCall("removeVersion", "12", new int[]{3,4}).andReturn(new int[0]);
-    
+
         DefaultFile updated = new DefaultFile();
         updated.setLastModified(new Date());
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(updated);
-        
-        
+
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
     @Override
     public AbstractFileAction createAction() {
         return new RevertAction();

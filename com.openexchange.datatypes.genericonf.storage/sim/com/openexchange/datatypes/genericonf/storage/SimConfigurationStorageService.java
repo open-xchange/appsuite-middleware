@@ -75,9 +75,9 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
     public void delete(Connection con, Context ctx, int id) throws OXException {
         entries.remove(id);
     }
-    
+
     public void delete(Connection writeConnection, Context ctx) throws OXException {
-        entries.clear();   
+        entries.clear();
     }
 
     public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
@@ -121,10 +121,10 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
     public List<Integer> search(Connection con, Context ctx, Map<String, Object> query) throws OXException {
         return search(query);
     }
-    
+
     private List<Integer> search(Map <String, Object> query) {
         List<Integer> retval = new ArrayList<Integer>();
-        
+
         Set<Integer> keySet = entries.keySet();
         for (Iterator<Integer> iter = keySet.iterator(); iter.hasNext();) {
             Set<String> queryKeySet = query.keySet();
@@ -146,7 +146,7 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
                 retval.add(currentId);
             }
         }
-        
+
         return retval;
     }
 

@@ -100,7 +100,7 @@ public class ConsistencyCheck {
         lexer.noise("files");
         lexer.noise("errors");
         lexer.noise("in");
-        
+
         if(lexer.consume("database")) {
             config.setSource("database");
             if (! parseId(lexer, config)) {
@@ -138,7 +138,7 @@ public class ConsistencyCheck {
             } else if (lexer.consume("missing_file_for_attachment")) {
                 lexer.noise(":");
                 if(lexer.consume("create_dummy")){
-                    config.addPolicy("missing_file_for_attachment" , "create_dummy");                    
+                    config.addPolicy("missing_file_for_attachment" , "create_dummy");
                 } else if(lexer.consume("delete")) {
                     config.addPolicy("missing_file_for_attachment" , "delete");
                 } else {
@@ -367,7 +367,7 @@ public class ConsistencyCheck {
         private void disconnect() {
             try {
                 if(jmxConnector != null) {
-                    jmxConnector.close();                     
+                    jmxConnector.close();
                 }
             } catch (final IOException e) {
                 //IGNORE

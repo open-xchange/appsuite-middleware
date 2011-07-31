@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * HttpServletRequestWrapper
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -109,7 +109,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}
-     * 
+     *
      * @param ajpRequestHandler The AJP request handler
      * @throws AJPv13Exception If instantiation fails
      */

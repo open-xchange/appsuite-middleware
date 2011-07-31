@@ -69,7 +69,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  * <p>
  * Reads the first four mandatory bytes of a non-blocking connection which signaled read-readiness in a transaction-like manner. Further
  * processing of AJP package's content is delegated to a data handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Execution(Execution.NONTHREADED)
@@ -150,7 +150,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
 
     /**
      * Processes the incoming data based on the given blocking connection.
-     * 
+     *
      * @param dataSource The data source to process.
      * @param session The AJP session
      * @throws IOException If an I/O error occurs
@@ -174,7 +174,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
     /**
      * Reads the first four mandatory bytes of an incoming AJP package:<br>
      * <code>0x12 0x34 <i>&lt;data-length&gt;</i></code>.
-     * 
+     *
      * @param dataSource The data source from which to read the mandatory bytes
      * @return
      * @throws IOException If an I/O error occurs

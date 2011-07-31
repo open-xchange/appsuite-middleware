@@ -64,7 +64,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer 
 
     private BundleContext context;
     private Activator activator;
-    
+
     public OAuthServiceMetaDataRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;

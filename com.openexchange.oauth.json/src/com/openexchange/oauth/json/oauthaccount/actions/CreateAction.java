@@ -67,10 +67,10 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CreateAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreateAction extends 
+public final class CreateAction extends
 AbstractOAuthTokenAction {
 
     /**

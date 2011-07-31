@@ -120,7 +120,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         }
         return retval;
     }
-    
+
     @Override
     public void put(T element) throws PipesAndFiltersException {
         try {

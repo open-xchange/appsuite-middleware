@@ -56,7 +56,7 @@ import java.util.concurrent.SynchronousQueue;
  * {@link UnifiedINBOXSynchronousQueueProvider} - Provider for appropriate synchronous queue instance dependent on JRE version.
  * <p>
  * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class UnifiedINBOXSynchronousQueueProvider {
@@ -72,7 +72,7 @@ public abstract class UnifiedINBOXSynchronousQueueProvider {
 
     /**
      * Initializes appropriate instance of synchronous queue provider.
-     * 
+     *
      * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
      *            {@link Java6SynchronousQueue}
      */
@@ -105,7 +105,7 @@ public abstract class UnifiedINBOXSynchronousQueueProvider {
 
     /**
      * Gets the {@link UnifiedINBOXSynchronousQueueProvider} instance.
-     * 
+     *
      * @return The {@link UnifiedINBOXSynchronousQueueProvider} instance
      */
     public static UnifiedINBOXSynchronousQueueProvider getInstance() {

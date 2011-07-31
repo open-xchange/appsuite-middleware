@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailAttachmentDataProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAttachmentDataProvider implements DataProvider<MailAttachmentState> {

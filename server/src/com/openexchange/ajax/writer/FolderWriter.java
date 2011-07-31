@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * FolderWriter
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderWriter extends DataWriter {
@@ -101,7 +101,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * {@link FolderFieldWriter} - A writer for folder fields
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static abstract class FolderFieldWriter {
@@ -115,7 +115,7 @@ public final class FolderWriter extends DataWriter {
 
         /**
          * Writes this writer's folder field from given {@link FolderObject} to specified {@link JSONWriter}.
-         * 
+         *
          * @param jsonwriter The JSON writer to write to
          * @param fo The folder object
          * @param withKey <code>true</code> to include JSON key; otherwise <code>false</code>
@@ -129,7 +129,7 @@ public final class FolderWriter extends DataWriter {
 
         /**
          * Writes this writer's folder field from given {@link FolderObject} to specified {@link JSONWriter}.
-         * 
+         *
          * @param jsonwriter The JSON writer to write to
          * @param fo The folder object
          * @param withKey <code>true</code> to include JSON key; otherwise <code>false</code>
@@ -334,7 +334,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Initializes a new {@link FolderWriter}
-     * 
+     *
      * @param jw The JSON writer to write to
      * @param session The session providing needed user data
      * @param ctx The session's context
@@ -358,7 +358,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Writes specified fields from given folder into a JSON object
-     * 
+     *
      * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
@@ -371,7 +371,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Writes specified fields from given folder into a JSON object
-     * 
+     *
      * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
@@ -408,7 +408,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Writes specified fields from given folder into a JSON array
-     * 
+     *
      * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
@@ -421,7 +421,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Writes specified fields from given folder into a JSON array
-     * 
+     *
      * @param customizer The customizer to call back
      * @param fields The fields to write
      * @param fo The folder object
@@ -459,7 +459,7 @@ public final class FolderWriter extends DataWriter {
 
     /**
      * Returns all known folder fields
-     * 
+     *
      * @return All known folder fields
      */
     public static int[] getAllFolderFields() {

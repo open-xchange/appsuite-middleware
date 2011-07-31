@@ -80,7 +80,7 @@ import com.openexchange.session.Session;
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
  * <p>
  * Provides access to global mail properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailConfig {
@@ -104,7 +104,7 @@ public abstract class MailConfig {
          * Parses given capability value. If given value equals ignore-case to string <code>true</code>, constant {@link #TRUE} will be
          * returned. Else if given value equals ignore-case to string <code>auto</code>, constant {@link #AUTO} will be returned. Otherwise
          * {@link #FALSE} will be returned.
-         * 
+         *
          * @param capVal - the string value to parse
          * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
          */
@@ -146,7 +146,7 @@ public abstract class MailConfig {
 
         /**
          * Parses specified string into a login source.
-         * 
+         *
          * @param loginSourceStr The string to parse to a login source
          * @return An appropriate login source or <code>null</code> if string could not be parsed to a login source
          */
@@ -185,7 +185,7 @@ public abstract class MailConfig {
 
         /**
          * Parses specified string into a password source.
-         * 
+         *
          * @param passwordSourceStr The string to parse to a password source
          * @return An appropriate password source or <code>null</code> if string could not be parsed to a password source
          */
@@ -224,7 +224,7 @@ public abstract class MailConfig {
 
         /**
          * Parses specified string into a server source.
-         * 
+         *
          * @param serverSourceStr The string to parse to a server source
          * @return An appropriate server source or <code>null</code> if string could not be parsed to a server source
          */
@@ -258,7 +258,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the user-specific mail configuration.
-     * 
+     *
      * @param <C> The return value type
      * @param clazz The mail configuration type
      * @param mailConfig A newly created {@link MailConfig mail configuration}
@@ -310,7 +310,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the mail login with respect to configured login source.
-     * 
+     *
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
@@ -339,7 +339,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the mail server URL appropriate to configured mail server source.
-     * 
+     *
      * @param mailAccount The user
      * @return The appropriate mail server URL or <code>null</code>
      */
@@ -355,7 +355,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the mail server URL appropriate to configured mail server source.
-     * 
+     *
      * @param session The user session
      * @param accountId The account ID
      * @return The appropriate mail server URL or <code>null</code>
@@ -371,7 +371,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the part modifier.
-     * 
+     *
      * @return the part modifier.
      */
     public static final PartModifier getPartModifier() {
@@ -380,7 +380,7 @@ public abstract class MailConfig {
 
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
-     * 
+     *
      * @param pattern The pattern
      * @param server The server address
      * @param ctx The context
@@ -460,7 +460,7 @@ public abstract class MailConfig {
 
     /**
      * Parses protocol out of specified server string according to URL specification; e.g. <i>mailprotocol://dev.myhost.com:1234</i>
-     * 
+     *
      * @param server The server string
      * @return An array of {@link String} with length <code>2</code>. The first element is the protocol and the second the server. If no
      *         protocol pattern could be found <code>null</code> is returned; meaning no protocol is present in specified server string.
@@ -487,7 +487,7 @@ public abstract class MailConfig {
     /**
      * Checks if a part modifier shall be used, that is {@link PartModifier#getInstance()} is not <code>null</code> and not
      * assignment-compatible to {@link DummyPartModifier} (which does nothing at all).
-     * 
+     *
      * @return <code>true</code> if part modifier shall be used; otherwise <code>false</code>
      */
     public static final boolean usePartModifier() {
@@ -524,7 +524,7 @@ public abstract class MailConfig {
 
     /**
      * Fills login and password in specified instance of {@link MailConfig}.
-     * 
+     *
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
      * @param mailAccount The mail account
@@ -632,7 +632,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -641,7 +641,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -650,14 +650,14 @@ public abstract class MailConfig {
 
     /**
      * Gets the mail system's capabilities
-     * 
+     *
      * @return The mail system's capabilities
      */
     public abstract MailCapabilities getCapabilities();
 
     /**
      * Gets the login.
-     * 
+     *
      * @return the login
      */
     public final String getLogin() {
@@ -666,7 +666,7 @@ public abstract class MailConfig {
 
     /**
      * Gets the password.
-     * 
+     *
      * @return the password
      */
     public final String getPassword() {
@@ -675,14 +675,14 @@ public abstract class MailConfig {
 
     /**
      * Gets the optional port of the server.
-     * 
+     *
      * @return The optional port of the server obtained via {@link #getServer()} or <code>-1</code> if no port needed.
      */
     public abstract int getPort();
 
     /**
      * Gets the host name or IP address of the server.
-     * 
+     *
      * @return The host name or IP address of the server.
      */
     public abstract String getServer();
@@ -719,14 +719,14 @@ public abstract class MailConfig {
 
     /**
      * Checks if a secure connection shall be established.
-     * 
+     *
      * @return <code>true</code> if a secure connection shall be established; otherwise <code>false</code>
      */
     public abstract boolean isSecure();
 
     /**
      * Sets the account ID (externally).
-     * 
+     *
      * @param accountId The account ID
      */
     public void setAccountId(final int accountId) {
@@ -735,7 +735,7 @@ public abstract class MailConfig {
 
     /**
      * Sets the session
-     * 
+     *
      * @param session The session
      */
     public void setSession(final Session session) {
@@ -744,7 +744,7 @@ public abstract class MailConfig {
 
     /**
      * Sets the login (externally).
-     * 
+     *
      * @param login The login
      */
     public void setLogin(final String login) {
@@ -753,7 +753,7 @@ public abstract class MailConfig {
 
     /**
      * Sets the password (externally).
-     * 
+     *
      * @param password The password
      */
     public void setPassword(final String password) {
@@ -762,35 +762,35 @@ public abstract class MailConfig {
 
     /**
      * Sets the port (externally).
-     * 
+     *
      * @param port The port
      */
     public abstract void setPort(int port);
 
     /**
      * Sets (externally) whether a secure connection should be established or not.
-     * 
+     *
      * @param secure <code>true</code> if a secure connection should be established; otherwise <code>false</code>
      */
     public abstract void setSecure(boolean secure);
 
     /**
      * Sets the host name or IP address of the server (externally).
-     * 
+     *
      * @param server The host name or IP address of the server
      */
     public abstract void setServer(String server);
 
     /**
      * Gets the mail properties for this mail configuration.
-     * 
+     *
      * @return The mail properties for this mail configuration
      */
     public abstract IMailProperties getMailProperties();
 
     /**
      * Sets the mail properties for this mail configuration.
-     * 
+     *
      * @param mailProperties The mail properties for this mail configuration
      */
     public abstract void setMailProperties(IMailProperties mailProperties);
@@ -802,7 +802,7 @@ public abstract class MailConfig {
      * <p>
      * Moreover this method should check if a secure connection shall be established dependent on URL's protocol. The result is then
      * accessible via {@link #isSecure()}.
-     * 
+     *
      * @param serverURL The server URL of the form:<br>
      *            (&lt;protocol&gt;://)?&lt;host&gt;(:&lt;port&gt;)?
      * @throws OXException If server URL cannot be parsed

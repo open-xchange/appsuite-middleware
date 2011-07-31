@@ -144,7 +144,7 @@ public abstract class UserStorage {
 
     /**
      * Gets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param userId The user identifier
      * @param context The context
@@ -155,7 +155,7 @@ public abstract class UserStorage {
 
     /**
      * Sets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
@@ -166,7 +166,7 @@ public abstract class UserStorage {
 
     /**
      * Sets specified unscoped attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier

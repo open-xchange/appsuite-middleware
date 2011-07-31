@@ -64,7 +64,7 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
 
     private BundleContext context;
     private Activator activator;
-    
+
     public OAuthServiceRegisterer(BundleContext context, Activator activator) {
         super();
         this.context = context;
@@ -72,12 +72,12 @@ public class OAuthServiceRegisterer implements ServiceTrackerCustomizer {
     }
 
     public Object addingService(ServiceReference reference) {
-        OAuthService oauth = (OAuthService) context.getService(reference);        
+        OAuthService oauth = (OAuthService) context.getService(reference);
         activator.setOauthService(oauth);
         activator.registerServices();
         return oauth;
-        
-        
+
+
     }
 
     public void modifiedService(ServiceReference reference, Object service) {

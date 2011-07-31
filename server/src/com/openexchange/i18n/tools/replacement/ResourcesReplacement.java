@@ -63,9 +63,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 /**
  * {@link ResourcesReplacement} - Replacement for
  * {@link TemplateToken#RESOURCES resources}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ResourcesReplacement implements TemplateReplacement {
 

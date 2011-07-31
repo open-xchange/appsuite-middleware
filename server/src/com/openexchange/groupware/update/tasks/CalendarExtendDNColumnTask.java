@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * {@link CalendarExtendDNColumnTask} - Extends size of <tt>VARCHAR</tt> column <i>dn</i> in both working and backup table of
  * <i>prg_date_rights</i>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CalendarExtendDNColumnTask implements UpdateTask {

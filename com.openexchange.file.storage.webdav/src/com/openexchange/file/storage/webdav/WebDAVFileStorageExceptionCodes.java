@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link WebDAVFileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -110,7 +110,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
      * Missing file name.
      */
     MISSING_FILE_NAME(WebDAVFileStorageExceptionMessages.MISSING_FILE_NAME_MSG, CATEGORY_ERROR, 12);
-    
+
 
     private final Category category;
 
@@ -123,7 +123,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "WEBDAV_FILE_STORAGE";
     }
@@ -146,7 +146,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -155,7 +155,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -165,7 +165,7 @@ public enum WebDAVFileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

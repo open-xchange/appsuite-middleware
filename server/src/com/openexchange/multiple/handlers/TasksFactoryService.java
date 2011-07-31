@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TasksFactoryService} - Factory service for tasks module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TasksFactoryService implements MultipleHandlerFactoryService {

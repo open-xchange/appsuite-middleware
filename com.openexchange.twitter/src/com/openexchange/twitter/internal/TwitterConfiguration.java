@@ -54,7 +54,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link TwitterConfiguration} - Configuration of twitter bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterConfiguration {
@@ -72,7 +72,7 @@ public final class TwitterConfiguration {
 
     /**
      * Configures twitter bundle.
-     * 
+     *
      * @param configurationService The configuration service needed to read properties
      */
     public static void configure(final ConfigurationService configurationService) {
@@ -100,7 +100,7 @@ public final class TwitterConfiguration {
 
     /**
      * Gets the configured consumer key.
-     * 
+     *
      * @return The consumer key
      */
     public static String getConsumerKey() {
@@ -109,7 +109,7 @@ public final class TwitterConfiguration {
 
     /**
      * Gets the configured consumer secret.
-     * 
+     *
      * @return The consumer secret
      */
     public static String getConsumerSecret() {

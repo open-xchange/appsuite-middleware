@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
 
 /**
  * {@link OSGiPropertyMixin}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OSGiPropertyMixin implements PropertyMixin {

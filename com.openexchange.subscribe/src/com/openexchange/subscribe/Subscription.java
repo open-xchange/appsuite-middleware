@@ -61,9 +61,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Subscription extends TargetFolderDefinition {
-    
+
     private int id;
-    
+
     private long lastUpdate;
 
     private SubscriptionSource source;
@@ -71,13 +71,13 @@ public class Subscription extends TargetFolderDefinition {
     private Map<String, Object> configuration = new HashMap<String, Object>();
 
     private String displayName;
-    
+
     private Boolean enabled;
-    
+
     private String secret;
 
     private ServerSession session;
-    
+
     public long getLastUpdate() {
         return lastUpdate;
     }
@@ -105,7 +105,7 @@ public class Subscription extends TargetFolderDefinition {
     public SubscriptionSource getSource() {
         return source;
     }
-    
+
     public boolean containsSource() {
         return getSource() != null;
     }
@@ -129,23 +129,23 @@ public class Subscription extends TargetFolderDefinition {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-    
+
     public boolean isEnabled() {
         return enabled == null ? true : enabled;
     }
-    
+
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-    
+
     public boolean containsEnabled() {
         return enabled != null;
     }
-    
+
     public String getSecret() {
         return secret;
     }
-    
+
     public void setSecret(String secret) {
         this.secret = secret;
     }
@@ -153,7 +153,7 @@ public class Subscription extends TargetFolderDefinition {
     public void setSession(ServerSession session) {
         this.session = session;
     }
-    
+
     public ServerSession getSession() {
         if (session != null) {
             return session;
@@ -164,7 +164,7 @@ public class Subscription extends TargetFolderDefinition {
             return null;
         }
     }
-    
+
 
 
 

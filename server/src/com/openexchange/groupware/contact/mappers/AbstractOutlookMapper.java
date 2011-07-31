@@ -81,7 +81,7 @@ public abstract class AbstractOutlookMapper implements ContactFieldMapper {
     public Collection<ContactField> getSupportedFields() {
         return outlook2ox.values();
     }
-    
+
     public void store(ContactField oxField, String outlookField){
         if(outlookField != null && ! "".equals(outlookField)) {
             outlook2ox.put(outlookField, oxField);

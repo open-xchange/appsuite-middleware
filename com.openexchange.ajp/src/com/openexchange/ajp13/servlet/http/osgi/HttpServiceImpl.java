@@ -61,7 +61,7 @@ import com.openexchange.ajp13.servlet.http.HttpServletManager;
 /**
  * {@link HttpServiceImpl} - The HTTP Service allows other bundles in the OSGi environment to dynamically register resources and servlets
  * into the URI namespace of HTTP Service. A bundle may later unregister its resources or servlets.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpServiceImpl implements HttpService {

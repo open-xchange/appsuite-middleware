@@ -83,30 +83,30 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
      * Parsing error.
      */
     ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
-    
+
     INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
     COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),
     TEMPORARILY_UNAVAILABLE(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.TRY_AGAIN_LATER, SubscriptionErrorStrings.SERVICE_TEMPORARILY_UNAVAILABLE),
     INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
-    INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA), 
+    INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA),
     MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT);
 
     private Category category;
     private int errorCode;
     private String help;
     private String message;
-    
+
     private SubscriptionErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;
         this.errorCode = errorCode;
         this.help = help;
         this.message = message;
     }
-    
+
     public String getPrefix() {
         return "SUB";
     }
-    
+
     public Category getCategory() {
         return category;
     }
@@ -122,14 +122,14 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -138,7 +138,7 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -148,7 +148,7 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
@@ -156,5 +156,5 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-    
+
 }

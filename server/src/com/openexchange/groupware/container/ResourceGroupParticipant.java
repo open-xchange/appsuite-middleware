@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link ResourceGroupParticipant} - Represents a group of resources as participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ResourceGroupParticipant implements Participant, Comparable<Participant> {
@@ -66,7 +66,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the resource group.
      */
     public ResourceGroupParticipant(final int id) {

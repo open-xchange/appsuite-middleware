@@ -32,7 +32,7 @@ import com.openexchange.groupware.search.Order;
 /**
  * {@link SpecialAlphanumSortContactComparator} - Sorts with respect to {@link Contact#SPECIAL_SORTING}. Considering given names, too, if
  * last names are equal.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SpecialAlphanumSortContactComparator implements Comparator<Contact> {
@@ -61,7 +61,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     /**
      * Initializes a new {@link SpecialAlphanumSortContactComparator}.
-     * 
+     *
      * @param stringComparator The string comparator
      * @param sortOrder The sort order
      */
@@ -90,7 +90,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     /**
      * Checks if specified field is either YOMI last name or surname.
-     * 
+     *
      * @param field The field to check
      * @return <code>true</code> if specified field is either YOMI last name or surname; otherwise <code>false</code>
      */
@@ -100,7 +100,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     /**
      * Compares the given names of specified contacts; preferring YOMI first names.
-     * 
+     *
      * @param contact1 The first contact
      * @param contact2 The second contact
      * @return The comparison result
@@ -124,7 +124,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
      * <li>email1</li>
      * <li>email2</li>
      * </ol>
-     * 
+     *
      * @param contact The contact
      * @return The field number for first non-<code>null</code> field or <code>0</code> if each value of the sequence was <code>null</code>
      */

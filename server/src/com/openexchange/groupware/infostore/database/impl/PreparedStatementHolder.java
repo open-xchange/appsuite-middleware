@@ -66,14 +66,14 @@ import org.apache.commons.logging.LogFactory;
  */
 public class PreparedStatementHolder {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreparedStatementHolder.class));
-    
+
     private Connection writeConnection;
     private Map<String, PreparedStatement> statements = new HashMap<String, PreparedStatement>();
-    
+
     public PreparedStatementHolder(Connection writeConnection) {
         this.writeConnection = writeConnection;
     }
-    
+
     public void execute(String sql, Object...replacements) throws SQLException {
         PreparedStatement statement = get(sql);
         for(int i = 0, size = replacements.length; i < size; i++) {
@@ -81,7 +81,7 @@ public class PreparedStatementHolder {
         }
         statement.executeUpdate();
     }
-    
+
     private PreparedStatement get(String sql) throws SQLException {
         if (statements.containsKey(sql)) {
             return statements.get(sql);
@@ -91,7 +91,7 @@ public class PreparedStatementHolder {
             return prepped;
         }
     }
-    
+
     public void close() {
         for(PreparedStatement stmt : statements.values()) {
             try {
@@ -101,10 +101,10 @@ public class PreparedStatementHolder {
             }
         }
     }
-    
+
     public Connection getConnection() {
         return writeConnection;
     }
-    
-    
+
+
 }

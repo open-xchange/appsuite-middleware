@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UWAActions}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UWAActions implements AJAXActionServiceFactory {

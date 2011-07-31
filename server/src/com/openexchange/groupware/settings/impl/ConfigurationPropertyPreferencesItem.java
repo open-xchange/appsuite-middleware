@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * Makes a certain configuration setting in the configuration service available as a preferences item service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigurationPropertyPreferencesItem implements PreferencesItemService {

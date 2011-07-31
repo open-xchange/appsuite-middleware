@@ -59,7 +59,7 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 	public GetSwitch(final AttachmentMetadata attachment) {
 		this.attachment = attachment;
 	}
-	
+
 	@Override
     public Object createdBy() {
 		return attachment.getCreatedBy();
@@ -99,12 +99,12 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
     public Object folderId() {
 		return attachment.getFolderId();
 	}
-	
+
 	@Override
     public Object fileName(){
 		return attachment.getFilename();
 	}
-	
+
 	@Override
     public Object rtfFlag(){
 		return attachment.getRtfFlag();

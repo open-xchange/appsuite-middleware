@@ -55,9 +55,9 @@ import com.openexchange.server.ServiceHolderListener;
 
 /**
  * {@link ServerStarterServiceListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ServerStarterServiceListener implements ServiceHolderListener<ConfigurationService> {
 
@@ -76,7 +76,7 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
 	 */
 	@Override
@@ -99,7 +99,7 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceRelease()
 	 */
 	@Override

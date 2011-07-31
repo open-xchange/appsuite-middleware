@@ -55,7 +55,7 @@ import java.io.StringReader;
 
 /**
  * Enriched2HtmlConverter - converts text content of MIME type 'text/enriched' to regular html content
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Enriched2HtmlConverter {
@@ -112,7 +112,7 @@ public class Enriched2HtmlConverter {
 
     /**
      * Converts specified enriched text ("text/enriched" or its predecessor "text/richtext") to HTML.
-     * 
+     *
      * @param enrichedText The enriched text
      * @return The HTML content
      */

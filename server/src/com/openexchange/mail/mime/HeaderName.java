@@ -55,7 +55,7 @@ import java.util.Locale;
 
 /**
  * {@link HeaderName} - Supports an ignore-case string implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderName implements Serializable, Cloneable, Comparable<HeaderName>, CharSequence {
@@ -143,7 +143,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
      * Initializes header names from specified character sequences.
      * <p>
      * Yields significantly better space and time performance by caching frequently requested headers.
-     * 
+     *
      * @param names The character sequences
      * @return The header names
      */
@@ -162,7 +162,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
      * Initializes a new header name from specified character sequence.
      * <p>
      * Yields significantly better space and time performance by caching frequently requested headers.
-     * 
+     *
      * @param s The character sequence
      * @return The new header name.
      */

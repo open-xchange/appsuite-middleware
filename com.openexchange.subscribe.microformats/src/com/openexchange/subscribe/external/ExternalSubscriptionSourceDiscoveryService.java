@@ -85,18 +85,18 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
 public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class));
-    
+
     private final String sourceURL;
     private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
     private final OXMFParserFactoryService parserFactory;
     private final OXMFFormParser formParser;
-    
+
     public ExternalSubscriptionSourceDiscoveryService(final String sourceURL, final OXMFParserFactoryService parserFactory, final OXMFFormParser formParser) {
         this.sourceURL = sourceURL;
         this.parserFactory = parserFactory;
         this.formParser = formParser;
     }
-    
+
     public SubscriptionSource getSource(final String identifier) {
         return sources.getSource(identifier);
     }
@@ -116,11 +116,11 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
     public boolean knowsSource(final String identifier) {
         return sources.knowsSource(identifier);
     }
-    
+
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return null;
     }
-    
+
     public void refresh() throws OXException {
         try {
             final List<ExternalSubscriptionSource> listing = grabListing();
@@ -140,22 +140,22 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
     private MicroformatSubscribeService grabService(final ExternalSubscriptionSource external) throws OXException {
         final String externalAddress = resolveRelative(sourceURL, external.getExternalAddress());
         external.setExternalAddress(externalAddress);
-        
+
         String icon = resolveRelative(sourceURL, external.getIcon());
         external.setIcon(icon);
-        
+
         try {
             final Reader r = HTTPToolkit.grab(externalAddress);
             final OXMFForm form = formParser.parse(r);
-            
+
             ListingParser.apply(external, form.getMetaInfo());
-            
+
             icon = resolveRelative(externalAddress, external.getIcon());
             external.setIcon(icon);
 
             final String action = resolveRelative(externalAddress, form.getAction());
             form.setAction(action);
-            
+
             final MapToObjectTransformer transformer = getTransformer(external.getFolderModule());
             if(transformer == null) {
                 LOG.error("We don't support subscription sources of type "+Module.getModuleString(external.getFolderModule(), -1)+" yet");
@@ -180,7 +180,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
             external.setFormDescription(form);
             external.setSubscribeService(subscribeService);
-            
+
             return subscribeService;
         } catch (final HttpException e) {
             LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
@@ -191,7 +191,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         }
     }
 
-   
+
 
     private String resolveRelative(final String sibling, final String relative) {
         if(relative == null) {
@@ -204,7 +204,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         if(relative.startsWith("/")) {
             return resolveServerRelative(sibling, relative);
         }
-        
+
         final String directory = sibling.substring(0,sibling.lastIndexOf('/'));
         return directory + '/'+ relative;
     }
@@ -234,7 +234,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
         } else if (folderModule == Module.INFOSTORE.getFolderConstant()) {
             return new MapToDocumentMetadataHolderTransformer();
         }
-        
+
         return null;
     }
 
@@ -251,7 +251,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
     }
-    
-    
+
+
 
 }

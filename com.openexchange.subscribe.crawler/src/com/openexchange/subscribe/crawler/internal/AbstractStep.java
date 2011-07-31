@@ -67,15 +67,15 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     protected Exception exception;
 
     protected boolean executedSuccessfully;
-    
+
     protected Workflow workflow;
-    
+
     protected O output;
-    
+
     protected I input;
-    
+
     protected boolean debuggingEnabled;
-    
+
     protected boolean switchUserAgent;
 
     protected AbstractStep() {
@@ -89,7 +89,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     public Exception getException() {
         return this.exception;
     }
-    
+
     public void setWorkflow (final Workflow workflow){
         this.workflow = workflow;
     }
@@ -97,7 +97,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
     public String getDescription() {
         return description;
     }
-    
+
     public void setDescription(final String description) {
         this.description = description;
     }
@@ -118,18 +118,18 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
 
     public void setInput(final I input) {
         this.input = input;
-        
+
     }
-    
+
     public I getInput() {
         return input;
     }
-    
+
     public boolean isSwitchUserAgent() {
         return switchUserAgent;
     }
 
-    
+
     public void setSwitchUserAgent(boolean switchUserAgent) {
         this.switchUserAgent = switchUserAgent;
     }
@@ -139,15 +139,15 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return debuggingEnabled;
     }
 
-    
+
     public void setDebuggingEnabled(boolean debuggingEnabled) {
         this.debuggingEnabled = debuggingEnabled;
     }
-    
+
     // this opens the current page in the developers browser while debugging for a fast overview.
     protected void openPageInBrowser(Page page){
         File file = new File ("./crawlerTestPage.html");
-        Writer output = null;                            
+        Writer output = null;
         try {
           output = new BufferedWriter(new FileWriter(file));
           output.write( page.getWebResponse().getContentAsString() );
@@ -169,12 +169,12 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
             output.close();
         } catch (IOException e) {
             e.printStackTrace();
-        } 
+        }
         }
     }
-    
-    public TypeVariable<?>[] runEmpty(){        
+
+    public TypeVariable<?>[] runEmpty(){
         return this.getClass().getTypeParameters();
     }
-    // Convenience Methods for Development / Debugging    
+    // Convenience Methods for Development / Debugging
 }

@@ -56,7 +56,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DataProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface DataProvider<T> {
@@ -71,10 +71,10 @@ public interface DataProvider<T> {
      * @return The state that is later passed into all other methods
      */
     public T start();
-    
+
     /**
      * Retrieve the binary data associated with this specification.
-     * 
+     *
      * @param state The state previously obtained from start
      * @param specification A parameter map specifying the file to be retrieved.
      * @param session The users session.
@@ -93,8 +93,8 @@ public interface DataProvider<T> {
      */
     public FileMetadata retrieveMetadata(T state, Map<String, Object> specification, ServerSession session) throws OXException;
 
-    
-    
+
+
     /**
      * Frees all resources associated with this session.
      * @param state The state previously obtained from #start()

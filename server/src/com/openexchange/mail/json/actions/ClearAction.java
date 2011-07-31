@@ -60,14 +60,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ClearAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClearAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link ClearAction}.
-     * 
+     *
      * @param services
      */
     public ClearAction(final ServiceLookup services) {

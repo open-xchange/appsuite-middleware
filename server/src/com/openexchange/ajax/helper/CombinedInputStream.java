@@ -55,7 +55,7 @@ import java.io.InputStream;
 /**
  * {@link CombinedInputStream} - An {@link InputStream input stream} implementation combining an already read/consumed byte sequence with
  * remaining {@link InputStream input stream} delegatee.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CombinedInputStream extends InputStream {
@@ -68,7 +68,7 @@ public final class CombinedInputStream extends InputStream {
 
     /**
      * Initializes a new {@link CombinedInputStream}.
-     * 
+     *
      * @param consumed The bytes already consumed from <code>remaining</code> input stream
      * @param remaining The remaining stream
      * @throws IllegalArgumentException If passed byte array or {@link InputStream} instance is <code>null</code>

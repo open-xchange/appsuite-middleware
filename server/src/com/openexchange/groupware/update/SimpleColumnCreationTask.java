@@ -108,6 +108,6 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
     protected abstract String getColumnName();
 
     protected abstract String getColumnDefinition();
-    
-    
+
+
 }

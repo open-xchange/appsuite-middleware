@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -47,8 +47,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -65,11 +65,11 @@ public class GetCallAPISettingsResponse {
 
     /**
      * Gets the value of the access property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetCallAPISettingsResponse.Access }
-     *     
+     *
      */
     public GetCallAPISettingsResponse.Access getAccess() {
         return access;
@@ -77,11 +77,11 @@ public class GetCallAPISettingsResponse {
 
     /**
      * Sets the value of the access property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetCallAPISettingsResponse.Access }
-     *     
+     *
      */
     public void setAccess(GetCallAPISettingsResponse.Access value) {
         this.access = value;
@@ -89,11 +89,11 @@ public class GetCallAPISettingsResponse {
 
     /**
      * Gets the value of the auth property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetCallAPISettingsResponse.Auth }
-     *     
+     *
      */
     public GetCallAPISettingsResponse.Auth getAuth() {
         return auth;
@@ -101,11 +101,11 @@ public class GetCallAPISettingsResponse {
 
     /**
      * Sets the value of the auth property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetCallAPISettingsResponse.Auth }
-     *     
+     *
      */
     public void setAuth(GetCallAPISettingsResponse.Auth value) {
         this.auth = value;
@@ -114,9 +114,9 @@ public class GetCallAPISettingsResponse {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -129,8 +129,8 @@ public class GetCallAPISettingsResponse {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -144,7 +144,7 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Gets the value of the legacyAuth property.
-         * 
+         *
          */
         public boolean isLegacyAuth() {
             return legacyAuth;
@@ -152,7 +152,7 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Sets the value of the legacyAuth property.
-         * 
+         *
          */
         public void setLegacyAuth(boolean value) {
             this.legacyAuth = value;
@@ -160,7 +160,7 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          */
         public boolean isStatus() {
             return status;
@@ -168,7 +168,7 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          */
         public void setStatus(boolean value) {
             this.status = value;
@@ -179,9 +179,9 @@ public class GetCallAPISettingsResponse {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -194,8 +194,8 @@ public class GetCallAPISettingsResponse {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -211,11 +211,11 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Gets the value of the password property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getPassword() {
             return password;
@@ -223,11 +223,11 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Sets the value of the password property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setPassword(String value) {
             this.password = value;
@@ -235,11 +235,11 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Gets the value of the username property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getUsername() {
             return username;
@@ -247,11 +247,11 @@ public class GetCallAPISettingsResponse {
 
         /**
          * Sets the value of the username property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setUsername(String value) {
             this.username = value;

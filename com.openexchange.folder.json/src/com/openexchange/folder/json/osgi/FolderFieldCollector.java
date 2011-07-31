@@ -57,7 +57,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 
 /**
  * {@link FolderFieldCollector} - Collector for additional folder fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderFieldCollector implements ServiceTrackerCustomizer {
@@ -74,7 +74,7 @@ public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link FolderFieldCollector}.
-     * 
+     *
      * @param context The bundle context
      * @param list The additional folder field list used to store tracked fields.
      */

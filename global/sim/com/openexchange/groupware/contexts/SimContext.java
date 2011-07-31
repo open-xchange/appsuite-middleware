@@ -63,15 +63,15 @@ import java.util.Set;
  *
  */
 public class SimContext implements Context {
-    
+
     private int id;
     private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
-    
+
     public SimContext(int id) {
         super();
         this.id = id;
     }
-    
+
     public int getContextId() {
         return id;
     }
@@ -119,7 +119,7 @@ public class SimContext implements Context {
     public Map<String, Set<String>> getAttributes() {
         return attributes;
     }
-    
+
     public void setAttribute(String key, String value) {
         attributes.put(key, new HashSet<String>(Arrays.asList(value)));
     }

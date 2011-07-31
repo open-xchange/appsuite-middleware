@@ -53,7 +53,7 @@ import com.openexchange.event.RemoteEvent;
 
 /**
  * {@link RemoteEventImpl} - Implementation of {@link RemoteEvent}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoteEventImpl implements RemoteEvent {
@@ -72,7 +72,7 @@ public final class RemoteEventImpl implements RemoteEvent {
 
     /**
      * Initializes a new {@link RemoteEventImpl}.
-     * 
+     *
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID

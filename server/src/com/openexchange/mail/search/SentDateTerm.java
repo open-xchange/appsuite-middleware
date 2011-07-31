@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SentDateTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.Date>> {

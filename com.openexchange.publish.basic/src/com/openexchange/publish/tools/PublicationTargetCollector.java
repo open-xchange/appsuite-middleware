@@ -69,7 +69,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 public class PublicationTargetCollector implements PublicationTargetDiscoveryService {
 
     private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
-    
+
     public PublicationTarget getTarget(String id) {
         return targets.get(id);
     }
@@ -104,11 +104,11 @@ public class PublicationTargetCollector implements PublicationTargetDiscoverySer
     public void addPublicationService(PublicationService publicationService) throws OXException {
         targets.put(publicationService.getTarget().getId(), publicationService.getTarget());
     }
-    
+
     public void removePublicationService(PublicationService publicationService) throws OXException {
         targets.remove(publicationService.getTarget().getId());
     }
-    
+
     public void clear() {
         targets.clear();
     }

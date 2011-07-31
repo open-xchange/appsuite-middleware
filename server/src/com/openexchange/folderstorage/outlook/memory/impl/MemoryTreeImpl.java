@@ -71,7 +71,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link MemoryTreeImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTreeImpl implements MemoryTree {

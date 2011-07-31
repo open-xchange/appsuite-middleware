@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AddressHeaderWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressHeaderWriter implements MessagingHeaderWriter {

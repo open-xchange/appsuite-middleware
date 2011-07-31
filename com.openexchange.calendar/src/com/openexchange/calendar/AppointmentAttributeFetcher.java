@@ -59,7 +59,7 @@ import com.openexchange.search.SearchAttributeFetcher;
 
 /**
  * {@link AppointmentAttributeFetcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appointment> {
@@ -356,7 +356,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
 
     /**
      * Gets the contact attribute fetcher instance.
-     * 
+     *
      * @return The contact attribute fetcher instance.
      */
     public static AppointmentAttributeFetcher getInstance() {

@@ -60,13 +60,13 @@ import com.openexchange.exception.OXException;
 public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     private SearchIterator<T> searchIterator;
     private Customizer<T> customizer;
-    
+
     public CustomizableSearchIterator(SearchIterator<T> searchIterator, Customizer<T> customizer) {
         super();
         this.searchIterator = searchIterator;
         this.customizer = customizer;
     }
-    
+
     public void addWarning(OXException warning) {
         searchIterator.addWarning(warning);
     }
@@ -88,6 +88,6 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     public int size() {
         return searchIterator.size();
     }
-    
-    
+
+
 }

@@ -66,7 +66,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link CIFSActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSActivator extends DeferredActivator {

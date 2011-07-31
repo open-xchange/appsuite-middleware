@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Importer for OX own CSV file format - this format is able to represent a contact with all fields that appear in the OX.
- * 
+ *
  * @see com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter - imports files prduced by Outlook
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
@@ -183,21 +183,21 @@ public class CSVContactImporter extends AbstractImporter {
             // ...and writing them
             intentions.add(writeEntry(fields, iter.next(), folder, conSet, lineNumber++, sessObj));
         }
-        
+
         // Build a list of contacts to insert
-        
+
         final List<Contact> contacts = new LinkedList<Contact>();
         for(final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 contacts.add(intention.contact);
             }
         }
-        
+
         // Insert or update contacts
-        
+
         final FolderUpdaterRegistry updaterRegistry = ServerServiceRegistry.getInstance().getService(FolderUpdaterRegistry.class);
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
-        
+
         try {
             final FolderUpdaterService folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
@@ -207,12 +207,12 @@ public class CSVContactImporter extends AbstractImporter {
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        
-        
+
+
         // Build result list
-        
+
         final List<ImportResult> results = new LinkedList<ImportResult>();
-        
+
         for(final ImportIntention intention : intentions) {
             if (intention.contact != null) {
                 final ImportResult result = new ImportResult();
@@ -227,7 +227,7 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(intention.result);
             }
         }
-        
+
         return results;
     }
 
@@ -298,7 +298,7 @@ public class CSVContactImporter extends AbstractImporter {
 //                result.setDate(contactObj.getLastModified());
                 if (result.getException() != null) {
                     return new ImportIntention(result, contactObj);
-                } 
+                }
                 return new ImportIntention(contactObj);
             } else {
                 result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
@@ -353,7 +353,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     /**
      * Adds error information to a given ImportResult
-     * 
+     *
      * @param result ImportResult to be written into.
      * @param lineNumber Number of the buggy line in the CSV script.
      * @param entry CSV line that was buggy.
@@ -364,7 +364,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     /**
      * Method used to find a ContactField based on the given field name
-     * 
+     *
      * @param name Name of the field
      * @return a ContactField that was identified by the given name
      */
@@ -406,19 +406,19 @@ public class CSVContactImporter extends AbstractImporter {
         }
         return field.getReadableName();
     }
-    
+
     private static final class ImportIntention {
         public Contact contact;
         public ImportResult result;
-        
+
         public ImportIntention(final Contact contact) {
             this.contact = contact;
         }
-        
+
         public ImportIntention(final ImportResult result) {
             this.result = result;
         }
-        
+
         public ImportIntention(final ImportResult result, final Contact contact) {
             this.result = result;
             this.contact = contact;

@@ -59,12 +59,12 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ResultConverter {
-    
+
     public enum Quality {
         GOOD,BAD;
     }
-    
-    
+
+
     String getInputFormat();
 
     String getOutputFormat();

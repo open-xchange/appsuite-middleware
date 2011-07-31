@@ -71,8 +71,8 @@ public final class ContextTabularData implements TabularData {
 
     /**
      * Initializes a new {@link ContextTabularData}.
-     * @param userService 
-     * @param contextService 
+     * @param userService
+     * @param contextService
      */
     public ContextTabularData(ContextService contextService, UserService userService) {
         super();

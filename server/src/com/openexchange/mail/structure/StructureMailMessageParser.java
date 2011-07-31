@@ -100,7 +100,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link StructureMailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code>
  * methods of given {@link MailMessageHandler} object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StructureMailMessageParser {
@@ -192,7 +192,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Switches the INLINE detector behavior.
-     * 
+     *
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
@@ -203,7 +203,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Sets whether TNEF parts should be parsed or not.
-     * 
+     *
      * @param parseTNEFParts <code>true</code> to parse TNEF parts; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
@@ -214,7 +214,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Sets whether UUEncoded parts should be parsed or not.
-     * 
+     *
      * @param parseUUEncodedParts <code>true</code> to parse UUEncoded parts; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
@@ -225,7 +225,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Resets this parser and returns itself
-     * 
+     *
      * @return The parser itself
      */
     public StructureMailMessageParser reset() {
@@ -236,7 +236,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Parses specified mail using given handler as call-back
-     * 
+     *
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @throws OXException If parsing specified mail fails
@@ -248,7 +248,7 @@ public final class StructureMailMessageParser {
     /**
      * Parses specified mail using given handler as call-back and given initial prefix for mail part identifiers; e.g.
      * <code>&quot;1.1&quot;</code>.
-     * 
+     *
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
@@ -681,7 +681,7 @@ public final class StructureMailMessageParser {
     /**
      * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
      * composed with <code>"Part_" + sequenceId</code>
-     * 
+     *
      * @param rawFileName The raw filename obtained from mail part
      * @param sequenceId The part's sequence ID
      * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
@@ -721,7 +721,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Composes part's sequence ID from given prefix and part's count
-     * 
+     *
      * @param prefix The prefix (may be <code>null</code>)
      * @param partCount The part count
      * @return The sequence ID
@@ -735,7 +735,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Generates a filename consisting of common prefix "Part_" and part's sequence ID appended
-     * 
+     *
      * @param sequenceId Part's sequence ID
      * @param baseMimeType The base MIME type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
      * @return The generated filename
@@ -806,7 +806,7 @@ public final class StructureMailMessageParser {
      * <li><code>text/richtext</code></li>
      * <li><code>text/rtf</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
@@ -826,7 +826,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Checks if content type matches <code>multipart/*</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
      */
@@ -838,7 +838,7 @@ public final class StructureMailMessageParser {
 
     /**
      * Checks if content type matches <code>message/rfc822</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */

@@ -59,6 +59,6 @@ public interface ContactFieldMapper {
 	public abstract String getNameOfField(ContactField field);
 
 	public abstract Collection<String> getNamesOfFields();
-	
+
 	public abstract Collection<ContactField> getSupportedFields();
 }

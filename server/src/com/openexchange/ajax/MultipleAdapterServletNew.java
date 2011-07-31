@@ -86,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link MultipleAdapterServletNew} is a rewrite of the really good {@link MultipleAdapterServlet} with smarter handling of the request
  * parameters.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class MultipleAdapterServletNew extends PermissionServlet {
@@ -113,7 +113,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     /**
      * Initializes a new {@link MultipleAdapterServletNew}.
-     * 
+     *
      * @param factory The factory to map incoming request to an appropriate {@link AJAXActionService}
      * @throws NullPointerException If factory is <code>null</code>
      */
@@ -142,7 +142,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
-     * 
+     *
      * @param req The HTTP request to handle
      * @param resp The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
@@ -193,7 +193,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 }
                 final StringWriter w = new StringWriter();
                 ResponseWriter.write(response, w);
-                
+
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else {
                 ResponseWriter.write(response, resp.getWriter());
@@ -207,27 +207,27 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     /**
      * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up- / downloads.
-     * 
+     *
      * @param action The action parameter given
      * @param req The HTTP request object
      * @param resp The HTTP response object
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
-     * @throws OXException 
+     * @throws OXException
      */
     protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
         return false;
     }
-    
+
     /**
      * Override this to handle an action differently from the usual JSON handling. This is primarily useful for handling up- / downloads.
-     * 
+     *
      * @param action The action parameter given
      * @param data The parsed request
      * @param req The HTTP request object
      * @param resp The HTTP response object
      * @return <code>true</code> if operation completed successfully and therefore usual JSON handling must be omitted; otherwise <code>false</code> to fall-back to usual JSON handling
-     * @throws IOException 
-     * @throws ServletException 
+     * @throws IOException
+     * @throws ServletException
      * @throws OXException
      */
     protected boolean handleIndividually(final String action, final AJAXRequestData data, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {

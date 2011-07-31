@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AbstractFolderAction} - An abstract folder action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFolderAction implements AJAXActionService {
@@ -81,7 +81,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
      * Gets the default tree identifier to use if request does not provide any.
-     * 
+     *
      * @return The default tree identifier
      */
     protected static String getDefaultTreeIdentifier() {
@@ -90,7 +90,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
      * Gets the default allowed modules.
-     * 
+     *
      * @return The default allowed modules
      */
     protected static List<ContentType> getDefaultAllowedModules() {
@@ -101,7 +101,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
@@ -122,7 +122,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
      * Parses specified optional parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
@@ -142,7 +142,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     /**
      * Parses the optional content type array parameter. Return {@link #getDefaultAllowedModules()} if not present.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of {@link ContentType} as a list.

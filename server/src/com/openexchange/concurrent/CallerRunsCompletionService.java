@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link CallerRunsCompletionService} - A {@link CompletionService} that uses submitting thread to perform the task.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CallerRunsCompletionService<V> implements CompletionService<V> {

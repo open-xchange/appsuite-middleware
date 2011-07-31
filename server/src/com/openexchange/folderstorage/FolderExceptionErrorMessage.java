@@ -58,7 +58,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * {@link FolderExceptionErrorMessage} - Error messages for folder exceptions.
  * <p>
  * Subclasses are supposed to start at <code>1000</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum FolderExceptionErrorMessage implements OXExceptionCode {
@@ -233,7 +233,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -242,7 +242,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -252,7 +252,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -54,7 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link FolderDeleteListenerService} - A listener for folder delete events.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderDeleteListenerService {
@@ -64,7 +64,7 @@ public interface FolderDeleteListenerService {
      * <p>
      * <b>Note</b>: The implementation is supposed to throw a {@link FolderException} only if folder deletion cannot proceed unless event
      * was successfully handled by implementation; e.g. a foreign key reference to folder's tables.
-     * 
+     *
      * @param folderId The ID of the folder which is going to be deleted
      * @param context The folder's context
      * @throws OXException If handling the folder delete event by this listener fails

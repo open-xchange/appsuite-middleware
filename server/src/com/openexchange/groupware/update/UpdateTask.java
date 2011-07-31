@@ -96,7 +96,7 @@ public interface UpdateTask {
      * This version is compared with the schema version of the database. This update will only be applied if the database schema version is
      * lower than this version. Remember to register your update task in the configuration file for update tasks or to publish it as an OSGi
      * service.
-     * 
+     *
      * @return The schema version with which this update task was introduced.
      */
     int addedWithVersion();
@@ -105,13 +105,13 @@ public interface UpdateTask {
      * Gets this update task's priority.
      * <p>
      * Returned value is supposed to be provided by one of the {@link UpdateTaskPriority} constants:
-     * 
+     *
      * <pre>
      * public int getPriority() {
      *     return UpdateTask.UpdateTaskPriority.NORMAL.priority;
      * }
      * </pre>
-     * 
+     *
      * @return The update task's priority
      */
     int getPriority();
@@ -119,7 +119,7 @@ public interface UpdateTask {
     /**
      * This method is called to apply the changes to the database schema. Performed changes must not destroy any information in the
      * database. This ensures that update tasks can be executed twice if a task failed.
-     * 
+     *
      * @param schema The schema meta data
      * @param contextId The context ID which is used to fetch database connections from the pool.
      * @throws OXException if applying the changes fails.

@@ -108,7 +108,7 @@ public class DiscovererActivator implements BundleActivator {
         final PublicationUserDeleteListener listener = new PublicationUserDeleteListener();
         listener.setDiscoveryService(compositeDiscovererCollector);
         listener.setGenConfStorage(confStorage);
-        
+
         context.registerService(DeleteListener.class.getName(), listener, null);
     }
 

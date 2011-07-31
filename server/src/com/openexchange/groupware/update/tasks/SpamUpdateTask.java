@@ -68,9 +68,9 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 /**
  * SpamUpdateTask - Inserts columns <tt>confirmed_spam</tt> and
  * <tt>confirmed_ham</tt> to table <tt>user_setting_mail</tt>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class SpamUpdateTask implements UpdateTask {
 
@@ -83,7 +83,7 @@ public class SpamUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	@Override
@@ -97,13 +97,13 @@ public class SpamUpdateTask implements UpdateTask {
 	private static final String SQL_MODIFY = "ALTER TABLE user_setting_mail "
 			+ "ADD COLUMN confirmed_spam VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL, "
 			+ "ADD COLUMN confirmed_ham VARCHAR(128) character set utf8 collate utf8_unicode_ci NOT NULL";
-	
+
 	private static final String SQL_UPDATE = "UPDATE user_setting_mail SET confirmed_spam = ?, confirmed_ham = ?";
-	
+
 	private static final String STR_INFO = "Performing update task 'SpamUpdateTask'";
-	
+
 	private static final String CONFIRMED_SPAM = "confirmed_spam";
-	
+
 	private static final String CONFIRMED_HAM = "confirmed_ham";
 
 	@Override
@@ -136,9 +136,9 @@ public class SpamUpdateTask implements UpdateTask {
 			}
 		}
 	}
-	
+
 	private static final String SQL_SELECT_ALL = "SELECT * FROM user_setting_mail";
-	
+
 	private static final boolean checkExistence(final String colName, final int contextId) throws OXException {
 		Connection readCon = null;
 		Statement stmt = null;

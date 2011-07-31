@@ -61,10 +61,10 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigProviderService {
-    
+
     public static final int NO_CONTEXT = -1;
     public static final int NO_USER = -1;
-    
+
     public static final BasicProperty NO_PROPERTY = new BasicProperty() {
 
         public String get() throws OXException {
@@ -80,21 +80,21 @@ public interface ConfigProviderService {
         }
 
         public void set(final String value) throws OXException {
-            
+
         }
 
         public void set(final String metadataName, final String value) throws OXException {
-            
+
         }
 
         public List<String> getMetadataNames() throws OXException {
             return Collections.emptyList();
         }
-        
+
     };
 
     BasicProperty get(String property, int context, int user) throws OXException;
-    
+
     Collection<String> getAllPropertyNames(int context, int user) throws OXException;
 
 }

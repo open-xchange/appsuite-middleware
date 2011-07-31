@@ -56,14 +56,14 @@ import com.openexchange.session.Session;
 
 /**
  * Factory class for getting new Instances of the type AppointmentSQLInterface.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
     /**
      * Facrory method for creating a new Instance.
-     * 
+     *
      * @param session
      * @return
      */

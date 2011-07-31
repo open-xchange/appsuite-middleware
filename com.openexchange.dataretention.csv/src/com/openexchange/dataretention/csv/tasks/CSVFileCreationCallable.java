@@ -60,7 +60,7 @@ import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 
 /**
  * {@link CSVFileCreationCallable} - Task for proper CSV file creation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CSVFileCreationCallable implements Callable<Boolean> {
@@ -79,7 +79,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
 
     /**
      * Initializes a new {@link CSVFileCreationCallable}.
-     * 
+     *
      * @param writeTask The invoking write task.
      */
     CSVFileCreationCallable(final AbstractWriteTask writeTask) {
@@ -158,7 +158,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
 
     /**
      * Appends formatted file number to specified string builder.
-     * 
+     *
      * @param fileNumber The file number to format
      * @param sb The string builder to append to
      */

@@ -64,7 +64,7 @@ import com.openexchange.systemname.SystemNameService;
  */
 public class JettyActivator extends HousekeepingActivator{
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JettyActivator.class));
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[0];
@@ -74,19 +74,19 @@ public class JettyActivator extends HousekeepingActivator{
     protected void startBundle() throws Exception {
         try {
             JettyHttpService httpService = new JettyHttpService(8088);
-            
+
             httpService.start();
-            
+
             registerService(HttpService.class, httpService);
-            
+
             registerService(SystemNameService.class, new SystemNameService() {
 
                 public String getSystemName() {
                     return "IMPLEMENTME";
                 }
-                
+
             });
-            
+
         } catch (Throwable t) {
             LOG.fatal(t.getMessage(), t);
         }

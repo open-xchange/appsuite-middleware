@@ -72,9 +72,9 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	private WebdavPath destUrl;
 
 	private ApacheURLDecoder decoder = new ApacheURLDecoder();
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletWebdavRequest.class));
-	
+
 	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
 		super(factory);
 		this.req = req;
@@ -110,7 +110,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
     public String getURLPrefix() {
 		return urlPrefix;
 	}
-	
+
     public void setUrlPrefix(String urlPrefix) {
         this.urlPrefix = urlPrefix;
     }
@@ -125,22 +125,22 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		if(destUrl != null) {
 			return destUrl;
 		}
-		
+
 		return destUrl = toWebdavURL(req.getHeader("destination"));
 	}
-	
+
 	protected WebdavPath toWebdavURL(String url) {
 		if(url == null) {
 			return null;
 		}
-		
+
 		try {
 			final URL urlO = new URL(url);
 			url = urlO.getPath();
 		} catch (final MalformedURLException x ){
 			LOG.debug("",x);
 		}
-		
+
 		if(url.startsWith(req.getServletPath())) {
 			url =  url.substring(req.getServletPath().length());
 		}

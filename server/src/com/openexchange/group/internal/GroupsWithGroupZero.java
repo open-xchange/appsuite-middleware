@@ -63,7 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * Implementation of the group storage that adds group with identifier 0 to all requests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupsWithGroupZero extends GroupStorage {
@@ -75,7 +75,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param ctx Context.
      * @param delegate underlying group storage.
      */

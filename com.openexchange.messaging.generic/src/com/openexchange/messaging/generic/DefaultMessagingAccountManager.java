@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DefaultMessagingAccountManager} - The default messaging account manager.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -101,7 +101,7 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
 
     /**
      * Initializes a new {@link DefaultMessagingAccountManager}.
-     * 
+     *
      * @param serviceId The messaging service identifier
      */
     public DefaultMessagingAccountManager(final MessagingService service) {

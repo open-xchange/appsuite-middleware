@@ -77,7 +77,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ManagedFileManagementImpl} - The file management designed to keep large content as a temporary file on disk.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ManagedFileManagementImpl implements ManagedFileManagement {
@@ -155,7 +155,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     /**
      * Gets the file management instance.
-     * 
+     *
      * @return The file management instance
      */
     static ManagedFileManagementImpl getInstance() {
@@ -280,7 +280,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         return tmpFile;
     }
-    
+
     @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
         final ManagedFile mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);

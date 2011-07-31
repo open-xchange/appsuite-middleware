@@ -58,7 +58,7 @@ public class StringTemplate extends CompiledLineParserTemplate {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param s string containing the template.
      */
     public StringTemplate(final String s) {

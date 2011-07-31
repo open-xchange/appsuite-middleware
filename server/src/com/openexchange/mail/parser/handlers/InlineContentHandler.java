@@ -74,7 +74,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link InlineContentHandler} - Finds matching inline parts to given content IDs
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InlineContentHandler implements MailMessageHandler {
@@ -89,7 +89,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     /**
      * Constructor
-     * 
+     *
      * @param cids The content IDs of the inline parts
      */
     public InlineContentHandler(final List<String> cids) {
@@ -101,7 +101,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     /**
      * Private constructor for recursive calls
-     * 
+     *
      * @param cids The content IDs of the inline parts
      * @param inlineContents The container for matching mail parts
      */
@@ -115,7 +115,7 @@ public final class InlineContentHandler implements MailMessageHandler {
     /**
      * Gets the found inline contents corresponding to given content IDs. Those inline content which could not be found are set to
      * <code>null</code>.
-     * 
+     *
      * @return The found inline contents
      */
     public Map<String, MailPart> getInlineContents() {

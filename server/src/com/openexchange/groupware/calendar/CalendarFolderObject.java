@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * CalendarFolderObject The CalendarFolderObject represents the sets of folders a user may have access to. This is cached by the calendar
  * subsystem to optimize its permission queries.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 
@@ -102,7 +102,7 @@ public class CalendarFolderObject implements Serializable {
      * Constructs a CalendarFolderObject. Note that it still has to be filled using {@link #addFolder(boolean, boolean, boolean, int, int)}
      * The CFO contains all folder a certain user (represented by his or her uid in a given context (cid)) has access to. Initializes a new
      * {@link CalendarFolderObject}.
-     * 
+     *
      * @param uid The User ID of the user the CFO describes
      * @param cid The ContextID
      * @param fill_shared set to true to have the CFO cache shared folders as well.
@@ -115,7 +115,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Add a folder description as described by the boolean parameters.
-     * 
+     *
      * @param readall Set to true if the user may read all entries in the given folder
      * @param readown Set to true if the user may read her own in the given folder
      * @param shared Set to true if this is a shared folder
@@ -196,7 +196,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * a set of all shared calendar folders the user can see
-     * 
+     *
      * @return
      */
     public final Set<Integer> getSharedFolderList() {
@@ -267,7 +267,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Creates an identity for cacheing purposes.
-     * 
+     *
      * @return A cache key to uniquely identify this CFO
      */
     public String getObjectKey() {
@@ -283,7 +283,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Returns a cacheing identifier to denote the group (context) to which this CFO belongs.
-     * 
+     *
      * @return
      */
     public String getGroupKey() {
@@ -295,7 +295,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Creates the group key for a given context id for lookup.
-     * 
+     *
      * @param cid
      * @return
      */
@@ -308,7 +308,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a public folder in which the user can read all entries
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadAllInPublicFolder(int fid) {
@@ -317,7 +317,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a public folder in which the user can read her own
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadOwnInPublicFolder(int fid) {
@@ -326,7 +326,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a private folder in which the user can read all entries
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadAllInPrivateFolder(int fid) {
@@ -335,7 +335,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a private folder in which the user can read her own entries
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadOwnInPrivateFolder(int fid) {
@@ -344,7 +344,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a shared folder in which the user can read all entries
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadAllInSharedFolder(int fid) {
@@ -353,7 +353,7 @@ public class CalendarFolderObject implements Serializable {
 
     /**
      * Denotes whether the given folder id belongs to a shared folder in which the user can read her own entries
-     * 
+     *
      * @param fid The folder id to check
      */
     public boolean canReadOwnInSharedFolder(int fid) {

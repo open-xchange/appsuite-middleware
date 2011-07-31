@@ -53,9 +53,9 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link IMAPMailFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class IMAPMailFolder extends MailFolder {
 
@@ -75,7 +75,7 @@ public final class IMAPMailFolder extends MailFolder {
 	/**
 	 * Checks if this folder is non-existent according to IMAP's "LIST-EXTENDED"
 	 * extension
-	 * 
+	 *
 	 * @return <code>true</code> if non-existent; otherwise <code>false</code>
 	 */
 	public boolean isNonExistent() {
@@ -101,7 +101,7 @@ public final class IMAPMailFolder extends MailFolder {
 	/**
 	 * Sets if this folder is non-existent according to IMAP's "LIST-EXTENDED"
 	 * extension
-	 * 
+	 *
 	 * @param nonExistent
 	 *            <code>true</code> to set as non-existent; otherwise
 	 *            <code>false</code>

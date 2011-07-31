@@ -75,7 +75,7 @@ import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListAction extends AbstractUserAction {

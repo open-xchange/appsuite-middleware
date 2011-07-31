@@ -59,7 +59,7 @@ import com.openexchange.tools.conf.AbstractConfig;
 /**
  * This class handles the configuration parameters of the system.properties
  * configuration file.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class SystemConfig extends AbstractConfig implements Initialization {
@@ -90,7 +90,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * Returns the value of the property with the specified key. This method
      * returns <code>null</code> if the property is not found.
-     * 
+     *
      * @param key
      *            the property key.
      * @return the value of the property or <code>null</code> if the property
@@ -103,7 +103,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * Returns the value of the property with the specified key. This method
      * returns the default value argument if the property is not found.
-     * 
+     *
      * @param key
      *            the property key.
      * @param def
@@ -246,7 +246,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
 
         /**
          * Default constructor.
-         * 
+         *
          * @param propertyName
          *            Name of the property in the server.properties file.
          */

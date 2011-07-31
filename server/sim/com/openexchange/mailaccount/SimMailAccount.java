@@ -89,7 +89,7 @@ public class SimMailAccount implements MailAccount {
     private String mailServer;
 
     private Map<String, String> properties;
-    
+
     public void setProperties(final Map<String, String> properties) {
         this.properties = properties;
     }

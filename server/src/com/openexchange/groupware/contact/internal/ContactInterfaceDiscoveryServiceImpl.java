@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactInterfaceDiscoveryServiceImpl} - The {@link ContactInterfaceDiscoveryService} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterfaceDiscoveryService {
@@ -74,7 +74,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
 
     /**
      * Gets the {@link ContactInterfaceDiscoveryService} implementation.
-     * 
+     *
      * @return The {@link ContactInterfaceDiscoveryService} implementation
      */
     public static ContactInterfaceDiscoveryServiceImpl getInstance() {
@@ -83,7 +83,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
 
     /**
      * Initializes the {@link ContactInterfaceDiscoveryService} implementation.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     static void initInstance() throws OXException {
@@ -106,7 +106,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
 
     /**
      * Initializes a new {@link ContactInterfaceDiscoveryServiceImpl}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private ContactInterfaceDiscoveryServiceImpl() throws OXException {
@@ -168,7 +168,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
             throw new OXException(e);
         }
     }
-    
+
     @Override
     public List<ContactInterfaceProviderRegistration> getRegistrations(final int contextId) {
         return ContactInterfaceProviderRegistry.getInstance().getRegistrations(contextId);

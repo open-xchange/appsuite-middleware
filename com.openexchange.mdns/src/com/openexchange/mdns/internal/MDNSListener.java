@@ -57,7 +57,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSListener implements javax.jmdns.ServiceListener {

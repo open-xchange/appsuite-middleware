@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Queue agent data
- * 
+ *
  * <p>Java class for Agent complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Agent">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Agent", propOrder = {
@@ -53,11 +53,11 @@ public class Agent {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -65,11 +65,11 @@ public class Agent {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -77,11 +77,11 @@ public class Agent {
 
     /**
      * Gets the value of the supervisor property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSupervisor() {
         return supervisor;
@@ -89,11 +89,11 @@ public class Agent {
 
     /**
      * Sets the value of the supervisor property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSupervisor(Boolean value) {
         this.supervisor = value;
@@ -101,11 +101,11 @@ public class Agent {
 
     /**
      * Gets the value of the penalty property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPenalty() {
         return penalty;
@@ -113,11 +113,11 @@ public class Agent {
 
     /**
      * Sets the value of the penalty property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPenalty(BigInteger value) {
         this.penalty = value;
@@ -125,11 +125,11 @@ public class Agent {
 
     /**
      * Gets the value of the extensionNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionNo() {
         return extensionNo;
@@ -137,11 +137,11 @@ public class Agent {
 
     /**
      * Sets the value of the extensionNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionNo(String value) {
         this.extensionNo = value;

@@ -51,7 +51,7 @@ package com.openexchange.imap.entity2acl;
 
 /**
  * {@link UserGroupID} - A user/group identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UserGroupID {
@@ -67,7 +67,7 @@ public class UserGroupID {
 
     /**
      * Initializes a new {@link UserGroupID}.
-     * 
+     *
      * @param id The user identifier
      * @throws IllegalArgumentException If identifier is less than zero
      */
@@ -77,7 +77,7 @@ public class UserGroupID {
 
     /**
      * Initializes a new {@link UserGroupID}.
-     * 
+     *
      * @param id The user/group identifier
      * @param group <code>true</code> if identifier denotes a group; otherwise <code>false</code>
      * @throws IllegalArgumentException If identifier is less than zero
@@ -88,7 +88,7 @@ public class UserGroupID {
 
     /**
      * Initializes a new {@link UserGroupID}.
-     * 
+     *
      * @param id The user/group identifier
      * @param group <code>true</code> if identifier denotes a group; otherwise <code>false</code>
      * @param allowNegative <code>true</code> if a negative identifier is allowed; otherwise <code>false</code>
@@ -105,7 +105,7 @@ public class UserGroupID {
 
     /**
      * Gets the user/group identifier.
-     * 
+     *
      * @return The user/group identifier
      */
     public int getId() {
@@ -114,7 +114,7 @@ public class UserGroupID {
 
     /**
      * Checks if identifier denotes a group.
-     * 
+     *
      * @return <code>true</code> if identifier denotes a group; otherwise <code>false</code>
      */
     public boolean isGroup() {

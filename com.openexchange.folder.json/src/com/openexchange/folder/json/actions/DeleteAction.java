@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction} - Maps the action to a DELETE action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteAction extends AbstractFolderAction {

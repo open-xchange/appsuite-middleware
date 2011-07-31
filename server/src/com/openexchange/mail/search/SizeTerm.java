@@ -60,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SizeTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {

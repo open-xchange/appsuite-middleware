@@ -53,9 +53,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link TwitterServiceRegistry} - A registry for services needed by POP3 bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class TwitterServiceRegistry {
 
@@ -63,7 +63,7 @@ public final class TwitterServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

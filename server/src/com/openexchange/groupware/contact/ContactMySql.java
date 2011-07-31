@@ -88,7 +88,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * {@link ContactMySql} - The MySQL implementation of {@link ContactSql}.
  * <p>
  * This implementation is <b>not</b> designed for multi-threaded access and therefore is not thread-safe.
- * 
+ *
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -141,7 +141,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param so The session
      * @throws OXException If context cannot be resolved
      */
@@ -154,7 +154,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param ctx The context
      * @param userId The user ID
      */
@@ -165,7 +165,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param so The session
      * @param ctx The context
      */
@@ -246,7 +246,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Parses denoted fields out of specified <code>ORDER BY</code> statement; <code>" ORDER BY co.field01 DESC "</code>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The parsed fields
      */
@@ -268,11 +268,11 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Prepares given <code>ORDER BY</code> statement to be used within a <code>UNION</code> statement.
-     * 
+     *
      * <pre>
      * ORDER BY co.field01 DESC -&gt; ORDER BY field01 DESC
      * </pre>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The prepared <code>ORDER BY</code> statement
      */
@@ -411,7 +411,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Appends appendix to string builder with contact search object proeprly set.
-     * 
+     *
      * @param sb The string builder
      * @param field The affected field
      * @param union <code>true</code> if a UNION statement is generated
@@ -467,7 +467,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Appends appendix to string builder
-     * 
+     *
      * @param sb The string builder
      */
     private void appendix(final StringBuilder sb) {
@@ -1160,7 +1160,7 @@ public class ContactMySql implements ContactSql {
     }
 
 
-  
+
 
     private static interface SearchFiller {
 
@@ -1209,7 +1209,7 @@ public class ContactMySql implements ContactSql {
                             sb.append(" AND ");
 
                             /*-
-                             * 
+                             *
                             sb.append(field);
                             sb.append(" LIKE ? AND ");
                              */
@@ -2001,7 +2001,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Checks if specified {@link StringBuilder string builder} ends with given suffix
-     * 
+     *
      * @param stringBuilder The string builder to check
      * @param suffix The suffix
      * @param ignoreTrailingWhitespaces <code>true</code> to ignore trailing whitespace characters following after suffix location;

@@ -90,7 +90,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEStructureParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEStructureParser {
@@ -98,56 +98,56 @@ public final class MIMEStructureParser {
     public static void main(final String[] args) {
         try {
             {
-                final JSONObject jsonMail = new JSONObject("{\n" + 
-                		"  \"user\": [],\n" + 
-                		"  \"headers\": {\n" + 
-                		"    \"to\": [{\"address\": \"bob@foobar.com\"}, {\"address\": \"cane@rofl.com\"}],\n" + 
-                		"    \"received\": [\n" + 
-                		"      \"from localhost (localhost.localdomain [127.0.0.1]) by ox.open-xchange.com (Postfix) with ESMTP id 63BA22AC4004 for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\",\n" + 
-                		"      \"from ox.open-xchange.com ([127.0.0.1]) by localhost (ox.open-xchange.com [127.0.0.1]) (amavisd-new, port 10024) with ESMTP id UjQ1iBeTBbxN for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\"\n" + 
-                		"    ],\n" + 
-                		"    \"content-disposition\": {\n" + 
-                		"      \"type\": \"inline\",\n" + 
-                		"      \"params\": {\"filename\": \"foo.txt\"}\n" + 
-                		"    },\n" + 
-                		"    \"from\": [{\n" + 
-                		"      \"address\": \"alice@foobar.com\",\n" + 
-                		"      \"personal\": \"Alice Doe\"\n" + 
-                		"    }],\n" + 
-                		"    \"subject\": \"The mail subject\",\n" + 
-                		"    \"content-type\": {\n" + 
-                		"      \"type\": \"text/plain\",\n" + 
-                		"      \"params\": {\n" + 
-                		"        \"charset\": \"UTF-8\",\n" + 
-                		"        \"name\": \"foo.txt\"\n" + 
-                		"      }\n" + 
-                		"    },\n" + 
-                		"    \"date\": {\n" + 
-                		"      \"utc\": 1258214589000,\n" + 
-                		"      \"date\": \"Sat, 14 Nov 2009 17:03:09 +0100 (CET)\"\n" + 
-                		"    },\n" + 
-                		"    \"mime-version\": \"1.0\",\n" + 
-                		"    \"x-priority\": \"3\",\n" + 
-                		"    \"message-id\": \"<1837640730.5.1258214590077.JavaMail.foobar@foobar>\"\n" + 
-                		"  },\n" + 
-                		"  \"color_label\": 0,\n" + 
-                		"  \"flags\": 0,\n" + 
-                		"  \"received_date\": null,\n" + 
-                		"  \"body\": {\n" + 
-                		"    \"data\": \"Hello Dave.\\nPeople have been asking ...\",\n" + 
-                		"    \"id\": \"1\"\n" + 
-                		"  }\n" + 
+                final JSONObject jsonMail = new JSONObject("{\n" +
+                		"  \"user\": [],\n" +
+                		"  \"headers\": {\n" +
+                		"    \"to\": [{\"address\": \"bob@foobar.com\"}, {\"address\": \"cane@rofl.com\"}],\n" +
+                		"    \"received\": [\n" +
+                		"      \"from localhost (localhost.localdomain [127.0.0.1]) by ox.open-xchange.com (Postfix) with ESMTP id 63BA22AC4004 for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\",\n" +
+                		"      \"from ox.open-xchange.com ([127.0.0.1]) by localhost (ox.open-xchange.com [127.0.0.1]) (amavisd-new, port 10024) with ESMTP id UjQ1iBeTBbxN for <holger.achtziger@open-xchange.com>; Fri, 30 Oct 2009 08:54:58 +0100 (CET)\"\n" +
+                		"    ],\n" +
+                		"    \"content-disposition\": {\n" +
+                		"      \"type\": \"inline\",\n" +
+                		"      \"params\": {\"filename\": \"foo.txt\"}\n" +
+                		"    },\n" +
+                		"    \"from\": [{\n" +
+                		"      \"address\": \"alice@foobar.com\",\n" +
+                		"      \"personal\": \"Alice Doe\"\n" +
+                		"    }],\n" +
+                		"    \"subject\": \"The mail subject\",\n" +
+                		"    \"content-type\": {\n" +
+                		"      \"type\": \"text/plain\",\n" +
+                		"      \"params\": {\n" +
+                		"        \"charset\": \"UTF-8\",\n" +
+                		"        \"name\": \"foo.txt\"\n" +
+                		"      }\n" +
+                		"    },\n" +
+                		"    \"date\": {\n" +
+                		"      \"utc\": 1258214589000,\n" +
+                		"      \"date\": \"Sat, 14 Nov 2009 17:03:09 +0100 (CET)\"\n" +
+                		"    },\n" +
+                		"    \"mime-version\": \"1.0\",\n" +
+                		"    \"x-priority\": \"3\",\n" +
+                		"    \"message-id\": \"<1837640730.5.1258214590077.JavaMail.foobar@foobar>\"\n" +
+                		"  },\n" +
+                		"  \"color_label\": 0,\n" +
+                		"  \"flags\": 0,\n" +
+                		"  \"received_date\": null,\n" +
+                		"  \"body\": {\n" +
+                		"    \"data\": \"Hello Dave.\\nPeople have been asking ...\",\n" +
+                		"    \"id\": \"1\"\n" +
+                		"  }\n" +
                 		"}");
-                
+
                 final MailMessage mail = parseStructure(jsonMail);
                 System.out.println(mail.getSource());
             }
-            
+
             {
-                
+
             }
-            
-            
+
+
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -162,7 +162,7 @@ public final class MIMEStructureParser {
 
     /**
      * Parses specified JSON mail structure to corresponding RFC822 bytes.
-     * 
+     *
      * @param jsonStructure The JSON mail structure
      * @return The RFC822 bytes
      * @throws OXException If parsing fails
@@ -188,7 +188,7 @@ public final class MIMEStructureParser {
 
     /**
      * Parses specified JSON mail structure to a {@link MailMessage} instance.
-     * 
+     *
      * @param jsonStructure The JSON mail structure
      * @return The {@link MailMessage} instance
      * @throws OXException If parsing fails
@@ -206,7 +206,7 @@ public final class MIMEStructureParser {
 
     /**
      * Parses specified JSON mail structure to a transportable {@link ComposedMailMessage} instance.
-     * 
+     *
      * @param jsonStructure The JSON mail structure
      * @param session The session
      * @return The transportable {@link ComposedMailMessage} instance
@@ -226,7 +226,7 @@ public final class MIMEStructureParser {
 
     /**
      * Parses specified JSON mail structure to a transportable {@link ComposedMailMessage} instance.
-     * 
+     *
      * @param jsonStructure The JSON mail structure
      * @param session The session
      * @return The transportable {@link ComposedMailMessage} instance
@@ -525,7 +525,7 @@ public final class MIMEStructureParser {
      * <li><code>text/plain</code></li>
      * <li><code>text/htm</code>&nbsp;or&nbsp;<code>text/html</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */

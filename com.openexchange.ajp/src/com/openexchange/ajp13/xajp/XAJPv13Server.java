@@ -166,7 +166,7 @@ import com.openexchange.ajp13.xajp.executor.XAJPv13ThreadPoolExecutor;
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13Server {
@@ -175,7 +175,7 @@ public final class XAJPv13Server {
 
     /**
      * Gets the instance of {@link XAJPv13Server}.
-     * 
+     *
      * @return The instance of {@link XAJPv13Server}.
      * @throws AJPv13Exception If server instance cannot be obtained
      */
@@ -237,7 +237,7 @@ public final class XAJPv13Server {
         /*-
          * Setting the flush-mode to ASYNC can improve the performance. However, some strong restriction exits by using the ASYNC
          * flush-mode:
-         * 
+         *
          * By setting the flush mode to ASYNC (default is SYNC) the data will be transferred to the underlying OS-internal socket send
          * buffer in an asynchronous way. By setting the flush mode to ASYNC the worker thread will not be synchronized with the
          * xSocket-internal I/O-Thread. Please take care by setting flush mode to ASYNC. If you access the buffer after writing it, race
@@ -266,7 +266,7 @@ public final class XAJPv13Server {
 
     /**
      * Starts this AJP server instance.
-     * 
+     *
      * @throws AJPv13Exception If start-up fails
      */
     public void start() throws AJPv13Exception {
@@ -281,7 +281,7 @@ public final class XAJPv13Server {
 
     /**
      * Gets the local address.
-     * 
+     *
      * @return The local address
      */
     public InetAddress getLocalAddress() {
@@ -290,7 +290,7 @@ public final class XAJPv13Server {
 
     /**
      * Closes this AJP server instance.
-     * 
+     *
      * @throws AJPv13Exception If shut-down fails
      */
     public void close() throws AJPv13Exception {
@@ -351,7 +351,7 @@ public final class XAJPv13Server {
 
     /**
      * Starts the given server within a dedicated thread. This method blocks until the server is open.
-     * 
+     *
      * @param server The server to start
      * @param timeoutSec The maximum time to wait
      * @throws SocketTimeoutException If the timeout has been reached

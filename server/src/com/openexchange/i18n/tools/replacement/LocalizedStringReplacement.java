@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link LocalizedStringReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class LocalizedStringReplacement implements TemplateReplacement {
 

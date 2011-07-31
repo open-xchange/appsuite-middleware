@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link MessagingAction} - A messaging action examined in <code>perform()</code> method.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -93,7 +93,7 @@ public final class MessagingAction {
 
     /**
      * Initializes a new {@link MessagingAction}.
-     * 
+     *
      * @param name The name
      * @param type The type
      */
@@ -103,7 +103,7 @@ public final class MessagingAction {
 
     /**
      * Initializes a new {@link MessagingAction}.
-     * 
+     *
      * @param name The name
      * @param type The type
      * @param follower The follower action name; may be <code>null</code> to indicate no following action
@@ -117,7 +117,7 @@ public final class MessagingAction {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -126,7 +126,7 @@ public final class MessagingAction {
 
     /**
      * Gets the type
-     * 
+     *
      * @return The type
      */
     public Type getType() {
@@ -135,7 +135,7 @@ public final class MessagingAction {
 
     /**
      * Gets the follower or <code>null</code> to indicate no following action.
-     * 
+     *
      * @return The follower or <code>null</code> to indicate no following action
      */
     public String getFollower() {

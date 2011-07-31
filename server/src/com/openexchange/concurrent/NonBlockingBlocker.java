@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link NonBlockingBlocker} - Non-blocking/wait-free reentrant blocker; also useful to wrap an existing {@link Runnable runnable}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingBlocker implements Blocker, Runnable {
@@ -81,7 +81,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
 
     /**
      * Initializes a new {@link NonBlockingBlocker} wrapping given {@link Runnable runnable}.
-     * 
+     *
      * @param runnable The runnable to block
      */
     public NonBlockingBlocker(final Runnable runnable) {
@@ -207,7 +207,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
 
     /**
      * Checks if current thread holds this blocker.
-     * 
+     *
      * @return <code>true</code> if current thread holds this blocker; otherwise <code>false</code>
      */
     public boolean holdsBlock() {

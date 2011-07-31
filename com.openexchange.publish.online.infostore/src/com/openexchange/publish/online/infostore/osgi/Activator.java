@@ -93,7 +93,7 @@ public class Activator extends DeferredActivator {
         InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
         InfostorePublicationServlet.setInfostoreDocumentPublicationService(infostorePublisher);
         serviceRegistration = context.registerService(PublicationService.class.getName(), infostorePublisher, null);
-        
+
         registerServlet();
 
     }
@@ -101,20 +101,20 @@ public class Activator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         InfostorePublicationServlet.setInfostoreDocumentPublicationService(null);
         serviceRegistration.unregister();
-        
+
         unregisterServlet();
     }
-    
+
     private void unregisterServlet() {
         InfostorePublicationServlet.setContextService(null);
         InfostorePublicationServlet.setPublicationDataLoaderService(null);
-        
+
         HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {
             httpService.unregister(ALIAS);
             servlet = null;
         }
-        
+
     }
 
     private void registerServlet() {
@@ -122,39 +122,39 @@ public class Activator extends DeferredActivator {
         if(httpService == null) {
             return;
         }
-        
+
         PublicationDataLoaderService dataLoader = getService(PublicationDataLoaderService.class);
         if(dataLoader == null) {
             return;
         }
-        
+
         ContextService contexts = getService(ContextService.class);
         if(contexts == null) {
             return;
-        }   
-        
+        }
+
         UserService users = getService(UserService.class);
         if(users == null) {
             return;
         }
-        
+
         UserConfigurationService userConfigs = getService(UserConfigurationService.class);
         if(userConfigs == null) {
             return;
         }
-        
+
         InfostoreFacade infostore = getService(InfostoreFacade.class);
         if(infostore == null) {
             return;
         }
-        
+
         InfostorePublicationServlet.setContextService(contexts);
         InfostorePublicationServlet.setUserService(users);
         InfostorePublicationServlet.setUserConfigService(userConfigs);
-        
+
         InfostorePublicationServlet.setInfostoreFacade(infostore);
         InfostorePublicationServlet.setPublicationDataLoaderService(dataLoader);
-        
+
         if(servlet == null) {
             try {
                 httpService.registerServlet(ALIAS, servlet = new InfostorePublicationServlet(), null, null);
@@ -162,8 +162,8 @@ public class Activator extends DeferredActivator {
                 LOG.error(e.getMessage(), e);
             }
         }
-        
+
     }
-    
+
 
 }

@@ -56,7 +56,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link MailFolderType} - The folder type for mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderType implements FolderType {
@@ -69,7 +69,7 @@ public final class MailFolderType implements FolderType {
 
     /**
      * Gets the {@link MailFolderType} instance.
-     * 
+     *
      * @return The {@link MailFolderType} instance
      */
     public static MailFolderType getInstance() {

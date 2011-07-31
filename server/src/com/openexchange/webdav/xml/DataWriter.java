@@ -63,7 +63,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link DataParser} - The base class for writing XML content
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -194,7 +194,7 @@ public class DataWriter {
      * <p>
      * This method is useful for correcting element content and attribute values. Note that characters like " and &lt; are allowed in
      * attribute values and element content. They will simply be escaped as &quot; or &lt; when the value is serialized.
-     * 
+     *
      * @param text The value to correct.
      * @return The corrected text (if passed to {@link Verifier#checkCharacterData(String)} <code>null</code> would be returned)
      */

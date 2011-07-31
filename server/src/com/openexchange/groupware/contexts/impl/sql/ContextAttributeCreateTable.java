@@ -53,7 +53,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * {@link ContextAttributeCreateTable}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextAttributeCreateTable extends AbstractCreateTableImpl {

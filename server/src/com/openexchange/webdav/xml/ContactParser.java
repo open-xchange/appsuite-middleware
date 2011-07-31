@@ -66,7 +66,7 @@ import com.openexchange.webdav.xml.fields.ContactFields;
 
 /**
  * ContactParser
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

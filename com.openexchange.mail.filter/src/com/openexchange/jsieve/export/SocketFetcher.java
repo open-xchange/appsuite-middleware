@@ -63,7 +63,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link SocketFetcher} - Utility class to get Sockets.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SocketFetcher {
@@ -135,7 +135,7 @@ public final class SocketFetcher {
 
     /**
      * Gets a socket factory of the specified class.
-     * 
+     *
      * @param sfClass The socket factory class name
      * @return A socket factory of the specified class
      * @throws ClassNotFoundException If class cannot be found

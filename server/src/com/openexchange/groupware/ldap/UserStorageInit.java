@@ -57,9 +57,9 @@ import com.openexchange.user.internal.UserServiceImpl;
 
 /**
  * {@link UserStorageInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserStorageInit implements Initialization {
 
@@ -67,7 +67,7 @@ public final class UserStorageInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link UserStorageInit}
-     * 
+     *
      * @return The singleton instance of {@link UserStorageInit}
      */
     public static UserStorageInit getInstance() {

@@ -56,7 +56,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link StatusImpl} - The status implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StatusImpl implements Status {
@@ -69,7 +69,7 @@ public final class StatusImpl implements Status {
 
     /**
      * Initializes a new {@link StatusImpl}.
-     * 
+     *
      * @param twitter4jStatus The twitter4j status
      */
     public StatusImpl(final twitter4j.Status twitter4jStatus) {

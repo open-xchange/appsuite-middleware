@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link SharedType} - The shared type for a database folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SharedType implements Type {
@@ -62,7 +62,7 @@ public final class SharedType implements Type {
 
     /**
      * Gets the {@link SharedType} instance.
-     * 
+     *
      * @return The {@link SharedType} instance
      */
     public static SharedType getInstance() {

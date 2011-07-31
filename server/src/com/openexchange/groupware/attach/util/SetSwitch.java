@@ -54,18 +54,18 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class SetSwitch implements AttachmentField.AttachmentSwitch{
-	
+
 	private final AttachmentMetadata attachment;
 	private Object value;
 
 	public SetSwitch(final AttachmentMetadata attachment) {
 		this.attachment = attachment;
 	}
-	
+
 	public void setValue(final Object value) {
 		this.value = value;
 	}
-	
+
 	@Override
     public Object createdBy() {
 		if(value == null) {
@@ -114,7 +114,7 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 	@Override
     public Object fileMIMEType() {
         if(value != null) {
-            attachment.setFileMIMEType(value.toString());            
+            attachment.setFileMIMEType(value.toString());
         }
         return null;
 	}
@@ -133,13 +133,13 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		attachment.setFolderId(((Integer)value).intValue());
 		return null;
 	}
-	
+
 	@Override
     public Object fileName(){
 		attachment.setFilename((String)value);
 		return null;
 	}
-	
+
 	@Override
     public Object rtfFlag(){
 		if(value == null) {
@@ -154,7 +154,7 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		attachment.setComment((String)value);
 		return null;
 	}
-	
+
 	@Override
     public Object fileId() {
 		attachment.setFileId((String)value);

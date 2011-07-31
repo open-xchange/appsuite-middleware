@@ -48,7 +48,7 @@
  */
 
 /**
- * 
+ *
  */
 package com.openexchange.groupware.infostore.database.impl;
 
@@ -67,10 +67,10 @@ public class SetSwitch implements MetadataSwitcher{
 			metadata.doSwitch(sw);
 		}
 	}
-	
+
 	private Object value;
 	private final DocumentMetadata impl;
-	
+
 	public SetSwitch(final DocumentMetadata impl) {
 		this.impl = impl;
 	}
@@ -78,7 +78,7 @@ public class SetSwitch implements MetadataSwitcher{
 	public void setValue(final Object value) {
 		this.value = value;
 	}
-	
+
 	@Override
     public Object lastModified() {
         if(null == value) { return null; }
@@ -181,21 +181,21 @@ public class SetSwitch implements MetadataSwitcher{
 		//impl.setSequenceNumber((Long)value);
 		return null;
 	}
-	
+
 	@Override
     public Object categories(){
         if(null == value) { return null; }
         impl.setCategories((String)value);
 		return null;
 	}
-	
+
 	@Override
     public Object lockedUntil(){
         if(null == value) { return null; }
         impl.setLockedUntil((Date)value);
 		return null;
 	}
-	
+
 	@Override
     public Object fileMD5Sum(){
         if(null == value) { return null; }
@@ -229,7 +229,7 @@ public class SetSwitch implements MetadataSwitcher{
 			value = Integer.valueOf(0);
 		}
 	}
-	
+
 	private void nullNumberAsLong() {
 		if(value == null) {
 			value = Long.valueOf(0);

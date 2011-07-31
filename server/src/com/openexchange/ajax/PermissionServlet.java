@@ -96,7 +96,7 @@ public abstract class PermissionServlet extends SessionServlet {
 
     /**
      * Indicates if incoming request is allowed to being performed due to permission settings.
-     * 
+     *
      * @param session The session providing needed user data
      * @return <code>true</code> if request is allowed to being performed due to permission settings; <code>false</code> otherwise.
      */

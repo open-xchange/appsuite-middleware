@@ -65,7 +65,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HttpServletRequestWrapper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {
@@ -108,7 +108,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}
-     * 
+     *
      * @param ajpSession The AJP session
      * @throws AJPv13Exception If instantiation fails
      */

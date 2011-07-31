@@ -71,7 +71,7 @@ import com.openexchange.mail.mime.ContentType;
 
 /**
  * {@link ServletRequestWrapper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServletRequestWrapper implements ServletRequest {
@@ -117,7 +117,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Initializes a new {@link ServletRequestWrapper}
-     * 
+     *
      * @throws AJPv13Exception If instantiation fails
      */
     public ServletRequestWrapper() throws AJPv13Exception {
@@ -325,7 +325,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets the servlet input stream of this servlet request
-     * 
+     *
      * @param is The servlet input stream
      */
     public void setInputStream(final XAJPv13ServletInputStream is) {
@@ -334,7 +334,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * Sets/appends new data to this servlet request's input stream
-     * 
+     *
      * @param newData The new data to set/append
      * @throws IOException If an I/O error occurs
      */
@@ -418,7 +418,7 @@ public class ServletRequestWrapper implements ServletRequest {
     @Override
     public String getServerName() {
         String host = getFromHost();
-        
+
         return (host == null) ? server_name : host;
     }
 
@@ -504,7 +504,7 @@ public class ServletRequestWrapper implements ServletRequest {
 
     /**
      * IteratorEnumeration
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static class IteratorEnumeration implements Enumeration<Object> {

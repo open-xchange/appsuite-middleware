@@ -54,7 +54,7 @@ package com.openexchange.authentication;
  * information.
  * <p>
  * If you want to influence the session, the {@link Authenticated} instance may also implement {@link SessionEnhancement}.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @see SessionEnhancement
  */

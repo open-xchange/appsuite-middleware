@@ -84,18 +84,18 @@ import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link HTMLProcessing} - Various methods for HTML processing.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLProcessing {
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLProcessing.class));
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
     /**
      * Performs all the formatting for text content for a proper display according to specified user's mail settings.
-     * 
+     *
      * @param content The plain text content
      * @param usm The settings used for formatting content
      * @param mode The display mode
@@ -108,7 +108,7 @@ public final class HTMLProcessing {
 
     /**
      * Performs all the formatting for HTML content for a proper display according to specified user's mail settings.
-     * 
+     *
      * @param content The HTML content
      * @param charset The character encoding
      * @param session The session
@@ -139,7 +139,7 @@ public final class HTMLProcessing {
      * <li>Both inline and non-inline images found in HTML content are prepared according to settings if {@link DisplayMode#DISPLAY} is
      * given</li>
      * </ol>
-     * 
+     *
      * @param content The content
      * @param charset The character encoding (only needed by HTML content; may be <code>null</code> on plain text)
      * @param isHtml <code>true</code> if content is of type <code>text/html</code>; otherwise <code>false</code>
@@ -167,7 +167,7 @@ public final class HTMLProcessing {
                      * Filter according to white-list
                      */
                     retval = htmlService.filterWhitelist(retval);
-                    
+
                     if (externalImagesAllowed) {
                         /*
                          * TODO: Does not work reliably by now
@@ -211,7 +211,7 @@ public final class HTMLProcessing {
 
     /**
      * Converts specified HTML content to plain text.
-     * 
+     *
      * @param htmlContent The <b>validated</b> HTML content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
@@ -227,7 +227,7 @@ public final class HTMLProcessing {
      * <p>
      * Example: <code>http://www.somewhere.com</code> is converted to
      * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
-     * 
+     *
      * @param content The content to search in
      * @return The given content with all non-HTML links converted to valid HTML links
      */
@@ -237,7 +237,7 @@ public final class HTMLProcessing {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param contentType The corresponding content type (including charset parameter)
      * @return The HTML content conform to W3C standards
@@ -248,7 +248,7 @@ public final class HTMLProcessing {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
@@ -259,7 +259,7 @@ public final class HTMLProcessing {
 
     /**
      * Creates a {@link Document DOM document} from specified XML/HTML string.
-     * 
+     *
      * @param string The XML/HTML string
      * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
      */
@@ -280,7 +280,7 @@ public final class HTMLProcessing {
 
     /**
      * Pretty-prints specified XML/HTML string.
-     * 
+     *
      * @param string The XML/HTML string to pretty-print
      * @return The pretty-printed XML/HTML string
      */
@@ -290,7 +290,7 @@ public final class HTMLProcessing {
 
     /**
      * Pretty-prints specified XML/HTML node.
-     * 
+     *
      * @param node The XML/HTML node pretty-print
      * @return The pretty-printed XML/HTML node
      */
@@ -302,7 +302,7 @@ public final class HTMLProcessing {
 
     /**
      * Pretty-prints specified XML/HTML string.
-     * 
+     *
      * @param node The XML/HTML node pretty-print
      * @param fallback The fallback string to return on error
      * @return The pretty-printed XML/HTML string
@@ -337,7 +337,7 @@ public final class HTMLProcessing {
 
     /**
      * Pretty prints specified HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return Pretty printed HTML content
      */
@@ -347,7 +347,7 @@ public final class HTMLProcessing {
 
     /**
      * Replaces all HTML entities occurring in specified HTML content.
-     * 
+     *
      * @param content The content
      * @return The content with HTML entities replaced
      */
@@ -357,7 +357,7 @@ public final class HTMLProcessing {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding ASCII character.
-     * 
+     *
      * @param entity The HTML entity
      * @return The corresponding ASCII character or <code>null</code>
      */
@@ -368,7 +368,7 @@ public final class HTMLProcessing {
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     * 
+     *
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
@@ -383,7 +383,7 @@ public final class HTMLProcessing {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -398,7 +398,7 @@ public final class HTMLProcessing {
 
     /**
      * Determines the quote color for given <code>quotelevel</code>.
-     * 
+     *
      * @param quotelevel - the quote level
      * @return The color for given <code>quotelevel</code>
      */
@@ -418,7 +418,7 @@ public final class HTMLProcessing {
     /**
      * Turns all simple quotes "&amp;gt; " occurring in specified HTML text to colored "&lt;blockquote&gt;" tags according to configured
      * quote colors.
-     * 
+     *
      * @param htmlText The HTML text
      * @return The HTML text with simple quotes replaced with block quotes
      */
@@ -512,7 +512,7 @@ public final class HTMLProcessing {
      * attachment identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
      * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
      * </ul>
-     * 
+     *
      * @param content The HTML content possibly containing images
      * @param session The session
      * @param msgUID The message's unique path in mailbox
@@ -581,7 +581,7 @@ public final class HTMLProcessing {
      * attachment identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
      * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
      * </ul>
-     * 
+     *
      * @param content The HTML content possibly containing images
      * @param session The session
      * @param msgUID The message's unique path in mailbox
@@ -688,7 +688,7 @@ public final class HTMLProcessing {
     /**
      * Translates specified string into application/x-www-form-urlencoded format using a specific encoding scheme. This method uses the
      * supplied encoding scheme to obtain the bytes for unsafe characters.
-     * 
+     *
      * @param text The string to be translated.
      * @param charset The character encoding to use; should be <code>UTF-8</code> according to W3C
      * @return The translated string or the string itself if any error occurred

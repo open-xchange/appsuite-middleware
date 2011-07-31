@@ -90,7 +90,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends AbstractMailAction {
@@ -101,7 +101,7 @@ public final class GetAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(final ServiceLookup services) {

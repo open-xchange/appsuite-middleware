@@ -58,21 +58,21 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FolderService} - The folder service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderService {
 
     /**
      * Gets a map of available content types registered by folder storages.
-     * 
+     *
      * @return A map of available content types registered by folder storages
      */
     Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
      * Checks the consistency of given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param user The user
      * @param context The context
@@ -82,7 +82,7 @@ public interface FolderService {
 
     /**
      * Checks the consistency of given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param session The session
      * @throws OXException If check fails
@@ -91,7 +91,7 @@ public interface FolderService {
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param user The user
@@ -104,7 +104,7 @@ public interface FolderService {
 
     /**
      * Gets the folder identified by given folder identifier and tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
@@ -116,7 +116,7 @@ public interface FolderService {
 
     /**
      * Gets all visible folders located in given tree for given user.
-     * 
+     *
      * @param treeId The tree identifier
      * @param filter The folder filter
      * @param user The user
@@ -129,7 +129,7 @@ public interface FolderService {
 
     /**
      * Gets all visible folders located in given tree for given session's user.
-     * 
+     *
      * @param treeId The tree identifier
      * @param filter The folder filter
      * @param session The session
@@ -141,7 +141,7 @@ public interface FolderService {
 
     /**
      * Gets this storage's default folder for specified user.
-     * 
+     *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
@@ -155,7 +155,7 @@ public interface FolderService {
 
     /**
      * Gets this storage's default folder for specified user.
-     * 
+     *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
@@ -170,7 +170,7 @@ public interface FolderService {
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
      * <p>
      * Does only work on virtual trees.
-     * 
+     *
      * @param sourceTreeId The source tree identifier
      * @param folderId The (source) folder identifier
      * @param targetTreeId The target tree identifier
@@ -186,7 +186,7 @@ public interface FolderService {
      * Subscribes an existing folder from specified source tree to specified (virtual) target tree below given parent.
      * <p>
      * Does only work on virtual trees.
-     * 
+     *
      * @param sourceTreeId The source tree identifier
      * @param folderId The (source) folder identifier
      * @param targetTreeId The target tree identifier
@@ -200,7 +200,7 @@ public interface FolderService {
      * Unsubscribes the specified folder in given (virtual) tree only.
      * <p>
      * Does only work on virtual trees.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param user The user
@@ -213,7 +213,7 @@ public interface FolderService {
      * Unsubscribes the specified folder in given (virtual) tree only.
      * <p>
      * Does only work on virtual trees.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
@@ -223,7 +223,7 @@ public interface FolderService {
 
     /**
      * Gets all visible folders of specified content type and folder type.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      * @param type The folder type
@@ -239,7 +239,7 @@ public interface FolderService {
 
     /**
      * Gets all visible folders of specified content type and folder type.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      * @param type The folder type
@@ -254,7 +254,7 @@ public interface FolderService {
 
     /**
      * Gets the subfolders of specified parent in given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
@@ -269,7 +269,7 @@ public interface FolderService {
 
     /**
      * Gets the subfolders of specified parent in given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @param all <code>true</code> to deliver all subfolders regardless of their subscribed status; <code>false</code> to deliver
@@ -283,7 +283,7 @@ public interface FolderService {
 
     /**
      * Gets the path from given folder to specified tree's root folder.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param user The user
@@ -296,7 +296,7 @@ public interface FolderService {
 
     /**
      * Gets the path from given folder to specified tree's root folder.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
@@ -308,7 +308,7 @@ public interface FolderService {
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
-     * 
+     *
      * @param treeId The tree identifier
      * @param timeStamp The time stamp from which to consider changes
      * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
@@ -323,7 +323,7 @@ public interface FolderService {
 
     /**
      * Gets all new, modified and deleted folders since given time stamp.
-     * 
+     *
      * @param treeId The tree identifier
      * @param timeStamp The time stamp from which to consider changes
      * @param ignoreDeleted <code>true</code> to ignore delete operations; otherwise <code>false</code>
@@ -339,7 +339,7 @@ public interface FolderService {
      * Deletes the specified folder in given tree.
      * <p>
      * The folder is deleted from all trees and its subfolders as well
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
@@ -353,7 +353,7 @@ public interface FolderService {
      * Deletes the specified folder in given tree.
      * <p>
      * The folder is deleted from all trees and its subfolders as well
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
@@ -364,7 +364,7 @@ public interface FolderService {
 
     /**
      * Clears the content of specified folder in given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param user The user
@@ -375,7 +375,7 @@ public interface FolderService {
 
     /**
      * Clears the content of specified folder in given tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param session The session
@@ -385,7 +385,7 @@ public interface FolderService {
 
     /**
      * Updates a folder identified through given folder object.
-     * 
+     *
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
      * @param timeStamp The requestor's last-modified time stamp
      * @param user The user
@@ -396,7 +396,7 @@ public interface FolderService {
 
     /**
      * Updates a folder identified through given folder object.
-     * 
+     *
      * @param folder The folder object containing tree identifier, folder identifier and modified data.
      * @param timeStamp The requestor's last-modified time stamp
      * @param session The session
@@ -406,7 +406,7 @@ public interface FolderService {
 
     /**
      * Creates a new folder described by given folder object.
-     * 
+     *
      * @param folder The folder object containing tree identifier, parent identifier and data.
      * @param user The user
      * @param context The context
@@ -417,7 +417,7 @@ public interface FolderService {
 
     /**
      * Creates a new folder described by given folder object.
-     * 
+     *
      * @param folder The folder object containing tree identifier, parent identifier and data.
      * @param session The session
      * @return The identifier of the newly created folder

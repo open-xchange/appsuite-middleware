@@ -53,7 +53,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceParticipant} - Represents a resource participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ResourceParticipant implements Participant, Comparable<Participant> {
@@ -68,17 +68,17 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the resource.
      */
     public ResourceParticipant(final int id) {
         super();
         this.id = id;
     }
-    
+
     /**
      * Constructor that takes values of from a given resource
-     * 
+     *
      * @param res - a resource to be used as base
      */
     public ResourceParticipant(Resource res){

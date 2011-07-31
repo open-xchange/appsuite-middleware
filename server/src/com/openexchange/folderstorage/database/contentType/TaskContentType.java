@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link TaskContentType} - The folder storage content type for tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TaskContentType implements ContentType {
@@ -62,7 +62,7 @@ public final class TaskContentType implements ContentType {
 
     /**
      * Gets the {@link TaskContentType} instance.
-     * 
+     *
      * @return The {@link TaskContentType} instance
      */
     public static TaskContentType getInstance() {

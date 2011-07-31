@@ -90,7 +90,7 @@ public class Credentials {
         this.userid = userid;
         this.contextid = contextid;
         this.username = username;
-        b_contextid = true;        
+        b_contextid = true;
     }
 
     /**
@@ -161,7 +161,7 @@ public class Credentials {
 
     /**
      * Gets the string value of context ID if a context ID is present; otherwise "unknown" is returned
-     * 
+     *
      * @return The string value of context ID if a context ID is present; otherwise "unknown" is returned
      */
     public final String getContextString() {

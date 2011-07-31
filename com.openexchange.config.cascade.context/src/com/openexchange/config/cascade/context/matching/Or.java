@@ -71,7 +71,7 @@ public class Or extends ContextSetTerm {
     public boolean matches(Set<String> tags) {
         return firstOperand.matches(tags) || otherOperand.matches(tags);
     }
-    
+
     @Override
     public String toString() {
         return "("+firstOperand.toString()+"|"+otherOperand.toString()+")";

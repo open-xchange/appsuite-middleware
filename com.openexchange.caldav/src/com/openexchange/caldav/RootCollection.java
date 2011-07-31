@@ -72,7 +72,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class RootCollection extends AbstractStandardCaldavCollection {
 
 
-    
+
     public RootCollection(GroupwareCaldavFactory factory) {
         super(factory);
         includeProperties(new CalendarHomeSet());
@@ -93,7 +93,7 @@ public class RootCollection extends AbstractStandardCaldavCollection {
     public String getDisplayName() throws OXException {
         return "";
     }
-    
+
     @Override
     protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
         return null;
@@ -103,6 +103,6 @@ public class RootCollection extends AbstractStandardCaldavCollection {
     protected boolean isset(Property p) {
         return true;
     }
-    
+
 
 }

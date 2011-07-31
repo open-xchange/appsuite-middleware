@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Registers the mail account servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountServletInit implements Initialization {

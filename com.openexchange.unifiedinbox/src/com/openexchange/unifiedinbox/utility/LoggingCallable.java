@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link LoggingCallable} - Extends {@link Callable} interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class LoggingCallable<V> implements Task<V> {
@@ -76,7 +76,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
 
     /**
      * Initializes a new {@link LoggingCallable}.
-     * 
+     *
      * @param session The session
      */
     public LoggingCallable(final Session session) {
@@ -85,7 +85,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
 
     /**
      * Initializes a new {@link LoggingCallable}.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      */
@@ -97,7 +97,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
 
     /**
      * Gets the logger.
-     * 
+     *
      * @return The logger
      */
     public org.apache.commons.logging.Log getLogger() {
@@ -106,7 +106,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session or <code>null</code> if not set
      */
     public Session getSession() {
@@ -115,7 +115,7 @@ public abstract class LoggingCallable<V> implements Task<V> {
 
     /**
      * Gets the account ID
-     * 
+     *
      * @return The account ID or <code>-1</code> if not set
      */
     public int getAccountId() {

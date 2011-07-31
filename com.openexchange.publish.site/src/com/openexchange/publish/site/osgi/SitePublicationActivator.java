@@ -70,7 +70,7 @@ public class SitePublicationActivator extends HousekeepingActivator {
         ContextService.class,
         IDBasedFileAccessFactory.class
     };
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
@@ -80,9 +80,9 @@ public class SitePublicationActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         registerService(PublicationService.class, SitePublicationService.getInstance());
         rememberTracker(new ServletRegistration(context, new SiteServlet(), Constants.PUBLICATION_ROOT_URL));
-    
+
         openTrackers();
-        
+
         SiteServlet.setContextService(getService(ContextService.class));
         SiteServlet.setFileAccess(getService(IDBasedFileAccessFactory.class));
     }

@@ -71,14 +71,14 @@ import com.openexchange.subscribe.microformats.OXMFServiceRegistry;
 
 /**
  * {@link HTTPToolkit}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HTTPToolkit {
 
     /**
      * Grabs HTML content from specified site.
-     * 
+     *
      * @param site The site or URL
      * @return The grabbed HTML content
      * @throws HttpException If a HTTP error occurs
@@ -96,7 +96,7 @@ public class HTTPToolkit {
          * Generate URL
          */
         String encodedSite = URIUtil.encodeQuery(site);
-        
+
         final java.net.URL javaURL = new java.net.URL(encodedSite);
 
         checkContentAndLength(javaURL, timeout);

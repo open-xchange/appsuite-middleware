@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link OXExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -98,13 +98,13 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // Unknown file content: %1$s.
     public static final String UNKNOWN_FILE_CONTENT_MSG = "Unknown file content: %1$s.";
-    
+
     // Unknown file storage service: %1$s.
     public static final String UNKNOWN_FILE_STORAGE_SERVICE_MSG = "Unknown file storage service: %1$s.";
-    
+
     //  Missing parameter: %1$s
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
-    
+
     // Invalid parameter: %1$s with value '%2$s'.
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
 

@@ -62,7 +62,7 @@ import com.openexchange.tools.net.URITools;
 
 /**
  * {@link MailAccountDescription} - Container object describing a mail account to insert/update.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountDescription implements Serializable {
@@ -157,7 +157,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the ID.
-     * 
+     *
      * @return The ID or <code>-1</code> if not set
      */
     public int getId() {
@@ -166,7 +166,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the login.
-     * 
+     *
      * @return The login
      */
     public String getLogin() {
@@ -175,7 +175,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the account name.
-     * 
+     *
      * @return The account name
      */
     public String getName() {
@@ -184,7 +184,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets clear, non-encrypted password.
-     * 
+     *
      * @return The clear, non-encrypted password.
      */
     public String getPassword() {
@@ -193,7 +193,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the primary email address.
-     * 
+     *
      * @return The primary email address
      */
     public String getPrimaryAddress() {
@@ -202,7 +202,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the personal.
-     * 
+     *
      * @return The personal
      */
     public String getPersonal() {
@@ -211,7 +211,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the reply-to address
-     * 
+     *
      * @return The reply-to address
      */
     public String getReplyTo() {
@@ -220,7 +220,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the ID
-     * 
+     *
      * @return The ID
      */
     public void setId(final int id) {
@@ -229,7 +229,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the login.
-     * 
+     *
      * @param login The login
      */
     public void setLogin(final String login) {
@@ -238,7 +238,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the clear-text password (which is stored encrypted).
-     * 
+     *
      * @param password The clear-text password
      */
     public void setPassword(final String password) {
@@ -250,7 +250,7 @@ public final class MailAccountDescription implements Serializable {
      * <p>
      * The mail server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
      * address.
-     * 
+     *
      * @return The mail server name
      */
     public String getMailServer() {
@@ -259,7 +259,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the mail server port.
-     * 
+     *
      * @return The mail server port
      */
     public int getMailPort() {
@@ -268,7 +268,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the mail server protocol.
-     * 
+     *
      * @return The mail server protocol
      */
     public String getMailProtocol() {
@@ -277,7 +277,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if a secure connection to mail server shall be established.
-     * 
+     *
      * @return <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
      */
     public boolean isMailSecure() {
@@ -286,7 +286,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the mail server name.
-     * 
+     *
      * @param mailServer The mail server name to set
      */
     public void setMailServer(final String mailServer) {
@@ -296,7 +296,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the mail server port.
-     * 
+     *
      * @param mailPort The mail server port to set
      */
     public void setMailPort(final int mailPort) {
@@ -306,7 +306,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the mail server protocol.
-     * 
+     *
      * @param mailProtocol The mail server protocol to set
      */
     public void setMailProtocol(final String mailProtocol) {
@@ -316,7 +316,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if a secure connection to mail server shall be established.
-     * 
+     *
      * @param mailSecure <code>true</code> if a secure connection to mail server shall be established; otherwise <code>false</code>
      */
     public void setMailSecure(final boolean mailSecure) {
@@ -329,7 +329,7 @@ public final class MailAccountDescription implements Serializable {
      * <p>
      * The transport server name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP
      * address.
-     * 
+     *
      * @return The transport server name
      */
     public String getTransportServer() {
@@ -338,7 +338,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the transport server port.
-     * 
+     *
      * @return The transport server port
      */
     public int getTransportPort() {
@@ -347,7 +347,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the transport server protocol.
-     * 
+     *
      * @return The transport server protocol
      */
     public String getTransportProtocol() {
@@ -356,7 +356,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if a secure connection to transport server shall be established.
-     * 
+     *
      * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
      */
     public boolean isTransportSecure() {
@@ -365,7 +365,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the transport server name.
-     * 
+     *
      * @param transportServer The transport server name to set
      */
     public void setTransportServer(final String transportServer) {
@@ -375,7 +375,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the transport server port
-     * 
+     *
      * @param transportPort The transport server port to set
      */
     public void setTransportPort(final int transportPort) {
@@ -385,7 +385,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the transport server protocol
-     * 
+     *
      * @param transportProtocol The transport server protocol to set
      */
     public void setTransportProtocol(final String transportProtocol) {
@@ -395,7 +395,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if a secure connection to transport server shall be established.
-     * 
+     *
      * @param mailSecure <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
      */
     public void setTransportSecure(final boolean transportSecure) {
@@ -405,7 +405,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Generates the mail server URL.
-     * 
+     *
      * @return The generated mail server URL
      * @throws OXException If mail server URL is invalid
      */
@@ -432,7 +432,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Parses specified mail server URL
-     * 
+     *
      * @param mailServerURL The mail server URL to parse
      * @throws OXException If URL cannot be parsed
      */
@@ -489,7 +489,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Parses specified transport server URL
-     * 
+     *
      * @param mailServerURL The transport server URL to parse
      * @throws OXException If URL cannot be parsed
      */
@@ -525,7 +525,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Generates transport server URL
-     * 
+     *
      * @return The transport server URL
      * @throws OXException If URL cannot be parsed
      */
@@ -553,7 +553,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the account name.
-     * 
+     *
      * @param name The account name.
      */
     public void setName(final String name) {
@@ -562,7 +562,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the primary email address.
-     * 
+     *
      * @param primaryAddress The primary email address
      */
     public void setPrimaryAddress(final String primaryAddress) {
@@ -571,7 +571,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the personal.
-     * 
+     *
      * @param personal The personal
      */
     public void setPersonal(final String personal) {
@@ -580,7 +580,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the reply-to address
-     * 
+     *
      * @param replyTo The reply-to address
      */
     public void setReplyTo(final String replyTo) {
@@ -589,7 +589,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default drafts folder.
-     * 
+     *
      * @return The name for default drafts folder
      */
     public String getDrafts() {
@@ -598,7 +598,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default sent folder.
-     * 
+     *
      * @return The name for default sent folder
      */
     public String getSent() {
@@ -607,7 +607,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default spam folder.
-     * 
+     *
      * @return The name for default spam folder
      */
     public String getSpam() {
@@ -616,7 +616,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default trash folder.
-     * 
+     *
      * @return The name for default trash folder
      */
     public String getTrash() {
@@ -625,7 +625,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default confirmed-ham folder.
-     * 
+     *
      * @return The name for default confirmed-ham folder
      */
     public String getConfirmedHam() {
@@ -634,7 +634,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the name for default confirmed-spam folder.
-     * 
+     *
      * @return The name for default confirmed-spam folder
      */
     public String getConfirmedSpam() {
@@ -643,7 +643,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the spam handler name.
-     * 
+     *
      * @return The spam handler name
      */
     public String getSpamHandler() {
@@ -652,7 +652,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default trash folder.
-     * 
+     *
      * @param trash The name for default trash folder
      */
     public void setTrash(final String trash) {
@@ -661,7 +661,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default sent folder.
-     * 
+     *
      * @param sent The name for default sent folder
      */
     public void setSent(final String sent) {
@@ -670,7 +670,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default drafts folder.
-     * 
+     *
      * @param drafts The name for default drafts folder
      */
     public void setDrafts(final String drafts) {
@@ -679,7 +679,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default spam folder.
-     * 
+     *
      * @param spam The name for spam trash folder
      */
     public void setSpam(final String spam) {
@@ -688,7 +688,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default confirmed-spam folder.
-     * 
+     *
      * @param confirmedSpam The name for default confirmed-spam folder
      */
     public void setConfirmedSpam(final String confirmedSpam) {
@@ -697,7 +697,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the name for default confirmed-ham folder.
-     * 
+     *
      * @param confirmedHam The name for default confirmed-ham folder
      */
     public void setConfirmedHam(final String confirmedHam) {
@@ -706,7 +706,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the spam handler name.
-     * 
+     *
      * @param spamHandler The spam handler name
      */
     public void setSpamHandler(final String spamHandler) {
@@ -715,7 +715,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if mail account denotes the default mail account.
-     * 
+     *
      * @return <code>true</code> if mail account denotes the default mail account; otherwise <code>false</code>
      */
     public boolean isDefaultFlag() {
@@ -724,7 +724,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets whether mail account denotes the default mail account.
-     * 
+     *
      * @param defaultFlag <code>true</code> if mail account denotes the default mail account; otherwise <code>false</code>
      */
     public void setDefaultFlag(final boolean defaultFlag) {
@@ -733,7 +733,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the optional transport login.
-     * 
+     *
      * @return The optional transport login
      */
     public String getTransportLogin() {
@@ -742,7 +742,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the optional transport password.
-     * 
+     *
      * @return The optional transport password
      */
     public String getTransportPassword() {
@@ -751,7 +751,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the optional transport login.
-     * 
+     *
      * @param transportLogin The optional transport login
      */
     public void setTransportLogin(final String transportLogin) {
@@ -760,7 +760,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the optional transport password.
-     * 
+     *
      * @param transportLogin The optional transport password
      */
     public void setTransportPassword(final String transportPassword) {
@@ -769,7 +769,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if this mail account is enabled for Unified INBOX.
-     * 
+     *
      * @return <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
      */
     public boolean isUnifiedINBOXEnabled() {
@@ -778,7 +778,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if this mail account is enabled for Unified INBOX.
-     * 
+     *
      * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
      */
     public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
@@ -787,7 +787,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the trash fullname
-     * 
+     *
      * @return The trash fullname
      */
     public String getTrashFullname() {
@@ -796,7 +796,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the trash fullname
-     * 
+     *
      * @param trashFullname The trash fullname to set
      */
     public void setTrashFullname(final String trashFullname) {
@@ -805,7 +805,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the sent fullname
-     * 
+     *
      * @return The sent fullname
      */
     public String getSentFullname() {
@@ -814,7 +814,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the sent fullname
-     * 
+     *
      * @param sentFullname The sent fullname to set
      */
     public void setSentFullname(final String sentFullname) {
@@ -823,7 +823,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the drafts fullname
-     * 
+     *
      * @return The drafts fullname
      */
     public String getDraftsFullname() {
@@ -832,7 +832,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the drafts fullname
-     * 
+     *
      * @param draftsFullname The drafts fullname to set
      */
     public void setDraftsFullname(final String draftsFullname) {
@@ -841,7 +841,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the spam fullname
-     * 
+     *
      * @return The spam fullname
      */
     public String getSpamFullname() {
@@ -850,7 +850,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the spam fullname
-     * 
+     *
      * @param spamFullname The spam fullname to set
      */
     public void setSpamFullname(final String spamFullname) {
@@ -859,7 +859,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the confirmed-spam fullname
-     * 
+     *
      * @return The confirmed-spam fullname
      */
     public String getConfirmedSpamFullname() {
@@ -868,7 +868,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the confirmed-spam fullname
-     * 
+     *
      * @param confirmedSpamFullname The confirmed-spam fullname to set
      */
     public void setConfirmedSpamFullname(final String confirmedSpamFullname) {
@@ -877,7 +877,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the confirmed-ham fullname
-     * 
+     *
      * @return The confirmed-ham fullname
      */
     public String getConfirmedHamFullname() {
@@ -886,7 +886,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the confirmed-ham fullname
-     * 
+     *
      * @param confirmedHamFullname The confirmed-ham fullname to set
      */
     public void setConfirmedHamFullname(final String confirmedHamFullname) {
@@ -895,7 +895,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Gets the properties
-     * 
+     *
      * @return The properties
      */
     public Map<String, String> getProperties() {
@@ -909,7 +909,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets the properties
-     * 
+     *
      * @param properties The properties to set
      */
     public void setProperties(final Map<String, String> properties) {
@@ -925,7 +925,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Adds specified name-value-pair to properties.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */

@@ -73,12 +73,12 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class));
 
     private static interface DateValidator {
-        
+
         boolean isValid(String dateString);
     }
 
     private static final DateValidator DEFAULT_VALIDATOR = new DateValidator() {
-        
+
         @Override
         public boolean isValid(final String dateString) {
             return true;
@@ -86,7 +86,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
     };
 
     private static final class RegexDateValidator implements DateValidator {
-        
+
         private final Pattern invalidPattern;
 
         public RegexDateValidator(final Pattern pattern) {
@@ -174,7 +174,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 
     /**
      * Adds specified {@link DateFormat date format} to this switcher.
-     * 
+     *
      * @param dateFormat The date format to add
      */
     public void addDateFormat(final DateFormat dateFormat) {

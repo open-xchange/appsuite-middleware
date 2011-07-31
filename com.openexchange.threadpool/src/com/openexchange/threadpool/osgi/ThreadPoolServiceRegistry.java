@@ -54,7 +54,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link ThreadPoolServiceRegistry} - The service registry for thread pool bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolServiceRegistry {
@@ -70,7 +70,7 @@ public final class ThreadPoolServiceRegistry {
 
     /**
      * Gets the service registry.
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {
@@ -79,7 +79,7 @@ public final class ThreadPoolServiceRegistry {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
@@ -92,7 +92,7 @@ public final class ThreadPoolServiceRegistry {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>

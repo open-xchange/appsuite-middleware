@@ -8,7 +8,7 @@ import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 
 
 public class Common {
-    
+
     public static SimConfigurationService simConfigurationService;
 
     public static void prepare(String passwordSource, String masterPassword) {

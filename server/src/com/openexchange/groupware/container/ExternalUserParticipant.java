@@ -53,7 +53,7 @@ import com.openexchange.groupware.container.participants.AbstractConfirmablePart
 
 /**
  * {@link ExternalUserParticipant} - Represents an external user participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ExternalUserParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
@@ -68,7 +68,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     /**
      * Default constructor.
-     * 
+     *
      * @param emailAddress The unique email address of the external participant.
      */
     public ExternalUserParticipant(final String emailAddress) {

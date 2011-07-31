@@ -64,7 +64,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link RTF2HTMLConverter} - Converts RTF to HTML based on <code>javax.swing.text.*</code> package
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RTF2HTMLConverter {
@@ -361,7 +361,7 @@ public final class RTF2HTMLConverter {
 
     /**
      * Triggers the rtf2html conversion
-     * 
+     *
      * @param rtfContent The RTF content
      * @return The converted HTML content
      */
@@ -375,7 +375,7 @@ public final class RTF2HTMLConverter {
 
     /**
      * Converts a single RTF string to HTML without wrapping returned converted HTML body inside a HTML document.
-     * 
+     *
      * @param rtfString The RTF string
      * @return The converted HTML body
      */

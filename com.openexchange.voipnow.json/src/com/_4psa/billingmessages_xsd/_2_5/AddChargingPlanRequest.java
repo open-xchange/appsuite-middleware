@@ -14,9 +14,9 @@ import com._4psa.billingdata_xsd._2_5.ChargingPlanInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -74,8 +74,8 @@ import com._4psa.billingdata_xsd._2_5.ChargingPlanInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -103,11 +103,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -115,11 +115,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -127,11 +127,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -139,11 +139,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -151,11 +151,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the userLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserLogin() {
         return userLogin;
@@ -163,11 +163,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the userLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserLogin(String value) {
         this.userLogin = value;
@@ -175,11 +175,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the forceChannelRule property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isForceChannelRule() {
         return forceChannelRule;
@@ -187,11 +187,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the forceChannelRule property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setForceChannelRule(Boolean value) {
         this.forceChannelRule = value;
@@ -199,25 +199,25 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the exception property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the exception property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getException().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AddChargingPlanRequest.Exception }
-     * 
-     * 
+     *
+     *
      */
     public List<AddChargingPlanRequest.Exception> getException() {
         if (exception == null) {
@@ -228,11 +228,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -240,11 +240,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -252,11 +252,11 @@ public class AddChargingPlanRequest
 
     /**
      * Gets the value of the signature property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSignature() {
         return signature;
@@ -264,11 +264,11 @@ public class AddChargingPlanRequest
 
     /**
      * Sets the value of the signature property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSignature(String value) {
         this.signature = value;
@@ -277,9 +277,9 @@ public class AddChargingPlanRequest
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -319,8 +319,8 @@ public class AddChargingPlanRequest
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -339,11 +339,11 @@ public class AddChargingPlanRequest
 
         /**
          * Gets the value of the areaCode property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getAreaCode() {
             return areaCode;
@@ -351,11 +351,11 @@ public class AddChargingPlanRequest
 
         /**
          * Sets the value of the areaCode property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setAreaCode(String value) {
             this.areaCode = value;
@@ -363,11 +363,11 @@ public class AddChargingPlanRequest
 
         /**
          * Gets the value of the description property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDescription() {
             return description;
@@ -375,11 +375,11 @@ public class AddChargingPlanRequest
 
         /**
          * Sets the value of the description property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDescription(String value) {
             this.description = value;
@@ -387,11 +387,11 @@ public class AddChargingPlanRequest
 
         /**
          * Gets the value of the charge property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddChargingPlanRequest.Exception.Charge }
-         *     
+         *
          */
         public AddChargingPlanRequest.Exception.Charge getCharge() {
             return charge;
@@ -399,11 +399,11 @@ public class AddChargingPlanRequest
 
         /**
          * Sets the value of the charge property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddChargingPlanRequest.Exception.Charge }
-         *     
+         *
          */
         public void setCharge(AddChargingPlanRequest.Exception.Charge value) {
             this.charge = value;
@@ -411,11 +411,11 @@ public class AddChargingPlanRequest
 
         /**
          * Gets the value of the package property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddChargingPlanRequest.Exception.Package }
-         *     
+         *
          */
         public AddChargingPlanRequest.Exception.Package getPackage() {
             return _package;
@@ -423,11 +423,11 @@ public class AddChargingPlanRequest
 
         /**
          * Sets the value of the package property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddChargingPlanRequest.Exception.Package }
-         *     
+         *
          */
         public void setPackage(AddChargingPlanRequest.Exception.Package value) {
             this._package = value;
@@ -436,9 +436,9 @@ public class AddChargingPlanRequest
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -454,8 +454,8 @@ public class AddChargingPlanRequest
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -476,11 +476,11 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the initialAmount property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Float }
-             *     
+             *
              */
             public Float getInitialAmount() {
                 return initialAmount;
@@ -488,11 +488,11 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the initialAmount property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Float }
-             *     
+             *
              */
             public void setInitialAmount(Float value) {
                 this.initialAmount = value;
@@ -500,11 +500,11 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the initialInterval property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getInitialInterval() {
                 return initialInterval;
@@ -512,11 +512,11 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the initialInterval property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setInitialInterval(BigInteger value) {
                 this.initialInterval = value;
@@ -524,7 +524,7 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the amount property.
-             * 
+             *
              */
             public float getAmount() {
                 return amount;
@@ -532,7 +532,7 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the amount property.
-             * 
+             *
              */
             public void setAmount(float value) {
                 this.amount = value;
@@ -540,11 +540,11 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the interval property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getInterval() {
                 return interval;
@@ -552,11 +552,11 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the interval property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setInterval(BigInteger value) {
                 this.interval = value;
@@ -564,11 +564,11 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the setupAmount property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Float }
-             *     
+             *
              */
             public Float getSetupAmount() {
                 return setupAmount;
@@ -576,11 +576,11 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the setupAmount property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Float }
-             *     
+             *
              */
             public void setSetupAmount(Float value) {
                 this.setupAmount = value;
@@ -591,9 +591,9 @@ public class AddChargingPlanRequest
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -606,8 +606,8 @@ public class AddChargingPlanRequest
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -622,11 +622,11 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the name property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getName() {
                 return name;
@@ -634,11 +634,11 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the name property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setName(String value) {
                 this.name = value;
@@ -646,7 +646,7 @@ public class AddChargingPlanRequest
 
             /**
              * Gets the value of the minutes property.
-             * 
+             *
              */
             public float getMinutes() {
                 return minutes;
@@ -654,7 +654,7 @@ public class AddChargingPlanRequest
 
             /**
              * Sets the value of the minutes property.
-             * 
+             *
              */
             public void setMinutes(float value) {
                 this.minutes = value;

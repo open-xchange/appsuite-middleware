@@ -60,9 +60,9 @@ import com.openexchange.subscribe.crawler.internal.Step;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForSunContactsWebmail extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testWebmailContacts(){
-        
+
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -75,8 +75,8 @@ public class GenericSubscribeServiceForSunContactsWebmail extends GenericSubscri
         crawler.setModule(FolderObject.CONTACT);
         crawler.setPriority(1);
         crawler.setJavascriptEnabled(true);
-        
-        
+
+
 
         ArrayList<Step> steps = new ArrayList<Step>();
 
@@ -90,23 +90,23 @@ public class GenericSubscribeServiceForSunContactsWebmail extends GenericSubscri
         loginStep.setNameOfPasswordField("IDToken2");
         loginStep.setStringAvailableAfterLogin(".*favicon.ico.*");
         steps.add(loginStep);
-        
+
         PageByUrlStep pageByUrlStep = new PageByUrlStep();
         pageByUrlStep.setUrl("https://uwc1.us.es/en/mail.html?lang=en");
         //pageByUrlStep.setDebuggingEnabled(true);
         steps.add(pageByUrlStep);
-        
+
         PageByFrameNumberStep pageByFrameNumberStep = new PageByFrameNumberStep();
         pageByFrameNumberStep.setFrameNumber(1);
         steps.add(pageByFrameNumberStep);
-        
+
         PageByLinkRegexStep pageByLinkRegexStep = new PageByLinkRegexStep();
         pageByLinkRegexStep.setUrl(".*displayPab.*");
         pageByLinkRegexStep.setDebuggingEnabled(true);
         steps.add(pageByLinkRegexStep);
-        
-                       
-        
+
+
+
 
         crawler.finishUp(steps);
 

@@ -73,7 +73,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @return The appropriate server session
      * @throws OXException If context cannot be resolved

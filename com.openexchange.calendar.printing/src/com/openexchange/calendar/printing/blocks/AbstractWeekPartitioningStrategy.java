@@ -60,7 +60,7 @@ import com.openexchange.calendar.printing.CPCalendar;
  * need to include weeks that do not belong to that month, in case the first or last week of a month contains days from neighbouring months.
  * To do these checks, this class keeps track of days, weeks and months internally. It works stateful, unlike its super class, which only
  * contains non-stateful classes.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalculator implements CPPartitioningStrategy {
@@ -198,7 +198,7 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
         CPCalendar cal = getCalendar();
         cal.setTime(day);
         int dayInYear = cal.get(Calendar.DAY_OF_YEAR);
-        
+
         cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWorkWeek());
         Date firstDayOfWorkWeek = cal.getTime();
         int firstDayOfWorkWeekInMonthInYear = cal.get(Calendar.DAY_OF_YEAR);

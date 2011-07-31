@@ -70,17 +70,17 @@ public class INSERT extends ModifyCommand {
     public void build(IStatementBuilder builder) {
 		builder.buildINSERT(this);
 	}
-	
+
 	public INSERT INTO(String tableName) {
 		into = new INTO(tableName);
 		return this;
 	}
-	
+
 	public INSERT INTO(Table table) {
 	    into = new INTO(table);
 	    return this;
 	}
-    
+
     public INSERT subSelect(SELECT select) {
         subSelect = select;
         return this;
@@ -97,11 +97,11 @@ public class INSERT extends ModifyCommand {
 	public List<List<Expression>> getValues() {
 		return values;
 	}
-	
+
 	public SELECT getSubSelect() {
 	    return subSelect;
 	}
-    
+
     public INSERT SET(String columnName, List<Expression> expressions) {
         columns.add(columnName);
         if (values.isEmpty()) {
@@ -114,7 +114,7 @@ public class INSERT extends ModifyCommand {
         }
         return this;
     }
-    
+
     public INSERT SET(Column column, List<Expression> expressions) {
         return SET(column.getName(), expressions);
     }
@@ -122,7 +122,7 @@ public class INSERT extends ModifyCommand {
 	public INSERT SET(String columnName, Expression... expressions) {
 	    return SET(columnName, Arrays.asList(expressions));
 	}
-	
+
 	public INSERT SET(Column column, Expression... expressions) {
 	    return SET(column.getName(), expressions);
 	}

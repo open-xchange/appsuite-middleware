@@ -78,7 +78,7 @@ import com.openexchange.configuration.SystemConfig;
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
  * <li>The file or resource denoted by property <i>MimeTypeFile</i>.</li>
  * </ol>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEType2ExtMap {
@@ -199,7 +199,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Gets the MIME type associated with given file.
-     * 
+     *
      * @param file The file
      * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
      */
@@ -209,7 +209,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Gets the MIME type associated with given file name.
-     * 
+     *
      * @param fileName The file name; e.g. <code>"file.html"</code>
      * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
      */
@@ -235,7 +235,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Gets the MIME type associated with given file extension.
-     * 
+     *
      * @param extension The file extension; e.g. <code>"txt"</code>
      * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
      */
@@ -261,7 +261,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Gets the file extension for given MIME type.
-     * 
+     *
      * @param mimeType The MIME type
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
@@ -272,7 +272,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Loads the MIME type file specified through <code>fileStr</code>.
-     * 
+     *
      * @param fileStr The MIME type file to load
      */
     public static void load(final String fileStr) {
@@ -282,7 +282,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Loads the MIME type file specified through given file.
-     * 
+     *
      * @param file The MIME type file to load
      */
     public static void load(final File file) {
@@ -292,7 +292,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Loads the MIME type file specified through given file.
-     * 
+     *
      * @param file The MIME type file to load
      */
     private static void loadInternal(final File file) {
@@ -319,7 +319,7 @@ public final class MIMEType2ExtMap {
 
     /**
      * Loads the MIME type file specified through given URL.
-     * 
+     *
      * @param url The URL to a MIME type file
      */
     private static void loadInternal(final URL url) {

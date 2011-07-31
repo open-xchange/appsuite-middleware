@@ -61,23 +61,23 @@ package com.openexchange.groupware.impl;
 public class UserNotFoundException extends Exception
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -6609617117778943165L;
 
 	public UserNotFoundException() {
 		super();
 	}
-	
+
 	public UserNotFoundException(final String message) {
 		super(message);
 	}
-	
+
 	public UserNotFoundException(final String message, final Exception exc) {
 		super(message, exc);
 	}
-	
+
 	public UserNotFoundException(final Exception exc) {
 		super(exc);
-	}	
+	}
 }

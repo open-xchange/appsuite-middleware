@@ -56,7 +56,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link DeleteListenerServiceTracker} - The {@link ServiceTrackerCustomizer} for mail account delete listeners.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer {

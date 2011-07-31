@@ -74,7 +74,7 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
 
     private final ICalParser delegate;
     private final ServerServiceRegistry registry;
-    
+
     public ExtraneousSeriesMasterRecoveryParser(final ICalParser delegate, final ServerServiceRegistry registry) {
         this.delegate = delegate;
         this.registry = registry;
@@ -106,7 +106,7 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
             }
             index++;
         }
-        
+
         return copy;
     }
 
@@ -124,5 +124,5 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     public String parseProperty(final String propertyName, final InputStream ical) {
         return delegate.parseProperty(propertyName, ical);
     }
-    
+
 }

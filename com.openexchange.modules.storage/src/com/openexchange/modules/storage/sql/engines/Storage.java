@@ -62,15 +62,15 @@ import com.openexchange.modules.model.Model;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Storage<T extends Model<T>> {
-    
+
     public void create(T thing) throws SQLException, OXException;
-    
+
     public void update(T thing, List<? extends Attribute<T>> updatedAttributes) throws SQLException, OXException;
-    
+
     public T load(Object id) throws SQLException, OXException;
-    
+
     public List<T> load() throws SQLException, OXException;
-    
+
     public void delete(Object id) throws SQLException, OXException;
-    
+
 }

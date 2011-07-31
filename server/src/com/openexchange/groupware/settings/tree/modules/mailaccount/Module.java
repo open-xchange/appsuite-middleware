@@ -56,7 +56,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link Module} - Contains initialization for the modules configuration tree setting mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Module extends AbstractModules {

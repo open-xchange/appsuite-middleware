@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagementService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ManagementService {
 
     /**
      * Registers a new MBean
-     * 
+     *
      * @param objectName The bean's object name
      * @param mbean The bean to register
      * @throws OXException If registration fails
@@ -70,7 +70,7 @@ public interface ManagementService {
 
     /**
      * Unregisters the MBean corresponding to given name
-     * 
+     *
      * @param name The bean name
      * @throws OXException If bean cannot be unregistered
      */
@@ -78,7 +78,7 @@ public interface ManagementService {
 
     /**
      * Unregisters the MBean corresponding to given object name
-     * 
+     *
      * @param objectName The bean's object name
      * @throws OXException If bean cannot be unregistered
      */

@@ -89,7 +89,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderImpl extends AbstractFolder {
@@ -121,7 +121,7 @@ public final class MailFolderImpl extends AbstractFolder {
 
         /**
          * Gets the content type associated with this mail folder type.
-         * 
+         *
          * @return The content type
          */
         public ContentType getContentType() {
@@ -130,7 +130,7 @@ public final class MailFolderImpl extends AbstractFolder {
 
         /**
          * Gets the type.
-         * 
+         *
          * @return The type
          */
         public int getType() {
@@ -159,7 +159,7 @@ public final class MailFolderImpl extends AbstractFolder {
      * Initializes a new {@link MailFolderImpl} from given mail folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
      * @param mailConfig The mail configuration
@@ -176,7 +176,7 @@ public final class MailFolderImpl extends AbstractFolder {
      * Initializes a new {@link MailFolderImpl} from given mail folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param mailFolder The underlying mail folder
      * @param accountId The account identifier
      * @param mailConfig The mail configuration

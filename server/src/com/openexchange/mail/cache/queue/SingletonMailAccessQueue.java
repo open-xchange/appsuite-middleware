@@ -60,7 +60,7 @@ import com.openexchange.mail.cache.PooledMailAccess;
 
 
 /**
- * {@link SingletonMailAccessQueue} - A thread-safe singleton queue backed by an {@link AtomicReference} instance. 
+ * {@link SingletonMailAccessQueue} - A thread-safe singleton queue backed by an {@link AtomicReference} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

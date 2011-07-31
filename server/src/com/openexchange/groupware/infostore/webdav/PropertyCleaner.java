@@ -61,16 +61,16 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
-	
+
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
-	
+
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;
 		this.infoProperties = infoProperties;
-		
+
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 	@Override
     public void infoitemModified(final DocumentMetadata metadata,
 			final Session sessionObj) {
-		
+
 	}
 
 }

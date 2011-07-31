@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Notice type
- * 
+ *
  * <p>Java class for notice complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="notice">
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "notice", propOrder = {
@@ -40,11 +40,11 @@ public class Notice {
 
     /**
      * Gets the value of the message property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMessage() {
         return message;
@@ -52,11 +52,11 @@ public class Notice {
 
     /**
      * Sets the value of the message property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMessage(String value) {
         this.message = value;
@@ -64,11 +64,11 @@ public class Notice {
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCode() {
         return code;
@@ -76,11 +76,11 @@ public class Notice {
 
     /**
      * Sets the value of the code property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCode(String value) {
         this.code = value;

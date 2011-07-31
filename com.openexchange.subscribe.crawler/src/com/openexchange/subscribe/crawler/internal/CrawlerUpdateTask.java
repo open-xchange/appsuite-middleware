@@ -71,7 +71,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * {@link CrawlerUpdateTask}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerUpdateTask implements Runnable {
@@ -169,7 +169,7 @@ public class CrawlerUpdateTask implements Runnable {
                     if (currentCrawlerDescription != null) {
                         LOG.info("There is an old description that could be replaced");
                         if (possibleNewCrawlerDescription.getPriority() > currentCrawlerDescription.getPriority()) {
-                            LOG.info("The priority is higher than the existing file so it will be replaced");                            
+                            LOG.info("The priority is higher than the existing file so it will be replaced");
                             //removal needs to happen before saving in case of the filename being the same
                             activator.removeCrawlerFromFilesystem(config, possibleNewCrawlerDescription.getId());
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));
@@ -180,7 +180,7 @@ public class CrawlerUpdateTask implements Runnable {
                         // it is a description for a completely new crawler
                     } else {
                         // only download configurations for new crawlers if this is enabled by configuration-file
-                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(activator.ONLY_UPDATE_INSTALLED));                         
+                        boolean onlyUpdateInstalled = Boolean.parseBoolean(config.getProperty(activator.ONLY_UPDATE_INSTALLED));
                         if (!onlyUpdateInstalled){
                             LOG.info("It is a completely new crawler and will be saved");
                             Yaml.dump(possibleNewCrawlerDescription, new File(path + ymlFilename));

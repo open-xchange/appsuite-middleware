@@ -54,7 +54,7 @@ import java.io.Writer;
 
 /**
  * {@link UnsynchronizedStringWriter} - A string writer based on unsynchronized {@link StringBuilder}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UnsynchronizedStringWriter extends Writer {
@@ -71,7 +71,7 @@ public class UnsynchronizedStringWriter extends Writer {
 
     /**
      * Create a new string writer, using the specified initial string-buffer size.
-     * 
+     *
      * @param initialSize An <code>int</code> specifying the initial size of the buffer.
      */
     public UnsynchronizedStringWriter(final int initialSize) {
@@ -84,7 +84,7 @@ public class UnsynchronizedStringWriter extends Writer {
 
     /**
      * Create a new string writer, using the specified string-buffer.
-     * 
+     *
      * @param initialSize The initial buffer.
      */
     public UnsynchronizedStringWriter(final StringBuilder builder) {
@@ -105,7 +105,7 @@ public class UnsynchronizedStringWriter extends Writer {
 
     /**
      * Write a portion of an array of characters.
-     * 
+     *
      * @param cbuf Array of characters
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
@@ -130,7 +130,7 @@ public class UnsynchronizedStringWriter extends Writer {
 
     /**
      * Write a portion of a string.
-     * 
+     *
      * @param str String to be written
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
@@ -144,7 +144,7 @@ public class UnsynchronizedStringWriter extends Writer {
      * Appends the specified character sequence to this writer.
      * <p>
      * An invocation of this method of the form <tt>out.append(csq)</tt> behaves in exactly the same way as the invocation
-     * 
+     *
      * <pre>
      * out.write(csq.toString())
      * </pre>
@@ -152,7 +152,7 @@ public class UnsynchronizedStringWriter extends Writer {
      * Depending on the specification of <tt>toString</tt> for the character sequence <tt>csq</tt>, the entire sequence may not be appended.
      * For instance, invoking the <tt>toString</tt> method of a character buffer will return a subsequence whose content depends upon the
      * buffer's position and limit.
-     * 
+     *
      * @param csq The character sequence to append. If <tt>csq</tt> is <tt>null</tt>, then the four characters <tt>"null"</tt> are appended
      *            to this writer.
      * @return This writer
@@ -172,11 +172,11 @@ public class UnsynchronizedStringWriter extends Writer {
      * <p>
      * An invocation of this method of the form <tt>out.append(csq, start,
      * end)</tt> when <tt>csq</tt> is not <tt>null</tt>, behaves in exactly the same way as the invocation
-     * 
+     *
      * <pre>
      * out.write(csq.subSequence(start, end).toString())
      * </pre>
-     * 
+     *
      * @param csq The character sequence from which a subsequence will be appended. If <tt>csq</tt> is <tt>null</tt>, then characters will
      *            be appended as if <tt>csq</tt> contained the four characters <tt>"null"</tt>.
      * @param start The index of the first character in the subsequence
@@ -196,11 +196,11 @@ public class UnsynchronizedStringWriter extends Writer {
      * Appends the specified character to this writer.
      * <p>
      * An invocation of this method of the form <tt>out.append(c)</tt> behaves in exactly the same way as the invocation
-     * 
+     *
      * <pre>
      * out.write(c)
      * </pre>
-     * 
+     *
      * @param c The 16-bit character to append
      * @return This writer
      */
@@ -220,7 +220,7 @@ public class UnsynchronizedStringWriter extends Writer {
 
     /**
      * Return the string buffer itself.
-     * 
+     *
      * @return The {@link StringBuilder} instance holding the current buffer value.
      */
     public StringBuilder getBuffer() {

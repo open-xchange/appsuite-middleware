@@ -63,7 +63,7 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link ParticipantsReplacement} - Replacement for {@link TemplateToken#PARTICIPANTS participants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParticipantsReplacement implements TemplateReplacement {

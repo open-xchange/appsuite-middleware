@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * constant over time. This class does not permit the <tt>null</tt> element.
  * <p>
  * Moreover it supports full concurrency of retrievals and adjustable expected concurrency for updates.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Cloneable, Serializable {
@@ -99,7 +99,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
 
     /**
      * Creates a new, empty set with the specified initial capacity, load factor, and concurrency level.
-     * 
+     *
      * @param initialCapacity The initial capacity. The implementation performs internal sizing to accommodate this many elements.
      * @param loadFactor The load factor threshold, used to control resizing. Resizing may be performed when the average number of elements
      *            per bin exceeds this threshold.
@@ -114,7 +114,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
 
     /**
      * Creates a new, empty set with the specified initial capacity, and with default load factor and concurrency level.
-     * 
+     *
      * @param initialCapacity the initial capacity. The implementation performs internal sizing to accommodate this many elements.
      * @throws IllegalArgumentException if the initial capacity of elements is negative.
      */
@@ -132,7 +132,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     /**
      * Creates a new set with the same elements as the given set. The set is created with a capacity of twice the number of elements in the
      * given map or <code>11</code> (whichever is greater), and a default load factor and concurrency level.
-     * 
+     *
      * @param t the map
      */
     public ConcurrentHashSet(final Set<? extends E> t) {

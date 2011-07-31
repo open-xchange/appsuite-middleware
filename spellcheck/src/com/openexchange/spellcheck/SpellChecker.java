@@ -54,7 +54,7 @@ import javax.swing.text.Document;
 
 /**
  * {@link SpellChecker} - Offers several methods for spell checking.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SpellChecker {
@@ -65,7 +65,7 @@ public interface SpellChecker {
      * For each invalid word an instance of {@link SpellCheckError} is generated; meaning an array with length <code>0</code> is returned if
      * no misspelt words are found.
      * </p>
-     * 
+     *
      * @param text The text to check
      * @return An array of {@link SpellCheckError} for each invalid word
      */
@@ -77,7 +77,7 @@ public interface SpellChecker {
      * For each invalid word an instance of {@link SpellCheckError} is generated; meaning an array with length <code>0</code> is returned if
      * no misspelt words are found.
      * </p>
-     * 
+     *
      * @param document The document whose text shall be checked
      * @return An array of {@link SpellCheckError} for each invalid word
      */
@@ -85,21 +85,21 @@ public interface SpellChecker {
 
     /**
      * Adds words to the user dictionary
-     * 
+     *
      * @param words The words to add
      */
     public void addWord(String... words);
 
     /**
      * Removes words from the user dictionary
-     * 
+     *
      * @param words The words to remove
      */
     public void removeWord(String... words);
 
     /**
      * Returns a list containing all user words
-     * 
+     *
      * @return A list containing all user words
      */
     public List<String> getUserWords();
@@ -110,7 +110,7 @@ public interface SpellChecker {
      * <li>The user dictionary</li>
      * <li>The locale-specific global dictionary</li>
      * </ul>
-     * 
+     *
      * @param word The word to verify that it's spelling is known.
      * @return <code>true</code> if the word is in a dictionary; otherwise <code>false</code>
      */
@@ -130,7 +130,7 @@ public interface SpellChecker {
      * words by setting an appropriately low threshold value. If you set the threshold value too low, you may get no suggestions for a given
      * word.
      * </p>
-     * 
+     *
      * @param word The word for which we want to gather suggestions
      * @param threshold The cost value above which any suggestions are thrown away
      * @return The list of suggested words

@@ -79,7 +79,7 @@ import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link FolderWriter}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

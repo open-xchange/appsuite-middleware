@@ -139,7 +139,7 @@ public class Day implements Comparable<Day> {
             if (fits) {
                 column.add(appointment);
                 return;
-            }            
+            }
         }
         SortedSet<CPAppointment> newColumn = new TreeSet<CPAppointment>(new AppointmentStartComparator());
         columns.add(newColumn);
@@ -219,7 +219,7 @@ public class Day implements Comparable<Day> {
         cal.setTime(orig);
         return retval;
     }
-    
+
     public boolean isWeekEnd() {
         Date orig = cal.getTime();
         cal.setTime(time);

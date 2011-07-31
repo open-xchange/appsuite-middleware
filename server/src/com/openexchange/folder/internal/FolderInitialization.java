@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link FolderInitialization} - {@link Initialization} for folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderInitialization implements Initialization {

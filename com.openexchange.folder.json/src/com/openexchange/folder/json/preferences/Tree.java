@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * Preferences tree item to allow the user to configure what folder tree he wants to use.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Tree implements PreferencesItemService {

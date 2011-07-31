@@ -13,11 +13,11 @@ import com._4psa.channeldata_xsd._2_5.RoutingRuleInfo;
 
 /**
  * Get outgoing routing rules in group: response type
- * 
+ *
  * <p>Java class for GetCallRulesOutResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCallRulesOutResponseType">
  *   &lt;complexContent>
@@ -57,8 +57,8 @@ import com._4psa.channeldata_xsd._2_5.RoutingRuleInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCallRulesOutResponseType", propOrder = {
@@ -79,11 +79,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -91,11 +91,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -103,11 +103,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -115,11 +115,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -127,11 +127,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -139,11 +139,11 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -151,25 +151,25 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Gets the value of the rules property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rules property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRules().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetCallRulesOutResponseType.Rules }
-     * 
-     * 
+     *
+     *
      */
     public List<GetCallRulesOutResponseType.Rules> getRules() {
         if (rules == null) {
@@ -180,25 +180,25 @@ public class GetCallRulesOutResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetCallRulesOutResponseType.Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<GetCallRulesOutResponseType.Notice> getNotice() {
         if (notice == null) {
@@ -210,9 +210,9 @@ public class GetCallRulesOutResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -225,8 +225,8 @@ public class GetCallRulesOutResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -240,11 +240,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Gets the value of the message property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getMessage() {
             return message;
@@ -252,11 +252,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Sets the value of the message property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setMessage(String value) {
             this.message = value;
@@ -264,11 +264,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Gets the value of the code property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getCode() {
             return code;
@@ -276,11 +276,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Sets the value of the code property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setCode(String value) {
             this.code = value;
@@ -291,9 +291,9 @@ public class GetCallRulesOutResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -306,8 +306,8 @@ public class GetCallRulesOutResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -324,11 +324,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Gets the value of the ruleID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getRuleID() {
             return ruleID;
@@ -336,11 +336,11 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Sets the value of the ruleID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setRuleID(BigInteger value) {
             this.ruleID = value;
@@ -348,7 +348,7 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          */
         public boolean isStatus() {
             return status;
@@ -356,7 +356,7 @@ public class GetCallRulesOutResponseType {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          */
         public void setStatus(boolean value) {
             this.status = value;

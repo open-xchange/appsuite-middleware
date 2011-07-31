@@ -99,7 +99,7 @@ public class SimContextService implements ContextService{
     @Override
     public void invalidateContext(int contextId) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -108,6 +108,6 @@ public class SimContextService implements ContextService{
     @Override
     public void invalidateLoginInfo(String loginContextInfo) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 }

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.SortableId;
 
 /**
  * {@link FileStorageId} - A file storage ID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageId implements SortableId {
@@ -66,7 +66,7 @@ public final class FileStorageId implements SortableId {
 
     /**
      * Initializes a new {@link FileStorageId}.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      * @param name The name

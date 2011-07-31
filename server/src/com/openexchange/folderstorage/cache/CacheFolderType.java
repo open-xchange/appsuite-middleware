@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.FolderType;
 
 /**
  * {@link CacheFolderType} - The folder type for cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderType implements FolderType {
@@ -62,7 +62,7 @@ public final class CacheFolderType implements FolderType {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance.
      */
     public static CacheFolderType getInstance() {

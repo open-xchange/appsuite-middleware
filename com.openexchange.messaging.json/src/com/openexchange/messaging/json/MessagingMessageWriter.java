@@ -89,7 +89,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * A parser to emit JSON representations of MessagingMessages. Note that writing can be customized by registering one or more
  * {@link MessagingHeaderWriter} and one or more {@link MessagingContentWriter}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -182,7 +182,7 @@ public class MessagingMessageWriter {
 
     /**
      * Gets the value of specified header.
-     * 
+     *
      * @param header The header
      * @param session The session
      * @return The header value
@@ -201,7 +201,7 @@ public class MessagingMessageWriter {
 
     /**
      * Adds time zone's offset to specified UTC time.
-     * 
+     *
      * @param date The UTC time
      * @param timeZone The time zone
      * @return The UTC time with offset applied
@@ -339,7 +339,7 @@ public class MessagingMessageWriter {
 
     /**
      * Writes specified part as a JSON object.
-     * 
+     *
      * @param part The message part
      * @param session The session providing user information
      * @param mode The display mode
@@ -387,7 +387,7 @@ public class MessagingMessageWriter {
 
     /**
      * Writes specified headers to its JSON representation.
-     * 
+     *
      * @param headers The headers
      * @param session The session
      * @return The resulting JSON representation
@@ -406,7 +406,7 @@ public class MessagingMessageWriter {
 
     /**
      * Gets the appropriate content writer for specified message part and content.
-     * 
+     *
      * @param part The message part
      * @param content The content
      * @return The appropriate content writer or <code>null</code> if none found
@@ -428,7 +428,7 @@ public class MessagingMessageWriter {
 
     /**
      * Gets the appropriate header writer for specified header name and value.
-     * 
+     *
      * @param entry The entry providing header name and value
      * @return The appropriate header writer (not <code>null</code>)
      */
@@ -453,7 +453,7 @@ public class MessagingMessageWriter {
 
     /**
      * Renders a MessagingMessage in its JSON representation.
-     * 
+     *
      * @param string
      */
     public JSONObject write(final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws JSONException, OXException {
@@ -478,9 +478,9 @@ public class MessagingMessageWriter {
             final long receivedDate = message.getReceivedDate();
             if (receivedDate > 0) {
                 final long dateWithOffset = addTimeZoneOffset(receivedDate, session.getUser().getTimeZone());
-                
+
                 System.out.println("date: " + receivedDate + ", date-with-offset: " + dateWithOffset);
-                
+
                 messageJSON.put("receivedDate", dateWithOffset);
             }
         }
@@ -537,7 +537,7 @@ public class MessagingMessageWriter {
 
     /**
      * Registers a custom writer for a {@link MessagingContent}
-     * 
+     *
      * @param contentWriter
      */
     public void addContentWriter(final MessagingContentWriter contentWriter) {
@@ -549,7 +549,7 @@ public class MessagingMessageWriter {
     }
 
     private static interface JSONFieldHandler {
-        
+
         Object handle(Object value, MessagingMessage message, String folderPrefix, ServerSession session, DisplayMode mode, MessagingMessageWriter messageWriter) throws OXException, JSONException;
     }
 
@@ -558,13 +558,13 @@ public class MessagingMessageWriter {
     static {
         final EnumMap<MessagingField, JSONFieldHandler> map = new EnumMap<MessagingField, JSONFieldHandler>(MessagingField.class);
         map.put(MessagingField.HEADERS, new JSONFieldHandler() {
-            
+
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return messageWriter.writeHeaders(message.getHeaders(), session);
             }
         });
         map.put(MessagingField.BODY, new JSONFieldHandler() {
-            
+
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final MessagingContent content = (MessagingContent) value;
                 final MessagingContentWriter writer = messageWriter.optContentWriter(message, content);
@@ -575,7 +575,7 @@ public class MessagingMessageWriter {
             }
         });
         map.put(MessagingField.FOLDER_ID, new JSONFieldHandler() {
-            
+
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return new StringBuilder(folderPrefix).append('/').append(value).toString();
             }
@@ -584,7 +584,7 @@ public class MessagingMessageWriter {
          * Date fields
          */
         final JSONFieldHandler dateHandler = new JSONFieldHandler() {
-            
+
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 final long date = ((Long) value).longValue();
                 if (date < 0) {
@@ -599,7 +599,7 @@ public class MessagingMessageWriter {
          * Unsigned-Number fields
          */
         final JSONFieldHandler unsignedNumberHandler = new JSONFieldHandler() {
-            
+
             public Object handle(final Object value, final MessagingMessage message, final String folderPrefix, final ServerSession session, final DisplayMode mode, final MessagingMessageWriter messageWriter) throws OXException, JSONException {
                 return ((Number) value).intValue() < 0 ? null : value;
             }
@@ -616,7 +616,7 @@ public class MessagingMessageWriter {
     /**
      * Renders a message as a list of fields. The fields to be written are given in the MessagingField array. Individual fields are rendered
      * exactly as in the JSONObject representation using custom header writers and content writers.
-     * 
+     *
      * @param folderPrefix
      */
     public JSONArray writeFields(final MessagingMessage message, final MessagingField[] fields, final String folderPrefix, final ServerSession session, final DisplayMode mode) throws OXException, JSONException {

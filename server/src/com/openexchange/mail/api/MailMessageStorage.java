@@ -68,7 +68,7 @@ import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link MailMessageStorage} - Abstract implementation of {@link IMailMessageStorage}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailMessageStorage implements IMailMessageStorage {
@@ -97,7 +97,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * Note that sorting needs not to be supported by underlying mailing system. This can be done n application side, too
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
-     * 
+     *
      * @param folder The folder fullname
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
@@ -148,7 +148,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * If no mail could be found for given mail ID, <code>null</code> is returned.
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
-     * 
+     *
      * @param folder The folder fullname
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
@@ -185,7 +185,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * {@link #EMPTY_RETVAL} may be returned if no unseen messages available in specified folder.
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
-     * 
+     *
      * @param folder The folder fullname
      * @param sortField The sort field
      * @param order The sort order
@@ -208,7 +208,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * If no mail could be found for a given mail ID, the corresponding value in returned array of <code>String</code> is <code>null</code>.
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
-     * 
+     *
      * @param sourceFolder The source folder fullname
      * @param destFolder The destination folder fullname
      * @param mailIds The mail IDs in source folder
@@ -267,7 +267,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     /**
      * Gets all new and modified messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
-     * 
+     *
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All new and modified messages in specified folder
@@ -280,7 +280,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     /**
      * Gets all deleted messages in specified folder. By default the constant {@link #EMPTY_RETVAL} is returned.
-     * 
+     *
      * @param folder The folder fullname
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return All deleted messages in specified folder

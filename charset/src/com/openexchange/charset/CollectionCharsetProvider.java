@@ -64,7 +64,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * {@link <code>CollectionCharsetProvider</code>} - A charset provider which performs the
  * {@link CollectionCharsetProvider#charsetForName(String)} and {@link CollectionCharsetProvider#charsets()} method invocations by iterating
  * over collected charset providers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CollectionCharsetProvider extends CharsetProvider {
@@ -94,7 +94,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     /**
      * Initializes a new {@link <code>CollectionCharsetProvider</code>} with specified instance of {@link <code>CharsetProvider</code>}
-     * 
+     *
      * @param provider The charset provider to be initially added
      */
     public CollectionCharsetProvider(final CharsetProvider provider) {
@@ -105,7 +105,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
     /**
      * Initializes a new {@link <code>CollectionCharsetProvider</code>} with specified collection of {@link <code>CharsetProvider</code>}
      * instances
-     * 
+     *
      * @param providers The charset provider collection to be initially added
      */
     public CollectionCharsetProvider(final Collection<CharsetProvider> providers) {
@@ -118,7 +118,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     /**
      * Adds an instance of {@link <code>CharsetProvider</code>} to this provider's collection
-     * 
+     *
      * @param charsetProvider The charset provider to add
      */
     public void addCharsetProvider(final CharsetProvider charsetProvider) {
@@ -201,7 +201,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     /**
      * Removes given charset provider from this charset provider's collection
-     * 
+     *
      * @param provider The provider which shall be removed
      * @return The removed charset provider or <code>null</code> if none present
      */
@@ -211,7 +211,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     /**
      * Removes the charset provider denoted by specified class argument from this charset provider's collection
-     * 
+     *
      * @param clazz The class of the charset provider which shall be removed
      * @return The removed charset provider or <code>null</code> if no collected charset provider is denoted by given class argument
      */

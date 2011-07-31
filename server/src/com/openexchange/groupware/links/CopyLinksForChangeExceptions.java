@@ -83,7 +83,7 @@ public class CopyLinksForChangeExceptions implements CalendarListener {
         if(folderId == 0) {
             folderId = inFolder;
         }
-        
+
         for (LinkObject loadedLink : loadedLinks) {
             LinkObject copy = new LinkObject();
             copy.setFirstFolder(folderId);

@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RdbPOP3StorageTrashContainer} - Database-backed implementation of {@link POP3StorageTrashContainer}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashContainer {
@@ -94,7 +94,7 @@ public final class RdbPOP3StorageTrashContainer implements POP3StorageTrashConta
 
     /**
      * Drops all trash entries related to specified POP3 account.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID

@@ -54,7 +54,7 @@ import com.openexchange.folderstorage.FolderType;
 
 /**
  * {@link OutlookFolderType} - The MS Outlook folder type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderType implements FolderType {

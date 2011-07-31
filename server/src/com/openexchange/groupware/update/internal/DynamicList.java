@@ -59,7 +59,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * {@link DynamicList} - Registry for {@link UpdateTask update tasks}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DynamicList implements UpdateTaskList<UpdateTask> {
@@ -70,7 +70,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
 
     /**
      * Gets the singleton instance of {@link DynamicList}.
-     * 
+     *
      * @return The singleton instance
      */
     public static DynamicList getInstance() {
@@ -102,7 +102,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
 
     /**
      * Removes specified update task from this registry.
-     * 
+     *
      * @param updateTask The update task
      */
     public void removeUpdateTask(final UpdateTask updateTask) {

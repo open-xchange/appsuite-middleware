@@ -71,7 +71,7 @@ import com.openexchange.server.Initialization;
  */
 
 public class EventInit implements Initialization {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventInit.class));
     private boolean started;
 

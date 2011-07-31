@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link OutlookFolderStorageRegistry} - MS Outlook storage's registry for real folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorageRegistry implements FolderStorageDiscoverer {
@@ -74,7 +74,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Gets the {@link OutlookFolderStorageRegistry} instance.
-     * 
+     *
      * @return The {@link OutlookFolderStorageRegistry} instance
      */
     public static OutlookFolderStorageRegistry getInstance() {
@@ -103,7 +103,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Associates specified folder storage to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to add
      * @return <code>true</code> If registration was successful; otherwise <code>false</code>
@@ -184,7 +184,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Gets the dedicated folder storage for specified tree-folder-pair.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @return The dedicated folder storage for specified tree-folder-pair or <code>null</code>
@@ -294,7 +294,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Removes specified folder storage bound to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to remove
      */

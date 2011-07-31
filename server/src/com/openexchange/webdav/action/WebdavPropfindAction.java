@@ -74,46 +74,46 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 public class WebdavPropfindAction extends AbstractAction {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPropfindAction.class));
-	
+
 	protected final XMLOutputter outputter = new XMLOutputter();
 
     protected Protocol protocol;
-	
+
 	public WebdavPropfindAction(final Protocol protocol) {
 	    this.protocol = protocol;
 	}
-	
+
 	@Override
     public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
-		
+
 		final Element response = new Element("multistatus",DAV_NS);
-		
+
         final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
         for (final Namespace namespace : namespaces) {
             response.addNamespaceDeclaration(namespace);
         }
 
-		
+
 		final Document responseBody = new Document(response);
-		
+
 		boolean forceAllProp = false;
 		Document requestBody = null;
 		try {
 			requestBody = req.getBodyAsDocument();
 		} catch (final JDOMException e1) {
-			
+
 			forceAllProp = true; //Assume All Prop, if all else fails
-			
+
 		} catch (final IOException e1) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
-		
+
         final LoadingHints loadingHints = new LoadingHints();
 		ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, loadingHints);
-		
+
 		if(null != req.getHeader("Depth")) {
 			int depth = 0;
 			if(req.getHeader("depth").trim().equalsIgnoreCase("infinity")) {
@@ -121,7 +121,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			} else {
 				depth = Integer.parseInt(req.getHeader("Depth"));
 			}
-			
+
 			marshaller = new RecursiveMarshaller(marshaller, depth);
 			loadingHints.setDepth(depth);
 		}
@@ -136,7 +136,7 @@ public class WebdavPropfindAction extends AbstractAction {
                 WebdavProtocolException.Code.GENERAL_ERROR.create(new WebdavPath(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
 		}
-		
+
 		try {
 			res.setStatus(Protocol.SC_MULTISTATUS);
 			res.setContentType("text/xml; charset=UTF-8");
@@ -152,20 +152,20 @@ public class WebdavPropfindAction extends AbstractAction {
         }
         ResourceMarshaller marshaller = null;
 		loadingHints.setUrl(req.getUrl());
-		
+
 		if(null != requestBody && null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
-			marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(),req.getCharset()); 
+			marshaller = new PropfindPropNamesMarshaller(req.getURLPrefix(),req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.ALL);
-		} 
-		
+		}
+
 		if(null != requestBody && null != requestBody.getRootElement().getChild("allprop", DAV_NS) || forceAllProp) {
 			marshaller = new PropfindAllPropsMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.ALL);
-		} 
+		}
 		if (null != requestBody && null != requestBody.getRootElement().getChild("prop",DAV_NS)) {
 			marshaller = new PropfindResponseMarshaller(req.getURLPrefix(), req.getCharset());
 			loadingHints.setProps(LoadingHints.Property.SOME);
-			
+
 			for(final Element props : (List<Element>) requestBody.getRootElement().getChildren("prop", DAV_NS)){
 				for(final Element requested : (List<Element>) props.getChildren()) {
 					((PropfindResponseMarshaller) marshaller).addProperty(requested.getNamespaceURI(), requested.getName());

@@ -51,7 +51,7 @@ package com.openexchange.recaptcha;
 
 /**
  * {@link ReCaptchaService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface ReCaptchaService {
@@ -64,7 +64,7 @@ public interface ReCaptchaService {
 
     /**
      * Checks if the entered string matches the displayd captcha challenge.
-     * 
+     *
      * @param address The remote address eg. request.getRemoteAddr()
      * @param challenge The challenge id
      * @param response The String entered by the user

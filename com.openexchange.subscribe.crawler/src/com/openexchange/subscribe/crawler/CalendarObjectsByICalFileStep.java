@@ -64,7 +64,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * {@link CalendarObjectsByICalFileStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {

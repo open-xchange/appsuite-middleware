@@ -69,9 +69,9 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * Note: This one does not use foreign key constraints on prg_contact.userfield20, 
+ * Note: This one does not use foreign key constraints on prg_contact.userfield20,
  * because it might be used for something else later on.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AggregatingContactTableService  extends AbstractCreateTableImpl implements UpdateTaskV2 {
@@ -82,10 +82,10 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         return "CREATE TABLE "+AGGREGATING_CONTACTS+" (" +
                     "contributor BINARY(16) NOT NULL, " +
         		    "aggregator BINARY(16) NOT NULL," +
-        		    "state TINYINT NOT NULL" + 
+        		    "state TINYINT NOT NULL" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
     @Override
     protected String[] getCreateStatements() {
         return new String[] { getTableSQL() };

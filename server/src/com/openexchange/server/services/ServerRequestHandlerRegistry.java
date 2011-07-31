@@ -58,9 +58,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 
 /**
  * {@link ServerRequestHandlerRegistry} - A registry for request handlers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ServerRequestHandlerRegistry {
 
@@ -68,7 +68,7 @@ public final class ServerRequestHandlerRegistry {
 
     /**
      * Gets the server's request handler registry
-     * 
+     *
      * @return The server's request handler registry
      */
     public static ServerRequestHandlerRegistry getInstance() {
@@ -95,7 +95,7 @@ public final class ServerRequestHandlerRegistry {
     /**
      * Removes a request handler bound to indicated module name and its
      * supported actions from this registry
-     * 
+     *
      * @param requestHandler
      *            The request handler to remove
      */
@@ -117,7 +117,7 @@ public final class ServerRequestHandlerRegistry {
      * registry.
      * <p>
      * Any existing boundaries are overwritten.
-     * 
+     *
      * @param requestHandler
      *            The request handler to add
      */
@@ -141,7 +141,7 @@ public final class ServerRequestHandlerRegistry {
 
     /**
      * Gets the request handlers by given module name
-     * 
+     *
      * @param moduleName
      *            The module name
      * @return The request handlers
@@ -157,7 +157,7 @@ public final class ServerRequestHandlerRegistry {
 
     /**
      * Gets the request handlers by given module and action
-     * 
+     *
      * @param moduleName
      *            The module name
      * @param action

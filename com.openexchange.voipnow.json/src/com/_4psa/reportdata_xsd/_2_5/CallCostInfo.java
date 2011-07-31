@@ -12,11 +12,11 @@ import com._4psa.reportmessagesinfo_xsd._2_5.CallCostsResponseType;
 
 /**
  * Call cost data
- * 
+ *
  * <p>Java class for CallCostInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallCostInfo">
  *   &lt;complexContent>
@@ -36,8 +36,8 @@ import com._4psa.reportmessagesinfo_xsd._2_5.CallCostsResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallCostInfo", propOrder = {
@@ -70,11 +70,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the cost property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link Float }{@code >}
-     *     
+     *
      */
     public JAXBElement<Float> getCost() {
         return cost;
@@ -82,11 +82,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the cost property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link Float }{@code >}
-     *     
+     *
      */
     public void setCost(JAXBElement<Float> value) {
         this.cost = value;
@@ -94,11 +94,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the profit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link Float }{@code >}
-     *     
+     *
      */
     public JAXBElement<Float> getProfit() {
         return profit;
@@ -106,11 +106,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the profit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link Float }{@code >}
-     *     
+     *
      */
     public void setProfit(JAXBElement<Float> value) {
         this.profit = value;
@@ -118,11 +118,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the currency property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCurrency() {
         return currency;
@@ -130,11 +130,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the currency property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCurrency(String value) {
         this.currency = value;
@@ -142,11 +142,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the totalCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getTotalCalls() {
         return totalCalls;
@@ -154,11 +154,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the totalCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setTotalCalls(Long value) {
         this.totalCalls = value;
@@ -166,11 +166,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the localCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getLocalCall() {
         return localCall;
@@ -178,11 +178,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the localCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setLocalCall(Long value) {
         this.localCall = value;
@@ -190,11 +190,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the elocalCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getElocalCall() {
         return elocalCall;
@@ -202,11 +202,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the elocalCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setElocalCall(Long value) {
         this.elocalCall = value;
@@ -214,11 +214,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the externalCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getExternalCall() {
         return externalCall;
@@ -226,11 +226,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the externalCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setExternalCall(Long value) {
         this.externalCall = value;
@@ -238,11 +238,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the incomingCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getIncomingCall() {
         return incomingCall;
@@ -250,11 +250,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the incomingCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setIncomingCall(Long value) {
         this.incomingCall = value;
@@ -262,11 +262,11 @@ public class CallCostInfo {
 
     /**
      * Gets the value of the outgoingCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getOutgoingCall() {
         return outgoingCall;
@@ -274,11 +274,11 @@ public class CallCostInfo {
 
     /**
      * Sets the value of the outgoingCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setOutgoingCall(Long value) {
         this.outgoingCall = value;

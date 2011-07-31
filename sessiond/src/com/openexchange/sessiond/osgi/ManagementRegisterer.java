@@ -124,7 +124,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

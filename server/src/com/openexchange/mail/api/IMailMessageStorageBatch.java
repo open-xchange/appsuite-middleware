@@ -55,7 +55,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link IMailMessageStorageBatch} - Extends {@link IMailMessageStorage} for mail systems which support to request single header names.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IMailMessageStorageBatch extends IMailMessageStorage {
@@ -70,7 +70,7 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * <p>
      * The color labels are user flags with the common prefix <code>"cl_"</code> and its numeric color code appended (currently numbers 0 to
      * 10).
-     * 
+     *
      * @param folder The folder full name
      * @param colorLabel The color label to apply
      * @throws OXException If color label cannot be updated
@@ -103,7 +103,7 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      * Moreover this routine checks for any spam related actions; meaning the {@link MailMessage#FLAG_SPAM} shall be enabled/disabled. Thus
      * the {@link SpamHandler#handleSpam(String, String[], boolean, MailAccess)}/
      * {@link SpamHandler#handleHam(String, String[], boolean, MailAccess)} methods needs to be executed.
-     * 
+     *
      * @param folder The folder full name
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>

@@ -111,7 +111,7 @@ public class DutchOutlookMapper extends AbstractOutlookMapper {
         store(ContactField.ANNIVERSARY, "");
         store(ContactField.CATEGORIES, "");
         store(ContactField.SPOUSE_NAME, "");
-        store(ContactField.PRIVATE_FLAG, ""); 
+        store(ContactField.PRIVATE_FLAG, "");
         store(ContactField.NUMBER_OF_CHILDREN, "");
         store(ContactField.ASSISTANT_NAME, "");
         store(ContactField.NOTE, "Aantekeningen");

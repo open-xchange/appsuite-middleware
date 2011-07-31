@@ -186,7 +186,7 @@ import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Mail extends PermissionServlet implements UploadListener {
@@ -217,7 +217,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
     /**
      * Generates a wrapping {@link AbstractOXException} for specified exception.
-     * 
+     *
      * @param cause The exception to wrap
      * @return The wrapping {@link AbstractOXException}
      */
@@ -821,7 +821,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         session,
                         usmNoSave,
                         warnings,
-                        false, 
+                        false,
                         -1);
             } finally {
                 if (closeMailInterface && mailInterface != null) {
@@ -2042,7 +2042,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     /*-
                      * TODO: Does not work, yet.
-                     * 
+                     *
                      * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
                      *     // Treat as a mail get
                      *     final MailMessage mail = (MailMessage) mailPart.getContent();
@@ -4449,7 +4449,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                         /*-
                          * Parse
-                         * 
+                         *
                          * Resolve "From" to proper mail account to select right transport server
                          */
                         final InternetAddress from;

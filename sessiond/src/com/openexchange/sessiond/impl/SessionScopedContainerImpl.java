@@ -62,7 +62,7 @@ import com.openexchange.session.SessionSpecificContainerRetrievalService.Lifecyc
 
 /**
  * {@link SessionScopedContainerImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> {

@@ -13,11 +13,11 @@ import com._4psa.extensiondata_xsd._2_5.CallerIDList;
 
 /**
  * Get authorized Caller ID: response type
- * 
+ *
  * <p>Java class for GetCallerIDResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCallerIDResponseType">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com._4psa.extensiondata_xsd._2_5.CallerIDList;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCallerIDResponseType", propOrder = {
@@ -46,25 +46,25 @@ public class GetCallerIDResponseType {
 
     /**
      * Gets the value of the callerID property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the callerID property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCallerID().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link CallerIDList }
-     * 
-     * 
+     *
+     *
      */
     public List<CallerIDList> getCallerID() {
         if (callerID == null) {
@@ -75,11 +75,11 @@ public class GetCallerIDResponseType {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -87,11 +87,11 @@ public class GetCallerIDResponseType {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;

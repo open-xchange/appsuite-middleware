@@ -515,9 +515,9 @@ private final int jjMoveNfa_0(int startState, int curPos)
    }
 }
 static final int[] jjnextStates = {
-   43, 44, 46, 47, 15, 17, 18, 2, 3, 5, 20, 21, 37, 23, 22, 23, 
-   36, 24, 23, 28, 29, 25, 26, 23, 28, 30, 31, 33, 35, 30, 31, 23, 
-   32, 43, 44, 46, 
+   43, 44, 46, 47, 15, 17, 18, 2, 3, 5, 20, 21, 37, 23, 22, 23,
+   36, 24, 23, 28, 29, 25, 26, 23, 28, 30, 31, 33, 35, 30, 31, 23,
+   32, 43, 44, 46,
 };
 private static final boolean jjCanMove_0(int hiByte, int i1, int i2, long l1, long l2)
 {
@@ -525,7 +525,7 @@ private static final boolean jjCanMove_0(int hiByte, int i1, int i2, long l1, lo
    {
       case 0:
          return ((jjbitVec2[i2] & l2) != 0L);
-      default : 
+      default :
          if ((jjbitVec0[i1] & l1) != 0L) {
             return true;
         }
@@ -533,20 +533,20 @@ private static final boolean jjCanMove_0(int hiByte, int i1, int i2, long l1, lo
    }
 }
 public static final String[] jjstrLiteralImages = {
-"", null, null, null, null, null, null, null, null, null, null, null, null, 
-null, null, null, null, null, null, null, null, null, null, null, null, "\73", 
+"", null, null, null, null, null, null, null, null, null, null, null, null,
+null, null, null, null, null, null, null, null, null, null, null, null, "\73",
 "\173", "\175", "\50", "\54", "\51", "\133", "\135", };
 public static final String[] lexStateNames = {
-   "DEFAULT", 
+   "DEFAULT",
 };
 static final long[] jjtoToken = {
-   0x1fe033301L, 
+   0x1fe033301L,
 };
 static final long[] jjtoSkip = {
-   0xfeL, 
+   0xfeL,
 };
 static final long[] jjtoSpecial = {
-   0xc0L, 
+   0xc0L,
 };
 protected JavaCharStream input_stream;
 private final int[] jjrounds = new int[48];
@@ -613,7 +613,7 @@ int jjround;
 int jjmatchedPos;
 int jjmatchedKind;
 
-public Token getNextToken() 
+public Token getNextToken()
 {
   int kind;
   Token specialToken = null;
@@ -622,13 +622,13 @@ public Token getNextToken()
 
   EOFLoop :
   for (;;)
-  {   
-   try   
-   {     
+  {
+   try
+   {
       curChar = input_stream.BeginToken();
-   }     
+   }
    catch(java.io.IOException e)
-   {        
+   {
       jjmatchedKind = 0;
       matchedToken = jjFillToken();
       matchedToken.specialToken = specialToken;

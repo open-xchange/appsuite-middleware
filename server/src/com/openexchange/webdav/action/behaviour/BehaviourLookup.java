@@ -52,31 +52,31 @@ package com.openexchange.webdav.action.behaviour;
 import com.openexchange.webdav.action.WebdavRequest;
 
 public class BehaviourLookup {
-	
+
 	private static final BehaviourLookup INSTANCE = new BehaviourLookup();
-	
+
 	public static BehaviourLookup getInstance(){
 		return INSTANCE;
 	}
-	
-	
+
+
 	private final ThreadLocal<WebdavRequest> requestHolder = new ThreadLocal<WebdavRequest>();
 	private RequestSpecificBehaviourRegistry registry = null;
-	
-	
+
+
 	public void setRequest(final WebdavRequest req) {
 		requestHolder.set(req);
 	}
-	
-	
+
+
 	public void unsetRequest(){
-		requestHolder.set(null);	
+		requestHolder.set(null);
 	}
-	
+
 	public void setRegistry(final RequestSpecificBehaviourRegistry reg) {
 		registry = reg;
 	}
-	
+
 	public <T> T get(final Class<T> clazz) {
 		if(null == registry) {
 			return null;
@@ -85,7 +85,7 @@ public class BehaviourLookup {
 		if(req == null) {
 			return null;
 		}
-		
+
 		return registry.get(req, clazz);
 	}
 }

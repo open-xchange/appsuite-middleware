@@ -104,7 +104,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * ical
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public final class ical extends PermissionServlet {
@@ -313,7 +313,7 @@ public final class ical extends PermissionServlet {
     }
 
     private static final TObjectProcedure<SeriesUIDPatcher> PATCH_PROCEDURE = new TObjectProcedure<SeriesUIDPatcher>() {
-        
+
         @Override
         public boolean execute(final SeriesUIDPatcher patcher) {
             patcher.patchUIDs();

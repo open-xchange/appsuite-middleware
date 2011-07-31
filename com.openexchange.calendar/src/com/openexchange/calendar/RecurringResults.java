@@ -54,7 +54,7 @@ import com.openexchange.groupware.calendar.RecurringResultsInterface;
 
 /**
  * {@link RecurringResults} - Collection for recurring results
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public final class RecurringResults implements RecurringResultsInterface {

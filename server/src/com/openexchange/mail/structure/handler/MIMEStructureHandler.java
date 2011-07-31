@@ -116,7 +116,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEStructureHandler} - The handler to generate a JSON object reflecting a message's MIME structure.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEStructureHandler implements StructureHandler {
@@ -169,7 +169,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     /**
      * Initializes a new {@link MIMEStructureHandler}.
-     * 
+     *
      * @param maxSize The max. size of a mail part to let its content being inserted as base64 encoded or UTF-8 string.
      */
     public MIMEStructureHandler(final long maxSize) {
@@ -182,7 +182,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     /**
      * Sets whether a JSON array is enforced for a multipart even if it only consists of one part.
-     * 
+     *
      * @param forceJSONArray4Multipart <code>true</code> to enforce a JSON array; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
@@ -193,7 +193,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     /**
      * Gets the JSON representation of mail's MIME structure.
-     * 
+     *
      * @return The JSON representation of mail's MIME structure
      */
     public JSONObject getJSONMailObject() {
@@ -277,9 +277,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         try {
             /*-
              * TODO: Decide whether to add separate "color_label" field or add it to user flags:
-             * 
+             *
              * Uncomment this for adding to user flags:
-             * 
+             *
              *   getUserFlags().put(MailMessage.getColorLabelStringValue(colorLabel));
              */
             currentMailObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
@@ -817,7 +817,7 @@ public final class MIMEStructureHandler implements StructureHandler {
      * <p>
      * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
      * address header as it is.
-     * 
+     *
      * @param name The address header name
      * @param message The message providing the address header
      * @return The parsed address headers as an array of {@link InternetAddress} instances

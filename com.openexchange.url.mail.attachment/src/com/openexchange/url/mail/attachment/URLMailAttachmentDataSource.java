@@ -72,7 +72,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link URLMailAttachmentDataSource}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class URLMailAttachmentDataSource implements DataSource {

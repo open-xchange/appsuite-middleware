@@ -60,7 +60,7 @@ import com.mdimension.jchronic.utils.Span;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- * 
+ *
  * Copied from the calendar test classes. Need this in Integrated Tests as well.
  */
 public final class TimeTools {
@@ -91,7 +91,7 @@ public final class TimeTools {
 
     /**
      * Creates a new calendar and sets it to the last current full hour.
-     * 
+     *
      * @param tz TimeZone.
      * @return a calendar set to last full hour.
      */
@@ -149,7 +149,7 @@ public final class TimeTools {
     public static Date D(final String date) {
         return D(date, TimeZone.getTimeZone("UTC"));
     }
-    
+
 
     public static Date applyTimeZone(final TimeZone timeZone, final Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat();

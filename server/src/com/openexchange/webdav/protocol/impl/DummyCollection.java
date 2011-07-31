@@ -65,13 +65,13 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class DummyCollection extends DummyResource implements WebdavCollection {
-	
+
 	private final List<WebdavResource> children = new ArrayList<WebdavResource>();
 
 	public DummyCollection(final DummyResourceManager manager, final WebdavPath url) {
 		super(manager,url);
 	}
-	
+
 	@Override
 	protected boolean isset(final Property p) {
 		switch(p.getId()) {
@@ -100,22 +100,22 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	public void putBody(final InputStream data, final boolean guessSize) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Override
 	public String getLanguage() throws OXException{
 		return null;
 	}
-	
+
 	@Override
 	public void setLanguage(final String lang) throws OXException{
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Override
 	public Long getLength() throws OXException{
 		return null;
 	}
-	
+
 	@Override
 	public void delete() throws OXException {
 		final List<WebdavResource> copy = new ArrayList<WebdavResource>(children);
@@ -142,13 +142,13 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			throw WebdavMultistatusException.create(getUrl(), exceptions);
 		}
 	}
-	
+
 	@Override
     public DummyCollection instance(final WebdavPath url) {
 		return new DummyCollection(mgr,url);
 	}
-	
-	
+
+
 	@Override
     public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 		try {
@@ -168,7 +168,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			} else {
 				copy = mgr.resolveCollection(dest);
 			}
-			
+
 			final List<WebdavResource> tmpList = new ArrayList<WebdavResource>(children);
 			for(final WebdavResource res : tmpList) {
 				try {
@@ -197,12 +197,12 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	public void setLength(final Long l) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
+
 	@Override
 	public String getETag() throws OXException{
 		return null;
 	}
-	
+
 	@Override
 	public void setContentType(final String s) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
@@ -217,16 +217,16 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
     public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
 		return mgr.resolveCollection(url.dup().append(subPath));
 	}
-	
+
 	@Override
     public List<WebdavResource> getChildren(){
 		return new ArrayList<WebdavResource>(children );
 	}
-	
+
 	public void addChild(final WebdavResource child) {
 		children.add(child);
 	}
-	
+
 	public void removeChild(final WebdavResource child) {
 		children.remove(child);
 	}
@@ -235,7 +235,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
     public Iterator<WebdavResource> iterator() {
 		return new ChildTreeIterator(children.iterator());
 	}
-	
+
 	@Override
     public Iterable<WebdavResource> toIterable(final int depth) {
 		switch(depth) {
@@ -245,16 +245,16 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		default: throw new IllegalArgumentException("Depth can only be one of 0, 1 or INFINITY");
 		}
 	}
-	
+
 	private static class ChildTreeIterator implements Iterator<WebdavResource> {
-		
+
 		private Iterator<WebdavResource> subIterator;
 		private final Iterator<WebdavResource> childIterator;
-		
+
 		public ChildTreeIterator(final Iterator<WebdavResource> childIterator) {
 			this.childIterator = childIterator;
 		}
-		
+
 		@Override
         public boolean hasNext() {
 			if(subIterator != null) {
@@ -282,7 +282,7 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
         public void remove() {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	}
-	
+
 }

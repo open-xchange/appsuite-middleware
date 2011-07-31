@@ -57,7 +57,7 @@ import javax.mail.Message;
 
 /**
  * {@link IMAPNumArgSplitter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPNumArgSplitter {
@@ -83,7 +83,7 @@ public final class IMAPNumArgSplitter {
 
     /**
      * From <a href="http://www.faqs.org/rfcs/rfc2683.html">RFC 2683</a> section 3.2.1.5. (Long Command Lines):<br>
-     * 
+     *
      * <pre>
      * &quot;
      * ...
@@ -94,7 +94,7 @@ public final class IMAPNumArgSplitter {
      * split the request into multiple commands.  The client should use
      * literals instead of long quoted strings, in order to keep the command
      * length down.
-     * 
+     *
      * For its part, a server should allow for a command line of at least
      * 8000 octets.  This provides plenty of leeway for accepting reasonable
      * length commands from clients.  The server should send a BAD response
@@ -112,7 +112,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
-     * 
+     *
      * @param arr - <code>int</code> array of message sequence numbers
      * @return an appropriate array of command arguments
      */
@@ -128,7 +128,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
-     * 
+     *
      * @param arr - <code>long</code> array of message UIDs
      * @return an appropriate array of command arguments
      */
@@ -144,7 +144,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Since an IMAP command MUST NOT exceed the maximum command length of the IMAP server, which is 8000 bytes, this method creates an
      * appropriate array of command arguments which can then be used with an instance of <code>{@link AbstractIMAPCommand}</code>
-     * 
+     *
      * @param arr - <code>Message</code> array
      * @return an appropriate array of command arguments
      */
@@ -160,7 +160,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
      * command length pieces
-     * 
+     *
      * @param arr - the array of sequence numbers
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
@@ -175,7 +175,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
      * command length pieces if desired.
-     * 
+     *
      * @param arr - the array of sequence numbers
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
@@ -206,7 +206,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
      * command length pieces
-     * 
+     *
      * @param arr - the array of sequence numbers
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
@@ -234,7 +234,7 @@ public final class IMAPNumArgSplitter {
     /**
      * Given array of sequence numbers is first transformed into a valid IMAP command's number argument and then split into max. IMAP
      * command length pieces
-     * 
+     *
      * @param arr - the array of sequence numbers
      * @param keepOrder - whether the values' ordering in array parameter <code>arr</code> shall be kept or not; if ordering does not care a
      *            more compact number argument for IMAP command is going to be created by grouping sequential numbers e.g.
@@ -268,7 +268,7 @@ public final class IMAPNumArgSplitter {
      * 8000 bytes
      * <p>
      * A resulting string can look like this: <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
-     * 
+     *
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */
@@ -313,7 +313,7 @@ public final class IMAPNumArgSplitter {
      * 8000 bytes
      * <p>
      * A resulting string can look like this: <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
-     * 
+     *
      * @param numbers The list of numbers; either sequence numbers or UIDs
      * @return The number argument or an empty string if specified numbers are empty
      */

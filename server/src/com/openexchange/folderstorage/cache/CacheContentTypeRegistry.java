@@ -63,7 +63,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
 
 /**
  * {@link CacheContentTypeRegistry} - A registry for a tree's content types.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheContentTypeRegistry {
@@ -74,7 +74,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Gets the {@link CacheContentTypeRegistry} instance.
-     * 
+     *
      * @return The {@link CacheContentTypeRegistry} instance
      */
     public static CacheContentTypeRegistry getInstance() {
@@ -146,7 +146,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Associates specified folder storage to given content type.
-     * 
+     *
      * @param treeId The folder storage's tree identifier
      * @param contentType The content type to register
      * @param folderStorage The content type's folder storage
@@ -168,7 +168,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Adds a general-purpose folder storage (capable to serve every content type) to this registry.
-     * 
+     *
      * @param treeId The folder storage's tree identifier
      * @param folderStorage The general-purpose folder storage
      * @return <code>true</code> if folder storage was successfully registered; otherwise <code>false</code>
@@ -185,7 +185,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Gets the specified content type's storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      * @return The content type's storage or <code>null</code>
@@ -209,7 +209,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Removes specified content type.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      */
@@ -224,7 +224,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Removes specified general-purpose folder storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The general-purpose folder storage
      */
@@ -239,7 +239,7 @@ public final class CacheContentTypeRegistry {
 
     /**
      * Removes tree's content types.
-     * 
+     *
      * @param treeId The tree identifier
      */
     public void removeTreeContentTypes(final String treeId) {

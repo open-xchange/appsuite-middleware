@@ -68,7 +68,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link MailSessionEventHandler} - The {@link EventHandler event handler} for mail bundle to track removed sessions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSessionEventHandler implements EventHandler {
@@ -85,7 +85,7 @@ public final class MailSessionEventHandler implements EventHandler {
 
     /**
      * Gets the topics.
-     * 
+     *
      * @return The topics
      */
     public static String[] getTopics() {

@@ -69,7 +69,7 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
 
 /**
  * {@link POP3StorageUtil} - Utility class for POP3 storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class POP3StorageUtil {
@@ -87,7 +87,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the POP3 storage provider name of specified user for given account.
-     * 
+     *
      * @param accountId The POP3 account ID
      * @param user The user ID
      * @param cid The context ID
@@ -129,7 +129,7 @@ public class POP3StorageUtil {
 
     /**
      * Sets the POP3 storage provider name of specified user for given account.
-     * 
+     *
      * @param accountId The POP3 account ID
      * @param user The user ID
      * @param cid The context ID
@@ -172,7 +172,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the number of new messages since last sync.
-     * 
+     *
      * @param uidls The UIDLs reflecting current POP3 INBOX content
      * @param user The user ID
      * @param cid The context ID
@@ -191,7 +191,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the number of deleted messages since last sync.
-     * 
+     *
      * @param uidls The UIDLs reflecting current POP3 INBOX content
      * @param user The user ID
      * @param cid The context ID
@@ -210,7 +210,7 @@ public class POP3StorageUtil {
 
     /**
      * Synchronizes database with specified UIDLs.
-     * 
+     *
      * @param uidls The UIDLs reflecting current POP3 INBOX content
      * @param user The user ID
      * @param cid The context ID
@@ -237,7 +237,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the UIDLs of the messages currently kept in database.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The UIDLs of the messages currently kept in database
@@ -275,7 +275,7 @@ public class POP3StorageUtil {
 
     /**
      * Deletes the messages from database whose UIDL is contained in specified collection.
-     * 
+     *
      * @param uidls The collection of UIDLs
      * @param user The user ID
      * @param cid The context ID
@@ -310,7 +310,7 @@ public class POP3StorageUtil {
 
     /**
      * Inserts the messages to database whose UIDL is contained in specified collection.
-     * 
+     *
      * @param uidls The collection of UIDLs
      * @param user The user ID
      * @param cid The context ID
@@ -348,7 +348,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the number of unread messages kept in database.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The number of unread messages kept in database
@@ -362,7 +362,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the UIDLs of unread messages kept in database.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The UIDLs of unread messages kept in database
@@ -402,7 +402,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the system flags of the message identified by specified UIDL.
-     * 
+     *
      * @param uidl The UIDL
      * @param user The user ID
      * @param cid The context ID
@@ -440,7 +440,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the color flag of the message identified by specified UIDL.
-     * 
+     *
      * @param uidl The UIDL
      * @param user The user ID
      * @param cid The context ID
@@ -478,7 +478,7 @@ public class POP3StorageUtil {
 
     /**
      * Gets the user flags of the message identified by specified UIDL.
-     * 
+     *
      * @param uidl The UIDL
      * @param user The user ID
      * @param cid The context ID
@@ -520,7 +520,7 @@ public class POP3StorageUtil {
 
     /**
      * Parses the minimum allowed seconds between logins indicated by "LOGIN-DELAY" capability.
-     * 
+     *
      * @param capabilities The capabilities possibly containing "LOGIN-DELAY" capability
      * @return The minimum allowed seconds between logins or <code>-1</code> on absence
      */

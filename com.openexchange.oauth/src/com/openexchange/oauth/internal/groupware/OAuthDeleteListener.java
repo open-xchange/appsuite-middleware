@@ -60,7 +60,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuthDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthDeleteListener implements DeleteListener {

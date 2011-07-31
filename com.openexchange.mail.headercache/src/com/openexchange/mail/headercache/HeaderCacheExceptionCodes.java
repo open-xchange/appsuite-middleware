@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link HeaderCacheExceptionCode} - Enumeration about all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum HeaderCacheExceptionCodes implements OXExceptionCode {
@@ -77,7 +77,7 @@ public enum HeaderCacheExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "HDR_CACHE";
     }
@@ -100,7 +100,7 @@ public enum HeaderCacheExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -109,7 +109,7 @@ public enum HeaderCacheExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -119,7 +119,7 @@ public enum HeaderCacheExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

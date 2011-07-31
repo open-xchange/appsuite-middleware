@@ -64,14 +64,14 @@ public class ContextServiceRegisterer implements ServiceTrackerCustomizer {
 
     private BundleContext context;
     private Activator activator;
-    
+
     public ContextServiceRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     public Object addingService(ServiceReference reference) {
-        ContextService contexts = (ContextService) context.getService(reference);        
+        ContextService contexts = (ContextService) context.getService(reference);
         activator.setContextService(contexts);
         activator.registerServices();
         return contexts;

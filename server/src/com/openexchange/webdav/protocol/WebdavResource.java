@@ -62,21 +62,21 @@ public interface WebdavResource {
 	boolean exists() throws OXException;
 
 	void delete() throws OXException;
-	
+
 	WebdavResource move(WebdavPath newUri) throws OXException;
-	
+
 	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException;
-	
+
 	WebdavResource copy(WebdavPath string) throws OXException;
-	
+
 	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException;
-	
+
 	boolean isCollection();
 
 	void putProperty(WebdavProperty prop) throws OXException;
 
 	void removeProperty(String namespace, String name) throws OXException;
-	
+
 	public List<WebdavProperty> getAllProps() throws OXException;
 
 	void save() throws OXException;
@@ -108,9 +108,9 @@ public interface WebdavResource {
 	String getContentType() throws OXException;
 
 	String getETag() throws OXException;
-	
+
 	String getSource() throws OXException;
-	
+
 	void setSource(String source) throws OXException;
 
 	void putBody(InputStream data) throws OXException;

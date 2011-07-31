@@ -68,14 +68,14 @@ public class UserScopedStorage<T extends Model<T>> extends BasicStorage<T>{
         super(metadata, dbService, ctxId);
         this.userId = userId;
     }
-    
+
     @Override
     protected List<String> getExtraFields() {
         List<String> fields = super.getExtraFields();
         fields.add("user");
         return fields;
     }
-    
+
     @Override
     protected List<Object> getExtraValues() {
         List<Object> values = super.getExtraValues();

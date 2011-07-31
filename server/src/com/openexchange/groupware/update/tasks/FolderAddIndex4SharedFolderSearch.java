@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 /**
  * {@link FolderAddIndex4SharedFolderSearch} - Creates indexes on tables "oxfolder_tree" and "del_oxfolder_tree" to improve shared folder
  * search.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderAddIndex4SharedFolderSearch extends UpdateTaskAdapter {

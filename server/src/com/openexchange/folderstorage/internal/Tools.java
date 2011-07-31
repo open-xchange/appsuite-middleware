@@ -62,7 +62,7 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Tools {
@@ -78,7 +78,7 @@ public final class Tools {
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.
-     * 
+     *
      * @param timeZoneID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as
      *            "America/Los_Angeles", or a custom ID such as "GMT-8:00".
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
@@ -132,7 +132,7 @@ public final class Tools {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
@@ -186,7 +186,7 @@ public final class Tools {
 
     /**
      * Calculates the bits from given permission.
-     * 
+     *
      * @param perm The permission
      * @return The bits calculated from given permission
      */
@@ -217,7 +217,7 @@ public final class Tools {
 
     /**
      * Calculates the bits from given permissions.
-     * 
+     *
      * @param fp The folder permission
      * @param rp The read permission
      * @param wp The write permission

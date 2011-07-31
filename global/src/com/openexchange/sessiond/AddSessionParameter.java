@@ -54,56 +54,56 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AddSessionParameter} - The parameter object to create a {@link Session session}.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface AddSessionParameter {
 
     /**
      * Gets the full login incl. context information; e.g <code>test@foo</code>
-     * 
+     *
      * @return The full login
      */
     String getFullLogin();
 
     /**
      * Gets the password
-     * 
+     *
      * @return The password
      */
     String getPassword();
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier
      */
     int getUserId();
 
     /**
      * Gets the user login information.
-     * 
+     *
      * @return The user login information
      */
     String getUserLoginInfo();
 
     /**
      * Gets the context of the authenticated user.
-     * 
+     *
      * @return The context.
      */
     Context getContext();
 
     /**
      * Gets the IP address of the connected client.
-     * 
+     *
      * @return The IP address
      */
     String getClientIP();
 
     /**
      * Gets the authentication identifier.
-     * 
+     *
      * @return The authentication identifier
      */
     String getAuthId();

@@ -412,7 +412,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         for (int i = 0; i < fields.length; i++) {
             sFields.append(fields[i]);
             sFields.append(", ");
-            tmp = 0; 
+            tmp = 0;
             try {
                 tmp = DBUtils.getColumnSize(con, SQL.EPARTS_TABLES.get(type),
                     fields[i]);
@@ -456,7 +456,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         }
         return tske;
     }
-    
+
     /**
      * {@inheritDoc}
      */

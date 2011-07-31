@@ -68,7 +68,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
 
 /**
  * {@link MicroformatSubscribeService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MicroformatSubscribeService extends AbstractSubscribeService {
@@ -98,7 +98,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         if (!objectParsers.isEmpty()) {
             data = read(htmlData);
             htmlData = new StringReader(data);
-        } 
+        }
 
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);

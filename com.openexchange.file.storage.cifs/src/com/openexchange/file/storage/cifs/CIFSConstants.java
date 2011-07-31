@@ -53,7 +53,7 @@ import com.openexchange.file.storage.FileStorageConstants;
 
 /**
  * {@link CIFSConstants} - Provides useful constants for CIFS/SMB file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSConstants implements FileStorageConstants {

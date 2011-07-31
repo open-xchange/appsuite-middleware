@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 
 /**
  * {@link UserSettingMailDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserSettingMailDeleteListener implements DeleteListener {

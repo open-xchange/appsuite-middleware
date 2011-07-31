@@ -11,11 +11,11 @@ import com._4psa.common_xsd._2_5.Notice;
 
 /**
  * Phone terminal provisioning: reponse data
- * 
+ *
  * <p>Java class for ProvisionResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ProvisionResponseType">
  *   &lt;complexContent>
@@ -37,8 +37,8 @@ import com._4psa.common_xsd._2_5.Notice;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ProvisionResponseType", propOrder = {
@@ -54,11 +54,11 @@ public class ProvisionResponseType {
 
     /**
      * Gets the value of the location property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLocation() {
         return location;
@@ -66,11 +66,11 @@ public class ProvisionResponseType {
 
     /**
      * Sets the value of the location property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLocation(String value) {
         this.location = value;
@@ -78,11 +78,11 @@ public class ProvisionResponseType {
 
     /**
      * Gets the value of the result property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getResult() {
         return result;
@@ -90,11 +90,11 @@ public class ProvisionResponseType {
 
     /**
      * Sets the value of the result property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setResult(String value) {
         this.result = value;
@@ -102,25 +102,25 @@ public class ProvisionResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

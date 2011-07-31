@@ -58,7 +58,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 
 /**
  * Service tracker for transport providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer {

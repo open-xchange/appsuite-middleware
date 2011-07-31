@@ -64,7 +64,7 @@ import com.openexchange.twitter.TwitterService;
 
 /**
  * {@link TwitterAccess} - The twitter mail access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterAccess extends MailAccess<TwitterFolderStorage, TwitterMessageStorage> {
@@ -87,7 +87,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
 
     /**
      * Initializes a new {@link TwitterAccess}.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      */
@@ -105,7 +105,7 @@ public final class TwitterAccess extends MailAccess<TwitterFolderStorage, Twitte
 
     /**
      * Gets the twitter configuration.
-     * 
+     *
      * @return The twitter configuration
      */
     public TwitterConfig getTwitterConfig() {

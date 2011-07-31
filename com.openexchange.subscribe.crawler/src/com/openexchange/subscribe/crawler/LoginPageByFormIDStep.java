@@ -78,7 +78,7 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
     private String url, username, password, idOfLoginForm, idOfUserField, idOfPasswordField, linkAvailableAfterLogin;
-    
+
     private Page loginPage;
 
 
@@ -94,7 +94,7 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
         this.idOfLoginForm = idOfLoginForm;
         this.idOfUserField = iddOfUserField;
         this.idOfPasswordField = idOfPasswordField;
-        this.linkAvailableAfterLogin = linkAvailableAfterLogin;        
+        this.linkAvailableAfterLogin = linkAvailableAfterLogin;
     }
 
     @Override
@@ -102,9 +102,9 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
         HtmlPage loginPage = null;
         try {
             // Get the page, fill in the credentials and submit the login form identified by its action
-            loginPage = webClient.getPage(url);                        
-            HtmlForm loginForm = (HtmlForm) loginPage.getElementById(idOfLoginForm);                
-            
+            loginPage = webClient.getPage(url);
+            HtmlForm loginForm = (HtmlForm) loginPage.getElementById(idOfLoginForm);
+
             if (loginForm != null) {
                 final HtmlTextInput userfield = (HtmlTextInput) loginForm.getInputByName("TextfieldEmail");
                 userfield.setValueAttribute(username);
@@ -114,7 +114,7 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
                 output = pageAfterLogin;
 
                 openPageInBrowser(pageAfterLogin);
-                
+
                 executedSuccessfully = true;
             }
         } catch (final FailingHttpStatusCodeException e) {
@@ -204,33 +204,33 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
     public String getBaseUrl() {
         return "";
     }
-    
-    
+
+
     public String getIdOfLoginForm() {
         return idOfLoginForm;
     }
 
-    
+
     public void setIdOfLoginForm(String idOfLoginForm) {
         this.idOfLoginForm = idOfLoginForm;
     }
 
-    
+
     public String getIdOfUserField() {
         return idOfUserField;
     }
 
-    
+
     public void setIdOfUserField(String idOfUserField) {
         this.idOfUserField = idOfUserField;
     }
 
-    
+
     public String getIdOfPasswordField() {
         return idOfPasswordField;
     }
 
-    
+
     public void setIdOfPasswordField(String idOfPasswordField) {
         this.idOfPasswordField = idOfPasswordField;
     }
@@ -239,5 +239,5 @@ public class LoginPageByFormIDStep extends AbstractStep<HtmlPage, Object> implem
         return loginPage;
     }
 
-    
+
 }

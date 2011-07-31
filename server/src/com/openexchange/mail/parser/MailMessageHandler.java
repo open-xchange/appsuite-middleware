@@ -65,7 +65,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  * <p>
  * Each methods returns a boolean value which indicates whether the underlying {@link MailMessageParser} instance should proceed or quit
  * message parsing after method invocation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailMessageHandler {
@@ -107,7 +107,7 @@ public interface MailMessageHandler {
 
     /**
      * Handle those message headers which cannot be handled through a <code>handleXXX</code> method
-     * 
+     *
      * @param size The iterator's size or <code>-1</code> to use {@link Iterator#hasNext()} instead
      * @param iter The header iterator
      * @return <code>true</code> to continue parsing; otherwise <code>false</code>
@@ -127,7 +127,7 @@ public interface MailMessageHandler {
 
     /**
      * Handle message's disposition notification
-     * 
+     *
      * @param seen TODO
      */
     public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen) throws OXException;
@@ -198,9 +198,9 @@ public interface MailMessageHandler {
      * Handle a nested message (<code>message/rfc822</code>)
      * <p>
      * Get the message via:
-     * 
+     *
      * <pre>
-     * 
+     *
      * MailMessage nestedMail = (MailMessage) mailPart.getContent();
      * </pre>
      */

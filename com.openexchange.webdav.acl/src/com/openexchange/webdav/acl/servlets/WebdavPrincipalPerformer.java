@@ -101,16 +101,16 @@ public class WebdavPrincipalPerformer implements SessionHolder{
     private static final Log LOG = LogFactory.getLog(WebdavPrincipalPerformer.class);
 
     private static WebdavPrincipalPerformer INSTANCE = null;
-    
+
     private static ServiceLookup services;
-    
+
     public static void setServices(final ServiceLookup lookup){
         services = lookup;
     }
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static WebdavPrincipalPerformer getInstance() {
@@ -288,7 +288,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
     public PrincipalWebdavFactory getFactory() {
         return factory;
     }
-    
+
     public void setGlobalMixins(final PropertyMixin...mixins) {
         factory.setGlobalMixins(mixins);
     }

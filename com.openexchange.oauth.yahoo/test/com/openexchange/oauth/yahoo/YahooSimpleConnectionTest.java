@@ -69,10 +69,10 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link YahooSimpleConnectionTest}
- * 
+ *
  * This does the complete OAuth-Dance with Yahoo without needing anything (running server etc) but the scribe library included in directory "lib".
  * It is meant as a reference implementation and a quick way to find out if the service itself is working properly
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class YahooSimpleConnectionTest extends TestCase {
@@ -303,7 +303,7 @@ public class YahooSimpleConnectionTest extends TestCase {
                                     }
                                 }
                             }
-                            
+
                             else if (type.equals("otherid")){
                                 if (field.has("value") && field.has("flags")){
                                     String kind = field.getString("flags");
@@ -312,7 +312,7 @@ public class YahooSimpleConnectionTest extends TestCase {
                                     if (matcher.find()){
                                         String service = matcher.group(1);
                                         oxContact.setInstantMessenger1(field.getString("value") + " ("+service+")");
-                                    }                                    
+                                    }
                                 }
                             }
 

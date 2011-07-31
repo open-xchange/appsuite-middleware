@@ -69,7 +69,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
  * RdbFolderSyncInterface
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RdbFolderSyncInterface implements FolderSyncInterface {

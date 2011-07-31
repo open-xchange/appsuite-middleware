@@ -102,7 +102,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
 
     /**
      * {@inheritDoc}
-     * @throws OXException 
+     * @throws OXException
      */
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {

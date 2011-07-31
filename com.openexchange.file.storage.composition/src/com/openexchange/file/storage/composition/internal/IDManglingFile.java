@@ -55,7 +55,7 @@ import com.openexchange.file.storage.File;
 
 /**
  * {@link IDManglingFile}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IDManglingFile implements File {

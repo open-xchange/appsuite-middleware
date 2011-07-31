@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -64,11 +64,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -76,11 +76,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -88,11 +88,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the queueID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getQueueID() {
         return queueID;
@@ -100,11 +100,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the queueID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setQueueID(BigInteger value) {
         this.queueID = value;
@@ -112,11 +112,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -124,11 +124,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -136,11 +136,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the penalty property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPenalty() {
         return penalty;
@@ -148,11 +148,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the penalty property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPenalty(BigInteger value) {
         this.penalty = value;
@@ -160,11 +160,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the supervisor property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSupervisor() {
         return supervisor;
@@ -172,11 +172,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the supervisor property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSupervisor(Boolean value) {
         this.supervisor = value;
@@ -184,11 +184,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the auth property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAuth() {
         return auth;
@@ -196,11 +196,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the auth property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAuth(Boolean value) {
         this.auth = value;
@@ -208,11 +208,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPIN() {
         return pin;
@@ -220,11 +220,11 @@ public class AssignQueueAgentRequest {
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPIN(String value) {
         this.pin = value;

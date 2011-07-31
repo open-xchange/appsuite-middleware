@@ -60,14 +60,14 @@ import com.openexchange.messaging.MessagingPermissions;
 
 /**
  * {@link TwitterMessagingFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingFolder implements MessagingFolder {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @param user The user ID
      * @return The instance
      */

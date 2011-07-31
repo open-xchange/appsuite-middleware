@@ -66,7 +66,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 
 /**
  * {@link SubscriptionJSONWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionJSONWriterTest extends TestCase {
@@ -93,14 +93,14 @@ public class SubscriptionJSONWriterTest extends TestCase {
 
         form = new DynamicFormDescription();
         form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
-        
+
     }
 
     public void testWriteAsObject() throws JSONException, OXException {
 
         JSONObject object = new SubscriptionJSONWriter().write(subscription, form, null);
 
-        JSONAssertion assertion = 
+        JSONAssertion assertion =
             new JSONAssertion()
                 .isObject()
                 .hasKey("id").withValue(2)
@@ -127,7 +127,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
             specialCols,
             Arrays.asList("com.openexchange.subscribe.test1"), form);
 
-        JSONAssertion assertion = 
+        JSONAssertion assertion =
             new JSONAssertion()
                 .isArray().withValues(2, "com.openexchange.subscribe.test1", "mySubscription", false, "My Username");
 
@@ -155,11 +155,11 @@ public class SubscriptionJSONWriterTest extends TestCase {
         assertValidates(assertion, array);
 
     }
-    
+
     public void testUnknownColumnGeneratesException() {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "unknownColumn" };
-        
+
         try {
             new SubscriptionJSONWriter().writeArray(
                 subscription,
@@ -168,7 +168,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
                 Arrays.asList("com.openexchange.subscribe.test2"), form);
             fail("Expected Exception");
         } catch (OXException x) {
-            
+
         }
         //TODO: Then what?
     }

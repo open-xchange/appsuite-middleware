@@ -76,7 +76,7 @@ import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 
 /**
  * {@link SMTPProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPProvider extends TransportProvider {
@@ -90,7 +90,7 @@ public final class SMTPProvider extends TransportProvider {
 
     /**
      * Gets the singleton instance of SMTP provider
-     * 
+     *
      * @return The singleton instance of SMTP provider
      */
     public static SMTPProvider getInstance() {

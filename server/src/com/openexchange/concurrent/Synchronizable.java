@@ -52,7 +52,7 @@ package com.openexchange.concurrent;
 /**
  * {@link Synchronizable} - Simple interface to synchronize/unsynchronize access to implementing object through its {@link #synchronize()}
  * and {@link #unsynchronize()} methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Synchronizable {

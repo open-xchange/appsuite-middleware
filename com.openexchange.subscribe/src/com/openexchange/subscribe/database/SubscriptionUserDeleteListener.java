@@ -89,7 +89,7 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
     public void setStorageService(GenericConfigurationStorageService storageService) {
         this.storageService = storageService;
     }
-    
+
     public void setDiscoveryService(SubscriptionSourceDiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
     }

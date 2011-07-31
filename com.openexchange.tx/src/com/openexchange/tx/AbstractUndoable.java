@@ -52,7 +52,7 @@ package com.openexchange.tx;
 import com.openexchange.exception.OXException;
 
 public abstract class AbstractUndoable implements Undoable {
-	
+
 	private String error;
 
 	public String error() {

@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link SystemPrivateFolder} - Gets the system shared folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemPrivateFolder {
@@ -85,7 +85,7 @@ public final class SystemPrivateFolder {
 
     /**
      * Gets the database folder representing system private folder.
-     * 
+     *
      * @param fo The folder object fetched from database
      * @return The database folder representing system private folder
      */
@@ -103,7 +103,7 @@ public final class SystemPrivateFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system private folder.
-     * 
+     *
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
@@ -166,7 +166,7 @@ public final class SystemPrivateFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system private folder.
-     * 
+     *
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
@@ -228,7 +228,7 @@ public final class SystemPrivateFolder {
 
     /**
      * {@link NameComparator} - Sorts names with respect to a certain locale
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class NameComparator implements Comparator<FolderObject> {

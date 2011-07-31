@@ -82,6 +82,6 @@ public class IfHeaderParseException extends Exception {
 		return col;
 	}
 
-	
+
 
 }

@@ -100,7 +100,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CacheFolderStorage} - The cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderStorage implements FolderStorage {
@@ -137,7 +137,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Clears this cache with respect to specified session.
-	 * 
+	 *
 	 * @param session
 	 *            The session
 	 * @throws OXException
@@ -153,7 +153,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Initializes this folder cache on available cache service.
-	 * 
+	 *
 	 * @throws OXException
 	 *             If initialization of this folder cache fails
 	 */
@@ -166,7 +166,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Disposes this folder cache on absent cache service.
-	 * 
+	 *
 	 * @throws OXException
 	 *             If disposal of this folder cache fails
 	 */
@@ -184,7 +184,7 @@ public final class CacheFolderStorage implements FolderStorage {
 			}
 		}
 		/*-
-		 * 
+		 *
 		if (userCache != null) {
 		    try {
 		        userCache.clear();
@@ -387,7 +387,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Removes specified folder and all of its predecessor folders from cache.
-	 * 
+	 *
 	 * @param id
 	 *            The folder identifier
 	 * @param treeId
@@ -480,7 +480,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Removes a single folder from cache.
-	 * 
+	 *
 	 * @param id
 	 *            The folder identifier
 	 * @param treeId
@@ -496,7 +496,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Removes a single folder from cache.
-	 * 
+	 *
 	 * @param id
 	 *            The folder identifier
 	 * @param treeId
@@ -1305,7 +1305,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Creates the cache key for specified folder ID and tree ID pair.
-	 * 
+	 *
 	 * @param folderId
 	 *            The folder ID
 	 * @param treeId
@@ -1513,7 +1513,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Creates a new storage parameter instance.
-	 * 
+	 *
 	 * @return A new storage parameter instance.
 	 */
 	static StorageParameters newStorageParameters(final StorageParameters source) {
@@ -1535,7 +1535,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
 	/**
 	 * Drops entries associated with specified user in given context.
-	 * 
+	 *
 	 * @param userId
 	 *            The user identifier
 	 * @param contextId

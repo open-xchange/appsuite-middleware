@@ -80,7 +80,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * {@link AJPv13Task} - Processes an accepted client socket until either executing thread is interrupted or assigned socket is closed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Task implements Task<Object> {
@@ -97,7 +97,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Creates a new {@link AJPv13Task} instance.
-     * 
+     *
      * @param client The client socket to process
      * @param listenerMonitor The listener monitor
      * @param watcher The task watcher
@@ -190,7 +190,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Sets the control for this AJP task.
-     * 
+     *
      * @param control The control
      */
     public void setControl(final Future<Object> control) {
@@ -199,7 +199,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the sequential task number.
-     * 
+     *
      * @return The sequential task number
      */
     public Long getNum() {
@@ -227,7 +227,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the client socket bound to this task.
-     * 
+     *
      * @return The client socket bound to this task.
      */
     public Socket getSocket() {
@@ -292,7 +292,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Checks if this task is long-running.
-     * 
+     *
      * @return <code>true</code> if this task is long-running; otherwise <code>false</code>
      */
     boolean isLongRunning() {
@@ -301,7 +301,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Sets if this task is long-running.
-     * 
+     *
      * @param longRunning <code>true</code> if this task is long-running; otherwise <code>false</code>
      */
     void setLongRunning(final boolean longRunning) {
@@ -310,7 +310,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets currently executing thread's stack trace.
-     * 
+     *
      * @return The currently executing thread's stack trace or an empty stack trace if no thread processes this task.
      */
     StackTraceElement[] getStackTrace() {
@@ -322,7 +322,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets currently executing thread's name.
-     * 
+     *
      * @return The currently executing thread's name or an empty string if no threads processes this task.
      */
     String getThreadName() {
@@ -334,7 +334,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the currently used AJP connection.
-     * 
+     *
      * @return The currently used AJP connection or <code>null</code> if none in use.
      */
     AJPv13ConnectionImpl getAJPConnection() {
@@ -478,7 +478,7 @@ public final class AJPv13Task implements Task<Object> {
                 try {
                     /*-
                      * Write error response
-                     * 
+                     *
                      * Send response headers
                      */
                     final OutputStream out = ajpCon.getOutputStream();
@@ -526,7 +526,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Checks if this task was canceled before it completed normally.
-     * 
+     *
      * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
@@ -536,7 +536,7 @@ public final class AJPv13Task implements Task<Object> {
     /**
      * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
      * this method will return <code>true</code>.
-     * 
+     *
      * @return <code>true</code> if this task completed; otherwise <code>false</code>
      */
     public boolean isDone() {
@@ -577,7 +577,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Increments/decrements the number of running AJP tasks.
-     * 
+     *
      * @param increment whether to increment or to decrement
      */
     private static void changeNumberOfRunningAJPTasks(final boolean increment) {
@@ -586,7 +586,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Writes pending data to client and closes current AJP cycle (End-Response package) but keeps socket connection alive.
-     * 
+     *
      * @param resp The HTTP response for writing possibly outstanding header package
      * @param data The pending data
      * @param ajpCon The AJP connection
@@ -625,7 +625,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Closes current AJP cycle (End-Response package) but keeps socket connection alive.
-     * 
+     *
      * @param ajpCon The AJP connection
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
@@ -643,7 +643,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Closes the accepted client socket.
-     * 
+     *
      * @param endResponse Whether to write connection-terminating AJP END_RESPONSE package to web server
      */
     private void terminateAndClose(final boolean endResponse) {
@@ -715,7 +715,7 @@ public final class AJPv13Task implements Task<Object> {
 
         /**
          * Initializes a new {@link KeepAliveRunnable} to only perform keep-alive on given AJP task.
-         * 
+         *
          * @param task The AJP task
          * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
          */
@@ -752,7 +752,7 @@ public final class AJPv13Task implements Task<Object> {
 
         /**
          * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         * 
+         *
          * @throws IOException If an I/O error occurs
          * @throws AJPv13Exception If an AJP error occurs
          */

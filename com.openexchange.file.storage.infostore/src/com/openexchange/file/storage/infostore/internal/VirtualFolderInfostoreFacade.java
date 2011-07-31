@@ -175,7 +175,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     public void unlock(final int id, final ServerSession sessionObj) {
-        // Nothing to do. 
+        // Nothing to do.
     }
 
     public void commit() {

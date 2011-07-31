@@ -73,15 +73,15 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         this.tracker = new ServiceTracker(context, GenericConfigurationStorageService.class.getName(), null);
         tracker.open();
     }
-    
+
     public void close() {
         this.tracker.close();
     }
-    
+
     public GenericConfigurationStorageService getDelegate() {
         return (GenericConfigurationStorageService) tracker.getService();
     }
-    
+
     public void delete(Context ctx, int id) throws OXException {
         getDelegate().delete(ctx, id);
     }
@@ -126,5 +126,5 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         return getDelegate().search(con, ctx, query);
     }
 
-    
+
 }

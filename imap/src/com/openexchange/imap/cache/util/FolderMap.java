@@ -58,7 +58,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link FolderMap} - A folder map.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMap {

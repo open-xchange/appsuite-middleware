@@ -75,18 +75,18 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     private final BundleContext context;
     private final ServiceTracker tracker;
     private final List<ServiceReference> references = new ArrayList<ServiceReference>();
-    
+
     private final CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
-    
-    
+
+
     private final Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
-    
+
     public OSGiSubscriptionSourceDiscoveryCollector(final BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
         tracker.open();
     }
-    
+
     public void close() {
         delegate.clear();
         for(final ServiceReference reference : references) {
@@ -94,7 +94,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         }
         tracker.close();
     }
-    
+
     public Object addingService(final ServiceReference reference) {
         final SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
         if(blacklist.contains(service) || service.getClass() == getClass()) {
@@ -114,8 +114,8 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
         references.remove(reference);
         context.ungetService(reference);
     }
-    
-  
+
+
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         return delegate.getSource(context, subscriptionId);
     }
@@ -135,7 +135,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     public boolean knowsSource(final String identifier) {
         return delegate.knowsSource(identifier);
     }
-    
+
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return delegate.filter(user, context);
     }
@@ -147,6 +147,6 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     public void removeSubscriptionSourceDiscoveryService(final SubscriptionSourceDiscoveryService service) {
         delegate.removeSubscriptionSourceDiscoveryService(service);
     }
-    
-    
+
+
 }

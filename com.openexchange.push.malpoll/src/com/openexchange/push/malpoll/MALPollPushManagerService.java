@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MALPollPushManagerService} - The MAL poll {@link PushManagerService} for primary mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollPushManagerService implements PushManagerService {
@@ -65,7 +65,7 @@ public final class MALPollPushManagerService implements PushManagerService {
 
     /**
      * Sets whether to start a timer task per listener.
-     * 
+     *
      * @param startTimerTaskPerListener <code>true</code> to start a timer task per listener; otherwise <code>false</code>
      */
     public static void setStartTimerTaskPerListener(final boolean startTimerTaskPerListener) {

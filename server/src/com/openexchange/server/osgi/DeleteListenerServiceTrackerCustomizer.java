@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteRegistry;
 
 /**
  * {@link DeleteListenerServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer} for delete registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -66,7 +66,7 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
 
     /**
      * Initializes a new {@link DeleteListenerServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public DeleteListenerServiceTrackerCustomizer(final BundleContext context) {

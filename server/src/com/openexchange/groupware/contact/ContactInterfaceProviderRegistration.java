@@ -69,22 +69,22 @@ public class ContactInterfaceProviderRegistration {
         this.contactInterfaceProvider = value;
     }
 
-    
+
     public int getFolderId() {
         return folderId;
     }
 
-    
+
     public void setFolderId(int folderId) {
         this.folderId = folderId;
     }
 
-    
+
     public ContactInterfaceProvider getContactInterfaceProvider() {
         return contactInterfaceProvider;
     }
 
-    
+
     public void setContactInterfaceProvider(ContactInterfaceProvider contactInterfaceProvider) {
         this.contactInterfaceProvider = contactInterfaceProvider;
     }
@@ -93,5 +93,5 @@ public class ContactInterfaceProviderRegistration {
     public ContactInterface newContactInterface(ServerSession session) throws OXException {
         return contactInterfaceProvider.newContactInterface(session);
     }
-    
+
 }

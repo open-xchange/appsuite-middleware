@@ -65,11 +65,11 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 public class RemoveDuplicateContactsStep extends AbstractStep<Contact[], Contact[]> {
 
     private HashMap<String, Contact> map = new HashMap<String, Contact>();
-    
+
     public RemoveDuplicateContactsStep(){
-        
+
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
@@ -80,12 +80,12 @@ public class RemoveDuplicateContactsStep extends AbstractStep<Contact[], Contact
             String hash = getUniqueHash(contact);
             if (!map.containsKey(hash)){
                 outputList.add(contact);
-                map.put(hash, contact);                
+                map.put(hash, contact);
             }
         }
-        
+
         output = outputList.toArray(new Contact[outputList.size()]);
-        
+
         executedSuccessfully = true;
     }
 

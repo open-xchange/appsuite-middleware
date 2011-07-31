@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface ContactSQLInterface extends ContactInterface {
-	
+
 	/**
 	 * insert the contact
 	 * By the insert the folderId is a mandatory field.
@@ -79,7 +79,7 @@ public interface ContactSQLInterface extends ContactInterface {
 	 */
 	@Override
     public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException;
-	
+
 	/**
 	 * deletes the ContactObject
 	 * The objectId is a mandatory field in the AppointmentObject

@@ -54,7 +54,7 @@ import com.openexchange.twitter.TwitterAccessToken;
 
 /**
  * {@link TwitterAccessTokenImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterAccessTokenImpl implements TwitterAccessToken {
@@ -63,7 +63,7 @@ public final class TwitterAccessTokenImpl implements TwitterAccessToken {
 
     /**
      * Initializes a new {@link TwitterAccessTokenImpl}.
-     * 
+     *
      * @param accessToken The twitter4j access token instance
      */
     public TwitterAccessTokenImpl(final AccessToken accessToken) {

@@ -56,7 +56,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link MALPollMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for MAL Poll bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollMailAccountDeleteListener implements MailAccountDeleteListener {

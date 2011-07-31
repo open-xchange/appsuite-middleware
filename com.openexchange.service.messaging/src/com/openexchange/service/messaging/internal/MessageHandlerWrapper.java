@@ -60,7 +60,7 @@ import com.openexchange.service.messaging.MessagingServiceConstants;
 
 /**
  * {@link MessageHandlerWrapper} - A wrapper for {@link MessageHandler}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageHandlerWrapper {
@@ -79,7 +79,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Initializes a new {@link MessageHandlerWrapper}.
-     * 
+     *
      * @param reference The reference to the message handler
      * @param context The bundle Context of the messaging service bundle
      */
@@ -91,7 +91,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Caches values from service properties
-     * 
+     *
      * @return <code>true</code> if the handler should be called; <code>false</code> if the handler should not be called
      */
     public synchronized boolean init() {
@@ -142,7 +142,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Gets the message topics for the wrapped handler.
-     * 
+     *
      * @return The wrapped handler's message topics
      */
     public synchronized String[] getTopics() {
@@ -151,7 +151,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Returns the wrapped handler.
-     * 
+     *
      * @return The wrapped handler.
      */
     private MessageHandler getHandler() {
@@ -192,7 +192,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Gets the filter object
-     * 
+     *
      * @return The handler's filter
      */
     private synchronized Filter getFilter() {
@@ -201,7 +201,7 @@ public final class MessageHandlerWrapper {
 
     /**
      * Dispatches event to handler. Performs final tests before actually calling the handler.
-     * 
+     *
      * @param message The message to dispatch
      */
     public void handleMessage(final Message message) {

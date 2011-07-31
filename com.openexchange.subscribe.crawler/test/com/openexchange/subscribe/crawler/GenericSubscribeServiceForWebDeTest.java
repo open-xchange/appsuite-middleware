@@ -59,7 +59,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForWebDeTest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeServiceTestHelpers {
@@ -113,7 +113,7 @@ public class GenericSubscribeServiceForWebDeTest extends GenericSubscribeService
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_business"));
         pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_business"));
         pageParts.add(new PagePart("(>)([a-zA-Z\u00e4\u00f6\u00fc]*)(<\\/td>)", "country_business"));
-        
+
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
 
         steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(

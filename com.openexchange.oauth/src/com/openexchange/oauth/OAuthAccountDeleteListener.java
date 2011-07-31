@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthAccountDeleteListener} - Listener interface for OAuth account deletion.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthAccountDeleteListener {
 
     /**
      * Handles the event <i>before</i> the denoted OAuth account is deleted.
-     * 
+     *
      * @param id The OAuth account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID
@@ -74,7 +74,7 @@ public interface OAuthAccountDeleteListener {
 
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
-     * 
+     *
      * @param id The OAuth account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID

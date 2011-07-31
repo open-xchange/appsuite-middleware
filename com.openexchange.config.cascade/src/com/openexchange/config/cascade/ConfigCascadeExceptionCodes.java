@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author francisco.laguna@open-xchange.com
  */
 public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
@@ -81,7 +81,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "CONF";
     }
@@ -108,7 +108,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -117,7 +117,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -127,7 +127,7 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

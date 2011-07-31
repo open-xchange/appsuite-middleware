@@ -58,14 +58,14 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link Mappings}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Mappings {
 
     /**
      * Generates a {@link Contact contact} from specified map containing crawled contact information.
-     * 
+     *
      * @param map The map
      * @return The generated contact
      * @throws ConverterException If conversion fails
@@ -257,7 +257,7 @@ public class Mappings {
             if (map.containsKey("birthday_year")) {
                 year = Integer.parseInt(map.get("birthday_year"));
             }
-            cal.set(year, month, date, 1, 1, 1);            
+            cal.set(year, month, date, 1, 1, 1);
             contact.setBirthday(cal.getTime());
         }
 
@@ -270,9 +270,9 @@ public class Mappings {
     }
 
     public static CalendarDataObject translateMapToCalendarDataObject(final Map<String, String> map){
-        
+
         CalendarDataObject oxEvent = new CalendarDataObject();
-         
+
         if (map.containsKey("title")){
             oxEvent.setTitle(map.get("title"));
         }
@@ -298,8 +298,8 @@ public class Mappings {
                 } else if (dateType.equals("end_date_")){
                     oxEvent.setEndDate(cal.getTime());
                 }
-            }                     
-        }        
+            }
+        }
         return oxEvent;
     }
 }

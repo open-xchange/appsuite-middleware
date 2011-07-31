@@ -154,14 +154,14 @@ public class ResourceRequest {
                 modified.put(ResourceWriter.writeResource(res));
             }
         }
-        
+
         final JSONArray deleted = new JSONArray();
         if(deletedResources != null){
             for(final Resource res: deletedResources){
                 if(res.getLastModified().getTime() > lm) {
                     lm = res.getLastModified().getTime();
                 }
-                
+
                 deleted.put(ResourceWriter.writeResource(res));
             }
         }
@@ -171,7 +171,7 @@ public class ResourceRequest {
         retVal.put("modified", modified);
         retVal.put("new", modified);
         retVal.put("deleted", deleted);
-        
+
         return retVal;
     }
 

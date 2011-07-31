@@ -67,7 +67,7 @@ public class PublicationMultipleHandlerFactory implements MultipleHandlerFactory
     private PublicationTargetDiscoveryService discoverer;
     private ConfigurationService config;
     private Map<String, EntityType> entityMap;
-    
+
     public PublicationMultipleHandlerFactory(PublicationTargetDiscoveryService discoverer, Map<String, EntityType> entityMap, ConfigurationService config) {
         this.discoverer = discoverer;
         this.entityMap = entityMap;

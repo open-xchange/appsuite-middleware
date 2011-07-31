@@ -57,7 +57,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link ConfigObjectsActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigObjectsActivator extends HousekeepingActivator {
@@ -75,7 +75,7 @@ public class ConfigObjectsActivator extends HousekeepingActivator {
             getService(ConfigViewFactory.class),
             getService(ConfigurationService.class)));
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();

@@ -105,7 +105,7 @@ public final class ResponseParser {
         parse(retval, json);
         return retval;
     }
-    
+
     public static void parse(final Response response, final JSONObject json) throws JSONException {
         if (json.has(ResponseFields.DATA)) {
             response.setData(json.get(ResponseFields.DATA));
@@ -157,7 +157,7 @@ public final class ResponseParser {
 
     /**
      * Parses the component part of the error code.
-     * 
+     *
      * @param code
      *            error code to parse.
      * @return the parsed component or {@link EnumComponent#NONE}.
@@ -180,7 +180,7 @@ public final class ResponseParser {
 
     /**
      * Parses the error number out of the error code.
-     * 
+     *
      * @param code
      *            error code to parse.
      * @return the parsed error number or 0.
@@ -202,7 +202,7 @@ public final class ResponseParser {
 
     /**
      * Parses the error message arguments.
-     * 
+     *
      * @param jArgs
      *            the json array with the error message arguments or
      *            <code>null</code>.
@@ -255,7 +255,7 @@ public final class ResponseParser {
             }
         };
     }
-    
+
     private static Parsing parseParsing(final JSONObject json) throws JSONException {
         final String attribute = json.getString(ParsingFields.NAME);
         return new Parsing() {

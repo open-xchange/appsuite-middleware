@@ -53,7 +53,7 @@ import com.openexchange.search.CompositeSearchTerm;
 
 /**
  * {@link OrTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OrTerm extends CompositeSearchTerm {

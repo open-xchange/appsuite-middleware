@@ -52,7 +52,7 @@ package com.openexchange.ajp13.servlet;
 
 /**
  * OXServletExceptionMessages
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXServletExceptionMessages {

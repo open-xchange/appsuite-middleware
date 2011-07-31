@@ -89,31 +89,31 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXIntegration.class));
 
     private static final String TEMPLATE_FOLDER_NAME = "OXMF Templates";
-    
+
     private final InfostoreFacade infostore;
 
     public OXIntegration(final InfostoreFacade infostore) {
         this.infostore = infostore;
     }
-    
+
     public FolderObject createPrivateTemplateFolder(final ServerSession session) throws OXException {
         final OXFolderManager manager = OXFolderManager.getInstance(session);
         final OXFolderAccess access = getFolderAccess(session);
-        
+
         final FolderObject parent = access.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
-        
+
         final FolderObject fo = new FolderObject();
         fo.setParentFolderID(parent.getObjectID());
         fo.setFolderName(TEMPLATE_FOLDER_NAME);
-        
+
         final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         adminPermission.setFolderAdmin(true);
         adminPermission.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
         adminPermission.setEntity(session.getUserId());
-        
+
         fo.setPermissions(Arrays.asList(adminPermission));
-        
+
         fo.setModule(FolderObject.INFOSTORE);
         fo.setType(FolderObject.PUBLIC);
         return manager.createFolder(fo, true, System.currentTimeMillis());
@@ -161,13 +161,13 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
                 matcher.propose(iterator.next());
             }
             final DocumentMetadata metadata = matcher.getBestMatch();
-            
+
             if(metadata == null) {
                 return null;
             }
-            
+
             final InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
-            
+
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             final StringBuilder builder = new StringBuilder();
             String line = null;
@@ -201,7 +201,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         metadata.setFolderId(folder.getObjectID());
         metadata.setVersionComment("Created as copy from default template");
         metadata.setFileMIMEType("text/plain");
-        
+
         try {
             infostore.saveDocument(metadata, new ByteArrayInputStream(templateText.getBytes("UTF-8")), InfostoreFacade.NEW, session);
         } catch (final UnsupportedEncodingException e) {
@@ -211,19 +211,19 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
     public List<String> getNames(final ServerSession session, final FolderObject folder, final String ... filter) throws OXException {
     	final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
-    	
+
         final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
         final List<String> names = new ArrayList<String>(30);
         while(iterator.hasNext()) {
             final DocumentMetadata doc = iterator.next();
             Set<String> categories = null;
-            
+
             if(doc.getCategories() != null && doc.getCategories().length() > 0){
                 categories = new HashSet<String>(Arrays.asList(doc.getCategories().split("\\s*,\\s*")));
             }
-            	
+
 			if(categories == null || categories.containsAll(sieve)) {
-				names.add(doc.getFileName());				
+				names.add(doc.getFileName());
 			}
         }
         return names;

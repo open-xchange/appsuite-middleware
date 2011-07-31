@@ -51,7 +51,7 @@ package com.openexchange.service.messaging;
 
 /**
  * {@link MessagingServiceConstants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
@@ -73,12 +73,12 @@ public final class MessagingServiceConstants {
      * the topics in which the handler is interested. An asterisk ('*') may be used as a trailing wildcard. Message Handlers which do not
      * have a value for this property must not receive messages. More precisely, the value of each string must conform to the following
      * grammar:
-     * 
+     *
      * <pre>
      *  topic-description := '*' | topic ( '/*' )?
      *  topic := token ( '/' token )*
      * </pre>
-     * 
+     *
      * @see Message
      */
     public static final String MESSAGE_TOPIC = "service.message.topics";
@@ -93,7 +93,7 @@ public final class MessagingServiceConstants {
      * property, then the properties of the event must also match the filter for the event to be delivered to the event handler.
      * <p>
      * If the filter syntax is invalid, then the Message Handler must be ignored and a warning should be logged.
-     * 
+     *
      * @see Message
      * @see org.osgi.framework.Filter
      */

@@ -101,7 +101,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbMailAccountStorage} - The relational database implementation of mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbMailAccountStorage implements MailAccountStorageService {
@@ -184,7 +184,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     /**
      * Gets the POP3 storage folders for specified session.
-     * 
+     *
      * @param session The session
      * @return The POP3 storage folder full names
      * @throws OXException If an error occurs
@@ -2057,7 +2057,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     /**
      * Checks if specified name contains an invalid character.
-     * 
+     *
      * @param name The name to check
      * @return <code>true</code> if name contains an invalid character; otherwsie <code>false</code>
      */

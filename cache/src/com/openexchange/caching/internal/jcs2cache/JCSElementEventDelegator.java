@@ -53,7 +53,7 @@ import com.openexchange.caching.ElementEvent;
 
 /**
  * {@link JCSElementEventDelegator} - Delegates method invocations to specified instance of {@link ElementEvent}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSElementEventDelegator extends org.apache.jcs.engine.control.event.ElementEvent {

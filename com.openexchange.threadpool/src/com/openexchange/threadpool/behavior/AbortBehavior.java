@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AbortBehavior} - Implements "Abort" behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
@@ -65,7 +65,7 @@ public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
 
     /**
      * Gets the "Abort" behavior.
-     * 
+     *
      * @return The "Abort" behavior
      */
     @SuppressWarnings("unchecked")
@@ -82,7 +82,7 @@ public final class AbortBehavior implements RefusedExecutionBehavior<Object> {
 
     /**
      * Always throws {@link RejectedExecutionException}.
-     * 
+     *
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
      * @return Nothing since a {@link RejectedExecutionException} is immediately thrown.

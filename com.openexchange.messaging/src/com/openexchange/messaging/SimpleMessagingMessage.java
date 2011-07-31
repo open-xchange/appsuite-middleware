@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SimpleMessagingMessage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPart {
@@ -191,14 +191,14 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     public void setHeaders(final Map<String, Collection<MessagingHeader>> headers) {
         this.headers = headers;
     }
-    
+
     public void putHeader(final MessagingHeader header) {
         if(headers.containsKey(header.getName())) {
             headers.get(header.getName()).add(header);
         } else {
             headers.put(header.getName(), new ArrayList<MessagingHeader>(Arrays.asList(header)));
         }
-        
+
     }
 
     public void setSectionId(final String sectionId) {
@@ -252,17 +252,17 @@ public class SimpleMessagingMessage implements MessagingMessage, MessagingBodyPa
     public String getPicture() {
         return picture;
     }
-    
+
     public void setPicture(final String picture) {
         this.picture = picture;
     }
-    
+
     public void setUrl(final String url) {
         this.url = url;
     }
-    
+
     public String getUrl() throws OXException {
-      return url;  
+      return url;
     }
 
     public void setContentReference(final String string) {

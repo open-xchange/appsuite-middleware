@@ -378,7 +378,7 @@ public class ReminderHandler implements ReminderService {
             closeSQLStuff(stmt);
         }
     }
-    
+
     @Override
     public boolean existsReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException {
         try {
@@ -387,7 +387,7 @@ public class ReminderHandler implements ReminderService {
             } else {
                 loadReminder(targetId, userId, module, con);
             }
-            
+
             return true;
         } catch (final OXException exc) {
             if (ReminderExceptionCode.NOT_FOUND.equals(exc)) {
@@ -420,7 +420,7 @@ public class ReminderHandler implements ReminderService {
         if (readCon == null) {
             return loadReminder(String.valueOf(targetId), userId, module);
         }
-        return loadReminder(String.valueOf(targetId), userId, module, readCon);        
+        return loadReminder(String.valueOf(targetId), userId, module, readCon);
     }
 
     public ReminderObject loadReminder(final String targetId, final int userId, final int module, final Connection con) throws OXException {

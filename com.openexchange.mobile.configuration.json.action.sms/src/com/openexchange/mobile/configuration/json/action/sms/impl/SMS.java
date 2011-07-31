@@ -11,7 +11,7 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 
 public class SMS {
-	
+
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class));
 
 	private String sipgateuser = "";
@@ -19,10 +19,10 @@ public class SMS {
 	private String NUMBER = ""; // 4915112345678
 	private String text = ""; // Please go to %u blalal
 	private String serverUrl = ""; // https://samurai.sipgate.net/RPC2
-	
+
 	private boolean replaceleadingzero = true;
 	private boolean replaceleadingzerozero = true;
-	
+
 	public String getServerUrl() {
 		return serverUrl;
 	}
@@ -72,17 +72,17 @@ public class SMS {
 	public SMS() {
 
 	}
-	
+
 	public boolean wasSuccessfull(){
 		return this.wassendingsuccessfull;
 	}
 	private boolean wassendingsuccessfull = false;
-	
+
 	public String getErrorMessage(){
 		return this.senderrormessage;
 	}
 	private String senderrormessage = null;
-	
+
 
 	public Map send() throws MalformedURLException, XmlRpcException {
 
@@ -178,7 +178,7 @@ public class SMS {
 		if (to.startsWith("+")) {
 			to = to.substring(1);
 		} else {
-			// remove leading 0 or 00 
+			// remove leading 0 or 00
 			if(replaceleadingzerozero && to.startsWith("00")){
 				to = ""+to.substring(2);
 			} else if (replaceleadingzero && to.startsWith("0")){

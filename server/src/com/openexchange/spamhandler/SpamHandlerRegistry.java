@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SpamHandlerRegistry} - The spam handler registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpamHandlerRegistry {
@@ -98,7 +98,7 @@ public final class SpamHandlerRegistry {
      * <p>
      * This is a convenience method that checks if the spam handler returned by {@link #getSpamHandlerBySession(Session)} is not an instance
      * of {@link NoSpamHandler}.
-     * 
+     *
      * @param session The session providing user data
      * @param accountId The account ID
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
@@ -110,7 +110,7 @@ public final class SpamHandlerRegistry {
 
     /**
      * Checks if a spam handler is present for the denoted mail account.
-     * 
+     *
      * @param mailAccount The mail account
      * @return <code>true</code> if a spam handler is defined by user's mail provider; otherwise <code>false</code>
      */
@@ -131,7 +131,7 @@ public final class SpamHandlerRegistry {
      * <p>
      * At first the mail account's spam handler is checked, if invalid the session provider's spam handler is checked. For last instance the
      * fallback spam handler {@link NoSpamHandler} is returned to accomplish no spam handler support.
-     * 
+     *
      * @param session The session which probably caches spam handler
      * @param accountId The account ID
      * @return The appropriate spam handler
@@ -146,7 +146,7 @@ public final class SpamHandlerRegistry {
      * <p>
      * At first the mail account's spam handler is checked, if invalid the specified provider's spam handler is checked. For last instance
      * the fallback spam handler {@link NoSpamHandler} is returned to accomplish no spam handler support.
-     * 
+     *
      * @param session The session which probably caches spam handler
      * @param accountId The account ID
      * @param mailProvider The mail provider whose spam handler is returned if account's one is empty (if <code>null</code> session's
@@ -206,7 +206,7 @@ public final class SpamHandlerRegistry {
             /*-
              * By now the providers spam handler is returned to maintain backward compatibility.
              * To retrieve account's spam handler type:
-             * 
+             *
              * spamHandlerName = mailAccount.getSpamHandler();
              */
             final MailProvider mailProvider = mailProviderGetter.getMailProvider();
@@ -241,7 +241,7 @@ public final class SpamHandlerRegistry {
      * <p>
      * If specified registration name is <code>null</code> or equals {@link SpamHandler#SPAM_HANDLER_FALLBACK},
      * {@link NoSpamHandler#getInstance()} is returned.
-     * 
+     *
      * @param registrationName The spam handler's registration name
      * @return The appropriate spam handler or <code>null</code>
      */
@@ -269,7 +269,7 @@ public final class SpamHandlerRegistry {
 
     /**
      * Registers a spam handler.
-     * 
+     *
      * @param registrationName The spam handler's registration name
      * @param spamHandler The spam handler to register
      * @return <code>true</code> if spam handler has been successfully registered and no other spam handler uses the same registration name;
@@ -307,7 +307,7 @@ public final class SpamHandlerRegistry {
 
     /**
      * Unregisters the spam handler.
-     * 
+     *
      * @param spamHandler The spam handler to unregister
      * @return The unregistered spam handler, or <code>null</code>
      */
@@ -322,7 +322,7 @@ public final class SpamHandlerRegistry {
 
     /**
      * Unregisters the spam handler registered by specified name.
-     * 
+     *
      * @param registrationName The registration name
      * @return The unregistered instance of {@link SpamHandler}, or <code>null</code> if there was no spam handler supporting registered by
      *         specified name

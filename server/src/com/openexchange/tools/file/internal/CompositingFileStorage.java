@@ -62,7 +62,7 @@ import com.openexchange.tools.file.external.FileStorage;
 
 /**
  * {@link CompositingFileStorage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositingFileStorage implements FileStorage {
@@ -83,16 +83,16 @@ public class CompositingFileStorage implements FileStorage {
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Map<FileStorage, List<String>> partitions = new HashMap<FileStorage, List<String>>();
         Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
-        
+
         for (String name : identifiers) {
             PreparedName preparedName = prepareName(name);
-            
+
             List<String> list = partitions.get(preparedName.fs);
             if(list == null) {
                 list = new LinkedList<String>();
                 partitions.put(preparedName.fs, list);
             }
-            
+
             list.add(preparedName.name);
             if(preparedName.prefix != null) {
                 prefixes.put(preparedName.fs, preparedName.prefix);
@@ -102,7 +102,7 @@ public class CompositingFileStorage implements FileStorage {
         for(Map.Entry<FileStorage, List<String>> entry: partitions.entrySet()) {
             FileStorage fileStorage = entry.getKey();
             List<String> ids = entry.getValue();
-            
+
             Set<String> files = fileStorage.deleteFiles(ids.toArray(new String[ids.size()]));
             String prefix = prefixes.get(fileStorage);
             if(prefix == null) {
@@ -113,7 +113,7 @@ public class CompositingFileStorage implements FileStorage {
                 }
             }
         }
-        
+
         return notDeleted;
     }
 
@@ -129,7 +129,7 @@ public class CompositingFileStorage implements FileStorage {
         for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
             String prefix = entry.getKey();
             FileStorage fileStorage = entry.getValue();
-            
+
             SortedSet<String> files = fileStorage.getFileList();
             for (String file : files) {
                 fileList.add(prefix+"/"+file);

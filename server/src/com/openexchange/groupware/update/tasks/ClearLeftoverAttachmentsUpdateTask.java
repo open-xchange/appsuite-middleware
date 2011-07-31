@@ -148,7 +148,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                 if(writeCon != null) {
                     Database.back(contextId, true, writeCon);
                 }
-            }   
+            }
         }
     }
 
@@ -252,7 +252,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                 "JOIN sequence_attachment ON prg_attachment.cid = sequence_attachment.cid  WHERE prg_attachment.id > sequence_attachment.id";
 
         final List<LeftoverAttachment> attachments = new ArrayList<LeftoverAttachment>();
-        
+
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;

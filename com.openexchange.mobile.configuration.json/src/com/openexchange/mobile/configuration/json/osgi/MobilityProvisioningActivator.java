@@ -63,26 +63,26 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class MobilityProvisioningActivator extends DeferredActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
-    
+
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class,HttpService.class };
-	
+
 	private SessionServletRegistration servletRegistration;
-	
+
 	private final List<ServiceTracker> serviceTrackerList;
 
 	public MobilityProvisioningActivator() {
 		super();
 		serviceTrackerList = new ArrayList<ServiceTracker>();
 	}
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return NEEDED_SERVICES;
@@ -93,7 +93,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-		
+
 		getInstance().addService(clazz, getService(clazz));
 	}
 
@@ -103,7 +103,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
 		getInstance().removeService(clazz);
-		
+
 	}
 
 	@Override
@@ -121,11 +121,11 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 					}
 				}
 			}
-			
+
 			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
 			this.servletRegistration.open();
             serviceTrackerList.add(new ServiceTracker(context, ActionService.class.getName(), new ActionServiceListener(context)));
-            
+
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackerList) {
                 tracker.open();
@@ -134,7 +134,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-		
+
 	}
 
 	@Override
@@ -144,7 +144,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 	            this.servletRegistration.close();
 	            this.servletRegistration = null;
 		    }
-		    
+
             /*
              * Close service trackers
              */
@@ -152,7 +152,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
                 tracker.close();
             }
             serviceTrackerList.clear();
-			
+
             getInstance().clearRegistry();
             getInstance().clearActionServices();
 		} catch (final Throwable t) {

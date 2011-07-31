@@ -94,9 +94,9 @@ public class PublicationMultipleHandler implements MultipleHandler {
     private final PublicationTargetDiscoveryService discovery;
 
     private final Map<String, EntityType> entities;
-    
+
     private final ConfigurationService config;
-    
+
     public PublicationMultipleHandler(final PublicationTargetDiscoveryService discovery, final Map<String, EntityType> entities, final ConfigurationService config) {
         this.discovery = discovery;
         this.entities = entities;
@@ -173,22 +173,22 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     private Object loadAllPublications(final JSONObject request, final ServerSession session) throws OXException, JSONException, OXException {
-    	final Context context = session.getContext();  
+    	final Context context = session.getContext();
     	final int userId = session.getUserId();
     	boolean containsFolderOrId = false;
-    	
+
     	if (request.has("folder") || request.has("id")) {
     		if (!request.has("entityModule")) {
     			throw MISSING_PARAMETER.create("entityModule");
     		}
     		containsFolderOrId = true;
-        } 
-    	
-    	String module = null;    	
+        }
+
+    	String module = null;
     	if (request.has("entityModule")) {
-    		module = request.optString("entityModule");        	
+    		module = request.optString("entityModule");
     	}
-        
+
         // Check if request contains folder attribute. If not assume a request for all publications of the session user.
     	// If module is set in this case, fetch all publications of a user in that module.
         final List<Publication> publications;
@@ -202,7 +202,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         } else {
         	publications = loadAllPublicationsForUser(context, userId, module);
         }
-        
+
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
@@ -256,28 +256,28 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
         return columns.split("\\s*,\\s*");
     }
-    
+
     private List<Publication> loadAllPublicationsForUser(final Context context, final int userId, final String module) throws OXException {
     	final List<Publication> publications = new LinkedList<Publication>();
     	final Collection<PublicationTarget> targets = discovery.listTargets();
-        
+
         for (final PublicationTarget target : targets) {
         	Collection<Publication> allPublicationsForUser = null;
-        	
+
         	if (module == null) {
         		final PublicationService publicationService = target.getPublicationService();
         		allPublicationsForUser = publicationService.getAllPublications(context, userId, target.getModule());
         	} else {
         		if (target.isResponsibleFor(module)) {
         			final PublicationService publicationService = target.getPublicationService();
-        			allPublicationsForUser = publicationService.getAllPublications(context, userId, module);        			
-        		}        		
+        			allPublicationsForUser = publicationService.getAllPublications(context, userId, module);
+        		}
         	}
         	if (allPublicationsForUser != null) {
                 publications.addAll(allPublicationsForUser);
-        	} 
+        	}
         }
-        
+
         return publications;
     }
 
@@ -316,19 +316,19 @@ public class PublicationMultipleHandler implements MultipleHandler {
         } else if (serverURL != null ){
             hostname = serverURL.substring(serverURL.indexOf("://")+3);
         }
-        
-        
+
+
         final String otherDomain = config.getProperty(PROPERTY_USE_OTHER_DOMAIN);
         final String separateSubdomain = config.getProperty(PROPERTY_USE_OTHER_SUBDOMAIN);
-        
+
         if(otherDomain != null){
             return protocol + otherDomain;
         }
-        
+
         if(separateSubdomain != null){
             return protocol + separateSubdomain + "." + hostname;
         }
-        
+
         return serverURL;
     }
 

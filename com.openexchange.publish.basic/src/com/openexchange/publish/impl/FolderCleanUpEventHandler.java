@@ -67,7 +67,7 @@ public class FolderCleanUpEventHandler extends EntityCleanUpEventHandler<FolderO
         super(entityCleanUp, module, contexts);
         this.moduleInt = moduleInt;
     }
-    
+
     @Override
     public boolean handle(FolderObject actionObj) {
         return actionObj.getModule() == moduleInt;

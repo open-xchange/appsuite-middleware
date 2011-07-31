@@ -54,14 +54,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ContactInterfaceProvider} - Provider for {@link ContactInterface} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ContactInterfaceProvider {
 
     /**
      * Returns a newly created {@link ContactInterface} instance for specified session.
-     * 
+     *
      * @param session The session
      * @return A newly created {@link ContactInterface} instance
      * @throws OXException If creating a new {@link ContactInterface} instance fails

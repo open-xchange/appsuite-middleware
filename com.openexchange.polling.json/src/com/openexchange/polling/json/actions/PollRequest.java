@@ -14,7 +14,7 @@ public class PollRequest {
 	private AJAXRequestData request;
 
 	private static final PollParser PARSER = new PollParser();
-	
+
 	public PollRequest(AJAXRequestData request, ServerSession session) {
 		this.session = session;
 		this.request = request;

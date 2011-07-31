@@ -138,7 +138,7 @@ public class AttachmentRequest extends CommonRequest {
         try {
             if (AJAXServlet.ACTION_ATTACH.equals(action)) {
                 final JSONObject object = (JSONObject) req.getBody();
-                
+
                 for (final AttachmentField required : Attachment.REQUIRED) {
                     if (!object.has(required.getName())) {
                         missingParameter(required.getName(), action);
@@ -152,51 +152,51 @@ public class AttachmentRequest extends CommonRequest {
 
                 final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(object.toString());
                 final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
-                
+
                 if (conversionService == null) {
-                    throw 
+                    throw
                         ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
                         ConversionService.class.getName());
                 }
-                
+
                 final JSONObject datasourceDef = object.getJSONObject(DATASOURCE);
                 final String datasourceIdentifier = datasourceDef.getString(IDENTIFIER);
-                
+
                 final DataSource source = conversionService.getDataSource(datasourceIdentifier);
                 if(source == null) {
                     invalidParameter("datasource", datasourceIdentifier);
                     return true;
                 }
-                
+
                 final List<Class<?>> types = Arrays.asList(source.getTypes());
-                
+
                 final Map<String, String> arguments = new HashMap<String, String>();
-                
+
                 for(final String key : datasourceDef.keySet()) {
                     arguments.put(key, datasourceDef.getString(key));
                 }
-                
+
                 InputStream is;
                 if(types.contains(InputStream.class)) {
                     final Data<InputStream> data = source.getData(InputStream.class, new DataArguments(arguments), session);
                     final String sizeS = data.getDataProperties().get(DataProperties.PROPERTY_SIZE);
                     final String contentTypeS = data.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-                    
+
                     if(sizeS != null) {
                         attachment.setFilesize(Long.parseLong(sizeS));
                     }
-                    
+
                     if(contentTypeS != null) {
                         attachment.setFileMIMEType(contentTypeS);
                     }
-                    
+
                     final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
                     if(name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
-                    
+
                     is = data.getData();
-                    
+
                 } else if (types.contains(byte[].class)) {
                     final Data<byte[]> data = source.getData(byte[].class, new DataArguments(arguments), session);
                     final byte[] bytes = data.getData();
@@ -207,23 +207,23 @@ public class AttachmentRequest extends CommonRequest {
                     if(contentTypeS != null) {
                         attachment.setFileMIMEType(contentTypeS);
                     }
-                    
+
                     final String name = data.getDataProperties().get(DataProperties.PROPERTY_NAME);
                     if(name != null && null == attachment.getFilename()) {
                         attachment.setFilename(name);
                     }
-                    
+
                 } else {
                     invalidParameter("datasource", datasourceIdentifier);
                     return true; // Maybe add better error message here.
                 }
-                
+
                 if(attachment.getFilename() == null) {
                     attachment.setFilename("unknown"+System.currentTimeMillis());
                 }
-                
+
                 attachment.setId(AttachmentBase.NEW);
-                
+
                 ATTACHMENT_BASE.startTransaction();
                 long ts;
                 try {
@@ -235,14 +235,14 @@ public class AttachmentRequest extends CommonRequest {
                 } finally {
                     ATTACHMENT_BASE.finish();
                 }
-                
+
                 final Response resp = new Response(session);
                 resp.setData(attachment.getId());
                 resp.setTimestamp(new Date(ts));
-                
+
                 ResponseWriter.write(resp, w);
                 return true;
-                
+
             } else if (AJAXServlet.ACTION_GET.equals(action)) {
                 if (!checkRequired(
                     req,

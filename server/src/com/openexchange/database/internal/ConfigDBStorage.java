@@ -64,9 +64,9 @@ import com.openexchange.exception.OXException;
 
 /**
  * ConfigDBStorage
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class ConfigDBStorage {
 
@@ -84,7 +84,7 @@ public class ConfigDBStorage {
 
     /**
      * Determines all context IDs which reside in given schema
-     * 
+     *
      * @param schema -
      *            the schema
      * @param writePoolId -

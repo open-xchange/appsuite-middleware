@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 /**
  * This class defines the storage API for groups. This is a low level API for reading and writing groups into some storage - normally
  * databases.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class GroupStorage {
@@ -75,7 +75,7 @@ public abstract class GroupStorage {
 
     /**
      * This method inserts a group without its members into the storage.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
@@ -87,7 +87,7 @@ public abstract class GroupStorage {
 
     /**
      * This method inserts a group without its members into the storage.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
@@ -98,7 +98,7 @@ public abstract class GroupStorage {
 
     /**
      * This method updates group field in the storage.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group with fields to update.
@@ -113,7 +113,7 @@ public abstract class GroupStorage {
 
     /**
      * This method deletes a group from the database. Before all its members must be removed.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param groupId unique identifier of the group to delete.
@@ -124,7 +124,7 @@ public abstract class GroupStorage {
 
     /**
      * Reads a group from the persistent storage.
-     * 
+     *
      * @param gid Unique identifier of the group.
      * @param The context.
      * @return The group data object.
@@ -137,7 +137,7 @@ public abstract class GroupStorage {
      * should be searched in. You can also name the attributes that values should be returned. Please insure that returned attributes are
      * strings and not any other data types. You will get a Set with string arrays. The string arrays contain the values auf the requested
      * attributes in the same order.
-     * 
+     *
      * @param pattern this pattern will be searched in the displayName of the group.
      * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
      * @param The context.
@@ -148,7 +148,7 @@ public abstract class GroupStorage {
 
     /**
      * This method returns groups that have been modified since the given timestamp.
-     * 
+     *
      * @param modifiedSince timestamp after that the groups have been modified.
      * @param The context.
      * @return an array of groups.
@@ -158,7 +158,7 @@ public abstract class GroupStorage {
 
     /**
      * This metods returns groups that have been deleted since the given timestamp
-     * 
+     *
      * @param modifiedSince timestamp after that the groups have been deleted.
      * @param The context.
      * @return an array of groups.
@@ -168,7 +168,7 @@ public abstract class GroupStorage {
 
     /**
      * Returns the data objects of all groups.
-     * 
+     *
      * @param context - the context.
      * @param loadMembers - switch whether members should be loaded, too (decreases performance, don't use if not needed)
      * @return all groups.
@@ -178,7 +178,7 @@ public abstract class GroupStorage {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @return an instance implementing the group storage interface.
      */
     public static GroupStorage getInstance() {

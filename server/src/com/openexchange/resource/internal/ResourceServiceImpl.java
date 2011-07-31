@@ -59,7 +59,7 @@ import com.openexchange.resource.storage.ResourceStorage;
 
 /**
  * {@link ResourceServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceServiceImpl implements ResourceService {
@@ -73,7 +73,7 @@ public final class ResourceServiceImpl implements ResourceService {
 
     /**
      * Gets the singleton instance of {@link ResourceServiceImpl}
-     * 
+     *
      * @return The singleton instance of {@link ResourceServiceImpl}
      */
     public static ResourceServiceImpl getInstance() {
@@ -119,7 +119,7 @@ public final class ResourceServiceImpl implements ResourceService {
             throw new OXException(e);
         }
     }
-    
+
     @Override
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
         try {

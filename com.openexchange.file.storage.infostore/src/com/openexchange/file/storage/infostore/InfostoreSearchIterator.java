@@ -69,7 +69,7 @@ public class InfostoreSearchIterator implements SearchIterator<File> {
      * @param deleted
      */
     public InfostoreSearchIterator(SearchIterator<DocumentMetadata> delegate) {
-        this.delegate = delegate;        
+        this.delegate = delegate;
     }
 
     public void addWarning(OXException warning) {

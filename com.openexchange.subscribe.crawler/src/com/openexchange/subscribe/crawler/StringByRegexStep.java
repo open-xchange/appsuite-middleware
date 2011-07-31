@@ -67,18 +67,18 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 public class StringByRegexStep extends AbstractStep<String, Page> {
 
     private String regex;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByRegexStep.class));
-    
+
     public StringByRegexStep(){
-        
+
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws OXException {       
+    public void execute(WebClient webClient) throws OXException {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input.getWebResponse().getContentAsString());
         if (matcher.find()){
@@ -88,14 +88,14 @@ public class StringByRegexStep extends AbstractStep<String, Page> {
         }
     }
 
-    
+
     public String getRegex() {
         return regex;
     }
 
-    
+
     public void setRegex(String regex) {
         this.regex = regex;
-    }        
-    
+    }
+
 }

@@ -80,7 +80,7 @@ import com.openexchange.tools.servlet.http.Tools;
 /**
  * New version with a login/handling that is more secure. Also parameter AuthID is added. Defaults are still set for maximum security: no
  * GET, SSL only
- * 
+ *
  * @author <a href="mailto:info@open-xchange.com">Holger Achtziger</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */

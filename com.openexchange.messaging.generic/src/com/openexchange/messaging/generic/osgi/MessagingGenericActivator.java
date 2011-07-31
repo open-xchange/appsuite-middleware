@@ -82,7 +82,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MessagingGenericActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -142,34 +142,34 @@ public class MessagingGenericActivator extends DeferredActivator {
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
-            
+
             {
                 /*
                  * MessagingAccount region with 5 minutes time-out
                  */
                 final String regionName = CachingMessagingAccountStorage.getRegionName();
-                final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" + 
-                		"jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + 
-                		"jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" + 
-                		"jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + 
-                		"jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" + 
-                		"jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" + 
-                		"jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" + 
-                		"jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + 
-                		"jcs.region."+regionName+".elementattributes.IsEternal=false\n" + 
-                		"jcs.region."+regionName+".elementattributes.MaxLifeSeconds=300\n" + 
-                		"jcs.region."+regionName+".elementattributes.IdleTime=180\n" + 
-                		"jcs.region."+regionName+".elementattributes.IsSpool=false\n" + 
-                		"jcs.region."+regionName+".elementattributes.IsRemote=false\n" + 
+                final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                		"jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                		"jcs.region."+regionName+".cacheattributes.MaxObjects=10000000\n" +
+                		"jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                		"jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                		"jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=180\n" +
+                		"jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                		"jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                		"jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                		"jcs.region."+regionName+".elementattributes.MaxLifeSeconds=300\n" +
+                		"jcs.region."+regionName+".elementattributes.IdleTime=180\n" +
+                		"jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                		"jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 		"jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
             }
 
             trackers = new ArrayList<ServiceTracker>();
-            
+
             final ServiceTracker messagingServiceTracker = new ServiceTracker(context, MessagingService.class.getName(), null);
             trackers.add(messagingServiceTracker);
-            
+
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
@@ -183,10 +183,10 @@ public class MessagingGenericActivator extends DeferredActivator {
             }, null));
             registrations.add(context.registerService(CreateTableService.class.getName(), createTableTask, null));
             registrations.add(context.registerService(DeleteListener.class.getName(), new MessagingGenericDeleteListener(), null));
-            
-            
+
+
             // Secret Handling
-            
+
             {
                 final MessagingSecretHandling secretHandling = new MessagingSecretHandling() {
                     @Override
@@ -199,17 +199,17 @@ public class MessagingGenericActivator extends DeferredActivator {
                         for (final Object o : objects) {
                             list.add((MessagingService) o);
                         }
-                        
+
                         return list;
                     }
                 };
-                
-                
+
+
                 registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null));
                 registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
-                
+
             }
-            
+
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingGenericActivator.class)).error(e.getMessage(), e);
             throw e;

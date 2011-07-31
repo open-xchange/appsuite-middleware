@@ -56,7 +56,7 @@ import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link TwitterProperties} - The twitter properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterProperties extends AbstractProtocolProperties implements IMailProperties {

@@ -71,10 +71,10 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
         setId("com.openexchange.oauth.yahoo");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
-        setDisplayName("Yahoo");        
+        setDisplayName("Yahoo");
         this.deferrer = deferrer;
-    }   
-    
+    }
+
     @Override
     public String modifyCallbackURL(String callbackUrl) {
         if (deferrer == null) {

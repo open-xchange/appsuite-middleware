@@ -58,7 +58,7 @@ import com.openexchange.caching.internal.jcs2cache.JCSStatsDelegator;
 
 /**
  * {@link CacheStatistics2JCS} - The {@link CacheStatistics} implementation backed by a {@link ICacheStats} object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheStatistics2JCS extends Statistics2JCS implements CacheStatistics {
@@ -67,7 +67,7 @@ public final class CacheStatistics2JCS extends Statistics2JCS implements CacheSt
 
     /**
      * Initializes a new {@link CacheStatistics2JCS}
-     * 
+     *
      * @param cacheStats The {@link ICacheStats} object to delegate to
      */
     public CacheStatistics2JCS(final ICacheStats cacheStats) {

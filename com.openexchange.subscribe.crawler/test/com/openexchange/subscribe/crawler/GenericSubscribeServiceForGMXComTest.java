@@ -72,19 +72,19 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         crawler.setDisplayName("gmx.com");
         crawler.setId("com.openexchange.subscribe.crawler.gmx.com");
         crawler.setCrawlerApiVersion(618);
-        //crawler.setJavascriptEnabled(true);       
-        crawler.setPriority(12);       
+        //crawler.setJavascriptEnabled(true);
+        crawler.setPriority(12);
 
         ArrayList<Step> listOfSteps = new ArrayList<Step>();
         listOfSteps.add(new LoginPageByFormActionReturningStringStep("Log into gmx.com", "https://www.gmx.com", "", "", ".*wicket\\:interface.*", "TextfieldEmail", "TextfieldPassword", 1, "", "ButtonLogin", "community=([0-9]*)&lang"));
-        
+
         ArrayList<NameValuePair> parameters = new ArrayList<NameValuePair>();
         parameters.add(new NameValuePair("what", "PERSON"));
         parameters.add(new NameValuePair("idList", ""));
         parameters.add(new NameValuePair("format", "csv_Outlook2003_eng"));
-        
-        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.42.4.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));        
-        
+
+        listOfSteps.add(new TextPageByPostRequestStep("Call the export", "https://www.gmx.com/callgate-6.42.4.0/coms8/ImportExportService/exportContacts", parameters, "accountId"));
+
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");
         fieldMapping.put(1, "title");
@@ -100,11 +100,11 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         fieldMapping.put(13, "telephone_home1");
         fieldMapping.put(14, "cellular_telephone1");
         fieldMapping.put(15, "cellular_telephone2");
-        fieldMapping.put(16, "telephone_other1");        
+        fieldMapping.put(16, "telephone_other1");
         fieldMapping.put(17, "fax_home");
         fieldMapping.put(18, "fax_business");
         fieldMapping.put(19, "fax_other");
-        fieldMapping.put(20, "url");        
+        fieldMapping.put(20, "url");
         fieldMapping.put(21, "street_business");
         fieldMapping.put(22, "city_business");
         fieldMapping.put(23, "postal_code_business");
@@ -113,15 +113,15 @@ public class GenericSubscribeServiceForGMXComTest extends GenericSubscribeServic
         fieldMapping.put(26, "city_home");
         fieldMapping.put(27, "postal_code_home");
         fieldMapping.put(28, "country_home");
-        fieldMapping.put(29, "street_other");        
+        fieldMapping.put(29, "street_other");
         fieldMapping.put(30, "city_other");
         fieldMapping.put(31, "postal_code_other");
         fieldMapping.put(32, "country_other");
         fieldMapping.put(33, "note");
-        
+
         boolean ignoreFirstLine = true;
         listOfSteps.add(new ContactsByCsvFileStep("Map csv fields to Contact-Fields", ignoreFirstLine, fieldMapping));
-        
+
         crawler.finishUp(listOfSteps);
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);

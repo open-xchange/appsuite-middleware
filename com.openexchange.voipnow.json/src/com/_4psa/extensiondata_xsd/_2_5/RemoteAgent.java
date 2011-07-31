@@ -14,11 +14,11 @@ import com._4psa.extensionmessages_xsd._2_5.SetQueueRemoteAgentRequest;
 
 /**
  * Remote agent data
- * 
+ *
  * <p>Java class for RemoteAgent complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="RemoteAgent">
  *   &lt;complexContent>
@@ -42,8 +42,8 @@ import com._4psa.extensionmessages_xsd._2_5.SetQueueRemoteAgentRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RemoteAgent", propOrder = {
@@ -73,11 +73,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -85,11 +85,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -97,11 +97,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the agentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getAgentID() {
         return agentID;
@@ -109,11 +109,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the agentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setAgentID(BigDecimal value) {
         this.agentID = value;
@@ -121,11 +121,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the penalty property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPenalty() {
         return penalty;
@@ -133,11 +133,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the penalty property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPenalty(BigInteger value) {
         this.penalty = value;
@@ -145,11 +145,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the registration property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRegistration() {
         return registration;
@@ -157,11 +157,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the registration property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRegistration(String value) {
         this.registration = value;
@@ -169,11 +169,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the phoneNumber property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneNumber() {
         return phoneNumber;
@@ -181,11 +181,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the phoneNumber property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneNumber(String value) {
         this.phoneNumber = value;
@@ -193,11 +193,11 @@ public class RemoteAgent {
 
     /**
      * Gets the value of the requireConfirmation property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRequireConfirmation() {
         return requireConfirmation;
@@ -205,11 +205,11 @@ public class RemoteAgent {
 
     /**
      * Sets the value of the requireConfirmation property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRequireConfirmation(Boolean value) {
         this.requireConfirmation = value;

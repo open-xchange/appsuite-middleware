@@ -58,7 +58,7 @@ import com.openexchange.search.SearchAttributeFetcher;
 
 /**
  * {@link ContactAttributeFetcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> {
@@ -744,7 +744,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
     /**
      * Gets the contact attribute fetcher instance.
-     * 
+     *
      * @return The contact attribute fetcher instance.
      */
     public static ContactAttributeFetcher getInstance() {

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link TwitterMessagingExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -70,10 +70,10 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
      * Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
      */
     INVALID_ACCOUNT(TwitterMessagingExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_ERROR, 2),
-    
-    
+
+
     ;
-    
+
 
     private final Category category;
 
@@ -86,7 +86,7 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "TWITTER-MSG";
     }
@@ -109,7 +109,7 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -118,7 +118,7 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -128,7 +128,7 @@ public enum TwitterMessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

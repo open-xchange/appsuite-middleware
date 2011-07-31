@@ -55,7 +55,7 @@ import com.openexchange.messaging.MessagingFolderAccess;
 
 /**
  * {@link MessagingAccountAccessFullnameProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingAccountAccessFullnameProvider implements DefaultFolderFullnameProvider {
@@ -72,7 +72,7 @@ public final class MessagingAccountAccessFullnameProvider implements DefaultFold
 
     /**
      * Initializes a new {@link MessagingAccountAccessFullnameProvider}.
-     * 
+     *
      * @param access The connected access instance
      */
     public MessagingAccountAccessFullnameProvider(final MessagingAccountAccess access) {

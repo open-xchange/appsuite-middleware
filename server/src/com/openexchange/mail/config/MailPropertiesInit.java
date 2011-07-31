@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link MailPropertiesInit} - Initializes global mail configuration implementation for mailing system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPropertiesInit implements Initialization {

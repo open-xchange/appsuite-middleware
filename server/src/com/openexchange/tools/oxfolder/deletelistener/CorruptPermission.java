@@ -51,7 +51,7 @@ package com.openexchange.tools.oxfolder.deletelistener;
 
 /**
  * {@link CorruptPermission} - Simple container for a corrupt permission entry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CorruptPermission {
@@ -64,7 +64,7 @@ public final class CorruptPermission {
 
     /**
      * Creates a new {@link CorruptPermission}
-     * 
+     *
      * @param cid The context ID
      * @param fuid The folder ID
      * @param permission_id The permission entity's ID

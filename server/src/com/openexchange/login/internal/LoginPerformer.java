@@ -83,7 +83,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LoginPerformer {
@@ -105,7 +105,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the login for specified login request.
-     * 
+     *
      * @param request The login request
      * @return The login providing login information
      * @throws OXException If login fails
@@ -116,7 +116,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the login for specified login request.
-     * 
+     *
      * @param request The login request
      * @return The login providing login information
      * @throws OXException If login fails
@@ -217,7 +217,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the logout for specified session ID.
-     * 
+     *
      * @param sessionId The session ID
      * @throws OXException If logout fails
      */

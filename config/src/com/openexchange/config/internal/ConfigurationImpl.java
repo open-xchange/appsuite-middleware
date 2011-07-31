@@ -74,7 +74,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 
 /**
  * {@link ConfigurationImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigurationImpl implements ConfigurationService {
@@ -128,19 +128,19 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Maps property names to the file path of the .properties file containing the property.
      */
     private final Map<String, String> propertiesFiles;
-    
+
     /**
      * Maps objects to yaml filename, with a path
      */
-    
+
      final Map<String, Object> yamlFiles;
-    
+
     /**
      * Maps filenames to whole file paths for yaml lookup
      */
 
      final Map<String, String> yamlPaths;
-     
+
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
      */
@@ -150,7 +150,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     /**
      * Initializes a new configuration
-     * 
+     *
      * @param directory The directory where property files are located
      */
     public ConfigurationImpl(final String[] directories) {
@@ -164,7 +164,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         propertiesFiles = new HashMap<String, String>();
         yamlFiles = new HashMap<String, Object>();
         yamlPaths = new HashMap<String, String>();
-        
+
         final FileFilter fileFilter = new PropertyFileFilter();
         dirs = new File[directories.length];
         for (int i = 0; i < directories.length; i++) {
@@ -182,17 +182,17 @@ public final class ConfigurationImpl implements ConfigurationService {
                 public void processFile(File file) {
                     processPropertiesFile(file);
                 }
-                
+
             });
-            
+
             processDirectory(dirs[i], new FileFilter() {
 
                 public boolean accept(File pathname) {
                     return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
                 }
-                
+
             },
-            
+
             new FileProcessor() {
 
                 public void processFile(File file) {
@@ -206,11 +206,11 @@ public final class ConfigurationImpl implements ConfigurationService {
                     yamlPaths.put(file.getName(), file.getPath());
                     yamlFiles.put(file.getPath(), o);
                 }
-                
+
             });
         }
     }
-    
+
     private static interface FileProcessor {
         public void processFile(File file);
     }

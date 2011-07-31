@@ -73,11 +73,11 @@ public class SimMapTransformer implements MapToObjectTransformer {
         this.input = list;
         return data;
     }
-    
+
     public List<Map<String, String>> getInput() {
         return input;
     }
-    
-    
+
+
 
 }

@@ -73,7 +73,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link ImageMessageHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageMessageHandler implements MailMessageHandler {

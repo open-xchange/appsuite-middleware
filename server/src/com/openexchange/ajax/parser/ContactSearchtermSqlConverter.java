@@ -52,12 +52,12 @@ package com.openexchange.ajax.parser;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * 
+ *
  * @author tobiasprinz
  * @param <T>
  */
 public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverter {
-	
+
 	@Override
     public String translateFromJSONtoDB(String fieldname) {
 		ContactField field = ContactField.getByAjaxName(fieldname);
@@ -67,7 +67,7 @@ public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverte
             return fieldname;
         }
 	}
-	
+
 	/**
 	 * @return the prefix our database queries usually use to refer to a table.
 	 */

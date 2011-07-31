@@ -57,14 +57,14 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 public abstract class AttachmentListQueryAction extends AbstractAttachmentAction {
 
 	private List<AttachmentMetadata> attachments;
-	
-	
+
+
 	protected void doUpdates(final String query, final List<AttachmentMetadata> attachments, final boolean addId) throws OXException {
 		final UpdateBlock[] updates = new UpdateBlock[attachments.size()];
 		int i = 0;
 		for(final AttachmentMetadata m : attachments) {
 			updates[i++] = new Update(query) {
-				
+
 				@Override
 				public void fillStatement() throws SQLException {
 					final int number = fillFields(m, stmt);
@@ -72,12 +72,12 @@ public abstract class AttachmentListQueryAction extends AbstractAttachmentAction
 						stmt.setInt(number,m.getId());
 					}
 				}
-				
+
 			};
 		}
 		doUpdates(updates);
 	}
-	
+
 	public List<AttachmentMetadata> getAttachments() {
 		return attachments;
 	}

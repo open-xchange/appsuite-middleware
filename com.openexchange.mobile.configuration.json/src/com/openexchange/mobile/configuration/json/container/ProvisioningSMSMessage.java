@@ -50,9 +50,9 @@
 package com.openexchange.mobile.configuration.json.container;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ProvisioningSMSMessage {
 
@@ -63,26 +63,26 @@ public class ProvisioningSMSMessage {
 		this.locale = locale;
 		this.smsText = "";
 	}
-	
+
 	public ProvisioningSMSMessage(String locale, String smsText) {
 		this.locale = locale;
 		this.smsText = smsText;
 	}
-	
+
 	public String getLocale() {
 		return locale;
 	}
-	
+
 	public void setLocale(String locale) {
 		this.locale = locale;
 	}
-	
+
 	public String getSmsText() {
 		return smsText;
 	}
-	
+
 	public void setSmsText(String smsText) {
 		this.smsText = smsText;
 	}
-	
+
 }

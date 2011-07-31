@@ -81,14 +81,14 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
     public String getSupportedModule() {
         return "config";
     }
-    
+
     private static final class ConfigMultipleHandler implements MultipleHandler, PathAware {
 
         private String path;
 
         @Override
         public void close() {
-            
+
         }
 
         @Override
@@ -103,13 +103,13 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
 
         @Override
         public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException {
-           
+
             final SettingStorage stor = SettingStorage.getInstance(session);
             Setting setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
             return convert2JS(setting);
         }
-        
+
         /**
          * Converts a tree of settings into the according java script objects.
          * @param setting Tree of settings.
@@ -164,7 +164,7 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
             this.path = path;
         }
 
-        
+
     }
 
 }

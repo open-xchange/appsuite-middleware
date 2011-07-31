@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RootAction} maps the action to a list action with parent 0.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class RootAction extends AbstractFolderAction {

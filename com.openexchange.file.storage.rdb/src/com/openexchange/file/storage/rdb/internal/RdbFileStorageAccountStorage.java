@@ -79,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbFileStorageAccountStorage} - The file storage account storage backed by database.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -99,7 +99,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     /**
      * Gets the database-backed instance of account storage manager.
-     * 
+     *
      * @return The database-backed instance of account storage manager
      */
     public static RdbFileStorageAccountStorage getInstance() {
@@ -245,7 +245,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
 
     /**
      * Gets the identifiers of user-associated accounts of a certain service.
-     * 
+     *
      * @param serviceId The service identifier
      * @param session The session
      * @return The identifiers of user-associated accounts of a certain service

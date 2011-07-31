@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultConverter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultConverter implements Converter {
@@ -71,7 +71,7 @@ public class DefaultConverter implements Converter {
     private final Map<String, List<Node>> suppliesFormat = new ConcurrentHashMap<String, List<Node>>();
 
     private final Map<Conversion, Step> cachedSteps = new ConcurrentHashMap<Conversion, Step>();
-    
+
     public void addConverter(final ResultConverter converter) {
         final Node n = new Node();
         n.converter = converter;
@@ -118,10 +118,10 @@ public class DefaultConverter implements Converter {
         }
 
     }
-    
+
     public void removeConverter(final ResultConverter thing) {
         // TODO Auto-generated method stub
-        
+
     }
 
 
@@ -199,7 +199,7 @@ public class DefaultConverter implements Converter {
             currentMark = nextMark;
             currentNode = nextNode;
             edges = nextNode.edges;
-            
+
         }
 
     }
@@ -207,7 +207,7 @@ public class DefaultConverter implements Converter {
     private Step unwind(Mark currentMark, final Edge edge, final Map<Node, Mark> markings) {
         Step current = new Step();
         current.converter = edge.node.converter;
-        
+
         while (currentMark.previous != null) {
             final Step step = new Step();
             step.converter = currentMark.previous.converter;
@@ -215,14 +215,14 @@ public class DefaultConverter implements Converter {
             current = step;
             currentMark = markings.get(currentMark.previous);
         }
-        
+
         return current;
     }
 
     // Synthetic edges for entry
     private List<Edge> getInitialEdges(final String format) {
         final List<Node> list = understandsFormat.get(format);
-        
+
         if(list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Can't convert from "+format);
         }
@@ -232,10 +232,10 @@ public class DefaultConverter implements Converter {
             edge.node = node;
             edges.add(edge);
         }
-        
+
         return edges;
     }
-    
+
     public static class Step {
         public Step next;
         public ResultConverter converter;
@@ -273,16 +273,16 @@ public class DefaultConverter implements Converter {
     }
 
     public static class Conversion {
-        
+
         private final String from;
         private final String to;
         private final int hashCode;
-        
+
         Conversion(final String from, final String to) {
             super();
             this.from = from;
             this.to = to;
-            
+
             final int prime = 31;
             int result = 1;
             result = prime * result + ((from == null) ? 0 : from.hashCode());
@@ -321,9 +321,9 @@ public class DefaultConverter implements Converter {
             }
             return true;
         }
-        
-        
-        
+
+
+
     }
 
 }

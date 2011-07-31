@@ -97,7 +97,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FileStorageFolderStorage} - The file storage folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderStorage implements FolderStorage {
@@ -867,7 +867,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         // Append files to destination account
         /* final String[] mailIds = */// destMessageStorage.appendMessages(destFullname, msgs.toArray(new FileStorageMessage[msgs.size()]));
         /*-
-         * 
+         *
         // Ensure flags
         final String[] arr = new String[1];
         for (int i = 0; i < msgs.length; i++) {
@@ -905,7 +905,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         @Override
         public int compare(final FileStorageAccount o1, final FileStorageAccount o2) {
             /*-
-             * 
+             *
             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;

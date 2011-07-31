@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link TransportLoginHandler} - The login handler for mail transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportLoginHandler implements LoginHandlerService {

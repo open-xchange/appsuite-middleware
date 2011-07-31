@@ -53,7 +53,7 @@ import java.util.UUID;
 
 /**
  * {@link UUIDs} - Utility class for {@link UUID}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UUIDs {
@@ -75,7 +75,7 @@ public final class UUIDs {
      * <code>
      * &nbsp;&nbsp;067e61623b6f4ae2a1712470b63dff00
      * </code>
-     * 
+     *
      * @param uuid The {@link UUID} instance
      * @return The unformatted string representation
      */
@@ -98,7 +98,7 @@ public final class UUIDs {
 
     /**
      * Gets the UUID from specified unformatted string.
-     * 
+     *
      * @param unformattedString The unformatted string; e.g. <code>067e61623b6f4ae2a1712470b63dff00</code>
      * @return The UUID
      * @throws IllegalArgumentException If specified string has an odd length or contains an illegal hexadecimal character
@@ -134,7 +134,7 @@ public final class UUIDs {
 
     /**
      * Gets the byte array of specified {@link UUID} instance.
-     * 
+     *
      * @param uuid The {@link UUID} instance
      * @return The byte array of specified {@link UUID} instance
      */
@@ -146,7 +146,7 @@ public final class UUIDs {
 
     /**
      * Generates a new {@link UUID} instance from specified byte array.
-     * 
+     *
      * @param bytes The byte array
      * @return A new {@link UUID} instance
      * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16
@@ -171,7 +171,7 @@ public final class UUIDs {
 
     /**
      * Appends specified byte arrays.
-     * 
+     *
      * @param first The first byte array
      * @param second The second byte array to append
      * @return A new byte array containing specified byte arrays
@@ -185,7 +185,7 @@ public final class UUIDs {
 
     /**
      * Builds a <code>byte</code> array with length 8 from a <code>long</code>.
-     * 
+     *
      * @param n The number
      * @return The filled <code>byte</code> array
      */

@@ -63,16 +63,16 @@ public class CPFactory {
     private CPType type;
 
     private CPCalendar calendar;
-    
+
     private List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
 
     public void setTypeToProduce(CPType type) {
         this.type = type;
     }
-    
+
     public void setCalendar(CPCalendar calendar){
         this.calendar = calendar;
-        
+
         if(strategies != null) {
             for(CPPartitioningStrategy strategy: strategies) {
                 strategy.setCalendar(calendar);

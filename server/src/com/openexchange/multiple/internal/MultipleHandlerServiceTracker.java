@@ -57,7 +57,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MultipleHandlerServiceTracker} - Service tracker for multiple handler factory services.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleHandlerServiceTracker implements ServiceTrackerCustomizer {
@@ -68,7 +68,7 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
 
     /**
      * Initializes a new {@link MultipleHandlerServiceTracker}.
-     * 
+     *
      * @param context The bundle context
      */
     public MultipleHandlerServiceTracker(final BundleContext context) {

@@ -62,7 +62,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
  *
  */
 public class OXMFFormParserTest extends TestCase {
-    private static final String FORM_PAGE = 
+    private static final String FORM_PAGE =
         "<html>\n"+
         "    <head>\n"+
         "        <meta name=\"ox_key\" value=\"ox_value\"></meta>\n"+
@@ -81,56 +81,56 @@ public class OXMFFormParserTest extends TestCase {
         "        </form>\n"+
         "    </body>\n"+
         "</html>\n";
-    
-    
+
+
         public void testParseMetadata() {
-            
+
             OXMFForm form = new CybernekoOXMFFormParser().parse(FORM_PAGE);
             assertNotNull(form);
-            
+
             Map<String, String> metaInfo = form.getMetaInfo();
             assertNotNull(metaInfo);
-            
+
             assertTrue(metaInfo.containsKey("ox_key"));
             assertEquals("ox_value", metaInfo.get("ox_key"));
-            
+
         }
-        
+
         public void testParseForm() {
             OXMFForm form = new CybernekoOXMFFormParser().parse(FORM_PAGE);
             assertNotNull(form);
-            
+
             List<FormElement> formElements = form.getFormElements();
             assertNotNull(formElements);
-            
+
             assertEquals(4, formElements.size());
 
             FormElement input1 = formElements.get(0);
             FormElement input2 = formElements.get(1);
             FormElement password = formElements.get(2);
             FormElement checkbox = formElements.get(3);
-            
+
             assertEquals(FormElement.Widget.INPUT, input1.getWidget());
             assertEquals("inputField", input1.getName());
             assertEquals("The First Input Field", input1.getDisplayName());
             assertEquals(input1, form.getDisplayNameField());
-            
+
             assertEquals(FormElement.Widget.INPUT, input2.getWidget());
             assertEquals("otherInputField", input2.getName());
             assertEquals("The other Input Field", input2.getDisplayName());
-            
+
             assertEquals(FormElement.Widget.PASSWORD, password.getWidget());
             assertEquals("passwordField", password.getName());
             assertEquals("The Password Field", password.getDisplayName());
-            
-            
+
+
             assertEquals(FormElement.Widget.CHECKBOX, checkbox.getWidget());
             assertEquals("choice", checkbox.getName());
             assertEquals("A checkbox", checkbox.getDisplayName());
-            
+
             assertEquals("http://someserver.com/someURL", form.getAction());
-            
-            
-             
+
+
+
         }
 }

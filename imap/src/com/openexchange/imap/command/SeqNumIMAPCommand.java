@@ -58,7 +58,7 @@ import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link SeqNumIMAPCommand}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {

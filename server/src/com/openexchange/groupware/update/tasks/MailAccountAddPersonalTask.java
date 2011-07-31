@@ -63,7 +63,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MailAccountAddPersonalTask} - Add "personal" column to mail/transport account table.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {

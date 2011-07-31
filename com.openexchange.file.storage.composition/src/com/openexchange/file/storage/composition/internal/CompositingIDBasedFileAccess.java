@@ -83,16 +83,16 @@ import com.openexchange.tx.TransactionException;
 
 /**
  * {@link CompositingIDBasedFileAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class CompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedFileAccess {
 
     protected Session session;
-    
+
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
-    
+
     public CompositingIDBasedFileAccess(final Session session) {
         super();
         this.session = session;
@@ -269,7 +269,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         FolderID folderID = null;
         if(document.getFolderId() != null) {
             folderID = new FolderID(document.getFolderId());
-        } 
+        }
         if (id != FileStorageFileAccess.NEW) {
             final FileID fileID = new FileID(id);
             if(folderID == null) {
@@ -279,7 +279,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
                 move(document, data, sequenceNumber, modifiedColumns);
                 return;
             }
-            
+
             document.setId(fileID.getFileId());
             if(folderID == null) {
                 folderID = new FolderID(fileID.getService(), fileID.getAccountId(), fileID.getFolderId());
@@ -370,11 +370,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
         });
     }
-    
+
     public String copy(final String sourceId, final String destFolderId, final File update, InputStream newData, final List<File.Field> fields) throws OXException {
         final FileID source = new FileID(sourceId);
         FolderID dest = null;
-        
+
         File fileMetadata = null;
         if(destFolderId != null) {
             dest = new FolderID(destFolderId);
@@ -382,34 +382,34 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
             fileMetadata = getFileMetadata(sourceId, FileStorageFileAccess.CURRENT_VERSION);
             dest = new FolderID(fileMetadata.getFolderId());
         }
-        
+
         if(source.getService().equals(dest.getService()) && source.getAccountId().equals(dest.getAccountId())) {
             final FileStorageFileAccess fileAccess = getFileAccess(source.getService(), source.getAccountId());
             final IDTuple destAddress = fileAccess.copy(new IDTuple(source.getFolderId(), source.getFileId()), dest.getFolderId(), update, newData, fields);
             return new FileID(source.getService(), source.getAccountId(), destAddress.getFolder(), destAddress.getId()).toUniqueID();
         }
-        
+
         if(fileMetadata == null) {
             fileMetadata = getFileMetadata(sourceId, FileStorageFileAccess.CURRENT_VERSION);
         }
-        
+
         if(update != null) {
             fileMetadata.copyFrom(update, fields.toArray(new File.Field[fields.size()]));
         }
-        
+
         if(newData == null) {
             newData = getDocument(sourceId, FileStorageFileAccess.CURRENT_VERSION);
         }
-        
+
         fileMetadata.setId(FileStorageFileAccess.NEW);
         fileMetadata.setFolderId(destFolderId);
-        
+
         if(newData == null) {
             saveFileMetadata(fileMetadata, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         } else {
             saveDocument(fileMetadata, newData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         }
-        
+
         return fileMetadata.getId();
     }
 
@@ -482,8 +482,8 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
 
     private void connect(final FileStorageAccountAccess accountAccess) throws OXException {
         final String id = accountAccess.getService().getId()+"/"+accountAccess.getAccountId();
-        
-        
+
+
         if(!connectedAccounts.get().containsKey(id)) {
             connectedAccounts.get().put(id, accountAccess);
             accountAccess.connect();
@@ -567,14 +567,14 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
         // TODO Auto-generated method stub
 
     }
-    
+
     @Override
     public void startTransaction() throws TransactionException {
         super.startTransaction();
         connectedAccounts.get().clear();
         accessesToClose.get().clear();
     }
-    
+
     @Override
     public void finish() throws TransactionException {
         connectedAccounts.get().clear();

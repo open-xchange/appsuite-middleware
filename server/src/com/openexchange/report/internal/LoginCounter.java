@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link LoginCounter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -192,7 +192,7 @@ public class LoginCounter implements LoginCounterMBean {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

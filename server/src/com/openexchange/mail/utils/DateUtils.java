@@ -59,7 +59,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link DateUtils} - Provides some date-related utility constants/methods
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DateUtils {
@@ -74,7 +74,7 @@ public final class DateUtils {
 
     /**
      * Gets the corresponding instance of {@link Date} from specified RFC822 date string
-     * 
+     *
      * @param string The RFC822 date string
      * @return The corresponding instance of {@link Date}
      * @throws IllegalArgumentException If specified string cannot be parsed to date
@@ -101,7 +101,7 @@ public final class DateUtils {
 
     /**
      * Gets the corresponding RFC822 date string from specified instance of {@link Date}
-     * 
+     *
      * @param d The instance of {@link Date} to convert
      * @return The corresponding RFC822 date string
      */
@@ -111,7 +111,7 @@ public final class DateUtils {
 
     /**
      * Gets the corresponding RFC822 date string from specified instance of {@link Date}
-     * 
+     *
      * @param d The instance of {@link Date} to convert
      * @param tz The time zone
      * @return The corresponding RFC822 date string

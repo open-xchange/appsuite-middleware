@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingPermission;
 
 /**
  * {@link MessagingPermissionImpl} - A messaging folder permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingPermissionImpl implements Permission {
@@ -84,7 +84,7 @@ public final class MessagingPermissionImpl implements Permission {
 
     /**
      * Initializes a new {@link MessagingPermissionImpl} from given messaging permission.
-     * 
+     *
      * @param messagingPermission The messaging permission
      */
     public MessagingPermissionImpl(final MessagingPermission messagingPermission) {

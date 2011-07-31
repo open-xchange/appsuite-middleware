@@ -66,7 +66,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link ServletResponseWrapper} - Wrapper for {@link ServletResponse}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -170,7 +170,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     /**
      * Sets the character encoding
-     * 
+     *
      * @param characterEncoding
      */
     @Override
@@ -186,7 +186,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     /**
      * Sets the character encoding
-     * 
+     *
      * @param characterEncoding
      * @param checkContentType
      */
@@ -297,7 +297,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     /**
      * Sets the commited flag
-     * 
+     *
      * @param committed
      */
     public void setCommitted(final boolean committed) {
@@ -319,7 +319,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     /**
      * Sets the underlying {@link XAJPv13ServletOutputStream} reference
-     * 
+     *
      * @param os
      */
     public void setServletOutputStream(final XAJPv13ServletOutputStream os) {

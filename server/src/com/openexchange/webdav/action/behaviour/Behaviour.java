@@ -55,6 +55,6 @@ import com.openexchange.webdav.action.WebdavRequest;
 public interface Behaviour {
 	public boolean matches(WebdavRequest req);
 	public Set<Class<? extends Object>> provides();
-	
+
 	public <T> T get(Class<T> clazz);
 }

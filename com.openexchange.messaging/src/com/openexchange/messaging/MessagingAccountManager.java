@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MessagingAccountManager} - An account manager.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -64,7 +64,7 @@ public interface MessagingAccountManager {
 
     /**
      * Adds a new account.
-     * 
+     *
      * @param account The account to add
      * @param session The session providing needed user data
      * @return The identifier of the newly created account
@@ -74,7 +74,7 @@ public interface MessagingAccountManager {
 
     /**
      * Updates an existing account.
-     * 
+     *
      * @param account The account providing the identifier and the data to update
      * @param session The session providing needed user data
      * @throws OXException If update fails
@@ -83,7 +83,7 @@ public interface MessagingAccountManager {
 
     /**
      * Deletes an existing account.
-     * 
+     *
      * @param account The account to delete
      * @param session The session providing needed user data
      * @throws OXException If deletion fails
@@ -92,7 +92,7 @@ public interface MessagingAccountManager {
 
     /**
      * Gets all accounts associated with session user.
-     * 
+     *
      * @param session The session providing needed user data
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
@@ -101,7 +101,7 @@ public interface MessagingAccountManager {
 
     /**
      * Gets an existing messaging account.
-     * 
+     *
      * @param id The identifier
      * @param session The session providing needed user data
      * @return The messaging account.
@@ -115,7 +115,7 @@ public interface MessagingAccountManager {
      * @param session The session providing needed user data
      * @param secret The secret to use for decrypting
      * @return true when all accounts could be decrypted, false otherwise
-     * @throws OXException 
+     * @throws OXException
      */
     public String checkSecretCanDecryptStrings(Session session, String secret) throws OXException;
 
@@ -124,7 +124,7 @@ public interface MessagingAccountManager {
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
-     * @throws OXException 
+     * @throws OXException
      */
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 }

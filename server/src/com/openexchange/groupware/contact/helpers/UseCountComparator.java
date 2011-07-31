@@ -67,7 +67,7 @@ public class UseCountComparator implements Comparator<Contact> {
         this.specialSort = specialSort;
         this.contactComparator = new SpecialAlphanumSortContactComparator();
     }
-    
+
     public UseCountComparator(final boolean specialSort, final Comparator comp) {
         this(specialSort);
         this.contactComparator = comp;

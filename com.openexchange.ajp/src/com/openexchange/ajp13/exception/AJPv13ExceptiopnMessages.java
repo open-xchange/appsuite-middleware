@@ -53,7 +53,7 @@ import com.openexchange.ajp13.AJPv13Response;
 
 /**
  * {@link AJPv13ExceptiopnMessages}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ExceptiopnMessages {

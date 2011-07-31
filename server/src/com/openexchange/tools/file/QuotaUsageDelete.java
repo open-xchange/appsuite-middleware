@@ -60,7 +60,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * QuotaUsageDelete
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class QuotaUsageDelete extends ContextDelete {

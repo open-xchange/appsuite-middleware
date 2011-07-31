@@ -81,7 +81,7 @@ import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * This servlet can be used as super class for all OX webdav servlets.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein </a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -218,7 +218,7 @@ public abstract class OXServlet extends WebDavServlet {
             throw se;
         }
     }
-    
+
     protected LoginCustomizer getLoginCustomizer() {
         return null;
     }
@@ -226,10 +226,10 @@ public abstract class OXServlet extends WebDavServlet {
     public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, Interface face) throws IOException {
         return doAuth(req, resp, face, null);
     }
-    
+
     /**
      * Performs authentication.
-     * 
+     *
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param face the used interface.
@@ -327,7 +327,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     /**
      * Checks if the client sends a correct digest authorization header.
-     * 
+     *
      * @param auth Authorization header.
      * @return <code>true</code> if the client sent a correct authorization header.
      */
@@ -346,7 +346,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     /**
      * Adds the header to the response message for authorization. Only add this header if the authorization of the user failed.
-     * 
+     *
      * @param resp the response to that the header should be added.
      */
     protected static void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
@@ -357,7 +357,7 @@ public abstract class OXServlet extends WebDavServlet {
          * Digest realm="testrealm@host.com",
          * qop="auth,auth-int",
          * nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
-         * opaque="5ccc069c403ebaf9f0171e9517f40e41" 
+         * opaque="5ccc069c403ebaf9f0171e9517f40e41"
          */
         builder.setLength(0);
         builder.append("Digest realm=\"").append(digestRealm).append('"').append(", ");
@@ -427,7 +427,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     /**
      * This method tries to create a session for the given user.
-     * 
+     *
      * @param login login name of the user.
      * @param pass plain text password of the user.
      * @param ipAddress client IP.
@@ -471,7 +471,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     /**
      * Parses the xml request body and returns a JDOM document.
-     * 
+     *
      * @param req the HttpServletRequest that body should be parsed.
      * @return a JDOM document of the parsed body.
      * @throws JDOMException if JDOM gets an exception

@@ -83,7 +83,7 @@ public class OXHCardParser implements ObjectParser<Contact>{
         return parse(buffy.toString());
     }
 
-    
+
     public List<Contact> parse(String html){
         try {
             List<HCard> parseMany = org.microformats.hCard.HCardParser.parseMany(html);

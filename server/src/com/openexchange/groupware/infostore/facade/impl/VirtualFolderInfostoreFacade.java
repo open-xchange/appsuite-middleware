@@ -198,7 +198,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public void unlock(final int id, final ServerSession sessionObj) {
-        // Nothing to do. 
+        // Nothing to do.
     }
 
     @Override

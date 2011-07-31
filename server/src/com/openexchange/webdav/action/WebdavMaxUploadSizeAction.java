@@ -63,7 +63,7 @@ public class WebdavMaxUploadSizeAction extends AbstractAction {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 		}
 	}
-	
+
 	public boolean fits(final WebdavRequest req){
 		return true;
 	}

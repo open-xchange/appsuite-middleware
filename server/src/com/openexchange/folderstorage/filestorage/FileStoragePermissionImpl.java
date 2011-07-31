@@ -54,7 +54,7 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link FileStoragePermissionImpl} - A file storage folder permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStoragePermissionImpl implements Permission {
@@ -84,7 +84,7 @@ public final class FileStoragePermissionImpl implements Permission {
 
     /**
      * Initializes a new {@link FileStoragePermissionImpl} from given messaging permission.
-     * 
+     *
      * @param fsPermission The file storage permission
      */
     public FileStoragePermissionImpl(final FileStoragePermission fsPermission) {

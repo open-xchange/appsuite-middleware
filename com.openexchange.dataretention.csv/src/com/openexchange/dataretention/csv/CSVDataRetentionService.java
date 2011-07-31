@@ -54,7 +54,7 @@ import com.openexchange.dataretention.RetentionData;
 
 /**
  * {@link CSVDataRetentionService} - The CSV data retention service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVDataRetentionService implements DataRetentionService {

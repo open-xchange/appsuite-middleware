@@ -53,7 +53,7 @@ import com.openexchange.search.Operand;
 
 /**
  * {@link ConstantOperand} - The constant operand.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConstantOperand<V> implements Operand<V> {

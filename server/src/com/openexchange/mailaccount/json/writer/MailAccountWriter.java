@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 
 /**
  * {@link MailAccountWriter} - Writes mail account as JSON data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountWriter {
@@ -73,7 +73,7 @@ public final class MailAccountWriter {
 
     /**
      * Writes specified mail account to a JSON object.
-     * 
+     *
      * @param account The mail account to write
      * @return A JSON object filled with
      * @throws JSONException If writing JSON fails
@@ -140,7 +140,7 @@ public final class MailAccountWriter {
 
     /**
      * Writes specified attributes for each mail account contained in given array in an own JSON array surrounded by a super JSON array.
-     * 
+     *
      * @param mailAccounts The mail accounts
      * @param attributes The attributes
      * @return A JSON array of JSON arrays for each account

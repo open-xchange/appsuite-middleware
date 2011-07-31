@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of {@link MailFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderParser {
@@ -88,7 +88,7 @@ public final class FolderParser {
 
     /**
      * Parses given instance of {@link JSONObject} to given instance of {@link MailFolder}
-     * 
+     *
      * @param jsonObj The JSON object (source)
      * @param mailFolder The mail folder (target), which should be empty
      * @param session The session

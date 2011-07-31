@@ -61,7 +61,7 @@ public class PathRegistration {
     public PathRegistration(String...paths) {
         this.paths = paths;
     }
-    
+
     public String[] getPaths() {
         return paths;
     }

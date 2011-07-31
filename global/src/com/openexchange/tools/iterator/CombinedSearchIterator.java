@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CombinedSearchIterator} - Combines one or more instances of {@link SearchIterator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CombinedSearchIterator<T> implements SearchIterator<T> {
@@ -71,7 +71,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link CombinedSearchIterator}
-     * 
+     *
      * @param iterators The instances of {@link SearchIterator}
      */
     public CombinedSearchIterator(final SearchIterator<T>... iterators) {

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link CalendarContentType} - The folder storage content type for calendar.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalendarContentType implements ContentType {
@@ -62,7 +62,7 @@ public final class CalendarContentType implements ContentType {
 
     /**
      * Gets the {@link CalendarContentType} instance.
-     * 
+     *
      * @return The {@link CalendarContentType} instance
      */
     public static CalendarContentType getInstance() {

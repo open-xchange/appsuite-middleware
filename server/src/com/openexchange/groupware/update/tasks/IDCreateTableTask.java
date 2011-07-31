@@ -63,7 +63,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link IDCreateTableTask} - Inserts necessary tables.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IDCreateTableTask extends UpdateTaskAdapter {
@@ -123,7 +123,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
 
     /**
      * Check a table's existence
-     * 
+     *
      * @param tableName The table name to check
      * @param dbmd The database's meta data
      * @return <code>true</code> if table exists; otherwise <code>false</code>

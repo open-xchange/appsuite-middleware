@@ -89,6 +89,6 @@ public class CustomizableDelta<T> implements Delta<T>{
     public long sequenceNumber() throws OXException {
         return delta.sequenceNumber();
     }
-    
-    
+
+
 }

@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
  * {@link GetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetSwitch implements AttributeSwitch {
@@ -257,5 +257,5 @@ public class GetSwitch implements AttributeSwitch {
     public Object pop3Storage() {
         return desc.getProperties().get("pop3.storage");
     }
-    
+
 }

@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MessagingFolderParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -108,7 +108,7 @@ public final class MessagingFolderParser {
 
         /**
          * Parses from given JSON object.
-         * 
+         *
          * @param folderJsonObject The JSON object containing folder data
          * @throws OXException If parsing folder fails
          */
@@ -156,7 +156,7 @@ public final class MessagingFolderParser {
 
         /**
          * Parses permissions from given JSON array.
-         * 
+         *
          * @param permissionsAsJSON The JSON array containing permissions data
          * @return The parsed permissions
          * @throws OXException If parsing permissions fails
@@ -203,7 +203,7 @@ public final class MessagingFolderParser {
 
     /**
      * Parses given instance of {@link JSONObject} to given instance of {@link DefaultMessagingFolder}.
-     * 
+     *
      * @param jsonObj The JSON object (source)
      * @param messagingFolder The messaging folder (target), which should be empty
      * @param session The session

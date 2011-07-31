@@ -86,7 +86,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
  * {@link XAJPv13ForwardRequest} - this class' purpose is mainly to fill the http servlet request from AJP's forward request, to identify
  * servlet instance through request path and to apply the load-balancing and http-session-identifying <tt>JSESSIONID</tt> cookie or URL
  * parameter to the http serlvet response
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13ForwardRequest extends XAJPv13Request {
@@ -165,7 +165,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
     /**
      * Initializes a new {@link XAJPv13ForwardRequest}
-     * 
+     *
      * @param payloadData The payload data with prefix code already consumed
      * @param connection The AJP connection passed to servlet's input/output stream
      */
@@ -385,7 +385,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request
-     * 
+     *
      * @param servletRequest The servlet request
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
@@ -396,7 +396,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request.
-     * 
+     *
      * @param servletRequest The servlet request
      * @param queryStr The query string to be parsed
      * @param fromAttribute <code>true</code> if query string comes from request's attributes; otherwise <code>false</code>
@@ -544,7 +544,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
     /**
      * Re-Parse previous cookie in list
-     * 
+     *
      * @param headerValue The complete cookie header value
      * @param prevEnd The detected cookie's end position
      * @param realEnd The real cookie's end position
@@ -590,7 +590,7 @@ public final class XAJPv13ForwardRequest extends XAJPv13Request {
 
     /**
      * Removes heading/trailing quote character <code>'"'</code> if both present.
-     * 
+     *
      * @param cookieValue The cookie value to strip quotes from
      * @return The stripped cookie value.
      */

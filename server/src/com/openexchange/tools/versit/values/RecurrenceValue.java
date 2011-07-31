@@ -132,7 +132,7 @@ public class RecurrenceValue {
 
     /**
      * Used in RecurrenceValue.ByDay
-     * 
+     *
      * @author Viktor Pracht
      */
     public static class Weekday {

@@ -69,7 +69,7 @@ public class BinaryContentDumper implements MessagingContentDumper {
     public void dump(final MessagingContent content, final OutputStream outputStream) throws OXException, IOException {
         final BinaryContent binContent = (BinaryContent) content;
         final InputStream inputStream = binContent.getData();
-        
+
         final BufferedInputStream bin = new BufferedInputStream(inputStream);
         final BufferedOutputStream bout = new BufferedOutputStream(outputStream);
         try {
@@ -83,7 +83,7 @@ public class BinaryContentDumper implements MessagingContentDumper {
                 bout.flush();
             }
         }
-        
+
     }
 
     public boolean handles(final MessagingContent content) {

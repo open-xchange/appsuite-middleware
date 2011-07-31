@@ -122,7 +122,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorage implements FolderStorage {
@@ -136,7 +136,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Gets the (active) connection.
-         * 
+         *
          * @return The connection
          */
         Connection getConnection();
@@ -477,7 +477,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
             }
-             * 
+             *
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } finally {
@@ -1163,7 +1163,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             /*-
              * IDs already sorted by default_flag DESC, fname
-             * 
+             *
              * TODO: Ensure locale-specific ordering is maintained
              */
             final boolean doDBSorting = true;

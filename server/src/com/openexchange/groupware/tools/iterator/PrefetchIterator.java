@@ -65,7 +65,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 /**
  * This iterator prefetches the delegating iterator results if the server configuration contains <code>true</code> for the prefetch
  * parameter.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class PrefetchIterator<T> implements SearchIterator<T> {
@@ -77,9 +77,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param delegate Delegating iterator.
-     * @throws OXException 
+     * @throws OXException
      */
     public PrefetchIterator(final SearchIterator<T> delegate) throws OXException {
         final boolean prefetch = ServerConfig.getBoolean(Property.PrefetchEnabled);
@@ -148,7 +148,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
     /**
      * This class prefetches the result.
-     * 
+     *
      * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
      * @param <T> type of objects in this iterator.
      */
@@ -169,9 +169,9 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param delegate Iterator for the object.
-         * @throws OXException 
+         * @throws OXException
          */
         Prefetch(final SearchIterator<T> delegate) throws OXException {
             super();
@@ -185,7 +185,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         /**
          * Reads all data from the delegate.
-         * @throws OXException 
+         * @throws OXException
          */
         private void fetch() throws OXException {
             data = new LinkedList<T>();
@@ -279,7 +279,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
     /**
      * This class doesn't prefetch the result.
-     * 
+     *
      * @param <T> type of objects in this iterator.
      */
     private static final class NoPrefetch<T> implements SearchIterator<T> {
@@ -291,7 +291,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param delegate Iterator for the object.
          */
         NoPrefetch(final SearchIterator<T> delegate) {

@@ -64,7 +64,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
  * {@link ThreadSortUtil} - Utilities for thread-sort.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadSortUtil {
@@ -80,7 +80,7 @@ public final class ThreadSortUtil {
 
     /**
      * Creates a newly allocated array of <code>int</code> filled with message's sequence number.
-     * 
+     *
      * @param threadResponse The thread response string; e.g.<br>
      *            <code>&quot;&#042;&nbsp;THREAD&nbsp;(1&nbsp;(2)(3)(4)(5))(6)(7)(8)((9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19))&quot;</code>
      * @return A newly allocated array of <code>int</code> filled with message's sequence number
@@ -108,7 +108,7 @@ public final class ThreadSortUtil {
 
     /**
      * Creates a newly allocated array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
-     * 
+     *
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
@@ -130,8 +130,8 @@ public final class ThreadSortUtil {
         return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
         /*-
          * Formerly:
-         * 
-        
+         *
+
         final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
         final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
         if (m.find()) {
@@ -147,7 +147,7 @@ public final class ThreadSortUtil {
 
     /**
      * Parses specified thread-sort string.
-     * 
+     *
      * @return Parsed thread-sort string in a structured data type
      */
     public static List<ThreadSortNode> parseThreadResponse(final String threadResponse) throws OXException {
@@ -166,7 +166,7 @@ public final class ThreadSortUtil {
 
     /**
      * Executes THREAD command with given arguments.
-     * 
+     *
      * @param imapFolder The IMAP folder on which THREAD command shall be executed
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or
      *            <code>&quot;12,13,14,24&quot;</code>
@@ -216,7 +216,7 @@ public final class ThreadSortUtil {
 
     /**
      * Outputs specified structured list to given string builder.
-     * 
+     *
      * @param structuredList The structured list
      * @param sb The string builder to output to
      */
@@ -238,7 +238,7 @@ public final class ThreadSortUtil {
 
     /**
      * Converts specified structured list to a flat list.
-     * 
+     *
      * @param structuredList The structured list
      * @param flatList The flat list to fill
      */
@@ -255,7 +255,7 @@ public final class ThreadSortUtil {
 
     /**
      * Generates a structured list from specified mails.
-     * 
+     *
      * @param mails The mails with thread level applied
      * @return A structured list reflecting thread-order structure
      */

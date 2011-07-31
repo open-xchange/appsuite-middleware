@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  * Version 6.16 contains a fix putting the feature bit for the contact collector to work properly. This causes the contact collector to not
  * work anymore for pre SP5 created users. All that users have to contact collector feature bit disabled. But contact collector worked
  * although the bit was disabled. Therefore this task sets this bit for all users.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class ContactCollectorReEnabler extends UpdateTaskAdapter {

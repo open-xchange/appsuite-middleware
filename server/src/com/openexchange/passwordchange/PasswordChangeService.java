@@ -71,7 +71,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link PasswordChangeService} - Performs changing a user's password
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class PasswordChangeService {
@@ -87,7 +87,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Performs the password update.
-     * 
+     *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @throws OXException If password update fails
@@ -101,7 +101,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Checks permission
-     * 
+     *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @throws OXException If permission is denied to update password
@@ -126,7 +126,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Check old password
-     * 
+     *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @throws OXException If old password is invalid
@@ -164,7 +164,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Actually updates the password in affected resources
-     * 
+     *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @see #getEncodedPassword(String, String)
@@ -174,7 +174,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Propagates changed password throughout system: invalidate caches, propagate to sub-systems like mail, etc.
-     * 
+     *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
      *            password (needed for verification)
      * @throws OXException If propagating the password change fails
@@ -211,7 +211,7 @@ public abstract class PasswordChangeService {
 
     /**
      * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     * 
+     *
      * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
      * @param newPassword The new password to encode
      * @return The encoded password
@@ -232,14 +232,14 @@ public abstract class PasswordChangeService {
             throw UserExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
-    
+
     /*-
      * +++++++++++++++ _LoginInfo +++++++++++++++
      */
 
     /**
      * {@link _LoginInfo} - Simple class that implements {@link LoginInfo}
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     protected static final class _LoginInfo implements LoginInfo {
@@ -250,7 +250,7 @@ public abstract class PasswordChangeService {
 
         /**
          * Initializes a new {@link _LoginInfo}
-         * 
+         *
          * @param loginInfo The login info
          * @param pw The password
          */
@@ -288,7 +288,7 @@ public abstract class PasswordChangeService {
      * <p>
      * Valid characters are:<br>
      * &quot;<i>&nbsp; abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ -+.%$@<i>&quot;
-     * 
+     *
      * @param password The password string to check
      * @return <code>true</code> if specified password string only consists of valid characters; otherwise <code>false</code>
      */

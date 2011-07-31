@@ -87,8 +87,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreLockNullResource.class));
-	
-	
+
+
 	private final InfostoreWebdavFactory factory;
 	private AbstractResource resource;
 	private final SessionHolder sessionHolder;
@@ -109,12 +109,12 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		this.lockHelper = new EntityLockHelper(factory.getLockNullLockManager(), sessionHolder, resource.getUrl());
 		this.provider = factory.getProvider();
 	}
-	
+
 	public InfostoreLockNullResource(final AbstractResource resource, final InfostoreWebdavFactory factory, final int id ){
 		this(resource, factory);
 		this.setId(id);
 	}
-	
+
 	public static int findInfostoreLockNullResource(final WebdavPath url, final Connection readCon, final Context ctx) throws OXException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -134,7 +134,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 				try {
 					stmt.close();
 				} catch (final SQLException e1) {
-					LOG.debug("",e1);		
+					LOG.debug("",e1);
 				}
 			}
 			if(rs != null) {
@@ -157,7 +157,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	protected WebdavFactory getFactory() {
 		return factory;
 	}
-	
+
 	@Override
 	protected List<WebdavProperty> internalGetAllProps() throws OXException {
 		return Collections.emptyList();
@@ -363,21 +363,21 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		// IGNORE
 	}
 
-	
+
 	@Override
 	public boolean isLockNull(){
 		return true;
 	}
-	
+
 	@Override
 	protected boolean isset(final Property p) {
 		switch(p.getId()) {
-		case Protocol.LOCKDISCOVERY : case Protocol.SUPPORTEDLOCK : case Protocol.DISPLAYNAME : 
+		case Protocol.LOCKDISCOVERY : case Protocol.SUPPORTEDLOCK : case Protocol.DISPLAYNAME :
 			return true;
 		default: return false;
 		}
 	}
-	
+
 	@Override
     public void unlock(final String token) throws OXException {
 		lockHelper.removeLock(token);
@@ -385,12 +385,12 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			delete();
 		}
 	}
-	
+
 	@Override
 	public WEBDAV_METHOD[] getOptions(){
 		return OPTIONS;
 	}
-	
+
 	private void dumpToDB() throws SQLException, OXException {
 		if(exists) {
 			return;
@@ -458,7 +458,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 	@Override
     public void transferLock(final WebdavLock lock) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 

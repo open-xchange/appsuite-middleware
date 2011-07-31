@@ -204,7 +204,7 @@ public class SimServerSession implements ServerSession {
     public void setUserConfig(UserConfiguration userConfig) {
         this.userConfig = userConfig;
     }
-    
+
     public void setLogin(String login) {
         this.login = login;
     }

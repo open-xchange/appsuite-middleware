@@ -81,7 +81,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * folders
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -227,7 +227,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
 
         /**
          * Initializes a new {@link QueuedTask}
-         * 
+         *
          * @param folderObject The folder object
          * @param clientId The client ID
          * @param action The desired action
@@ -318,7 +318,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                         + exc.toString(), clientId, os, xo);
             }
         }
-        
+
         public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
             this.lastModifiedCache = lastModifiedCache;
         }

@@ -53,7 +53,7 @@ import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 
 /**
- * Default database update task attributes. This represents how old database update tasks worked. 
+ * Default database update task attributes. This represents how old database update tasks worked.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

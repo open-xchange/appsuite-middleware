@@ -59,7 +59,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link OutlookFolder} - A MS Outlook folder backed by a real folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolder implements Folder {
@@ -93,7 +93,7 @@ public final class OutlookFolder implements Folder {
 
     /**
      * Initializes a {@link OutlookFolder} with specified real folder.
-     * 
+     *
      * @param source The real folder which is mapped by this virtual folder
      */
     public OutlookFolder(final Folder source) {
@@ -218,11 +218,11 @@ public final class OutlookFolder implements Folder {
 
     /**
      * Gets either real folder's permissions or virtual folder's individual permissions (if set)
-     * 
+     *
      * <pre>
      * return permissions == null ? realFolder.getPermissions() : permissions;
      * </pre>
-     * 
+     *
      * @return The permissions for this virtual folder
      */
     @Override
@@ -304,14 +304,14 @@ public final class OutlookFolder implements Folder {
     public boolean hasSubscribedSubfolders() {
         return null == subscribedSubfolders ? realFolder.hasSubscribedSubfolders() : subscribedSubfolders.booleanValue();
         /*-
-         * 
+         *
         if (null == subscribedSubfolders) {
             return null == subfolders || subfolders.length > 0;
         }
         return subscribedSubfolders.booleanValue();
         */
     }
-    
+
     @Override
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         this.subscribedSubfolders = Boolean.valueOf(subscribedSubfolders);

@@ -63,7 +63,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link ExtendedMimeMessage} - Extends {@link MimeMessage} by some additional attributes to store message information such as its UID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ExtendedMimeMessage extends MimeMessage {
@@ -92,7 +92,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Initializes a new {@link ExtendedMimeMessage}
-     * 
+     *
      * @param fullname The folder fullname
      * @param separator The folder separator character
      * @param msgnum The message number in folder
@@ -106,7 +106,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Parse the input stream: setting the headers and content fields appropriately.
-     * 
+     *
      * @param in The input stream
      * @throws MessagingException If parsing the input stream fails
      */
@@ -118,7 +118,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Gets this message's folder fullname
-     * 
+     *
      * @return The fullname
      */
     public String getFullname() {
@@ -127,7 +127,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Gets this message's folder separator
-     * 
+     *
      * @return The separator
      */
     public char getSeparator() {
@@ -140,7 +140,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * The flag if this message has attachments
-     * 
+     *
      * @return <code>true</code> if this message has attachments; otherwise <code>false</code>
      */
     public boolean hasAttachment() {
@@ -183,7 +183,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the flag if this message has attachments
-     * 
+     *
      * @param hasAttachment <code>true</code> to mark this message to hold attachments; otherwise <code>false</code>
      */
     public void setHasAttachment(final boolean hasAttachment) {
@@ -192,7 +192,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Gets the thread level
-     * 
+     *
      * @return the thread level
      */
     public int getThreadLevel() {
@@ -201,7 +201,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the thread level
-     * 
+     *
      * @param threadLevel the thread level to set
      */
     public void setThreadLevel(final int threadLevel) {
@@ -214,7 +214,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      * This attribute is only available if underlying mail system as an IMAP server and fetch item <i>BODYSTRUCTURE</i> has been requested.
      * <p>
      * By now this attribute is only used to detect if message contains (file) attachment(s) in a more precise manner.
-     * 
+     *
      * @return The body structure
      */
     public BODYSTRUCTURE getBodystructure() {
@@ -227,7 +227,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
      * This attribute can only be set if underlying mail system as an IMAP server and fetch item <i>BODYSTRUCTURE</i> has been requested.
      * <p>
      * By now this attribute is only used to detect if message contains (file) attachment(s) in a more precise manner.
-     * 
+     *
      * @param bodystructure The body structure to set
      */
     public void setBodystructure(final BODYSTRUCTURE bodystructure) {
@@ -236,7 +236,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Gets the priority
-     * 
+     *
      * @return The priority
      */
     public int getPriority() {
@@ -275,7 +275,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the priority
-     * 
+     *
      * @param priority The priority to set
      */
     public void setPriority(final int priority) {
@@ -289,7 +289,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the received date
-     * 
+     *
      * @param receivedDate the received date to set
      */
     public void setReceivedDate(final Date receivedDate) {
@@ -313,7 +313,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the size
-     * 
+     *
      * @param size the size to set
      */
     public void setSize(final int size) {
@@ -352,7 +352,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the content type
-     * 
+     *
      * @param contentType the content type to set
      */
     public void setContentType(final ContentType contentType) {
@@ -361,7 +361,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Gets the UID
-     * 
+     *
      * @return The UID
      */
     public long getUid() {
@@ -370,7 +370,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 
     /**
      * Sets the UID
-     * 
+     *
      * @param uid The UID to set
      */
     public void setUid(final long uid) {

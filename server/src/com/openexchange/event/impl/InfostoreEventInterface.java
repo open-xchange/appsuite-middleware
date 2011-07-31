@@ -59,5 +59,5 @@ public interface InfostoreEventInterface {
 	public void infoitemModified(DocumentMetadata metadata, Session sessionObject);
 
 	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObject);
-	
+
 }

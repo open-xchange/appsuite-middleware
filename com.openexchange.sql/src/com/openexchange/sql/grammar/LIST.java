@@ -55,17 +55,17 @@ import com.openexchange.sql.builder.IStatementBuilder;
 
 
 public class LIST extends Expression {
-    
+
     private List<Expression> expressions;
-    
+
     public LIST(Expression... expressions) {
         this.expressions = Arrays.asList(expressions);
     }
-    
+
     public LIST(List<Expression> expressions) {
         this.expressions = expressions;
     }
-    
+
     public List<Expression> getExpressions() {
         return expressions;
     }

@@ -54,13 +54,13 @@ public class WebdavStatusImpl<T> implements WebdavStatus<T> {
 	private final int status;
 	private final T additional;
 	private final WebdavPath url;
-	
+
 	public WebdavStatusImpl(final int status, final WebdavPath url, final T additional) {
 		this.status = status;
 		this.url = url;
 		this.additional = additional;
 	}
-	
+
 	@Override
     public T getAdditional() {
 		return additional;

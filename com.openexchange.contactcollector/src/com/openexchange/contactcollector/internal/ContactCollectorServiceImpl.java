@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ContactCollectorServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -100,7 +100,7 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     /**
      * Starts this contact collector service implementation.
-     * 
+     *
      * @throws OXException If a needed service is missing
      */
     public void start() throws OXException {

@@ -64,19 +64,19 @@ import com.openexchange.publish.json.Hostname;
 public class HostnameServiceTracker extends ServiceTracker {
 
     private Hostname hostname;
-    
+
     public HostnameServiceTracker(BundleContext context, Hostname hostname) {
         super(context, HostnameService.class.getName(), null);
         this.hostname = hostname;
     }
-    
+
     @Override
     public Object addingService(ServiceReference reference) {
         Object service = super.addingService(reference);
         hostname.setHostnameService((HostnameService) service);
         return service;
     }
-    
+
     @Override
     public void removedService(ServiceReference reference, Object service) {
         hostname.setHostnameService(null);

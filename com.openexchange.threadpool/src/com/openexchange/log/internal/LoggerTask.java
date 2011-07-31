@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link LoggerTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class LoggerTask extends AbstractTask<Object> {
@@ -69,19 +69,19 @@ final class LoggerTask extends AbstractTask<Object> {
      * The poison element.
      */
     private static final Loggable POISON = new Loggable() {
-        
+
         public Throwable getThrowable() {
             return null;
         }
-        
+
         public String getMessage() {
             return null;
         }
-        
+
         public Log getLog() {
             return null;
         }
-        
+
         public Level getLevel() {
             return null;
         }
@@ -101,7 +101,7 @@ final class LoggerTask extends AbstractTask<Object> {
 
     /**
      * Initializes a new {@link LoggerTask}.
-     * 
+     *
      * @param queue
      */
     protected LoggerTask(final BlockingQueue<Loggable> queue) {

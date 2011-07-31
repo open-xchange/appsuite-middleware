@@ -106,7 +106,7 @@ public class Assert extends org.junit.Assert {
         }
         return retval;
     }
-    
+
     /**
      * Compare two bean style objects attributes. If given a list of field names only those fields will be compared,
      * otherwise all fields will be compared
@@ -114,10 +114,10 @@ public class Assert extends org.junit.Assert {
      * @param bean1 The expected values
      * @param bean2 The actual values
      * @param fields The fields to compare, if empty, compares all fields.
-     * @throws IntrospectionException 
-     * @throws InvocationTargetException 
-     * @throws IllegalAccessException 
-     * @throws IllegalArgumentException 
+     * @throws IntrospectionException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
      */
     public static void assertEqualAttributes(String message, Object expected, Object actual, String...fields) throws Exception {
         if(! expected.getClass().isAssignableFrom(actual.getClass())) {
@@ -127,7 +127,7 @@ public class Assert extends org.junit.Assert {
         PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
         boolean all = fields.length == 0;
         Set<String> fieldsToCompare = new HashSet<String>(Arrays.asList(fields));
-        
+
         for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String propName = propertyDescriptor.getName();
             if(all || fieldsToCompare.contains(propName)) {
@@ -144,7 +144,7 @@ public class Assert extends org.junit.Assert {
             }
         }
     }
-    
+
     public static void assertEqualAttributes(Object expected, Object actual, String...fields) throws Exception {
         assertEqualAttributes("Attributes mismatch", expected, actual, fields);
     }

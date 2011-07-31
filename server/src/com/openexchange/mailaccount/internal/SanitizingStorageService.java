@@ -65,7 +65,7 @@ import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link SanitizingStorageService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class SanitizingStorageService implements MailAccountStorageService {

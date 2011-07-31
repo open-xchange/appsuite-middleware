@@ -51,12 +51,12 @@ package com.openexchange.sql.grammar;
 
 public abstract class UnaryArithmeticExpression extends ArithmeticExpression {
 	protected Expression expression;
- 
+
 	public UnaryArithmeticExpression(Expression expression) {
 		super();
 		this.expression = expression;
 	}
-	
+
 	public Expression getExpression() {
 		return expression;
 	}

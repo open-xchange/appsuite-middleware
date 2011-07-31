@@ -71,26 +71,26 @@ public class NewTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testNoUpload() throws JSONException, OXException {
         request().body(new JSONObject("{folder: '12', title: 'nice title'}"));
-        
+
         final DefaultFile file = new DefaultFile();
         file.setFolderId("12");
         file.setTitle("nice title");
         file.setId(FileStorageFileAccess.NEW);
-        
+
         fileAccess().expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-    
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
     public void testUpload() {
         // TODO
     }
-    
+
     @Override
     public AbstractFileAction createAction() {
         return new NewAction();

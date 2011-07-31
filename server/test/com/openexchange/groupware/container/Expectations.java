@@ -54,24 +54,24 @@ import java.util.HashMap;
 
 
 /**
- * A set of keys that are to be checked and a set of expected values for these keys. 
+ * A set of keys that are to be checked and a set of expected values for these keys.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Expectations extends KeyValueHolder {
-    
+
     public Expectations(Changes changes){
         setMap(changes.getMap());
     }
-    
+
     public Expectations(){
         setMap(new HashMap<Integer, Object>());
     }
-    
+
     public void verify(CommonObject actual){
         verify("", actual);
     }
-    
+
     public void verify(String message, CommonObject actual){
         int successfulTests = 0;
         for(Integer key: getMap().keySet()){

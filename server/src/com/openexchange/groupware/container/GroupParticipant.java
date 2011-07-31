@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link GroupParticipant} - Represents an internal group participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class GroupParticipant implements Participant, Comparable<Participant> {
@@ -66,7 +66,7 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the group.
      */
     public GroupParticipant(final int id) {

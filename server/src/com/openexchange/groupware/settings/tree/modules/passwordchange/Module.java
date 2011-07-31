@@ -56,9 +56,9 @@ import com.openexchange.passwordchange.service.PasswordChange;
 /**
  * {@link Module} - Contains initialization for the modules configuration tree
  * setting password-change.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class Module extends AbstractModules {
 

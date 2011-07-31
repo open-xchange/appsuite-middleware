@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UserActionFactory} - Factory for user component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserActionFactory implements AJAXActionServiceFactory {
@@ -71,7 +71,7 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Gets the {@link UserActionFactory factory} instance.
-     * 
+     *
      * @return The {@link UserActionFactory factory} instance.
      */
     public static final UserActionFactory getInstance() {
@@ -108,7 +108,7 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes the unmodifiable map to stored actions.
-     * 
+     *
      * @return The unmodifiable map with actions stored
      */
     private Map<String, AJAXActionService> initActions() {

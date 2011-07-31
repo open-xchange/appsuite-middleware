@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CookieLifetime}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CookieLifetime implements PreferencesItemService {

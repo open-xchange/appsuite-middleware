@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
 public class FileStorageCompositionActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{FileStorageServiceRegistry.class};
-    
+
     private ServiceRegistration registration;
 
     @Override
@@ -79,12 +79,12 @@ public class FileStorageCompositionActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
-        
+
     }
 
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        
+
     }
 
     @Override
@@ -103,10 +103,10 @@ public class FileStorageCompositionActivator extends DeferredActivator {
                     protected FileStorageService getFileStorageService(String serviceId) throws OXException {
                         return getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
                     }
-                    
+
                 };
             }
-            
+
         }, null);
     }
 
@@ -116,9 +116,9 @@ public class FileStorageCompositionActivator extends DeferredActivator {
             registration.unregister();
         }
     }
-    
-    
-   
+
+
+
 
 
 }

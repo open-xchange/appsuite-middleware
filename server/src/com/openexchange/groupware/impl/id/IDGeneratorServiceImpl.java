@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link IDGeneratorServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDGeneratorServiceImpl implements IDGeneratorService {

@@ -72,7 +72,7 @@ import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link OAuthServiceMetaDataMSNImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -154,14 +154,14 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             HttpClient httpClient = new HttpClient();
             Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
             httpClient.getHostConfiguration().setHost("live.com", 443, protocol);
-            String urlString = accessTokenGrabber;            
+            String urlString = accessTokenGrabber;
             PostMethod postMethod = new PostMethod(urlString + params);
             postMethod.addParameter("wrap_client_id", getAPIKey());
             postMethod.addParameter("wrap_client_secret", getAPISecret());
             postMethod.addParameter("wrap_callback", callback);
             postMethod.addParameter("wrap_verification_code", verifier);
 
-            httpClient.executeMethod(postMethod);            
+            httpClient.executeMethod(postMethod);
 
             DefaultOAuthToken token = new DefaultOAuthToken();
             token.setSecret("");
@@ -170,7 +170,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             for (String keyValuePair : keyValuePairs) {
                 String[] split = keyValuePair.split("=");
                 if (split[0].equals(REFRESH_TOKEN_KEY)) {
-                    token.setToken(split[1]);                                        
+                    token.setToken(split[1]);
                     return token;
                 }
             }

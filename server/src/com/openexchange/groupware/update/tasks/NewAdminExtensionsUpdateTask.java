@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * @author choeger
- * 
+ *
  */
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
@@ -77,7 +77,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
      */
     @Override
@@ -87,7 +87,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTask#getPriority()
      */
     @Override
@@ -99,7 +99,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     }
 
     private static final String STR_INFO = "Performing update task 'NewAdminExtensionsUpdateTask'";
-    
+
     private static final String CREATE_SEQUENCE_UID  = "CREATE TABLE IF NOT EXISTS `sequence_uid_number` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     private static final String CREATE_SEQUENCE_GID  = "CREATE TABLE IF NOT EXISTS `sequence_gid_number` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     private static final String CREATE_SEQUENCE_MAIL = "CREATE TABLE IF NOT EXISTS `sequence_mail_service` ( `cid` INT4 unsigned NOT NULL, `id` INT4 unsigned NOT NULL, PRIMARY KEY  (`cid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
@@ -109,17 +109,17 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     private static final String TABLE_GROUPS       = "groups";
     private static final String TABLE_DEL_GROUPS   = "del_groups";
 
-    private static final String COL_UID_NUMBER     = "uidNumber"; 
-    private static final String COL_GID_NUMBER     = "gidNumber"; 
-    private static final String COL_HOME_DIRECTORY = "homeDirectory"; 
-    private static final String COL_LOGIN_SHELL    = "loginShell"; 
-    private static final String COL_PASSWORD_MECH  = "passwordMech"; 
+    private static final String COL_UID_NUMBER     = "uidNumber";
+    private static final String COL_GID_NUMBER     = "gidNumber";
+    private static final String COL_HOME_DIRECTORY = "homeDirectory";
+    private static final String COL_LOGIN_SHELL    = "loginShell";
+    private static final String COL_PASSWORD_MECH  = "passwordMech";
 
     private static final int NOGROUP    = 65534;
     private static final int NOBODY     = 65534;
     private static final String NOHOME  = "/dev/null";
     private static final String NOSHELL = "/bin/false";
-    private static final String SHA     = "{SHA}";    
+    private static final String SHA     = "{SHA}";
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
@@ -225,7 +225,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
                 final String table = entry.getKey();
                 final ArrayList<String> cols = entry.getValue();
-                if( cols.size() > 0 && 
+                if( cols.size() > 0 &&
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
                         if( col.equals(COL_GID_NUMBER) ) {
@@ -249,8 +249,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                             stmt.executeUpdate();
                             stmt.close();
                         }
-                    }                        
-                } else if( cols.size() > 0 && 
+                    }
+                } else if( cols.size() > 0 &&
                         ( table.equals(TABLE_GROUPS) || table.equals(TABLE_DEL_GROUPS) ) ) {
                     for( final String col : cols ) {
                         if( col.equals(COL_GID_NUMBER) ) {
@@ -274,7 +274,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
             for(final Map.Entry<String, ArrayList<String>> entry : missingCols.entrySet() ) {
                 final String table = entry.getKey();
                 final ArrayList<String> cols = entry.getValue();
-                if( cols.size() > 0 && 
+                if( cols.size() > 0 &&
                         ( table.equals(TABLE_USER) || table.equals(TABLE_DEL_USER) ) ) {
                     for( final String col : cols ) {
                         if( col.equals(COL_GID_NUMBER) ) {
@@ -303,8 +303,8 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
                             stmt.executeUpdate();
                             stmt.close();
                         }
-                    }                        
-                } else if( cols.size() > 0 && 
+                    }
+                } else if( cols.size() > 0 &&
                         ( table.equals(TABLE_GROUPS) || table.equals(TABLE_DEL_GROUPS) ) ) {
                     for( final String col : cols ) {
                         if( col.equals(COL_GID_NUMBER) ) {

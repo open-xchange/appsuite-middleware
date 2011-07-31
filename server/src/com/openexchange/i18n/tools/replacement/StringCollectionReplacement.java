@@ -54,15 +54,15 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link StringCollectionReplacement} - A string collection replacement.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class StringCollectionReplacement extends StringReplacement {
 
     /**
      * Initializes a new {@link StringCollectionReplacement}
-     * 
+     *
      * @param token The token
      * @param replacementCollection The collection of string replacements
      */
@@ -72,7 +72,7 @@ public final class StringCollectionReplacement extends StringReplacement {
 
     /**
      * Converts given string collection to a CRLF-separated string
-     * 
+     *
      * @param replacementCollection The collection of strings
      * @return The resulting string
      */

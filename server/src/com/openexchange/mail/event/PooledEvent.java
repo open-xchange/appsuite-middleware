@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PooledEvent} - A pooled event.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PooledEvent implements Delayed {
@@ -85,7 +85,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Initializes a new {@link PooledEvent} with {@link PushEventConstants#TOPIC default topic}.
-     * 
+     *
      * @param contextId The context ID
      * @param userId The user ID
      * @param accountId The account ID
@@ -100,7 +100,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Initializes a new {@link PooledEvent}.
-     * 
+     *
      * @param contextId The context ID
      * @param userId The user ID
      * @param accountId The account ID
@@ -139,7 +139,7 @@ public final class PooledEvent implements Delayed {
      * {@link EventPool#put(PooledEvent)} does not return to the caller until delivery of the event is completed.
      * <p>
      * <b>Note</b>: Works only if this pooled event is considered for immediate delivery.
-     * 
+     *
      * @param async <code>true</code> to deliver asynchronously; otherwise <code>false</code>
      * @return This pooled event with new behavior applied
      */
@@ -150,7 +150,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Checks whether the event should be delivered asynchronously.
-     * 
+     *
      * @return <code>true</code> to deliver asynchronously; otherwise <code>false</code>
      */
     public boolean isAsync() {
@@ -174,7 +174,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the topic for this event.
-     * 
+     *
      * @return The topic
      */
     public String getTopic() {
@@ -190,7 +190,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets this pooled notification's last-accessed time stamp.
-     * 
+     *
      * @return The last-accessed time stamp.
      */
     public long lastAccessed() {
@@ -199,7 +199,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Checks if this pooled events matches specified user ID and context ID.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return <code>true</code> this pooled events matches; otherwise <code>false</code>
@@ -253,7 +253,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the context ID.
-     * 
+     *
      * @return The context ID
      */
     public int getContextId() {
@@ -262,7 +262,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the user ID.
-     * 
+     *
      * @return The user ID
      */
     public int getUserId() {
@@ -271,7 +271,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -280,7 +280,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the fullname
-     * 
+     *
      * @return The fullname
      */
     public String getFullname() {
@@ -289,7 +289,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Gets the session
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -298,7 +298,7 @@ public final class PooledEvent implements Delayed {
 
     /**
      * Checks for a content-related event.
-     * 
+     *
      * @return <code>true</code> for a content-related event; otherwise <code>false</code>
      */
     public boolean isContentRelated() {

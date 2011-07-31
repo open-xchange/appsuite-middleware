@@ -55,7 +55,7 @@ import java.util.Locale;
 
 /**
  * A container for vCard and iCalendar objects.
- * 
+ *
  * @author Viktor Pracht
  */
 public class VersitObject {

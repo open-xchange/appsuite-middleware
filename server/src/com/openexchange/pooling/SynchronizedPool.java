@@ -559,7 +559,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     idleSize = data.numIdle();
                     lifecycle.destroy(metaData.getPooled());
                     continue;
-                } 
+                }
                 index++;
             }
             ensureMinIdle();

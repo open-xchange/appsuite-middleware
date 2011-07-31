@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link FileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -146,7 +146,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     /**
      * Not connected
      */
-    NOT_CONNECTED(FileStorageExceptionMessages.NOT_CONNECTED_MSG, Category.CATEGORY_PERMISSION_DENIED, 23), 
+    NOT_CONNECTED(FileStorageExceptionMessages.NOT_CONNECTED_MSG, Category.CATEGORY_PERMISSION_DENIED, 23),
     /**
      * Invalid sorting column. Cannot sort by %1$s.
      */
@@ -173,7 +173,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
-    
+
     private final boolean display;
 
     private FileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -209,7 +209,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -218,7 +218,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -228,7 +228,7 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

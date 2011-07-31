@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StorageParametersImpl} - Implementation of {@link StorageParameters}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StorageParametersImpl implements StorageParameters {
@@ -98,7 +98,7 @@ public final class StorageParametersImpl implements StorageParameters {
 
     /**
      * Initializes a new {@link List} from given session.
-     * 
+     *
      * @param session The session
      */
     public StorageParametersImpl(final ServerSession session) {
@@ -114,7 +114,7 @@ public final class StorageParametersImpl implements StorageParameters {
 
     /**
      * Initializes a new {@link List} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -272,7 +272,7 @@ public final class StorageParametersImpl implements StorageParameters {
      * Gets the trace of the thread that lastly obtained this access.
      * <p>
      * This is useful to detect certain threads which uses an access for a long time
-     * 
+     *
      * @return the trace of the thread that lastly obtained this access
      */
     @Override

@@ -160,7 +160,7 @@ public final class AllAction extends AbstractMailAction {
                             for (final MailFieldWriter writer : writers) {
                                 writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
                             }
-   
+
                         }
                         jsonWriter.value(ja);
                     }

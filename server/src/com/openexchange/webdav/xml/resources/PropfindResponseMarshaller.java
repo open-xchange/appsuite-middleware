@@ -103,7 +103,7 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 		if(!notFound.isEmpty()) {
 			multistatus.addStatus(new WebdavStatusImpl<Iterable<WebdavProperty>>(HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), notFound));
 		}
-		
+
 		return multistatus;
 	}
 

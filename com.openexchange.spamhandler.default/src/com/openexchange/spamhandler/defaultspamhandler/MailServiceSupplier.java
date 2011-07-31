@@ -54,7 +54,7 @@ import com.openexchange.mail.service.MailService;
 
 /**
  * {@link MailServiceSupplier} - Supplies the mail service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailServiceSupplier {
@@ -63,7 +63,7 @@ public final class MailServiceSupplier {
 
     /**
      * Gets the mail service supplier.
-     * 
+     *
      * @return The mail service supplier.
      */
     public static MailServiceSupplier getInstance() {
@@ -82,7 +82,7 @@ public final class MailServiceSupplier {
 
     /**
      * Sets the mail service.
-     * 
+     *
      * @param mailService The mail service
      */
     public void setMailService(final MailService mailService) {
@@ -91,7 +91,7 @@ public final class MailServiceSupplier {
 
     /**
      * Gets the mail service.
-     * 
+     *
      * @return The mail service
      */
     public MailService getMailService() {

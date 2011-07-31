@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CommonEventImpl} - Implementation of {@link CommonEvent}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class CommonEventImpl implements CommonEvent {

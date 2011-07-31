@@ -78,7 +78,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link MailAttributeFetcher} - The attribute fetcher for mail module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMessage> {
@@ -448,7 +448,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
 
     /**
      * Gets the mail attribute fetcher instance.
-     * 
+     *
      * @return The mail attribute fetcher instance.
      */
     public static MailAttributeFetcher getInstance() {
@@ -481,7 +481,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
 
     /**
      * Gets the mail search term for given simple search term identifier
-     * 
+     *
      * @param attributeName The attribute name
      * @param operation The operation
      * @param constant The constant to compare to

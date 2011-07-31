@@ -72,7 +72,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link MailPrefetcherCallable} - The mail prefetcher {@link Callable callable}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPrefetcherCallable implements Callable<Object> {
@@ -95,7 +95,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
     /**
      * Initializes a new {@link MailPrefetcherCallable}.
-     * 
+     *
      * @param session The session providing needed user information
      * @param accountId he account ID
      * @param fullname The folder's fullname
@@ -241,7 +241,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                         LOG.debug(sb.toString());
                     }
                     /*-
-                     * 
+                     *
                     for (int i = 0; i < mailIds.length; i++) {
                         final SetableFutureTask<JSONObject> future = futures[i];
                         if (null != future) {
@@ -346,7 +346,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         /**
          * Sets the result of this Future to the given value unless this future has already been set or has been canceled. Otherwise it is a
          * no-op.
-         * 
+         *
          * @param v The value
          */
         @Override
@@ -358,7 +358,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         /**
          * Causes this future to report an <tt>ExecutionException</tt> with the given throwable as its cause, unless this Future has already
          * been set or has been canceled. Otherwise it is a no-op.
-         * 
+         *
          * @param t The cause of failure.
          */
         @Override
@@ -369,7 +369,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         /**
          * Checks whether an exception instance was previously set by {@link #setException(Throwable)}.
-         * 
+         *
          * @return <code>true</code> if an exception instance was set; otherwise <code>false</code>
          */
         public boolean hasException() {
@@ -378,7 +378,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
 
         /**
          * Checks whether a value was previously set by {@link #set(Object)}.
-         * 
+         *
          * @return <code>true</code> if a value was set; otherwise <code>false</code>
          */
         public boolean hasValue() {

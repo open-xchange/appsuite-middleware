@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultFolderFullnameProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default INBOX folder
-     * 
+     *
      * @return The fullname of default INBOX folder
      * @throws OXException If INBOX folder's fullname cannot be returned
      */
@@ -68,7 +68,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default confirmed ham folder
-     * 
+     *
      * @return The fullname of default confirmed ham folder
      * @throws OXException If confirmed ham folder's fullname cannot be returned
      */
@@ -76,7 +76,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default confirmed spam folder
-     * 
+     *
      * @return The fullname of default confirmed spam folder
      * @throws OXException If confirmed spam folder's fullname cannot be returned
      */
@@ -84,7 +84,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default drafts folder
-     * 
+     *
      * @return The fullname of default drafts folder
      * @throws OXException If draft folder's fullname cannot be returned
      */
@@ -92,7 +92,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default spam folder
-     * 
+     *
      * @return The fullname of default spam folder
      * @throws OXException If spam folder's fullname cannot be returned
      */
@@ -100,7 +100,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default sent folder
-     * 
+     *
      * @return The fullname of default sent folder
      * @throws OXException If sent folder's fullname cannot be returned
      */
@@ -108,7 +108,7 @@ public interface DefaultFolderFullnameProvider {
 
     /**
      * Gets the fullname of default trash folder
-     * 
+     *
      * @return The fullname of default trash folder
      * @throws OXException If trash folder's fullname cannot be returned
      */

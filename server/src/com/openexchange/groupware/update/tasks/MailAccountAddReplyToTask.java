@@ -66,7 +66,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MailAccountAddReplyToTask} - Add "replyTo" column to mail/transport account table.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountAddReplyToTask extends UpdateTaskAdapter {

@@ -59,7 +59,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link AbstractContextBasedConfigProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractContextBasedConfigProvider implements ConfigProviderService {

@@ -55,14 +55,14 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ShutDown} - The console handler for <code>&quot;shutdown&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ShutDown extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link ShutDown} with specified arguments and performs {@link #shutdown() shutdown}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public ShutDown(final String args[]) {

@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME messages (as per RFC822).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEMailMessage extends MailMessage implements MIMERawSource {
@@ -95,7 +95,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     /**
      * Gets the separator.
-     * 
+     *
      * @return The separator
      */
     public char getSeparator() {
@@ -104,7 +104,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     /**
      * Sets the separator.
-     * 
+     *
      * @param separator The separator to set
      */
     public void setSeparator(final char separator) {
@@ -113,7 +113,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     /**
      * Gets the sequence number.
-     * 
+     *
      * @return The sequence number
      */
     public int getSeqnum() {
@@ -122,7 +122,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     /**
      * Sets the sequence number.
-     * 
+     *
      * @param seqnum The sequence number to set
      */
     public void setSeqnum(final int seqnum) {
@@ -133,7 +133,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
      * Sets this mail message's content
      * <p>
      * Through providing a <code>null</code> reference the body is cleared from this mail.
-     * 
+     *
      * @param msg The MIME message or <code>null</code> to clear any body references
      */
     public void setContent(final MimeMessage msg) {
@@ -143,7 +143,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
 
     /**
      * Gets the {@link MimeMessage MIME message}.
-     * 
+     *
      * @return The {@link MimeMessage MIME message} or <code>null</code>
      */
     public MimeMessage getMimeMessage() {

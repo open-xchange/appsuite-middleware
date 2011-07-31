@@ -66,7 +66,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * {@link CachingUserConfigurationStorage} - A cache-based implementation of {@link UserConfigurationStorage} with a fallback to
  * {@link RdbUserConfigurationStorage}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
@@ -87,7 +87,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Initializes a new {@link CachingUserConfigurationStorage}.
-     * 
+     *
      * @throws OXException If an error occurs
      */
     public CachingUserConfigurationStorage() throws OXException {
@@ -139,7 +139,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Initializes cache reference
-     * 
+     *
      * @throws OXException If an error occurs
      */
     void initCache() throws OXException {
@@ -155,7 +155,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Releases cache reference
-     * 
+     *
      * @throws OXException If an error occurs
      */
     void releaseCache() throws OXException {

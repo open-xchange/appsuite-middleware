@@ -71,7 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 
 public class UpdateFolderIdInReminder implements UpdateTask {
-    
+
     private static final String DELETE_ZERO_REMINDERS = "DELETE from reminder WHERE module = " + Types.APPOINTMENT + " AND folder < 1";
     private static final String FIND_REMINDERS = "SELECT target_id, cid, userid, folder from reminder WHERE module = ?";
     private static final String FIND_CURRENT_USER_FOLDER = "SELECT pfid from prg_dates_members WHERE cid = ? AND member_uid = ? AND object_id = ?";
@@ -81,17 +81,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
     private static final String DELETE_ENTRIES_MEMBERS = "DELETE FROM prg_dates_members WHERE cid = ? AND object_id = ?";
     private static final String DELETE_ENTRIES_RIGTHS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
     private static final String FIND_WITHOUT_REFERENCE = "SELECT reminder.object_id, reminder.cid, reminder.userid, reminder.folder FROM reminder LEFT JOIN prg_dates ON reminder.cid = prg_dates.cid AND reminder.target_id = prg_dates.intfield01 where reminder.module = 1 AND intfield01 is NULL";
-    
+
     @Override
     public int addedWithVersion() {
         return 10;
     }
-    
+
     @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
-    
+
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
@@ -107,7 +107,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
         ResultSet rs3 = null;
         ResultSet rs4 = null;
         CalendarCollectionService collection = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        
+
         try {
             writecon = Database.get(contextId, true);
             try {
@@ -158,7 +158,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             } catch (final SQLException ex) {
                 throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
-            
+
             try {
                 pst6 = writecon.prepareStatement(FIND_WITHOUT_REFERENCE, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 rs4 = pst6.executeQuery();
@@ -166,7 +166,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                     final int oid = rs4.getInt(1);
                     final int cid = rs4.getInt(2);
                     final int uid = rs4.getInt(3);
-                    final int fid = rs4.getInt(4);                    
+                    final int fid = rs4.getInt(4);
                     final ReminderUpdate ru = new ReminderUpdate();
                     ru.setOID(oid);
                     if (rs4.next()) {
@@ -175,8 +175,8 @@ public class UpdateFolderIdInReminder implements UpdateTask {
                 }
             } catch (final SQLException ex) {
                 throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
-            }            
-            
+            }
+
             try {
                 if (update.size() > 0) {
                     pst3 = writecon.prepareStatement(UPDATE_REMINDER);
@@ -210,7 +210,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             } catch (final SQLException ex) {
                 throw OXCalendarExceptionCodes.UPDATE_EXCEPTION.create(ex);
             }
-            
+
             try {
                 // SELECT intfield01 FROM prg_dates WHERE cid = ? AND intfield01 = ?
                 if (update.size() > 0 || delete.size() > 0 || check.size() > 0) {
@@ -296,7 +296,7 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             }
         }
     }
-    
+
     private static class ReminderUpdate {
         private int oid;
         private int uid;
@@ -327,5 +327,5 @@ public class UpdateFolderIdInReminder implements UpdateTask {
             return fid;
         }
     }
-    
+
 }

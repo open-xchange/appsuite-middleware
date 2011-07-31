@@ -270,9 +270,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     readScriptFromString.getRulelist(), parameters.getParameter(Parameter.FLAG), readScriptFromString
                             .isError());
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
-            
+
             changeOutgoingVacationRule(clientrules);
-            
+
             return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
         } catch (final UnsupportedEncodingException e) {
             throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
@@ -328,9 +328,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             final String body = request.getBody();
             final JSONObject json = new JSONObject(body);
             final Rule newrule = CONVERTER.parse(json);
-            
+
             changeIncomingVacationRule(newrule);
-            
+
             // Now find the right position inside the array
             int position = newrule.getPosition();
             final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
@@ -725,7 +725,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private void changeIncomingVacationRule(final Rule newrule) throws SieveException {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
-    
+
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             final IfCommand ifCommand = newrule.getIfCommand();
             final RuleComment ruleComment = newrule.getRuleComment();
@@ -733,12 +733,12 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final List<Object> argList = new ArrayList<Object>();
                 argList.add(Rule2JSON2Rule.createTagArg("is"));
                 argList.add(Rule2JSON2Rule.createTagArg("domain"));
-    
+
                 final ArrayList<String> header = new ArrayList<String>();
                 header.add("From");
-                
+
                 final String[] split = vacationdomains.split(",");
-                
+
                 argList.add(header);
                 argList.add(Arrays.asList(split));
                 final TestCommand testcommand = ifCommand.getTestcommand();
@@ -761,7 +761,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private void changeOutgoingVacationRule(final ArrayList<Rule> clientrules) throws SieveException {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final String vacationdomains = config.getProperty(MailFilterProperties.Values.VACATION_DOMAINS.property);
-        
+
         if (null != vacationdomains && 0 != vacationdomains.length()) {
             for (final Rule rule : clientrules) {
                 final IfCommand ifCommand = rule.getIfCommand();
@@ -910,7 +910,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private void writeScript(final SieveHandler sieveHandler, final String activeScript, final String writeback)
             throws OXSieveHandlerException, IOException, UnsupportedEncodingException {
         final StringBuilder commandBuilder = new StringBuilder(64);
-        
+
         if (null != activeScript && activeScript.equals(this.scriptname)) {
             sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"), commandBuilder);
             sieveHandler.setScriptStatus(activeScript, true, commandBuilder);
@@ -927,7 +927,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return msg;
     }
-    
+
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions.
      * This method analyses an exception message and throws a more detailed
@@ -935,14 +935,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
      */
     private void handleParsingException(final OXSieveHandlerException e, final Credentials credentials) throws OXException{
         final String message = e.toString();
-        
+
         if(message.contains("unexpected SUBJECT")) {
             throw OXMailfilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS (probably)");
         }
         if(message.contains("address ''")) {
             throw OXMailfilterExceptionCode.EMPTY_MANDATORY_FIELD.create(e, "ADDRESS");
         }
-        
+
         throw OXMailfilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e
             .getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());
     }

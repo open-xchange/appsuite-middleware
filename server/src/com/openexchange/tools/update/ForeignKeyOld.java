@@ -59,7 +59,7 @@ import java.util.List;
 
 /**
  * A foreign key represents a foreign key from a certain table referencing a column in a target table.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ForeignKeyOld {

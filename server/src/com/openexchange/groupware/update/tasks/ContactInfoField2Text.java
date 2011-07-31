@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link ContactInfoField2Text}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ContactInfoField2Text extends UpdateTaskAdapter {
@@ -104,7 +104,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private void execute(Connection con, String update) throws SQLException {
         Statement stmt = null;
         try {

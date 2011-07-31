@@ -72,7 +72,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link ContactObjectsByVcardFileStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page> {

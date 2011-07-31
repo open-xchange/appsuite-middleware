@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailServiceImpl} - The mail service implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailServiceImpl implements MailService {

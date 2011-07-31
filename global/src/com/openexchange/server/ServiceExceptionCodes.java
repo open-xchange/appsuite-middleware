@@ -28,7 +28,7 @@ public enum ServiceExceptionCodes {
     private final int detailNumber;
 
     private final Category category;
-    
+
     private final boolean display;
 
     private ServiceExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -42,7 +42,7 @@ public enum ServiceExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @return The newly created {@link OXException} instance.
      */
     public OXException create() {
@@ -51,7 +51,7 @@ public enum ServiceExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param logArguments The arguments for log message.
      * @return The newly created {@link OXException} instance.
      */
@@ -61,7 +61,7 @@ public enum ServiceExceptionCodes {
 
     /**
      * Creates an {@link OXException} instance using this error code.
-     * 
+     *
      * @param cause The initial cause for {@link OXException}
      * @param arguments The arguments for message.
      * @return The newly created {@link OXException} instance.

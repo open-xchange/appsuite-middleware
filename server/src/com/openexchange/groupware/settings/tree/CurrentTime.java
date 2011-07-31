@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
- * Adds a configuration setting tree entry for the current time of the server. 
+ * Adds a configuration setting tree entry for the current time of the server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class CurrentTime implements PreferencesItemService {

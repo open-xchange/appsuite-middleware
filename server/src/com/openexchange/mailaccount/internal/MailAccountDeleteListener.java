@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountDeleteListener implements DeleteListener {

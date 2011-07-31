@@ -93,7 +93,7 @@ public class NodeCollection extends AbstractCollection {
     @Override
     protected void internalDelete() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -108,12 +108,12 @@ public class NodeCollection extends AbstractCollection {
 
     @Override
     protected void internalPutProperty(WebdavProperty prop) {
-        
+
     }
 
     @Override
     protected void internalRemoveProperty(String namespace, String name) {
-        
+
     }
 
     @Override
@@ -123,7 +123,7 @@ public class NodeCollection extends AbstractCollection {
 
     @Override
     public void setCreationDate(Date date) {
-        
+
     }
 
     public List<WebdavResource> getChildren() throws OXException {
@@ -136,7 +136,7 @@ public class NodeCollection extends AbstractCollection {
     }
 
     public void create() {
-        
+
     }
 
     public boolean exists() {
@@ -180,22 +180,22 @@ public class NodeCollection extends AbstractCollection {
     }
 
     public void lock(WebdavLock lock) {
-        
+
     }
 
     public void save() {
-        
+
     }
 
     public void setDisplayName(String displayName) {
-        
+
     }
 
 
     public void unlock(String token) {
-        
+
     }
 
-   
+
 
 }

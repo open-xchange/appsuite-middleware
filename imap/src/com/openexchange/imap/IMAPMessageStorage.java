@@ -132,7 +132,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch {
@@ -186,7 +186,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Initializes a new {@link IMAPMessageStorage}.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
@@ -423,7 +423,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (MIMEMailExceptionCode.MESSAGING_ERROR.getNumber() == e.getCode() && e.isPrefix("MSG")) {
                     /*-
                      * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
-                     * 
+                     *
                      * Perform some debug logs for traceability...
                      */
                     if (DEBUG) {
@@ -1858,7 +1858,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
-     * 
+     *
      * @param fullName The IMAP folder's full name
      * @param lowCostFields The low-cost fields
      * @param order The order direction (needed to possibly flip the results)
@@ -2006,7 +2006,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Determines the corresponding UIDs in destination folder
-     * 
+     *
      * @param msgUIDs The UIDs in source folder
      * @param destFullName The destination folder's full name
      * @return The corresponding UIDs in destination folder
@@ -2118,13 +2118,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 resetIMAPFolder();
                 imapFolder = setAndOpenFolder(imapFolder, fullName, desiredMode);
-            } 
+            }
         }
     }
 
     /**
      * Checks and converts specified APPENDUID response.
-     * 
+     *
      * @param appendUIDs The APPENDUID response
      * @return An array of long for each valid {@link AppendUID} element or a zero size array of long if an invalid {@link AppendUID}
      *         element was detected.
@@ -2148,7 +2148,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Removes all user flags from given message's flags
-     * 
+     *
      * @param message The message whose user flags shall be removed
      * @throws MessagingException If removing user flags fails
      */
@@ -2172,7 +2172,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /**
      * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
      * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-     * 
+     *
      * @return A UUID string
      */
     private static String randomUUID() {
@@ -2181,7 +2181,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instance of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instance
      * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -2200,7 +2200,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained

@@ -62,13 +62,13 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SimMessagingService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SimMessagingService implements MessagingService {
 
- 
+
     private String displayName;
 
     private DynamicFormDescription formDescription;
@@ -84,7 +84,7 @@ public class SimMessagingService implements MessagingService {
     private List<MessagingAction> capabilities;
 
     private int[] staticRootPermissions;
-    
+
     public SimMessagingService() {
         super();
         accountAccessMap = new HashMap<Integer, MessagingAccountAccess>();
@@ -98,7 +98,7 @@ public class SimMessagingService implements MessagingService {
     /**
      * Gets the names of those {@link FormElement} associated with given identifier's messaging service which indicate to be of type
      * {@link Widget#PASSWORD password}.
-     * 
+     *
      * @param serviceId The service identifier
      * @return The password field names
      */
@@ -185,10 +185,10 @@ public class SimMessagingService implements MessagingService {
         return ret;
     }
 
-    
+
     /**
      * Sets the static root folder permissions.
-     * 
+     *
      * @param staticRootPermissions The static root folder permissions
      */
     public void setStaticRootPermissions(int[] staticRootPermissions) {

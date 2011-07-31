@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * UploadServletException
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

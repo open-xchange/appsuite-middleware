@@ -55,8 +55,8 @@ import com.openexchange.groupware.contexts.Context;
 public class StaticDBPoolProvider implements DBProvider{
 
 	private final Connection writeCon;
-	
-	
+
+
 
 	public StaticDBPoolProvider(final Connection writeCon) {
 		super();
@@ -79,7 +79,7 @@ public class StaticDBPoolProvider implements DBProvider{
 
 	@Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
-		
+
 	}
 
 }

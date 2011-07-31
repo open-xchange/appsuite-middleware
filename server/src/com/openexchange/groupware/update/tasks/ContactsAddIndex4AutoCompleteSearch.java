@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * {@link ContactsAddIndex4AutoCompleteSearch} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
  * search.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {

@@ -54,20 +54,20 @@ package com.openexchange.groupware.contact;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public enum ContactUnificationState {
-    RED(1),        //user decided two contacts are not refering to the same person 
+    RED(1),        //user decided two contacts are not refering to the same person
     GREEN(2),      //user stated that two contacts represent the same person
-    UNDEFINED(0);  
-    
+    UNDEFINED(0);
+
     private int num;
-    
+
     ContactUnificationState(int num){
         this.num = num;
     }
-    
+
     public int getNumber(){
         return num;
     }
-    
+
     public static ContactUnificationState getByNumber(int num){
         for(ContactUnificationState state: values()) {
             if(state.getNumber() == num) {

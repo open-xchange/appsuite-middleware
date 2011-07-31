@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscriptionMultipleHandler}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionMultipleHandler implements MultipleHandler {
@@ -97,7 +97,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
        add("list");
        add("fetch");
     }};
-    
+
     public SubscriptionMultipleHandler(final SubscriptionSourceDiscoveryService discovery, final SubscriptionExecutionService executor, final SecretService secretService) {
         super();
         this.discovery = discovery;
@@ -148,7 +148,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             throw wrapThrowable(t);
         }
     }
-    
+
     private Object fetchSubscription(JSONObject request, ServerSession session) throws JSONException, OXException {
         final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
         subscription.setId(-1);
@@ -171,7 +171,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                     }
                     return (int) (o2.getLastUpdate() - o1.getLastUpdate());
                 }
-                
+
             });
             for (final Subscription subscription : allSubscriptions) {
                 ids.add(subscription.getId());
@@ -186,7 +186,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
                 subscriptionsToRefresh.add(subscription);
             }
         }
-        
+
         return executor.executeSubscriptions(subscriptionsToRefresh, session);
     }
 
@@ -220,7 +220,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             folderId = request.getString("folder");
             containsFolder = true;
         }
-        
+
         final Context context = session.getContext();
 
         List<Subscription> allSubscriptions = null;
@@ -228,7 +228,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             allSubscriptions = getSubscriptionsInFolder(session, folderId, secretService.getSecret(session));
         } else {
             allSubscriptions = getAllSubscriptions(session, secretService.getSecret(session));
-        }       
+        }
 
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
@@ -246,7 +246,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         }
         return allSubscriptions;
     }
-    
+
     private List<Subscription> getAllSubscriptions(final ServerSession session, final String secret) throws OXException {
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
         final List<Subscription> allSubscriptions = new ArrayList<Subscription>();
@@ -255,7 +255,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
             allSubscriptions.addAll(subscriptions);
         }
-        
+
         return allSubscriptions;
     }
 

@@ -56,7 +56,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link RegistryCustomizer} - Registers/unregisters a certain service in/from {@link ServerServiceRegistry}.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
@@ -67,7 +67,7 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link RegistryCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param clazz The class of the service to register
      */

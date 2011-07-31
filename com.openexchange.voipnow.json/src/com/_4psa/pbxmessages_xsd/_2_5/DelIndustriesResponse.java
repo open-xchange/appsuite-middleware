@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -34,8 +34,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -52,11 +52,11 @@ public class DelIndustriesResponse {
 
     /**
      * Gets the value of the items property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getItems() {
         return items;
@@ -64,11 +64,11 @@ public class DelIndustriesResponse {
 
     /**
      * Sets the value of the items property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setItems(BigInteger value) {
         this.items = value;
@@ -76,11 +76,11 @@ public class DelIndustriesResponse {
 
     /**
      * Gets the value of the result property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getResult() {
         return result;
@@ -88,11 +88,11 @@ public class DelIndustriesResponse {
 
     /**
      * Sets the value of the result property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setResult(String value) {
         this.result = value;

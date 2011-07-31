@@ -104,7 +104,7 @@ public class ContactSearchMultiplexer {
                 final SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
                 searchIterators.add(contactsByExtendedSearch);
             }
-            
+
         } else {
             final List<ContactInterfaceProviderRegistration> registrations = discoveryService.getRegistrations(contextId);
             for (final ContactInterfaceProviderRegistration registration : registrations) {
@@ -117,14 +117,14 @@ public class ContactSearchMultiplexer {
             final ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
             final SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchObj, orderBy, order, collation, cols);
             searchIterators.add(contactsByExtendedSearch);
-        
+
         }
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
         }
         return new ContactMergerator(new DefaultContactComparator(orderBy, order), searchIterators);
     }
-    
+
     public SearchIterator<Contact> extendedSearch(final ServerSession session, final SearchTerm<?> searchTerm, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
     	final ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
     	conv.parse(searchTerm);
@@ -158,7 +158,7 @@ public class ContactSearchMultiplexer {
             final ContactInterface defaultContactInterface = discoveryService.newDefaultContactInterface(session);
             final SearchIterator<Contact> contactsByExtendedSearch = defaultContactInterface.getContactsByExtendedSearch(searchTerm, orderBy, order, collation, cols);
             searchIterators.add(contactsByExtendedSearch);
-        
+
         }
         if(searchIterators.size() == 1) {
             return searchIterators.get(0);
@@ -171,10 +171,10 @@ public class ContactSearchMultiplexer {
 		if(collation == null) {
             return new DefaultContactComparator(orderBy, order);
         }
-		
+
 		final SuperCollator myI18nMap = SuperCollator.get(collation);
 		final ContactField myField = ContactField.getByValue(orderBy);
-		
+
 		return new CollationContactComparator(myField, order, myI18nMap.getJavaLocale());
 	}
 }

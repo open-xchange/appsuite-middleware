@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder fullname followed
  * by the value of {@link #SEPERATOR} followed by mail's unique ID:<br>
  * Example: <i>default1/INBOX.Subfolder/1234</i>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPath implements Cloneable, Serializable {
@@ -94,7 +94,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets the mail path corresponding to given folder fullname and message UID
-     * 
+     *
      * @param accountId The account ID
      * @param folder The folder fullname
      * @param mailId The mail ID
@@ -107,7 +107,7 @@ public final class MailPath implements Cloneable, Serializable {
     /**
      * Returns the mail paths for given comma-separated mail IDs each conform to pattern &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}
      * &gt;&lt;mail-ID&gt;
-     * 
+     *
      * @param mailPaths The comma-separated mail IDs
      * @return The corresponding mail paths
      * @throws OXException If mail paths cannot be generated
@@ -119,7 +119,7 @@ public final class MailPath implements Cloneable, Serializable {
     /**
      * Returns the mail paths for given mail IDs each conform to pattern &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}
      * &gt;&lt;mail-ID&gt;
-     * 
+     *
      * @param mailPaths The mail IDs
      * @return The corresponding mail paths
      * @throws OXException If mail paths cannot be generated
@@ -134,7 +134,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Extracts the IDs from given mail paths
-     * 
+     *
      * @param mailPaths The mail IDs
      * @return The extracted IDs
      */
@@ -167,7 +167,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Initializes a new {@link MailPath}
-     * 
+     *
      * @param mailPathStr The mail path's string representation
      * @throws OXException If mail path's string representation does not match expected pattern
      */
@@ -178,7 +178,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Initializes a new {@link MailPath}
-     * 
+     *
      * @param accountId The account ID
      * @param folder Folder fullname
      * @param uid The mail's unique ID
@@ -247,7 +247,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -256,7 +256,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets the folder fullname
-     * 
+     *
      * @return The folder fullname
      */
     public String getFolder() {
@@ -265,7 +265,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets the folder argument; <i>default3/INBOX</i>.
-     * 
+     *
      * @return The folder argument
      */
     public String getFolderArgument() {
@@ -274,7 +274,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets this mail path's string representation.
-     * 
+     *
      * @return This mail path's string representation
      * @see #toString()
      */
@@ -284,7 +284,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Gets the mail ID.
-     * 
+     *
      * @return The mail ID
      */
     public String getMailID() {
@@ -293,7 +293,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Sets this mail path's folder fullname and mail's unique ID (for re-usage).
-     * 
+     *
      * @param mailPathStr The mail paths string representation
      * @return The mail path itself
      * @throws OXException If mail path's string representation does not match expected pattern
@@ -314,7 +314,7 @@ public final class MailPath implements Cloneable, Serializable {
     /**
      * Gets this mail path's string representation following pattern:<br>
      * <i>"default" + &lt;account-id&gt; + &lt;default-separator&gt; + &lt;folder-fullname&gt; + "/" + &lt;mail-id&gt;</i>
-     * 
+     *
      * <pre>
      * default2/INBOX/Subfolder/453&quot;
      * </pre>

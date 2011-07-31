@@ -60,7 +60,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetTest extends FileActionTest {
-    
+
     public void testMissingParameters() {
         try {
             action.handle(request());
@@ -69,24 +69,24 @@ public class GetTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request().param("id", "12");
-        
+
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(new DefaultFile());
-    
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
     public void testWithVersionNumber() throws OXException {
         request().param("id", "12").param("version", "2");
-        
+
         fileAccess().expectCall("getFileMetadata", "12", 2).andReturn(new DefaultFile());
-    
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

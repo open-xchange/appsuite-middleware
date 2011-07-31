@@ -69,20 +69,20 @@ public class HeaderParserTracker extends ServiceTracker {
         super(context, MessagingHeaderParser.class.getName(), null);
         this.parser = parser;
     }
-    
+
     @Override
     public Object addingService(final ServiceReference reference) {
         final MessagingHeaderParser parser = (MessagingHeaderParser) super.addingService(reference);
         this.parser.addHeaderParser(parser);
         return parser;
     }
-    
+
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         parser.removeHeaderParser((MessagingHeaderParser) service);
         super.removedService(reference, service);
     }
-    
-    
+
+
 
 }

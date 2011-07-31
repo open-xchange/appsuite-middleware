@@ -54,7 +54,7 @@ import com.openexchange.groupware.calendar.Constants;
 
 /**
  * The appointment object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class Appointment extends CalendarObject implements Cloneable {
@@ -156,7 +156,7 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     /**
      * Returns the time zone essential for recurring appointments.
-     * 
+     *
      * @return the time zone if it has been set otherwise <code>null</code>.
      */
     public String getTimezone() {
@@ -165,7 +165,7 @@ public class Appointment extends CalendarObject implements Cloneable {
 
     /**
      * Returns the time zone essential for recurring appointments.
-     * 
+     *
      * @return the time zone if it has been set otherwise UTC.
      * @deprecated use {@link #getTimezone()} and handle fallback to UTC yourself.
      */
@@ -315,7 +315,7 @@ public class Appointment extends CalendarObject implements Cloneable {
                     appointmentobject.set(field, get(field));
                 }
             }
-            
+
             if (containsLabel()) {
                 appointmentobject.setLabel(getLabel());
             }

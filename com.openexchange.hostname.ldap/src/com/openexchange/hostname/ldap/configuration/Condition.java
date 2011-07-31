@@ -52,7 +52,7 @@ package com.openexchange.hostname.ldap.configuration;
 
 public class Condition {
     private final PropertyInterface property;
-    
+
     private final Object value;
 
     public Condition(PropertyInterface property, Object value) {
@@ -61,15 +61,15 @@ public class Condition {
         this.value = value;
     }
 
-    
+
     public PropertyInterface getProperty() {
         return property;
     }
 
-    
+
     public Object getValue() {
         return value;
     }
 
-    
+
 }

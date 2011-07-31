@@ -86,10 +86,10 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
         public String getId() {
             return DEFAULT_ID;
         }
-        
+
     };
-    
-    
+
+
     public String addAccount(final FileStorageAccount account, final Session session) throws OXException {
         return "";
     }

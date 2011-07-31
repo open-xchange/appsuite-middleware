@@ -60,7 +60,7 @@ import com.openexchange.dataretention.DataRetentionExceptionMessages;
 
 /**
  * {@link CSVDataRetentionConfig} - The configuration for CSV data retention.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVDataRetentionConfig {
@@ -71,7 +71,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the singleton instance of {@link CSVDataRetentionConfig}.
-     * 
+     *
      * @return The singleton instance of {@link CSVDataRetentionConfig}.
      */
     public static CSVDataRetentionConfig getInstance() {
@@ -126,7 +126,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Initializes this configuration with specified configuration service.
-     * 
+     *
      * @param configurationService The configuration service
      * @throws OXException If initialization fails
      */
@@ -235,7 +235,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the parent directory of the CSV file.
-     * 
+     *
      * @return The parent directory of the CSV file.
      */
     public File getDirectory() {
@@ -244,7 +244,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the version number which identifies the format version of the file.
-     * 
+     *
      * @return The version number
      */
     public int getVersionNumber() {
@@ -253,7 +253,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the client ID. A string identifying the tenant; e.g. <code>&quot;1UND1&quot;</code>.
-     * 
+     *
      * @return The client ID
      */
     public String getClientId() {
@@ -262,7 +262,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the source ID. Any string identifying the data source; e.g. <code>&quot;GMX_mail_01&quot;</code>.
-     * 
+     *
      * @return The sourceId
      */
     public String getSourceId() {
@@ -271,7 +271,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the location of the system generating the CSV file; e.g. <code>&quot;DE/Karlsruhe;</code>.
-     * 
+     *
      * @return The location
      */
     public String getLocation() {
@@ -280,7 +280,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the time zone of the location.
-     * 
+     *
      * @return The time zone of the location.
      */
     public TimeZone getTimeZone() {
@@ -289,7 +289,7 @@ public final class CSVDataRetentionConfig {
 
     /**
      * Gets the rotate length.
-     * 
+     *
      * @return The rotate length.
      */
     public long getRotateLength() {

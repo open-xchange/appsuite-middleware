@@ -77,9 +77,9 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        
+
         Tools.initExceptionFactory();
-        
+
         FormElement formElementLogin = new FormElement();
         formElementLogin.setName("login");
         formElementLogin.setDisplayName("Login");
@@ -127,7 +127,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         subscriptionSource2.setFormDescription(formDescription2);
         subscriptionSource2.setFolderModule(FolderObject.CONTACT);
 
-        
+
         sourceList = new ArrayList<SubscriptionSource>();
         sourceList.add(subscriptionSource);
         sourceList.add(subscriptionSource2);
@@ -150,9 +150,9 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         JSONArray rows = parser.writeJSONArray(sourceList, new String[]{"id", "displayName", "icon", "module"});
         assertEquals(2, rows.length());
-        
+
         boolean foundFirst = false, foundSecond = false;
-        
+
         for(int i = 0; i < 2; i++) {
             JSONArray row = rows.getJSONArray(i);
             String id = row.getString(0);
@@ -165,11 +165,11 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
                 fail("Got unexpected subscription id: "+id);
             }
         }
-        
+
         assertTrue(foundFirst && foundSecond);
 
     }
-    
+
     public void testUnknownColumn() {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
         try {
@@ -179,50 +179,50 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
             // Exception is expected
         }
     }
-    
+
     public static final void assertRow(JSONArray array, Object...values) throws JSONException {
         assertEquals(array.length(), values.length);
         for(int i = 0; i < values.length; i++) {
             assertEquals(values[i], array.get(i));
         }
     }
-    
+
     public void testMandatoryFieldCheck() throws Exception {
         SubscriptionSourceJSONWriterInterface parser = new SubscriptionSourceJSONWriter(Translator.EMPTY);
-        
+
         String temp = subscriptionSource.getId();
         subscriptionSource.setId(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.setId(temp);
-        
+
         temp = subscriptionSource.getDisplayName();
         subscriptionSource.setDisplayName(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.setDisplayName(temp);
-        
+
         DynamicFormDescription dTemp = subscriptionSource.getFormDescription();
         subscriptionSource.setFormDescription(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.setFormDescription(dTemp);
-        
+
         temp = subscriptionSource.getFormDescription().getFormElements().get(0).getName();
         subscriptionSource.getFormDescription().getFormElements().get(0).setName(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.getFormDescription().getFormElements().get(0).setName(temp);
-        
+
         temp = subscriptionSource.getFormDescription().getFormElements().get(0).getDisplayName();
         subscriptionSource.getFormDescription().getFormElements().get(0).setDisplayName(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.getFormDescription().getFormElements().get(0).setDisplayName(temp);
-        
+
         // TODO: Check mandatory
-        
+
         Widget wTemp = subscriptionSource.getFormDescription().getFormElements().get(0).getWidget();
         subscriptionSource.getFormDescription().getFormElements().get(0).setWidget(null);
         checkForParseException(parser, subscriptionSource);
         subscriptionSource.getFormDescription().getFormElements().get(0).setWidget(wTemp);
     }
-    
+
     private void checkForParseException(SubscriptionSourceJSONWriterInterface parser, SubscriptionSource source) throws Exception {
         try {
             parser.writeJSON(source);
@@ -244,7 +244,7 @@ public class BasicSubscriptionSourceJSONWriterTest extends TestCase {
         assertEquals("Wrong displayName", "Basic Subscription for Tests", json.getString("displayName"));
         assertEquals("Wrong icon", "http://path/to/icon", json.getString("icon"));
         assertEquals("Wrong module", "contacts", json.getString("module"));
-        
+
         JSONArray description = json.getJSONArray("formDescription");
         assertEquals("Wrong size of form descriptions", 2, description.length());
 

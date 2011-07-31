@@ -67,16 +67,16 @@ import com.openexchange.tools.service.SpecificServiceChooser;
 public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceTracker<T> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentPluginsTracker.class));
-    
+
     public AttachmentPluginsTracker(BundleContext context, Class<T> toTrack) {
         super(context, toTrack);
     }
-    
+
     @Override
     public void removedService(int module, T tracked, ServiceReference reference) {
         Integer contextId = getInt(reference, Constants.OX_OVERRIDE_CONTEXT);
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
-    
+
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
             LOG.warn("Can't register services for module "+module+" in tracker "+getClass().getName());
@@ -97,7 +97,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
             chooser.removeForFolder(tracked, folderId);
         }
     }
-    
+
 
     @Override
     public void addingService(int module, T tracked, ServiceReference reference) {
@@ -128,7 +128,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
             if(folderId != null) {
                 chooser.registerForFolder(tracked, ranking, folderId);
             }
-           
+
         } catch (ServicePriorityConflictException x) {
             LOG.error("Could not register service "+tracked+" with contextId: "+contextId+" for folder: "+folderId+" with ranking: "+ranking+". A conflicting service has already been registered for the combination");
         }
@@ -136,13 +136,13 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
 
     @Override
     public void modifiedService(int module, T tracked, ServiceReference reference) {
-        
+
     }
 
 
     public abstract SpecificServiceChooser<T> getChooser(int module);
 
-    
+
     protected Integer getInt(ServiceReference reference, String key) {
         Object property = reference.getProperty(key);
         if(property == null) {

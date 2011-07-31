@@ -115,7 +115,7 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public String getVersion() {
                 return loginReq.getVersion();
             }
-            
+
         };
     }
 }

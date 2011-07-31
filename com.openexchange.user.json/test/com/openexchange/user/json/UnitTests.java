@@ -64,8 +64,8 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.user.json.filter.NoGlobalAddressBookContactCensorshipTest.class);
         tests.addTestSuite(com.openexchange.user.json.filter.NoGlobalAddressBookUserCensorshipTest.class);
-        
-        
+
+
         return tests;
     }
 }

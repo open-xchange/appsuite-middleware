@@ -53,7 +53,7 @@ import com.openexchange.proxy.Header;
 
 /**
  * {@link HeaderImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderImpl implements Header {
@@ -62,7 +62,7 @@ public final class HeaderImpl implements Header {
 
     /**
      * Initializes a new {@link HeaderImpl}.
-     * 
+     *
      * @param header The delegatee
      */
     public HeaderImpl(final org.apache.commons.httpclient.Header header) {

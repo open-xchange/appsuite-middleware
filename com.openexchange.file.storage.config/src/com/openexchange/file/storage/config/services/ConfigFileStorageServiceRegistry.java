@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link ConfigFileStorageServiceRegistry} - The service registry for <code>com.openexchange.file.storage.config</code> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -63,7 +63,7 @@ public final class ConfigFileStorageServiceRegistry {
 
     /**
      * Gets the service registry.
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

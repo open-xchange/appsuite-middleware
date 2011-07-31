@@ -203,7 +203,7 @@ public class CalendarParser extends CommonParser {
         for (int i = 0; i < jparticipants.length(); i++) {
             final JSONObject jparticipant = jparticipants.getJSONObject(i);
             final int type = jparticipant.getInt(ParticipantsFields.TYPE);
-            
+
             int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);

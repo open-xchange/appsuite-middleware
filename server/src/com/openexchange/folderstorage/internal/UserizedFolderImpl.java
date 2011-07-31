@@ -59,7 +59,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link UserizedFolderImpl} - The {@link UserizedFolder} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserizedFolderImpl implements UserizedFolder {
@@ -87,12 +87,12 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private String parentId;
 
     private Date creationDate;
-    
+
     private Date lastModified;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
-     * 
+     *
      * @param folder The underlying folder
      * @throws IllegalArgumentException If folder is <code>null</code>
      */

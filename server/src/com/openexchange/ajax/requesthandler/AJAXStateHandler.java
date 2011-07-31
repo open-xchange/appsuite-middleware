@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AJAXStateHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJAXStateHandler {
 
     /**
      * Initializes common state.
-     * 
+     *
      * @param state The state
      * @throws OXException If start-up fails
      */
@@ -68,7 +68,7 @@ public interface AJAXStateHandler {
 
     /**
      * Ends common state.
-     * 
+     *
      * @param state The state
      * @throws OXException If shut-down fails
      */

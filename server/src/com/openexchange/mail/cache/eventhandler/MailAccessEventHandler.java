@@ -57,13 +57,13 @@ import com.openexchange.mail.api.MailAccess;
 /**
  * {@link MailAccessEventHandler} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess} is
  * removed from mail access cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessEventHandler implements ElementEventHandler {
 
     /**
-	 * 
+	 *
 	 */
     private static final long serialVersionUID = 6568843006180170658L;
 

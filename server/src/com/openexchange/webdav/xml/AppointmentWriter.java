@@ -88,7 +88,7 @@ import com.openexchange.webdav.xml.fields.CalendarFields;
 
 /**
  * The WebDAV/XML writer for calendar module.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AppointmentWriter extends CalendarWriter {
@@ -119,7 +119,7 @@ public class AppointmentWriter extends CalendarWriter {
 
     /**
      * Initializes a new {@link AppointmentWriter}.
-     * 
+     *
      * @param userObj The user
      * @param ctx The context
      * @param sessionObj The session providing needed user data
@@ -375,7 +375,7 @@ public class AppointmentWriter extends CalendarWriter {
             if (ao.getIgnoreConflicts()) {
                 addElement(AppointmentFields.IGNORE_CONFLICTS, true, e_prop);
             }
-            
+
             if (ao.containsUid()) {
                 addElement(AppointmentFields.UID, ao.getUid(), e_prop);
             }

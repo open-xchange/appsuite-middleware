@@ -55,7 +55,7 @@ import com.openexchange.imap.config.IMAPConfig;
 
 /**
  * {@link ACLExtensionAutoDetector} - Auto-detects IMAP server's ACL extension.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ACLExtensionAutoDetector {
@@ -73,7 +73,7 @@ final class ACLExtensionAutoDetector {
 
     /**
      * Determines the ACL extension dependent on IMAP server's capabilities.
-     * 
+     *
      * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.
      */
@@ -83,7 +83,7 @@ final class ACLExtensionAutoDetector {
 
     /**
      * Determines the ACL extension dependent on IMAP server's capabilities.
-     * 
+     *
      * @param capabilities The capabilities map
      * @param imapConfig The IMAP configuration
      * @return The IMAP server's ACL extension.

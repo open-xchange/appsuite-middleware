@@ -53,7 +53,7 @@ import java.util.Set;
 
 /**
  * {@link HasTag}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HasTag extends ContextSetTerm {

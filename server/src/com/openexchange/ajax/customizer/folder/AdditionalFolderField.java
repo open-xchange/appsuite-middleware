@@ -60,10 +60,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public interface AdditionalFolderField {
-    
+
     public int getColumnID();
     public String getColumnName();
     public Object getValue(FolderObject folder, ServerSession session);
     public Object renderJSON(Object value);
-    
+
 }

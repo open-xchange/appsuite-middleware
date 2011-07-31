@@ -67,9 +67,9 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * PasswordMechUpdateTask - Adds column <tt>passwordMech</tt> to table
  * <tt>user</tt> if it does not exist, yet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class PasswordMechUpdateTask implements UpdateTask {
 
@@ -82,7 +82,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	@Override
@@ -140,7 +140,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	/**
 	 * Determines if column named 'passwordMech' already exists in table 'user'
-	 * 
+	 *
 	 * @param contextId -
 	 *            the context ID
 	 * @return <code>true</code> if column named 'passwordMech' was found;

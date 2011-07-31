@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MessagingFolderWriter} - The messaging folder writer.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderWriter {
@@ -513,7 +513,7 @@ public final class MessagingFolderWriter {
 
     /**
      * Writes whole folder as a JSON object
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param folder The folder to write
@@ -537,7 +537,7 @@ public final class MessagingFolderWriter {
 
     /**
      * Generates appropriate field writers for given mail folder fields
-     * 
+     *
      * @param fields The fields to write
      * @param session The server session
      * @return Appropriate field writers as an array of {@link MessagingFolderFieldWriter}
@@ -548,7 +548,7 @@ public final class MessagingFolderWriter {
 
     /**
      * Generates appropriate field writers for given mail folder fields
-     * 
+     *
      * @param fields The fields to write
      * @param session The server session
      * @param additionalFields Additional fields

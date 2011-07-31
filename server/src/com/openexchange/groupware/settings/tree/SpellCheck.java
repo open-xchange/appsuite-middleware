@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  * <p>
  * <b>Note</b>: This item is currently disabled in <code>com.openexchange.groupware.settings.impl.ConfigTree</code> class.<br>
  * By now a global option to enable/disable spell check functionality is sufficient.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpellCheck implements PreferencesItemService {

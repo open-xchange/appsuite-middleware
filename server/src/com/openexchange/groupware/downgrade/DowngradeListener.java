@@ -53,15 +53,15 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DowngradeListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class DowngradeListener {
 
 	/**
 	 * Performs removal of unused data related to a former user downgrade.
-	 * 
+	 *
 	 * @param event
 	 *            The downgrade event providing needed data
 	 * @throws OXException
@@ -75,7 +75,7 @@ public abstract class DowngradeListener {
 	 * The returned value defines the ranking within registry's calling
 	 * sequence. An order of <code>1</code> means to execute at the very
 	 * beginning, subsequent <code>int</code> values are ordered afterward.
-	 * 
+	 *
 	 * @return The listener's order
 	 */
 	public abstract int getOrder();

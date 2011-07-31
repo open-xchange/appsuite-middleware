@@ -52,7 +52,7 @@ package com.openexchange.groupware.container;
 
 /**
  * A change for an update request.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Changes extends KeyValueHolder {

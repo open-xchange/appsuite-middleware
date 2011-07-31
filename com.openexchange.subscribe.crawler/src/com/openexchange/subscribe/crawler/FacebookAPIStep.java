@@ -126,7 +126,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
             HtmlPage page = step.getOutput();
             PageByNamedHtmlElementStep step2 = new PageByNamedHtmlElementStep("", 0, "grant_clicked");
             step2.setInput(page);
-            step2.execute(webClient);            
+            step2.execute(webClient);
             webClient.closeAllWindows();
 
             // fetch session key
@@ -245,7 +245,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
             LOG.error(e.getMessage(), e);
         }  catch (final ClassCastException e) {
             LOG.error(e.getMessage(), e);
-        } 
+        }
         executedSuccessfully = true;
         output = new Contact[contactObjects.size()];
         for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
@@ -318,37 +318,37 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
         return url;
     }
 
-    
+
     public String getApiKey() {
         return apiKey;
     }
 
-    
+
     public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
 
-    
+
     public String getSecret() {
         return secret;
     }
 
-    
+
     public void setSecret(String secret) {
         this.secret = secret;
     }
 
-    
+
     public String getBirthdayPattern() {
         return birthdayPattern;
     }
 
-    
+
     public void setBirthdayPattern(String birthdayPattern) {
         this.birthdayPattern = birthdayPattern;
     }
 
-    
-    
+
+
 
 }

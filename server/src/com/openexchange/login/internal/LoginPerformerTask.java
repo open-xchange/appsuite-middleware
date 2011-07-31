@@ -54,7 +54,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link LoginPerformerTask} - Simple {@link AbstractTask task} wrapper for login performer.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class LoginPerformerTask extends AbstractTask<Object> {

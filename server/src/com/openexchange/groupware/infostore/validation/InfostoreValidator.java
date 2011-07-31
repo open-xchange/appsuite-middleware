@@ -52,18 +52,18 @@ package com.openexchange.groupware.infostore.validation;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * 
+ *
  * @author francisco.laguna@open-xchange.com
- * 
- * An InfostoreValidator is used to validate a DocumentMetadata for according to some criterium 
+ *
+ * An InfostoreValidator is used to validate a DocumentMetadata for according to some criterium
  *
  */
 public interface InfostoreValidator {
-	
+
 	/**
 	 * This method is expected to check a DocumentMetadata and fill a new instance
 	 * of DocumentMetadataValidation with the relevant errors. A few implementation hints:
-	 * 1) Don't include the field name in the error messages, it will be included by the ValidationChain. 
+	 * 1) Don't include the field name in the error messages, it will be included by the ValidationChain.
 	 * 2) Try to reuse error messages. All fields with the same error message are collected and displayed together.
 	 * @param The DocumentMetadata to check
 	 * @return A DocumentMetadataValidation filled with the relevant errors

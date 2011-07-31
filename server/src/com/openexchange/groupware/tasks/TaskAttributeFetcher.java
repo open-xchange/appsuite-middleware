@@ -58,7 +58,7 @@ import com.openexchange.search.SearchAttributeFetcher;
 
 /**
  * {@link TaskAttributeFetcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
@@ -466,7 +466,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
     /**
      * Gets the task attribute fetcher instance.
-     * 
+     *
      * @return The task attribute fetcher instance.
      */
     public static TaskAttributeFetcher getInstance() {

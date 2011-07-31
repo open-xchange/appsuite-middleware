@@ -18,11 +18,11 @@ public class CompositeFileStorageFactory implements FileStorageFactory {
         LocalFileStorage standardFS = new LocalFileStorage(uri);
         HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
         CompositingFileStorage cStorage = new CompositingFileStorage();
-        
+
         cStorage.addStore(standardFS);
         cStorage.addStore("hashed", hashedFS);
         cStorage.setSavePrefix("hashed");
-        
+
         return cStorage;
     }
 }

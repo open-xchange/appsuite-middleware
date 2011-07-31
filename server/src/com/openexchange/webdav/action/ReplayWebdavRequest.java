@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class ReplayWebdavRequest implements WebdavRequest{
 	private final WebdavRequest delegate;
 	private byte[] body;
-	
+
 	public ReplayWebdavRequest(final WebdavRequest req) {
 		this.delegate = req;
 	}
@@ -80,20 +80,20 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		if(this.body != null) {
 			return new ByteArrayInputStream(this.body);
 		}
-		
+
 		final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream();
 		InputStream in = null;
-		
+
 		in = delegate.getBody();
-		
+
 		final byte[] buffer = new byte[200];
 		int b = 0;
-		
+
 		while((b = in.read(buffer))!=-1) {
 			bout.write(buffer,0,b);
 		}
 		this.body = bout.toByteArray();
-		
+
 		return new ByteArrayInputStream(this.body);
 	}
 
@@ -146,7 +146,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
     public String getURLPrefix() {
 		return delegate.getURLPrefix();
 	}
-	
+
 	@Override
     public int getDepth(final int depth) {
 		return delegate.getDepth(depth);
@@ -161,12 +161,12 @@ public class ReplayWebdavRequest implements WebdavRequest{
     public String getCharset() {
 		return delegate.getCharset();
 	}
-	
+
 	@Override
     public boolean hasBody() {
 	    return delegate.hasBody();
 	}
-	
+
 	@Override
     public Map<String, Object> getUserInfo() {
 	    return delegate.getUserInfo();

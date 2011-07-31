@@ -59,40 +59,40 @@ import com.openexchange.exception.OXException;
  * @author Benjamin Otterbach
  */
 public class AuditConfiguration {
-	
+
 	public static boolean getEnabled() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.AuditFileHandler.enabled", "false")); 
+		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.AuditFileHandler.enabled", "false"));
 	}
-	
+
 	public static String getLogfileLocation() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.pattern", "/var/log/open-xchange/open-xchange-audit.log"); 
+		return configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.pattern", "/var/log/open-xchange/open-xchange-audit.log");
 	}
-	
+
 	public static Level getLoglevel() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return Level.parse(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.level", Level.INFO.toString())); 
+		return Level.parse(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.level", Level.INFO.toString()));
 	}
-	
+
 	public static int getLogfileLimit() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.limit", "2097152")); 
+		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.limit", "2097152"));
 	}
-	
+
 	public static int getLogfileCount() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.count", "99")); 
+		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.count", "99"));
 	}
-	
+
 	public static Formatter getLogfileFormatter() throws InstantiationException, IllegalAccessException, ClassNotFoundException, OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return (Formatter)Class.forName(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance(); 
+		return (Formatter)Class.forName(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance();
 	}
-	
+
 	public static boolean getLogfileAppend() throws OXException {
 		final ConfigurationService configservice = AuditServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.append", "true")); 
+		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.append", "true"));
 	}
-	
+
 }

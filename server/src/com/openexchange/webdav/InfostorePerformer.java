@@ -113,7 +113,7 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link InfostorePerformer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public final class InfostorePerformer implements SessionHolder {
@@ -124,7 +124,7 @@ public final class InfostorePerformer implements SessionHolder {
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static InfostorePerformer getInstance() {
@@ -170,20 +170,20 @@ public final class InfostorePerformer implements SessionHolder {
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
-        
-        
+
+
         final InfostoreWebdavFactory infoFactory = new InfostoreWebdavFactory();
         final InfostoreFacadeImpl database = new InfostoreFacadeImpl();
         infoFactory.setDatabase(database);
         infoFactory.setFolderLockManager(new FolderLockManagerImpl());
         infoFactory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
-        
+
         final EntityLockManagerImpl infoLockManager = new EntityLockManagerImpl("infostore_lock");
         infoLockManager.addExpiryListener(new TouchInfoitemsWithExpiredLocksListener(this, database));
-        
+
         infoFactory.setInfoLockManager(infoLockManager);
-        
-        
+
+
         infoFactory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
         infoFactory.setInfoProperties(new PropertyStoreImpl("infostore_property"));
         infoFactory.setProvider(new DBPoolProvider());
@@ -274,7 +274,7 @@ public final class InfostorePerformer implements SessionHolder {
             LOG.error("Can't add default overrides", e);
         }
         registry.log();
-        
+
         BehaviourLookup.getInstance().setRegistry(registry);
     }
 
@@ -324,7 +324,7 @@ public final class InfostorePerformer implements SessionHolder {
     public Context getContext() {
         return session.get().getContext();
     }
-    
+
     @Override
     public User getUser() {
         return session.get().getUser();

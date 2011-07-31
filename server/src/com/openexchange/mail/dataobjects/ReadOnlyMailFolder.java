@@ -57,7 +57,7 @@ import com.openexchange.mail.permission.MailPermission;
 
 /**
  * {@link ReadOnlyMailFolder} - a data container object for a mail folder
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReadOnlyMailFolder extends MailFolder implements Serializable {
@@ -96,7 +96,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this mail folder has subfolders.
-     * 
+     *
      * @return <code>true</code> if this mail folder has subfolders; otherwise <code>false</code>
      */
     @Override
@@ -106,7 +106,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if has-subfolders flag was set through {@link #setSubfolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if has-subfolders flag is set; otherwise <code>false</code>
      */
     @Override
@@ -124,7 +124,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets if this mail folder has subfolders.
-     * 
+     *
      * @param hasSubfolders the has-subfolders flag to set
      */
     @Override
@@ -134,7 +134,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this mail folder has subscribed subfolders.
-     * 
+     *
      * @return <code>true</code> if this mail folder has subscribed subfolders; otherwise <code>false</code>
      */
     @Override
@@ -144,7 +144,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if the has-subscribed-subfolders flag was set through {@link #setSubscribedSubfolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if the has-subscribed-subfolders flag was set; otherwise <code>false</code>
      */
     @Override
@@ -162,7 +162,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets if this mail folder has subscribed subfolders.
-     * 
+     *
      * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
     @Override
@@ -172,7 +172,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     @Override
@@ -182,7 +182,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if name was set through {@link #setName(String)}.
-     * 
+     *
      * @return <code>true</code> if name is set; otherwise <code>false</code>
      */
     @Override
@@ -202,7 +202,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Sets this mail folder's name.
      * <p>
      * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_NAME} is supposed to be set as name.
-     * 
+     *
      * @param name the name to set
      */
     @Override
@@ -214,7 +214,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Returns whether the denoted mail folder is subscribed or not.
      * <p>
      * If mailing system does not support subscription, <code>true</code> is supposed to be returned.
-     * 
+     *
      * @return Whether the denoted mail folder is subscribed or not
      */
     @Override
@@ -224,7 +224,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if subscribed status was set through {@link #setSubscribed(boolean)}.
-     * 
+     *
      * @return <code>true</code> if subscribed is set; otherwise <code>false</code>
      */
     @Override
@@ -244,7 +244,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Sets the subscription status for this mail folder.
      * <p>
      * If mailing system does not support subscription, <code>true</code> is supposed to be set as subscription status.
-     * 
+     *
      * @param subscribed the subscription status to set
      */
     @Override
@@ -254,7 +254,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the number of messages marked for deletion in this folder
-     * 
+     *
      * @return The number of messages marked for deletion in this folder or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -265,7 +265,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if the number of messages was set through {@link #setDeletedMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if deletedMessageCount is set; otherwise <code>false</code>
      */
     @Override
@@ -283,7 +283,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the number of messages marked for deletion in this folder.
-     * 
+     *
      * @param deletedMessageCount The number of messages marked for deletion or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
@@ -293,7 +293,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this folder exists.
-     * 
+     *
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
     @Override
@@ -303,7 +303,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if folder existence status was set through {@link #setExists(boolean)}.
-     * 
+     *
      * @return <code>true</code> if exists status is set; otherwise <code>false</code>
      */
     @Override
@@ -321,7 +321,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the exists status.
-     * 
+     *
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
     @Override
@@ -331,7 +331,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the number of messages.
-     * 
+     *
      * @return The number of messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -342,7 +342,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if number of messages was set through {@link #setMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if messageCount is set; otherwise <code>false</code>
      */
     @Override
@@ -360,7 +360,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the number of messages.
-     * 
+     *
      * @param messageCount The number of messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
@@ -370,7 +370,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the number of new messages (since last time this folder was accessed).
-     * 
+     *
      * @return The number of new messages or <code>-1</code> if this mail folder does not hold messages.
      * @see #isHoldsMessages()
      */
@@ -381,7 +381,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if the number of new messages was set through {@link #setNewMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if newMessageCount is set; otherwise <code>false</code>
      */
     @Override
@@ -399,7 +399,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the number of new messages.
-     * 
+     *
      * @param newMessageCount The number of new messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
@@ -409,7 +409,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the number of unread messages.
-     * 
+     *
      * @return The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -420,7 +420,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if the number of unread messages was set through {@link #setUnreadMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if unreadMessageCount is set; otherwise <code>false</code>
      */
     @Override
@@ -438,7 +438,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the number of unread messages.
-     * 
+     *
      * @param unreadMessageCount The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      */
     @Override
@@ -448,7 +448,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the separator character.
-     * 
+     *
      * @see MailConfig#getDefaultSeparator()
      * @return The separator character.
      */
@@ -459,7 +459,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if seperator character was set through {@link #setSeparator(char)}.
-     * 
+     *
      * @return <code>true</code> if separator is set; otherwise <code>false</code>
      */
     @Override
@@ -479,7 +479,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Sets the separator character.
      * <p>
      * If mailing system does not support a separator character, {@link MailConfig#getDefaultSeparator()} should to be used.
-     * 
+     *
      * @param separator the separator to set
      */
     @Override
@@ -489,7 +489,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Gets the parent fullname.
-     * 
+     *
      * @return The parent fullname or <code>null</code> if this mail folder denotes the root folder
      */
     @Override
@@ -499,7 +499,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if parent fullname was set through {@link #setParentFullname(String)}.
-     * 
+     *
      * @return <code>true</code> if parentFullname is set; otherwise <code>false</code>
      */
     @Override
@@ -519,7 +519,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Sets the parent fullname.
      * <p>
      * If this mail folder denotes the root folder, <code>null</code> is supposed to be set.
-     * 
+     *
      * @param parentFullname the parent fullname to set
      */
     @Override
@@ -529,7 +529,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this folder is able to hold messages.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold messages; otherwise <code>false</code>
      */
     @Override
@@ -539,7 +539,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if he holds-messages flag was set through {@link #setHoldsMessages(boolean)}.
-     * 
+     *
      * @return <code>true</code> if the holds-messages flag is set; otherwise <code>false</code>
      */
     @Override
@@ -557,7 +557,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets if this folder holds messages.
-     * 
+     *
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
     @Override
@@ -567,7 +567,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this folder is able to hold folders.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
     @Override
@@ -577,7 +577,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if the holds-folder flag was set through {@link #setHoldsFolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-folder flag set; otherwise <code>false</code>
      */
     @Override
@@ -595,7 +595,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets if this folder holds folders.
-     * 
+     *
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
     @Override
@@ -610,7 +610,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * {@link DefaultMailPermission} is supposed to be returned on missing permissions support except for the root folder. The root folder
      * should indicate no object permissions in any case, but the folder permission varies if mailing system allows subfolder creation below
      * root folder or not. The returned permission must reflect the allowed behavior.
-     * 
+     *
      * @return The own permission
      */
     @Override
@@ -620,7 +620,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if own permission was set through {@link #setOwnPermission(MailPermission)}.
-     * 
+     *
      * @return <code>true</code> if own permission is set; otherwise <code>false</code>
      */
     @Override
@@ -642,7 +642,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
      * Apply an instance of {@link DefaultMailPermission} if mailing system does not support permissions, except if this mail folder denotes
      * the root folder, then apply altered instance of {@link DefaultMailPermission} with no object permissions but properly reflects folder
      * permission as described in {@link #getOwnPermission()}.
-     * 
+     *
      * @param ownPermission the own permission to set
      */
     @Override
@@ -652,7 +652,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this folder denotes the root folder
-     * 
+     *
      * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
      */
     @Override
@@ -662,7 +662,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if root-folder flag was set through {@link #setRootFolder(boolean)}.
-     * 
+     *
      * @return <code>true</code> if root-folder flag is set; otherwise <code>false</code>
      */
     @Override
@@ -680,7 +680,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Sets the root folder flag.
-     * 
+     *
      * @param rootFolder the root folder flag to set
      */
     @Override
@@ -690,7 +690,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if this folder denotes a default folder (Drafts, Sent, Trash, etc.)
-     * 
+     *
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
     @Override
@@ -700,7 +700,7 @@ public class ReadOnlyMailFolder extends MailFolder implements Serializable {
 
     /**
      * Checks if default-folder flag was set through {@link #setDefaultFolder(boolean)}.
-     * 
+     *
      * @return <code>true</code> if default-folder flag is set; otherwise <code>false</code>
      */
     @Override

@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link DelegateExecutorService} - A delegating {@link ExecutorService} which denies shut-down.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegateExecutorService extends AbstractExecutorService {
@@ -65,7 +65,7 @@ public final class DelegateExecutorService extends AbstractExecutorService {
 
     /**
      * Initializes a new {@link DelegateExecutorService}.
-     * 
+     *
      * @param executorService The executor service
      */
     public DelegateExecutorService(final ExecutorService executorService) {

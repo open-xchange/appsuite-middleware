@@ -18,7 +18,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
 
-// Contributors: Bjorn Aadland, Chris Bartley, Nicola Fankhauser, 
+// Contributors: Bjorn Aadland, Chris Bartley, Nicola Fankhauser,
 //               Victor Havin,  Christian Kurzke, Bogdan Onoiu,
 //               Jain Sanjay, David Santoro.
 
@@ -79,7 +79,7 @@ public class WbxmlParser implements XmlPullParser {
     //	private String encoding;
     private Object wapExtensionData;
     private int wapExtensionCode;
-    
+
     private int type;
 	private int codePage;
 
@@ -370,11 +370,11 @@ public class WbxmlParser implements XmlPullParser {
 			}
 
 			if (minType >= TEXT) {  // text, see if accumulate
-				
+
 				if (save != null) {
 					text = text == null ? save : save + text;
 				}
-				
+
 				switch(peekId()) {
 					case Wbxml.ENTITY:
 					case Wbxml.STR_I:
@@ -384,8 +384,8 @@ public class WbxmlParser implements XmlPullParser {
 					case Wbxml.LITERAL_AC: continue;
 					default:
 				}
-			}	
-            break; 
+			}
+            break;
         }
 
         type = minType;
@@ -491,10 +491,10 @@ public class WbxmlParser implements XmlPullParser {
 				buf.append((char) readByte());
 			}
 	        stringTable = buf.toString();
-	        
+
 	   //     System.out.println("String table: "+stringTable);
 	    //    System.out.println("String table length: "+stringTable.length());
-	        
+
 	        selectPage(0, true);
 			selectPage(0, false);
         }
@@ -654,8 +654,8 @@ public class WbxmlParser implements XmlPullParser {
 		}
 		tables.add(page*3+type, table);
 	}
-		
-		
+
+
 
 
 
@@ -669,11 +669,11 @@ public class WbxmlParser implements XmlPullParser {
 		if(tables.size() == 0 && nr == 0) {
 			return;
 		}
-		
+
 		if(nr*3 > tables.size()) {
 			exception("Code Page "+nr+" undefined!");
 		}
-		
+
 		if(tags) {
 			tagTable = tables.get(nr * 3 + TAG_TABLE);
 		} else {
@@ -703,7 +703,7 @@ public class WbxmlParser implements XmlPullParser {
         while(id == Wbxml.SWITCH_PAGE){
         	nextId = -2;
 			selectPage(readByte(), true);
-			id = peekId();        	
+			id = peekId();
         }
         nextId = -2;
 
@@ -774,7 +774,7 @@ public class WbxmlParser implements XmlPullParser {
         //        return next;
     }
 
-    
+
 
     public void parseWapExtension(final int id)
         throws IOException, XmlPullParserException {
@@ -814,7 +814,7 @@ public class WbxmlParser implements XmlPullParser {
                     wapExtensionData = buf;
                 } // case OPAQUE
             	break;
-            	
+
             default:
                 exception("illegal id: "+id);
         } // SWITCH
@@ -830,8 +830,8 @@ public class WbxmlParser implements XmlPullParser {
         	while(id == Wbxml.SWITCH_PAGE){
                 selectPage(readByte(), false);
                 id = readByte();
-            } 
-        	
+            }
+
             String name = resolveId(attrStartTable, id);
             StringBuilder value;
 
@@ -858,7 +858,7 @@ public class WbxmlParser implements XmlPullParser {
 					case Wbxml.SWITCH_PAGE :
 						selectPage(readByte(), false);
 						break;
-                	
+
                     case Wbxml.ENTITY :
                         value.append((char) readInt());
                         break;
@@ -885,9 +885,9 @@ public class WbxmlParser implements XmlPullParser {
                                                 if (!(e.getType() != Xml.TEXT
                                                     && e.getType() != Xml.WHITESPACE))
                                                     throw new RuntimeException("parse WapExtension must return Text Event in order to work inside Attributes!");
-                        
+
                                                 value.append(e.getText());
-                        
+
                                                 //value.append (handleExtension (id)); // skip EXT in ATTR
                                                 //break;
                         */
@@ -910,7 +910,7 @@ public class WbxmlParser implements XmlPullParser {
             attributes[i++] = null;
             attributes[i++] = name;
             attributes[i++] = value.toString();
-            
+
             attributeCount++;
         }
     }
@@ -921,8 +921,8 @@ public class WbxmlParser implements XmlPullParser {
 		}
 		return nextId;
 	}
-		
-		
+
+
 
 
     String resolveId(final String[] tab, final int id) throws IOException {
@@ -965,8 +965,8 @@ public class WbxmlParser implements XmlPullParser {
              System.arraycopy(nspCounts, 0, bigger, 0, nspCounts.length);
              nspCounts = bigger;
         }
-        
-        nspCounts[depth] = nspCounts[depth - 1]; 
+
+        nspCounts[depth] = nspCounts[depth - 1];
 
         for (int i = attributeCount - 1; i > 0; i--) {
             for (int j = 0; j < i; j++) {
@@ -1050,25 +1050,25 @@ public class WbxmlParser implements XmlPullParser {
         return stringTable.substring(pos, end);
     }
 
-    /** 
+    /**
      * Sets the tag table for a given page.
      * The first string in the array defines tag 5, the second tag 6 etc.
      */
 
     public void setTagTable(final int page, final String[] table) {
     	setTable(page, TAG_TABLE, table);
-    	
+
 //        this.tagTable = tagTable;
   //      if (page != 0)
     //        throw new RuntimeException("code pages curr. not supp.");
     }
 
     /** Sets the attribute start Table for a given page.
-     *	The first string in the array defines attribute 
+     *	The first string in the array defines attribute
      *  5, the second attribute 6 etc.
-     *  Currently, only page 0 is supported. Please use the 
-     *  character '=' (without quote!) as delimiter 
-     *  between the attribute name and the (start of the) value 
+     *  Currently, only page 0 is supported. Please use the
+     *  character '=' (without quote!) as delimiter
+     *  between the attribute name and the (start of the) value
      */
 
     public void setAttrStartTable(
@@ -1079,7 +1079,7 @@ public class WbxmlParser implements XmlPullParser {
     }
 
     /** Sets the attribute value Table for a given page.
-     *	The first string in the array defines attribute value 0x85, 
+     *	The first string in the array defines attribute value 0x85,
      *  the second attribute value 0x86 etc.
      *  Currently, only page 0 is supported.
      */
@@ -1094,7 +1094,7 @@ public class WbxmlParser implements XmlPullParser {
     public int getWapExtensionCode() {
     	return wapExtensionCode;
     }
-    
+
     public Object getWapExtensionData() {
     	return wapExtensionData;
     }

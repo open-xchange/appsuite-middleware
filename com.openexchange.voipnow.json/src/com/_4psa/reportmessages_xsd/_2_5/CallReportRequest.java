@@ -13,9 +13,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -75,8 +75,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -108,11 +108,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -120,11 +120,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -132,11 +132,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -144,11 +144,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -156,11 +156,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the login property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -168,11 +168,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the login property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -180,11 +180,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the interval property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallReportRequest.Interval }
-     *     
+     *
      */
     public CallReportRequest.Interval getInterval() {
         return interval;
@@ -192,11 +192,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the interval property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallReportRequest.Interval }
-     *     
+     *
      */
     public void setInterval(CallReportRequest.Interval value) {
         this.interval = value;
@@ -204,11 +204,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the flow property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFlow() {
         return flow;
@@ -216,11 +216,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the flow property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFlow(String value) {
         this.flow = value;
@@ -228,11 +228,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -240,11 +240,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -252,11 +252,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the disposion property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDisposion() {
         return disposion;
@@ -264,11 +264,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the disposion property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDisposion(String value) {
         this.disposion = value;
@@ -276,11 +276,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the records property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRecords() {
         return records;
@@ -288,11 +288,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the records property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRecords(BigInteger value) {
         this.records = value;
@@ -300,11 +300,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the hangupCause property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getHangupCause() {
         return hangupCause;
@@ -312,11 +312,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the hangupCause property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setHangupCause(BigInteger value) {
         this.hangupCause = value;
@@ -324,11 +324,11 @@ public class CallReportRequest {
 
     /**
      * Gets the value of the networkCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNetworkCode() {
         return networkCode;
@@ -336,11 +336,11 @@ public class CallReportRequest {
 
     /**
      * Sets the value of the networkCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNetworkCode(String value) {
         this.networkCode = value;
@@ -349,9 +349,9 @@ public class CallReportRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -364,8 +364,8 @@ public class CallReportRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -381,11 +381,11 @@ public class CallReportRequest {
 
         /**
          * Gets the value of the startDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getStartDate() {
             return startDate;
@@ -393,11 +393,11 @@ public class CallReportRequest {
 
         /**
          * Sets the value of the startDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setStartDate(XMLGregorianCalendar value) {
             this.startDate = value;
@@ -405,11 +405,11 @@ public class CallReportRequest {
 
         /**
          * Gets the value of the endDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getEndDate() {
             return endDate;
@@ -417,11 +417,11 @@ public class CallReportRequest {
 
         /**
          * Sets the value of the endDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setEndDate(XMLGregorianCalendar value) {
             this.endDate = value;

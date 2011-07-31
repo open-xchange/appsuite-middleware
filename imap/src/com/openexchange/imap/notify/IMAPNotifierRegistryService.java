@@ -60,7 +60,7 @@ public interface IMAPNotifierRegistryService {
 
     /**
      * Adds (and starts) a new notifier task for specified account.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing user information
      * @return <code>true</code> for successful insertion and start-up of a new notifier task; otherwise <code>false</code>
@@ -69,7 +69,7 @@ public interface IMAPNotifierRegistryService {
 
     /**
      * Checks if this registry contains a notifier task for specified session's user.
-     * 
+     *
      * @param session The session providing user information
      * @return <code>true</code> if this registry contains a notifier task for specified session's user; otherwise <code>false</code>
      */
@@ -77,14 +77,14 @@ public interface IMAPNotifierRegistryService {
 
     /**
      * Removes and shuts down all notifier tasks for specified session's user.
-     * 
+     *
      * @param session The session providing user information
      */
     public void removeTaskFor(final Session session);
 
     /**
      * Handles tracked removal of specified session
-     * 
+     *
      * @param session The removed session
      */
     public void handleRemovedSession(final Session session);

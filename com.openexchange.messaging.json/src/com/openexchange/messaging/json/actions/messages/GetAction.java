@@ -78,11 +78,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetAction extends AbstractMessagingAction {
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
-    
+
     public GetAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
-    
+
     public GetAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
@@ -91,10 +91,10 @@ public class GetAction extends AbstractMessagingAction {
 
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, OXException {
-        
+
         final MessagingMessageAccess messageAccess = req.getMessageAccess(session.getUserId(), session.getContextId());
         final MessagingMessage message = messageAccess.getMessage(req.getFolderId(), req.getId(), req.getPeek());
-        
+
         return new AJAXRequestResult(writer.write(message, req.getAccountAddress(), session, DISPLAY_MODE));
     }
 

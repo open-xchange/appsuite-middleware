@@ -63,7 +63,7 @@ public class Table extends Element {
 	public Table(String name) {
 		this.name = name;
 	}
-	
+
 	public Table(String name, String alias) {
 	    this(name);
 	    this.alias = alias;
@@ -72,15 +72,15 @@ public class Table extends Element {
 	public String getName() {
 		return name;
 	}
-	
+
 	public String getAlias() {
 	    return alias;
 	}
-	
+
 	public Column getColumn(String column) {
 	    return new Column((alias == null ? getName() : getAlias()) + "." + column);
 	}
-	
+
 	public List<Column> getColumns(String... columns) {
 	    List<Column> retVal = new ArrayList<Column>();
 	    for (String column : columns) {

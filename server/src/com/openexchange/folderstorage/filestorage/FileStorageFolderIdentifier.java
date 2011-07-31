@@ -58,7 +58,7 @@ import com.openexchange.tools.id.IDMangler;
 /**
  * {@link FileStorageFolderIdentifier} - A parsed folder storage folder identifier:<br>
  * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;folder-id&gt;)</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderIdentifier {
@@ -68,7 +68,7 @@ public final class FileStorageFolderIdentifier {
     /**
      * Gets the fully qualified name:<br>
      * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;folder-id&gt;)</code>
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param folderId The folder identifier
@@ -77,7 +77,7 @@ public final class FileStorageFolderIdentifier {
     public static String getFQN(final String serviceId, final String accountId, String folderId) {
         if(serviceId == null && accountId == null) {
             // Looks like a global and regular OX folder id.
-            return folderId; 
+            return folderId;
         }
         if(serviceId == null) {
             throw new NullPointerException("In plugin supplied folder IDs, the service may not be null");
@@ -94,7 +94,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Checks if given identifier is a valid fully qualified name.
-     * 
+     *
      * @param identifier The identifier to check
      * @return <code>true</code> if given identifier is a valid fully qualified name; otherwise <code>false</code>
      */
@@ -125,7 +125,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Parses given identifier to a valid fully qualified name.
-     * 
+     *
      * @param identifier The identifier to parse
      * @return The parsed fully qualified name or <code>null</code> if not parseable
      */
@@ -149,7 +149,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Initializes a new {@link FileStorageFolderIdentifier}.
-     * 
+     *
      * @param identifier The identifier according to pattern:<br>
      *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
      * @throws OXException If identifier is <code>null</code> or invalid
@@ -159,9 +159,9 @@ public final class FileStorageFolderIdentifier {
         if (null == identifier) {
             throw FolderExceptionErrorMessage.MISSING_FOLDER_ID.create();
         }
-        
+
         List<String> components = IDMangler.unmangle(identifier);
-        
+
         if (components.isEmpty() || components.size() == 1) {
             throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(identifier);
         }
@@ -199,7 +199,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Initializes a new {@link FileStorageFolderIdentifier}.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param folderId The folder fullname
@@ -223,7 +223,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     public String getServiceId() {
@@ -232,7 +232,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Gets the account identifier.
-     * 
+     *
      * @return The account identifier
      */
     public String getAccountId() {
@@ -241,7 +241,7 @@ public final class FileStorageFolderIdentifier {
 
     /**
      * Gets the folder identifier
-     * 
+     *
      * @return The folder identifier
      */
     public String getFolderId() {

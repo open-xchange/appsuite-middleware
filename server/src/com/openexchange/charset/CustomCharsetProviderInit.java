@@ -56,7 +56,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link CustomCharsetProviderInit} - Initialization for custom charset provider.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomCharsetProviderInit implements Initialization {

@@ -61,7 +61,7 @@ public class ServletWebdavResponse implements WebdavResponse {
 	public ServletWebdavResponse(final HttpServletResponse res) {
 		this.res = res;
 	}
-	
+
 	@Override
     public OutputStream getOutputStream() throws IOException {
 		return res.getOutputStream();

@@ -54,9 +54,9 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link CacheAvailabilityRegistryInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CacheAvailabilityRegistryInit implements Initialization {
 
@@ -78,7 +78,7 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	@Override
@@ -88,7 +88,7 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	@Override

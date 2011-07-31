@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link HeaderCacheMailProviderRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheMailProviderRegistry {
@@ -88,7 +88,7 @@ public final class HeaderCacheMailProviderRegistry {
 
     /**
      * Gets the mail provider appropriate for specified session.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return The appropriate mail provider
@@ -118,13 +118,13 @@ public final class HeaderCacheMailProviderRegistry {
      * Gets the mail provider appropriate for specified mail server URL.
      * <p>
      * The given URL should match pattern
-     * 
+     *
      * <pre>
      * &lt;protocol&gt;://&lt;host&gt;(:&lt;port&gt;)?
      * </pre>
-     * 
+     *
      * The protocol should be present. Otherwise the configured fallback is used as protocol.
-     * 
+     *
      * @param serverUrl The mail server URL
      * @return The appropriate mail provider
      */
@@ -137,7 +137,7 @@ public final class HeaderCacheMailProviderRegistry {
 
     /**
      * Gets the mail provider appropriate for specified protocol.
-     * 
+     *
      * @param protocolName The mail protocol; e.g. <code>"imap"</code>
      * @return The appropriate mail provider
      */
@@ -167,7 +167,7 @@ public final class HeaderCacheMailProviderRegistry {
 
     /**
      * Registers a mail provider and performs its start-up actions
-     * 
+     *
      * @param protocol The mail protocol's string representation; e.g. <code>"imap_imaps"</code>
      * @param provider The mail provider to register
      * @return <code>true</code> if mail provider has been successfully registered and no other mail provider supports the same protocol;
@@ -192,7 +192,7 @@ public final class HeaderCacheMailProviderRegistry {
 
     /**
      * Unregisters the mail provider
-     * 
+     *
      * @param provider The mail provider to unregister
      * @return The unregistered mail provider, or <code>null</code>
      */
@@ -206,7 +206,7 @@ public final class HeaderCacheMailProviderRegistry {
 
     /**
      * Unregisters the mail provider supporting specified protocol
-     * 
+     *
      * @param protocol The protocol
      * @return The unregistered instance of {@link MailProvider}, or <code>null</code> if there was no provider supporting specified
      *         protocol

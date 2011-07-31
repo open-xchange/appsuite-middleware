@@ -51,9 +51,9 @@ package com.openexchange.mobile.configuration.json.container;
 
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ProvisioningEmailMessage {
 
@@ -66,7 +66,7 @@ public class ProvisioningEmailMessage {
 		this.subject = "";
 		this.message = "";
 	}
-	
+
 	public ProvisioningEmailMessage(String locale, String subject,
 			String message) {
 		this.locale = locale;
@@ -97,5 +97,5 @@ public class ProvisioningEmailMessage {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 }

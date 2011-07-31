@@ -86,7 +86,7 @@ public class JSONSimpleRequest implements SimpleRequest {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

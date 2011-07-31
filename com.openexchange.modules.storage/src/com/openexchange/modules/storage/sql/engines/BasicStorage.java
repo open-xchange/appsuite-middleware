@@ -84,22 +84,22 @@ import com.openexchange.sql.grammar.UPDATE;
 public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
     protected Metadata<T> metadata;
-    
+
     protected Builder<T> builder = null;
     protected DatabaseService dbService;
     protected int ctxId;
-    
+
     protected AttributeHandler<T> overridesFromDB = AttributeHandler.DO_NOTHING;
     protected AttributeHandler<T> overridesToDB = AttributeHandler.DO_NOTHING;
-     
-    
+
+
     public BasicStorage(final Metadata<T> metadata, final DatabaseService dbService, final int ctxId) {
         this.metadata = metadata;
         this.dbService = dbService;
         this.ctxId = ctxId;
         builder = new Builder<T>(metadata);
     }
-    
+
     public void setOverridesFromDB(final AttributeHandler<T> overrides) {
         this.overridesFromDB = overrides;
     }
@@ -107,7 +107,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     public void setOverridesToDB(final AttributeHandler<T> overrides) {
         this.overridesToDB = overrides;
     }
-    
+
     public void create(final T thing) throws SQLException, OXException {
         final List<Attribute<T>> attributes = getAttributes();
         final INSERT insert = builder.insert(attributes, getExtraFields());
@@ -125,7 +125,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         final List<Attribute<T>> attributes = getAttributes();
         final SELECT select = builder.select(attributes);
         final List<Object> primaryKey = primaryKey(id);
-        
+
         return executeQuery(select, primaryKey, new ResultSetHandler<T>() {
 
             public T handle(final ResultSet rs) throws OXException, SQLException {
@@ -136,9 +136,9 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
                 SQLTools.fillObject(rs, thing, attributes, overridesFromDB);
                 return thing;
             }
-            
+
         });
-        
+
     }
 
 
@@ -155,13 +155,13 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
                 predicate = old.AND(predicate);
             }
         }
-        
+
         select.WHERE(predicate);
-        
+
         final List<Object> values = getExtraValues();
-        
-        
-        
+
+
+
         return executeQuery(select, values, new ResultSetHandler<List<T>>() {
 
             public List<T> handle(final ResultSet rs) throws OXException, SQLException {
@@ -173,7 +173,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
                 }
                 return list;
             }
-            
+
         });
     }
 
@@ -185,34 +185,34 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             return;
         }
         final UPDATE update = builder.update(updatedAttributes);
-        
+
         final List<Object> values = Tools.values(thing, updatedAttributes, overridesToDB);
         values.addAll(primaryKey(thing.get(metadata.getIdField())));
-        
+
         executeUpdate(update, values);
-        
+
     }
-    
+
     public void delete(final Object id) throws SQLException, OXException {
         final DELETE delete = builder.delete();
-        
+
         final List<Object> primaryKey = primaryKey(id);
-        
+
         executeUpdate(delete, primaryKey);
     }
-    
+
     public boolean exists(final Object id) throws SQLException, OXException {
         final SELECT select = new SELECT(metadata.getIdField().getName()).FROM(builder.getTableName());
         select.WHERE(builder.matchOne());
-        
+
         final List<Object> primaryKey = primaryKey(id);
-        
+
         return executeQuery(select, primaryKey, new ResultSetHandler<Boolean>() {
 
             public Boolean handle(final ResultSet rs) throws OXException, SQLException {
                 return rs.next();
             }
-            
+
         });
     }
 
@@ -230,11 +230,11 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     protected List<String> getExtraFields() {
         return new LinkedList<String>(Arrays.asList("cid"));
     }
-    
+
     protected List<Object> getExtraValues() {
         return new LinkedList<Object>(Arrays.asList(ctxId));
     }
-    
+
     protected <M> M executeQuery(final Command command, final List<Object> values, final ResultSetHandler<M> handler) throws SQLException, OXException {
         Connection con = null;
         ResultSet rs = null;
@@ -243,7 +243,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             con = dbService.getWritable(ctxId);
             rs = sBuilder.executeQuery(con, command, values);
             return handler.handle(rs);
-            
+
         } finally {
             sBuilder.closePreparedStatement(null, rs);
             if(con != null) {
@@ -259,7 +259,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
             con = dbService.getWritable(ctxId);
             final StatementBuilder sBuilder = new StatementBuilder();
             sBuilder.executeStatement(con, command, values);
-            
+
         } finally {
             if(con != null) {
                 try {

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.StorageParameters;
 
 /**
  * {@link InstanceStorageParametersProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InstanceStorageParametersProvider implements StorageParametersProvider {

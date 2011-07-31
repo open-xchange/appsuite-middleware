@@ -57,9 +57,9 @@ public class FoldingWriter implements VersitDefinition.Writer {
     private final Writer w;
 
     private int LineLength;
-    
+
     private final int MAX = 75;
-    
+
     private final String INDENTATION = " ";
 
     public FoldingWriter(final Writer w) {
@@ -87,7 +87,7 @@ public class FoldingWriter implements VersitDefinition.Writer {
             w.write(s);
         }
     }
-    
+
     private void writeLong(String s) throws IOException {
         w.write("\n");
         w.write(INDENTATION);
@@ -98,7 +98,7 @@ public class FoldingWriter implements VersitDefinition.Writer {
             w.write(s);
         }
     }
-    
+
     public void writeln() throws IOException {
         w.write("\n");
         LineLength = 0;

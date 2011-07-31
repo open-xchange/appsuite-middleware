@@ -83,7 +83,7 @@ import com.openexchange.groupware.update.internal.UpdateProcess;
 
 /**
  * MBean for update task toolkit.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */

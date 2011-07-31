@@ -53,7 +53,7 @@ import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 
 /**
  * {@link FileFieldSet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileFieldSet extends AbstractFileFieldSwitcher {

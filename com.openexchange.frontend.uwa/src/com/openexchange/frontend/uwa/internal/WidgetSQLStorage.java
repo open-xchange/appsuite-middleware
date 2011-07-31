@@ -75,9 +75,9 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
             }
             return null;
         }
-        
+
     };
-    
+
     private static final AttributeHandler<UWAWidget> TURN_ID_TO_STRING = new AttributeHandler<UWAWidget>() {
 
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
@@ -86,21 +86,21 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
             }
             return null;
         }
-        
+
     };
-    
+
     private List<Attribute<UWAWidget>> attributes = new ArrayList<Attribute<UWAWidget>>(Field.values().length-4);
-    
+
     public WidgetSQLStorage(Metadata<UWAWidget> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, userId, ctxId);
         for(Field f : EnumSet.complementOf(EnumSet.of(Field.ADJ))) {
             attributes.add(f);
         }
-        
+
         setOverridesToDB(TURN_ID_TO_INT);
         setOverridesFromDB(TURN_ID_TO_STRING);
     }
-    
+
     @Override
     protected List<Attribute<UWAWidget>> getAttributes() {
         return attributes;

@@ -93,7 +93,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link IMAPDefaultFolderChecker} - The IMAP default folder checker.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPDefaultFolderChecker {
@@ -118,7 +118,7 @@ public final class IMAPDefaultFolderChecker {
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @param ctx The context
@@ -136,7 +136,7 @@ public final class IMAPDefaultFolderChecker {
 
     /**
      * Checks if given fullname denotes a default folder.
-     * 
+     *
      * @param folderFullName The fullname to check
      * @return <code>true</code> if given fullname denotes a default folder; otherwise <code>false</code>
      * @throws OXException If check for default folder fails
@@ -154,7 +154,7 @@ public final class IMAPDefaultFolderChecker {
 
     /**
      * Gets the default folder for specified index.
-     * 
+     *
      * @param index The default folder index taken from class <code>StorageUtility</code>
      * @return The default folder for specified index
      * @throws OXException If default folder retrieval fails
@@ -184,7 +184,7 @@ public final class IMAPDefaultFolderChecker {
 
     /**
      * Checks default folders.
-     * 
+     *
      * @throws OXException If default folder check fails
      */
     public void checkDefaultFolders() throws OXException {
@@ -403,7 +403,7 @@ public final class IMAPDefaultFolderChecker {
                 Integer.valueOf(accountId),
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
-      
+
     }
 
 
@@ -814,8 +814,8 @@ public final class IMAPDefaultFolderChecker {
                 }
             }
             /*-
-             * 
-             * 
+             *
+             *
             final IMAPException oxme = IMAPException.Code.NO_DEFAULT_FOLDER_CREATION.create(
                 tmp.append(prefix).append(name).toString());
             tmp.setLength(0);
@@ -868,7 +868,7 @@ public final class IMAPDefaultFolderChecker {
 
     /**
      * Stores specified separator character in session parameters for future look-ups.
-     * 
+     *
      * @param separator The separator character
      */
     private void setSeparator(final char separator, final MailSessionCache mailSessionCache) {

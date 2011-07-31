@@ -76,7 +76,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link MSNServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MSNServiceImpl implements MSNService {
@@ -84,7 +84,7 @@ public class MSNServiceImpl implements MSNService {
     private MSNOAuthActivator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
-    
+
     public MSNServiceImpl(MSNOAuthActivator activator){
         this.activator = activator;
     }
@@ -112,7 +112,7 @@ public class MSNServiceImpl implements MSNService {
      * @param wrap_access_token
      * @return
      */
-    private JSONObject useAccessTokenToAccessData(String wrap_access_token) {        
+    private JSONObject useAccessTokenToAccessData(String wrap_access_token) {
         JSONObject wholeResponse = new JSONObject();
         String responseString = "";
         String protectedUrl = "http://apis.live.net/V4.1/";

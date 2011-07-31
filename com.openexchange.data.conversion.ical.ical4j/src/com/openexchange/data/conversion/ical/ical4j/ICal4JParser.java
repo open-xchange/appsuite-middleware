@@ -95,7 +95,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link ICal4JParser} - The {@link ICalParser} using <a href="http://ical4j.sourceforge.net/">ICal4j</a> library.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Tobias Prinz <tobias.prinz@open-xchange.com> (bug workarounds)
  */
@@ -158,7 +158,7 @@ public class ICal4JParser implements ICalParser {
                     }
                 }
             }
-            
+
         } catch (final UnsupportedEncodingException e) {
             // IGNORE
         } catch (final ConversionError e){
@@ -257,8 +257,8 @@ public class ICal4JParser implements ICalParser {
             converter.verify(index, appointment, warnings);
         }
 
-        
-        
+
+
         appointment.setTimezone(getTimeZoneID(tz));
 
         return appointment;
@@ -318,7 +318,7 @@ public class ICal4JParser implements ICalParser {
             final StringBuilder chunk = new StringBuilder();
             String line;
             boolean read = false;
-            boolean timezoneStarted = false; //hack to fix bug 11958 
+            boolean timezoneStarted = false; //hack to fix bug 11958
             boolean timezoneEnded = false; //hack to fix bug 11958
             boolean timezoneRead = false; //hack to fix bug 11958
             final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
@@ -374,7 +374,7 @@ public class ICal4JParser implements ICalParser {
             	removeAnnoyingWhitespaces(chunk.toString()
                 )))))))
             ); // FIXME: Encoding?
-            return builder.build(chunkedReader); 
+            return builder.build(chunkedReader);
         } catch (final IOException e) {
             //IGNORE
         } catch (final ParserException e) {
@@ -391,7 +391,7 @@ public class ICal4JParser implements ICalParser {
 	private String workaroundFor17492(final String input) {
     	return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
 	}
-	
+
 	private String workaroundFor19463(final String input) {
 		return input
 			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
@@ -402,7 +402,7 @@ public class ICal4JParser implements ICalParser {
 	/**
      * Method written out of laziness: Because you can spread iCal attributes
      * over several lines with newlines followed by a white space while a normal
-     * newline means a new attribute starts, one would need to parse the whole file 
+     * newline means a new attribute starts, one would need to parse the whole file
      * (with a lookahead) before fixing errors. That means no regular expressions
      * allowed. Since spreading just makes it nicer to read for humans, this method
      * strips those newline+whitespace elements so we can use simple regexps.
@@ -412,7 +412,7 @@ public class ICal4JParser implements ICalParser {
 	}
 
 	private String workaroundFor16895(final String input) {
-		/* Bug in Zimbra: They like to use an EMAIL element for the 
+		/* Bug in Zimbra: They like to use an EMAIL element for the
 		 * ATTENDEE property, though there is none.
 		 */
 		return input.replaceAll("ATTENDEE([^\n]*?);EMAIL=", "ATTENDEE$1;X-ZIMBRA-EMAIL=");
@@ -420,11 +420,11 @@ public class ICal4JParser implements ICalParser {
 
 	private String workaroundFor16367(final String input) {
         /* Bug in MS Exchange: If you use a CN element, it must have a value.
-         * MS Exchange has an empty value, which we now replace properly. 
+         * MS Exchange has an empty value, which we now replace properly.
          */
         return input.replaceAll("CN=:", "CN=\"\":");
     }
-    
+
     private String workaroundFor16613(final String input) {
         /*
          * Bug in Groupwise: There is no attribute ID for ATTACH. Experimental
@@ -433,11 +433,11 @@ public class ICal4JParser implements ICalParser {
          */
         return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])" , "\nATTACH$1$3");
     }
-    
+
     private String removeByteOrderMarks(String line){
     	char[] buf = line.toCharArray();
     	int length = buf.length;
-    	
+
 		if(length > 3) {
             if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
 				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {

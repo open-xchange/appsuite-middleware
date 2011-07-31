@@ -80,7 +80,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link FacebookMessagingActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacebookMessagingActivator extends DeferredActivator {
@@ -139,13 +139,13 @@ public final class FacebookMessagingActivator extends DeferredActivator {
                         registry.addService(classe, service);
                     }
                 }
-                
+
                 secretService = new WhiteboardSecretService(context);
                 secretService.open();
                 registry.addService(SecretService.class, secretService);
             }
-            
-            
+
+
             /*
              * Some init stuff
              */

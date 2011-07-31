@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EventFactoryServiceImpl} - Implementation of {@link EventFactoryService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EventFactoryServiceImpl implements EventFactoryService {

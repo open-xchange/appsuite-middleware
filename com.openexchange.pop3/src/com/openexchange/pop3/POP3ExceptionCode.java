@@ -336,7 +336,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
     private final int detailNumber;
 
     private final Category category;
-    
+
     private final String prefix;
 
     private POP3ExceptionCode(final String message, final Category category, final int detailNumber) {
@@ -352,7 +352,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
         category = code.getCategory();
         prefix = code.getPrefix();
     }
-    
+
     private POP3ExceptionCode(final MIMEMailExceptionCode code) {
         message = code.getMessage();
         detailNumber = code.getNumber();
@@ -360,7 +360,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
         prefix = code.getPrefix();
     }
 
-    
+
     public String getPrefix() {
         return prefix;
     }
@@ -376,14 +376,14 @@ public enum POP3ExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -392,7 +392,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -402,7 +402,7 @@ public enum POP3ExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

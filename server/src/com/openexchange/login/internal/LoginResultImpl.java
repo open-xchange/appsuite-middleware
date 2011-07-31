@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link LoginResultImpl} - The {@link LoginResult} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class LoginResultImpl implements LoginResult {

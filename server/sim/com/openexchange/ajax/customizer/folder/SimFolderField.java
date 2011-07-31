@@ -85,11 +85,11 @@ public class SimFolderField implements AdditionalFolderField {
     public Object renderJSON(Object value) {
         return jsonValue;
     }
-    
+
     public void setColumnId(int columnId) {
         this.columnId = columnId;
     }
-    
+
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
@@ -97,7 +97,7 @@ public class SimFolderField implements AdditionalFolderField {
     public void setValue(Object value) {
         this.value = value;
     }
-    
+
     public void setJsonValue(Object jsonValue) {
         this.jsonValue = jsonValue;
     }

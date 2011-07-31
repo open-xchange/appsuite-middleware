@@ -80,7 +80,7 @@ public class CacheKeyImpl implements CacheKey {
 
     /**
      * Initializes a new {@link CacheKeyImpl}
-     * 
+     *
      * @param contextId The context ID
      * @param objectId The object ID
      */
@@ -90,7 +90,7 @@ public class CacheKeyImpl implements CacheKey {
 
     /**
      * Initializes a new {@link CacheKeyImpl}
-     * 
+     *
      * @param contextId The context ID
      * @param key Any instance of {@link Serializable} to identify the cached object
      * @throws IllegalArgumentException If specified key is <code>null</code>
@@ -107,7 +107,7 @@ public class CacheKeyImpl implements CacheKey {
 
     /**
      * Initializes a new {@link CacheKeyImpl}.
-     * 
+     *
      * @param contextId The context ID
      * @param keys Instances of {@link Serializable} to identify the cached object.
      * @throws IllegalArgumentException If specified keys are <code>null</code>

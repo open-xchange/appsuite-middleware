@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
 
 /**
  * HttpServletResponseWrapper
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -153,7 +153,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Initializes a new {@link HttpServletResponseWrapper}
-     * 
+     *
      * @param request The corresponding servlet request to this servlet response
      */
     public HttpServletResponseWrapper(final HttpServletRequestWrapper request) {
@@ -167,7 +167,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Gets the associated HTTP request.
-     * 
+     *
      * @return The associated HTTP request
      */
     public HttpServletRequestWrapper getRequest() {
@@ -297,7 +297,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Removes specified cookie from cookie set
-     * 
+     *
      * @param cookie The cookie to remove
      */
     public void removeCookie(final Cookie cookie) {
@@ -309,7 +309,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
      * response's cookies.
      * <p>
      * For each cookie its HTTP header format is generated and added to corresponding array of {@link String}
-     * 
+     *
      * @return A two dimensional array of {@link String} containing the <tt>Set-Cookie</tt>/<tt>Set-Cookie2</tt> headers
      */
     public String[][] getFormatedCookies() {
@@ -334,7 +334,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Gets the HTTP header format for specified instance of {@link Cookie}
-     * 
+     *
      * @param cookie The cookie whose HTTP header format shall be returned
      * @param composer A string builder used for composing
      * @return A string representing the HTTP header format
@@ -361,7 +361,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         /*-
          * TODO: HttpOnly currently cannot be set in Cookie class, thus we do it hard-coded here.
          *       This is available with Java Servlet Specification v3.0.
-         * 
+         *
          * Append HttpOnly flag
          */
         if (httpOnly /*&& maxAge > 0*/) {
@@ -470,7 +470,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Composes and sets appropriate error in this HTTP servlet response wrapper.
-     * 
+     *
      * @param status The status to set
      * @param statusMsg The (optional) status message or <code>null</code>
      * @return The error message in bytes
@@ -506,7 +506,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     /**
      * Gets the default error page.
-     * 
+     *
      * @return The default error page
      * @throws IOException If an I/O error occurs
      */

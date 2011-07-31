@@ -53,14 +53,14 @@ import com.openexchange.sql.builder.IStatementBuilder;
 
 /**
  * {@link BitXOR}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class BitXOR extends BinaryBitFunction {
 
     /**
      * Initializes a new {@link BitXOR}.
-     * 
+     *
      * @param left
      * @param right
      */

@@ -72,7 +72,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link IMAPSearch}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSearch {
@@ -88,7 +88,7 @@ public final class IMAPSearch {
 
     /**
      * Searches messages in given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param searchTerm The search term
      * @return Filtered messages' sequence numbers according to search term
@@ -230,7 +230,7 @@ public final class IMAPSearch {
      * <p>
      * The search term is considered to not contain any wildcard characters, but may contain non-ascii characters since IMAP search is
      * capable to deal with non-ascii characters through specifying a proper charset like UTF-8.
-     * 
+     *
      * @param term The search term to pass
      * @param imapFolder The IMAP folder to search in
      * @return The matching messages as an array
@@ -251,7 +251,7 @@ public final class IMAPSearch {
 
     /**
      * Searches with respect to umlauts
-     * 
+     *
      * @param searchTerm
      *            The search term
      * @param msgs

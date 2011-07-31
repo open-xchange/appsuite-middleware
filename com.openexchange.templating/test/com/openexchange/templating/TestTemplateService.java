@@ -183,7 +183,7 @@ public class TestTemplateService extends TestCase {
         templateService.setInfostoreHelper(infostoreBuilder.getSim(OXInfostoreHelper.class));
 
         final OXTemplate template = templateService.loadTemplate("new-template", "test-template.tmpl", session);
-        
+
         assertNotNull(template);
         assertEquals(TemplateLevel.USER, template.getLevel());
         final StringWriter writer = new StringWriter();
@@ -218,7 +218,7 @@ public class TestTemplateService extends TestCase {
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
     }
-    
+
     public void testGrabBasicTemplateAndDontRecreateIt() throws Exception {
         final SimBuilder oxfolderHelperBuilder = new SimBuilder();
         oxfolderHelperBuilder.expectCall("getPrivateTemplateFolder", session).andReturn(null);

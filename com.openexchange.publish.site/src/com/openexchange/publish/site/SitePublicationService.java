@@ -68,7 +68,7 @@ import com.openexchange.publish.helpers.SecurityStrategy;
 
 /**
  * {@link SitePublicationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SitePublicationService extends AbstractPublicationService implements PublicationService {

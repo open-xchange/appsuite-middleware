@@ -60,14 +60,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link HashingFileStorageMultithreadingTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HashingFileStorageMultithreadingTest extends AbstractHashingFileStorageTest {
-    
+
     private final int NUM_FILES = 10000;
     private final int NUM_THREADS = 10;
-    
+
     public void testManyThreads() throws InterruptedException, OXException, IOException {
         List<FileSaverThread> fsThreads = new ArrayList<FileSaverThread>(10);
         for(int i = 0; i < NUM_THREADS; i++) {
@@ -75,7 +75,7 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
             thread.start();
             fsThreads.add(thread);
         }
-        
+
         for (FileSaverThread fileSaverThread : fsThreads) {
             fileSaverThread.join();
             fileSaverThread.checkConsistency();
@@ -96,16 +96,16 @@ public class HashingFileStorageMultithreadingTest extends AbstractHashingFileSto
             for(Map.Entry<String, String> entry: dataMap.entrySet()) {
                 String fileId = entry.getKey();
                 String data = entry.getValue();
-                
+
                 InputStream file = fs.getFile(fileId);
                 InputStream expected = IS(data);
-                
+
                 int d = 0;
                 while((d = file.read()) != -1) {
                     assertEquals(d, expected.read());
                 }
                 assertEquals(-1, expected.read());
-                
+
             }
         }
 

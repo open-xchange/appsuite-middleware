@@ -63,7 +63,7 @@ public class ResolvedImpl implements Resolved {
 		this.id = id;
 		this.document = document;
 	}
-	
+
 	@Override
     public WebdavPath getPath() {
 		return path;

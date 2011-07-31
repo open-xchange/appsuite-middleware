@@ -55,7 +55,7 @@ import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class InvalidCharactersValidator implements InfostoreValidator{
-	
+
 	@Override
     public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 		final DocumentMetadataValidation validation = new DocumentMetadataValidation();

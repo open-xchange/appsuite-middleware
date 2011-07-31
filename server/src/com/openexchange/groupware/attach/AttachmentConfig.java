@@ -75,7 +75,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
     private static final Property KEY = Property.ATTACHMENT;
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentConfig.class));
-    
+
     private static AttachmentConfig singleton;
 
     private static boolean loaded = false;
@@ -110,11 +110,11 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 				LOG.error("Can't init config",e);
 			}
 		}
-			
+
         return singleton.getPropertyInternal(key);
     }
 
-      
+
     public static long getMaxUploadSize() {
 		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
 		if (null == sizeS) {

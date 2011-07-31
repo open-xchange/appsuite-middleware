@@ -51,7 +51,7 @@ package com.openexchange.folder.json;
 
 /**
  * {@link FolderField} - Enumeration for folder fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum FolderField {
@@ -172,7 +172,7 @@ public enum FolderField {
 
     /**
      * Gets the column or <code>-1</code> if none available
-     * 
+     *
      * @return The column or <code>-1</code> if none available
      */
     public int getColumn() {
@@ -181,7 +181,7 @@ public enum FolderField {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {

@@ -87,7 +87,7 @@ public class UserPrincipalResource extends AbstractResource {
     public String getResourceType() throws OXException {
         return"<D:resourcetype><D:principal /></D:resourcetype>";
     }
-    
+
     @Override
     protected WebdavFactory getFactory() {
         return factory;

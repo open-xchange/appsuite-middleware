@@ -74,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CachingMailAccountStorage} - The caching implementation of mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CachingMailAccountStorage implements MailAccountStorageService {
@@ -93,7 +93,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     /**
      * Initializes a new {@link CachingMailAccountStorage}.
-     * 
+     *
      * @param delegate The database-backed delegate storage
      */
     CachingMailAccountStorage(final RdbMailAccountStorage delegate) {

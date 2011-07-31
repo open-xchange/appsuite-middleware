@@ -75,12 +75,12 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class JSONResponseOutputter implements ResponseOutputter {
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
-    
+
     @Override
     public int getPriority() {
         return 0;
     }
-    
+
     @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         Object resultObject = result.getResultObject();
@@ -103,7 +103,7 @@ public class JSONResponseOutputter implements ResponseOutputter {
                 }
                 final StringWriter w = new StringWriter();
                 ResponseWriter.write(response, w);
-                
+
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else {
                 ResponseWriter.write(response, resp.getWriter());
@@ -118,7 +118,7 @@ public class JSONResponseOutputter implements ResponseOutputter {
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(),e);
-        }        
+        }
     }
 
     private static String substituteJS(String json, String action) {

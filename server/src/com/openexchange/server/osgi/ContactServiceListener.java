@@ -58,7 +58,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 
 /**
  * {@link ContactServiceListener} - The {@link ServiceTrackerCustomizer} for {@link ContactInterface} instances.
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,7 +70,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link ContactServiceListener}.
-     * 
+     *
      * @param context The bundle context
      */
     public ContactServiceListener(final BundleContext context) {

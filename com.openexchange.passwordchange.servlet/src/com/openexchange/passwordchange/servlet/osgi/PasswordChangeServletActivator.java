@@ -62,7 +62,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link PasswordChangeServletActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PasswordChangeServletActivator extends DeferredActivator {

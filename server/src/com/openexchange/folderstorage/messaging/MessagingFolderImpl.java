@@ -75,7 +75,7 @@ import com.openexchange.messaging.MessagingPermission;
 
 /**
  * {@link MessagingFolderImpl} - A messaging folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderImpl extends AbstractFolder {
@@ -106,7 +106,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
 
         /**
          * Gets the content type associated with this mail folder type.
-         * 
+         *
          * @return The content type
          */
         public ContentType getContentType() {
@@ -115,7 +115,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
 
         /**
          * Gets the type.
-         * 
+         *
          * @return The type
          */
         public int getType() {
@@ -144,7 +144,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
      * Initializes a new {@link MessagingFolderImpl} from given messaging folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param messagingFolder The underlying messaging folder
      * @param accountId The account identifier
      * @param serviceId The service identifier
@@ -316,7 +316,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
 
     /**
      * Parses given capabilities to an <code>int</code> value.
-     * 
+     *
      * @param caps The capabilities to parse
      * @return The resulting <code>int</code> value
      */
@@ -337,7 +337,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
          * Initializes a new header name from specified character sequence.
          * <p>
          * Yields significantly better space and time performance by caching frequently requested headers.
-         * 
+         *
          * @param s The character sequence
          * @return The new header name.
          */

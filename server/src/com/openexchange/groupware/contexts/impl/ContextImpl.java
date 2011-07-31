@@ -57,7 +57,7 @@ import java.util.Set;
 
 /**
  * {@link ContextImpl} - The implementation of {@link ContextExtended}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -191,18 +191,18 @@ public class ContextImpl implements ContextExtended {
     public boolean isReadOnly() {
         return readOnly;
     }
-    
+
     @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
-        
+
     }
 
     @Override
     public Map<String, Set<String>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }
-    
+
     public void addAttribute(String attrName, String value) {
         Set<String> set = attributes.get(attrName);
         if (set == null) {

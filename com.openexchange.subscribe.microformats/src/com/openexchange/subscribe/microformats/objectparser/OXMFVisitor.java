@@ -66,7 +66,7 @@ import org.microformats.hCard.HCardParser.HCardVisitor;
  * <span class="ox_element">some unimportant stuff<span class="value">myValue</span></span>
  * </code> If both are
  * used, the second form takes precedence.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class OXMFVisitor extends HCardVisitor {

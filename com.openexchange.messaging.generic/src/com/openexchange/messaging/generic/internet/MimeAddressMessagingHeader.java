@@ -62,7 +62,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
  * {@link MimeAddressMessagingHeader} - A MIME address header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -70,7 +70,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
 
     /**
      * Parse the given comma-separated sequence of addresses. Addresses must follow RFC822 syntax.
-     * 
+     *
      * @param name The header name
      * @param addressList The comma-separated sequence of addresses
      * @return The parsed address headers
@@ -93,7 +93,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
 
     /**
      * Initializes a new {@link MimeAddressMessagingHeader} interpreted in RFC822 format.
-     * 
+     *
      * @param name The header name
      * @param address The address in RFC822 format
      * @return A new {@link MimeAddressMessagingHeader} interpreted in RFC822 format
@@ -111,7 +111,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
 
     /**
      * Initializes a new plain {@link MimeAddressMessagingHeader} with no specific format.
-     * 
+     *
      * @param name The header name
      * @param personal The (optional) personal part of the address; may be <code>null</code>
      * @param address The address with no specific format
@@ -160,7 +160,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
     /**
      * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
      * mail-safe.
-     * 
+     *
      * @return The RFC 822 / RFC 2047 encoded address
      */
     public String getValue() {
@@ -173,7 +173,7 @@ public class MimeAddressMessagingHeader implements MessagingAddressHeader {
 
     /**
      * Gets the properly formatted address.
-     * 
+     *
      * @return The properly formatted address
      */
     public String getUnicodeValue() {

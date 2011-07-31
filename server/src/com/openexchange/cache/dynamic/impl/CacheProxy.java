@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Creates a proxy object for cached objects. The proxy object insures that the real data object is reloaded into the cache if it times out.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -62,7 +62,7 @@ public final class CacheProxy {
 
     /**
      * Static method for generating the proxy for cached objects.
-     * 
+     *
      * @param <T> Class implementing all given interfaces.
      * @param factory Factory for generating keys and objects that will be cached.
      * @param regionName The cache's region name.

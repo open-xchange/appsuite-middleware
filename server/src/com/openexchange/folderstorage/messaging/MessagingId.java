@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.SortableId;
 
 /**
  * {@link MessagingId} - A messaging ID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingId implements SortableId {
@@ -66,7 +66,7 @@ public final class MessagingId implements SortableId {
 
     /**
      * Initializes a new {@link MessagingId}.
-     * 
+     *
      * @param fullname The fullname
      * @param ordinal The ordinal
      * @param name The name

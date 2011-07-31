@@ -110,7 +110,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MessagingFolderStorage} - The messaging folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderStorage implements FolderStorage {
@@ -121,7 +121,7 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     /**
      * Sets whether mail folder storage is available.
-     * 
+     *
      * @param mailFolderStorageAvailable <code>true</code> if mail folder storage is available; otherwise <code>false</code>
      */
     public static void setMailFolderStorageAvailable(final boolean mailFolderStorageAvailable) {
@@ -1080,7 +1080,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs.toArray(new MessagingMessage[msgs.size()]));
         /*-
-         * 
+         *
         // Ensure flags
         final String[] arr = new String[1];
         for (int i = 0; i < msgs.length; i++) {
@@ -1118,7 +1118,7 @@ public final class MessagingFolderStorage implements FolderStorage {
         @Override
         public int compare(final MessagingAccount o1, final MessagingAccount o2) {
             /*-
-             * 
+             *
             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
                     return 0;

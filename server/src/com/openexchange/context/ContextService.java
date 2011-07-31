@@ -55,16 +55,16 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link ContextService} - Offers access method to context module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface ContextService {
 
     /**
      * Instantiates an implementation of the context interface and fill its
      * attributes according to the needs to be able to separate contexts.
-     * 
+     *
      * @param loginContextInfo
      *            the login info for the context.
      * @return the unique identifier of the context or <code>-1</code> if no
@@ -76,7 +76,7 @@ public interface ContextService {
 
     /**
      * Gets the context for the given context unique identifier.
-     * 
+     *
      * @param contextId The unique identifier of the context.
      * @return The context
      * @throws OXException If the specified context cannot be found or the update is running/started.
@@ -94,7 +94,7 @@ public interface ContextService {
 
     /**
      * Invalidates the context object in cache(s).
-     * 
+     *
      * @param contextId
      *            unique identifier of the context to invalidate
      * @throws OXException
@@ -105,7 +105,7 @@ public interface ContextService {
 
     /**
      * Invalidates a login information in the cache.
-     * 
+     *
      * @param loginContextInfo
      *            login information to invalidate.
      * @throws OXException
@@ -116,7 +116,7 @@ public interface ContextService {
 
     /**
      * Gives a list of all context ids which are stored in the config database.
-     * 
+     *
      * @return the list of context ids
      * @throws OXException
      *             if reading the contexts fails.

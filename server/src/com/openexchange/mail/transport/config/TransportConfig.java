@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  * {@link TransportConfig} - The user-specific transport configuration
  * <p>
  * Provides access to global transport properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class TransportConfig extends MailConfig {
@@ -78,7 +78,7 @@ public abstract class TransportConfig extends MailConfig {
 
     /**
      * Gets the user-specific transport configuration
-     * 
+     *
      * @param clazz The transport configuration type
      * @param transportConfig A newly created {@link TransportConfig transport configuration}
      * @param session The session providing needed user data
@@ -129,7 +129,7 @@ public abstract class TransportConfig extends MailConfig {
 
     /**
      * Gets the transport server URL appropriate to configured transport server source.
-     * 
+     *
      * @param mailAccount The mail account
      * @return The appropriate transport server URL or <code>null</code>
      */
@@ -145,7 +145,7 @@ public abstract class TransportConfig extends MailConfig {
 
     /**
      * Gets the transport server URL appropriate to configured login type
-     * 
+     *
      * @param session The user session
      * @param accountId The account ID
      * @return The appropriate transport server URL or <code>null</code>
@@ -168,14 +168,14 @@ public abstract class TransportConfig extends MailConfig {
 
     /**
      * Gets the transport properties for this transport configuration.
-     * 
+     *
      * @return The transport properties for this transport configuration
      */
     public abstract ITransportProperties getTransportProperties();
 
     /**
      * Sets the transport properties for this transport configuration.
-     * 
+     *
      * @param transportProperties The transport properties for this transport configuration
      */
     public abstract void setTransportProperties(ITransportProperties transportProperties);

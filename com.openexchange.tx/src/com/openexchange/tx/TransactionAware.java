@@ -55,28 +55,28 @@ public interface TransactionAware {
 
     /**
      * Starts the transaction.
-     * 
+     *
      * @throws TransactionException If transaction start-up fails
      */
     public void startTransaction() throws OXException;
 
     /**
      * Commits the transaction.
-     * 
+     *
      * @throws TransactionException If transaction commit fails
      */
     public void commit() throws OXException;
 
     /**
      * Rolls-back the transaction.
-     * 
+     *
      * @throws TransactionException If transaction roll-back fails
      */
     public void rollback() throws OXException;
 
     /**
      * Performs possible clean-up operations after a commit/roll-back.
-     * 
+     *
      * @throws TransactionException If clean-up fails
      */
     public void finish() throws OXException;
@@ -87,7 +87,7 @@ public interface TransactionAware {
 
     /**
      * Sets whether auto-commit is activated or not.
-     * 
+     *
      * @param commits <code>true</code> if auto-commit is activated; otherwise <code>false</code>
      */
     public void setCommitsTransaction(boolean commits);

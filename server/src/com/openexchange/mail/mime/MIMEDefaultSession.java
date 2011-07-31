@@ -54,7 +54,7 @@ import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link MIMEDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEDefaultSession {
@@ -72,7 +72,7 @@ public final class MIMEDefaultSession {
 
     /**
      * Applies basic properties to system properties and instantiates the singleton instance of {@link javax.mail.Session}.
-     * 
+     *
      * @return The default instance of {@link javax.mail.Session}
      */
     public static javax.mail.Session getDefaultSession() {
@@ -95,7 +95,7 @@ public final class MIMEDefaultSession {
 
     /**
      * Gets a clone of the default mail properties.
-     * 
+     *
      * @return A clone of the default mail properties
      */
     public static Properties getDefaultMailProperties() {

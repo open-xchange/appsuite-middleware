@@ -52,12 +52,12 @@ package com.openexchange.mobile.configuration.json.action;
 import com.openexchange.mobile.configuration.json.container.ProvisioningInformation;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public interface ActionService {
-    
+
     public com.openexchange.mobile.configuration.json.container.ProvisioningResponse handleAction(ProvisioningInformation provisioningInformation) throws ActionException;
 
 }

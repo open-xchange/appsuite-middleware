@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * UnboundFolderReplacementUpdateTask
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
@@ -77,7 +77,7 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
 	@Override
@@ -87,7 +87,7 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	@Override

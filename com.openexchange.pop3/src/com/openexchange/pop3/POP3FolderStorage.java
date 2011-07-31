@@ -62,13 +62,13 @@ import com.openexchange.pop3.storage.POP3Storage;
  * {@link POP3FolderStorage} - The POP3 folder storage implementation.
  * <p>
  * POP3 folder structure only consists of the INBOX folder with its parental root folder:
- * 
+ *
  * <pre>
  * &lt;default&gt;
  *      |
  *      |-- INBOX
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3FolderStorage extends MailFolderStorage {
@@ -77,7 +77,7 @@ public final class POP3FolderStorage extends MailFolderStorage {
 
     /**
      * Initializes a new {@link POP3FolderStorage}
-     * 
+     *
      * @param pop3Storage The POP3 storage
      * @throws OXException If initialization fails
      */

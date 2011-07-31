@@ -80,7 +80,7 @@ public abstract class JDBC3ResultSetWrapper implements ResultSet {
 
     /**
      * Initializes a new {@link JDBC3ResultSetWrapper}.
-     * 
+     *
      * @param delegate The delegate result set
      * @param stmt The statement wrapper
      */

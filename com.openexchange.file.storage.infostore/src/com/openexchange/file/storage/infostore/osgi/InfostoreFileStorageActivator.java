@@ -89,7 +89,7 @@ public class InfostoreFileStorageActivator extends DeferredActivator {
             public InfostoreFacade getInfostore() {
                 return getService(InfostoreFacade.class);
             }
-            
+
             @Override
             public InfostoreSearchEngine getSearch() {
                 return getService(InfostoreSearchEngine.class);

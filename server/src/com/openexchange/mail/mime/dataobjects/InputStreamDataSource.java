@@ -63,7 +63,7 @@ import javax.activation.DataSource;
 final class InputStreamDataSource implements DataSource {
 
     private final InputStream inStream;
-    
+
     private String type;
 
     public InputStreamDataSource(final InputStream inputStream) {

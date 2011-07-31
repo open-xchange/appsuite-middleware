@@ -63,12 +63,12 @@ public class DELETE extends ModifyCommand {
     public void build(IStatementBuilder builder) {
 		builder.buildDELETE(this);
 	}
-	
+
 	public DELETE FROM(String table) {
 		from.addTable(table);
 		return this;
 	}
-    
+
     public DELETE FROM(Table table) {
         from.addTable(table);
         return this;
@@ -78,12 +78,12 @@ public class DELETE extends ModifyCommand {
         from.addTables(tables);
         return this;
     }
-    
+
     public DELETE FROM(Table... tables) {
         from.addTables(tables);
         return this;
     }
-	
+
 	public DELETE WHERE(Predicate predicate) {
 		where = new WHERE(predicate);
 		return this;

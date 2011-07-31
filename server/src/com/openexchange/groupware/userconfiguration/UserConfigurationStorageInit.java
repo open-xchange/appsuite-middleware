@@ -57,7 +57,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link UserConfigurationStorageInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserConfigurationStorageInit implements Initialization {
@@ -97,7 +97,7 @@ public final class UserConfigurationStorageInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link UserConfigurationStorageInit}
-     * 
+     *
      * @return The singleton instance of {@link UserConfigurationStorageInit}
      */
     public static UserConfigurationStorageInit getInstance() {

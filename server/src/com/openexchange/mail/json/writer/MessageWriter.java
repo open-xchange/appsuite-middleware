@@ -85,7 +85,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MessageWriter} - Writes {@link MailMessage} instances as JSON strings
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageWriter {
@@ -110,7 +110,7 @@ public final class MessageWriter {
      * <li>Address headers are delivered as JSON objects with a <code>"personal"</code> and an <code>"address"</code> field</li>
      * <li>Parameterized headers are delivered as JSON objects with a <code>"type"</code> and a <code>"params"</code> field</li>
      * </ol>
-     * 
+     *
      * @param accountId The mail's account ID
      * @param mail The mail to write
      * @param maxSize The allowed max. size
@@ -125,7 +125,7 @@ public final class MessageWriter {
 
     /**
      * Writes whole mail as a JSON object.
-     * 
+     *
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
@@ -142,7 +142,7 @@ public final class MessageWriter {
 
     /**
      * Writes whole mail as a JSON object.
-     * 
+     *
      * @param accountId The account ID
      * @param mail The mail to write
      * @param displayMode The display mode
@@ -150,7 +150,7 @@ public final class MessageWriter {
      * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
      *            storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
-     * @param tokenTimeout 
+     * @param tokenTimeout
      * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws OXException If writing message fails
@@ -185,7 +185,7 @@ public final class MessageWriter {
 
     /**
      * Writes raw mail as a JSON object.
-     * 
+     *
      * @param accountId The account ID
      * @param mail The mail to write
      * @return The written JSON object or <code>null</code> if message's text body parts exceed max. size
@@ -655,7 +655,7 @@ public final class MessageWriter {
 
     /**
      * Generates appropriate field writers for given mail fields
-     * 
+     *
      * @param fields The mail fields to write
      * @return Appropriate field writers as an array of {@link MailFieldWriter}
      */
@@ -674,7 +674,7 @@ public final class MessageWriter {
 
     /**
      * Gets writers for specified header names.
-     * 
+     *
      * @param headers The header names
      * @return The writers for specified header names
      */
@@ -691,7 +691,7 @@ public final class MessageWriter {
 
     /**
      * Adds the user time zone offset to given date time
-     * 
+     *
      * @param time The date time
      * @param timeZone The time zone
      * @return The time with added time zone offset
@@ -704,7 +704,7 @@ public final class MessageWriter {
 
     /**
      * Convert an array of <code>InternetAddress</code> instances into a JSON-Array conforming to:
-     * 
+     *
      * <pre>
      * [[&quot;The Personal&quot;, &quot;someone@somewhere.com&quot;], ...]
      * </pre>

@@ -60,13 +60,13 @@ import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Metadata;
 /**
  * {@link UWAWidget}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
     private String adj;
-    
+
     private boolean autorefresh, standalone, visible, prot;
 
     private String title, url, parameters, id;
@@ -74,11 +74,11 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
     public void setADJ(String adj) {
         this.adj = adj;
     }
-    
+
     public String getADJ() {
         return adj;
     }
-    
+
     public String getId() {
         return id;
     }
@@ -159,11 +159,11 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         PARAMETERS(String.class);
 
         private Class type;
-        
+
         Field(Class type) {
             this.type = type;
         }
-        
+
         public Object get(UWAWidget thing) {
             switch(this) {
             case ADJ: return thing.getADJ();
@@ -182,7 +182,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         public String getName() {
             return this.name().toLowerCase();
         }
-        
+
         private static final EnumSet<Field> NULLABLE = EnumSet.of(ID, TITLE, URL, PARAMETERS);
 
         public void set(UWAWidget thing, Object value) {
@@ -201,7 +201,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             case PARAMETERS:  thing.setParameters((String) value); break;
             }
         }
-        
+
         public static List<Attribute<UWAWidget>> toAttributes(List<Field> fields) {
             List<Attribute<UWAWidget>> attributes = new ArrayList<Attribute<UWAWidget>>(fields.size());
             for (Field field : fields) {
@@ -214,27 +214,27 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
             return type;
         }
     }
-    
+
     public static UWAWidgetMetadata METADATA = new UWAWidgetMetadata();
 
     private static final class UWAWidgetMetadata implements Metadata<UWAWidget> {
 
-        private List<Attribute<UWAWidget>> allFields; 
-        private List<Attribute<UWAWidget>> persistentFields; 
-        
+        private List<Attribute<UWAWidget>> allFields;
+        private List<Attribute<UWAWidget>> persistentFields;
+
         public UWAWidgetMetadata() {
             allFields = new LinkedList<Attribute<UWAWidget>>();
             for(Field f : Field.values()) {
                 allFields.add(f);
             }
-            
+
             persistentFields = new LinkedList<Attribute<UWAWidget>>();
-            
+
             for(Field f : EnumSet.complementOf(EnumSet.of(Field.PROTECTED))) {
                 persistentFields.add(f);
             }
         }
-        
+
         public UWAWidget create() {
             return new UWAWidget();
         }

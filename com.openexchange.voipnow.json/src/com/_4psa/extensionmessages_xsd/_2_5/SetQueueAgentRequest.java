@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -34,8 +34,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -60,7 +60,7 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the supervisor property.
-     * 
+     *
      */
     public boolean isSupervisor() {
         return supervisor;
@@ -68,7 +68,7 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the supervisor property.
-     * 
+     *
      */
     public void setSupervisor(boolean value) {
         this.supervisor = value;
@@ -76,11 +76,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the penalty property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPenalty() {
         return penalty;
@@ -88,11 +88,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the penalty property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPenalty(BigInteger value) {
         this.penalty = value;
@@ -100,11 +100,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the queueID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getQueueID() {
         return queueID;
@@ -112,11 +112,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the queueID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setQueueID(BigInteger value) {
         this.queueID = value;
@@ -124,11 +124,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the queueIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getQueueIdentifier() {
         return queueIdentifier;
@@ -136,11 +136,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the queueIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setQueueIdentifier(String value) {
         this.queueIdentifier = value;
@@ -148,11 +148,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -160,11 +160,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -172,11 +172,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -184,11 +184,11 @@ public class SetQueueAgentRequest {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

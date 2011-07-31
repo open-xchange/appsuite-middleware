@@ -63,7 +63,7 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
 	public EntityLockManagerImpl(final String tablename) {
 		super(tablename);
 	}
-	
+
 	public EntityLockManagerImpl(final DBProvider provider, final String tablename) {
 		super(provider, tablename);
 	}
@@ -77,7 +77,7 @@ public class EntityLockManagerImpl extends LockManagerImpl<Lock> implements
     public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		return findLocksByEntity(Arrays.asList(Integer.valueOf(entity)), ctx).get(Integer.valueOf(entity));
 	}
-	
+
 	@Override
     public boolean isLocked(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		return existsLockForEntity(Arrays.asList(new Integer[]{Integer.valueOf(entity)}), ctx);

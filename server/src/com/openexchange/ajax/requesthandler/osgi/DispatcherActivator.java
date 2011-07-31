@@ -87,11 +87,11 @@ public class DispatcherActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
-        
+
         final DefaultConverter defaultConverter = new DefaultConverter();
         defaultConverter.addConverter(new JSONResponseConverter());
         defaultConverter.addConverter(new DebugConverter());
-        
+
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
             @Override
@@ -103,19 +103,19 @@ public class DispatcherActivator extends HousekeepingActivator {
             public void removed(final ServiceReference ref, final ResultConverter thing) {
                 defaultConverter.removeConverter(thing);
             }
-            
+
         });
-        
+
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
-        
+
         final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
         Multiple.setDispatcher(dispatcher);
-        
+
         DispatcherServlet.registerRenderer(new JSONResponseOutputter());
         final FileResponseOutputter fileRenderer = new FileResponseOutputter();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseOutputter());
-        
+
         track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
 
             @Override
@@ -125,14 +125,14 @@ public class DispatcherActivator extends HousekeepingActivator {
 
             @Override
             public void removed(final ServiceReference ref, final ResponseOutputter thing) {
-                DispatcherServlet.unregisterRenderer(thing);    
+                DispatcherServlet.unregisterRenderer(thing);
             }
-            
+
         });
-        
-        
+
+
         track(AJAXActionServiceFactory.class, new Registerer(dispatcher, servlet));
-        
+
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
             @Override
@@ -144,20 +144,20 @@ public class DispatcherActivator extends HousekeepingActivator {
             public void removed(final ServiceReference ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(null);
             }
-            
+
         });
-        
+
         openTrackers();
     }
-    
+
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
 
         private final DefaultDispatcher dispatcher;
         private final DispatcherServlet servlet;
-        
+
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
         private final Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
-        
+
         public Registerer(final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
             this.dispatcher = dispatcher;
             this.servlet = servlet;
@@ -171,7 +171,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             registrations.put(module, registration);
             rememberTracker(registration);
         }
-        
+
         @Override
         public void removed(final ServiceReference ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
@@ -182,7 +182,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             serviceRegistrations.remove(module).unregister();
         }
 
-        
+
     }
 
 }

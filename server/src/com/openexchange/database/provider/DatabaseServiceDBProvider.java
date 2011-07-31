@@ -63,10 +63,10 @@ import com.openexchange.groupware.contexts.Context;
 public class DatabaseServiceDBProvider implements DBProvider {
 
     private final DatabaseService databaseService;
-    
+
     /**
      * Initializes a new {@link DatabaseServiceDBProvider}.
-     * 
+     *
      * @param databaseService The backing {@link DatabaseService} instance
      */
     public DatabaseServiceDBProvider(final DatabaseService databaseService) {

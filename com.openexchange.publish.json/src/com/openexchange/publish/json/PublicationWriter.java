@@ -70,7 +70,7 @@ import com.openexchange.publish.json.types.EntityMap;
 
 /**
  * {@link PublicationWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationWriter {

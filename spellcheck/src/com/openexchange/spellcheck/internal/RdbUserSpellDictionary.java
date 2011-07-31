@@ -79,7 +79,7 @@ import com.swabunga.spell.engine.SpellDictionary;
 
 /**
  * {@link RdbUserSpellDictionary}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbUserSpellDictionary implements SpellDictionary {
@@ -112,7 +112,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
         /**
          * Initializes a new {@link Key}
-         * 
+         *
          * @param userId The user ID
          * @param contextId The context ID
          */
@@ -168,7 +168,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Initializes a new {@link RdbUserSpellDictionary}
-     * 
+     *
      * @param userId The user ID
      * @param ctx The user's context
      * @throws OXException If initialization fails
@@ -186,7 +186,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Add a word (possibly) permanently to the dictionary.
-     * 
+     *
      * @param word The word to add to the dictionary
      * @param save <code>true</code> to save permanently to database storage; otherwise <code>false</code>
      */
@@ -251,7 +251,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Removes a word from this dictionary
-     * 
+     *
      * @param word The word to remove
      */
     private boolean _removeWord(final String word) {
@@ -271,7 +271,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Removes a word from this dictionary
-     * 
+     *
      * @param word The word to remove
      * @param save <code>true</code> to save removal permanently to database storage; otherwise <code>false</code>
      */
@@ -287,7 +287,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Checks if this user dictionary has been modified
-     * 
+     *
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     public boolean isModified() {
@@ -296,7 +296,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Writes this dictionary's content to database storage
-     * 
+     *
      * @throws OXException If writing to database storage fails
      */
     public void save() throws OXException {
@@ -307,7 +307,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 
     /**
      * Returns all words contained in this user dictionary
-     * 
+     *
      * @return All words contained in this user dictionary
      */
     public List<String> getWords() {

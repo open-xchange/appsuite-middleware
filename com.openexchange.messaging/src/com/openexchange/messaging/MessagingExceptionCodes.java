@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MessagingExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -145,7 +145,7 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
     /**
      * Not connected
      */
-    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, CATEGORY_PERMISSION_DENIED, 22), 
+    NOT_CONNECTED(MessagingExceptionMessages.NOT_CONNECTED_MSG, CATEGORY_PERMISSION_DENIED, 22),
     /**
      * Invalid sorting column. Cannot sort by %1$s.
      */
@@ -170,7 +170,7 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "MESSAGING";
     }
@@ -193,7 +193,7 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -202,7 +202,7 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -212,7 +212,7 @@ public enum MessagingExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

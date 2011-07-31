@@ -73,7 +73,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ServletActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ServletActivator extends DeferredActivator {
@@ -81,7 +81,7 @@ public class ServletActivator extends DeferredActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
 
     private ServiceTracker tracker;
-    
+
     private final PublicationServicesActivator activator = new PublicationServicesActivator();
 
     private boolean registered;
@@ -143,17 +143,17 @@ public class ServletActivator extends DeferredActivator {
         }
 
         activator.setTemplateService(templates);
-        
+
         OnlinePublicationServlet.setContextService(contexts);
         OnlinePublicationServlet.setUserConfigurationService(userConfigs);
-        
+
         MicroformatServlet.setPublicationDataLoaderService(dataLoader);
         MicroformatServlet.setUserService(users);
         MicroformatServlet.setStringTranslator(customizer);
         MicroformatServlet.setConfigService(configService);
         MicroformatServlet.setHtmlService(htmlService);
         final MicroformatServlet microformatServlet = new MicroformatServlet();
-        
+
         ContactPictureServlet.setContactInterfaceDiscoveryService(contacts);
         MicroformatServlet.setContactInterfaceDiscoveryService(contacts);
 

@@ -51,7 +51,7 @@ package com.openexchange.mail.api;
 
 /**
  * {@link MailCapabilities} - Holds capabilities of the underlying mail system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailCapabilities {
@@ -129,11 +129,11 @@ public abstract class MailCapabilities {
 
     /**
      * The next available shift operand which can be used in sub-classes to declare own bit constants; e.g.:
-     * 
+     *
      * <pre>
-     * 
+     *
      * private static final int BIT_CUSTOM1 = 1 &lt;&lt; NEXT_SHIFT_OPERAND;
-     * 
+     *
      * private static final int BIT_CUSTOM2 = 1 &lt;&lt; (NEXT_SHIFT_OPERAND + 1);
      * </pre>
      */
@@ -164,28 +164,28 @@ public abstract class MailCapabilities {
      * Indicates if mail system supports any kind of folder permissions to define access rights for certain users to a mail folder.
      * <p>
      * Therefore this capability indicates if mail system supports shared/public folders.
-     * 
+     *
      * @return <code>true</code> if mail system supports any kind of mail permissions; otherwise <code>false</code>
      */
     public abstract boolean hasPermissions();
 
     /**
      * Indicates if mail system supports sorting messages in a certain mail folder by their communication thread reference.
-     * 
+     *
      * @return <code>true</code> if mail system supports sorting by communication thread reference; otherwise <code>false</code>
      */
     public abstract boolean hasThreadReferences();
 
     /**
      * Indicates if mail system supports user-specific quota restrictions on resources like storage space.
-     * 
+     *
      * @return <code>true</code> if mail system supports user-specific quota restrictions; otherwise <code>false</code>
      */
     public abstract boolean hasQuota();
 
     /**
      * Indicates if mail system supports sorting messages in a certain mail folder.
-     * 
+     *
      * @return <code>true</code> if mail system supports sorting; otherwise <code>false</code>
      */
     public abstract boolean hasSort();
@@ -194,7 +194,7 @@ public abstract class MailCapabilities {
      * Indicates if mail system supports subscription of mail folders.
      * <p>
      * Note: This capability is also takes the configuration setting {@link MailConfig#isSupportSubscription()} into consideration.
-     * 
+     *
      * @return <code>true</code> if mail system supports subscription; otherwise <code>false</code>
      */
     public abstract boolean hasSubscription();
@@ -203,7 +203,7 @@ public abstract class MailCapabilities {
      * Returns the capabilities as a bit mask.
      * <p>
      * Override to support additional capabilities:
-     * 
+     *
      * <pre>
      * &#064;Override
      * public int getCapabilities() {
@@ -211,7 +211,7 @@ public abstract class MailCapabilities {
      * 	// your capabilities added here
      * }
      * </pre>
-     * 
+     *
      * @return The capabilities as a bit mask
      */
     public int getCapabilities() {

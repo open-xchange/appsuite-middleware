@@ -60,7 +60,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
  * {@link OSGiOAuthService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthService> implements OAuthService {

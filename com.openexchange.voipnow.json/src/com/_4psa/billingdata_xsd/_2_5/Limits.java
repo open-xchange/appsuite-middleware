@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Charging limits definition: postpaid charging plan
- * 
+ *
  * <p>Java class for Limits complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Limits">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Limits", propOrder = {
@@ -56,11 +56,11 @@ public class Limits {
 
     /**
      * Gets the value of the limitIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public JAXBElement<String> getLimitIn() {
         return limitIn;
@@ -68,11 +68,11 @@ public class Limits {
 
     /**
      * Sets the value of the limitIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public void setLimitIn(JAXBElement<String> value) {
         this.limitIn = value;
@@ -80,11 +80,11 @@ public class Limits {
 
     /**
      * Gets the value of the limitOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLimitOut() {
         return limitOut;
@@ -92,11 +92,11 @@ public class Limits {
 
     /**
      * Sets the value of the limitOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLimitOut(String value) {
         this.limitOut = value;
@@ -104,11 +104,11 @@ public class Limits {
 
     /**
      * Gets the value of the overusage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOverusage() {
         return overusage;
@@ -116,11 +116,11 @@ public class Limits {
 
     /**
      * Sets the value of the overusage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOverusage(String value) {
         this.overusage = value;
@@ -128,11 +128,11 @@ public class Limits {
 
     /**
      * Gets the value of the orderNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrderNo() {
         return orderNo;
@@ -140,11 +140,11 @@ public class Limits {
 
     /**
      * Sets the value of the orderNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrderNo(String value) {
         this.orderNo = value;
@@ -152,11 +152,11 @@ public class Limits {
 
     /**
      * Gets the value of the monthly property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMonthly() {
         return monthly;
@@ -164,11 +164,11 @@ public class Limits {
 
     /**
      * Sets the value of the monthly property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMonthly(Boolean value) {
         this.monthly = value;

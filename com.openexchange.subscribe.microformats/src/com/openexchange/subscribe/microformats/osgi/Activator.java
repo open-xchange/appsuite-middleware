@@ -54,7 +54,7 @@ import com.openexchange.server.osgiservice.CompositeBundleActivator;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Activator extends CompositeBundleActivator {

@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Update} - SQL for updating a MS outlook folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Update {
@@ -75,7 +75,7 @@ public final class Update {
 
     /**
      * Updates specified folder.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -117,7 +117,7 @@ public final class Update {
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -157,7 +157,7 @@ public final class Update {
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -191,7 +191,7 @@ public final class Update {
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -224,7 +224,7 @@ public final class Update {
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -257,7 +257,7 @@ public final class Update {
 
     /**
      * Updates last-modified time stamp of specified folder in virtual table.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

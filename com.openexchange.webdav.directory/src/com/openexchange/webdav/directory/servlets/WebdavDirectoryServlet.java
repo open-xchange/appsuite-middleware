@@ -161,7 +161,7 @@ public class WebdavDirectoryServlet extends OXServlet {
         		WebdavStatus status = (WebdavStatus) x;
         		resp.setStatus(status.getStatus());
         		resp.sendError(status.getStatus());
-        		
+
         	}
         	resp.setStatus(500);
         	resp.sendError(500);
@@ -205,9 +205,9 @@ public class WebdavDirectoryServlet extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

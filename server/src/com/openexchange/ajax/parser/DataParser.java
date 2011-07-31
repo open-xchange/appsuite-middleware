@@ -114,7 +114,7 @@ public abstract class DataParser {
 
     /**
      * Parses optional field out of specified JSON object.
-     * 
+     *
      * @param jsonObj
      *            The JSON object to parse
      * @param name
@@ -317,7 +317,7 @@ public abstract class DataParser {
             throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
         }
     }
-    
+
     public static UUID checkUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {
@@ -370,7 +370,7 @@ public abstract class DataParser {
 
     /**
      * Parses optional array field out of specified JSON object
-     * 
+     *
      * @param jsonObj
      *            The JSON object to parse
      * @param name
@@ -391,7 +391,7 @@ public abstract class DataParser {
         }
         return s;
     }
-    
+
     public static UUID parseUUID(final JSONObject jsonObj, final String name) throws OXException, OXException {
         final String tmp = parseString(jsonObj, name);
         if (tmp == null) {

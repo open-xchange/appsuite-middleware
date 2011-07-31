@@ -65,7 +65,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link AJPv13Config} - The AJPv13 configuration
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Config implements Initialization {
@@ -386,7 +386,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the capacity for listener pool
-     * 
+     *
      * @return The capacity for listener pool
      */
     public static int getAJPListenerPoolSize() {
@@ -458,7 +458,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified server property.
-     * 
+     *
      * @param property The server property
      * @return The property value
      */
@@ -469,7 +469,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified system property.
-     * 
+     *
      * @param property The system property
      * @return The property value
      */

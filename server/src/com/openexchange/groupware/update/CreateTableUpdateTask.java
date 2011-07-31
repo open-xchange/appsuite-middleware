@@ -66,7 +66,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     private final String[] dependencies;
     private final int version;
     private final DatabaseService databaseService;
-    
+
     public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
         super();
         this.create = create;
@@ -78,8 +78,8 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     @Override
     public TaskAttributes getAttributes() {
         // Creating Tables is blocking and schema level.
-        return new Attributes(); 
-        
+        return new Attributes();
+
     }
 
     @Override

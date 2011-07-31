@@ -67,17 +67,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * objects must be stored in a manner that allows them to be inserted in any
  * order, but enable the implies function to evaluate the implies method in an
  * efficient (and consistent) manner.
- * 
+ *
  * A {@link BundleAccessPermissionCollection} handles comparing a permission
  * like "a.b.c.d.e" with a Permission such as "a.b.*", or "*".
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class BundleAccessPermissionCollection extends PermissionCollection {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -1058822504713725539L;
 
@@ -91,7 +91,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	/**
 	 * This is set to <code>true</code> if this BundleAccessPermissionCollection
 	 * contains a permission with '*' as its permission name.
-	 * 
+	 *
 	 * @see #serialPersistentFields
 	 */
 	private boolean all_allowed;
@@ -99,7 +99,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	/**
 	 * The class to which all BundleAccessPermission in this
 	 * BundleAccessPermissionCollection belongs.
-	 * 
+	 *
 	 * @see #serialPersistentFields
 	 */
 	private Class<? extends Permission> permClass;
@@ -115,15 +115,15 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	/**
 	 * Adds a permission to the BundleAccessPermission. The key for the hash is
 	 * permission.path.
-	 * 
+	 *
 	 * @param permission
 	 *            the Permission object to add.
-	 * 
+	 *
 	 * @exception IllegalArgumentException
 	 *                If the permission is not a BundleAccessPermission, or if
 	 *                the permission is not of the same Class as the other
 	 *                permissions in this collection.
-	 * 
+	 *
 	 * @exception SecurityException
 	 *                If this BundleAccessPermissionCollection object has been
 	 *                marked read-only
@@ -153,10 +153,10 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 
 	/**
 	 * Check if this set of permissions implies the specified permission
-	 * 
+	 *
 	 * @param p
 	 *            The permission to compare
-	 * 
+	 *
 	 * @return <code>true</code> if permission is a proper subset of a
 	 *         permission in the collection, <code>false</code> if not.
 	 */
@@ -214,7 +214,7 @@ public final class BundleAccessPermissionCollection extends PermissionCollection
 	/**
 	 * Returns an {@link Enumeration enumeration} of all the
 	 * {@link BundleAccessPermission} objects in the container.
-	 * 
+	 *
 	 * @return an {@link Enumeration enumeration} of all the
 	 *         {@link BundleAccessPermission} objects.
 	 */

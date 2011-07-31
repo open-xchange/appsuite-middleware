@@ -57,14 +57,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link IMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IMailAccessCache {
 
     /**
      * Removes and returns a mail access from cache.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
@@ -73,7 +73,7 @@ public interface IMailAccessCache {
 
     /**
      * Puts given mail access into cache if none user-bound connection is already contained in cache.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @param mailAccess The mail access to put into cache
@@ -83,7 +83,7 @@ public interface IMailAccessCache {
 
     /**
      * Checks if cache already holds a user-bound mail access for specified account.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
@@ -92,7 +92,7 @@ public interface IMailAccessCache {
 
     /**
      * Clears the cache entries kept for specified user.
-     * 
+     *
      * @param session The session
      * @throws OXException If clearing user entries fails
      */

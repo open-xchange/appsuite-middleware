@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ServiceHolderInit} - Initialization for service holder
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServiceHolderInit implements Initialization {
@@ -73,7 +73,7 @@ public final class ServiceHolderInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link ServiceHolderInit}
-     * 
+     *
      * @return The singleton instance of {@link ServiceHolderInit}
      */
     public static ServiceHolderInit getInstance() {

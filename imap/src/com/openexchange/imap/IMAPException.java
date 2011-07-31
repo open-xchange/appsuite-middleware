@@ -67,7 +67,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPException} - Indicates an IMAP error.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPException extends OXException {
@@ -337,7 +337,7 @@ public final class IMAPException extends OXException {
          * Default folder %1$s must not be unsubscribed.
          */
         NO_DEFAULT_FOLDER_UNSUBSCRIBE(IMAPCode.NO_DEFAULT_FOLDER_UNSUBSCRIBE),
-        
+
         ;
 
         private final IMAPCode imapCode;
@@ -353,7 +353,7 @@ public final class IMAPException extends OXException {
         public int getNumber() {
             return imapCode.getNumber();
         }
-        
+
         public String getPrefix() {
             return imapCode.getPrefix();
         }
@@ -361,18 +361,18 @@ public final class IMAPException extends OXException {
         public Category getCategory() {
             return imapCode.getCategory();
         }
-        
+
         public String getMessage() {
             return imapCode.getMessage();
         }
-        
+
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -381,7 +381,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -391,7 +391,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
@@ -845,7 +845,7 @@ public final class IMAPException extends OXException {
          * Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_DEFAULT_FOLDER_UNSUBSCRIBE_EXT("Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DEFAULT_FOLDER_UNSUBSCRIBE),
-        
+
         ;
 
         private final String message;
@@ -853,7 +853,7 @@ public final class IMAPException extends OXException {
         private final IMAPCode extend;
 
         private final int detailNumber;
-        
+
         private final String prefix;
 
         private final Category category;
@@ -901,7 +901,7 @@ public final class IMAPException extends OXException {
         public String getMessage() {
             return message;
         }
-        
+
         public String getPrefix() {
             return prefix;
         }
@@ -921,7 +921,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Gets the extended code for specified code.
-         * 
+         *
          * @param code The code whose extended version shall be returned
          * @return The extended code for specified code or <code>null</code>
          */
@@ -931,7 +931,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -940,7 +940,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -950,7 +950,7 @@ public final class IMAPException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
@@ -968,7 +968,7 @@ public final class IMAPException extends OXException {
 
     /**
      * Throws a new OXException for specified error code.
-     * 
+     *
      * @param code The error code
      * @param imapConfig The IMAP configuration providing account information
      * @param session The session providing user information
@@ -981,7 +981,7 @@ public final class IMAPException extends OXException {
 
     /**
      * Throws a new OXException for specified error code.
-     * 
+     *
      * @param code The error code
      * @param imapConfig The IMAP configuration providing account information
      * @param session The session providing user information
@@ -994,7 +994,7 @@ public final class IMAPException extends OXException {
 
     /**
      * Throws a new OXException for specified error code.
-     * 
+     *
      * @param code The error code
      * @param imapConfig The IMAP configuration providing account information
      * @param session The session providing user information
@@ -1009,7 +1009,7 @@ public final class IMAPException extends OXException {
 
     /**
      * Creates a new OXException for specified error code.
-     * 
+     *
      * @param code The error code
      * @param imapConfig The IMAP configuration providing account information
      * @param session The session providing user information
@@ -1055,7 +1055,7 @@ public final class IMAPException extends OXException {
 
     /**
      * Gets the message corresponding to specified error code with given message arguments applied.
-     * 
+     *
      * @param code The code
      * @param msgArgs The message arguments
      * @return The message corresponding to specified error code with given message arguments applied

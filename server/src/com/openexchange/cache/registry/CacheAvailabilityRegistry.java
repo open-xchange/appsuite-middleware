@@ -61,9 +61,9 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CacheAvailabilityRegistry} - The cache availability registry
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CacheAvailabilityRegistry {
 
@@ -139,7 +139,7 @@ public final class CacheAvailabilityRegistry {
 
 	/**
 	 * Notifies the absence of cache service
-	 * 
+	 *
 	 * @throws OXException
 	 *             If an error occurs
 	 */
@@ -158,7 +158,7 @@ public final class CacheAvailabilityRegistry {
 
 	/**
 	 * Notifies the availability of cache service
-	 * 
+	 *
 	 * @throws OXException
 	 *             If an error occurs
 	 */
@@ -181,7 +181,7 @@ public final class CacheAvailabilityRegistry {
 	 * {@link CacheAvailabilityListener} implementation is added, meaning if you
 	 * try to register a certain implementation twice, the latter one is going
 	 * to be discarded
-	 * 
+	 *
 	 * @param listener
 	 *            the listener to register
 	 * @return <code>true</code> if specified downgrade listener has been
@@ -204,7 +204,7 @@ public final class CacheAvailabilityRegistry {
 	/**
 	 * Removes given instance of {@link CacheAvailabilityListener} from this
 	 * registry's known listeners.
-	 * 
+	 *
 	 * @param listener -
 	 *            the listener to remove
 	 */

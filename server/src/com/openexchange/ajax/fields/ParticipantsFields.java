@@ -66,7 +66,7 @@ public final class ParticipantsFields {
     public static final String CONFIRMATION = "confirmation";
 
     public static final String CONFIRM_MESSAGE = "confirmmessage";
-    
+
     public static final String LAST_MODIFIED = "last_modified";
 
     private ParticipantsFields() {

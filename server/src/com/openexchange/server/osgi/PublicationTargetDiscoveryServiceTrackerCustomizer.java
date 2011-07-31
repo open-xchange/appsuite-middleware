@@ -58,7 +58,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * {@link PublicationTargetDiscoveryServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for
  * {@link PublicationTargetDiscoveryService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -71,7 +71,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
 
     /**
      * Initializes a new {@link PublicationTargetDiscoveryServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public PublicationTargetDiscoveryServiceTrackerCustomizer(final BundleContext context) {

@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderStorageActivator} - {@link BundleActivator Activator} for folder storage framework.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageActivator implements BundleActivator {
@@ -90,11 +90,11 @@ public final class FolderStorageActivator implements BundleActivator {
         public static Key valueOf(final int userId, final int cid) {
             return new Key(userId, cid);
         }
-        
+
         private final int userId;
-        
+
         private final int cid;
-        
+
         private final int hash;
 
         public Key(final int userId, final int cid) {

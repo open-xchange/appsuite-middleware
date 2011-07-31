@@ -53,13 +53,13 @@ import java.util.List;
 
 
 public class RuleComment {
-    
+
     private List<String> flags;
-    
+
     private String rulename;
-    
+
     private String errortext;
-    
+
     private int uniqueid = -1;
 
     private int line = -1;
@@ -77,7 +77,7 @@ public class RuleComment {
         this.uniqueid = uniqueid;
         this.line = line;
     }
-    
+
     /**
      * @param errortext
      * @param line
@@ -146,7 +146,7 @@ public class RuleComment {
         this.flags = flags;
     }
 
-    
+
     /**
      * @return the errortext
      */
@@ -230,5 +230,5 @@ public class RuleComment {
     public String toString() {
         return "## Flag: " + this.flags + "|Unique: " + this.uniqueid + "|Name: " + this.rulename + "...line" + this.line;
     }
-    
+
 }

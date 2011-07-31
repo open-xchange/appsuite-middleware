@@ -12,9 +12,9 @@ import com._4psa.pbxdata_xsd._2_5.CustomAlert;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import com._4psa.pbxdata_xsd._2_5.CustomAlert;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -59,11 +59,11 @@ public class AddCustomAlertRequest
 
     /**
      * Gets the value of the severity property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSeverity() {
         return severity;
@@ -71,11 +71,11 @@ public class AddCustomAlertRequest
 
     /**
      * Sets the value of the severity property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSeverity(String value) {
         this.severity = value;
@@ -83,11 +83,11 @@ public class AddCustomAlertRequest
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -95,11 +95,11 @@ public class AddCustomAlertRequest
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -107,11 +107,11 @@ public class AddCustomAlertRequest
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -119,11 +119,11 @@ public class AddCustomAlertRequest
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;

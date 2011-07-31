@@ -54,7 +54,7 @@ import com.openexchange.groupware.upload.UploadFile;
 
 /**
  * {@link UploadFileImpl} - Represents an uploaded file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadFileImpl implements UploadFile {
@@ -82,7 +82,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the file's field name in multipart upload.
-     * 
+     *
      * @return The file's field name in multipart upload.
      */
     @Override
@@ -92,7 +92,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the file's field name in multipart upload.
-     * 
+     *
      * @param fieldName The file's field name in multipart upload.
      */
     @Override
@@ -102,7 +102,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the file's content type.
-     * 
+     *
      * @return The file's content type.
      */
     @Override
@@ -112,7 +112,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the file's content type.
-     * 
+     *
      * @param contentType The file's content type.
      */
     @Override
@@ -127,7 +127,7 @@ public class UploadFileImpl implements UploadFile {
      * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
      * <p>
      * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
-     * 
+     *
      * @see #getPreparedFileName()
      * @return The file name.
      */
@@ -138,7 +138,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the prepared file name; meaning prepending path and encoding information omitted.
-     * 
+     *
      * @return The prepared file name
      */
     @Override
@@ -167,7 +167,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the file name as provided through upload form.
-     * 
+     *
      * @param fileName The file name
      */
     @Override
@@ -177,7 +177,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the file size in bytes.
-     * 
+     *
      * @return The file size in bytes.
      */
     @Override
@@ -187,7 +187,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the file size in bytes.
-     * 
+     *
      * @param size The file size in bytes.
      */
     @Override
@@ -197,7 +197,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the associated unique temporary file on disk.
-     * 
+     *
      * @return The associated unique temporary file on disk.
      */
     @Override
@@ -207,7 +207,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the associated unique temporary file on disk.
-     * 
+     *
      * @param tmpFile The associated unique temporary file on disk.
      */
     @Override
@@ -217,7 +217,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Gets the next homonymous file.
-     * 
+     *
      * @return The next homonymous file.
      */
     @Override
@@ -227,7 +227,7 @@ public class UploadFileImpl implements UploadFile {
 
     /**
      * Sets the next homonymous file.
-     * 
+     *
      * @param homonymous The next homonymous file.
      */
     @Override

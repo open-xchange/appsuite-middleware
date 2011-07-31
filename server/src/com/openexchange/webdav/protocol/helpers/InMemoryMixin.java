@@ -67,7 +67,7 @@ public class InMemoryMixin implements PropertyMixin {
     private Map<String, WebdavProperty> properties = new HashMap<String, WebdavProperty>();
 
     private PropertyMixin mixin = null;
-    
+
     @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         ArrayList<WebdavProperty> allProperties = new ArrayList<WebdavProperty>(properties.values());
@@ -85,14 +85,14 @@ public class InMemoryMixin implements PropertyMixin {
         }
         return webdavProperty;
     }
-    
+
     public void setMixin(PropertyMixin mixin) {
         this.mixin = mixin;
     }
-    
+
     public void setProperty(WebdavProperty property) {
         properties.put(property.getNamespace()+":"+property.getName(), property);
     }
-    
- 
+
+
 }

@@ -62,12 +62,12 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
  *
  */
 public class FolderCacheInvalidation implements GenericCacheInvalidationInterface {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderCacheInvalidation.class);
-	
+
 	private static final String REMOTE_NAME = "FolderCacheInvalidation";
-	
+
 	private static final String ERR = "Folder could not be remote-removed";
 
 	/* (non-Javadoc)

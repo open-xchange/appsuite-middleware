@@ -57,11 +57,11 @@ import java.util.ListIterator;
 public class IfHeaderList implements List<IfHeaderEntity>{
 	private final List<IfHeaderEntity> delegate;
 	private String tag;
-	
+
 	public IfHeaderList(final List<IfHeaderEntity> delegate) {
 		this.delegate = delegate;
 	}
-	
+
 	public IfHeaderList(final String tag, final List<IfHeaderEntity> delegate) {
 		this.delegate = delegate;
 		this.tag = tag;
@@ -70,13 +70,13 @@ public class IfHeaderList implements List<IfHeaderEntity>{
 	public boolean isTagged() {
 		return tag != null;
 	}
-	
+
 	public String getTag() {
 		return tag;
 	}
-	
+
 	// Delegate Methods
-	
+
 	@Override
     public boolean add(final IfHeaderEntity arg0) {
 		return delegate.add(arg0);

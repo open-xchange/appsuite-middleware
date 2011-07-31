@@ -99,7 +99,7 @@ public class LdapJNDIImpl implements LdapInterface {
      *
      */
     private class DeletedControl implements Control {
-    
+
         /**
          * For serialization
          */
@@ -107,26 +107,26 @@ public class LdapJNDIImpl implements LdapInterface {
         public byte[] getEncodedValue() {
             return new byte[] {};
         }
-    
+
         public String getID() {
             return "1.2.840.113556.1.4.417";
         }
-    
+
         public boolean isCritical() {
             return true;
         }
     }
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapJNDIImpl.class));
-    
+
     private final FolderProperties folderprop;
-    
+
     private final LdapContext context;
-    
+
     private final boolean deleted;
 
     private static Map<String, String> MAPPINGTABLE_USERNAME_LDAPBIND = new ConcurrentHashMap<String, String>();
-    
+
     public LdapJNDIImpl(final String login, final String password, final FolderProperties folderprop, final boolean deleted, final boolean distributionlist, final SortInfo sortField) throws OXException {
         this.folderprop = folderprop;
         this.deleted = deleted;
@@ -151,9 +151,9 @@ public class LdapJNDIImpl implements LdapInterface {
             LOG.error(e.getMessage(), e);
             throw LdapExceptionCode.ERROR_GETTING_ATTRIBUTE.create(e.getMessage());
         }
-        
+
     }
-    
+
     public void search(final String baseDN, final String filter, final boolean distributionslist, final Set<Integer> columns, final FillClosure closure) throws OXException {
         final String defaultNamingContext;
         if (deleted) {
@@ -178,7 +178,7 @@ public class LdapJNDIImpl implements LdapInterface {
             ownBaseDN = baseDN;
             ownFilter = filter;
         }
-        
+
         try {
             byte[] cookie = null;
             // Attention: It is important that we progress the objects in a second step after the search
@@ -191,7 +191,7 @@ public class LdapJNDIImpl implements LdapInterface {
                     final Attributes attributes = next.getAttributes();
                     ldapGetterList.add(getLdapGetter(attributes, context, next.getNameInNamespace()));
                 }
-                // Examine the paged results control response 
+                // Examine the paged results control response
                 final Control[] controls = context.getResponseControls();
                 if (controls != null) {
                     for (int i = 0; i < controls.length; i++) {
@@ -207,7 +207,7 @@ public class LdapJNDIImpl implements LdapInterface {
                     context.setRequestControls(new Control[] { new PagedResultsControl(pagesize, cookie, Control.CRITICAL) });
                 }
             } while (null != cookie);
-            
+
             context.setRequestControls(null);
             for (final LdapGetter ldapGetter : ldapGetterList) {
                 try {
@@ -227,7 +227,7 @@ public class LdapJNDIImpl implements LdapInterface {
         }
 
     }
-    
+
     private Control[] getControls(final SortInfo sortField, final boolean distributionlist, final int pagesize) throws IOException, NamingException {
         if (this.deleted) {
             if (0 == pagesize) {
@@ -527,7 +527,7 @@ public class LdapJNDIImpl implements LdapInterface {
                             }
                         }
                     }
-                } 
+                }
             }
             throw LdapExceptionCode.ERROR_GETTING_DEFAULT_NAMING_CONTEXT.create();
         } catch (final NamingException e) {
@@ -623,7 +623,7 @@ public class LdapJNDIImpl implements LdapInterface {
         if (-1 != pooltimeout) {
             env.put("com.sun.jndi.ldap.connect.pool.timeout", String.valueOf(pooltimeout));
         }
-        
+
         return env;
     }
 

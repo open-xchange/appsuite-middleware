@@ -73,7 +73,7 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
         subscriptionsToDelete.add(I(subscription2.getId()));
-        
+
         final SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
         WHERE(new EQUALS("id", I(subscription2.getId())).
@@ -83,17 +83,17 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             AND(new EQUALS("folder_id", folderId)).
             AND(new EQUALS("last_update", L(lastUpdate))).
             AND(new EQUALS("enabled", false)));
-        
+
         assertResult(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void testForget() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
         subscriptionsToDelete.add(I(subscription2.getId()));
-        
+
         storage.forgetSubscription(subscription2);
-        
+
         final SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
         WHERE(new EQUALS("id", I(subscription2.getId())).
@@ -102,24 +102,24 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             AND(new EQUALS("source_id", "com.openexchange.subscribe.test.basic2")).
             AND(new EQUALS("folder_id", folderId)).
             AND(new EQUALS("last_update", L(lastUpdate))));
-        
+
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void testListGet() throws Exception {
         clearFolder(folderId);
         storage.rememberSubscription(subscription);
         assertTrue("Id should be greater 0", subscription.getId() > 0);
         subscriptionsToDelete.add(I(subscription.getId()));
-        
+
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
         subscriptionsToDelete.add(I(subscription2.getId()));
-        
+
         final List<Subscription> list = storage.getSubscriptions(ctx, folderId);
-        
+
         assertEquals("Number of Subscriptions does not match", 2, list.size());
-        
+
         for (final Subscription loadedSubscription : list) {
             if (loadedSubscription.getId() == subscription.getId()) {
                 assertEquals(subscription, loadedSubscription);
@@ -129,8 +129,8 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
                 fail("Unexpected subscription loaded");
             }
         }
-    }    
-    
+    }
+
     public void testUpdate() throws Exception {
         storage.rememberSubscription(subscription);
         assertTrue("Id should be greater 0", subscription.getId() > 0);
@@ -138,7 +138,7 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
         subscription2.setId(subscription.getId());
         storage.updateSubscription(subscription2);
         assertEquals("Id should not changed", subscription.getId(), subscription2.getId());
-        
+
         final SELECT select = new SELECT(ASTERISK).
         FROM(subscriptions).
         WHERE(new EQUALS("id", I(subscription.getId())).
@@ -148,10 +148,10 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             AND(new EQUALS("folder_id", subscription2.getFolderId())).
             AND(new EQUALS("last_update", L(subscription2.getLastUpdate()))).
             AND(new EQUALS("enabled", false)));
-        
+
         assertResult(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void testIDCheckDuringRemember() throws Exception {
         subscription.setId(123);
         try {
@@ -162,37 +162,37 @@ public class SubscriptionSQLStorageTest extends AbstractSubscriptionSQLStorageTe
             assertTrue("Wrong error code", SubscriptionErrorMessage.IDGiven.equals(e));
         }
     }
-    
+
     public void testGet() throws Exception {
         storage.rememberSubscription(subscription2);
         assertTrue("Id should be greater 0", subscription2.getId() > 0);
         subscriptionsToDelete.add(I(subscription2.getId()));
-        
+
         final Subscription loadedSubscription = storage.getSubscription(ctx, subscription2.getId());
-        
+
         assertEquals(subscription2, loadedSubscription);
     }
-    
+
     public void testDeleteAllSubscriptionsOfAUser() throws OXException, SQLException{
         storage.rememberSubscription(subscription);
         storage.deleteAllSubscriptionsForUser(userId, ctx);
-        final SELECT select = 
+        final SELECT select =
             new SELECT(ASTERISK).
             FROM(subscriptions).
             WHERE(new EQUALS("cid", I(ctx.getContextId())).AND(new EQUALS("user_id", I(userId))));
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void testDeleteAllSubscriptionsOfAContext() throws OXException, SQLException{
         storage.rememberSubscription(subscription);
         storage.deleteAllSubscriptionsInContext(ctx.getContextId(), ctx);
-        final SELECT select = 
+        final SELECT select =
             new SELECT(ASTERISK).
             FROM(subscriptions).
             WHERE(new EQUALS("cid", I(ctx.getContextId())));
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void testGetAllSubscriptionsOfAUser() throws OXException{
         storage.rememberSubscription(subscription);
         List<Subscription> subscriptionsOfUser = storage.getSubscriptionsOfUser(ctx, userId);

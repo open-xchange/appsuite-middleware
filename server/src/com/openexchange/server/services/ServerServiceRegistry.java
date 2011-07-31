@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link ServerServiceRegistry} - A registry for services needed by server
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerServiceRegistry {
@@ -66,7 +66,7 @@ public final class ServerServiceRegistry {
 
     /**
      * Gets the server's service registry
-     * 
+     *
      * @return The server's service registry
      */
     public static ServerServiceRegistry getInstance() {
@@ -92,7 +92,7 @@ public final class ServerServiceRegistry {
 
     /**
      * Removes a service bound to given class from this service registry
-     * 
+     *
      * @param clazz The service's class
      */
     public void removeService(final Class<?> clazz) {
@@ -101,7 +101,7 @@ public final class ServerServiceRegistry {
 
     /**
      * Adds a service bound to given class to this service registry
-     * 
+     *
      * @param clazz The service's class
      * @param service The service itself
      */
@@ -111,7 +111,7 @@ public final class ServerServiceRegistry {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
@@ -129,7 +129,7 @@ public final class ServerServiceRegistry {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param failOnError <code>true</code> to throw an appropriate {@link OXException} if service is missing; otherwise

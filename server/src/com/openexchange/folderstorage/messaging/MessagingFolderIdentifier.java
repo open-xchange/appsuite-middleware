@@ -56,7 +56,7 @@ import com.openexchange.messaging.MessagingFolder;
 /**
  * {@link MessagingFolderIdentifier} - A parsed messaging folder identifier:<br>
  * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderIdentifier {
@@ -66,7 +66,7 @@ public final class MessagingFolderIdentifier {
     /**
      * Gets the fully qualified name:<br>
      * <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param fullname The folder fullname
@@ -78,7 +78,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Checks if given identifier is a valid fully qualified name.
-     * 
+     *
      * @param identifier The identifier to check
      * @return <code>true</code> if given identifier is a valid fully qualified name; otherwise <code>false</code>
      */
@@ -109,7 +109,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Parses given identifier to a valid fully qualified name.
-     * 
+     *
      * @param identifier The identifier to parse
      * @return The parsed fully qualified name or <code>null</code> if not parseable
      */
@@ -133,7 +133,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Initializes a new {@link MessagingFolderIdentifier}.
-     * 
+     *
      * @param identifier The identifier according to pattern:<br>
      *            <code>(&lt;service-id&gt;)://(&lt;account-id&gt;)/(&lt;fullname&gt;)</code>
      * @throws OXException If identifier is <code>null</code> or invalid
@@ -184,7 +184,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Initializes a new {@link MessagingFolderIdentifier}.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param fullname The folder fullname
@@ -208,7 +208,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     public String getServiceId() {
@@ -217,7 +217,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Gets the account identifier.
-     * 
+     *
      * @return The account identifier
      */
     public int getAccountId() {
@@ -226,7 +226,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Gets the fullname
-     * 
+     *
      * @return The fullname
      */
     public String getFullname() {
@@ -279,7 +279,7 @@ public final class MessagingFolderIdentifier {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

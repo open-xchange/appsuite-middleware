@@ -9,11 +9,11 @@ import com._4psa.common_xsd._2_5.DelObject;
 
 /**
  * Delete channel: response type
- * 
+ *
  * <p>Java class for DelChannelResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DelChannelResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.common_xsd._2_5.DelObject;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DelChannelResponseType")

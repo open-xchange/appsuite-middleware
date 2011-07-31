@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractAttachmentHandler} - An abstract {@link IAttachmentHandler attachment handler}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
@@ -79,7 +79,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
 
     /**
      * Initializes a new {@link AbstractAttachmentHandler}.
-     * 
+     *
      * @param session The session providing needed user information
      * @throws OXException If initialization fails
      */

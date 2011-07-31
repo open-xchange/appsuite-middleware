@@ -67,7 +67,7 @@ public class SubscriptionMultipleFactory implements MultipleHandlerFactoryServic
     private SubscriptionExecutionService executor;
     private SubscriptionSourceDiscoveryService discovery;
     private SecretService secretService;
-    
+
     public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
         this.executor = executor;
         this.discovery = discovery;

@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailFolderUtility} - Provides utility methods for mail folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderUtility {
@@ -77,11 +77,11 @@ public final class MailFolderUtility {
      * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator from specified folder fullname argument only if
      * fullname argument is not <code>null</code> and is not equal to {@link MailFolder#DEFAULT_FOLDER_ID}.<br>
      * Example:
-     * 
+     *
      * <pre>
      * &quot;default/INBOX&quot; -&gt; &quot;INBOX&quot;
      * </pre>
-     * 
+     *
      * @param fullnameArgument The groupware's mail folder fullname
      * @return The stripped mail folder fullname argument
      */
@@ -119,7 +119,7 @@ public final class MailFolderUtility {
 
     /**
      * Checks if specified fullname argument's real fullname equals given fullname.
-     * 
+     *
      * @param fullnameArgument The fullname argument
      * @param fullname The fullname to compare with
      * @return <code>true</code> if specified fullname argument's real fullname equals given fullname; otherwise <code>false</code>
@@ -138,11 +138,11 @@ public final class MailFolderUtility {
      * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus the default separator (obtained by {@link MailConfig#getDefaultSeparator()}) to
      * given folder fullname. <br>
      * Example:
-     * 
+     *
      * <pre>
      * &quot;INBOX&quot; -&gt; &quot;default2/INBOX&quot;
      * </pre>
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @return The groupware's mail folder fullname
@@ -172,7 +172,7 @@ public final class MailFolderUtility {
 
     /**
      * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
-     * 
+     *
      * @param str The string to test
      * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
      */

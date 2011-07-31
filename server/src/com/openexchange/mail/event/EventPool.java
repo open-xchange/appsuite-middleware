@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link EventPool} - The mail event pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EventPool implements Runnable {
@@ -116,14 +116,14 @@ public final class EventPool implements Runnable {
 
     /**
      * Gets the event pool instance.
-     * 
+     *
      * @return The event pool instance
      */
     public static EventPool getInstance() {
         return instance;
     }
 
-    /*- 
+    /*-
      * ############################# Member section #############################
      */
 
@@ -139,7 +139,7 @@ public final class EventPool implements Runnable {
 
     /**
      * Initializes a new {@link EventPool}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private EventPool() throws OXException {
@@ -182,7 +182,7 @@ public final class EventPool implements Runnable {
 
     /**
      * Removes all pooled events from this pool associated with given user.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      */
@@ -203,7 +203,7 @@ public final class EventPool implements Runnable {
 
     /**
      * Puts given pooled event into this pool. If an equal pooled event is already present its time stamp is updated.
-     * 
+     *
      * @param pooledEvent The pooled event to put.
      */
     public void put(final PooledEvent pooledEvent) {

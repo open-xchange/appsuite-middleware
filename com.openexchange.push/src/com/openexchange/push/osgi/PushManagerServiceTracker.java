@@ -57,7 +57,7 @@ import com.openexchange.push.internal.PushManagerRegistry;
 
 /**
  * {@link PushManagerServiceTracker} - The service tracker for push managers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushManagerServiceTracker implements ServiceTrackerCustomizer {
@@ -66,7 +66,7 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
 
     /**
      * Initializes a new {@link PushManagerServiceTracker}.
-     * 
+     *
      * @param context The bundle context
      */
     public PushManagerServiceTracker(final BundleContext context) {

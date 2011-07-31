@@ -95,7 +95,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
             List<ForeignKeyOld> keys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
             ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
-          
+
             if( keys.contains(fk)) {
                 LOG.info("Foreign Key "+fk+" exists. Skipping Update Task.");
                 return;

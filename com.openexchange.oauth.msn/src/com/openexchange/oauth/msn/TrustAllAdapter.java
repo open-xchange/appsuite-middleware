@@ -69,7 +69,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  *
  */
 public class TrustAllAdapter implements ProtocolSocketFactory {
-    
+
     private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
 
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
@@ -93,20 +93,20 @@ public class TrustAllAdapter implements ProtocolSocketFactory {
             socket.connect(remoteaddr, timeout);
             return socket;
         }
-        
-        
+
+
         int linger = params.getLinger();
         if(linger == 0) {
             socket.setSoLinger(false, 0);
         } else if (linger > 0) {
             socket.setSoLinger(true, linger);
         }
-        
+
         socket.setSoTimeout(params.getSoTimeout());
         socket.setTcpNoDelay(params.getTcpNoDelay());
-        
+
         return socket;
     }
-    
- 
+
+
 }

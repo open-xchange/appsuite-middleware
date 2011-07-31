@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -32,8 +32,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -54,11 +54,11 @@ public class GetDevicesRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -66,11 +66,11 @@ public class GetDevicesRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -78,11 +78,11 @@ public class GetDevicesRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -90,11 +90,11 @@ public class GetDevicesRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -102,11 +102,11 @@ public class GetDevicesRequest {
 
     /**
      * Gets the value of the ownerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getOwnerID() {
         return ownerID;
@@ -114,11 +114,11 @@ public class GetDevicesRequest {
 
     /**
      * Sets the value of the ownerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setOwnerID(BigInteger value) {
         this.ownerID = value;
@@ -126,11 +126,11 @@ public class GetDevicesRequest {
 
     /**
      * Gets the value of the assignedClientID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAssignedClientID() {
         return assignedClientID;
@@ -138,11 +138,11 @@ public class GetDevicesRequest {
 
     /**
      * Sets the value of the assignedClientID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAssignedClientID(BigInteger value) {
         this.assignedClientID = value;
@@ -150,25 +150,25 @@ public class GetDevicesRequest {
 
     /**
      * Gets the value of the assignedExtensions property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the assignedExtensions property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAssignedExtensions().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getAssignedExtensions() {
         if (assignedExtensions == null) {

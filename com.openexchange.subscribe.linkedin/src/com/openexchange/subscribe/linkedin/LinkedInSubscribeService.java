@@ -71,13 +71,13 @@ import com.openexchange.subscribe.linkedin.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LinkedInSubscribeService  extends AbstractSubscribeService {
-    
+
     private Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInSubscribeService.class));
 
     private final SubscriptionSource source = new SubscriptionSource();
-    
+
     public LinkedInSubscribeService(Activator activator){
         this.activator = activator;
 
@@ -115,7 +115,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
             subscription.getConfiguration().put("account", accountId.toString());
         }
     }
-    
+
     @Override
     public void modifyOutgoing(Subscription subscription) throws OXException {
         String accountId = (String) subscription.getConfiguration().get("account");
@@ -133,11 +133,11 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
             } else {
                 subscription.setDisplayName("LinkedIn");
             }
-            
-        }        
+
+        }
         super.modifyOutgoing(subscription);
     }
-    
+
     public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
         Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));

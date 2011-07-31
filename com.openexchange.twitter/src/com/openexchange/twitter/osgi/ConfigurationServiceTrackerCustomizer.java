@@ -59,7 +59,7 @@ import com.openexchange.twitter.internal.TwitterConfiguration;
 
 /**
  * {@link ConfigurationServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for {@link ConfigurationService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigurationServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -68,7 +68,7 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
 
     /**
      * Initializes a new {@link ConfigurationServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public ConfigurationServiceTrackerCustomizer(final BundleContext context) {

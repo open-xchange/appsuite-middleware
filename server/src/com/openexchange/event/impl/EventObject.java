@@ -62,42 +62,42 @@ import com.openexchange.session.Session;
 
 /**
  * EventObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
 public class EventObject {
-	
+
 	private int module;
-	
+
 	private int action;
-	
+
 	private Object obj;
-	
+
 	private Session session;
-	
+
 	private Date creationDate;
-	
+
 	public EventObject(final Appointment obj, final int action, final Session session) {
 		init(obj, Types.APPOINTMENT, action, session);
 	}
-	
+
 	public EventObject(final Task obj, final int action, final Session session) {
 		init(obj, Types.TASK, action, session);
 	}
-	
+
 	public EventObject(final Contact obj, final int action, final Session session) {
 		init(obj, Types.CONTACT, action, session);
 	}
-	
+
 	public EventObject(final FolderObject obj, final int action, final Session session) {
 		init(obj, Types.FOLDER, action, session);
 	}
-	
+
 	public EventObject(final DocumentMetadata obj, final int action, final Session session) {
 		init(obj, Types.INFOSTORE, action, session);
 	}
-	
+
 	private void init(final Object obj, final int module, final int action, final Session session) {
 		this.obj = obj;
 		this.module = module;
@@ -105,15 +105,15 @@ public class EventObject {
 		this.session = session;
 		creationDate = new Date();
 	}
-	
+
 	public int getModule() {
 		return module;
 	}
-	
+
 	public int getAction() {
 		return action;
 	}
-	
+
 	public Object getObject() {
 		return obj;
 	}
@@ -125,9 +125,9 @@ public class EventObject {
 	public Date getCreationDate() {
 		return creationDate;
 	}
-	
+
 	/* (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

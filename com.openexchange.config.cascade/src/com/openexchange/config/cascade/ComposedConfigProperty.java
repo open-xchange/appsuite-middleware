@@ -60,8 +60,8 @@ import com.openexchange.exception.OXException;
 public interface ComposedConfigProperty<T> extends ConfigProperty<T> {
     public ComposedConfigProperty<T> precedence(String...scopes) throws OXException;
     public <M> ComposedConfigProperty<M> to(Class<M> otherType) throws OXException;
-    
+
     public ComposedConfigProperty<T> set(T value) throws OXException;
     public <M> ComposedConfigProperty<T> set(String metadataName, M value) throws OXException;
-    
+
 }

@@ -64,7 +64,7 @@ public interface ContactInterfaceFactory {
 
     /**
      * Creates an appropriate {@link ContactInterface} instance for given folder ID and session.
-     * 
+     *
      * @param folderId The folder ID
      * @param session The session
      * @return An appropriate {@link ContactInterface} instance

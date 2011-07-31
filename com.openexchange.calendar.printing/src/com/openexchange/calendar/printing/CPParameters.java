@@ -129,7 +129,7 @@ public class CPParameters {
     public void setUserTemplate(String template) {
         this.usertemplate = template;
     }
-    
+
     public boolean hasUserTemplate(){
         return this.usertemplate != null;
     }
@@ -141,7 +141,7 @@ public class CPParameters {
     public void setFolder(int folder) {
         this.folder = folder;
     }
-    
+
     public boolean hasFolder(){
         return folder != -1;
     }
@@ -153,7 +153,7 @@ public class CPParameters {
     public void setWorkDayStart(Date workDayStart) {
         this.workDayStart = workDayStart;
     }
-    
+
     public boolean hasWorkDayStart(){
         return this.workDayStart != null;
     }
@@ -165,7 +165,7 @@ public class CPParameters {
     public void setWorkDayEnd(Date workDayEnd) {
         this.workDayEnd = workDayEnd;
     }
-    
+
     public boolean hasWorkDayEnd(){
         return this.workDayEnd != null;
     }
@@ -177,7 +177,7 @@ public class CPParameters {
     public void setWeekStart(int weekStart) {
         this.weekStart = weekStart;
     }
-        
+
     public boolean hasWeekStart(){
         return this.weekStart != -1;
     }
@@ -189,7 +189,7 @@ public class CPParameters {
     public void setWorkWeekStart(int workWeekStart) {
         this.workWeekStart = workWeekStart;
     }
-    
+
     public boolean hasWorkWeekStart(){
         return this.workWeekStart != -1;
     }
@@ -201,7 +201,7 @@ public class CPParameters {
     public void setWorkWeekDuration(int workWeekDuration) {
         this.workWeekDuration = workWeekDuration;
     }
-    
+
     public boolean hasWorkWeekDuration(){
         return this.workWeekDuration != -1;
     }
@@ -213,7 +213,7 @@ public class CPParameters {
     public void setTimezone(TimeZone timezone) {
         this.timezone = timezone;
     }
-        
+
     public boolean hasTimezone(){
         return this.timezone != null;
     }
@@ -348,7 +348,7 @@ public class CPParameters {
         }
         return val;
     }
-    
+
     private String extractMandatoryStringParam(HttpServletRequest req, String parameter) {
         String val = req.getParameter(parameter);
         if (val == null) {

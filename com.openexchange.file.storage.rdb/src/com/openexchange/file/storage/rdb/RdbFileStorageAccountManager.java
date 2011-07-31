@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RdbFileStorageAccountManager} - The default file storage account manager.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -82,7 +82,7 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
 
     /**
      * Initializes a new {@link RdbFileStorageAccountManager}.
-     * 
+     *
      * @param service The file storage service
      */
     public RdbFileStorageAccountManager(final FileStorageService service) {

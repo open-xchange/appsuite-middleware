@@ -63,7 +63,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageDataSource} - Allows creation of a data source by either an input stream, a string or a byte array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageDataSource implements DataSource {

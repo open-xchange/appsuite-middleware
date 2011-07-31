@@ -80,7 +80,7 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 /**
  * {@link tasks} - The WebDAV/XML servlet for task module.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class tasks extends XmlServlet<TasksSQLInterface> {
@@ -206,7 +206,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
         /**
          * Initializes a new {@link QueuedTask}
-         * 
+         *
          * @param task The task object
          * @param clientId The client ID
          * @param confirm The confirm status
@@ -226,7 +226,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
         /**
          * Performs this queued task's action
-         * 
+         *
          * @param tasksSQL The task SQL interface
          * @param os The output stream
          * @param user The user ID

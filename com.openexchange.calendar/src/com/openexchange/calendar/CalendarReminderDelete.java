@@ -62,9 +62,9 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * {@link CalendarReminderDelete} - The {@link TargetService}
  * implementation for calendar module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CalendarReminderDelete implements TargetService {
 

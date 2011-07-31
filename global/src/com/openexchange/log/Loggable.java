@@ -51,7 +51,7 @@ package com.openexchange.log;
 
 /**
  * {@link Loggable} - A loggable object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Loggable {
@@ -65,42 +65,42 @@ public interface Loggable {
 
     /**
      * Gets the log level.
-     * 
+     *
      * @return The log level
      */
     public Level getLevel();
 
     /**
      * Gets the logger.
-     * 
+     *
      * @return The logger
      */
     public org.apache.commons.logging.Log getLog();
 
     /**
      * Gets the log message.
-     * 
+     *
      * @return The log message
      */
     public String getMessage();
 
     /**
      * Gets the {@link Throwable} instance.
-     * 
+     *
      * @return The {@link Throwable} instance.
      */
     public Throwable getThrowable();
 
     /**
      * Gets the caller's stack trace.
-     * 
+     *
      * @return The caller's stack trace
      */
     public StackTraceElement[] getCallerTrace();
 
     /**
      * Checks if loggable.
-     * 
+     *
      * @return <code>true</code> if loggable; otherwise <code>false</code>
      */
     public boolean isLoggable();

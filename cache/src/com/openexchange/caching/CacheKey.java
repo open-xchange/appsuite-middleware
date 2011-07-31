@@ -58,14 +58,14 @@ public interface CacheKey extends Serializable {
 
     /**
      * Gets the context ID
-     * 
+     *
      * @return The context ID
      */
     public int getContextId();
 
     /**
      * Gets the serializable key objects
-     * 
+     *
      * @return The serializable key objects
      */
     public Serializable[] getKeys();

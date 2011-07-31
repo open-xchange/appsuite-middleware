@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link ContactInterfaceDiscoveryInitialization} - {@link Initialization} for contact interface discovery.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactInterfaceDiscoveryInitialization implements Initialization {

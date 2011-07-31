@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * {@link DefaultMessagingFolder} - The default messaging folder providing setter methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultMessagingFolder implements MessagingFolder {
@@ -140,7 +140,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the default folder type.
-     * 
+     *
      * @param defaultFolderType The default folder type
      */
     public void setDefaultFolderType(final DefaultFolderType defaultFolderType) {
@@ -158,7 +158,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
-     * 
+     *
      * @return The list of capabilities or <code>null</code> if not set
      */
     public Set<String> getCapabilities() {
@@ -170,7 +170,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the capabilities.
-     * 
+     *
      * @param capabilities The capabilities
      */
     public void setCapabilities(final Set<String> capabilities) {
@@ -187,7 +187,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the deleted message count.
-     * 
+     *
      * @param deletedMessageCount The deleted message count
      */
     public void setDeletedMessageCount(final int deletedMessageCount) {
@@ -200,7 +200,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the folder identifier.
-     * 
+     *
      * @param id The folder identifier
      */
     public void setId(final String id) {
@@ -213,7 +213,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the message count.
-     * 
+     *
      * @param messageCount The message count
      */
     public void setMessageCount(final int messageCount) {
@@ -226,7 +226,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the name.
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {
@@ -239,7 +239,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the new message count.
-     * 
+     *
      * @param newMessageCount The new message count
      */
     public void setNewMessageCount(final int newMessageCount) {
@@ -252,7 +252,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the own permission.
-     * 
+     *
      * @param ownPermission The own permission
      */
     public void setOwnPermission(final MessagingPermission ownPermission) {
@@ -265,7 +265,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the parent identifier.
-     * 
+     *
      * @param parentId The parent identifier
      */
     public void setParentId(final String parentId) {
@@ -281,7 +281,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the permissions
-     * 
+     *
      * @param permissions The permissions
      */
     public void setPermissions(final List<MessagingPermission> permissions) {
@@ -294,7 +294,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Adds given permission.
-     * 
+     *
      * @param permission The permission
      */
     public void addPermission(final MessagingPermission permission) {
@@ -310,7 +310,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets the unread message count.
-     * 
+     *
      * @param unreadMessageCount The unread message count
      */
     public void setUnreadMessageCount(final int unreadMessageCount) {
@@ -323,7 +323,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder has subfolders.
-     * 
+     *
      * @param subfolders <code>true</code> if this folder has subfolders; otherwise <code>false</code>
      */
     public void setSubfolders(final boolean subfolders) {
@@ -333,7 +333,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the has-subfolders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the has-subfolders flag set; otherwise <code>false</code>
      */
     public boolean containsSubfolders() {
@@ -354,7 +354,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder has subscribed subfolders.
-     * 
+     *
      * @param subscribedSubfolders <code>true</code> if this folder has subscribed subfolders; otherwise <code>false</code>
      */
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
@@ -364,7 +364,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the has-subscribed-subfolders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the has-subscribed-subfolders flag set; otherwise <code>false</code>
      */
     public boolean containsSubscribedSubfolders() {
@@ -385,7 +385,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder is a default folder.
-     * 
+     *
      * @param defaultFolder <code>true</code> if this folder is a default folder; otherwise <code>false</code>
      */
     public void setDefaultFolder(final boolean defaultFolder) {
@@ -395,7 +395,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the default-folder flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the default-folder flag set; otherwise <code>false</code>
      */
     public boolean containsDefaultFolder() {
@@ -416,7 +416,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder has the capability to hold subfolders.
-     * 
+     *
      * @param holdsFolders <code>true</code> if this folder has the capability to hold subfolders; otherwise <code>false</code>
      */
     public void setHoldsFolders(final boolean holdsFolders) {
@@ -426,7 +426,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the holds-folders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-folders flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsFolders() {
@@ -447,7 +447,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the holds-messages flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-messages flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsMessages() {
@@ -464,7 +464,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder has the capability to hold messages.
-     * 
+     *
      * @param holdsMessages <code>true</code> if this folder has the capability to hold messages; otherwise <code>false</code>
      */
     public void setHoldsMessages(final boolean holdsMessages) {
@@ -478,7 +478,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets if this folder is the root folder.
-     * 
+     *
      * @param rootFolder <code>true</code> if this folder is the root folder; otherwise <code>false</code>
      */
     public void setRootFolder(final boolean rootFolder) {
@@ -488,7 +488,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the root-folder flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the root-folder flag set; otherwise <code>false</code>
      */
     public boolean containsRootFolder() {
@@ -509,7 +509,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets if this folder is subscribed.
-     * 
+     *
      * @param subscribed <code>true</code> if this folder is subscribed; otherwise <code>false</code>
      */
     public void setSubscribed(final boolean subscribed) {
@@ -519,7 +519,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder has the subscribed flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the subscribed flag set; otherwise <code>false</code>
      */
     public boolean containsSubscribed() {
@@ -536,7 +536,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Indicates whether this folder exists in folder storage.
-     * 
+     *
      * @return <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
      */
     public boolean exists() {
@@ -545,7 +545,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Sets whether this folder exists in folder storage.
-     * 
+     *
      * @param exists <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
      */
     public void setExists(final boolean exists) {
@@ -558,7 +558,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
 
     /**
      * Checks if separator character was set through {@link #setSeparator(char)}.
-     * 
+     *
      * @return <code>true</code> if separator is set; otherwise <code>false</code>
      */
     public boolean containsSeparator() {
@@ -577,7 +577,7 @@ public class DefaultMessagingFolder implements MessagingFolder {
      * Sets the separator character.
      * <p>
      * If mailing system does not support a separator character, {@link MailConfig#getDefaultSeparator()} should to be used.
-     * 
+     *
      * @param separator the separator to set
      */
     public void setSeparator(final char separator) {

@@ -95,7 +95,7 @@ public class RepairRecurrencePatternNullValue implements UpdateTask {
             Database.backNoTimeout(contextId, true, con);
         }
     }
-    
+
     private void executeStatement(Connection con, String statement) throws SQLException {
         PreparedStatement stmt = null;
         try {

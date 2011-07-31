@@ -27,7 +27,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-/** 
+/**
  * In order to create an element, please use the createElement method
  * instead of invoking the constructor directly. The right place to
  * add user defined initialization code is the init method. */
@@ -43,7 +43,7 @@ public class Element extends Node {
     public Element() {
     }
 
-    /** 
+    /**
      * called when all properties are set, but before children
      * are parsed. Please do not use setParent for initialization
      * code any longer. */
@@ -54,7 +54,7 @@ public class Element extends Node {
 
 
 
-    /** 
+    /**
      * removes all children and attributes */
 
     public void clear() {
@@ -62,27 +62,27 @@ public class Element extends Node {
         children = null;
     }
 
-    /** 
+    /**
      * Forwards creation request to parent if any, otherwise
      * calls super.createElement. */
 
     @Override
     public Element createElement(
     		final String namespace,
-    		final String name) { 
+    		final String name) {
 
         return (this.parent == null)
             ? super.createElement(namespace, name)
             : this.parent.createElement(namespace, name);
     }
 
-    /** 
+    /**
      * Returns the number of attributes of this element. */
 
     public int getAttributeCount() {
         return attributes == null ? 0 : attributes.size ();
     }
- 
+
 	public String getAttributeNamespace (final int index) {
 		return attributes.get(index)[0];
 	}
@@ -90,53 +90,53 @@ public class Element extends Node {
 /*	public String getAttributePrefix (int index) {
 		return ((String []) attributes.elementAt (index)) [1];
 	}*/
-	
+
 	public String getAttributeName (final int index) {
 		return attributes.get(index)[1];
 	}
-	
+
 
 	public String getAttributeValue (final int index) {
 		return attributes.get(index)[2];
 	}
-	
-	
+
+
 	public String getAttributeValue (final String namespace, final String name) {
 		for (int i = 0; i < getAttributeCount (); i++) {
-			if (name.equals (getAttributeName (i)) 
+			if (name.equals (getAttributeName (i))
 				&& (namespace == null || namespace.equals (getAttributeNamespace(i)))) {
 				return getAttributeValue (i);
 			}
-		}						
-		return null;			
+		}
+		return null;
 	}
 
-    /** 
-     * Returns the root node, determined by ascending to the 
+    /**
+     * Returns the root node, determined by ascending to the
      * all parents un of the root element. */
 
     public Node getRoot() {
 
         Element current = this;
-        
+
         while (current.parent != null) {
             if (!(current.parent instanceof Element)) {
 				return current.parent;
 			}
             current = (Element) current.parent;
         }
-        
+
         return current;
     }
 
-    /** 
+    /**
      * returns the (local) name of the element */
 
     public String getName() {
         return name;
     }
 
-    /** 
+    /**
      * returns the namespace of the element */
 
     public String getNamespace() {
@@ -144,9 +144,9 @@ public class Element extends Node {
     }
 
 
-    /** 
+    /**
      * returns the namespace for the given prefix */
-    
+
     public String getNamespaceUri (final String prefix) {
     	final int cnt = getNamespaceCount ();
 		for (int i = 0; i < cnt; i++) {
@@ -154,13 +154,13 @@ public class Element extends Node {
 			if (prefix == getNamespacePrefix (i) ||
 				(prefix != null && prefix.equals (getNamespacePrefix (i)))) {
 				return getNamespaceUri (i);
-			}	
+			}
 		}
 		return parent instanceof Element ? ((Element) parent).getNamespaceUri (prefix) : null;
     }
 
 
-	/** 
+	/**
      * returns the number of declared namespaces, NOT including
 	 * parent elements */
 
@@ -178,15 +178,15 @@ public class Element extends Node {
 	}
 
 
-    /** 
+    /**
      * Returns the parent node of this element */
 
     public Node getParent() {
         return parent;
     }
 
-    /* 
-     * Returns the parent element if available, null otherwise 
+    /*
+     * Returns the parent element if available, null otherwise
 
     public Element getParentElement() {
         return (parent instanceof Element)
@@ -195,9 +195,9 @@ public class Element extends Node {
     }
 */
 
-    /** 
-     * Builds the child elements from the given Parser. By overwriting 
-     * parse, an element can take complete control over parsing its 
+    /**
+     * Builds the child elements from the given Parser. By overwriting
+     * parse, an element can take complete control over parsing its
      * subtree. */
 
     @Override
@@ -208,8 +208,8 @@ public class Element extends Node {
         	i < parser.getNamespaceCount (parser.getDepth ()); i++) {
         	setPrefix (parser.getNamespacePrefix (i), parser.getNamespaceUri(i));
         }
-        
-        
+
+
         for (int i = 0; i < parser.getAttributeCount (); i++) {
 			setAttribute (parser.getAttributeNamespace (i),
 //	        			  parser.getAttributePrefix (i),
@@ -233,17 +233,17 @@ public class Element extends Node {
 				addChild(IGNORABLE_WHITESPACE, "");
 			}
 		}
-		
+
         parser.require(
             XmlPullParser.END_TAG,
             getNamespace(),
             getName());
-            
+
         parser.nextToken ();
     }
 
 
-    /** 
+    /**
      * Sets the given attribute; a value of null removes the attribute */
 
 	public void setAttribute (String namespace, final String name, final String value) {
@@ -254,19 +254,19 @@ public class Element extends Node {
 		if (namespace == null) {
 			namespace = "";
 		}
-		
+
         for (int i = attributes.size()-1; i >=0; i--){
             String[] attribut = attributes.get(i);
             if (attribut[0].equals(namespace) &&
 				attribut[1].equals(name)){
-					
+
 				if (value == null) {
 	                attributes.remove(i);
 				}
 				else {
 					attribut[2] = value;
 				}
-	            return; 
+	            return;
 			}
         }
 
@@ -274,26 +274,26 @@ public class Element extends Node {
 	}
 
 
-	/** 
-     * Sets the given prefix; a namespace value of null removess the 
+	/**
+     * Sets the given prefix; a namespace value of null removess the
 	 * prefix */
 
 	public void setPrefix (final String prefix, final String namespace) {
 		if (prefixes == null) {
 			prefixes = new ArrayList<String[]>();
 		}
-		prefixes.add(new String [] {prefix, namespace});		
+		prefixes.add(new String [] {prefix, namespace});
 	}
 
 
-    /** 
+    /**
      * sets the name of the element */
 
     public void setName(final String name) {
         this.name = name;
     }
 
-    /** 
+    /**
      * sets the namespace of the element. Please note: For no
      * namespace, please use Xml.NO_NAMESPACE, null is not a legal
      * value. Currently, null is converted to Xml.NO_NAMESPACE, but
@@ -306,7 +306,7 @@ public class Element extends Node {
         this.namespace = namespace;
     }
 
-    /** 
+    /**
      * Sets the Parent of this element. Automatically called from the
      * add method.  Please use with care, you can simply
      * create inconsitencies in the document tree structure using
@@ -317,7 +317,7 @@ public class Element extends Node {
     }
 
 
-    /** 
+    /**
      * Writes this element and all children to the given XmlWriter. */
 
     @Override

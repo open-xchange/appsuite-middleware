@@ -62,7 +62,7 @@ public class UPDATE extends ModifyCommand {
 		this.tableName = tableName;
 		assignments = new LinkedList<Assignment>();
 	}
-	
+
 	public UPDATE(Table table) {
 	    this(table.getName());
 	}
@@ -71,16 +71,16 @@ public class UPDATE extends ModifyCommand {
     public void build(IStatementBuilder builder) {
 		builder.buildUPDATE(this);
 	}
-	
+
 	public UPDATE SET(Column column, Expression expression) {
 	    return SET(column.getName(), expression);
 	}
-	
+
 	public UPDATE SET(String column, Expression expression) {
 		assignments.add(new Assignment(column, expression));
 		return this;
 	}
-	
+
 	public UPDATE WHERE(Predicate predicate) {
 		where = new WHERE(predicate);
 		return this;

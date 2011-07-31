@@ -53,9 +53,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
 * {@link CloudmarkSpamHandlerServiceRegistry} - A registry for services required by Cloudmark Spamhandler bundle
-* 
+*
 * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
-* 
+*
 */
 public final class CloudmarkSpamHandlerServiceRegistry {
 
@@ -63,7 +63,7 @@ public final class CloudmarkSpamHandlerServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

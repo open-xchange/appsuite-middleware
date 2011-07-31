@@ -13,11 +13,11 @@ import com._4psa.extensiondata_xsd._2_5.RemoteAgent;
 
 /**
  * Get queue agents list: response type
- * 
+ *
  * <p>Java class for GetQueueAgentsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetQueueAgentsResponseType">
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import com._4psa.extensiondata_xsd._2_5.RemoteAgent;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetQueueAgentsResponseType", propOrder = {
@@ -55,25 +55,25 @@ public class GetQueueAgentsResponseType {
 
     /**
      * Gets the value of the localAgents property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the localAgents property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLocalAgents().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetQueueAgentsResponseType.LocalAgents }
-     * 
-     * 
+     *
+     *
      */
     public List<GetQueueAgentsResponseType.LocalAgents> getLocalAgents() {
         if (localAgents == null) {
@@ -84,25 +84,25 @@ public class GetQueueAgentsResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -113,25 +113,25 @@ public class GetQueueAgentsResponseType {
 
     /**
      * Gets the value of the remoteAgents property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the remoteAgents property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRemoteAgents().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link RemoteAgent }
-     * 
-     * 
+     *
+     *
      */
     public List<RemoteAgent> getRemoteAgents() {
         if (remoteAgents == null) {
@@ -143,9 +143,9 @@ public class GetQueueAgentsResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -154,8 +154,8 @@ public class GetQueueAgentsResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")

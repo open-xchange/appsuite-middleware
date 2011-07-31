@@ -78,7 +78,7 @@ public abstract class AbstractVerifyingAttributeConverter<T extends CalendarComp
         }
         this.verifier.verify(index, object, warnings);
     }
-    
+
     protected boolean isSet(final U calendarObject, final int value) {
         return calendarObject.contains(value) && calendarObject.get(value) !=null;
     }

@@ -163,9 +163,9 @@ public class Mappings {
         userfield20("userfield20");
 
         private final String name;
-        
+
         private static String prefix;
-        
+
         private Parameters(final String name) {
             this.name = name;
         }
@@ -173,12 +173,12 @@ public class Mappings {
         public String getName() {
             return prefix + '.' + name;
         }
-        
+
         public static void setPrefix(final String pref) {
             prefix = pref;
         }
     }
-    
+
     private String anniversary;
     private String assistant_name;
     private String birthday;
@@ -280,203 +280,203 @@ public class Mappings {
     public static Mappings getMappingsFromProperties(final Properties props, final String prefix, final String mappingfile) throws OXException {
         final Mappings retval = new Mappings();
         Parameters.setPrefix(prefix);
-        
+
         final CheckStringPropertyParameter parameterObject = new CheckStringPropertyParameter(props, mappingfile);
-        
-        
+
+
         // TODO: Differentiate between optional and non-optional settings
         retval.setDisplayname(checkStringPropertyOptional(parameterObject, Parameters.displayname));
-        
+
         retval.setGivenname(checkStringPropertyOptional(parameterObject, Parameters.givenname));
-        
+
         retval.setSurname(checkStringPropertyOptional(parameterObject, Parameters.surname));
 
         retval.setEmail1(checkStringPropertyOptional(parameterObject, Parameters.email1));
-        
+
         retval.setDepartment(checkStringPropertyOptional(parameterObject, Parameters.department));
-        
+
         retval.setCompany(checkStringPropertyOptional(parameterObject, Parameters.company));
-        
+
         retval.setDistributionlistname(checkStringPropertyOptional(parameterObject, Parameters.distributionlistname));
-        
+
         retval.setDistributionuid(checkStringProperty(parameterObject, Parameters.distributionuid));
 
         retval.setBirthday(checkStringPropertyOptional(parameterObject, Parameters.birthday));
-        
+
         retval.setAnniversary(checkStringPropertyOptional(parameterObject, Parameters.anniversary));
-        
+
         retval.setBranches(checkStringPropertyOptional(parameterObject, Parameters.branches));
-        
+
         retval.setBusiness_category(checkStringPropertyOptional(parameterObject, Parameters.business_category));
-        
+
         retval.setPostal_code_business(checkStringPropertyOptional(parameterObject, Parameters.postal_code_business));
-        
+
         retval.setState_business(checkStringPropertyOptional(parameterObject, Parameters.state_business));
-        
+
         retval.setStreet_business(checkStringPropertyOptional(parameterObject, Parameters.street_business));
-        
+
         retval.setTelephone_callback(checkStringPropertyOptional(parameterObject, Parameters.telephone_callback));
-        
+
         retval.setCity_home(checkStringPropertyOptional(parameterObject, Parameters.city_home));
-        
+
         retval.setCommercial_register(checkStringPropertyOptional(parameterObject, Parameters.commercial_register));
-        
+
         retval.setCountry_home(checkStringPropertyOptional(parameterObject, Parameters.country_home));
-        
+
         retval.setEmail2(checkStringPropertyOptional(parameterObject, Parameters.email2));
-        
+
         retval.setEmail3(checkStringPropertyOptional(parameterObject, Parameters.email3));
-        
+
         retval.setEmployeetype(checkStringPropertyOptional(parameterObject, Parameters.employeetype));
-        
+
         retval.setFax_business(checkStringPropertyOptional(parameterObject, Parameters.fax_business));
-        
+
         retval.setFax_home(checkStringPropertyOptional(parameterObject, Parameters.fax_home));
-        
+
         retval.setFax_other(checkStringPropertyOptional(parameterObject, Parameters.fax_other));
-        
+
         retval.setInstant_messenger1(checkStringPropertyOptional(parameterObject, Parameters.instant_messenger1));
-        
+
         retval.setInstant_messenger2(checkStringPropertyOptional(parameterObject, Parameters.instant_messenger2));
-        
+
         retval.setTelephone_ip(checkStringPropertyOptional(parameterObject, Parameters.telephone_ip));
-        
+
         retval.setTelephone_isdn(checkStringPropertyOptional(parameterObject, Parameters.telephone_isdn));
-        
+
         retval.setManager_name(checkStringPropertyOptional(parameterObject, Parameters.manager_name));
-        
+
         retval.setMarital_status(checkStringPropertyOptional(parameterObject, Parameters.marital_status));
-        
+
         retval.setCellular_telephone1(checkStringPropertyOptional(parameterObject, Parameters.cellular_telephone1));
-        
+
         retval.setCellular_telephone2(checkStringPropertyOptional(parameterObject, Parameters.cellular_telephone2));
-        
+
         retval.setInfo(checkStringPropertyOptional(parameterObject, Parameters.info));
-        
+
         retval.setNickname(checkStringPropertyOptional(parameterObject, Parameters.nickname));
-        
+
         retval.setNumber_of_children(checkStringPropertyOptional(parameterObject, Parameters.number_of_children));
-        
+
         retval.setNote(checkStringPropertyOptional(parameterObject, Parameters.note));
-        
+
         retval.setNumber_of_employee(checkStringPropertyOptional(parameterObject, Parameters.number_of_employee));
-        
+
         retval.setTelephone_pager(checkStringPropertyOptional(parameterObject, Parameters.telephone_pager));
-        
+
         retval.setTelephone_assistant(checkStringPropertyOptional(parameterObject, Parameters.telephone_assistant));
-        
+
         retval.setTelephone_business1(checkStringPropertyOptional(parameterObject, Parameters.telephone_business1));
-        
+
         retval.setTelephone_business2(checkStringPropertyOptional(parameterObject, Parameters.telephone_business2));
-        
+
         retval.setTelephone_car(checkStringPropertyOptional(parameterObject, Parameters.telephone_car));
-        
+
         retval.setTelephone_company(checkStringPropertyOptional(parameterObject, Parameters.telephone_company));
-        
+
         retval.setTelephone_home1(checkStringPropertyOptional(parameterObject, Parameters.telephone_home1));
-        
+
         retval.setTelephone_home2(checkStringPropertyOptional(parameterObject, Parameters.telephone_home2));
-        
+
         retval.setTelephone_other(checkStringPropertyOptional(parameterObject, Parameters.telephone_other));
-        
+
         retval.setPostal_code_home(checkStringPropertyOptional(parameterObject, Parameters.postal_code_home));
-        
+
         retval.setProfession(checkStringPropertyOptional(parameterObject, Parameters.profession));
-        
+
         retval.setTelephone_radio(checkStringPropertyOptional(parameterObject, Parameters.telephone_radio));
-        
+
         retval.setRoom_number(checkStringPropertyOptional(parameterObject, Parameters.room_number));
-        
+
         retval.setSales_volume(checkStringPropertyOptional(parameterObject, Parameters.sales_volume));
-        
+
         retval.setCity_other(checkStringPropertyOptional(parameterObject, Parameters.city_other));
-        
+
         retval.setCountry_other(checkStringPropertyOptional(parameterObject, Parameters.country_other));
-        
+
         retval.setMiddle_name(checkStringPropertyOptional(parameterObject, Parameters.middle_name));
-        
+
         retval.setPostal_code_other(checkStringPropertyOptional(parameterObject, Parameters.postal_code_other));
-        
+
         retval.setState_other(checkStringPropertyOptional(parameterObject, Parameters.state_other));
-        
+
         retval.setStreet_other(checkStringPropertyOptional(parameterObject, Parameters.street_other));
-        
+
         retval.setSpouse_name(checkStringPropertyOptional(parameterObject, Parameters.spouse_name));
-        
+
         retval.setState_home(checkStringPropertyOptional(parameterObject, Parameters.state_home));
-        
+
         retval.setStreet_home(checkStringPropertyOptional(parameterObject, Parameters.street_home));
-        
+
         retval.setSuffix(checkStringPropertyOptional(parameterObject, Parameters.suffix));
 
         retval.setTax_id(checkStringPropertyOptional(parameterObject, Parameters.tax_id));
-        
+
         retval.setTelephone_telex(checkStringPropertyOptional(parameterObject, Parameters.telephone_telex));
-        
+
         retval.setTelephone_ttytdd(checkStringPropertyOptional(parameterObject, Parameters.telephone_ttytdd));
-        
+
         retval.setUrl(checkStringPropertyOptional(parameterObject, Parameters.url));
-        
+
         retval.setUserfield01(checkStringPropertyOptional(parameterObject, Parameters.userfield01));
-        
+
         retval.setUserfield02(checkStringPropertyOptional(parameterObject, Parameters.userfield02));
-        
+
         retval.setUserfield03(checkStringPropertyOptional(parameterObject, Parameters.userfield03));
-        
+
         retval.setUserfield04(checkStringPropertyOptional(parameterObject, Parameters.userfield04));
-        
+
         retval.setUserfield05(checkStringPropertyOptional(parameterObject, Parameters.userfield05));
-        
+
         retval.setUserfield06(checkStringPropertyOptional(parameterObject, Parameters.userfield06));
-        
+
         retval.setUserfield07(checkStringPropertyOptional(parameterObject, Parameters.userfield07));
-        
+
         retval.setUserfield08(checkStringPropertyOptional(parameterObject, Parameters.userfield08));
-        
+
         retval.setUserfield09(checkStringPropertyOptional(parameterObject, Parameters.userfield09));
-        
+
         retval.setUserfield10(checkStringPropertyOptional(parameterObject, Parameters.userfield10));
-        
+
         retval.setUserfield10(checkStringPropertyOptional(parameterObject, Parameters.userfield10));
-        
+
         retval.setUserfield11(checkStringPropertyOptional(parameterObject, Parameters.userfield11));
-        
+
         retval.setUserfield12(checkStringPropertyOptional(parameterObject, Parameters.userfield12));
-        
+
         retval.setUserfield13(checkStringPropertyOptional(parameterObject, Parameters.userfield13));
-        
+
         retval.setUserfield14(checkStringPropertyOptional(parameterObject, Parameters.userfield14));
-        
+
         retval.setUserfield15(checkStringPropertyOptional(parameterObject, Parameters.userfield15));
-        
+
         retval.setUserfield16(checkStringPropertyOptional(parameterObject, Parameters.userfield16));
-        
+
         retval.setUserfield17(checkStringPropertyOptional(parameterObject, Parameters.userfield17));
-        
+
         retval.setUserfield18(checkStringPropertyOptional(parameterObject, Parameters.userfield18));
-        
+
         retval.setUserfield19(checkStringPropertyOptional(parameterObject, Parameters.userfield19));
-        
+
         retval.setUserfield20(checkStringPropertyOptional(parameterObject, Parameters.userfield20));
-        
+
         retval.setCity_business(checkStringPropertyOptional(parameterObject, Parameters.city_business));
-        
+
         retval.setCountry_business(checkStringPropertyOptional(parameterObject, Parameters.country_business));
-        
+
         retval.setAssistant_name(checkStringPropertyOptional(parameterObject, Parameters.assistant_name));
-        
+
         retval.setTelephone_primary(checkStringPropertyOptional(parameterObject, Parameters.telephone_primary));
-        
+
         retval.setCategories(checkStringPropertyOptional(parameterObject, Parameters.categories));
-        
+
         retval.setDefaultaddress(checkStringPropertyOptional(parameterObject, Parameters.defaultaddress));
-        
+
         retval.setTitle(checkStringPropertyOptional(parameterObject, Parameters.title));
 
         retval.setPosition(checkStringPropertyOptional(parameterObject, Parameters.position));
-        
+
         retval.setLastmodified(checkStringPropertyOptional(parameterObject, Parameters.lastmodified));
-        
+
         retval.setCreationdate(checkStringPropertyOptional(parameterObject, Parameters.creationdate));
 
         retval.setUniqueid(checkStringPropertyOptional(parameterObject, Parameters.uniqueid));
@@ -484,8 +484,8 @@ public class Mappings {
         return retval;
     }
 
-    
-    
+
+
     public static class CheckStringPropertyParameter {
 
         private Properties m_props;
@@ -537,92 +537,92 @@ public class Mappings {
         return assistant_name;
     }
 
-    
+
     public final String getBirthday() {
         return birthday;
     }
 
-    
+
     public final String getBranches() {
         return branches;
     }
 
-    
+
     public final String getBusiness_category() {
         return business_category;
     }
 
-    
+
     public final String getCategories() {
         return categories;
     }
 
-    
+
     public final String getCellular_telephone1() {
         return cellular_telephone1;
     }
 
-    
+
     public final String getCellular_telephone2() {
         return cellular_telephone2;
     }
 
-    
+
     public final String getCity_business() {
         return city_business;
     }
 
-    
+
     public final String getCity_home() {
         return city_home;
     }
 
-    
+
     public final String getCity_other() {
         return city_other;
     }
 
-    
+
     public final String getCommercial_register() {
         return commercial_register;
     }
 
-    
+
     public final String getCompany() {
         return company;
     }
 
-    
+
     public final String getCountry_business() {
         return country_business;
     }
 
-    
+
     public final String getCountry_home() {
         return country_home;
     }
 
-    
+
     public final String getCountry_other() {
         return country_other;
     }
 
-    
+
     public final String getCreationdate() {
         return creationdate;
     }
 
-    
+
     public final String getDefaultaddress() {
         return defaultaddress;
     }
 
-    
+
     public final String getDepartment() {
         return department;
     }
 
-    
+
     public final String getDisplayname() {
         return displayname;
     }
@@ -649,372 +649,372 @@ public class Mappings {
         return email1;
     }
 
-    
+
     public final String getEmail2() {
         return email2;
     }
 
-    
+
     public final String getEmail3() {
         return email3;
     }
 
-    
+
     public final String getEmployeetype() {
         return employeetype;
     }
 
-    
+
     public final String getFax_business() {
         return fax_business;
     }
 
-    
+
     public final String getFax_home() {
         return fax_home;
     }
 
-    
+
     public final String getFax_other() {
         return fax_other;
     }
 
-    
+
     public final String getGivenname() {
         return givenname;
     }
 
-    
+
     public final String getInfo() {
         return info;
     }
 
-    
+
     public final String getInstant_messenger1() {
         return instant_messenger1;
     }
 
-    
+
     public final String getInstant_messenger2() {
         return instant_messenger2;
     }
 
-    
+
     public final String getLastmodified() {
         return lastmodified;
     }
 
-    
+
     public final String getManager_name() {
         return manager_name;
     }
 
-    
+
     public final String getMarital_status() {
         return marital_status;
     }
 
-    
+
     public final String getMiddle_name() {
         return middle_name;
     }
 
-    
+
     public final String getNickname() {
         return nickname;
     }
 
-    
+
     public final String getNote() {
         return note;
     }
 
-    
+
     public final String getNumber_of_children() {
         return number_of_children;
     }
 
-    
+
     public final String getNumber_of_employee() {
         return number_of_employee;
     }
 
-    
+
     public final String getPosition() {
         return position;
     }
 
-    
+
     public final String getPostal_code_business() {
         return postal_code_business;
     }
 
-    
+
     public final String getPostal_code_home() {
         return postal_code_home;
     }
 
-    
+
     public final String getPostal_code_other() {
         return postal_code_other;
     }
 
-    
+
     public final String getProfession() {
         return profession;
     }
 
-    
+
     public final String getRoom_number() {
         return room_number;
     }
 
-    
+
     public final String getSales_volume() {
         return sales_volume;
     }
 
-    
+
     public final String getSpouse_name() {
         return spouse_name;
     }
 
-    
+
     public final String getState_business() {
         return state_business;
     }
 
-    
+
     public final String getState_home() {
         return state_home;
     }
 
-    
+
     public final String getState_other() {
         return state_other;
     }
 
-    
+
     public final String getStreet_business() {
         return street_business;
     }
 
-    
+
     public final String getStreet_home() {
         return street_home;
     }
 
-    
+
     public final String getStreet_other() {
         return street_other;
     }
 
-    
+
     public final String getSuffix() {
         return suffix;
     }
 
-    
+
     public final String getSurname() {
         return surname;
     }
 
-    
+
     public final String getTax_id() {
         return tax_id;
     }
 
-    
+
     public final String getTelephone_assistant() {
         return telephone_assistant;
     }
 
-    
+
     public final String getTelephone_business1() {
         return telephone_business1;
     }
 
-    
+
     public final String getTelephone_business2() {
         return telephone_business2;
     }
 
-    
+
     public final String getTelephone_callback() {
         return telephone_callback;
     }
 
-    
+
     public final String getTelephone_car() {
         return telephone_car;
     }
 
-    
+
     public final String getTelephone_company() {
         return telephone_company;
     }
 
-    
+
     public final String getTelephone_home1() {
         return telephone_home1;
     }
 
-    
+
     public final String getTelephone_home2() {
         return telephone_home2;
     }
 
-    
+
     public final String getTelephone_ip() {
         return telephone_ip;
     }
 
-    
+
     public final String getTelephone_isdn() {
         return telephone_isdn;
     }
 
-    
+
     public final String getTelephone_other() {
         return telephone_other;
     }
 
-    
+
     public final String getTelephone_pager() {
         return telephone_pager;
     }
 
-    
+
     public final String getTelephone_primary() {
         return telephone_primary;
     }
 
-    
+
     public final String getTelephone_radio() {
         return telephone_radio;
     }
 
-    
+
     public final String getTelephone_telex() {
         return telephone_telex;
     }
 
-    
+
     public final String getTelephone_ttytdd() {
         return telephone_ttytdd;
     }
 
-    
+
     public final String getTitle() {
         return title;
     }
 
-    
+
     public final String getUniqueid() {
         return uniqueid;
     }
 
-    
+
     public final String getUrl() {
         return url;
     }
 
-    
+
     public final String getUserfield01() {
         return userfield01;
     }
 
-    
+
     public final String getUserfield02() {
         return userfield02;
     }
 
-    
+
     public final String getUserfield03() {
         return userfield03;
     }
 
-    
+
     public final String getUserfield04() {
         return userfield04;
     }
 
-    
+
     public final String getUserfield05() {
         return userfield05;
     }
 
-    
+
     public final String getUserfield06() {
         return userfield06;
     }
 
-    
+
     public final String getUserfield07() {
         return userfield07;
     }
 
-    
+
     public final String getUserfield08() {
         return userfield08;
     }
 
-    
+
     public final String getUserfield09() {
         return userfield09;
     }
 
-    
+
     public final String getUserfield10() {
         return userfield10;
     }
 
-    
+
     public final String getUserfield11() {
         return userfield11;
     }
 
-    
+
     public final String getUserfield12() {
         return userfield12;
     }
 
-    
+
     public final String getUserfield13() {
         return userfield13;
     }
 
-    
+
     public final String getUserfield14() {
         return userfield14;
     }
 
-    
+
     public final String getUserfield15() {
         return userfield15;
     }
 
-    
+
     public final String getUserfield16() {
         return userfield16;
     }
 
-    
+
     public final String getUserfield17() {
         return userfield17;
     }
 
-    
+
     public final String getUserfield18() {
         return userfield18;
     }
 
-    
+
     public final String getUserfield19() {
         return userfield19;
     }
 
-    
+
     public final String getUserfield20() {
         return userfield20;
     }

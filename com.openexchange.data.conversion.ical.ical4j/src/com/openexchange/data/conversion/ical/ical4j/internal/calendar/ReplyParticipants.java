@@ -70,7 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link ReplyParticipants}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ReplyParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
@@ -84,9 +84,9 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
             super.emit(index, cObj, component, warnings, ctx, args);
             return;
         }
-        
+
         final ITipContainer iTip = (ITipContainer) args[0];
-        
+
         for (final UserParticipant p : cObj.getUsers()) {
             if (p.getType() == Participant.USER) {
                 if (p.getIdentifier() == iTip.getUserId()) {
@@ -112,18 +112,18 @@ public class ReplyParticipants<T extends CalendarComponent, U extends CalendarOb
             default:
                 break;
             }
-            
+
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
             LOG.error(e);
         }
-        
+
         if (userParticipant.getConfirmMessage() != null && !userParticipant.getConfirmMessage().equals("")) {
             final Comment comment = new Comment();
             comment.setValue(userParticipant.getConfirmMessage());
             component.getProperties().add(comment);
         }
-        
+
     }
 
 }

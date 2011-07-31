@@ -62,7 +62,7 @@ public interface QueuedAction<I> {
 
     /**
      * Performs this queued action.
-     * 
+     *
      * @param sqlInterface The SQL interface
      * @param os The output stream
      * @param user The user ID

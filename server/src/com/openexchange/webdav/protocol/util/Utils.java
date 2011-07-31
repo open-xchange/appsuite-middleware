@@ -57,9 +57,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.tools.TimeZoneUtils;
 
 public class Utils {
-	
+
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utils.class));
-	
+
 	// Taken from slide
 	/**
      * The set of SimpleDateFormat formats to use in getDateHeader().
@@ -73,12 +73,12 @@ public class Utils {
          new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US),
          new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'", Locale.US)
     };
-    
+
     private static final SimpleDateFormat output_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
     static {
         output_format.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
     }
-    
+
 	public static Date convert(final String s) {
 		if(s == null) {
 			return null;
@@ -99,7 +99,7 @@ public class Utils {
         }
         return date;
 	}
-	
+
 	public static String convert(final Date d) {
 		if(d == null) {
 			return null;

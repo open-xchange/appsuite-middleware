@@ -65,17 +65,17 @@ import com.openexchange.tools.session.ServerSession;
 public class ThreadLocalSessionHolder implements SessionHolder {
 
     private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
-    
+
     private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
     public void setSession(ServerSession serverSession) {
         session.set(serverSession);
     }
-    
+
     public void clear() {
         session.remove();
     }
-    
+
     @Override
     public Context getContext() {
         return session.get().getContext();

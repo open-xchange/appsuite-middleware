@@ -75,15 +75,15 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AJAXServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));   
-    
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
+
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 
     /**
@@ -116,11 +116,11 @@ public abstract class AJAXServlet extends HttpServlet {
             if (sessionId == null) {
                 throw OXMailfilterExceptionCode.MISSING_PARAMETER.create("session");
             }
-            
+
             final SessiondService service = MailFilterServletServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (null == service) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-            }            
+            }
             final Session session = service.getSession(sessionId);
             if (null == session) {
                 throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
@@ -131,7 +131,7 @@ public abstract class AJAXServlet extends HttpServlet {
             if (!session.getSecret().equals(secret)) {
                 throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
-            
+
             final AbstractRequest request = createRequest();
             request.setSession(session);
 
@@ -189,10 +189,10 @@ public abstract class AJAXServlet extends HttpServlet {
             if (!session.getSecret().equals(secret)) {
                 throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
             }
-            
+
             final AbstractRequest request = createRequest();
             request.setSession(session);
-            
+
             request.setParameters(new AbstractRequest.Parameters() {
                 public String getParameter(final Parameter param) throws OXException {
                     final String value = req.getParameter(param.getName());

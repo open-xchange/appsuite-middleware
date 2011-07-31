@@ -62,7 +62,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link ImageSessionEventHandler} - The {@link EventHandler event handler} for the ImageRegistry to remove ImageId-SessionId mappings after session removal.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public final class ImageSessionEventHandler implements EventHandler {
@@ -93,7 +93,7 @@ public final class ImageSessionEventHandler implements EventHandler {
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
                 imageService.removeImageData(session);
-                
+
                 if (DEBUG) {
                     LOG.debug("Removed image mappings for session " + session.getSessionID() + ".");
                 }
@@ -101,13 +101,13 @@ public final class ImageSessionEventHandler implements EventHandler {
                 // A session container was removed
                 @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer =
                     (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                
+
                 final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
-                
+
                 // For each session
                 for (final Session session : sessionContainer.values()) {
                     imageService.removeImageData(session);
-                    
+
                     if (DEBUG) {
                         LOG.debug("Removed image mappings for session " + session.getSessionID() + ".");
                     }

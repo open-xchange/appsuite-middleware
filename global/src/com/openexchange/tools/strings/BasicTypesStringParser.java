@@ -83,7 +83,7 @@ public class BasicTypesStringParser implements StringParser {
         } catch (NumberFormatException x) {
             return null;
         }
-        
+
         return null;
     }
 

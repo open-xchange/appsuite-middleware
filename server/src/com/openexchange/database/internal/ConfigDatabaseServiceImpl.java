@@ -103,7 +103,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         }
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write || forceWriteOnly);
-        
+
     }
 
     private void back(final Connection con, final boolean write) {

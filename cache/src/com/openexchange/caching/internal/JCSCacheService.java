@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JCSCacheService} - Cache service implementation through JCS cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCacheService implements CacheService {
@@ -69,7 +69,7 @@ public final class JCSCacheService implements CacheService {
 
     /**
      * Gets the singleton instance of JCS cache service
-     * 
+     *
      * @return The singleton instance of JCS cache service
      */
     public static JCSCacheService getInstance() {

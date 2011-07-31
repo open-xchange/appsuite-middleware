@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 /**
  * Grabs events from the OSGi Event Admin and disseminates them to server listeners. Only handles appointments, and has to be extended once
  * needed.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {

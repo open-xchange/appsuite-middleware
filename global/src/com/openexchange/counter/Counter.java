@@ -59,7 +59,7 @@ public interface Counter {
 
     /**
      * Gets the current count.
-     * 
+     *
      * @return The count
      */
     int getCount();

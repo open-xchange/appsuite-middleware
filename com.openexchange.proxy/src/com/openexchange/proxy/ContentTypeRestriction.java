@@ -60,7 +60,7 @@ import java.util.regex.Pattern;
  * <p>
  * It is allowed to specify certain values like <code>"text/plain"</code> or <code>"image/jpeg"</code>, but wild-card patterns are
  * supported, too: <code>"text/*"</code> or <code>"text/htm*"</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentTypeRestriction implements Restriction {
@@ -77,7 +77,7 @@ public class ContentTypeRestriction implements Restriction {
 
     /**
      * Initializes a new {@link ContentTypeRestriction}.
-     * 
+     *
      * @param contentTypes The allowed content types
      */
     public ContentTypeRestriction(final Set<String> contentTypes) {
@@ -94,7 +94,7 @@ public class ContentTypeRestriction implements Restriction {
 
     /**
      * Initializes a new {@link ContentTypeRestriction}.
-     * 
+     *
      * @param contentTypes The allowed content types
      */
     public ContentTypeRestriction(final String... contentTypes) {
@@ -139,7 +139,7 @@ public class ContentTypeRestriction implements Restriction {
 
     /**
      * Checks if specified string contains any of the wild-card characters <code>'*'</code> or <code>'?'</code>.
-     * 
+     *
      * @param toCheck The string to check
      * @return <code>true</code> if specified string contains any wild-card character; otherwise <code>false</code>
      */
@@ -149,7 +149,7 @@ public class ContentTypeRestriction implements Restriction {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

@@ -56,7 +56,7 @@ import java.nio.ByteBuffer;
 
 /**
  * {@link ByteBuffers} - Utility methods for {@link ByteBuffer} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ByteBuffers {
@@ -70,7 +70,7 @@ public final class ByteBuffers {
 
     /**
      * Creates a new output stream for specified {@link ByteBuffer byte buffer}.
-     * 
+     *
      * @param buf The byte buffer from which the output stream shall be created
      * @return The newly created output stream
      */
@@ -91,7 +91,7 @@ public final class ByteBuffers {
 
     /**
      * Creates a new unsynchronized output stream for specified {@link ByteBuffer byte buffer}.
-     * 
+     *
      * @param buf The byte buffer from which the unsynchronized output stream shall be created
      * @return The newly created unsynchronized output stream
      */
@@ -112,7 +112,7 @@ public final class ByteBuffers {
 
     /**
      * Gets a new input stream for specified {@link ByteBuffer byte buffer}.
-     * 
+     *
      * @param buf The byte buffer for which the input stream shall be created
      * @return The newly created input stream
      */
@@ -138,7 +138,7 @@ public final class ByteBuffers {
 
     /**
      * Gets a new unsynchronized input stream for specified {@link ByteBuffer byte buffer}.
-     * 
+     *
      * @param buf The byte buffer for which the unsynchronized input stream shall be created
      * @return The newly created unsynchronized input stream
      */

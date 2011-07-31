@@ -76,7 +76,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link SharedPrefixFolder} - Gets the folder whose identifier starts with shared prefix.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SharedPrefixFolder {
@@ -130,7 +130,7 @@ public final class SharedPrefixFolder {
     /**
      * Checks existence of specified folder identifier starting with shared prefix; meaning folder's owner shared at least one folder to
      * given user.
-     * 
+     *
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
      * @param userConfiguration The user configuration
@@ -162,7 +162,7 @@ public final class SharedPrefixFolder {
 
     /**
      * Gets the folder whose identifier starts with shared prefix.
-     * 
+     *
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
      * @param ctx The context
@@ -200,7 +200,7 @@ public final class SharedPrefixFolder {
 
     /**
      * Gets the folder whose identifier starts with shared prefix.
-     * 
+     *
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
      * @param userConfiguration The user configuration
@@ -252,10 +252,10 @@ public final class SharedPrefixFolder {
         }
         return ret.toNativeArray();
     }
- 
+
     /**
      * Gets the folder whose identifier starts with shared prefix.
-     * 
+     *
      * @param folderIdentifier The folder identifier starting with shared prefix
      * @param user The user
      * @param userConfiguration The user configuration

@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DelegateEventHandler} - The event handler delegating incoming events with topic <b><code>"remote/*"</code></b> to message service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegateEventHandler implements EventHandler {

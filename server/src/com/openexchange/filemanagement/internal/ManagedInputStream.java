@@ -60,7 +60,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ManagedInputStream} - A managed input stream which spools data to disk if necessary.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedInputStream extends InputStream {
@@ -77,7 +77,7 @@ public final class ManagedInputStream extends InputStream {
 
     /**
      * Initializes a new {@link ManagedInputStream} from specified bytes with default capacity of <code>1048576</code> (1 MB).
-     * 
+     *
      * @param bytes The bytes held by this input stream
      * @param management The file management possibly used
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
@@ -88,7 +88,7 @@ public final class ManagedInputStream extends InputStream {
 
     /**
      * Initializes a new {@link ManagedInputStream} from specified bytes.
-     * 
+     *
      * @param bytes The bytes held by this input stream
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @param management The file management possibly used
@@ -108,7 +108,7 @@ public final class ManagedInputStream extends InputStream {
     /**
      * Initializes a new {@link ManagedInputStream} from specified input stream with default capacity of <code>1048576</code> (1 MB) and
      * unknown stream size.
-     * 
+     *
      * @param in The input stream to manage
      * @param management The file management possibly used
      * @throws OXException If an appropriate managed file cannot be created.
@@ -119,7 +119,7 @@ public final class ManagedInputStream extends InputStream {
 
     /**
      * Initializes a new {@link ManagedInputStream} from specified input stream with unknown stream size.
-     * 
+     *
      * @param in The input stream to manage
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @param management The file management possibly used
@@ -131,7 +131,7 @@ public final class ManagedInputStream extends InputStream {
 
     /**
      * Initializes a new {@link ManagedInputStream} from specified input stream.
-     * 
+     *
      * @param in The input stream to manage
      * @param size The stream's size; leave to <code>-1</code> if unknown
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
@@ -228,7 +228,7 @@ public final class ManagedInputStream extends InputStream {
 
         /**
          * Initializes a new {@link CombinedInputStream}.
-         * 
+         *
          * @param consumed The bytes already consumed from <code>remaining</code> input stream
          * @param remaining The remaining stream
          */

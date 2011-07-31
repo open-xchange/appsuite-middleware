@@ -55,7 +55,7 @@ import javax.management.MBeanException;
 
 /**
  * {@link GeneralControlMBean} - MBean interface for calls to OSGi framework.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface GeneralControlMBean {
@@ -63,14 +63,14 @@ public interface GeneralControlMBean {
     /**
      * Lists all active bundles while mapping bundle name to the bundle's current state which is one of UNINSTALLED, INSTALLED, RESOLVED,
      * STARTING, STOPPING, or ACTIVE.
-     * 
+     *
      * @return A bundle list
      */
     public List<Map<String, String>> list();
 
     /**
      * Starts the bundle denoted by specified bundle name.
-     * 
+     *
      * @param name The bundle name
      * @throws MBeanException If an appropriate bundle could not be found for given name
      */
@@ -78,7 +78,7 @@ public interface GeneralControlMBean {
 
     /**
      * Stops the bundle denoted by specified bundle name.
-     * 
+     *
      * @param name The bundle name
      * @throws MBeanException If an appropriate bundle could not be found for given name
      */
@@ -87,7 +87,7 @@ public interface GeneralControlMBean {
     /**
      * This a convenience method that just invokes {@link #stop(String)} followed by {@link #start(String)} on the bundle denoted by
      * specified bundle name.
-     * 
+     *
      * @param name The bundle name
      * @throws MBeanException If an appropriate bundle could not be found for given name
      */
@@ -97,14 +97,14 @@ public interface GeneralControlMBean {
      * Installs a bundle from the specified location string. A bundle is obtained from location as interpreted by the OSGi framework in an
      * implementation dependent manner. Every installed bundle is uniquely identified by its location string, typically in the form of a
      * URL.
-     * 
+     *
      * @param local The location identifier of the bundle to install.
      */
     public void install(final String local);
 
     /**
      * Uninstalls the bundle denoted by specified bundle name.
-     * 
+     *
      * @param name The bundle name
      * @throws MBeanException If an appropriate bundle could not be found for given name
      */
@@ -112,7 +112,7 @@ public interface GeneralControlMBean {
 
     /**
      * Updates the bundle denoted by specified bundle name.
-     * 
+     *
      * @param name The bundle name
      * @param autorefresh <code>true</code> to automatically refresh bundles for immediate usage; otherwise <code>false</code>
      * @throws MBeanException If an appropriate bundle could not be found for given name
@@ -134,20 +134,20 @@ public interface GeneralControlMBean {
      * <p>
      * For each registered service its name, the bundle that registered the service and the bundles that are using the service are contained
      * in the map:
-     * 
+     *
      * <pre>
      * &quot;service&quot; -&gt; &lt;service-name&gt;
      * &quot;registered_by&quot; -&gt; &lt;name-of-the-bundle-that-registered-the-service&gt;
      * &quot;bundles&quot; -&gt; &lt;names-of-the-bundles-that-are-using-the-service&gt;
      * </pre>
-     * 
+     *
      * @return A list of available registered services.
      */
     public List<Map<String, Object>> services();
 
     /**
      * Gets the version of the OX groupware.
-     * 
+     *
      * @return The version number.
      */
     public String version();

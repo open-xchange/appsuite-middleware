@@ -60,7 +60,7 @@ public class NOTNULL extends UnaryPredicate {
 	public NOTNULL(String column) {
 		this(new Column(column));
 	}
-	
+
 	@Override
     public void build(IStatementBuilder builder) {
 		builder.buildNOTNULL(this);

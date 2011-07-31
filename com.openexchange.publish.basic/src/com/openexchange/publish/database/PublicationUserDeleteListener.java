@@ -90,11 +90,11 @@ public class PublicationUserDeleteListener implements DeleteListener {
     protected PublicationStorage getStorage(Connection writeCon) {
         return new PublicationSQLStorage(new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS, genConfStorage, discoveryService);
     }
-    
+
     public void setDiscoveryService(PublicationTargetDiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
     }
-    
+
     public void setGenConfStorage(GenericConfigurationStorageService genConfStorage) {
         this.genConfStorage = genConfStorage;
     }

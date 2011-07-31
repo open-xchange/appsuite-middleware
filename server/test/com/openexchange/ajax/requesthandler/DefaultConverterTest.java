@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultConverterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultConverterTest extends TestCase {
@@ -123,7 +123,7 @@ public class DefaultConverterTest extends TestCase {
         converter.addConverter(a);
         converter.addConverter(b);
         converter.addConverter(c);
-        
+
         try {
             converter.getShortestPath("A", "E");
             fail("Huh?!");

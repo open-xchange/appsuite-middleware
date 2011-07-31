@@ -57,7 +57,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
 
 /**
  * {@link XAJPv13RequestBody} - Processes an incoming AJP request body.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13RequestBody extends XAJPv13Request {
@@ -116,7 +116,7 @@ public final class XAJPv13RequestBody extends XAJPv13Request {
 
     /**
      * Initializes a new {@link XAJPv13RequestBody}
-     * 
+     *
      * @param payloadData The body's payload data
      */
     public XAJPv13RequestBody(final ByteBuffer payloadData) {

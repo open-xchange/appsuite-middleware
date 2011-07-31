@@ -56,7 +56,7 @@ import java.util.TimeZone;
 
 /**
  * {@link RenderMap} - A map containing replacements for tokens to render a {@link Template template}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RenderMap implements Cloneable {
@@ -73,7 +73,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Initializes a new {@link RenderMap} from given replacements
-     * 
+     *
      * @param replacements The replacements
      */
     public RenderMap(final TemplateReplacement... replacements) {
@@ -85,7 +85,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Checks if any of the contained {@link TemplateReplacement}s is marked as changed.
-     * 
+     *
      * @return <code>true</code> if any of the contained {@link TemplateReplacement}s is marked as changed; otherwise <code>false</code>
      */
     public boolean containsChanges() {
@@ -106,7 +106,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Returns <code>true</code> if this map contains no token-replacement mappings.
-     * 
+     *
      * @return <code>true</code> if this map contains no token-replacement mappings; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -115,7 +115,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Returns the number of token-replacement mappings in this map.
-     * 
+     *
      * @return The number of token-replacement mappings in this map.
      */
     public int size() {
@@ -125,7 +125,7 @@ public final class RenderMap implements Cloneable {
     /**
      * Associates the specified replacement with the specified token in this map. If the map previously contained a mapping for this token,
      * the old replacement is replaced.
-     * 
+     *
      * @param replacement The replacement to put into this map
      * @return The previous replacement associated with specified token, or <code>null</code> if there was no mapping for token. (A
      *         <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified token.)
@@ -137,7 +137,7 @@ public final class RenderMap implements Cloneable {
     /**
      * Returns the replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      * specified token.
-     * 
+     *
      * @param token The token whose associated value is to be returned
      * @return The replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      *         specified token.
@@ -149,7 +149,7 @@ public final class RenderMap implements Cloneable {
     /**
      * Returns the replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      * specified token.
-     * 
+     *
      * @param tokenStr The token whose associated value is to be returned
      * @return The replacement to which this map maps the specified token, or <code>null</code> if this map contains no mapping for the
      *         specified token.
@@ -164,7 +164,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Returns <code>true</code> if this map contains a mapping for the specified token.
-     * 
+     *
      * @param token The token whose presence in this map is to be tested
      * @return <code>true</code> if this map contains a mapping for the specified token
      */
@@ -174,7 +174,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Returns an iterator over the tokens in this map. The template tokens are returned in no particular order.
-     * 
+     *
      * @return An iterator over the tokens in this map.
      */
     public Iterator<TemplateToken> getKeys() {
@@ -183,7 +183,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Returns an iterator over the replacements in this map. The replacements are returned in no particular order.
-     * 
+     *
      * @return An iterator over the replacements in this map.
      */
     public Iterator<TemplateReplacement> getValues() {
@@ -192,7 +192,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Removes the mapping for specified token from this map if present.
-     * 
+     *
      * @param token The token whose mapping is to be removed from the map
      * @return The previous replacement associated with specified token, or <code>null</code> if there was no entry for token. (A
      *         <code>null</code> return can also indicate that the map previously associated <code>null</code> with the specified token.)
@@ -203,7 +203,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Applies specified changed status to all contained token-replacement mappings.
-     * 
+     *
      * @param changed The changed status to apply
      * @return This render map with specified changed status applied to all contained token-replacement mappings.
      */
@@ -218,7 +218,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Applies specified locale to all contained token-replacement mappings.
-     * 
+     *
      * @param locale The locale to apply
      * @return This render map with specified locale applied to all contained token-replacement mappings.
      */
@@ -233,7 +233,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Applies specified time zone to all contained token-replacement mappings.
-     * 
+     *
      * @param timeZone The time zone to apply
      * @return This render map with specified time zone applied to all contained token-replacement mappings.
      */
@@ -264,7 +264,7 @@ public final class RenderMap implements Cloneable {
 
     /**
      * Merges this render map's token-replacement mappings with specified render map's token-replacement mappings.
-     * 
+     *
      * @param other The other render map to merge with
      * @return This render map merged with specified render map
      */

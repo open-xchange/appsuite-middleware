@@ -113,7 +113,7 @@ public class TaskReminderFolderZero implements UpdateTask {
         private int userid;
         private int folder;
     }
-    
+
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task TaskReminderFolderZero.");
@@ -258,6 +258,6 @@ public class TaskReminderFolderZero implements UpdateTask {
                 + " have been removed.");
         }
         return retval;
-        
+
     }
 }

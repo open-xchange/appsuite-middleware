@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link MailType} - The mail type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailType implements Type {
@@ -62,7 +62,7 @@ public final class MailType implements Type {
 
     /**
      * Gets the {@link MailType} instance.
-     * 
+     *
      * @return The {@link MailType} instance
      */
     public static MailType getInstance() {

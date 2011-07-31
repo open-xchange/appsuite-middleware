@@ -56,16 +56,16 @@ import java.util.Locale;
  * one consistent package. This way, you always know which collation to use for
  * a Java locale or the other way around. Note that the only unique attribute is
  * the mysql collation: Both locales and charsets might occur more than once.
- * 
+ *
  * @author tobiasp
- * 
+ *
  */
 public enum SuperCollator {
-	PRC_1		("PRC", Locale.PRC, "gb2312", "gb2312_chinese_ci"), 
-	PRC_2		("PRC", Locale.PRC, "gbk","gbk_chinese_ci"), 
-	CHINA_TAIWAN("TAIWAN",Locale.TAIWAN, "big5","big5_chinese_ci"), 
-	CHINA_2		("CHINESE", Locale.CHINESE, "gb2312","gb2312_chinese_ci"), 
-	CHINA_3		("CHINA", Locale.CHINA, "gb2312",	"gb2312_chinese_ci"), 
+	PRC_1		("PRC", Locale.PRC, "gb2312", "gb2312_chinese_ci"),
+	PRC_2		("PRC", Locale.PRC, "gbk","gbk_chinese_ci"),
+	CHINA_TAIWAN("TAIWAN",Locale.TAIWAN, "big5","big5_chinese_ci"),
+	CHINA_2		("CHINESE", Locale.CHINESE, "gb2312","gb2312_chinese_ci"),
+	CHINA_3		("CHINA", Locale.CHINA, "gb2312",	"gb2312_chinese_ci"),
 	DEFAULT		("DEFAULT", Locale.getDefault(), "utf8","utf8_general_ci");
 
 	private String collation;
@@ -117,7 +117,7 @@ public enum SuperCollator {
 		if (result != null) {
             return result;
         }
-		
+
 		return result;
 	}
 
@@ -125,7 +125,7 @@ public enum SuperCollator {
 		if(something == null) {
             return null;
         }
-		
+
 		String[] parts = something.split("_");
 
 		String lang = null, country = null, variant = null;
@@ -185,7 +185,7 @@ public enum SuperCollator {
         }
 		return null;
 	}
-	
+
 	public static SuperCollator getByName(String something) {
 		for (SuperCollator loc : values()) {
             if (loc.getName().equalsIgnoreCase(something)) {

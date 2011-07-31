@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingMessageSwitcher}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -62,7 +62,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's identifier and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -71,7 +71,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's folder identifier and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -80,7 +80,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's folder identifier and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -89,7 +89,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's from address and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -98,7 +98,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's To address and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -107,7 +107,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's Cc address and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -116,7 +116,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's Bcc address and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -125,7 +125,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's subject and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -134,7 +134,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's size and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -143,7 +143,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's sent date and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -152,7 +152,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's received date and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -161,7 +161,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's flags and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -170,7 +170,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's thread level and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -179,7 +179,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's disposition notification and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -188,7 +188,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's priority and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -197,7 +197,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's color label and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -206,7 +206,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's accout name and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -215,7 +215,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's body and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -224,7 +224,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's headers and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -233,7 +233,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles all fields of a message and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -242,7 +242,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's picture URI and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs
@@ -251,7 +251,7 @@ public interface MessagingMessageSwitcher {
 
     /**
      * Handles a message's URL and returns switcher's optional value.
-     * 
+     *
      * @param args The arguments for handling
      * @return The switcher's value or <code>null</code>
      * @throws OXException If a messaging error occurs

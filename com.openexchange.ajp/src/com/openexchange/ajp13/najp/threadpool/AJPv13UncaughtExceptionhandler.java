@@ -53,7 +53,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * {@link AJPv13UncaughtExceptionhandler} - The {@link UncaughtExceptionHandler} for AJP threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler {

@@ -53,14 +53,14 @@ import java.net.URI;
 
 public class FilestoreImpl implements Filestore {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -912578396776397210L;
 	private int id;
 	private URI uri;
 	private long size;
 	private long maxContext;
-	
+
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.filestore.Filestore#getId()
 	 */
@@ -101,6 +101,6 @@ public class FilestoreImpl implements Filestore {
 	public void setUri(final URI uri) {
 		this.uri = uri;
 	}
-	
-	
+
+
 }

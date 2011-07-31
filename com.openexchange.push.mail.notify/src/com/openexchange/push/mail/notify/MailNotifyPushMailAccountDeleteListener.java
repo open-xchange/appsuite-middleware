@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 /**
  * {@link MailNotifyPushMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for the push bundle.
  * Defines what actions should be triggered if an account is deleted
- * 
+ *
  */
 public final class MailNotifyPushMailAccountDeleteListener implements MailAccountDeleteListener {
 

@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
  * {@link SetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SetSwitch implements AttributeSwitch {

@@ -61,7 +61,7 @@ import com.openexchange.charset.ModifyCharsetStandardProvider;
 
 /**
  * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {

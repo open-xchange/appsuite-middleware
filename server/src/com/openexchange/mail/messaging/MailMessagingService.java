@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailMessagingService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailMessagingService implements MessagingService {
@@ -71,7 +71,7 @@ public final class MailMessagingService implements MessagingService {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MailMessagingService getInstance() {

@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SearchTerm} - A search term.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -63,21 +63,21 @@ public interface SearchTerm<T> extends Serializable {
 
     /**
      * Gets the pattern to which the expression should match.
-     * 
+     *
      * @return The pattern
      */
     public T getPattern();
 
     /**
      * Adds the addressed MailField to specified collection.
-     * 
+     *
      * @param col The collection which gathers addressed fields
      */
     public void addMessagingField(Collection<MessagingField> col);
 
     /**
      * Checks if given message matches this search term.
-     * 
+     *
      * @param msg The message to check
      * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
      * @throws OXException If check fails

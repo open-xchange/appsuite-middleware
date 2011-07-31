@@ -63,11 +63,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SecretRecoveryServlet extends MultipleAdapterServlet {
-    
+
     public static SecretService secretService;
     public static SecretInconsistencyDetector detector;
     public static SecretMigrator migrator;
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return new SecretRecoveryMultipleHandler(detector, migrator, secretService);

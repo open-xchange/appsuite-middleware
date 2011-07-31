@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ExtensionDetailsAction} - Maps the action to a <tt>extensiondetails</tt> action.
  * <p>
  * A extension details is initiated using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ExtensionDetailsAction extends AbstractVoipNowSOAPAction<ExtensionInterface> {

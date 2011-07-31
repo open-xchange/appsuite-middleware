@@ -55,7 +55,7 @@ import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link MailAccessFullnameProvider} - TODO Short description of this class' purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessFullnameProvider implements DefaultFolderFullnameProvider {
@@ -72,7 +72,7 @@ public final class MailAccessFullnameProvider implements DefaultFolderFullnamePr
 
     /**
      * Initializes a new {@link MailAccessFullnameProvider}.
-     * 
+     *
      * @param mailAccess The connected mail access instance
      */
     public MailAccessFullnameProvider(final MailAccess<?, ?> mailAccess) {

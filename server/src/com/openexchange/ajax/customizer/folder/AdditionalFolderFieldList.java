@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AdditionalFolderFieldList}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -74,7 +74,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Adds an additional folder field to this list.
-     * 
+     *
      * @param field The additional folder field
      */
     public synchronized void addField(final AdditionalFolderField field) {
@@ -93,7 +93,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Gets the additional folder field associated with specified column number.
-     * 
+     *
      * @param col The column number
      * @return The additional folder field associated with specified column number or a neutral <code>null</code> field
      */
@@ -104,7 +104,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Gets known fields.
-     * 
+     *
      * @return The known fields
      */
     public int[] getKnownFields() {
@@ -113,7 +113,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Gets the additional folder field associated with specified column name.
-     * 
+     *
      * @param col The column name
      * @return The additional folder field associated with specified column name or a <code>null</code>
      */
@@ -123,7 +123,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Checks if an additional folder field is associated with specified column number.
-     * 
+     *
      * @param col The column number
      * @return <code>true</code> if an additional folder field is associated with specified column number; otherwise <code>false</code>
      */
@@ -133,7 +133,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Checks if an additional folder field is associated with specified column name.
-     * 
+     *
      * @param col The column name
      * @return <code>true</code> if an additional folder field is associated with specified column name; otherwise <code>false</code>
      */
@@ -143,7 +143,7 @@ public class AdditionalFolderFieldList {
 
     /**
      * Removes the additional folder field associated with specified column number.
-     * 
+     *
      * @param colId The column number
      */
     public synchronized void remove(final int colId) {

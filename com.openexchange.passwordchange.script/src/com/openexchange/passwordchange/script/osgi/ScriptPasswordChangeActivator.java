@@ -60,7 +60,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link ScriptPasswordChangeActivator}
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  */
 public final class ScriptPasswordChangeActivator extends DeferredActivator {

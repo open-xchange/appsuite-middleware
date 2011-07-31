@@ -62,23 +62,23 @@ import com.openexchange.timer.TimerService;
 
 /**
  * ReminderPool - Not used by now.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class ReminderPool implements Runnable {
-	
+
 	private static final Map<String, ReminderEvent> register = new HashMap<String, ReminderEvent>();
 
 	private static final Set<ReminderObject> pool = new HashSet<ReminderObject>();
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderPool.class));
-	
+
 	public ReminderPool(final ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting ReminderPool");
 			}
-			
+
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
 			final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
@@ -91,20 +91,20 @@ public class ReminderPool implements Runnable {
 			}
 		}
 	}
-	
+
 	@Override
     public void run() {
 	    // TODO: Do something useful here
 	}
-	
+
 	public static void addReminderEvent( final ReminderEvent reminderevent, final int module ) {
 		register.put(String.valueOf(module), reminderevent);
 	}
-	
+
 	public static void add( final ReminderObject reminderobject ) {
 		pool.add(reminderobject);
 	}
-	
+
 	public static void remove( final ReminderObject reminderobject ) {
 		pool.remove(reminderobject);
 	}

@@ -66,9 +66,9 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * {@link SpellCheckUserDictTableTask} - Creates the table
  * <i>spellcheck_user_dict</i> used to store user dictionaries.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SpellCheckUserDictTableTask implements UpdateTask {
 
@@ -88,7 +88,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
 	@Override
@@ -98,7 +98,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
 	@Override
@@ -140,7 +140,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 
 	/**
 	 * Check a table's existence
-	 * 
+	 *
 	 * @param tableName
 	 *            The table name to check
 	 * @param dbmd

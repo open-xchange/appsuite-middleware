@@ -78,18 +78,18 @@ import com.openexchange.tools.session.ServerSession;
  * Servlet for doing imports of data like contacts stored in CSV format,
  * contacts stored as VCards or tasks and appointments within an ICAL file.
  *
- * You do a basic POST request uploading a file. A bit different is the 
- * response: Since this servlet works with an AJAX GUI, the upload is 
- * normally targetted at a hidden frame somewhere (not to cause a reload 
- * of the whole GUI) and this frame needs a JavaScript method call to come 
+ * You do a basic POST request uploading a file. A bit different is the
+ * response: Since this servlet works with an AJAX GUI, the upload is
+ * normally targetted at a hidden frame somewhere (not to cause a reload
+ * of the whole GUI) and this frame needs a JavaScript method call to come
  * back from the dead.
  * So the response is a HTML page calling a JavaScript.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a> (development)
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (refactoring, redesign)
  */
 public class ImportServlet extends ImportExport {
-    
+
     private static final long serialVersionUID = 5639598623111215315L;
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImportServlet.class));
     //identifying part of the ajax method that does the callback after the upload
@@ -98,8 +98,8 @@ public class ImportServlet extends ImportExport {
     public ImportServlet() {
         super();
     }
-    
-    @Override 
+
+    @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Response resObj = new Response();
         final List<ImportResult> importResult;

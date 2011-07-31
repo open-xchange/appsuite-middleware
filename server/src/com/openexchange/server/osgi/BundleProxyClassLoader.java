@@ -56,9 +56,9 @@ import org.osgi.framework.Bundle;
 
 /**
  * {@link BundleProxyClassLoader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class BundleProxyClassLoader extends ClassLoader {
 

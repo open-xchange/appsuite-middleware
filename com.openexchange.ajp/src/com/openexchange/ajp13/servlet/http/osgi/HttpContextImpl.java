@@ -58,13 +58,13 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * {@link HttpContextImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpContextImpl implements HttpContext {
 
     /**
-	 * 
+	 *
 	 */
     public HttpContextImpl() {
         super();

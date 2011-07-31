@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link LdapUserFolderCreator}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class LdapUserFolderCreator implements LoginHandlerService {

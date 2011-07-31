@@ -53,42 +53,42 @@ import java.io.Serializable;
 
 /**
  * {@link ElementEventHandler} - Handles several events triggered by cache
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ElementEventHandler extends Serializable {
 
     /**
      * Handle events for this element. The events are typed.
-     * 
+     *
      * @param event The event created by the cache.
      */
     public void handleElementEvent(ElementEvent event);
 
     /**
      * The element exceeded its max life. This was detected in a background cleanup
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onExceededIdletimeBackground(final ElementEvent event);
 
     /**
      * The element exceeded its max life. This was detected on request
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onExceededIdletimeOnRequest(final ElementEvent event);
 
     /**
      * The element exceeded its max idle. This was detected in a background cleanup
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onExceededMaxlifeBackground(final ElementEvent event);
 
     /**
      * The element exceeded its max idle time. This was detected on request
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onExceededMaxlifeOnRequest(final ElementEvent event);
@@ -96,14 +96,14 @@ public interface ElementEventHandler extends Serializable {
     /**
      * The element was pushed out of the memory store, there is a disk store available for the region, and the element is marked as
      * spoolable
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onSpooledDiskAvailable(final ElementEvent event);
 
     /**
      * The element was pushed out of the memory store, and there is not a disk store available for the region
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onSpooledDiskNotAvailable(ElementEvent event);
@@ -111,7 +111,7 @@ public interface ElementEventHandler extends Serializable {
     /**
      * The element was pushed out of the memory store, there is a disk store available for the region, but the element is marked as not
      * spoolable
-     * 
+     *
      * @param event - the element event containing event code and event's source object
      */
     public void onSpooledNotAllowed(ElementEvent event);

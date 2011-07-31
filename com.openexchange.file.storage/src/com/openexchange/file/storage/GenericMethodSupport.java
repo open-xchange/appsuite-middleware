@@ -53,7 +53,7 @@ import java.util.Date;
 
 /**
  * {@link GenericMethodSupport}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GenericMethodSupport {

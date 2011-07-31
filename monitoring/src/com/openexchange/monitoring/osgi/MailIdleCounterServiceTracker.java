@@ -57,14 +57,14 @@ import com.openexchange.monitoring.MonitoringInfo;
 
 /**
  * {@link MailIdleCounterServiceTracker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailIdleCounterServiceTracker extends ServiceTracker {
 
     /**
      * Initializes a new {@link MailIdleCounterServiceTracker}.
-     * 
+     *
      * @param context The bundle context
      */
     public MailIdleCounterServiceTracker(final BundleContext context) {

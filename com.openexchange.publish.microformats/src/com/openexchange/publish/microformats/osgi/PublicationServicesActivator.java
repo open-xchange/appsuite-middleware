@@ -82,10 +82,10 @@ public class PublicationServicesActivator implements BundleActivator {
         contactPublisher.setTargetDisplayName(FormStrings.TARGET_NAME_CONTACTS);
         contactPublisher.setTargetId("com.openexchange.publish.microformats.contacts.online");
         contactPublisher.setDefaultTemplateName("contacts.tmpl");
-        
+
         Map<String, Object> additionalVars = new HashMap<String, Object>();
         additionalVars.put("utils", new ContactTemplateUtils());
-        
+
         MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
         ContactPictureServlet.setContactPublisher(contactPublisher);
 
@@ -113,7 +113,7 @@ public class PublicationServicesActivator implements BundleActivator {
             registration.unregister();
         }
     }
-    
+
     public void setTemplateService(TemplateService templateService) {
         infostorePublisher.setTemplateService(templateService);
         contactPublisher.setTemplateService(templateService);

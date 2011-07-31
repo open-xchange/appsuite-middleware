@@ -60,7 +60,7 @@ import java.util.Set;
 
 /**
  * {@link DynamicFormDescription}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DynamicFormDescription implements Iterable<FormElement> {

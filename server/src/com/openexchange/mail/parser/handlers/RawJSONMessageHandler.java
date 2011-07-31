@@ -93,7 +93,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link RawJSONMessageHandler} - Generates a raw JSON message representation without any user-sensitive data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RawJSONMessageHandler implements MailMessageHandler {
@@ -129,7 +129,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link RawJSONMessageHandler}.
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @throws OXException If JSON message handler cannot be initialized
@@ -143,7 +143,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link RawJSONMessageHandler}.
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -712,7 +712,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         /*-
-         * 
+         *
         if (false && !textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             String charset = part.getContentType().getCharsetParameter();
             if (null == charset) {
@@ -809,7 +809,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets the filled instance of {@link JSONObject}
-     * 
+     *
      * @return The filled instance of {@link JSONObject}
      */
     public JSONObject getJSONObject() {
@@ -818,7 +818,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets mail path.
-     * 
+     *
      * @return The mail path
      */
     public MailPath getMailPath() {

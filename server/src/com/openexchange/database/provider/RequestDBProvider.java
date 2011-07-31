@@ -73,7 +73,7 @@ public class RequestDBProvider implements DBProvider {
         public Connection readConnection;
         public Context ctx;
         public boolean transactional;
-        
+
         List<Throwable> readConnectionStacks = new ArrayList<Throwable>();
         public boolean autoCommit;
 
@@ -85,54 +85,54 @@ public class RequestDBProvider implements DBProvider {
             }
         }
     }
-    
+
     private final ThreadLocal<Integer> readCount = new ThreadLocal<Integer>(){
 
         @Override
         protected final Integer initialValue() {
             return 0;
         }
-        
+
     };
-    
-        
+
+
     public RequestDBProvider(){}
-    
+
     public RequestDBProvider(final DBProvider provider) {
         setProvider(provider);
     }
-    
+
     private boolean transactional;
-    
+
     private DBProvider provider;
 
     public DBProvider getProvider() {
         return this.provider;
     }
-    
+
     public void setProvider(final DBProvider provider){
         this.provider = provider;
     }
 
-    
+
     // Service
-    
+
     public void startTransaction() throws OXException {
         final DBTransaction tx = createTransaction();
         tx.transactional = transactional;
         tx.commit = commits;
         txIds.set(tx);
     }
-    
+
     public void commit() throws OXException{
         checkThreadDeath();
         commit(getActiveTransaction());
     }
-    
+
     private void checkThreadDeath() {
         /*-
          * TODO:
-         * 
+         *
         final Thread current = Thread.currentThread();
         if (current instanceof AJPv13ListenerThread) {
             final AJPv13ListenerThread ajpv13Thread = (AJPv13ListenerThread) current;
@@ -147,9 +147,9 @@ public class RequestDBProvider implements DBProvider {
                 } catch (final OXException x) {
                     LOG.debug("",x);
                 }
-                
+
                 throw new ThreadDeath();
-                
+
             }
         }
         */
@@ -158,14 +158,14 @@ public class RequestDBProvider implements DBProvider {
     public void rollback() throws OXException{
         rollback(getActiveTransaction());
     }
-    
+
     protected DBTransaction getActiveTransaction(){
         return txIds.get();
     }
-    
+
     // Abstract Service
-    
-    
+
+
     protected DBTransaction createTransaction() {
         final DBTransaction tx = new DBTransaction();
         return tx;
@@ -175,7 +175,7 @@ public class RequestDBProvider implements DBProvider {
         try {
             if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
                 if(tx.commit) {
-                    tx.writeConnection.commit();                        
+                    tx.writeConnection.commit();
                 }
             }
         } catch (final SQLException e) {
@@ -198,7 +198,7 @@ public class RequestDBProvider implements DBProvider {
             throw com.openexchange.database.DBPoolingExceptionCodes.SQL_ERROR.create(e);
         }
     }
-    
+
     @Override
     public Connection getReadConnection(final Context ctx) throws OXException{
         checkThreadDeath();
@@ -218,7 +218,7 @@ public class RequestDBProvider implements DBProvider {
             readCount.set(rc);
             return tx.readConnection;
         }
-        
+
         final Connection readCon = getProvider().getReadConnection(ctx);
         if(LOG.isDebugEnabled()) {
             LOG.debug("---> "+readCon);
@@ -233,7 +233,7 @@ public class RequestDBProvider implements DBProvider {
         }
         return readCon;
     }
-    
+
     @Override
     public Connection getWriteConnection(final Context ctx) throws OXException{
         checkThreadDeath();
@@ -262,7 +262,7 @@ public class RequestDBProvider implements DBProvider {
         }
         return tx.writeConnection;
     }
-    
+
     @Override
     public void releaseReadConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
@@ -292,9 +292,9 @@ public class RequestDBProvider implements DBProvider {
             LOG.debug("<--- "+con);
         }
         getProvider().releaseReadConnection(ctx,con);
-        
+
     }
-    
+
     @Override
     public void releaseWriteConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
@@ -302,7 +302,7 @@ public class RequestDBProvider implements DBProvider {
             getProvider().releaseWriteConnection(ctx, con);
         }
     }
-    
+
     public void finish() throws OXException {
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {
@@ -334,11 +334,11 @@ public class RequestDBProvider implements DBProvider {
             }
         }
     }
-    
+
     public void setTransactional(final boolean transactional) {
         this.transactional = transactional;
     }
-    
+
     public boolean isTransactional(){
         final DBTransaction tx = getActiveTransaction();
         if(tx != null && tx.transactional) {
@@ -346,7 +346,7 @@ public class RequestDBProvider implements DBProvider {
         }
         return this.transactional;
     }
-    
+
     public void setRequestTransactional(final boolean transactional) {
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {

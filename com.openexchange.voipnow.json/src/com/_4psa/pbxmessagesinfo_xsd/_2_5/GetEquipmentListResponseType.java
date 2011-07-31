@@ -11,11 +11,11 @@ import com._4psa.extensiondata_xsd._2_5.Equipments;
 
 /**
  * Get equipment list: response data
- * 
+ *
  * <p>Java class for GetEquipmentListResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetEquipmentListResponseType">
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com._4psa.extensiondata_xsd._2_5.Equipments;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetEquipmentListResponseType", propOrder = {
@@ -40,25 +40,25 @@ public class GetEquipmentListResponseType {
 
     /**
      * Gets the value of the equipment property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the equipment property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getEquipment().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Equipments }
-     * 
-     * 
+     *
+     *
      */
     public List<Equipments> getEquipment() {
         if (equipment == null) {

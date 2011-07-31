@@ -13,11 +13,11 @@ import com._4psa.extensionmessages_xsd._2_5.AddExtensionResponse;
 
 /**
  * Get detailed extension data: response type
- * 
+ *
  * <p>Java class for GetExtensionDetailsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetExtensionDetailsResponseType">
  *   &lt;complexContent>
@@ -46,8 +46,8 @@ import com._4psa.extensionmessages_xsd._2_5.AddExtensionResponse;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetExtensionDetailsResponseType", propOrder = {
@@ -71,11 +71,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Gets the value of the extensionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionType() {
         return extensionType;
@@ -83,11 +83,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Sets the value of the extensionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionType(String value) {
         this.extensionType = value;
@@ -95,11 +95,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Gets the value of the extensionNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionNo() {
         return extensionNo;
@@ -107,11 +107,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Sets the value of the extensionNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionNo(String value) {
         this.extensionNo = value;
@@ -119,11 +119,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -131,11 +131,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -143,11 +143,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -155,11 +155,11 @@ public class GetExtensionDetailsResponseType
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;

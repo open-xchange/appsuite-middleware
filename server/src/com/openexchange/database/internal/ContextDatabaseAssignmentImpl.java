@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {

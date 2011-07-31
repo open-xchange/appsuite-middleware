@@ -65,7 +65,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link TNEF2ICalUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TNEF2ICalUtility {
@@ -79,7 +79,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Gets the valid email address from given string
-     * 
+     *
      * @param s The string which is possibly an email address
      * @return The valid email address or <code>null</code>
      */
@@ -107,7 +107,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Generates an appropriate {@link DateTime} instance from given date.
-     * 
+     *
      * @param date The date
      * @return The {@link DateTime} instance
      */
@@ -122,7 +122,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Generates an appropriate {@link DateTime} instance from given date.
-     * 
+     *
      * @param date The date
      * @param tzid The optional time zone identifier; may be <code>null</code>
      * @return The {@link DateTime} instance
@@ -186,7 +186,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Extracts the substring from specified position with guiven length.
-     * 
+     *
      * @param s The string to extract from
      * @param pos The position
      * @param len The length
@@ -210,7 +210,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Gets the <i>n</i> leftmost characters from specified string.
-     * 
+     *
      * @param s The string
      * @param n The number of leftmost characters
      * @return The string with <i>n</i> leftmost characters
@@ -230,7 +230,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Removes specified characters from given string.
-     * 
+     *
      * @param s The string
      * @param chars The characters to remove
      * @return The string with characters removed
@@ -254,7 +254,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Checks if given string is empty.
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */
@@ -276,7 +276,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Finds a property by ID.
-     * 
+     *
      * @param <V> The return type to cast to
      * @param id The property ID
      * @param mapiProps The MAPI properties to search in
@@ -289,7 +289,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Finds a property by ID.
-     * 
+     *
      * @param <V> The return type to cast to
      * @param id The property ID
      * @param fallback The fallback if missing
@@ -304,7 +304,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Finds a property by ID.
-     * 
+     *
      * @param id The property ID
      * @param mapiProps The MAPI properties to search in
      * @return The string of found property's value or <code>null</code>
@@ -316,7 +316,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Finds a property by ID.
-     * 
+     *
      * @param id The property ID
      * @param fallback The fallback if missing
      * @param mapiProps The MAPI properties to search in
@@ -330,7 +330,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Find property by name.
-     * 
+     *
      * @param name The name
      * @param mapiProps The MAPI properties to search in
      * @return The string of found property's value or <code>null</code>
@@ -342,7 +342,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Find property by name.
-     * 
+     *
      * @param name The name
      * @param fallback The fallback value
      * @param mapiProps The MAPI properties to search in
@@ -374,7 +374,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Find property by name.
-     * 
+     *
      * @param name The name
      * @param mapiProps The MAPI properties to search in
      * @return The string of found property's value or <code>null</code>
@@ -386,7 +386,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Find property by name.
-     * 
+     *
      * @param name The name
      * @param fallback The fallback value
      * @param mapiProps The MAPI properties to search in
@@ -418,7 +418,7 @@ public final class TNEF2ICalUtility {
 
     /**
      * Creates a String containing the hexadecimal representation of the given bytes.
-     * 
+     *
      * @param bytes a byte array whose content is to be displayed
      * @return a String containing the hexadecimal representation of the given bytes
      */
@@ -431,7 +431,7 @@ public final class TNEF2ICalUtility {
      * <p>
      * If {@code max} is non-negative and {@code bytes.length > max}, then the first {@code max} bytes are returned, followed by a
      * human-readable indication that there are {@code bytes.length} total bytes of data including those that are not returned.
-     * 
+     *
      * @param bytes a byte array whose content is to be displayed
      * @param max the maximum number of bytes to be displayed (-1 means no limit)
      * @return a String containing the hexadecimal representation of the given bytes
@@ -449,7 +449,7 @@ public final class TNEF2ICalUtility {
      * In particular, {@code offset + len} can extend beyond the array boundaries, as long as {@code offset + max} is still within them,
      * resulting in {@code max} bytes returned followed by an indication that there are {@code len} total data bytes (including those that
      * are not returned).
-     * 
+     *
      * @param bytes a byte array whose content is to be displayed
      * @param offset the offset within the byte array to start at
      * @param len the number of bytes

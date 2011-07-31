@@ -2,7 +2,7 @@
  * This work is hereby released into the Public Domain.
  * To view a copy of the public domain dedication, visit http://creativecommons.org/licenses/publicdomain/ or
  * send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
- * 
+ *
  * Check HCard.java's top-level comment for more information.
  */
 package org.microformats.hCard;
@@ -27,18 +27,18 @@ import com.openexchange.subscribe.microformats.objectparser.OXMFVisitor;
 
 /**
  * Parses HCards in sources (URLs, files, or HTML directly) into HCard objects.
- * 
+ *
  * @version 0.2
  * @author Reinier Zwitserloot
  */
 public class HCardParser {
 
     private static List<Map<String, String>> oxmfData;
-    
+
     public static List<Map<String, String>> getOXMFData(){
         return oxmfData;
     }
-    
+
     /**
 	 * Supply with any number of urls, filenames, or straight html sources on the command line, and you'll get the hCards printed out in
 	 * human readable form.
@@ -55,18 +55,18 @@ public class HCardParser {
 	/**
 	 * Supply with any source. This method will start parsing the source. Once 1 full hCard has been parsed, it is immediately returned.
 	 * If no hCard can be found, it returns <code>null</code>.
-	 * 
+	 *
 	 * @param source A URL, <i>or</i>a block of HTML, <i>or</i> a filename.
 	 * @throws ParserException If the HTML is so mangled it can't be parsed anymore.
 	 */
 	public static HCard parseOne(String source) throws ParserException {
 		return parseOne(source, null);
 	}
-	
+
 	/**
 	 * Supply with any source. This method will start parsing the source. Once 1 full hCard has been parsed, it is immediately returned.
 	 * If no hCard can be found, it returns <code>null</code>.
-	 * 
+	 *
 	 * @param source A URL, <i>or</i>a block of HTML, <i>or</i> a filename.
 	 * @param defaultBase a URL to use as document base. This is neccessary only when passing direct HTML as a <i>source</i>.
 	 * @throws ParserException If the HTML is so mangled it can't be parsed anymore.
@@ -79,22 +79,22 @@ public class HCardParser {
             return parsed.get(0);
         }
 	}
-	
+
 	/**
 	 * Supply with any source. This method will start parsing the source in full, then returns any and all hCards it found.
 	 * If no hCard can be found, it returns an empty list; this method never returns <code>null</code>.
-	 * 
+	 *
 	 * @param source A URL, <i>or</i>a block of HTML, <i>or</i> a filename.
 	 * @throws ParserException If the HTML is so mangled it can't be parsed anymore.
 	 */
 	public static List<HCard> parseMany(String source) throws ParserException {
 		return parseMany(source, null);
 	}
-	
+
 	/**
 	 * Supply with any source. This method will start parsing the source in full, then returns any and all hCards it found.
 	 * If no hCard can be found, it returns an empty list; this method never returns <code>null</code>.
-	 * 
+	 *
 	 * @param source A URL, <i>or</i>a block of HTML, <i>or</i> a filename.
 	 * @param defaultBase a URL to use as document base. This is neccessary only when passing direct HTML as a <i>source</i>.
 	 * @throws ParserException If the HTML is so mangled it can't be parsed anymore.
@@ -102,7 +102,7 @@ public class HCardParser {
 	public static List<HCard> parseMany(String source, URI defaultBase) throws ParserException {
 		return parse(source, defaultBase, 0);
 	}
-	
+
 	private static List<HCard> parse(String source, URI defaultBase, int limit) throws ParserException {
 	    oxmfData = null;
 		Parser p = new Parser(source);
@@ -122,11 +122,11 @@ public class HCardParser {
 			if ( anchor != null ) {
                 v.ignoreUntilAnchor(anchor);
             }
-			
+
 			try {
 				p.visitAllNodesWith(v);
 			} catch ( HCardFound ignore ) {}
-			
+
 			oxmfData = v.getOXMFElements();
 			return v.parsedHCards();
 		} finally {
@@ -136,7 +136,7 @@ public class HCardParser {
 			} catch ( Throwable ignore ) {}
 		}
 	}
-	
+
 	/**
 	 * Creates a new Visitor that can be used to parse a single hCard from a stream of HTML. You may want to use this to parse hCard-formatted subcontent
 	 * in e.g. an hReview block.
@@ -154,14 +154,14 @@ public class HCardParser {
 	 * exactly 1 HCard object in it. Thus, catch it, handle the hCard, and from that point onwards do not redirect the visit methods to this visitor anymore.
 	 * From there you should continue parsing your hReview, or whichever other content is wrapped around the hCard. Then, when you encounter another tag with
 	 * <code>class="vcard"</code>, get a new visitor by calling this method again, and repeat the process.
-	 * 
+	 *
 	 * @param defaultBase URLs in the hCard should be normalized to an absolute URL. Supply any URI that serves as a base. Passing in <code>null</code>
 	 *    is legal but will result in relative URIs in the hCard.
 	 */
 	public static HCardVisitor getHCardParsingVisitor(URI defaultBase) {
 		return new HCardVisitor(1, defaultBase);
 	}
-	
+
 	private static void display(String... urls) throws ParserException {
 		for ( String url : urls ) {
 			System.out.printf("For URL %s: ", url);
@@ -184,26 +184,26 @@ public class HCardParser {
 			}
 		}
 	}
-	
+
 	/**
 	 * Thrown by the the Visitors returned by the {@link #getHCardParsingVisitor(URI)} method to indicate it has parsed a complete HCard.
 	 */
 	public static class HCardFound extends RuntimeException {
 		private static final long serialVersionUID = -5391059983274499720L;
 	}
-	
+
 	static class Result {
 		final HCardProperty property;
 		String value;
 		URI uri;
 		String rel;
 		List<Result> subResults;
-		
+
 		Result(HCardProperty property) {
 			this.property = property;
 		}
 	}
-	
+
 	private static class Marker {
 		boolean valueExcerpt = false;
 		boolean isBeingExcerpted = false;
@@ -213,7 +213,7 @@ public class HCardParser {
 		final StringBuilder sb;
 		final String tagName;
 		int count = 1;
-		
+
 		Marker(Collection<HCardProperty> properties, Collection<String> presetValues, boolean buildText, String tagName, String rel) {
 			this.properties = Collections.unmodifiableList(new ArrayList<HCardProperty>(properties));
 			this.presetValues = Collections.unmodifiableList(new ArrayList<String>(presetValues));
@@ -225,7 +225,7 @@ public class HCardParser {
 				results.add(r);
 			}
 		}
-		
+
 		void toValueExcerptMode(String value) {
 			if ( !isBeingExcerpted ) {
                 sb.setLength(0);
@@ -234,20 +234,20 @@ public class HCardParser {
 			sb.append(value);
 		}
 	}
-	
+
 	private static class Base {
 		public final URI uri;
 		public final String tagName;
 		public final boolean isXML;
 		public int depth;
-		
+
 		private Base(URI uri, String tagName, boolean isXML) {
 			this.uri = uri;
 			this.tagName = tagName;
 			this.isXML = isXML;
 			this.depth = 1;
 		}
-		
+
 		private static URI convert(String url) {
 			try {
 				URI uri = new URI(url);
@@ -258,19 +258,19 @@ public class HCardParser {
 			} catch ( Exception ignore ) {}
 			return null;
 		}
-		
+
 		public static Base forXML(String tagName, String url) {
 			return new Base(convert(url), tagName, true);
 		}
-		
+
 		public static Base forHTML(String url) {
 			return new Base(convert(url), "BASE", false);
 		}
 	}
-	
+
 	/**
 	 * Returned by the {@link #getHCardParsingVisitor} method.
-	 * 
+	 *
 	 * Like a normal NodeVisitor, except this one also has a {@link HCardVisitor#parsedHCards()} method that returns the hCards found so far.
 	 */
 	public static class HCardVisitor extends NodeVisitor {
@@ -283,19 +283,19 @@ public class HCardParser {
 		private boolean inPre = false;
 		private boolean inDel = false;
 		private String ignoreUntilAnchor;
-		
+
 		private final LinkedList<Marker> stack = new LinkedList<Marker>();
 		private final List<Result> results = new ArrayList<Result>();
 		private final List<Result> openResults = new ArrayList<Result>();
-		
+
 		private static final List<String> CONVERT_OPEN_TAG_TO_SOFT_BREAK = Collections.unmodifiableList(Arrays.asList(
 				"DIV", "DL", "DT", "TABLE", "TBODY", "THEAD", "TFOOT", "TR", "CAPTION"
 		));
-		
+
 		private static final List<String> CONVERT_CLOSE_TAG_TO_SOFT_BREAK = Collections.unmodifiableList(Arrays.asList(
 				"DIV", "DL", "LI", "DD", "TABLE", "TBODY", "THEAD", "TFOOT", "TR", "CAPTION"
 		));
-		
+
 		/**
 		 * Returns a list of hCards parsed so far. Never returns <code>null</code> but will return an empty list if it hasn't finished
 		 * parsing anything yet.
@@ -303,7 +303,7 @@ public class HCardParser {
 		public List<HCard> parsedHCards() {
 			return hCards;
 		}
-		
+
 		protected HCardVisitor(int toParse, URI defaultBase) {
 			this.defaultBase = defaultBase;
 			if ( toParse < 1 ) {
@@ -312,46 +312,46 @@ public class HCardParser {
                 this.toParse = toParse;
             }
 		}
-		
+
 		protected void ignoreUntilAnchor(String anchor) {
 			this.ignoreUntilAnchor = anchor;
 		}
-		
+
 		public @Override void visitEndTag(Tag tag) {
 			String name = tag.getTagName();
-			
+
 			Base top = baseStack.peek();
 			if ( top != null && top.isXML && name.equals(top.tagName) && --top.depth == 0 ) {
                 baseStack.poll();
             }
-			
+
 			if ( "BASE".equals(name) ) {
 				top = baseStack.peek();
 				if ( top != null && !top.isXML ) {
                     baseStack.poll();
                 }
 			}
-			
+
 			if ( "PRE".equals(name) ) {
                 inPre = false;
             }
 			if ( "DEL".equals(name) ) {
                 inDel = false;
             }
-			
+
 			for ( Marker m : stack ) {
                 if ( m.tagName.equals(name) ) {
                     m.count--;
                 }
             }
-			
+
 			if ( hCardTagName != null && hCardTagName.equals(name) ) {
 				if ( --hCardTagNameLevel == 0 ) {
 					finalizeHCard();
 					return;
 				}
 			}
-			
+
 			//The next step handles hCards with crappy formatting where certain class-carrying tags aren't closed.
 			//Anytime a given tag is closed, all tags 'below it' in the hierarchy (more specific) are also closed.
 			int count = stack.size();
@@ -363,14 +363,14 @@ public class HCardParser {
                     count--;
                 }
 			}
-			
+
 			if ( count > 0 ) {
 				while ( count-- > 0 ) {
                     finalizeTag();
                 }
 				return;
 			}
-			
+
 			Appendable sb = getBuildersOnStack();
 			if ( sb != null ) {
 				if ( "DT".equals(name) ) {
@@ -392,23 +392,23 @@ public class HCardParser {
                 }
 			}
 		}
-		
+
 		public @Override void visitStringNode(Text textNode) {
 			if ( inDel || hCardTagName == null ) {
                 return;
             }
 			Appendable sb = getBuildersOnStack();
-			
+
 			if ( sb != null ) {
 				String text = textNode.getText();
 				if ( textNode.getText().equals("\n\t\t") ) {
                     System.err.println("WHUH");
                 }
-				
+
 				if ( text.length() == 0 ) {
                     return;
                 }
-				
+
 				if ( !inPre ) {
 					text = collapseWhitespace(text);
 					if ( text.startsWith(" ") ) {
@@ -416,15 +416,15 @@ public class HCardParser {
 						text = text.substring(1);
 					}
 				}
-				
+
 				sb.append(text);
 			}
 		}
-		
+
 		public @Override void visitTag(Tag tag) {
 			String name = tag.getTagName();
 			String hClass = tag.getAttribute("class");
-			
+
 			if ( "BASE".equals(name) && !tag.isEndTag() ) {
                 baseStack.addFirst(Base.forHTML(tag.getAttribute("href")));
             } else {
@@ -438,28 +438,28 @@ public class HCardParser {
                     }
 				}
 			}
-			
+
 			for ( Marker m : stack ) {
                 if ( m.tagName.equals(name) ) {
                     m.count++;
                 }
             }
-			
+
 			if ( "PRE".equals(name) && !tag.isEndTag() ) {
                 inPre = true;
             }
 			if ( "DEL".equals(name) && !tag.isEndTag() ) {
                 inDel = true;
             }
-			
+
 			if ( ignoreUntilAnchor != null && "A".equals(name) && ignoreUntilAnchor.equals(tag.getAttribute("name")) ) {
                 ignoreUntilAnchor = null;
             }
-			
+
 			if ( inDel || ignoreUntilAnchor != null ) {
                 return;
             }
-			
+
 			if ( hCardTagName == null ) {
 				if ( "vcard".equalsIgnoreCase(hClass) ) {
 					hCardTagName = name;
@@ -467,15 +467,15 @@ public class HCardParser {
 				}
 				return;
 			}
-			
+
 			if ( hCardTagName.equals(name) ) {
                 hCardTagNameLevel++;
             }
-			
+
 			List<HCardProperty> properties = new LinkedList<HCardProperty>();
-			
+
 			boolean isValueClass = false;
-			
+
 			if ( hClass != null ) {
                 for ( String hClassElement : hClass.split("\\s+") ) {
                 	if ( "value".equals(hClassElement) ) {
@@ -487,17 +487,17 @@ public class HCardParser {
                     }
                 }
             }
-			
+
 			int pSize = properties.size();
 			boolean treatAsEndTag = false;
-			
+
 			if ( pSize == 0 && isValueClass && !stack.isEmpty() ) {
 				properties.addAll(stack.peek().properties);
 				pSize = properties.size();
 			} else {
                 isValueClass = false;
             }
-			
+
 			if ( pSize > 0 ) {
 				List<String> values = new LinkedList<String>();
 				if ( "ABBR".equals(name) ) {
@@ -520,7 +520,7 @@ public class HCardParser {
 					if ( areaAlt == null ) {
                         areaAlt = "";
                     }
-					
+
 					for ( HCardProperty property : properties ) {
 						if ( areaHref != null && property.isUrl() ) {
                             values.add(areaHref);
@@ -551,7 +551,7 @@ public class HCardParser {
 					if ( imgAlt == null ) {
                         imgAlt = "";
                     }
-					
+
 					for ( HCardProperty property : properties ) {
 						if ( imgSrc != null && property.isUrl() ) {
                             values.add(imgSrc);
@@ -559,8 +559,8 @@ public class HCardParser {
                             values.add(imgAlt);
                         }
 					}
-				} 
-				
+				}
+
 				boolean buildText = false;
 				if ( values.isEmpty() ) {
                     for ( int i = 0 ; i < pSize ; i++ ) {
@@ -573,7 +573,7 @@ public class HCardParser {
                     	break;
                     }
                 }
-				
+
 				Marker marker = new Marker(properties, values, buildText, tag.getTagName(), tag.getAttribute("rel"));
 				if ( isValueClass ) {
                     marker.valueExcerpt = true;
@@ -581,7 +581,7 @@ public class HCardParser {
                     openResults.addAll(marker.results);
                 }
 				stack.addFirst(marker);
-				
+
 				if ( treatAsEndTag || tag.isEndTag() || tag.getAttributeEx("/") != null ) {
                     finalizeTag();
                 }
@@ -610,7 +610,7 @@ public class HCardParser {
 				}
 			}
 		}
-		
+
 		private URI fixUrl(String relativeUrl) {
 			try {
 				URI base = defaultBase;
@@ -620,7 +620,7 @@ public class HCardParser {
                     	break;
                     }
                 }
-				
+
 				if ( base == null || !base.isAbsolute() ) {
                     return new URI(relativeUrl);
                 } else {
@@ -636,28 +636,28 @@ public class HCardParser {
 				}
 			}
 		}
-		
+
 		static class Appendable {
 			private final List<StringBuilder> builders;
-			
+
 			Appendable(List<StringBuilder> builders) {
 				this.builders = builders;
 			}
-			
+
 			Appendable append(String s) {
 				for ( StringBuilder sb : builders ) {
                     sb.append(s);
                 }
 				return this;
 			}
-			
+
 			Appendable append(char c) {
 				for ( StringBuilder sb : builders ) {
                     sb.append(c);
                 }
 				return this;
 			}
-			
+
 			Appendable appendSoftSpace() {
 				for ( StringBuilder sb : builders ) {
                     if ( sb.length() > 0 && !Character.isWhitespace(sb.charAt(sb.length() -1)) ) {
@@ -666,7 +666,7 @@ public class HCardParser {
                 }
 				return this;
 			}
-			
+
 			Appendable appendSoftLineBreak() {
 				for ( StringBuilder sb : builders ) {
                     if ( sb.length() == 0 || sb.charAt(sb.length() -1) != '\n' ) {
@@ -676,7 +676,7 @@ public class HCardParser {
 				return this;
 			}
 		}
-		
+
 		private Appendable getBuildersOnStack() {
 			List<StringBuilder> list = new ArrayList<StringBuilder>();
 			for ( Marker m : stack ) {
@@ -690,25 +690,25 @@ public class HCardParser {
                 return new Appendable(list);
             }
 		}
-		
+
 		private void finalizeTag() {
 			Marker marker = stack.poll();
 			if ( marker == null ) {
                 return;
             }
-			
+
 			if ( marker.valueExcerpt ) {
 				stack.peek().toValueExcerptMode(marker.sb.toString());
 				return;
 			}
-			
+
 			Iterator<HCardProperty> properties = marker.properties.iterator();
 			Iterator<String> presets = marker.presetValues.iterator();
 			Iterator<Result> tagResults = marker.results.iterator();
 			String text = marker.sb == null ? "" : marker.sb.toString();
-			
+
 			openResults.removeAll(marker.results);
-			
+
 			while ( properties.hasNext() ) {
 				HCardProperty property = properties.next();
 				Result result = tagResults.next();
@@ -718,7 +718,7 @@ public class HCardParser {
                 }
 				result.value = value.trim();
 				result.uri = property.isUrl() ? fixUrl(result.value.trim()) : null;
-				
+
 				if ( property.isTopLevel() ) {
                     results.add(result);
                 } else {
@@ -736,12 +736,12 @@ public class HCardParser {
 				}
 			}
 		}
-		
+
 		private void finalizeHCard() {
 			while ( !stack.isEmpty() ) {
                 finalizeTag();
             }
-			
+
 			hCardTagName = null;
 			hCards.add(HCardCreator.createHCard(results));
 			this.hCardTagNameLevel = 0;
@@ -752,7 +752,7 @@ public class HCardParser {
             }
 		}
 	}
-	
+
 	private static String collapseWhitespace(String text) {
 		return text.replaceAll("\\s+", " ");
 	}

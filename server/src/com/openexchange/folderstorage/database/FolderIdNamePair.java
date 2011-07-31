@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.database;
 
 /**
  * {@link FolderIdNamePair} - Simple container for folder identifier and its name (optional).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderIdNamePair {
@@ -68,7 +68,7 @@ public final class FolderIdNamePair {
 
     /**
      * Initializes a new {@link FolderIdNamePair}.
-     * 
+     *
      * @param fuid The folder identifier
      * @param name The folder name
      */

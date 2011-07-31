@@ -69,7 +69,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MALPollCreateTableTask} - Inserts necessary tables to support MAL Poll bundle features.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
@@ -85,15 +85,15 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
     }
 
     private static String getCreateHashTable() {
-        return "CREATE TABLE malPollHash (" + 
-        " cid INT4 UNSIGNED NOT NULL," + 
-        " user INT4 UNSIGNED NOT NULL," + 
-        " id INT4 UNSIGNED NOT NULL," + 
-        " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " hash BINARY(16) NOT NULL," + 
+        return "CREATE TABLE malPollHash (" +
+        " cid INT4 UNSIGNED NOT NULL," +
+        " user INT4 UNSIGNED NOT NULL," +
+        " id INT4 UNSIGNED NOT NULL," +
+        " fullname VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " hash BINARY(16) NOT NULL," +
         " PRIMARY KEY (cid,user,id,fullname)," +
-        " FOREIGN KEY (cid,user) REFERENCES user(cid,id)," + 
-        " FOREIGN KEY (cid,user,id) REFERENCES user_mail_account(cid,user,id)" + 
+        " FOREIGN KEY (cid,user) REFERENCES user(cid,id)," +
+        " FOREIGN KEY (cid,user,id) REFERENCES user_mail_account(cid,user,id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -101,7 +101,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         return "CREATE TABLE malPollUid (" +
         " cid INT4 UNSIGNED NOT NULL," +
         " hash BINARY(16) NOT NULL," +
-        " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
+        " uid VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         " PRIMARY KEY (cid,hash,uid(32))" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }

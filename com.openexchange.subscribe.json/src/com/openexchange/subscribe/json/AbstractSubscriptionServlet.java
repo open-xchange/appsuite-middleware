@@ -66,9 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  *
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSubscriptionServlet.class));
-    
+
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().isSubscription();
@@ -80,18 +80,18 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
         response.setException(x);
         writeResponseSafely(response, resp);
     }
-    
+
     protected void writeData(final Object data, final HttpServletResponse resp) {
         final Response response = new Response();
         response.setData(data);
         writeResponseSafely(response, resp);
     }
-    
+
     protected OXException wrapThrowable(final Throwable t) {
         LOG.error(t.getMessage(), t);
         return SubscriptionJSONErrorMessages.THROWABLE.create(t, t.getMessage());
     }
-    
+
     protected void writeResponseSafely(final Response response, final HttpServletResponse resp) {
         try {
             writeResponse(response, resp);

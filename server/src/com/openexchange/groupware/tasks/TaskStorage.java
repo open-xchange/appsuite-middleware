@@ -88,7 +88,7 @@ abstract class TaskStorage {
 
     /**
      * Stores a task object.
-     * 
+     *
      * @param ctx Context
      * @param con writable database connection.
      * @param task Task to store.
@@ -99,7 +99,7 @@ abstract class TaskStorage {
 
     /**
      * Stores a task object.
-     * 
+     *
      * @param ctx Context
      * @param con writable database connection.
      * @param task Task to store.
@@ -122,7 +122,7 @@ abstract class TaskStorage {
 
     /**
      * Checks if a database entry for the task with the given identifier exists.
-     * 
+     *
      * @param ctx Context.
      * @param con readable database connection.
      * @param taskId unique identifier of the task to check.
@@ -134,7 +134,7 @@ abstract class TaskStorage {
 
     /**
      * Updates a task without touching folder mappings and participants.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param task Task.
@@ -147,7 +147,7 @@ abstract class TaskStorage {
 
     /**
      * Deletes a task.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param taskId unique identifier of the task to delete.
@@ -161,7 +161,7 @@ abstract class TaskStorage {
 
     /**
      * Deletes a task.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param taskId unique identifier of the task to delete.
@@ -175,7 +175,7 @@ abstract class TaskStorage {
 
     /**
      * Counts tasks in a folder.
-     * 
+     *
      * @param ctx Context.
      * @param userId unique identifier of the user. This parameter is only required if only own tasks should be counted.
      * @param folderId unique identifier of the folder.
@@ -188,7 +188,7 @@ abstract class TaskStorage {
 
     /**
      * This method is currently unimplemented.
-     * 
+     *
      * @param ctx Context.
      * @param taskIds unique identifier of the tasks.
      * @param columns attributes of the returned tasks that should be loaded.
@@ -199,7 +199,7 @@ abstract class TaskStorage {
 
     /**
      * This method lists tasks in a folder.
-     * 
+     *
      * @param ctx Context.
      * @param folderId unique identifier of the folder.
      * @param from Iterator should only return tasks that position in the list is after this from.
@@ -218,7 +218,7 @@ abstract class TaskStorage {
     /**
      * Searches for tasks. Currently not all search options are available.
      * Folder lists must not be null but empty lists if there are no such folderId's.
-     * 
+     *
      * @param session Session.
      * @param search search object with the search parameters.
      * @param orderBy identifier of the column that should be used for sorting. If no ordering is necessary give <code>0</code>.
@@ -234,7 +234,7 @@ abstract class TaskStorage {
 
     /**
      * This method only reads the task without participants and folders.
-     * 
+     *
      * @param context Context.
      * @param con readable database connection.
      * @param taskId unique identifier of the task.
@@ -246,7 +246,7 @@ abstract class TaskStorage {
 
     /**
      * This method only reads the task without participants and folders.
-     * 
+     *
      * @param ctx Context.
      * @param taskId unique identifier of the task.
      * @param type storage type of the task.

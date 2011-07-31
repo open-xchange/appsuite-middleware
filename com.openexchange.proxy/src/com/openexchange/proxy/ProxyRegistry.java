@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ProxyRegistry} - The registry for proxy registrations.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ProxyRegistry {
 
     /**
      * Registers specified registration.
-     * 
+     *
      * @param registration The registration
      * @return The URL to use to access the resource
      * @throws OXException If registration fails

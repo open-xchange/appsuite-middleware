@@ -51,14 +51,14 @@ package com.openexchange.mail.dataobjects.compose;
 
 /**
  * {@link ComposedMailPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ComposedMailPart {
 
     /**
      * {@link ComposedPartType} - The different SMTP parts
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static enum ComposedPartType {

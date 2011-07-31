@@ -2,7 +2,7 @@
  * This work is hereby released into the Public Domain.
  * To view a copy of the public domain dedication, visit http://creativecommons.org/licenses/publicdomain/ or
  * send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
- * 
+ *
  * Check HCard.java's top-level comment for more information.
  */
 package org.microformats.hCard;
@@ -24,14 +24,14 @@ class HCardCreator {
 		if ( result.property != HCardProperty.N ) {
             throw new IllegalArgumentException();
         }
-		
+
 		String familyName = null;
 		String givenName = null;
-		
+
 		List<String> additionalNames = new ArrayList<String>();
 		List<String> honorificPrefixes = new ArrayList<String>();
 		List<String> honorificSuffixes = new ArrayList<String>();
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -51,15 +51,15 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		return new HCard.Name(familyName, givenName, additionalNames, honorificPrefixes, honorificSuffixes);
 	}
-	
+
 	static HCard.Address createAddress(Result result) {
 		if ( result.property != HCardProperty.ADR ) {
             throw new IllegalArgumentException();
         }
-		
+
 		List<String> types = new ArrayList<String>();
 		String postOfficeBox = null;
 		String streetAddress = null;
@@ -68,7 +68,7 @@ class HCardCreator {
 		String locality = null;
 		String postalCode = null;
 		String countryName = null;
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -111,18 +111,18 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		if ( types.isEmpty() ) {
             types = HCard.Address.DEFAULT_TYPE_LIST;
         }
-		
+
 		return new HCard.Address(types, streetAddress, extendedAddress, locality, postOfficeBox, region, postalCode, countryName);
 	}
-	
+
 	private static final List<String> TEL_URL_SCHEMES = Collections.unmodifiableList(Arrays.asList("tel", "fax", "modem"));
 	private static String getTelValueFrom(Result result) {
 		String value;
-		
+
 		if ( result.uri != null && TEL_URL_SCHEMES.contains(result.uri.getScheme()) ) {
 			value = result.uri.getSchemeSpecificPart();
 			int idx = value.indexOf(';');
@@ -132,21 +132,21 @@ class HCardCreator {
 		} else {
             value = result.value;
         }
-		
+
 		if ( value != null ) {
             value = value.trim();
         }
 		return value;
 	}
-	
+
 	static HCard.Tel createTel(Result result) {
 		if ( result.property != HCardProperty.TEL ) {
             throw new IllegalArgumentException();
         }
-		
+
 		List<String> types = new ArrayList<String>();
 		String value = null;
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -159,24 +159,24 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		if ( types.isEmpty() ) {
             types = HCard.Tel.DEFAULT_TYPE_LIST;
         }
 		if ( value == null ) {
             value = getTelValueFrom(result);
         }
-		
+
 		if ( value == null || value.length() == 0 ) {
             return null;
         } else {
             return new HCard.Tel(value, types.toArray(new String[0]));
         }
 	}
-	
+
 	private static String getEmailValueFrom(Result result) {
 		String value;
-		
+
 		if ( result.uri != null && "mailto".equals(result.uri.getScheme()) ) {
 			value = result.uri.getSchemeSpecificPart();
 			if ( value.indexOf("?") > -1 ) {
@@ -185,21 +185,21 @@ class HCardCreator {
 		} else {
             value = result.value;
         }
-		
+
 		if ( value != null ) {
             value = value.trim();
         }
 		return value;
 	}
-	
+
 	static HCard.Email createEmail(Result result) {
 		if ( result.property != HCardProperty.EMAIL ) {
             throw new IllegalArgumentException();
         }
-		
+
 		List<String> types = new ArrayList<String>();
 		String value = null;
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -212,29 +212,29 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		if ( types.isEmpty() ) {
             types = HCard.Email.DEFAULT_TYPE_LIST;
         }
 		if ( value == null ) {
             value = getEmailValueFrom(result);
         }
-		
+
 		if ( value == null || value.length() == 0 ) {
             return null;
         } else {
             return new HCard.Email(value, types.toArray(new String[0]));
         }
 	}
-	
+
 	static HCard.Geolocation createGeolocation(Result result) {
 		if ( result.property != HCardProperty.GEO ) {
             throw new IllegalArgumentException();
         }
-		
+
 		String latitude = null;
 		String longitude = null;
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -251,7 +251,7 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		if ( latitude == null && longitude == null && result.value != null ) {
 			String[] elems = result.value.split(";");
 			if ( elems.length == 2 ) {
@@ -259,7 +259,7 @@ class HCardCreator {
 				longitude = elems[1];
 			}
 		}
-		
+
 		try {
 			double lat = Double.parseDouble(latitude.trim());
 			double lon = Double.parseDouble(longitude.trim());
@@ -268,15 +268,15 @@ class HCardCreator {
 			return null;
 		}
 	}
-	
+
 	static HCard.Organization createOrganization(Result result) {
 		if ( result.property != HCardProperty.ORG ) {
             throw new IllegalArgumentException();
         }
-		
+
 		String unit = null;
 		String name = null;
-		
+
 		if ( result.subResults != null ) {
             for ( Result sub : result.subResults ) {
             	switch ( sub.property ) {
@@ -293,7 +293,7 @@ class HCardCreator {
             	}
             }
         }
-		
+
 		if ( unit == null && name == null ) {
 			name = result.value;
 			if ( name == null ) {
@@ -305,15 +305,15 @@ class HCardCreator {
             }
 			unit = "";
 		}
-		
+
 		return new HCard.Organization(name, unit);
 	}
-	
+
 	static HCard.XFNURL createXFNURL(Result result) {
 		if ( result.property != HCardProperty.URL ) {
             throw new IllegalArgumentException();
         }
-		
+
 		URI url = result.uri;
 		if ( result.rel == null || result.rel.length() == 0 ) {
             return new HCard.XFNURL(url, null);
@@ -324,7 +324,7 @@ class HCardCreator {
         }
 		return new HCard.XFNURL(url, list);
 	}
-	
+
 	static HCard createHCard(List<Result> results) {
 		String fn = null;
 		HCard.Name n = null;
@@ -352,7 +352,7 @@ class HCardCreator {
 		List<HCard.XFNURL> urls = new ArrayList<HCard.XFNURL>();
 		String accessClass = null;
 		List<String> keys = new ArrayList<String>();
-		
+
 		for ( Result result : results ) {
 			switch ( result.property ) {
 			case ADR:
@@ -504,14 +504,14 @@ class HCardCreator {
 				break;
 			}
 		}
-		
+
 		//No fn means this is not a (valid) hCard.
 		if ( fn == null ) {
             return null;
         }
-		
+
 		boolean isOrg = orgs.size() == 1 && fn.equals(orgs.get(0).name);
-		
+
 		// ---- Implied "nickname" optimization
 		if ( !isOrg && (n == null || n.isEmpty()) && fn.matches("^\\w+$") ) {
 			List<String> newNicks = new ArrayList<String>();
@@ -520,26 +520,26 @@ class HCardCreator {
 			nicknames = newNicks;
 			n = new HCard.Name(null, null, null, null, null);
 		}
-		
+
 		// ---- Organization Contact Info - always has an empty 'N' value.
 		if ( isOrg ) {
             n = new HCard.Name(null, null, null, null, null);
         }
-		
+
 		// ---- Implied "n" optimization
 		if ( n == null && !isOrg ) {
             n = impliedFN2N(fn);
         }
-		
+
 		return new HCard(fn, n, nicknames, photos, bday, adrs, labels, tels, emails, mailers, tz, geo, titles, roles, logos,
 				agents, orgs, categories, notes, rev, sortString, sounds, uid, urls, accessClass, keys);
 	}
-	
+
 	static HCard.Name impliedFN2N(String fn) {
 		String[] elems = fn.trim().split("\\s+");
 		if ( elems.length == 2 ) {
 			String given, family;
-			
+
 			if ( elems[0].endsWith(",") ) {
 				family = elems[0].substring(0, elems[0].length() -1);
 				given = elems[1];
@@ -550,13 +550,13 @@ class HCardCreator {
 				family = elems[1];
 				given = elems[0];
 			}
-			
+
 			return new HCard.Name(family, given, null, null, null);
 		} else {
             return null;
         }
 	}
-	
+
 	private static Long parseDate(String value) {
 		try {
 			return ISODateTimeFormat.dateOptionalTimeParser().withZone(DateTimeZone.UTC).parseMillis(value);
@@ -564,9 +564,9 @@ class HCardCreator {
 			return null;
 		}
 	}
-	
+
 	private static final Pattern TIMEZONE_REGEX = Pattern.compile("^([\\-+])(\\d\\d?)(?::?(\\d\\d))$");
-	
+
 	private static Long parseTimezone(String value) {
 		try {
 			Matcher matcher = TIMEZONE_REGEX.matcher(value);
@@ -576,7 +576,7 @@ class HCardCreator {
 			boolean negative = matcher.group(1).charAt(0) == '-';
 			int hours = Integer.parseInt(matcher.group(2));
 			int minutes = matcher.groupCount() > 2 ? Integer.parseInt(matcher.group(3)) : 0;
-			
+
 			long millis = ((hours * 60L) + minutes) * 60L * 1000L;
 			if ( negative ) {
                 millis = -millis;

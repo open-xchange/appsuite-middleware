@@ -58,8 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormStrings implements LocalizableStrings {
-    
+
     public static final String ACCOUNT_LABEL = "The OAuth Account to use";
-    
-    
+
+
 }

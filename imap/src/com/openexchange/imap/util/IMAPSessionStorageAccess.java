@@ -56,7 +56,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link IMAPSessionStorageAccess} - IMAP utility class for session storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSessionStorageAccess {
@@ -76,7 +76,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Checks if session storage contains entries for given folder.
-     * 
+     *
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
      * @param session The session providing user data
@@ -91,7 +91,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Fills session storage with data fetched from specified IMAP folder.
-     * 
+     *
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
      * @param session The session providing user data
@@ -106,7 +106,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Gets IMAP messages newly created, formerly deleted or of which flags have been changed since specified time stamp.
-     * 
+     *
      * @param accountId The account ID
      * @param imapFolder The IMAP folder of which messages are examined
      * @param session The session providing user data
@@ -124,7 +124,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Removes specified deleted UIDs from session storage.
-     * 
+     *
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
      * @param session The session
@@ -140,7 +140,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Removes specified deleted UIDs from session storage.
-     * 
+     *
      * @param deletedUIDs The set of deleted UIDs
      * @param accountId The account ID
      * @param session The session
@@ -156,7 +156,7 @@ public final class IMAPSessionStorageAccess {
 
     /**
      * Removes specified deleted UIDs from session storage.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @param fullName The IMAP folder's full name

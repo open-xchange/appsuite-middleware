@@ -72,7 +72,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfAction extends AbstractAction {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(WebdavIfAction.class);
 
@@ -83,22 +83,22 @@ public class WebdavIfAction extends AbstractAction {
 	private boolean checkDestinationLocks;
 
 	public WebdavIfAction(){}
-	
+
 	public WebdavIfAction(final int defaultDepth, final boolean checkSourceLocks, final boolean checkDestinationLocks) {
 		this.defaultDepth = defaultDepth;
 		this.checkSourceLocks = checkSourceLocks;
 		this.checkDestinationLocks = checkDestinationLocks;
 	}
-	
+
 	public WebdavIfAction(final boolean checkSourceLocks, final boolean checkDestinationLocks) {
 		this(0,checkSourceLocks,checkDestinationLocks);
 	}
-	
+
 	@Override
     public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		final int depth = getDepth(req);
-		
+
 		IfHeader ifHeader;
 		try {
 			ifHeader = req.getIfHeader();
@@ -113,9 +113,9 @@ public class WebdavIfAction extends AbstractAction {
 			if(checkDestinationLocks) {
 				lockHints.add(preloadDestinationLocks(req));
 			}
-			
+
 			preLoad(lockHints);
-			
+
 			if(checkSourceLocks) {
 				checkNeededLocks(ifHeader,req,depth);
 			}
@@ -128,11 +128,11 @@ public class WebdavIfAction extends AbstractAction {
 				LOG.trace(e.getMessage(), e);
 			}
 		}
-		
+
 		yield(req,res);
-		
+
 	}
-	
+
     private void rememberMentionedLocks(final WebdavRequest req, final IfHeader ifHeader) {
         final List<String> mentionedLocks = new LinkedList<String>();
         for(final IfHeaderList list : ifHeader.getLists()) {
@@ -153,7 +153,7 @@ public class WebdavIfAction extends AbstractAction {
 		loadingHints.loadLocks(true);
 		return loadingHints;
 	}
-	
+
 	private LoadingHints preloadSourceLocks(final WebdavRequest req, final int depth) {
 		final LoadingHints loadingHints = new LoadingHints();
 		loadingHints.setUrl(req.getUrl());
@@ -167,20 +167,20 @@ public class WebdavIfAction extends AbstractAction {
 		if(null == req.getDestinationUrl()) {
 			return;
 		}
-		
-		
+
+
 		final WebdavResource destination = req.getDestination();
 		if(null == destination) {
 			return;
 		}
-		
+
 		final Set<String> locks = new HashSet<String>();
-		
+
 		for(final WebdavLock lock : destination.getLocks()) {
 			locks.add(lock.getToken());
 		}
 		removeProvidedLocks(ifHeader,locks);
-		
+
 		if(!locks.isEmpty()) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), Protocol.SC_LOCKED);
 		}
@@ -194,17 +194,17 @@ public class WebdavIfAction extends AbstractAction {
 		} else {
 			iter = Collections.emptyList();
 		}
-		
+
 		final Set<String> neededLocks = new HashSet<String>();
-		
+
 		for(final WebdavResource resource : iter) {
 			addLocks(neededLocks, resource);
 		}
-		
+
 		addLocks(neededLocks, res);
-		
+
 		removeProvidedLocks(ifHeader,neededLocks);
-		
+
 		if(!neededLocks.isEmpty()) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), Protocol.SC_LOCKED);
 		}
@@ -244,17 +244,17 @@ public class WebdavIfAction extends AbstractAction {
 		} else {
 			iter = Collections.emptyList();
 		}
-		
+
 		for(final WebdavResource resource : iter) {
 			if( !checkList(ifHeader, resource, req) ) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 		}
-		
+
 		if( checkList(ifHeader, res, req) ) {
 			return ;
 		}
-		
+
 		throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 	}
 
@@ -277,7 +277,7 @@ public class WebdavIfAction extends AbstractAction {
 		}
 		return true;
 	}
-	
+
 	private IfHeaderApply getApply() {
 	    final IfHeaderApply apply = BehaviourLookup.getInstance().get(IfHeaderApply.class);
 	    if(apply != null) {
@@ -297,11 +297,11 @@ public class WebdavIfAction extends AbstractAction {
 	public void setDefaultDepth(final int i) {
 		this.defaultDepth = i;
 	}
-	
+
 	public void checkSourceLocks(final boolean b) {
 		this.checkSourceLocks = b;
 	}
-	
+
 	public void checkDestinationLocks(final boolean b) {
 		this.checkDestinationLocks = b;
     }

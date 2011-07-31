@@ -286,7 +286,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             extendedCols = Arrays.addUniquely(extendedCols, new int[] {
                 Contact.YOMI_LAST_NAME, Contact.SUR_NAME, Contact.YOMI_FIRST_NAME, Contact.GIVEN_NAME, Contact.DISPLAY_NAME, Contact.YOMI_COMPANY, Contact.COMPANY, Contact.EMAIL1, Contact.EMAIL2, Contact.USE_COUNT });
         }
-        
+
         if (from != 0 || to != 0) {
             order.append(" LIMIT ");
             order.append(from);
@@ -330,7 +330,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
         conv.setCharset(collation);
         conv.parse(searchterm);
-        
+
         //generate parts of query
         int[] extendedCols = cols;
         final boolean specialSort;
@@ -345,12 +345,12 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         final String whereFolder = checkFolderRights(conv, cs);
         final String whereConditions = conv.getPreparedWhereString();
         final String sqlOrder = specialSort ? null : generateOrder(order_field, order, SuperCollator.get(collation));
-        
+
         //build query
         final StringBuilder query = new StringBuilder(select);
 
         query.append("WHERE (co.cid=").append(ctx.getContextId()).append(") "); //never forget the context
-        
+
        	if(whereConditions != null && whereConditions.length() > 0) {
             query.append(" AND ").append(whereConditions);
         }
@@ -362,9 +362,9 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
 
         final String queryStr = query.toString();
-        
+
         final Connection con = DBPool.pickup(ctx);
-        
+
         Contact[] contacts;
         ResultSet result = null;
         PreparedStatement stmt = null;
@@ -403,13 +403,13 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         return new ArrayIterator<Contact>(contacts);
     }
-  
+
 
 	private void sortByCollation(final List<Contact> tmp, final int orderField, final Order order, final String collation) {
 		if(collation == null) {
             return;
         }
-		
+
 		final ContactField field = ContactField.getByValue(orderField);
 		final SuperCollator mapping = SuperCollator.get(collation);
 		if(field == null){
@@ -437,7 +437,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             fieldsBuilder.deleteCharAt(len - 1);
         }
         final String fields = fieldsBuilder.toString();
-        
+
         len = fields.length();
         final StringBuilder sb = new StringBuilder(len + 256).append("SELECT ");
         sb.append(ContactMySql.PREFIXED_FIELDS);
@@ -1020,7 +1020,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
     }
- 
+
     @Override
     public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws OXException, OXException {
         final int[] myCols = checkColumns(cols);
@@ -1361,14 +1361,14 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 }
             }
             final ContactUnificationState prevState = getAssociationBetween(aggregator, contributor);
-            
+
             // no change in status => no change in DB:
             if(prevState == state) {
                 return;
             }
-            
+
             final boolean contactsHaveDefinedState = (prevState != ContactUnificationState.UNDEFINED);
-            
+
 			// state == undefined => remove all possible entries
             if(contacsAlreadyHadUUID && ContactUnificationState.UNDEFINED == state){
                 stmt = con.prepareStatement("DELETE FROM aggregatingContacts WHERE (contributor = ? OR contributor = ?) AND (aggregator = ? OR aggregator = ?)");
@@ -1392,7 +1392,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
                 stmt.setInt(3, state.getNumber());
             }
             stmt.execute();
-            
+
         } catch (final SQLException e) {
             handleUnsupportedAggregatingContactModule(e);
             LOG.error(e.getMessage(), e);
@@ -1411,7 +1411,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
     }
-    
+
     private byte[] dbUUID(final Contact c){
         return UUIDs.toByteArray(UUID.fromString(c.getUserField20()));
     }
@@ -1431,7 +1431,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if(!contact.containsUserField20()) {
             return new LinkedList<UUID>();
         }
-            
+
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1470,10 +1470,10 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         if(! c1.containsUserField20() || ! c2.containsUserField20()) {
             return ContactUnificationState.UNDEFINED;
         }
-        
+
         final UUID uuid1 = UUID.fromString(c1.getUserField20());
         final UUID uuid2 = UUID.fromString(c2.getUserField20());
-        
+
         Connection con = null;
         PreparedStatement stmt = null;
         try {
@@ -1552,8 +1552,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             return null;
         }
 
-    	final boolean addCollation = collation != null && collation != SuperCollator.DEFAULT; 
-    	
+    	final boolean addCollation = collation != null && collation != SuperCollator.DEFAULT;
+
     	final StringBuilder sqlOrder = new StringBuilder();
         sqlOrder.append(" ORDER BY ");
         final int realOrderField = order_field == Contact.USE_COUNT_GLOBAL_FIRST ? Contact.USE_COUNT : order_field;
@@ -1578,7 +1578,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
         return sqlOrder.append(' ').toString();
 	}
-    
+
     private String generateFieldPart(final int fieldNum){
     	if(Contact.SPECIAL_SORTING != fieldNum) {
             return "co." + Contacts.mapping[fieldNum].getDBFieldName();
@@ -1598,7 +1598,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
 
 	private String checkFolderRights(final ContactSearchtermSqlConverter conv, final ContactSql cs) throws OXException {
-        
+
         if(! conv.hasFolders() ){
         	try {
                 return cs.buildAllFolderSearchString(userId, memberInGroups, session).toString();
@@ -1608,7 +1608,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-        
+
         final List<String> folders = conv.getFolders();
         final int[] folders2 = new int[folders.size()]; int i = 0;
         final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
@@ -1617,7 +1617,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         	try {
         		folderId = Integer.parseInt(folderStr);
         	} catch(final NumberFormatException e){
-        		throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId));            		
+        		throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folderStr, I(ctx.getContextId()), I(userId));
         	}
             final FolderObject contactFolder = folderAccess.getFolderObject(folderId);
             if (contactFolder.getModule() != FolderObject.CONTACT) {

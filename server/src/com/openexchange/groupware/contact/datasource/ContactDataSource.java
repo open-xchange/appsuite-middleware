@@ -80,7 +80,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link ContactDataSource} - A data source for contacts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactDataSource implements DataSource {

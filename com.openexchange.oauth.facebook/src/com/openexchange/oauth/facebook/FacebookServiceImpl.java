@@ -72,13 +72,13 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link FacebookServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookServiceImpl implements FacebookService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class));
-    
+
     private com.openexchange.oauth.OAuthService oAuthService;
     private OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
@@ -88,13 +88,13 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
-        
+
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
             facebookMetaData.getAPISecret()).build();
 
         OAuthAccount account = null;
-        
+
         try {
             account = oAuthService.getAccount(accountId, password, user, contextId);
         } catch (OXException e) {
@@ -194,7 +194,7 @@ public class FacebookServiceImpl implements FacebookService {
 
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
-        try {            
+        try {
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
         } catch (OXException e) {

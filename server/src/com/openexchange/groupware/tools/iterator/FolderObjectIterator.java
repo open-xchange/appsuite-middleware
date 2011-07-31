@@ -94,7 +94,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link FolderObjectIterator} - A {@link SearchIterator} especially for instances of {@link FolderObject}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderObjectIterator implements SearchIterator<FolderObject> {
@@ -186,7 +186,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
      * {@link FolderObject}.
-     * 
+     *
      * @param tableAlias The table alias used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no alias used.
      * @return All necessary fields in right order to be used in an SQL <i>SELECT</i> statement
      */
@@ -214,7 +214,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
      * {@link FolderObject} with permissions applied.
-     * 
+     *
      * @param folderAlias The table alias for folder used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
      *            alias used.
      * @param permAlias The table alias for permissions used throughout corresponding SQL <i>SELECT</i> statement or <code>null</code> if no
@@ -279,7 +279,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     /**
      * Initializes a new {@link FolderObjectIterator} from specified collection.
-     * 
+     *
      * @param col The collection containing instances of {@link FolderObject}
      * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
      */
@@ -306,7 +306,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     /**
      * Initializes a new {@link FolderObjectIterator}
-     * 
+     *
      * @param rs The result set providing selected folder data
      * @param stmt The fired statement (to release all resources on iterator end)
      * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
@@ -321,7 +321,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     /**
      * Initializes a new {@link FolderObjectIterator}
-     * 
+     *
      * @param rs The result set providing selected folder data
      * @param stmt The fired statement (to release all resources on iterator end)
      * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
@@ -729,7 +729,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     /**
      * Creates a <code>java.util.Queue</code> containing all iterator's elements. All resources are closed immediately.
-     * 
+     *
      * @return iterator's content backed up by a <code>java.util.Queue</code>
      * @throws OXException if any error occurs
      */
@@ -739,7 +739,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     /**
      * Creates a <code>java.util.List</code> containing all iterator's elements. All resources are closed immediately.
-     * 
+     *
      * @return iterator's content backed up by a <code>java.util.List</code>
      * @throws OXException if any error occurs
      */
@@ -804,7 +804,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     private static final class SetableFutureTask extends FutureTask<OCLPermission[]> {
 
         private static final Callable<OCLPermission[]> DUMMY = new Callable<OCLPermission[]>() {
-            
+
             @Override
             public OCLPermission[] call() throws Exception {
                 return null;
@@ -817,7 +817,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         public SetableFutureTask() {
             super(DUMMY);
         }
-        
+
         @Override
         public void set(final OCLPermission[] v) {
             super.set(v);
@@ -925,7 +925,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 final Future<Object> f = mainFuture;
                 final AtomicBoolean fl = flag;
                 tps.submit(ThreadPools.task(new Callable<Object>() {
-    
+
                     @Override
                     public Object call() throws Exception {
                         while (!q.isEmpty()) {
@@ -935,7 +935,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         f.cancel(true);
                         return null;
                     }
-                    
+
                 }), CallerRunsBehavior.<Object> getInstance());
             }
         }

@@ -67,7 +67,7 @@ import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 
 /**
  * {@link FacebookFQLPageParser} - Parses a given facebook page element.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -122,7 +122,7 @@ public final class FacebookFQLPageParser {
 
     /**
      * Parses given facebook page element into a user.
-     * 
+     *
      * @param pageElement The facebook page element
      * @return The resulting page
      * @throws OXException If parsing fails
@@ -157,7 +157,7 @@ public final class FacebookFQLPageParser {
 
     /**
      * Gets the first node with specified name occurring as child below given node.
-     * 
+     *
      * @param name The node name to look-up
      * @param node The parent node
      * @return The appropriate node or <code>null</code> if none found
@@ -172,7 +172,7 @@ public final class FacebookFQLPageParser {
 
     /**
      * Gets the first node with specified name occurring in given node list.
-     * 
+     *
      * @param name The node name to look-up
      * @param nodes The node list
      * @param len The length of the node list
@@ -190,7 +190,7 @@ public final class FacebookFQLPageParser {
 
     /**
      * Gets all nodes with specified name occurring as child below given node.
-     * 
+     *
      * @param name The node name to look-up
      * @param node The parent node
      * @return The appropriate nodes

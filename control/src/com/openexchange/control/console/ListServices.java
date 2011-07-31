@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ListServices} - The console handler for <code>&quot;listservices&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ListServices extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class ListServices extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link ListServices} with specified arguments and performs {@link #listServices() list services}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public ListServices(final String args[]) {

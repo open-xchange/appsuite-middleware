@@ -106,7 +106,7 @@ public class CPToolTest extends AbstractDateTest {
 
     public void testShouldSplitAHundredDayAppointment() {
         final int amount = 5, offset = 10;
-        
+
         Appointment app = new Appointment();
         app.setTitle("Appointment spanning " +amount+" days");
         Calendar cal = getCalendar();
@@ -135,7 +135,7 @@ public class CPToolTest extends AbstractDateTest {
     public void testShouldWorkWithoutSeriesAlso() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.HOUR_OF_DAY, 15);
@@ -154,7 +154,7 @@ public class CPToolTest extends AbstractDateTest {
     public void testShouldSplitAnAppointmentSpanningNewYear() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2008);
         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -169,7 +169,7 @@ public class CPToolTest extends AbstractDateTest {
     public void testShouldSplitEvenWhenDayOfYearForStartDateIsBiggerThanForEndDate() {
         Appointment app = new Appointment();
         app.setTitle("Appointment starting late in one year and ending early in the following");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 300);
@@ -185,7 +185,7 @@ public class CPToolTest extends AbstractDateTest {
     public void testShouldSplitReallyLongAppointment() {
         Appointment app = new Appointment();
         app.setTitle("Long appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2008);
         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -201,7 +201,7 @@ public class CPToolTest extends AbstractDateTest {
     public void testShouldRetainDayTimeForFirstAndLastAppointmentInExpandedSeries() {
         Appointment app = new Appointment();
         app.setTitle("Single day appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.HOUR_OF_DAY, 15);
@@ -218,11 +218,11 @@ public class CPToolTest extends AbstractDateTest {
         actual = apps.get(1);
         assertEquals("Should not change end date on last", app.getEndDate(), actual.getEndDate());
     }
-    
+
     public void testShouldSplit23HourTwoDayAppointmentProperly(){
         Appointment app = new Appointment();
         app.setTitle("Two-day long appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -231,15 +231,15 @@ public class CPToolTest extends AbstractDateTest {
         cal.set(Calendar.DAY_OF_YEAR, 2);
         cal.set(Calendar.HOUR_OF_DAY, 1);
         app.setEndDate(cal.getTime());
-        
+
         List<Appointment> apps = tool.splitIntoSingleDays(app);
         assertEquals("Should produce two appointments", 2, apps.size());
     }
-    
+
     public void testShouldSplit47HourThreeDayAppointmentProperly(){
         Appointment app = new Appointment();
         app.setTitle("Two-day long appointment");
-        
+
         Calendar cal = getCalendar();
         cal.set(Calendar.YEAR, 2007);
         cal.set(Calendar.DAY_OF_YEAR, 1);
@@ -248,7 +248,7 @@ public class CPToolTest extends AbstractDateTest {
         cal.set(Calendar.DAY_OF_YEAR, 3);
         cal.set(Calendar.HOUR_OF_DAY, 1);
         app.setEndDate(cal.getTime());
-        
+
         List<Appointment> apps = tool.splitIntoSingleDays(app);
         for(Appointment temp: apps) {
             System.out.println(temp.getStartDate() + " / " + temp.getEndDate());

@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link OAuthConstants} - Constants for OAuth module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthConstants {

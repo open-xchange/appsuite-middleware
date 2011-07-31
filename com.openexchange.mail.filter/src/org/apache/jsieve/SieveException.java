@@ -28,7 +28,7 @@ public class SieveException extends Exception
 {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5119070903962609785L;
 

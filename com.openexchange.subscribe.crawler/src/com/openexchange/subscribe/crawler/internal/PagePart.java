@@ -55,7 +55,7 @@ package com.openexchange.subscribe.crawler.internal;
  * after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts (identified by their TYPE-Integer):
  * - Fillers, only used to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a
  * three-capture-group regex (immediately before, relevant part, immediately after) and the type of the info (e.g. Contact.LAST_NAME)
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 
@@ -70,9 +70,9 @@ public class PagePart {
     private String regex;
 
     private String typeOfInfo;
-    
+
     private int addInfo;
-    
+
     private boolean keepStringAfterMatching;
 
     public PagePart() {
@@ -85,7 +85,7 @@ public class PagePart {
         this.typeOfInfo = typeOfInfo;
         this.addInfo = 0;
     }
-    
+
     public PagePart(final String regex, final String typeOfInfo, boolean keepStringAfterMatching) {
         type = INFO;
         this.regex = regex;
@@ -93,7 +93,7 @@ public class PagePart {
         this.addInfo = 0;
         this.keepStringAfterMatching = keepStringAfterMatching;
     }
-    
+
     public PagePart(final String regex, final String typeOfInfo, int addInfo) {
         this.addInfo = addInfo;
         type = INFO;
@@ -130,24 +130,24 @@ public class PagePart {
         this.typeOfInfo = typeOfInfo;
     }
 
-    
+
     public int getAddInfo() {
         return addInfo;
     }
 
-    
+
     public void setAddInfo(int addInfo) {
         this.addInfo = addInfo;
     }
 
-    
+
     public boolean isKeepStringAfterMatching() {
         return keepStringAfterMatching;
     }
 
-    
+
     public void setKeepStringAfterMatching(boolean keepStringAfterMatching) {
         this.keepStringAfterMatching = keepStringAfterMatching;
     }
-    
+
 }

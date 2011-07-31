@@ -93,6 +93,6 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private FileStorage getFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 }

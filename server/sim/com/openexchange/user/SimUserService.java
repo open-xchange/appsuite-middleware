@@ -71,7 +71,7 @@ public class SimUserService implements UserService {
     @Override
     public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -176,7 +176,7 @@ public class SimUserService implements UserService {
     @Override
     public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

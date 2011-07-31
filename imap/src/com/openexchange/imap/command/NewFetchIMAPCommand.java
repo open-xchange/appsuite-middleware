@@ -103,7 +103,7 @@ import com.sun.mail.imap.protocol.UID;
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
  * RFC822.SIZE)) when later working on returned <code>javax.mail.Message</code> objects.
  * </p>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]> {
@@ -142,7 +142,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -176,7 +176,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     /**
      * Initializes a new {@link NewFetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -219,7 +219,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
      * Sets whether detection if message contains attachment is performed by "Content-Type" header only.
      * <p>
      * If <code>true</code> a message is considered to contain attachments if its "Content-Type" header equals "multipart/mixed".
-     * 
+     *
      * @param determineAttachmentByHeader <code>true</code> to detect if message contains attachment is performed by "Content-Type" header
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
@@ -549,7 +549,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
         /**
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance and applies it to given message.
-         * 
+         *
          * @param item The item to handle
          * @param msg The message to apply to
          * @param logger The logger
@@ -689,7 +689,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     }
                 }
                 /*-
-                 * 
+                 *
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
                 if (hdrHandler == null) {
                     msg.setHeader(hdr.getName(), hdr.getValue());
@@ -718,7 +718,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
                     }
                 }
                 /*-
-                 * 
+                 *
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
                 if (hdrHandler == null) {
                     msg.setHeader(hdr.getName(), hdr.getValue());
@@ -1019,7 +1019,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
-     * 
+     *
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
@@ -1100,7 +1100,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     /**
      * Strips BODYSTRUCTURE item from given fetch profile.
-     * 
+     *
      * @param fetchProfile The fetch profile
      * @return The fetch profile with BODYSTRUCTURE item stripped
      */
@@ -1128,7 +1128,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
 
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response

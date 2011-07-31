@@ -54,17 +54,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class SearchResult implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private List<Serializable> entries = Collections.emptyList();
-	
+
 	private String sortedBy = "";
 	private int order = -1;
-	
+
 	private int from;
 	private int to;
-	
+
 	private int max;
 
 	public List getEntries() {
@@ -114,6 +114,6 @@ public class SearchResult implements Serializable {
 	public void setTo(final int to) {
 		this.to = to;
 	}
-	
-	
+
+
 }

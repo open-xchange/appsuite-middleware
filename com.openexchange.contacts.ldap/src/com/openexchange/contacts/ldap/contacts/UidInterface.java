@@ -55,12 +55,12 @@ import com.openexchange.exception.OXException;
 /**
  * This interface is used to abstract the fetching of the uids in the mapper
  * class. This is required, because integer uids are used internally, but some
- * LDAP servers only provide string values 
+ * LDAP servers only provide string values
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public interface UidInterface {
-    
+
     public Integer getUid(final String uid) throws OXException;
 }

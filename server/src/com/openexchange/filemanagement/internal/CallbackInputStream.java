@@ -55,7 +55,7 @@ import java.io.InputStream;
 
 /**
  * {@link CallbackInputStream} - Touches given managed file on every access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CallbackInputStream extends InputStream implements FileRemovedListener {
@@ -70,7 +70,7 @@ final class CallbackInputStream extends InputStream implements FileRemovedListen
 
     /**
      * Initializes a new {@link CallbackInputStream}
-     * 
+     *
      * @param delegate The delegate input stream
      * @param reg The file-removed registry
      */

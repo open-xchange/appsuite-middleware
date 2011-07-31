@@ -92,15 +92,15 @@ public class PublicationSQLStorage implements PublicationStorage {
     private final DBProvider dbProvider;
 
     private final DBTransactionPolicy txPolicy;
-    
+
     private final PublicationTargetDiscoveryService discoveryService;
 
     private final GenericConfigurationStorageService storageService;
-    
+
     public PublicationSQLStorage(final DBProvider provider, final GenericConfigurationStorageService simConfigurationStorageService, final PublicationTargetDiscoveryService discoveryService) {
         this(provider, DBTransactionPolicy.NORMAL_TRANSACTIONS, simConfigurationStorageService, discoveryService);
     }
-    
+
 
     public PublicationSQLStorage(final DBProvider provider, final DBTransactionPolicy txPolicy, final GenericConfigurationStorageService simConfigurationStorageService, final PublicationTargetDiscoveryService discoveryService) {
         this.dbProvider = provider;
@@ -176,11 +176,11 @@ public class PublicationSQLStorage implements PublicationStorage {
             readConnection = dbProvider.getReadConnection(ctx);
             final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
-        	
+
         	final List<Object> values = new ArrayList<Object>();
         	values.add(I(ctx.getContextId()));
             values.add(module);
-            values.add(entityId);          
+            values.add(entityId);
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -236,21 +236,21 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         return retval;
     }
-    
+
     public List<Publication> getPublicationsOfUser(final Context ctx, final int userId)  throws OXException {
     	return getPublicationsOfUser(ctx, userId, null);
     }
 
     public List<Publication> getPublicationsOfUser(final Context ctx, final int userId, final String module)  throws OXException {
         List<Publication> retval = null;
-        
+
         final int contextId = ctx.getContextId();
         Connection readConnection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            
+
             SELECT select;
             final List<Object> values = new ArrayList<Object>();;
             if (module == null) {
@@ -267,7 +267,7 @@ public class PublicationSQLStorage implements PublicationStorage {
                 values.add(I(userId));
                 values.add(module);
             }
-            
+
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
@@ -384,7 +384,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             tryToClose(context, writeConnection);
         }
     }
-    
+
     public void deletePublicationsInContext(final int contextId, final Context ctx) throws OXException {
         Connection writeConnection = null;
         try {
@@ -419,7 +419,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             storageService.delete(writeConnection, context, getConfigurationId(pub));
         }
     }
-    
+
     private void deleteWhereContextID(final int contextId, final Context ctx, final Connection writeConnection) throws SQLException, OXException {
         final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER));
 
@@ -461,7 +461,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         values.add(I(configId));
         values.add(publication.getTarget().getId());
         values.add(publication.isEnabled());
-        
+
         new StatementBuilder().executeStatement(writeConnection, insert, values);
         return id;
     }
@@ -491,7 +491,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             update.SET("target_id", PLACEHOLDER);
             values.add(publication.getTarget().getId());
         }
-        
+
         if (publication.containsEnabled()) {
             update.SET("enabled", PLACEHOLDER);
             values.add(publication.isEnabled());
@@ -517,7 +517,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             publication.setModule(resultSet.getString("module"));
             publication.setUserId(resultSet.getInt("user_id"));
             publication.setEnabled(resultSet.getBoolean("enabled"));
-            
+
             final Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
 

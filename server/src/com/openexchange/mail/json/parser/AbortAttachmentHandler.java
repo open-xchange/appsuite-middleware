@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 /**
  * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota
  * (either overall or per-file quota).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
@@ -71,7 +71,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
     /**
      * Initializes a new {@link AbortAttachmentHandler}.
-     * 
+     *
      * @param session The session providing needed user information
      * @throws OXException If initialization fails
      */

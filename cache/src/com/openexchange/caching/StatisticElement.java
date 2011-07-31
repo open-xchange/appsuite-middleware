@@ -51,35 +51,35 @@ package com.openexchange.caching;
 
 /**
  * {@link StatisticElement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface StatisticElement {
 
     /**
      * Gets the name of the statistic element, e.g. "HitCount"
-     * 
+     *
      * @return the statistic element name
      */
     public abstract String getName();
 
     /**
      * Sets the name of the statistic element, e.g. "HitCount"
-     * 
+     *
      * @param name
      */
     public abstract void setName(String name);
 
     /**
      * Get the data, e.g. for hit count you would get a {@link String} value for some number.
-     * 
+     *
      * @return The data as a string
      */
     public abstract String getData();
 
     /**
      * Set the data for this element as a string.
-     * 
+     *
      * @param data The data as a string
      */
     public abstract void setData(String data);

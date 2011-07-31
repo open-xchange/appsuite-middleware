@@ -67,10 +67,10 @@ import org.apache.commons.lang.StringUtils;
 public class CrawlerCookieManager extends CookieManager {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -970080965438974839L;
-    
+
     /**
      * Creates a new instance.
      */
@@ -78,7 +78,7 @@ public class CrawlerCookieManager extends CookieManager {
         cookiesEnabled_ = true;
         cookies_ = new LinkedHashSet<Cookie>();
     }
-    
+
     /**
      * HtmlUnit's cookie policy is to be browser-compatible. Code which requires access to
      * HtmlUnit's cookie policy should use this constant, rather than making assumptions and using

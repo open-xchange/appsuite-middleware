@@ -57,14 +57,14 @@ import com.openexchange.mail.mime.HeaderName;
 
 /**
  * {@link IMAPUpdateableData}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPUpdateableData {
 
     /**
      * Initializes a new {@link IMAPUpdateableData}.
-     * 
+     *
      * @param uid The message's UID
      * @param flags The message's flags
      * @param userFlags The message's user flags
@@ -88,7 +88,7 @@ public final class IMAPUpdateableData {
 
     /**
      * Initializes a new {@link IMAPUpdateableData}.
-     * 
+     *
      * @param uid The message's UID
      * @param flags The message's flags
      * @param userFlags The message's user flags
@@ -145,7 +145,7 @@ public final class IMAPUpdateableData {
 
     /**
      * Indicates whether some other object is "equal to" this one considering UID only.
-     * 
+     *
      * @param obj The reference object with which to compare.
      * @return <code>true</code> if this object is the same as the obj argument; <code>false</code> otherwise.
      */
@@ -165,7 +165,7 @@ public final class IMAPUpdateableData {
 
     /**
      * Gets the UID.
-     * 
+     *
      * @return The UID
      */
     public long getUid() {
@@ -174,7 +174,7 @@ public final class IMAPUpdateableData {
 
     /**
      * Gets the flags.
-     * 
+     *
      * @return The flags
      */
     public int getFlags() {
@@ -183,7 +183,7 @@ public final class IMAPUpdateableData {
 
     /**
      * Gets the user flags.
-     * 
+     *
      * @return The user flags
      */
     public Set<HeaderName> getUserFlags() {

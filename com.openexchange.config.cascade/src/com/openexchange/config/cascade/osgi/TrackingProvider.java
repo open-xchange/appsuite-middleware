@@ -97,15 +97,15 @@ public class TrackingProvider implements ConfigProviderService {
                 if(p1 == null) {
                     return -1;
                 }
-                
+
                 if(p2 == null) {
                     return 1;
                 }
                 return p1.compareTo(p2);
             }
-            
+
         });
-        
+
         BasicProperty first = null;
         for (ServiceReference ref : serviceReferences) {
             ConfigProviderService delegate = (ConfigProviderService) tracker.getService(ref);
@@ -137,12 +137,12 @@ public class TrackingProvider implements ConfigProviderService {
                 }
 
                 public void set(String metadataName, String value) throws OXException {
-                    throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");    
+                    throw new UnsupportedOperationException("Can't save metadata "+metadataName+" on property "+property+". No ConfigProvider is specified for this value");
                 }
 
                 public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
-                }  
+                }
             };
         }
         return first;
@@ -154,12 +154,12 @@ public class TrackingProvider implements ConfigProviderService {
             return Collections.emptyList();
         }
         Set<String> allNames = new HashSet<String>();
-        
+
         for (Object object : services) {
             ConfigProviderService configProvider = (ConfigProviderService) object;
             Collection<String> names = configProvider.getAllPropertyNames(context, user);
             allNames.addAll(names);
-            
+
         }
         return allNames;
     }

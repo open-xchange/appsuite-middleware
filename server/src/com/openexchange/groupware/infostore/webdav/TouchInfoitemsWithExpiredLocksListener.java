@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link TouchInfoitemsWithExpiredLocksListener}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListener {
@@ -71,7 +71,7 @@ public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListene
         this.sessionHolder = sessionHolder;
         this.infostoreFacade = infostoreFacade;
     }
-    
+
     public TouchInfoitemsWithExpiredLocksListener() {
         super();
 
@@ -84,22 +84,22 @@ public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListene
         infostoreFacade.touch(lock.getEntity(), serverSession);
     }
 
-    
+
     public SessionHolder getSessionHolder() {
         return sessionHolder;
     }
 
-    
+
     public void setSessionHolder(SessionHolder sessionHolder) {
         this.sessionHolder = sessionHolder;
     }
 
-    
+
     public InfostoreFacade getInfostoreFacade() {
         return infostoreFacade;
     }
 
-    
+
     public void setInfostoreFacade(InfostoreFacade infostoreFacade) {
         this.infostoreFacade = infostoreFacade;
     }

@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 /**
  * {@link MailLoginHandler} - The login handler delivering mailbox access event
  * to data retention.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailLoginHandler implements LoginHandlerService {

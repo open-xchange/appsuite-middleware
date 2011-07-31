@@ -66,7 +66,7 @@ public final class SessionStorageParametersProvider implements StorageParameters
     private final ServerSession session;
 
     private final User user;
-    
+
     private final Context ctx;
 
     /**

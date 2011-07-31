@@ -82,13 +82,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * Attachment
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAttachment extends AJAXServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3109402774466180271L;
 
@@ -208,7 +208,7 @@ public class MailAttachment extends AJAXServlet {
 
     /**
      * Generates a wrapping {@link AbstractOXException} for specified exception.
-     * 
+     *
      * @param cause The exception to wrap
      * @return The wrapping {@link AbstractOXException}
      */

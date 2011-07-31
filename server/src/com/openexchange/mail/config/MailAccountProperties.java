@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountProperties} - Mail properties read from mail account with fallback to properties read from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountProperties implements IMailProperties {
@@ -66,7 +66,7 @@ public class MailAccountProperties implements IMailProperties {
 
     /**
      * Initializes a new {@link MailAccountProperties}.
-     * 
+     *
      * @param mailAccount The mail account
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */

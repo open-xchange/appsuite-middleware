@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MDNSExceptionMessages} - Exception messages for mDNS module that needs to be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */

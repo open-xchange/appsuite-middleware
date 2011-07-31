@@ -67,14 +67,14 @@ import com.openexchange.java.Autoboxing;
 
 /**
  * {@link DeferredRegistryRegistration}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
 
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DeferredRegistryRegistration.class));
-     
+
     private R registry;
 
     private Class<R> registryClass;

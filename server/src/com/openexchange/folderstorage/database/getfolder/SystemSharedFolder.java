@@ -80,7 +80,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link SystemSharedFolder} - Gets the system shared folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemSharedFolder {
@@ -96,7 +96,7 @@ public final class SystemSharedFolder {
 
     /**
      * Gets the database folder representing system shared folder for given user.
-     * 
+     *
      * @param fo The folder object fetched from database
      * @param user The user
      * @param userConfiguration The user configuration
@@ -145,7 +145,7 @@ public final class SystemSharedFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system shared folder for given user.
-     * 
+     *
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
@@ -215,7 +215,7 @@ public final class SystemSharedFolder {
 
     /**
      * {@link DisplayNameComparator} - Sorts display names with respect to a certain locale.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class DisplayNameComparator implements Comparator<String> {

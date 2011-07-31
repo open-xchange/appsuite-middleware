@@ -358,7 +358,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
         /**
          * Initializes a new {@link Result}
-         * 
+         *
          * @param toChange
          *            The map containing the names of the columns to change as
          *            keys and desired column's VARCHAR size as value

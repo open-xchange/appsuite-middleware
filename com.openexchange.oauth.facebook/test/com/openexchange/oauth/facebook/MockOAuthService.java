@@ -61,7 +61,7 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
  * {@link MockOAuthService}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MockOAuthService implements OAuthService {

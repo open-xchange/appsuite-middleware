@@ -62,7 +62,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Copied from AlterDeleteExceptionFieldLength
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class AlterChangeExceptionFieldLength implements UpdateTask {

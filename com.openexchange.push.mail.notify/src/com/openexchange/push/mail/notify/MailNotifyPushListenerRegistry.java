@@ -65,13 +65,13 @@ import com.openexchange.tools.iterator.ReadOnlyIterator;
 
 /**
  * {@link MailNotifyPushListenerRegistry} - The registry for {@link PushListener}s.
- * 
+ *
  */
 public final class MailNotifyPushListenerRegistry {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushListenerRegistry.class));
-    
-    
+
+
     /**
      * @return the useOXLogin
      */
@@ -79,7 +79,7 @@ public final class MailNotifyPushListenerRegistry {
         return useOXLogin;
     }
 
-    
+
     /**
      * @param useOXLogin the useOXLogin to set
      */
@@ -87,7 +87,7 @@ public final class MailNotifyPushListenerRegistry {
         this.useOXLogin = useOXLogin;
     }
 
-    
+
     /**
      * @return the useEmailAddress
      */
@@ -95,7 +95,7 @@ public final class MailNotifyPushListenerRegistry {
         return useEmailAddress;
     }
 
-    
+
     /**
      * @param useEmailAddress the useEmailAddress to set
      */
@@ -121,7 +121,7 @@ public final class MailNotifyPushListenerRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static MailNotifyPushListenerRegistry getInstance() {
@@ -130,9 +130,9 @@ public final class MailNotifyPushListenerRegistry {
 
     /**
      * If the given mboxid is registered for receiving of events, fire event...
-     * 
+     *
      * @param mboxid
-     * @throws OXException 
+     * @throws OXException
      */
     public void fireEvent(final String mboxid) throws OXException {
         final PushListener listener;
@@ -141,11 +141,11 @@ public final class MailNotifyPushListenerRegistry {
             LOG.debug("fireEvent, mboxid=" + mboxid);
             listener.notifyNewMail();
         }
-        
+
     }
     /**
      * Adds specified push listener.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param pushListener The push listener to add
@@ -165,7 +165,7 @@ public final class MailNotifyPushListenerRegistry {
 
     /**
      * return all the users aliases with domain stripped off and localpart to lowercase
-     * 
+     *
      * @param contextId
      * @param userId
      * @return String Array
@@ -226,7 +226,7 @@ public final class MailNotifyPushListenerRegistry {
      * Gets a read-only {@link Iterator iterator} over the push listeners in this registry.
      * <p>
      * Invoking {@link Iterator#remove() remove} will throw an {@link UnsupportedOperationException}.
-     * 
+     *
      * @return A read-only {@link Iterator iterator} over the push listeners in this registry.
      */
     public Iterator<MailNotifyPushListener> getPushListeners() {
@@ -252,11 +252,11 @@ public final class MailNotifyPushListenerRegistry {
 
     /**
      * Purges specified user's push listener and all of user-associated session identifiers from this registry.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and purged; otherwise <code>false</code>
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) throws OXException {
         return removeListener(getMboxIds(contextId, userId));
@@ -265,11 +265,11 @@ public final class MailNotifyPushListenerRegistry {
     /**
      * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
      * user-associated session identifiers are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = PushServiceRegistry.getServiceRegistry().getService(SessiondService.class);

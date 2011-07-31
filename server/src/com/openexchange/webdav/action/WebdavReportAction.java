@@ -67,11 +67,11 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class WebdavReportAction extends AbstractAction {
 
     private final Protocol protocol;
-    
+
     public WebdavReportAction(final Protocol protocol) {
         this.protocol = protocol;
     }
-    
+
     @Override
     public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
         try {
@@ -79,21 +79,21 @@ public class WebdavReportAction extends AbstractAction {
             final Element root = reportQuery.getRootElement();
             final String ns = root.getNamespace().getURI();
             final String name = root.getName();
-            
+
             final WebdavAction reportAction = protocol.getReportAction(ns, name);
-            
+
             if (reportAction == null) {
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
-            
+
             reportAction.perform(req, res);
-            
+
         } catch (final JDOMException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (final IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-        
+
     }
 
 }

@@ -55,7 +55,7 @@ import java.util.EmptyStackException;
 
 /**
  * ArrayStack - an array-based stack
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ArrayStack<T> implements Stack<T> {
@@ -70,7 +70,7 @@ public final class ArrayStack<T> implements Stack<T> {
 
     /**
      * Construct the stack with default capacity of 10
-     * 
+     *
      * @param clazz - the class of the objects kept in this stack
      */
     public ArrayStack(final Class<T> clazz) {
@@ -79,7 +79,7 @@ public final class ArrayStack<T> implements Stack<T> {
 
     /**
      * Construct the stack.
-     * 
+     *
      * @param clazz - the class of the objects kept in this stack
      * @param capacity - the initial capacity
      */

@@ -75,43 +75,43 @@ import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep<CalendarDataObject[], List<HtmlAnchor>> {
 
     private PagePartSequence pageParts;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
-    
+
     public CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;
         this.pageParts = pageParts;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
-    public void execute(WebClient webClient) throws OXException {   
+    public void execute(WebClient webClient) throws OXException {
         ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
         for (HtmlAnchor link : input){
             try {
                 HtmlPage page = link.click();
-                final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());                
+                final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
                 LOG.debug("Page evaluated is : "+pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
                 final CalendarDataObject oxEvent = Mappings.translateMapToCalendarDataObject(map);
                 events.add(oxEvent);
-                
+
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
-        
+
         output = new CalendarDataObject[events.size()];
         for (int i = 0; i < events.size() && i < output.length; i++) {
             output[i] = events.get(i);
         }
         executedSuccessfully = true;
     }
-    
+
     public PagePartSequence getPageParts() {
         return pageParts;
     }

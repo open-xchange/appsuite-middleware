@@ -65,11 +65,11 @@ import com.openexchange.session.Session;
 public class ContactCollectOnMailTransport implements PreferencesItemService {
 
     private static final String[] PATH = new String[] { "modules", "mail", "contactCollectOnMailTransport" };
-    
+
     public ContactCollectOnMailTransport() {
         super();
     }
-    
+
     public String[] getPath() {
         return PATH;
     }

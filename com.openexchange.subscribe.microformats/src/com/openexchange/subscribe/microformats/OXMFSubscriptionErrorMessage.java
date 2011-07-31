@@ -61,34 +61,34 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{ 
+public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
 
     /**
      * A parsing error occurred: %1$s.
      */
     ParseException(CATEGORY_ERROR, 2, "Provide well-formed HTML.", OXMFErrorStrings.PARSE_EXCEPTION),
     IOException(CATEGORY_SERVICE_DOWN, 3, "Try again later.", OXMFErrorStrings.IOException),
-    HttpException(CATEGORY_SERVICE_DOWN, 4, "Try again later.", OXMFErrorStrings.HttpException), 
+    HttpException(CATEGORY_SERVICE_DOWN, 4, "Try again later.", OXMFErrorStrings.HttpException),
     CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(CATEGORY_ERROR, 5,"Try again later.", OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES),
-    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, "Try again later.", OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION), 
+    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, "Try again later.", OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION),
     ;
-    
+
     private Category category;
     private int errorCode;
     private String help;
     private String message;
-    
+
     private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;
         this.errorCode = errorCode;
         this.help = help;
         this.message = message;
     }
-    
+
     public String getPrefix() {
         return "MFS";
     }
-    
+
     public Category getCategory() {
         return category;
     }
@@ -104,14 +104,14 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
     public String getMessage() {
         return message;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -120,7 +120,7 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -130,7 +130,7 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode{
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

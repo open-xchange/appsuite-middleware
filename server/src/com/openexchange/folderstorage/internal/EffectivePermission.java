@@ -61,7 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  * {@link EffectivePermission} - A read-only permission considering user access restrictions and folder boundaries.
  * <p>
  * Access to any of the setXXX() method will throw an {@link UnsupportedOperationException}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EffectivePermission implements Permission {
@@ -98,7 +98,7 @@ public final class EffectivePermission implements Permission {
 
     /**
      * Initializes a new {@link EffectivePermission}.
-     * 
+     *
      * @param underlyingPerm The underlying permission
      * @param folderId The referenced folder's identifier
      * @param type The type of the referenced folder

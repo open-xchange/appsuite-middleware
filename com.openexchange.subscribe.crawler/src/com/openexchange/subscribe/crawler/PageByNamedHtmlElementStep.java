@@ -67,21 +67,21 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
-    
+
     protected String buttonName;
-    
+
     protected int formNumber;
 
     private Exception exception;
 
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByNamedHtmlElementStep.class));
 
-    
+
     public PageByNamedHtmlElementStep(){
-        
+
     }
-    
+
     public PageByNamedHtmlElementStep(final String description, final int formNumber, final String buttonName){
         this.description = description;
         this.formNumber = formNumber;
@@ -100,25 +100,25 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
         }
         executedSuccessfully = true;
     }
-    
+
     public String getButtonName() {
         return buttonName;
     }
 
-    
+
     public void setButtonName(final String buttonName) {
         this.buttonName = buttonName;
     }
 
-    
+
     public int getFormNumber() {
         return formNumber;
     }
 
-    
+
     public void setFormNumber(final int formNumber) {
         this.formNumber = formNumber;
     }
-    
-    
+
+
 }

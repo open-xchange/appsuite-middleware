@@ -80,7 +80,7 @@ public final class AliasesProvider {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static AliasesProvider getInstance() {
@@ -102,7 +102,7 @@ public final class AliasesProvider {
 
     /**
      * Gets all aliases of all users of specified context.
-     * 
+     *
      * @param context The context
      * @param userService The user service
      * @return All aliases
@@ -147,7 +147,7 @@ public final class AliasesProvider {
 
     /**
      * Gets the aliases of a specified user.
-     * 
+     *
      * @param user The user whose aliases shall be returned
      * @return The aliases of a specified user
      */
@@ -171,7 +171,7 @@ public final class AliasesProvider {
 
     /**
      * Starts this contact collector service implementation.
-     * 
+     *
      * @throws OXException If a needed service is missing
      */
     public void start() throws OXException {
@@ -188,5 +188,5 @@ public final class AliasesProvider {
         }
     }
 
-    
+
 }

@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link SearchIteratorException} - The xception for {@link SearchIterator}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class SearchIteratorException extends OXException {
@@ -141,7 +141,7 @@ public class SearchIteratorException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -150,7 +150,7 @@ public class SearchIteratorException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -160,7 +160,7 @@ public class SearchIteratorException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance

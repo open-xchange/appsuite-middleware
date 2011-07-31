@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RSSCommon {
-    
+
     protected Session session;
     protected int accountId;
 
@@ -68,9 +68,9 @@ public class RSSCommon {
         this.accountId = accountId;
         this.session = session;
     }
-    
+
     protected static final String EMPTY = "";
-    
+
     protected void checkFolder(final String folder) throws OXException {
         if (!EMPTY.equals(folder)) {
             throw MessagingExceptionCodes.FOLDER_NOT_FOUND.create(

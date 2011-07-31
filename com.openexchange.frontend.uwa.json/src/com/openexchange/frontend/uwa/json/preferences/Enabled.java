@@ -64,13 +64,13 @@ import com.openexchange.session.Session;
 
 /**
  * {@link Enabled}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Enabled implements PreferencesItemService {
 
     static final String UWA_ENABLED = "com.openexchange.frontend.uwa.enabled";
-    
+
     ConfigViewFactory configViews;
 
     public Enabled(ConfigViewFactory configViews) {

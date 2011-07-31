@@ -65,7 +65,7 @@ import com.openexchange.service.messaging.internal.MessagingConfig;
 
 /**
  * {@link MessagingServer} - The messaging server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingServer implements Runnable {
@@ -110,7 +110,7 @@ public final class MessagingServer implements Runnable {
 
     /**
      * Starts the messaging server parameterized with given configuration.
-     * 
+     *
      * @param config The configuration
      * @throws OXException If start-up fails
      */
@@ -205,7 +205,7 @@ public final class MessagingServer implements Runnable {
 
     /**
      * Checks if this AJP server instance is running
-     * 
+     *
      * @return <code>true</code> if this AJP server instance is running; otherwise <code>false</code>
      */
     public boolean isRunning() {
@@ -214,7 +214,7 @@ public final class MessagingServer implements Runnable {
 
     /**
      * Gets the datagram socket
-     * 
+     *
      * @return The datagram
      */
     public DatagramSocket getServerSocket() {

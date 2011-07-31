@@ -92,7 +92,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         }
         return false;
     }
-    
+
     public PublicationTarget getTarget(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {

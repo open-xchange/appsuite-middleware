@@ -203,7 +203,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                         }
                         break;
                     default:
-                        throw 
+                        throw
                             TaskExceptionCode.UNKNOWN_ATTRIBUTE.create(Integer
                             .valueOf(attribute));
                     }

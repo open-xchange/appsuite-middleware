@@ -69,7 +69,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link DefaultFolderNamesProvider} - Provides the default folder (full-)names for a certain mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultFolderNamesProvider {
@@ -87,7 +87,7 @@ public final class DefaultFolderNamesProvider {
 
     /**
      * Initializes a new {@link DefaultFolderNamesProvider}.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -107,7 +107,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
@@ -126,7 +126,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
@@ -141,11 +141,11 @@ public final class DefaultFolderNamesProvider {
             mailAccount.getConfirmedHam(),
             isSpamEnabled);
     }
-    
+
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param trash The trash name
      * @param sent The sent name
      * @param drafts The drafts name
@@ -219,7 +219,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder fullnames as an array of {@link String}
@@ -238,7 +238,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder fullnames as an array of {@link String}
@@ -261,7 +261,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param trashFullname The trash fullname
      * @param sentFullname The sent fullname
      * @param draftsFullname The drafts fullname

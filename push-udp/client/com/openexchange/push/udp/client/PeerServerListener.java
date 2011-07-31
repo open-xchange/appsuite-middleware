@@ -60,7 +60,7 @@ import com.openexchange.push.udp.PushRequest;
 
 /**
  * {@link PeerServerListener}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PeerServerListener {
@@ -71,18 +71,18 @@ public class PeerServerListener {
     private InetAddress myAddress;
     private int myPort;
 
-    
+
     private DatagramSocket mySocket;
 
     public PeerServerListener(String remoteHost, String remotePort, String myHost, String myPort) throws SocketException, UnknownHostException {
 
         this.remoteAddress = InetAddress.getByName(remoteHost);
         this.remotePort = Integer.parseInt(remotePort);
-        
+
         this.myAddress = InetAddress.getByName(myHost);
         this.myPort = Integer.parseInt(myPort);
-        
-        
+
+
         mySocket = new DatagramSocket(this.myPort, myAddress);
     }
 
@@ -104,14 +104,14 @@ public class PeerServerListener {
         try {
             mySocket.receive(datagramPacket);
             String[] event = new String(datagramPacket.getData(), "UTF-8").split("\1");
-            
+
             StringBuilder b = new StringBuilder();
             for (String string : event) {
                 b.append(string).append("\t");
             }
-            
+
             System.out.println(b);
-            
+
         } catch (Exception x) {
             x.printStackTrace();
         }

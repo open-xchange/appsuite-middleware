@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServlet;
 
 /**
  * {@link SingletonServletQueue} - A singleton servlet queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SingletonServletQueue implements ServletQueue {
@@ -64,7 +64,7 @@ public final class SingletonServletQueue implements ServletQueue {
 
     /**
      * Initializes a new {@link SingletonServletQueue}.
-     * 
+     *
      * @param singleton The singleton HTTP servlet
      * @param servletPath The servlet path
      */

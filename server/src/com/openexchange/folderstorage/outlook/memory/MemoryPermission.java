@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link MemoryPermission} - A mail folder permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryPermission implements Permission {
@@ -86,7 +86,7 @@ public final class MemoryPermission implements Permission {
     /**
      * Initializes a {@link MemoryPermission} from specified {@link ResultSet}'s currently select row:<br>
      * <code>SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission ...</code>
-     * 
+     *
      * @throws SQLException If reading from result set fails
      */
     public MemoryPermission(final ResultSet rs) throws SQLException {

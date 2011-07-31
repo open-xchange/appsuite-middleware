@@ -97,7 +97,7 @@ import org.apache.commons.logging.impl.SimpleLog;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerWebConnection extends HttpWebConnection {
-        
+
     private final WebClient webClient_;
     private HttpClient httpClient_;
     private String virtualHost_;
@@ -122,7 +122,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      */
     @Override
     public WebResponse getResponse(final WebRequestSettings settings) throws IOException {
-        
+
         final URL url = settings.getUrl();
 
         final HttpClient httpClient = getHttpClient();
@@ -160,10 +160,10 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 newRequest.setAdditionalHeaders(settings.getAdditionalHeaders());
                 return getResponse(newRequest);
             }
-            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);        
+            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);
         }
         // this is done so the logfile is not cluttered with irrelevant data as per bug 16591
-        catch (SSLProtocolException e){            
+        catch (SSLProtocolException e){
             LOG.error(e);
             return null;
         }
@@ -299,8 +299,8 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 httpMethod.setRequestHeader("User-Agent", mobileUserAgent);
             }
         } else {
-            httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());            
-        }    
+            httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());
+        }
 
         writeRequestHeadersToHttpMethod(httpMethod, webRequestSettings.getAdditionalHeaders());
         httpMethod.setFollowRedirects(false);
@@ -443,7 +443,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     @Override
     protected HttpClient createHttpClient() {
         //final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here. 
+        return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here.
     }
 
 
@@ -583,12 +583,12 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
     }
 
-    
+
     public boolean isQuirkyCookieQuotes() {
         return quirkyCookieQuotes;
     }
 
-    
+
     public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
@@ -597,5 +597,5 @@ public class CrawlerWebConnection extends HttpWebConnection {
         if (this.switchUserAgent) {this.switchUserAgent = false;}
         else {this.switchUserAgent = true;}
     }
-    
+
 }

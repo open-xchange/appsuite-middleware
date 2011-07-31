@@ -63,7 +63,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Methods for easy handling of collections.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
@@ -82,7 +82,7 @@ public final class Collections {
 
     /**
      * Finds the first element in a collection that satisfies the filter
-     * 
+     *
      * @return
      */
     public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
@@ -121,7 +121,7 @@ public final class Collections {
 
     /**
      * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> like dynamical lists
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static class SmartIntArray {
@@ -170,7 +170,7 @@ public final class Collections {
 
     /**
      * SmartLongArray - A tiny helper class to increase arrays of <code>long</code> as dynamical lists
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static class SmartLongArray {
@@ -425,7 +425,7 @@ public final class Collections {
 
     /**
      * Interface to provide filtering opportunities for collections
-     * 
+     *
      * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
      * @param <T>
      */

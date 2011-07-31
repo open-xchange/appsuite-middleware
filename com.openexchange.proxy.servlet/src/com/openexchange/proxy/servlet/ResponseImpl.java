@@ -57,7 +57,7 @@ import com.openexchange.proxy.Response;
 
 /**
  * {@link ResponseImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResponseImpl implements Response {
@@ -66,7 +66,7 @@ public final class ResponseImpl implements Response {
 
     /**
      * Initializes a new {@link ResponseImpl}.
-     * 
+     *
      * @param httpMethod The delegatee
      */
     public ResponseImpl(final HttpMethodBase httpMethod) {

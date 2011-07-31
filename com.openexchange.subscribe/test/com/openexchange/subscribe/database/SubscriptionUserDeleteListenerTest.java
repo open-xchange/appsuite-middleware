@@ -65,7 +65,7 @@ import com.openexchange.subscribe.sql.AbstractSubscriptionSQLStorageTest;
 
 /**
  * {@link SubscriptionUserDeleteListenerTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class SubscriptionUserDeleteListenerTest extends AbstractSubscriptionSQLStorageTest {

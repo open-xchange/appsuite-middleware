@@ -73,7 +73,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterDirectMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterDirectMessage implements MessagingMessage {
@@ -103,7 +103,7 @@ public final class TwitterDirectMessage implements MessagingMessage {
 
     /**
      * Initializes a new {@link TwitterDirectMessage}.
-     * 
+     *
      * @param recipient The recipient of the direct message
      * @param from The sending user
      */

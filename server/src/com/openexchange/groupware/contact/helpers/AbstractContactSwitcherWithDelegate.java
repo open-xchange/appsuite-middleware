@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.Contact;
 public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 
 	protected ContactSwitcher delegate;
-	
+
 //------//
 	public ContactSwitcher getDelegate() {
 		return delegate;
@@ -63,7 +63,7 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 
 	public void setDelegate(final ContactSwitcher delegate) {
 		this.delegate = delegate;
-	}	
+	}
 
 //------//
 	@Override

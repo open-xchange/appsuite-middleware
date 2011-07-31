@@ -61,7 +61,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
 
 /**
  * {@link UpdateTaskCustomizer} - The {@link ServiceTrackerCustomizer service tracker customizer} for update tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {

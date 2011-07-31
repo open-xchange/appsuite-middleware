@@ -56,7 +56,7 @@ import com.openexchange.conversion.DataSource;
 
 /**
  * {@link ConversionEngineRegistry} - The registry for {@link DataSource data sources} and {@link DataHandler data handlers}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversionEngineRegistry {
@@ -65,7 +65,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Gets the instance of {@link ConversionEngineRegistry}
-     * 
+     *
      * @return The instance of {@link ConversionEngineRegistry}
      */
     public static ConversionEngineRegistry getInstance() {
@@ -87,7 +87,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Puts a data handler into this registry
-     * 
+     *
      * @param identifier The identifier
      * @param dataHandler The data handler
      */
@@ -98,7 +98,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Puts a data handler into this registry
-     * 
+     *
      * @param identifier The identifier
      * @param dataSource The data source
      */
@@ -109,7 +109,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Gets the data handler associated with specified identifier
-     * 
+     *
      * @param identifier The identifier
      * @return The data handler associated with specified identifier or <code>null</code>
      */
@@ -119,7 +119,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Gets the data source associated with specified identifier
-     * 
+     *
      * @param identifier The identifier
      * @return The data source associated with specified identifier or <code>null</code>
      */
@@ -129,7 +129,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Removes the data handler associated with specified identifier
-     * 
+     *
      * @param identifier The identifier
      * @return The removed data handler or <code>null</code> if none was associated with specified identifier
      */
@@ -139,7 +139,7 @@ public final class ConversionEngineRegistry {
 
     /**
      * Removes the data source associated with specified identifier
-     * 
+     *
      * @param identifier The identifier
      * @return The removed data source or <code>null</code> if none was associated with specified identifier
      */

@@ -182,14 +182,14 @@ public class ConversionWarning extends OXException {
          */
         EMPTY_CLASS("Empty \"CLASS\" element.", Category.CATEGORY_USER_INPUT, 17),
         /**
-         * 
+         *
          */
         INSUFFICIENT_INFORMATION("Insufficient information for parsing/writing this element.", Category.CATEGORY_ERROR, 18),
         /**
          * An error occurred: %1$s
          */
         UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 19),
-        
+
         ;
 
         /**
@@ -209,7 +209,7 @@ public class ConversionWarning extends OXException {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param message message.
          * @param category category.
          * @param number detail number.
@@ -256,7 +256,7 @@ public class ConversionWarning extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -265,7 +265,7 @@ public class ConversionWarning extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -275,7 +275,7 @@ public class ConversionWarning extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance

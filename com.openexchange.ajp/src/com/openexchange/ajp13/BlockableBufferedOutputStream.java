@@ -60,7 +60,7 @@ import com.openexchange.concurrent.NonBlockingBlocker;
 /**
  * {@link BlockableBufferedOutputStream} - A blockable version of {@link BufferedOutputStream} which keeps track of last write access time
  * stamp.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BlockableBufferedOutputStream extends BufferedOutputStream implements Blocker {
@@ -71,7 +71,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Initializes a new {@link BlockableBufferedOutputStream}.
-     * 
+     *
      * @param out The underlying output stream.
      * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
@@ -82,7 +82,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Initializes a new {@link BlockableBufferedOutputStream}.
-     * 
+     *
      * @param out The underlying output stream.
      * @param size The buffer size.
      * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
@@ -122,7 +122,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Flush the internal buffer
-     * 
+     *
      * @throws IOException
      */
     private void flushBuffer() throws IOException {
@@ -134,7 +134,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Writes the specified byte to this buffered output stream.
-     * 
+     *
      * @param b the byte to be written.
      * @exception IOException if an I/O error occurs.
      */
@@ -153,7 +153,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      * stream as needed. If the requested length is at least as large as this stream's buffer, however, then this method will flush the
      * buffer and write the bytes directly to the underlying output stream. Thus redundant <code>BufferedOutputStream</code>s will not copy
      * data unnecessarily.
-     * 
+     *
      * @param b the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -179,7 +179,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream.
-     * 
+     *
      * @exception IOException if an I/O error occurs.
      * @see java.io.FilterOutputStream#out
      */
@@ -199,7 +199,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
      * Gets the last-accessed time stamp of this output stream.
      * <p>
      * The last-accessed time stamp reflects when data was lastly flushed.
-     * 
+     *
      * @return The last-accessed time stamp.
      */
     public long getLastAccessed() {

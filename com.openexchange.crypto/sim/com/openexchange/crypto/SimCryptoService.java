@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
  */
 public class SimCryptoService implements CryptoService {
 
-    
+
     private String encrypted;
     private String decrypted;
 
@@ -69,7 +69,7 @@ public class SimCryptoService implements CryptoService {
         this.encrypted = encrypted;
         this.decrypted = decrypted;
     }
-    
+
     public String decrypt(String encryptedPayload, String password) throws OXException {
         return decrypted;
     }

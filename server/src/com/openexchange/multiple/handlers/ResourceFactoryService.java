@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResourceFactoryService} - Factory service for resource module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceFactoryService implements MultipleHandlerFactoryService {

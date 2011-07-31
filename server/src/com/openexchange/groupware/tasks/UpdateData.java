@@ -79,7 +79,7 @@ import com.openexchange.tools.arrays.Arrays;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class UpdateData {
@@ -206,7 +206,7 @@ class UpdateData {
 
     /**
      * Easier constructor for live data.
-     * 
+     *
      * @param ctx Context.
      * @param user User.
      * @param userConfig User configuration.
@@ -220,7 +220,7 @@ class UpdateData {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param ctx Context.
      * @param user User.
      * @param userConfig User configuration.
@@ -242,7 +242,7 @@ class UpdateData {
 
     /**
      * Proxy loading method for the task.
-     * 
+     *
      * @return the original task.
      * @throws OXException if loading of the original tasks fails.
      */
@@ -319,7 +319,7 @@ class UpdateData {
 
     /**
      * Checks everything and prepares the data structures for an update.
-     * 
+     *
      * @throws OXException if an error occurs
      */
     void prepare() throws OXException {
@@ -335,7 +335,7 @@ class UpdateData {
 
     /**
      * Prepares the data structures for an update.
-     * 
+     *
      * @throws OXException if an error occurs.
      */
     void prepareWithoutChecks() throws OXException {
@@ -638,7 +638,7 @@ class UpdateData {
 
     /**
      * This method executes the prepared update.
-     * 
+     *
      * @throws OXException
      */
     void doUpdate() throws OXException {
@@ -687,7 +687,7 @@ class UpdateData {
 
     /**
      * This method execute the SQL statements on the given connection defined by the given data for the update.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param task task object with changed values.
@@ -819,7 +819,7 @@ class UpdateData {
 
     /**
      * Inserts a new task according to the recurrence.
-     * 
+     *
      * @param task recurring task.
      * @param parts participants of the updated task.
      * @param folders folders of the updated task.

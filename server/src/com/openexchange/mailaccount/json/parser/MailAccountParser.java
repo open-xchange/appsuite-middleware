@@ -65,7 +65,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailAccountParser} - Parses a JSON object to a mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountParser extends DataParser {
@@ -79,7 +79,7 @@ public class MailAccountParser extends DataParser {
 
     /**
      * Parses the attributes from the JSON and writes them into the account object.
-     * 
+     *
      * @param account Any attributes will be stored in this account object.
      * @param json A JSON object containing a reminder.
      * @throws OXException If parsing fails.
@@ -269,7 +269,7 @@ public class MailAccountParser extends DataParser {
             attributes.add(Attribute.POP3_PATH_LITERAL);
         }
         /*-
-         * 
+         *
         else if ("pop3".equalsIgnoreCase(account.getMailProtocol())) {
             String name = account.getName();
             if (null != name && (name = name.trim()).length() > 0) {
@@ -292,5 +292,5 @@ public class MailAccountParser extends DataParser {
         }
         return sb.toString();
     }
-    
+
 }

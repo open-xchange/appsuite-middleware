@@ -66,7 +66,7 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
  * {@link SearchTermParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTermParser {
@@ -144,7 +144,7 @@ public final class SearchTermParser {
 
     /**
      * Parses specified search term JSON array.
-     * 
+     *
      * @param jsonArray The search term JSON array.
      * @return The parsed instance of search term.
      * @throws OXException If parsing fails.

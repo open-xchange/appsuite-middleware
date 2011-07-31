@@ -61,17 +61,17 @@ import com.openexchange.oauth.linkedin.LinkedInService;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LinkedInServiceRegisterer implements ServiceTrackerCustomizer {
-    
+
     private BundleContext context;
     private Activator activator;
-    
+
     public LinkedInServiceRegisterer(BundleContext context, Activator activator){
         this.context = context;
         this.activator = activator;
     }
 
     public Object addingService(ServiceReference reference) {
-        LinkedInService linkedIn = (LinkedInService) context.getService(reference);        
+        LinkedInService linkedIn = (LinkedInService) context.getService(reference);
         activator.setLinkedInService(linkedIn);
         activator.registerServices();
         return linkedIn;

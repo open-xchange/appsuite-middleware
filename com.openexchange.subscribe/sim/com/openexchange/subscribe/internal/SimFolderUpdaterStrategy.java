@@ -69,10 +69,10 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
 
     private Set<String> dataSet;
-    
+
     private final Set<String> savedElements = new HashSet<String>();
     private final Map<String, String> updatedElements = new HashMap<String, String>();
-    
+
     public boolean handles(final FolderObject folder) {
         return true;
     }
@@ -107,7 +107,7 @@ public class SimFolderUpdaterStrategy implements FolderUpdaterStrategy<String> {
     }
 
     public void closeSession(final Object session) throws OXException {
-        
+
     }
 
     public Collection<String> getData(final TargetFolderDefinition target, final Object session) throws OXException {

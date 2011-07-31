@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingFolderAccess} - Provides access to folder storage.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -62,7 +62,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>
-     * 
+     *
      * @param folderId The identifier
      * @return <code>true</code> if folder exists in account; otherwise <code>false</code>
      * @throws OXException If existence cannot be checked
@@ -71,7 +71,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the folder identified through given identifier
-     * 
+     *
      * @param folderId The identifier
      * @return The corresponding instance of {@link MessagingFolder}
      * @throws OXException If either folder does not exist or could not be fetched
@@ -82,7 +82,7 @@ public interface MessagingFolderAccess {
      * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
      * <p>
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.
-     * 
+     *
      * @param parentIdentifier The parent identifier
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying messaging system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
@@ -95,7 +95,7 @@ public interface MessagingFolderAccess {
      * Gets the account's root folder.
      * <p>
      * A convenience method for {@link #getFolder(String)} invoked with {@link MessagingFolder#ROOT_FULLNAME}.
-     * 
+     *
      * @return The account's root folder
      * @throws OXException If account's default folder cannot be delivered
      */
@@ -107,14 +107,14 @@ public interface MessagingFolderAccess {
      * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
      * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
-     * 
+     *
      * @throws OXException If user's default folder could not be checked
      */
     // public void checkDefaultFolders() throws OXException;
 
     /**
      * Creates a new messaging folder with attributes taken from given messaging folder description
-     * 
+     *
      * @param toCreate The messaging folder to create
      * @return The identifier of the created messaging folder
      * @throws OXException If creation fails
@@ -133,7 +133,7 @@ public interface MessagingFolderAccess {
      * Of course more folder attributes may be checked by implementation to enhance update operations.
      * <p>
      * <b>Note</b>: If underlying messaging system does not support the corresponding capability, the update is treated as a no-op.
-     * 
+     *
      * @param identifier The identifier of the messaging folder to update
      * @param toUpdate The messaging folder to update containing only the modified fields
      * @return The identifier of the updated messaging folder
@@ -145,11 +145,11 @@ public interface MessagingFolderAccess {
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.newpath.to.folder
      * </pre>
-     * 
+     *
      * @param folderId The folder identifier
      * @param newParentId The identifier of the new parent to move to
      * @return The new identifier where the folder has been moved
@@ -161,11 +161,11 @@ public interface MessagingFolderAccess {
      * Renames the folder identified through given identifier to the specified new name.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.path.to.newfolder
      * </pre>
-     * 
+     *
      * @param folderId The folder identifier
      * @param newName The new name
      * @return The new identifier
@@ -178,7 +178,7 @@ public interface MessagingFolderAccess {
      * <p>
      * This is a convenience method that invokes {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set to
      * <code>false</code>.
-     * 
+     *
      * @param folderId The identifier of the messaging folder to delete
      * @return The identifier of the deleted messaging folder
      * @throws OXException If either folder does not exist or cannot be deleted
@@ -197,7 +197,7 @@ public interface MessagingFolderAccess {
      * the next name would be "DeleteMe3", and so no.
      * <p>
      * If default trash folder cannot hold subfolders, the folder is either deleted permanently or an appropriate exception may be thrown.
-     * 
+     *
      * @param folderId The identifier of the messaging folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @return The identifier of the deleted messaging folder
@@ -207,7 +207,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Deletes the content of the folder identified through given identifier.
-     * 
+     *
      * @param folderId The identifier of the messaging folder whose content should be cleared
      * @throws OXException If either folder does not exist or its content cannot be cleared
      */
@@ -215,7 +215,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Deletes the content of the folder identified through given identifier.
-     * 
+     *
      * @param folderId The identifier of the messaging folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @throws OXException If either folder does not exist or its content cannot be cleared
@@ -225,7 +225,7 @@ public interface MessagingFolderAccess {
     /**
      * Gets the reverse path from the folder identified through given identifier to parental default folder. All occurring folders on that
      * path are contained in reverse order in returned array of {@link MessagingFolder} instances.
-     * 
+     *
      * @param folderId The folder identifier
      * @return All occurring folders in reverse order as an array of {@link MessagingFolder} instances.
      * @throws OXException If either folder does not exist or path cannot be determined
@@ -238,7 +238,7 @@ public interface MessagingFolderAccess {
      * available (limit) and allocated (usage) storage size.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in 1024 octets.
-     * 
+     *
      * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -249,7 +249,7 @@ public interface MessagingFolderAccess {
      * Detects both quota limit and quota usage of MESSAGE resource on given messaging folder's quota-root. If the folder denoted by passed
      * messaging folder's quota-root is the INBOX itself, the whole account's MESSAGE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) message amount.
-     * 
+     *
      * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of MESSAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -265,7 +265,7 @@ public interface MessagingFolderAccess {
      * to indicate no limitations on that resource type.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} returned for {@link Quota.Type#STORAGE} quota is in 1024 octets.
-     * 
+     *
      * @param folder The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types
@@ -275,7 +275,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default confirmed ham folder
-     * 
+     *
      * @return The identifier of default confirmed ham folder or <code>null</code> if not applicable
      * @throws OXException If confirmed ham folder's identifier cannot be returned
      */
@@ -283,7 +283,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default confirmed spam folder
-     * 
+     *
      * @return The identifier of default confirmed spam folder or <code>null</code> if not applicable
      * @throws OXException If confirmed spam folder's identifier cannot be returned
      */
@@ -291,7 +291,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default drafts folder
-     * 
+     *
      * @return The identifier of default drafts folder or <code>null</code> if not applicable
      * @throws OXException If draft folder's identifier cannot be returned
      */
@@ -299,7 +299,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default spam folder
-     * 
+     *
      * @return The identifier of default spam folder or <code>null</code> if not applicable
      * @throws OXException If spam folder's identifier cannot be returned
      */
@@ -307,7 +307,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default sent folder
-     * 
+     *
      * @return The identifier of default sent folder or <code>null</code> if not applicable
      * @throws OXException If sent folder's identifier cannot be returned
      */
@@ -315,7 +315,7 @@ public interface MessagingFolderAccess {
 
     /**
      * Gets the identifier of default trash folder
-     * 
+     *
      * @return The identifier of default trash folder or <code>null</code> if not applicable
      * @throws OXException If trash folder's identifier cannot be returned
      */

@@ -79,7 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEMailPart} - Represents a MIME part as per RFC 822.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEMailPart extends MailPart implements MIMERawSource {
@@ -172,7 +172,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
      * <p>
      * <b>Note</b>: Set only to <code>true</code> if JavaMail property <code>"mail.mime.multipart.allowempty"</code> is set to
      * <code>"false"</code>.
-     * 
+     *
      * @param handleMissingStartBoundary <code>true</code> to handle <i>"Missing start boundary"</i> error; otherwise <code>false</code>
      */
     public void setHandleMissingStartBoundary(final boolean handleMissingStartBoundary) {
@@ -181,7 +181,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Sets this mail part's content.
-     * 
+     *
      * @param part The part
      */
     public void setContent(final Part part) {
@@ -218,7 +218,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Gets the {@link Part part}.
-     * 
+     *
      * @return The {@link Part part} or <code>null</code>
      */
     public Part getPart() {
@@ -496,7 +496,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
      * <code>ObjectOutputStream.defaultWriteObject()</code>. The method does not need to concern itself with the state belonging to its
      * super classes or subclasses. State is saved by writing the individual fields to the ObjectOutputStream using the writeObject method
      * or by using the methods for primitive data types supported by <code>DataOutput</code> .
-     * 
+     *
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
@@ -567,7 +567,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
      * fields. The method does not need to concern itself with the state belonging to its super classes or subclasses. State is saved by
      * writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for primitive data types
      * supported by <code>DataOutput</code>.
-     * 
+     *
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
@@ -619,7 +619,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Compose a new MIME body part with message/rfc822 data.
-     * 
+     *
      * @param data The message/rfc822 data
      * @return A new MIME body part with message/rfc822 data
      * @throws MessagingException If a messaging error occurs
@@ -634,7 +634,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Compose a new MIME body part with multipart/* data.
-     * 
+     *
      * @param data The multipart/* data
      * @param contentType The multipart's content type (containing important boundary parameter)
      * @return A new MIME body part with multipart/* data
@@ -648,7 +648,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Compose a new MIME body part directly from specified data.
-     * 
+     *
      * @param data The part's data
      * @return A new MIME body part
      * @throws MessagingException If a messaging error occurs
@@ -659,7 +659,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Compose a new MIME message directly from specified data.
-     * 
+     *
      * @param data The message's data
      * @return A new MIME message
      * @throws MessagingException If a messaging error occurs
@@ -670,7 +670,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Gets the bytes of specified part's raw data.
-     * 
+     *
      * @param part Either a message or a body part
      * @return The bytes of specified part's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
@@ -688,7 +688,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Gets the bytes of specified multipart's raw data.
-     * 
+     *
      * @param multipart A multipart object
      * @return The bytes of specified multipart's raw data (with the optional empty starting line omitted)
      * @throws IOException If an I/O error occurs
@@ -706,7 +706,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
 
     /**
      * Strips the possible empty starting line from specified byte array.
-     * 
+     *
      * @param data The byte array
      * @return The stripped byte array
      */
@@ -750,7 +750,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
                     } else {
                         /*-
                          * Content object is not a Multipart. Then data is kept in memory regardless of MultipartWrapper implementation.
-                         * 
+                         *
                          * Since MIMEMultipartMailPart was introduced to provide a faster multipart/* parsing, use the MIMEMultipartWrapper
                          * implementation to take benefit of improved parsing.
                          */

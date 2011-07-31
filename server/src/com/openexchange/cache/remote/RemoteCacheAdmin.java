@@ -58,9 +58,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * RemoteCacheAdmin
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class RemoteCacheAdmin {
 

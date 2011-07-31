@@ -67,20 +67,20 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 
 public class AlterCreatingDate implements UpdateTask {
-    
+
     private static final String UPDATE_PRG_DATES = "alter table prg_dates change column creating_date creating_date timestamp DEFAULT CURRENT_TIMESTAMP";
- 
-    
+
+
     @Override
     public int addedWithVersion() {
         return 6;
     }
-    
+
     @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
-    
+
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
@@ -108,5 +108,5 @@ public class AlterCreatingDate implements UpdateTask {
             }
         }
     }
-    
+
 }

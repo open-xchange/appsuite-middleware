@@ -59,7 +59,7 @@ import com.openexchange.ajp13.monitoring.AJPv13TaskMonitorMBean;
 
 /**
  * {@link AJPv13TaskMonitor} - The task monitor MBean implementation monitoring AJP tasks processed by global thread pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonitorMBean {
@@ -94,7 +94,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
 
     /**
      * Initializes a new {@link AJPv13TaskMonitor}.
-     * 
+     *
      * @throws NotCompliantMBeanException If MBean is not compliant
      */
     public AJPv13TaskMonitor() throws NotCompliantMBeanException {
@@ -195,7 +195,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
 
     /**
      * Adds the total time in milliseconds an AJP thread processed a client socket until socket closure.
-     * 
+     *
      * @param time The total time in milliseconds
      */
     public void addUseTime(final long time) {
@@ -263,7 +263,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
     /**
      * Adds the time in milliseconds an AJP thread processed an AJP cycle; meaning from initial FORWARD-REQUEST until terminating
      * END-RESPONSE.
-     * 
+     *
      * @param time The time in milliseconds
      */
     public void addProcessingTime(final long time) {

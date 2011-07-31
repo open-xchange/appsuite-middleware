@@ -70,7 +70,7 @@ public class InfostoreTemplateUtils {
             return "/publications/files/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get("siteName")+"/"+document.getId()+"/current";
         }
     }
-    
+
     public String getScheme(HttpServletRequest req) {
         return Tools.getProtocol(req);
     }

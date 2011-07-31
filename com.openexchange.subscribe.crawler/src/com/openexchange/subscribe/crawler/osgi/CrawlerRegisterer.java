@@ -61,10 +61,10 @@ import com.openexchange.config.ConfigurationService;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerRegisterer implements ServiceTrackerCustomizer {
-    
+
     private BundleContext context;
     private Activator activator;
-    
+
     public CrawlerRegisterer(BundleContext context, Activator activator) {
         super();
         this.context = context;

@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Charging plan recharge limits data
- * 
+ *
  * <p>Java class for LimitsList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="LimitsList">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "LimitsList", propOrder = {
@@ -48,11 +48,11 @@ public class LimitsList
 
     /**
      * Gets the value of the limitID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getLimitID() {
         return limitID;
@@ -60,11 +60,11 @@ public class LimitsList
 
     /**
      * Sets the value of the limitID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setLimitID(BigInteger value) {
         this.limitID = value;
@@ -72,11 +72,11 @@ public class LimitsList
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -84,11 +84,11 @@ public class LimitsList
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

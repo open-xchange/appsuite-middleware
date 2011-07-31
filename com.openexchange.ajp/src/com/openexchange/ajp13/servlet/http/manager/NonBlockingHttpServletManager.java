@@ -66,7 +66,7 @@ import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * {@link NonBlockingHttpServletManager} - A HTTP servlet manager using a {@link NonBlockingRWLock non-blocking read-write lock}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingHttpServletManager extends AbstractHttpServletManager {
@@ -75,7 +75,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
 
     /**
      * Initializes a new {@link NonBlockingHttpServletManager}.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map from which to initialize static servlet instances
      */
     public NonBlockingHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {

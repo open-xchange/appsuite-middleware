@@ -86,7 +86,7 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
         accountAccess.connect();
         try {
             FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
-            
+
             final DefaultFile file = new DefaultFile();
             file.setFileName("test.txt");
             file.setFileMIMEType("text/plain");
@@ -103,13 +103,13 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             accountAccess.close();
         }
     }
-    
+
     public void testTouchFile() throws Exception {
         final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
         accountAccess.connect();
         try {
             FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
-            
+
             final DefaultFile file = new DefaultFile();
             file.setFileName("test.txt");
             file.setFileMIMEType("text/plain");
@@ -135,13 +135,13 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             accountAccess.close();
         }
     }
-    
+
     public void testCopyFile() throws Exception {
         final WebDAVFileStorageAccountAccess accountAccess = getAccountAccess();
         accountAccess.connect();
         try {
             FileStorageFileAccess fileAccess = accountAccess.getFileAccess();
-            
+
             final DefaultFile file = new DefaultFile();
             file.setFileName("test.txt");
             file.setFileMIMEType("text/plain");
@@ -155,7 +155,7 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
                  * Create a new folder
                  */
                 final FileStorageFolderAccess folderAccess = accountAccess.getFolderAccess();
-                
+
                 final DefaultFileStorageFolder folder = new DefaultFileStorageFolder();
                 final String name = "TestFolder" + System.currentTimeMillis();
                 folder.setName(name);

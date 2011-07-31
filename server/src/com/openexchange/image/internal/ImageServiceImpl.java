@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImageServiceImpl} - Implementation of {@link ImageService} using {@link ImageRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageServiceImpl implements ImageService {

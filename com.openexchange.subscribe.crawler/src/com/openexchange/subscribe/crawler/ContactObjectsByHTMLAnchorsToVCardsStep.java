@@ -70,7 +70,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes HtmlPages that each contain contact information in vcard-format and converts them to ContactObjects for OX
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contact[], List<HtmlAnchor>> {

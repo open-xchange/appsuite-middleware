@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link ContentType} - The content type (aka the module) of a folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ContentType {
@@ -60,14 +60,14 @@ public interface ContentType {
      * Gets this content type's module identifier.
      * <p>
      * This method is mainly for migration convenience.
-     * 
+     *
      * @return The module identifier
      */
     int getModule();
 
     /**
      * Returns a string representation of this content type.
-     * 
+     *
      * @return A string representation of this content type
      */
     @Override
@@ -75,7 +75,7 @@ public interface ContentType {
 
     /**
      * Gets the priority.
-     * 
+     *
      * @return The priority.
      */
     int getPriority();

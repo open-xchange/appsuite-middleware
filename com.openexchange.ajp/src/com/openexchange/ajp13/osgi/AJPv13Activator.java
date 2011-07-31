@@ -73,7 +73,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends DeferredActivator {
@@ -165,12 +165,12 @@ public final class AJPv13Activator extends DeferredActivator {
             }
             inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
             inits.add(new Initialization() {
-                
+
                 @Override
                 public void stop() {
                     AJPv13Request.setEchoHeaderName(null);
                 }
-                
+
                 @Override
                 public void start() {
                     final ConfigurationService service = getService(ConfigurationService.class);
@@ -205,10 +205,10 @@ public final class AJPv13Activator extends DeferredActivator {
 
             /*-
              * Alternative approach for HttpService:
-             * 
+             *
              * http://www.eclipse.org/equinox/server/
              * http://www.eclipse.org/equinox/server/http_in_equinox.php
-             * 
+             *
              * http://docs.codehaus.org/display/JETTY/OSGi+Tips
              */
 

@@ -57,7 +57,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link MessagingFolderType} - The folder type for messaging.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderType implements FolderType {
@@ -66,7 +66,7 @@ public final class MessagingFolderType implements FolderType {
 
     /**
      * Gets the {@link MessagingFolderType} instance.
-     * 
+     *
      * @return The {@link MessagingFolderType} instance
      */
     public static MessagingFolderType getInstance() {

@@ -51,7 +51,7 @@ package com.openexchange.control.console.internal;
 
 /**
  * {@link AbstractValue} - Abstract super class for parsed values.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class AbstractValue {
@@ -77,14 +77,14 @@ public abstract class AbstractValue {
 
     /**
      * Gets this value's type; either {@link #VALUE_PAIR} or {@link #VALUE}.
-     * 
+     *
      * @return The value's type.
      */
     protected abstract int getType();
 
     /**
      * Gets the value as a string.
-     * 
+     *
      * @return The value as a string.
      */
     public final String getValue() {

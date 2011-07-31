@@ -70,7 +70,7 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link SSOServletRegisterer}.
-     * 
+     *
      * @param context The bundle context
      */
     public SSOServletRegisterer(final BundleContext context) {

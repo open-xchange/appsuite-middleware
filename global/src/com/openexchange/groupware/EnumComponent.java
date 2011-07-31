@@ -287,7 +287,7 @@ public enum EnumComponent implements Component {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param abbrevation Abbreviation for the component.
      */
     private EnumComponent(final String abbrevation) {

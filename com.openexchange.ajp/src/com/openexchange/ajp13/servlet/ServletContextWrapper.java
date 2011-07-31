@@ -66,7 +66,7 @@ import com.openexchange.server.impl.Version;
 
 /**
  * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -84,7 +84,7 @@ public class ServletContextWrapper implements ServletContext {
      * Return a context-relative path, beginning with a "/", that represents the canonical version of the specified path after ".." and "."
      * elements are resolved out. If the specified path attempts to go outside the boundaries of the current context (i.e. too many ".."
      * path elements are present), return <code>null</code> instead.
-     * 
+     *
      * @param path Path to be normalized
      */
     private static String normalize(final String path) {

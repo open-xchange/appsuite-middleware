@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public interface PublicationService {
-    
+
     public void create(Publication publication) throws OXException;
     public void update(Publication publication) throws OXException;
     public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
@@ -67,6 +67,6 @@ public interface PublicationService {
     public Publication load(Context ctx, int publicationId) throws OXException;
     public void delete(Publication publication) throws OXException;
     public PublicationTarget getTarget() throws OXException;
-    
-    
+
+
 }

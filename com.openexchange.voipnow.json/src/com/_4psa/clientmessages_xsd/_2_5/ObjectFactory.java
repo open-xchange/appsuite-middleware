@@ -13,18 +13,18 @@ import com._4psa.common_xsd._2_5.UpdateObject;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.clientmessages_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.clientmessages_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -40,14 +40,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.clientmessages_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link DelClientRequest }
-     * 
+     *
      */
     public DelClientRequest createDelClientRequest() {
         return new DelClientRequest();
@@ -55,7 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link MoveClientsRequest }
-     * 
+     *
      */
     public MoveClientsRequest createMoveClientsRequest() {
         return new MoveClientsRequest();
@@ -63,7 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddClientRequest }
-     * 
+     *
      */
     public AddClientRequest createAddClientRequest() {
         return new AddClientRequest();
@@ -71,7 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetClientDetailsRequest }
-     * 
+     *
      */
     public GetClientDetailsRequest createGetClientDetailsRequest() {
         return new GetClientDetailsRequest();
@@ -79,7 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SetClientCpAccessRequest }
-     * 
+     *
      */
     public SetClientCpAccessRequest createSetClientCpAccessRequest() {
         return new SetClientCpAccessRequest();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetClientDetailsResponse }
-     * 
+     *
      */
     public GetClientDetailsResponse createGetClientDetailsResponse() {
         return new GetClientDetailsResponse();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetClientsRequest }
-     * 
+     *
      */
     public GetClientsRequest createGetClientsRequest() {
         return new GetClientsRequest();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditClientResponse }
-     * 
+     *
      */
     public EditClientResponse createEditClientResponse() {
         return new EditClientResponse();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditClientRequest }
-     * 
+     *
      */
     public EditClientRequest createEditClientRequest() {
         return new EditClientRequest();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddClientResponse }
-     * 
+     *
      */
     public AddClientResponse createAddClientResponse() {
         return new AddClientResponse();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UpdateClientPLRequest }
-     * 
+     *
      */
     public UpdateClientPLRequest createUpdateClientPLRequest() {
         return new UpdateClientPLRequest();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SetClientPLRequest }
-     * 
+     *
      */
     public SetClientPLRequest createSetClientPLRequest() {
         return new SetClientPLRequest();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetClientPLRequest }
-     * 
+     *
      */
     public GetClientPLRequest createGetClientPLRequest() {
         return new GetClientPLRequest();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SetClientStatusRequest }
-     * 
+     *
      */
     public SetClientStatusRequest createSetClientStatusRequest() {
         return new SetClientStatusRequest();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "UpdateClientPLResponse")
     public JAXBElement<UpdateObject> createUpdateClientPLResponse(UpdateObject value) {
@@ -168,7 +168,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "DelClientResponse")
     public JAXBElement<DelObject> createDelClientResponse(DelObject value) {
@@ -177,7 +177,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link MoveClientsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "MoveClientsResponse")
     public JAXBElement<MoveClientsResponseType> createMoveClientsResponse(MoveClientsResponseType value) {
@@ -186,7 +186,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetClientPLResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "GetClientPLResponse")
     public JAXBElement<GetClientPLResponseType> createGetClientPLResponse(GetClientPLResponseType value) {
@@ -195,7 +195,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "SetClientPLResponse")
     public JAXBElement<UpdateObject> createSetClientPLResponse(UpdateObject value) {
@@ -204,7 +204,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "SetClientCpAccessResponse")
     public JAXBElement<UpdateObject> createSetClientCpAccessResponse(UpdateObject value) {
@@ -213,7 +213,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "SetClientStatusResponse")
     public JAXBElement<UpdateObject> createSetClientStatusResponse(UpdateObject value) {
@@ -222,7 +222,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetClientResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ClientMessages.xsd/2.5.1", name = "GetClientsResponse")
     public JAXBElement<GetClientResponseType> createGetClientsResponse(GetClientResponseType value) {

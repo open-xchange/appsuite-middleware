@@ -146,7 +146,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * TODO: userPassword had been initialized with "x" in the past. This, however
      * does not work since we now update the password of a user in {@link RdbUserStorage}
-     * 
+     *
      * OLD comment:
      * The hashed and base64 encoded password. The default value is
      * <code>"x"</code> to cause matches fail.
@@ -503,7 +503,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Gets this user's aliases.
-     * 
+     *
      * @return The aliases
      */
     @Override
@@ -513,7 +513,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Sets this user's aliases.
-     * 
+     *
      * @param aliases The aliases to set
      */
     public void setAliases(final String[] aliases) {
@@ -526,8 +526,8 @@ public class UserImpl implements User, Cloneable {
     }
 
     /**
-     * Sets the user attributes as an unmodifiable map. 
-     * 
+     * Sets the user attributes as an unmodifiable map.
+     *
      * @param attributes The attributes to set as an unmodifiable map
      */
     public void setAttributes(final Map<String, Set<String>> attributes) {

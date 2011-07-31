@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailPartDataSource} - A generic {@link DataSource} for mail parts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailPartDataSource implements DataSource {

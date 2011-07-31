@@ -57,7 +57,7 @@ import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 
 /**
  * {@link FolderStorageTracker} - The tracker for folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageTracker implements ServiceTrackerCustomizer {

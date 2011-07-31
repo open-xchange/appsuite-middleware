@@ -67,7 +67,7 @@ import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
  * assigned AJP request handler.
  * <p>
  * Moreover it keeps track of package numbers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13ConnectionImpl implements AJPv13Connection {
@@ -88,7 +88,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Initializes a new {@link AJPv13ConnectionImpl}
-     * 
+     *
      * @param listener The AJP listener providing client socket
      */
     AJPv13ConnectionImpl(final AJPv13Listener listener) {
@@ -108,7 +108,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     /**
      * Resets this connection instance and prepares it for next upcoming AJP cycle. That is associated request handler will be set to
      * <code>null</code>, its state is set to <code>IDLE</code> and the output stream is going to be flushed.
-     * 
+     *
      * @param releaseRequestHandler
      */
     void resetConnection(final boolean releaseRequestHandler) {
@@ -152,7 +152,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * Waits for and processes incoming AJP package through delegating to associated request handler.
      * <p>
      * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it's still <tt>IDLE</tt>.
-     * 
+     *
      * @throws IOException If AJP socket is closed
      * @throws AJPv13Exception If an AJP error occurs
      */
@@ -179,7 +179,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Creates the AJP response data to previously received AJP package through delegating to request handler.
-     * 
+     *
      * @throws AJPv13Exception If an AJP error occurs while creating response data or this connection is not in <tt>ASSIGNED</tt> state
      * @throws ServletException If a servlet error occurs
      */
@@ -192,7 +192,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Gets the associated AJP request handler which processes the AJP data sent over this connection
-     * 
+     *
      * @return The associated AJP request handler.
      */
     @Override
@@ -202,7 +202,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Gets the input stream from AJP client
-     * 
+     *
      * @return The input stream from AJP client
      * @throws IOException If input stream cannot be returned
      */
@@ -216,7 +216,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Gets the output stream to AJP client
-     * 
+     *
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
@@ -230,7 +230,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
-     * 
+     *
      * @param millis The timeout in milliseconds
      * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
@@ -245,7 +245,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Gets the number of actual AJP package.
-     * 
+     *
      * @return The number of actual AJP package.
      */
     @Override
@@ -262,7 +262,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Gets the current AJP connection's state
-     * 
+     *
      * @return Current AJP connection's state
      */
     @Override
@@ -361,7 +361,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
 
     /**
      * Applies an AJP listener to this AJP connection
-     * 
+     *
      * @param listener The AJP listener
      * @return This AJP connection with specified listener applied
      */

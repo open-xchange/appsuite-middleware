@@ -58,29 +58,29 @@ import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
 public class Protocol {
-	
+
 	public static final int SC_LOCKED = 423;
 	public static final int SC_MULTISTATUS = 207;
-	
+
 	public static final Namespace DAV_NS = Namespace.getNamespace("D","DAV:");
-	
-	
+
+
 	public static final String DEFAULT_NAMESPACE = "DAV:";
 	public static final String COLLECTION = "<D:collection />";
-	
+
 	public static enum WEBDAV_METHOD {GET, PUT, MKCOL, DELETE, HEAD, OPTIONS, TRACE, PROPPATCH, PROPFIND, MOVE, COPY, LOCK, UNLOCK, REPORT, ACL, MKCALENDAR}
-	
+
 	public static final class Property {
 		private final int id;
 		private final String name;
 		private final String namespace;
-		
+
 		private Property(final int id, final String namespace, final String name) {
 			this.id = id;
 			this.name = name;
 			this.namespace = namespace;
 		}
-		
+
 		public Object doSwitch(final PropertySwitch sw) throws OXException {
 			switch(id) {
 			case CREATIONDATE : return sw.creationDate();
@@ -109,7 +109,7 @@ public class Protocol {
 		public String getNamespace() {
 			return namespace;
 		}
-		
+
 		public WebdavProperty getWebdavProperty(){
 			final WebdavProperty p = new WebdavProperty();
 			p.setNamespace(namespace);
@@ -120,12 +120,12 @@ public class Protocol {
 			}
 			return p;
 		}
-		
+
 		@Override
 		public int hashCode(){
 			return id;
 		}
-		
+
 		@Override
 		public boolean equals(final Object o) {
 			if (o instanceof Property) {
@@ -135,8 +135,8 @@ public class Protocol {
 			return false;
 		}
 	}
-	
-	
+
+
 	public static final int CREATIONDATE = 1;
 	public static final int DISPLAYNAME = 2;
 	public static final int GETCONTENTLANGUAGE = 3;
@@ -148,7 +148,7 @@ public class Protocol {
 	public static final int LOCKDISCOVERY = 9;
 	public static final int SUPPORTEDLOCK = 10;
 	public static final int SOURCE = 11;
-	
+
 	public static final Property CREATIONDATE_LITERAL = new Property(CREATIONDATE, DEFAULT_NAMESPACE,"creationdate");
 	public static final Property DISPLAYNAME_LITERAL = new Property(DISPLAYNAME, DEFAULT_NAMESPACE, "displayname");
 	public static final Property GETCONTENTLANGUAGE_LITERAL = new Property(GETCONTENTLANGUAGE, DEFAULT_NAMESPACE,"getcontentlanguage");
@@ -162,7 +162,7 @@ public class Protocol {
 	public static final Property SOURCE_LITERAL = new Property(SOURCE,DEFAULT_NAMESPACE,"source");
 
 
-	
+
 	public Property[] VALUES_ARRAY = new Property[]{
 			CREATIONDATE_LITERAL,
 			DISPLAYNAME_LITERAL,
@@ -176,13 +176,13 @@ public class Protocol {
 			SUPPORTEDLOCK_LITERAL,
 			SOURCE_LITERAL
 	};
-	
+
 	public List<Property> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
-	
+
 	public List<Property> getKnownProperties(){
 		return VALUES;
 	}
-	
+
 	public Property get(final int i) {
 		switch(i) {
 		case CREATIONDATE : return CREATIONDATE_LITERAL;
@@ -199,7 +199,7 @@ public class Protocol {
 		default : return null;
 		}
 	}
-	
+
 	public Property get(String namespace, final String name) {
 		if(namespace == null) {
 			namespace = DEFAULT_NAMESPACE;

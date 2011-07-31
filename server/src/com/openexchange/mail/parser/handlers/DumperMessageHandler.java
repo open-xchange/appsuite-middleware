@@ -73,7 +73,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link DumperMessageHandler} - For testing purposes
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DumperMessageHandler implements MailMessageHandler {
@@ -85,7 +85,7 @@ public class DumperMessageHandler implements MailMessageHandler {
     private final StringBuilder strBuilder;
 
     /**
-	 * 
+	 *
 	 */
     public DumperMessageHandler(final boolean bodyOnly) {
         super();

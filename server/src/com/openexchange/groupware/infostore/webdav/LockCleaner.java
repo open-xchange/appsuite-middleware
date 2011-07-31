@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class LockCleaner implements FolderEventInterface, InfostoreEventInterface {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LockCleaner.class));
-	
+
 	private final EntityLockManager infoLockManager;
 	private final FolderLockManager folderLockManager;
 
@@ -74,7 +74,7 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		this.infoLockManager = infoLockManager;
 	}
 
-	
+
 	@Override
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
@@ -85,7 +85,7 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		}
     }
 
-	
+
 	@Override
     public void infoitemDeleted(final DocumentMetadata metadata, final Session session) {
 		try {
@@ -98,22 +98,22 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 
 	@Override
     public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
-		
+
 	}
-	
+
 	@Override
     public void folderModified(final FolderObject folderObj, final Session sessionObj) {
-		
+
 	}
 
 	@Override
     public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
-		
+
 	}
-	
+
 	@Override
     public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
-		
+
 	}
 
 }

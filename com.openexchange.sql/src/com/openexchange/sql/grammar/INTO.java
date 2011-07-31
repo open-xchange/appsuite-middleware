@@ -57,7 +57,7 @@ public class INTO extends Element {
 	public INTO(String tableName) {
 		this.tableName = tableName;
 	}
-	
+
 	public INTO(Table table) {
 	    this(table.getName());
 	}

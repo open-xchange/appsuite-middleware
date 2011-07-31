@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -63,11 +63,11 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the resellerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getResellerID() {
         return resellerID;
@@ -75,11 +75,11 @@ public class MoveClientsRequest {
 
     /**
      * Sets the value of the resellerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setResellerID(BigInteger value) {
         this.resellerID = value;
@@ -87,11 +87,11 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the resellerIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getResellerIdentifier() {
         return resellerIdentifier;
@@ -99,11 +99,11 @@ public class MoveClientsRequest {
 
     /**
      * Sets the value of the resellerIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setResellerIdentifier(String value) {
         this.resellerIdentifier = value;
@@ -111,11 +111,11 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -123,11 +123,11 @@ public class MoveClientsRequest {
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -135,11 +135,11 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -147,11 +147,11 @@ public class MoveClientsRequest {
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;
@@ -159,25 +159,25 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the id property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getID().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getID() {
         if (id == null) {
@@ -188,25 +188,25 @@ public class MoveClientsRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the identifier property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getIdentifier().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getIdentifier() {
         if (identifier == null) {

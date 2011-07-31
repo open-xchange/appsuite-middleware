@@ -61,18 +61,18 @@ package com.openexchange.service.messaging;
  * value is the list of topics in which the message handler is interested.
  * <p>
  * For example:
- * 
+ *
  * <pre>
  * String[] topics = new String[] { &quot;com/isv/*&quot; };
  * Hashtable ht = new Hashtable();
  * ht.put(MessagingServiceConstants.MESSAGE_TOPIC, topics);
  * context.registerService(MessageHandler.class.getName(), this, ht);
  * </pre>
- * 
+ *
  * Event Handler services can also be registered with an {@link MessagingServiceConstants#MESSAGE_FILTER} service property to further filter
  * the events. If the syntax of this filter is invalid, then the Event Handler must be ignored by the messaging service. The messaging
  * service should log a warning.
- * 
+ *
  * @see Message
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
@@ -81,7 +81,7 @@ public interface MessageHandler {
 
     /**
      * Called by the {@link MessagingService messaging service} to notify the listener of a message.
-     * 
+     *
      * @param message The message that occurred.
      */
     void handleMessage(Message message);

@@ -58,7 +58,7 @@ import org.osgi.service.event.EventHandler;
 
 /**
  * {@link LoginEventListener} - Abstract super class for login event handlers.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class LoginEventListener implements EventHandler {

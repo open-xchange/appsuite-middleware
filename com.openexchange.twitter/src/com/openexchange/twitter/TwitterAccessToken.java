@@ -51,21 +51,21 @@ package com.openexchange.twitter;
 
 /**
  * {@link TwitterAccessToken} - Represents a twitter access token.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TwitterAccessToken {
 
     /**
      * Gets the token
-     * 
+     *
      * @return The token
      */
     String getToken();
 
     /**
      * Gets the token secret
-     * 
+     *
      * @return The token secret
      */
     String getTokenSecret();

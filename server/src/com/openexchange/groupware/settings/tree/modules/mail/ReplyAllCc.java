@@ -62,8 +62,8 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; replyallcc</code>
- * 
- * 
+ *
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReplyAllCc implements PreferencesItemService {

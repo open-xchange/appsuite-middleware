@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link Regexp}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Regexp implements PreferencesItemService {

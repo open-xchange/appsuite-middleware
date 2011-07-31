@@ -49,18 +49,18 @@
 package com.openexchange.mailfilter.internal;
 
 public class MailFilterProperties {
-    
+
     public enum LoginTypes {
         GLOBAL("global"),
         USER("user");
-        
+
         public final String name;
-        
+
         private LoginTypes(final String name) {
             this.name = name;
         }
     }
-    
+
     public enum Values {
         SIEVE_CREDSRC("SIEVE_CREDSRC", CredSrc.SESSION.name),
         SIEVE_LOGIN_TYPE("SIEVE_LOGIN_TYPE", LoginTypes.GLOBAL.name),
@@ -75,36 +75,36 @@ public class MailFilterProperties {
         SIEVE_PASSWORDSRC("com.openexchange.mail.filter.passwordSource", PasswordSource.SESSION.name),
         SIEVE_MASTERPASSWORD("com.openexchange.mail.filter.masterPassword", ""),
         USE_UTF7_FOLDER_ENCODING("com.openexchange.mail.filter.useUTF7FolderEncoding", "false");
-        
+
         public final String property;
-        
+
         public final String def;
-        
+
         private Values(final String property, final String def) {
             this.property = property;
             this.def = def;
         }
-        
+
     }
 
     public enum CredSrc {
         SESSION("session"),
         IMAP_LOGIN("imapLogin"),
         MAIL("mail");
-        
+
         public final String name;
-        
+
         private CredSrc(final String name) {
             this.name = name;
         }
     }
-    
+
     public enum PasswordSource {
         SESSION("session"),
         GLOBAL("global");
 
         public final String name;
-        
+
         private PasswordSource(final String name) {
             this.name = name;
         }

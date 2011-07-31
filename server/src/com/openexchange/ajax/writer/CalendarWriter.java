@@ -65,7 +65,7 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * {@link CalendarWriter} - Writer for calendar objects
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -250,7 +250,7 @@ public abstract class CalendarWriter extends CommonWriter {
             return confirmations;
         }
     };
-    
+
     protected static final FieldWriter<CalendarObject> ORGANIZER_WRITER = new FieldWriter<CalendarObject>() {
         @Override
         public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
@@ -261,7 +261,7 @@ public abstract class CalendarWriter extends CommonWriter {
             writeParameter(CalendarFields.ORGANIZER, obj.getOrganizer(), json, obj.containsOrganizer());
         }
     };
-    
+
     protected static final FieldWriter<CalendarObject> UID_WRITER = new FieldWriter<CalendarObject>() {
         @Override
         public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {
@@ -272,7 +272,7 @@ public abstract class CalendarWriter extends CommonWriter {
             writeParameter(CalendarFields.UID, obj.getUid(), json, obj.containsUid());
         }
     };
-    
+
     protected static final FieldWriter<CalendarObject> SEQUENCE_WRITER = new FieldWriter<CalendarObject>() {
         @Override
         public void write(final CalendarObject obj, final TimeZone timeZone, final JSONArray json) {

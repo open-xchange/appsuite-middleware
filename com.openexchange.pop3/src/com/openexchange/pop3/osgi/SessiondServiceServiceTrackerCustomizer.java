@@ -57,7 +57,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SessiondServiceServiceTrackerCustomizer} - Service tracker customizer for {@link SessiondService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondServiceServiceTrackerCustomizer implements ServiceTrackerCustomizer {

@@ -70,7 +70,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * Utilities for database resource handling.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -86,7 +86,7 @@ public final class DBUtils {
 
     /**
      * Closes the ResultSet.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      */
     public static void closeSQLStuff(final ResultSet result) {
@@ -101,7 +101,7 @@ public final class DBUtils {
 
     /**
      * Closes the {@link Statement}.
-     * 
+     *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     public static void closeSQLStuff(final Statement stmt) {
@@ -116,7 +116,7 @@ public final class DBUtils {
 
     /**
      * Closes the ResultSet and the Statement.
-     * 
+     *
      * @param result <code>null</code> or a ResultSet to close.
      * @param stmt <code>null</code> or a Statement to close.
      */
@@ -218,7 +218,7 @@ public final class DBUtils {
 
     /**
      * Rolls a transaction of a connection back.
-     * 
+     *
      * @param con connection to roll back.
      */
     public static void rollback(final Connection con) {
@@ -236,7 +236,7 @@ public final class DBUtils {
 
     /**
      * Convenience method to set the autocommit of a connection to <code>true</code>.
-     * 
+     *
      * @param con connection that should go into autocommit mode.
      */
     public static void autocommit(final Connection con) {
@@ -258,7 +258,7 @@ public final class DBUtils {
      * This method tries to parse the truncated fields out of the DataTruncation exception. This method has been implemented because mysql
      * doesn't return the column identifier of the truncated field through the getIndex() method of the DataTruncation exception. This
      * method uses the fact that the exception sent by the mysql server encapsulates the truncated fields into single quotes.
-     * 
+     *
      * @param e DataTruncation exception to parse.
      * @return a string array containing all truncated field from the exception.
      */
@@ -275,7 +275,7 @@ public final class DBUtils {
 
     /**
      * Extends a SQL statement with enough ? characters in the last IN argument.
-     * 
+     *
      * @param sql SQL statement ending with "IN (";
      * @param length number of entries.
      * @return the ready to use SQL statement.
@@ -292,7 +292,7 @@ public final class DBUtils {
     /**
      * This method determines the size of a database column. For strings it gives the maximum allowed characters and for number it returns
      * the precision.
-     * 
+     *
      * @param con read only database connection.
      * @param table name of the table.
      * @param column name of the column.
@@ -308,7 +308,7 @@ public final class DBUtils {
         }
         return retval;
     }
-    
+
     /**
      * Filters a given list of tablenames. Returns only those that also exist
      * @param con The connection to the database in which to check for the tables

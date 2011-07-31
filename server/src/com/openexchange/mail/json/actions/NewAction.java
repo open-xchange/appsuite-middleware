@@ -128,7 +128,7 @@ public final class NewAction extends AbstractMailAction {
                     }
                     /*-
                      * Parse
-                     * 
+                     *
                      * Resolve "From" to proper mail account to select right transport server
                      */
                     final InternetAddress from;

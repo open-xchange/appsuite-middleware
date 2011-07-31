@@ -23,21 +23,21 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Specifies the positional extent of an element 
- * within the script being executed. 
+ * Specifies the positional extent of an element
+ * within the script being executed.
  * In other words, this gives the line and column at which
  * the elment starts and at which it ends.
  */
 public final class ScriptCoordinate {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScriptCoordinate.class));
-    
+
     private final int startLineNumber;
     private final int startColumnNumber;
     private final int endLineNumber;
     private final int endColumnNumber;
-    
-    public ScriptCoordinate(final int startLineNumber, final int startColumnNumber, 
+
+    public ScriptCoordinate(final int startLineNumber, final int startColumnNumber,
             final int endLineNumber, final int endColumnNumber) {
         super();
         this.startLineNumber = startLineNumber;
@@ -45,7 +45,7 @@ public final class ScriptCoordinate {
         this.endLineNumber = endLineNumber;
         this.endColumnNumber = endColumnNumber;
     }
-    
+
     /**
      * Gets the number of the column where the elements ends.
      * @return column number
@@ -53,7 +53,7 @@ public final class ScriptCoordinate {
     public int getEndColumnNumber() {
         return endColumnNumber;
     }
-    
+
     /**
      * Gets the number of the line where the element ends.
      * @return line number
@@ -61,7 +61,7 @@ public final class ScriptCoordinate {
     public int getEndLineNumber() {
         return endLineNumber;
     }
-    
+
     /**
      * Gets the number of the column where the element start.
      * @return column number
@@ -69,7 +69,7 @@ public final class ScriptCoordinate {
     public int getStartColumnNumber() {
         return startColumnNumber;
     }
-    
+
     /**
      * Gets the number of the line where the element starts.
      * @return line number
@@ -77,7 +77,7 @@ public final class ScriptCoordinate {
     public int getStartLineNumber() {
         return startLineNumber;
     }
-    
+
     /**
      * Creates a syntax exception based on the given message
      * containing details of the script position.
@@ -96,8 +96,8 @@ public final class ScriptCoordinate {
         final SyntaxException result = new SyntaxException(fullMessage);
         return result;
     }
-    
-    
+
+
 //    /**
 //     * Creates a command exception based on the given message
 //     * containing details of the script position.
@@ -116,7 +116,7 @@ public final class ScriptCoordinate {
 //        final CommandException result = new CommandException(fullMessage);
 //        return result;
 //    }
-    
+
     /**
      * Appends a standard position phrase to the given message.
      * This message should end with a full stop.
@@ -138,7 +138,7 @@ public final class ScriptCoordinate {
         buffer.append(".");
         return buffer.toString();
     }
-    
+
     /**
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null
@@ -149,7 +149,7 @@ public final class ScriptCoordinate {
             logger.info("Expression ends line " + endLineNumber + " column " + endColumnNumber);
         }
     }
-    
+
     /**
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null

@@ -57,7 +57,7 @@ import java.sql.Statement;
 
 /**
  * The method {@link #getConnection()} must be overwritten to return the {@link JDBC3ConnectionReturner}.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC3StatementWrapper implements Statement {
@@ -68,7 +68,7 @@ public abstract class JDBC3StatementWrapper implements Statement {
 
     /**
      * Initializes a new {@link JDBC3StatementWrapper}.
-     * 
+     *
      * @param delegate The delegate statement
      * @param con The connection returner
      */

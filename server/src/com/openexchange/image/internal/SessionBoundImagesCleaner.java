@@ -64,7 +64,7 @@ final class SessionBoundImagesCleaner implements Runnable {
 
 	/**
 	 * Initializes a new {@link SessionBoundImagesCleaner}
-	 * 
+	 *
 	 * @param session2imageMaps
 	 *            The concurrent map to iterate
 	 */

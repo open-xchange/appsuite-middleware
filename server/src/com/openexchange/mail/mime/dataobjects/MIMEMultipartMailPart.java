@@ -78,7 +78,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for mail parts of MIME type <code>multipart/*</code>.
  * <p>
  * Parsing of multipart data is based on <b>Knuth&#045;Morris&#045;Pratt (KMP)</b> algorithm.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEMultipartMailPart extends MailPart {
@@ -106,7 +106,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
      */
@@ -116,7 +116,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param contentType The content type; may be <code>null</code>
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
@@ -137,7 +137,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param inputData The input data
      * @throws OXException If reading input stream fails
      */
@@ -147,7 +147,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param contentType The content type; may be <code>null</code>
      * @param inputData The input data
      * @throws OXException If reading input stream fails
@@ -438,7 +438,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Gets the (starting) boundary bytes by determining the <i>boundary</i> parameter from Content-Type header and prepending <i>--</i>.
-     * 
+     *
      * @return The (starting) boundary bytes
      */
     private byte[] getBoundaryBytes() {
@@ -455,7 +455,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * The readObject method is responsible for reading from the stream and restoring the classes fields.
-     * 
+     *
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
@@ -470,7 +470,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     /**
      * The writeObject method is responsible for writing the state of the object for its particular class so that the corresponding
      * readObject method can restore it.
-     * 
+     *
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
@@ -494,7 +494,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Copies given input stream into a newly created byte array.
-     * 
+     *
      * @param inputStream The input stream
      * @return The newly created byte array containing input stream's bytes
      * @throws IOException If reading input stream fails
@@ -519,7 +519,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Converts given string to a byte array.
-     * 
+     *
      * @param s The string
      * @return The converted string's byte array
      */
@@ -538,7 +538,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -587,7 +587,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -634,7 +634,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern matches against itself.
-     * 
+     *
      * @param pattern The pattern
      * @return The failures
      */

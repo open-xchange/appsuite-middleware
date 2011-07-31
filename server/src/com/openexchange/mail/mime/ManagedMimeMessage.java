@@ -66,7 +66,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * {@link ManagedMimeMessage} - A {@link MimeMessage} backed by an array or file dependent on provided byte array's size.
  * <p>
  * Invoke {@link #cleanUp()} to release used resources immediately; otherwise they will be released if a specific idle time has elapsed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedMimeMessage extends MimeMessage {
@@ -77,7 +77,7 @@ public final class ManagedMimeMessage extends MimeMessage {
 
     /**
      * Initializes a new {@link ManagedMimeMessage} with default in-memory size of 128KB.
-     * 
+     *
      * @param session The session
      * @param sourceBytes The RFC822 source bytes
      * @throws MessagingException If a messaging error occurs
@@ -89,7 +89,7 @@ public final class ManagedMimeMessage extends MimeMessage {
 
     /**
      * Initializes a new {@link ManagedMimeMessage}.
-     * 
+     *
      * @param session The session
      * @param sourceBytes The RFC822 source bytes
      * @param maxInMemorySize The max. in-memory size in bytes
@@ -127,7 +127,7 @@ public final class ManagedMimeMessage extends MimeMessage {
 
     /**
      * Cleans up this managed MIME message.
-     * 
+     *
      * @throws MessagingException If a messaging error occurs
      */
     public void cleanUp() throws MessagingException {

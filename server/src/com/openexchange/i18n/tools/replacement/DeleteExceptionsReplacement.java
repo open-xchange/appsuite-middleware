@@ -58,15 +58,15 @@ import com.openexchange.i18n.tools.TemplateToken;
 /**
  * {@link DeleteExceptionsReplacement} - The replacement for delete exceptions
  * of a recurring calendar object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDateReplacement {
 
     /**
      * Initializes a new {@link DeleteExceptionsReplacement}
-     * 
+     *
      * @param dates The delete exception dates
      */
     public DeleteExceptionsReplacement(final Date[] dates) {
@@ -75,7 +75,7 @@ public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDat
 
     /**
      * Initializes a new {@link DeleteExceptionsReplacement}
-     * 
+     *
      * @param dates The delete exception dates
      * @param locale The locale
      * @param timeZone The time zone

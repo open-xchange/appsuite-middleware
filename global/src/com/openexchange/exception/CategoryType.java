@@ -51,7 +51,7 @@ package com.openexchange.exception;
 
 /**
  * {@link CategoryType} - The interface for category type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CategoryType {

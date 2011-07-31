@@ -80,7 +80,7 @@ import com.sun.mail.imap.Rights.Right;
 /**
  * {@link IMAPFolderWorker} - An abstract class that extends {@link MailMessageStorage} by convenience methods for working on a certain IMAP
  * folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class IMAPFolderWorker extends MailMessageStorageLong {
@@ -118,7 +118,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Initializes a new {@link IMAPFolderWorker}.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
@@ -144,7 +144,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Reports a modification of the IMAP folder denoted by specified full name. If stored IMAP folder's full name equals specified full
      * name, it is closed quietly.
-     * 
+     *
      * @param modifiedFullName The full name of the folder which has been modified
      */
     public void notifyIMAPFolderModification(final String modifiedFullName) {
@@ -165,7 +165,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Reports a modification of the IMAP folders denoted by specified set of full names. If stored IMAP folder's full name is contained in
      * set of full names, it is closed quietly.
-     * 
+     *
      * @param modifiedFullNames The full names of the folders which have been modified
      */
     public void notifyIMAPFolderModification(final Set<String> modifiedFullNames) {
@@ -184,7 +184,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Closes remembered IMAP folder (if non-<code>null</code>).
-     * 
+     *
      * @throws OXException If closing remembered IMAP folder fails
      */
     private void closeIMAPFolder() throws OXException {
@@ -212,11 +212,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /**
      * Determine if field {@link #imapFolder} indicates to hold messages.<br>
      * <b>NOTE</b>: This method assumes that field {@link #imapFolder} is <b>not</b> <code>null</code>.
-     * 
+     *
      * <pre>
      * return ((imapFolder.getType() &amp; IMAPFolder.HOLDS_MESSAGES) == 1)
      * </pre>
-     * 
+     *
      * @return <code>true</code> if field {@link #imapFolder} indicates to hold messages
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a messaging error occurs
@@ -230,7 +230,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
-     * 
+     *
      * @param fullName The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
      * @return The properly opened IMAP folder
@@ -243,7 +243,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
-     * 
+     *
      * @param imapFolder The IMAP folder to check against
      * @param fullName The folder full name
      * @param desiredMode The desired opening mode (either {@link Folder#READ_ONLY} or {@link Folder#READ_WRITE})
@@ -396,7 +396,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Handles specified {@link RuntimeException} instance.
-     * 
+     *
      * @param e The runtime exception to handle
      * @return An appropriate {@link OXException}
      */

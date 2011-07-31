@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link OAuthToken} - Represents an OAuth token.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -74,14 +74,14 @@ public interface OAuthToken {
 
     /**
      * Gets the token.
-     * 
+     *
      * @return The token
      */
     String getToken();
 
     /**
      * Gets the secret.
-     * 
+     *
      * @return The secret
      */
     String getSecret();

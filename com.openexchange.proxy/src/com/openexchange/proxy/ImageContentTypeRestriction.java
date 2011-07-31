@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 /**
  * {@link ImageContentTypeRestriction} - A {@link ContentTypeRestriction} for images. <code>"Content-Type"</code> header must match pattern
  * <code>"image/*"</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageContentTypeRestriction extends ContentTypeRestriction {
@@ -64,7 +64,7 @@ public final class ImageContentTypeRestriction extends ContentTypeRestriction {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @return The singleton instance
      */
     public static ImageContentTypeRestriction getInstance() {

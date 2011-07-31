@@ -62,7 +62,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 
 /**
  * {@link ManagedFileImpl} - Implementation of a managed file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
@@ -85,7 +85,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     /**
      * Initializes a new {@link ManagedFileImpl}.
-     * 
+     *
      * @param id The unique ID
      * @param file The kept file
      */

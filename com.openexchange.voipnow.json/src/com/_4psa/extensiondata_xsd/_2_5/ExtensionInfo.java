@@ -13,11 +13,11 @@ import com._4psa.extensionmessages_xsd._2_5.EditExtensionRequest;
 
 /**
  * Extension data
- * 
+ *
  * <p>Java class for ExtensionInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtensionInfo">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com._4psa.extensionmessages_xsd._2_5.EditExtensionRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtensionInfo", propOrder = {
@@ -52,11 +52,11 @@ public class ExtensionInfo
 
     /**
      * Gets the value of the phoneLang property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneLang() {
         return phoneLang;
@@ -64,11 +64,11 @@ public class ExtensionInfo
 
     /**
      * Sets the value of the phoneLang property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneLang(String value) {
         this.phoneLang = value;
@@ -76,11 +76,11 @@ public class ExtensionInfo
 
     /**
      * Gets the value of the channelRuleId property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelRuleId() {
         return channelRuleId;
@@ -88,11 +88,11 @@ public class ExtensionInfo
 
     /**
      * Sets the value of the channelRuleId property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelRuleId(BigInteger value) {
         this.channelRuleId = value;

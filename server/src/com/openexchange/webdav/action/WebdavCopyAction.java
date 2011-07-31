@@ -54,11 +54,11 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 
 public class WebdavCopyAction extends WebdavStructureAction {
 
-	
+
 	public WebdavCopyAction(final WebdavFactory factory) {
 		super(factory);
 	}
-	
+
 	@Override
     public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
@@ -69,6 +69,6 @@ public class WebdavCopyAction extends WebdavStructureAction {
 		res.setStatus(rc);
 	}
 
-	
+
 
 }

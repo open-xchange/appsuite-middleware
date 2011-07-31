@@ -65,7 +65,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
  * {@link ConfigFileStorageAccountParser} - Provides configured accounts parsed from a <i>.properties</i> file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -75,7 +75,7 @@ public final class ConfigFileStorageAccountParser {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static ConfigFileStorageAccountParser getInstance() {
@@ -101,7 +101,7 @@ public final class ConfigFileStorageAccountParser {
 
     /**
      * Gets the configured accounts for specified service identifier.
-     * 
+     *
      * @param serviceId The service identifier
      * @return The configured accounts
      */
@@ -115,7 +115,7 @@ public final class ConfigFileStorageAccountParser {
 
     /**
      * Parses specified properties to a map associating service identifier with configured file storage accounts.
-     * 
+     *
      * @param properties The properties to parse
      */
     public void parse(final Properties properties) {

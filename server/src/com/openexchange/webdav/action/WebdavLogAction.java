@@ -66,11 +66,11 @@ public class WebdavLogAction extends AbstractAction {
     private static final Set<String> CONFIDENTIAL_HEADERS = new HashSet<String>() {{
         add("AUTHORIZATION");
     }};
-    
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLogAction.class));
 	private boolean logBody;
 	private boolean logResponse;
-	
+
 	@Override
     public void perform(WebdavRequest req, WebdavResponse res)
 			throws OXException {
@@ -88,11 +88,11 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("Resource: "); b.append(resource); b.append('\n');
 			b.append("exists: "); b.append(resource.exists()); b.append('\n');
 			b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
-		
+
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString());
 			}
-		
+
 			if(LOG.isTraceEnabled()) {
 				if(logBody) {
 					req = new ReplayWebdavRequest(req);
@@ -102,19 +102,19 @@ public class WebdavLogAction extends AbstractAction {
 					res = new CapturingWebdavResponse(res);
 				}
 			}
-		
+
 			yield(req,res);
 			b = new StringBuilder();
 			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
-				
+
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString());
 			}
-			
+
 			if(LOG.isTraceEnabled() && logResponse) {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
-			
+
 		} catch (final WebdavProtocolException x) {
 			b = new StringBuilder();
 			b.append("Status: "); b.append(x.getMessage()); b.append(' '); b.append(x.getStatus()); b.append('\n');
@@ -160,11 +160,11 @@ public class WebdavLogAction extends AbstractAction {
 			}
 		}
 	}
-	
+
 	public void setLogRequestBody(final boolean b) {
 		logBody = b;
 	}
-	
+
 	public void setLogResponseBody(final boolean b) {
 		logResponse = b;
 	}

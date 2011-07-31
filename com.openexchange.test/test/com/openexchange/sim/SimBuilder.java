@@ -64,28 +64,28 @@ import java.util.List;
 public class SimBuilder {
     private List<DynamicSim> expectedCalls = new ArrayList<DynamicSim>();
     private DynamicSim last = null;
-    
-    
+
+
     public SimBuilder expectCall(String methodName, Object...args) {
         last = new DynamicSim(new Called(methodName, args));
         expectedCalls.add(last);
         return this;
     }
-    
+
     public SimBuilder andReturn(Object returnValue) {
         last.setReturnValue(returnValue);
         return this;
     }
-    
+
     public SimBuilder andThrow(Exception x) {
         last.setException(x);
         return this;
     }
-    
+
     public void andDo(Block block) {
         last.setBlock(block);
     }
-    
+
     public <T> T getSim(Class<T> klass, Class...classes) {
         return DynamicSim.compose(klass, classes, expectedCalls); // *shrug*
     }
@@ -99,10 +99,10 @@ public class SimBuilder {
         }
         return missingCalls;
     }
-    
+
     public void assertAllWereCalled() {
         List<String> missingCalls = getMissingCalls();
         assertTrue("Missing calls: "+missingCalls.toString(), missingCalls.isEmpty());
     }
-    
+
 }

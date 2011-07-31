@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CascadingConfigObjectRegistryFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistryFactory {

@@ -54,7 +54,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountGetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAccountGetSwitch implements AttributeSwitch {
@@ -114,7 +114,7 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object primaryAddress() {
         return account.getPrimaryAddress();
     }
-    
+
     @Override
     public Object personal() {
         return account.getPersonal();

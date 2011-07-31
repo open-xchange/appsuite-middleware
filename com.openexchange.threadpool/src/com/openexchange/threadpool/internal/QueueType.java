@@ -53,7 +53,7 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * {@link QueueType} - The queue type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum QueueType {
@@ -89,14 +89,14 @@ public enum QueueType {
         this.queueProvider = queueProvider;
     }
 
-    
+
     /**
      * Checks whether the queue type enforces the thread pool being at fixed-size.
      * <ul>
      * <li>A <b>synchronous</b> queue is appropriate for <code>core-size &lt; max-size</code></li>
      * <li>A <b>linked</b> queue is appropriate for <code>core-size = max-size</code></li>
      * </ul>
-     * 
+     *
      * @return <code>true</code> if the queue type enforces the thread pool being at fixed-size; otherwsie <code>false</code>
      */
     public boolean isFixedSize() {
@@ -105,7 +105,7 @@ public enum QueueType {
 
     /**
      * Creates a new work queue of this type.
-     * 
+     *
      * @param fixedCapacity The fixed capacity
      * @return A new work queue of this type
      */
@@ -115,7 +115,7 @@ public enum QueueType {
 
     /**
      * Gets the queue type for given type string.
-     * 
+     *
      * @param type The type string
      * @return The queue type for given type string or <code>null</code>
      */

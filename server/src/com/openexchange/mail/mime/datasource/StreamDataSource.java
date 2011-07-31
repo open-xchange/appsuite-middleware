@@ -56,7 +56,7 @@ import javax.activation.DataSource;
 
 /**
  * {@link StreamDataSource} - A simple {@link DataSource data source} that encapsulates an input stream provider.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StreamDataSource implements DataSource {
@@ -70,7 +70,7 @@ public final class StreamDataSource implements DataSource {
      * called that requires the stream to be opened.</i>
      * <p>
      * Content type is initially set to "application/octet-stream".
-     * 
+     *
      * @param provider The input stream provider
      */
     public StreamDataSource(final InputStreamProvider provider) {
@@ -80,7 +80,7 @@ public final class StreamDataSource implements DataSource {
     /**
      * Creates a StreamDataSource from an InputStreamProvider object. <i>Note: The stream will not actually be opened until a method is
      * called that requires the stream to be opened.</i>
-     * 
+     *
      * @param provider The input stream provider
      * @param contentType The content type
      */
@@ -115,7 +115,7 @@ public final class StreamDataSource implements DataSource {
 
     /**
      * Sets the content type.
-     * 
+     *
      * @param contentType The content type.
      */
     public void setContentType(final String contentType) {
@@ -133,7 +133,7 @@ public final class StreamDataSource implements DataSource {
          * This method returns an InputStream representing the data and throws the appropriate exception if it can not do so.<br>
          * <small><b>NOTE:</b></small> A new InputStream object must be returned each time this method is called, and the stream must be
          * positioned at the beginning of the data.
-         * 
+         *
          * @throws IOException If an I/O error occurs when allocating a new input stream.
          * @return A newly allocated input stream
          */
@@ -141,7 +141,7 @@ public final class StreamDataSource implements DataSource {
 
         /**
          * Gets an appropriate name for the resource providing the input stream.
-         * 
+         *
          * @return An appropriate name for the resource providing the input stream
          */
         String getName();

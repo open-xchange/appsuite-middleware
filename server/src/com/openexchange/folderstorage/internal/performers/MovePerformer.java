@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MovePerformer} - Serves the <code>UPDATE</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class MovePerformer extends AbstractPerformer {
@@ -140,7 +140,7 @@ final class MovePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link MovePerformer} from given session.
-     * 
+     *
      * @param session The session
      */
     MovePerformer(final ServerSession session) {
@@ -149,7 +149,7 @@ final class MovePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link MovePerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -159,7 +159,7 @@ final class MovePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link MovePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -169,7 +169,7 @@ final class MovePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link MovePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer

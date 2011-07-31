@@ -59,7 +59,7 @@ public class GetSwitch implements MetadataSwitcher {
 	public GetSwitch(final DocumentMetadata metadata){
 		this.metadata = metadata;
 	}
-	
+
 	@Override
     public Object lastModified() {
 		return metadata.getLastModified();

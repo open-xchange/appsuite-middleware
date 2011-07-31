@@ -61,7 +61,7 @@ import com._4psa.headerdata_xsd._2_5.UserCredentials;
 
 /**
  * {@link AbstractVoipNowSOAPAction} - The abstract SOAP action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractVoipNowSOAPAction<S extends Object> extends AbstractVoipNowAction {
@@ -75,7 +75,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Object> extends Abstra
 
 	/**
 	 * Creates a new the SOAP stub.
-	 * 
+	 *
 	 * @return A new SOAP stub
 	 * @throws AxisFault If creating a new stub fails
 	 */
@@ -83,21 +83,21 @@ public abstract class AbstractVoipNowSOAPAction<S extends Object> extends Abstra
 
 	/**
 	 * Gets the SOAP path with starting "/" character.
-	 * 
+	 *
 	 * @return The SOAP path
 	 */
 	protected abstract String getSOAPPath();
 
 	/**
 	 * Gets the SOAP timeout in milliseconds.
-	 * 
+	 *
 	 * @return The SOAP timeout in milliseconds
 	 */
 	protected abstract int getSOAPTimeout();
 
 	/**
 	 * Configures a new stub according to given setting.
-	 * 
+	 *
 	 * @param setting The VoipNow server setting
 	 * @return The new configured stub
 	 * @throws AxisFault If returning a new stub fails
@@ -122,7 +122,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Object> extends Abstra
 		((BindingProvider)soapStub).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url.toString());
 
 		List<Header> commonHeaders = new ArrayList<Header>(1);
-		
+
 		try {
 			Header header = new Header(new QName("http://4psa.com/HeaderData.xsd/2.5.1", "userCredentials"), getUserCredentials(setting), new JAXBDataBinding(UserCredentials.class));
 			commonHeaders.add(header);
@@ -130,7 +130,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Object> extends Abstra
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
-		
+
 		//TODO: Implement those features somehow
 		//        final int soapTimeout = getSOAPTimeout();
 		//        final Integer timeout = Integer.valueOf(soapTimeout);
@@ -149,7 +149,7 @@ public abstract class AbstractVoipNowSOAPAction<S extends Object> extends Abstra
 
 	/**
 	 * Gets the appropriate SOAP {@link UserCredentials} instance from specified {@link VoipNowServerSetting setting}.
-	 * 
+	 *
 	 * @param setting The VoipNow server setting
 	 * @return The appropriate SOAP {@link UserCredentials} instance
 	 */

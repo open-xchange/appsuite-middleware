@@ -96,7 +96,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ReportingMBean}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ReportingMBean implements DynamicMBean {
@@ -237,15 +237,15 @@ public class ReportingMBean implements DynamicMBean {
     private Integer modifyForConfigCascade(Integer accessCombination, ConfigView configView) throws OXException {
         ComposedConfigProperty<Boolean> caldav = configView.property("com.openexchange.caldav.enabled", boolean.class);
         ComposedConfigProperty<Boolean> carddav = configView.property("com.openexchange.carddav.enabled", boolean.class);
-        
+
         if (caldav.isDefined() && caldav.get()) {
             accessCombination =  (accessCombination | UserConfiguration.CALDAV);
-        } 
-        
+        }
+
         if (carddav.isDefined() && carddav.get()) {
             accessCombination =  (accessCombination | UserConfiguration.CARDDAV);
         }
-        
+
         return accessCombination;
     }
 

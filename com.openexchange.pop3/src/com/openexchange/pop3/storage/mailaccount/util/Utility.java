@@ -53,7 +53,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link Utility} - TODO Short description of this class' purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utility {
@@ -70,7 +70,7 @@ public final class Utility {
      * <code>
      * &quot;<b>Trash</b>&quot;&nbsp;=&gt;&nbsp;&quot;INBOX/path/to/pop3account/<b>Trash</b>&quot;
      * </code>
-     * 
+     *
      * @param path The path to prepend; e.g. "INBOX/My POP3 account"
      * @param separator The separator character
      * @param virtualFullname The virtual fullname; e.g. "INBOX"
@@ -88,7 +88,7 @@ public final class Utility {
      * <code>
      * &quot;INBOX/path/to/pop3account/<b>Trash</b>&quot;&nbsp;=&gt;&nbsp;&quot;<b>Trash</b>&quot;
      * </code>
-     * 
+     *
      * @param path The path to strip
      * @param realFullname The real fullname
      * @return The virtual fullname

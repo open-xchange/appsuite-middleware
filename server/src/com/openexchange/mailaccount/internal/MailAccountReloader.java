@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountReloader} - Manages to reload the mail account into the cache if cache invalidates it.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class MailAccountReloader extends Refresher<MailAccount> implements MailAccount {
@@ -71,7 +71,7 @@ final class MailAccountReloader extends Refresher<MailAccount> implements MailAc
 
     /**
      * Initializes a new {@link MailAccountReloader}.
-     * 
+     *
      * @throws OXException If initial load of the object fails.
      */
     public MailAccountReloader(final OXObjectFactory<MailAccount> factory, final String regionName) throws OXException {

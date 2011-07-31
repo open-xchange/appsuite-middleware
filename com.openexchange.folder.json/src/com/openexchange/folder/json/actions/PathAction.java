@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PathAction} - Maps the action to a PATH action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PathAction extends AbstractFolderAction {

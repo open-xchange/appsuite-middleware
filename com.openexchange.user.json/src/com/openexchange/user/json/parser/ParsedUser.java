@@ -56,7 +56,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link ParsedUser} - A parsed user.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParsedUser implements User {
@@ -162,7 +162,7 @@ public final class ParsedUser implements User {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final int id) {
@@ -171,7 +171,7 @@ public final class ParsedUser implements User {
 
     /**
      * Sets the locale
-     * 
+     *
      * @param locale The locale to set
      */
     public void setLocale(final Locale locale) {
@@ -180,7 +180,7 @@ public final class ParsedUser implements User {
 
     /**
      * Sets the time zone
-     * 
+     *
      * @param timeZone The time zone to set
      */
     public void setTimeZone(final String timeZone) {

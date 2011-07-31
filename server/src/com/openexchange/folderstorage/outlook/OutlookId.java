@@ -54,7 +54,7 @@ import com.openexchange.folderstorage.database.DatabaseId;
 
 /**
  * {@link OutlookId} - A MS Outlook ID which orders subfolder by name in a locale-sensitive way.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookId implements SortableId {
@@ -67,7 +67,7 @@ public final class OutlookId implements SortableId {
 
     /**
      * Initializes a new {@link DatabaseId}.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      * @param name The name

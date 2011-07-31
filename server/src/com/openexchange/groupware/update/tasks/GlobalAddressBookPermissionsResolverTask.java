@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link GlobalAddressBookPermissionsResolverTask} - Resolves GAB's group permission to individual user permissions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAdapter {

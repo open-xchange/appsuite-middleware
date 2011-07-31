@@ -135,7 +135,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * DatabaseImpl
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
@@ -493,9 +493,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             VALIDATION.validate(document);
             CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
-            
+
             final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
-            
+
             final InfostoreFilenameReservation reservation = reserve(
                 document.getFileName(),
                 document.getFolderId(),
@@ -506,7 +506,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             if(titleAlso) {
                 document.setTitle(reservation.getFilename());
             }
-            
+
             try {
                 Connection writeCon = null;
                 try {

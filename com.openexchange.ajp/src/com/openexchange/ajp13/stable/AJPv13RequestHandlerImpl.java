@@ -94,7 +94,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * <p>
  * Sub-sequential AJP communication may be initiated through {@link AJPv13ServletInputStream} and {@link AJPv13ServletOutputStream} during
  * servlets' processing.
- * 
+ *
  * @see AJPv13ServletInputStream
  * @see AJPv13ServletOutputStream
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -355,7 +355,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration
-     * 
+     *
      * @return The forward request's bytes as a formatted string
      */
     @Override
@@ -365,7 +365,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the AJP connection of this request handler
-     * 
+     *
      * @return The AJP connection of this request handler
      */
     @Override
@@ -375,7 +375,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets the AJP connection of this request handler
-     * 
+     *
      * @param ajpCon The AJP connection
      */
     void setAJPConnection(final AJPv13ConnectionImpl ajpCon) {
@@ -384,7 +384,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>
-     * 
+     *
      * @param payloadLength
      * @param in
      * @param strict if <code>true</code> only <code>payloadLength</code> bytes are read, otherwise all data is read
@@ -544,7 +544,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Flushes the response to output stream
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void doResponseFlush() throws IOException {
@@ -586,7 +586,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets/appends new data to servlet request's input stream
-     * 
+     *
      * @param newData The new data to set
      * @throws IOException If an I/O error occurs
      */
@@ -654,7 +654,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets the request's content length
-     * 
+     *
      * @param contentLength The content length
      */
     @Override
@@ -718,7 +718,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Marks that requests content type equals <code>application/x-www-form-urlencoded</code>
-     * 
+     *
      * @param isFormData <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise
      *            <code>false</code>
      */

@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * {@link UnifiedINBOXCompletionService} - A {@link TrackingCompletionService} that uses a supplied {@link Executor} to execute tasks. This
  * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXCompletionService<V> implements TrackingCompletionService<V> {
@@ -100,7 +100,7 @@ public final class UnifiedINBOXCompletionService<V> implements TrackingCompletio
 
     /**
      * Initializes a new {@link UnifiedINBOXCompletionService}.
-     * 
+     *
      * @param executor The executor to use
      * @throws NullPointerException If executor is <tt>null</tt>
      */
@@ -115,7 +115,7 @@ public final class UnifiedINBOXCompletionService<V> implements TrackingCompletio
 
     /**
      * Initializes a new {@link UnifiedINBOXCompletionService}.
-     * 
+     *
      * @param executor The executor to use
      * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
      * @throws NullPointerException If executor or completionQueue are <tt>null</tt>

@@ -61,7 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
 /**
  * {@link HTMLParser} - Parses a well-formed HTML document based on {@link XmlPullParser}. The corresponding events are delegated to a given
  * instance of {@link HTMLHandler}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLParser {
@@ -87,7 +87,7 @@ public final class HTMLParser {
 
     /**
      * Parses specified well-formed HTML document and delegates events to given instance of {@link HTMLHandler}
-     * 
+     *
      * @param html The well-formed HTML document
      * @param handler The HTML handler
      */

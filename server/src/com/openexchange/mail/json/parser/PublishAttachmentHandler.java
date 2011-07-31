@@ -106,7 +106,7 @@ import com.openexchange.user.UserService;
 /**
  * {@link PublishAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that publishes attachments on exceeded quota (either
  * overall or per-file quota).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
@@ -131,7 +131,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     /**
      * Initializes a new {@link PublishAttachmentHandler}.
-     * 
+     *
      * @param session The session providing needed user information
      * @param transportProvider The transport provider
      * @param protocol The server's protocol

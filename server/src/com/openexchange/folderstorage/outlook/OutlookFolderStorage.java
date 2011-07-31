@@ -139,7 +139,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OutlookFolderStorage} - The MS Outlook folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorage implements FolderStorage {
@@ -265,7 +265,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Removes specified folder from TCM map.
-     * 
+     *
      * @param fullname The folder full name
      * @param user The user identifier
      * @param contextId The context identifier
@@ -322,7 +322,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     /**
      * Gets the public mail folder path.
-     * 
+     *
      * @return The public mail folder path
      */
     public String getPublicMailFolderPath() {
@@ -822,7 +822,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final User user = storageParameters.getUser();
             final int tree = Tools.getUnsignedInteger(treeId);
             final int contextId = storageParameters.getContextId();
-            
+
             final List<Folder> realFolders;
             {
                 /*
@@ -1106,7 +1106,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             }
                             /*-
                              * TODO: If sorting needed:
-                             * 
+                             *
                              * outlookFolder.setSubfolderIDs(null);
                              * outlookFolder.setSubscribedSubfolders(true);
                              */
@@ -2270,7 +2270,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     private static SortableId[] getSubfolderIDs(final Folder realFolder, final FolderStorage folderStorage, final StorageParameters storageParameters) throws OXException {
         /*-
-         * 
+         *
         final String[] ids = realFolder.getSubfolderIDs();
         if (null != ids) {
             return ids;

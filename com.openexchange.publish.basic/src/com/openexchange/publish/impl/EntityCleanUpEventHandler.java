@@ -60,7 +60,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link EntityCleanUpEventHandler}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class EntityCleanUpEventHandler<T> implements EventHandler {

@@ -61,7 +61,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link SimpleTableCreationTask}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {

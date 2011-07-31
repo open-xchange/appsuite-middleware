@@ -99,7 +99,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> {
@@ -192,7 +192,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
-     * 
+     *
      * @param session The session providing needed user data
      */
     protected IMAPAccess(final Session session) {
@@ -202,7 +202,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access}.
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
@@ -213,7 +213,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the underlying IMAP store.
-     * 
+     *
      * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
     public AccessedIMAPStore getIMAPStore() {
@@ -233,9 +233,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void releaseResources() {
         /*-
-         * 
+         *
          * Don't need to close when cached!
-         * 
+         *
         if (folderStorage != null) {
             try {
                 folderStorage.releaseResources();
@@ -304,7 +304,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the IMAP configuration.
-     * 
+     *
      * @return The IMAP configuration
      */
     public IMAPConfig getIMAPConfig() {
@@ -706,7 +706,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     public boolean isConnected() {
         /*-
-         * 
+         *
         if (!connected) {
             return false;
         }
@@ -722,7 +722,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets used IMAP session
-     * 
+     *
      * @return The IMAP session
      */
     public javax.mail.Session getMailSession() {
@@ -1026,7 +1026,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Checks if given string is empty.
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */

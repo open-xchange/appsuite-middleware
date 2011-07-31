@@ -74,7 +74,7 @@ import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 
 /**
  * {@link YahooServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class YahooServiceImpl implements YahooService {
@@ -94,11 +94,11 @@ public class YahooServiceImpl implements YahooService {
     /* (non-Javadoc)
      * @see com.openexchange.oauth.yahoo.YahooService#getContacts(java.lang.String, int, int, int)
      */
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {        
+    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthAccount account = null;
 
-        
+
             com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             try {
                 account = oAuthService.getAccount(accountId, password, user, contextId);
@@ -119,7 +119,7 @@ public class YahooServiceImpl implements YahooService {
         OAuthRequest request1 = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
         service.signRequest(accessToken, request1);
         Response response1 = request1.send();
-        
+
 
         // Extract the Users ID from a response looking like this: <value>ANZAPAEE55TMMWPLYXQCJO7BAM<
         Pattern pattern = Pattern.compile("<value>([^<]*)<");
@@ -134,20 +134,20 @@ public class YahooServiceImpl implements YahooService {
         OAuthRequest request = new OAuthRequest(Verb.GET, resource);
         service.signRequest(accessToken, request);
         Response response = request.send();
-        
+
         try {
             JSONObject allContactsWholeResponse = new JSONObject(response.getBody());
             if (allContactsWholeResponse.has("contacts")) {
                 JSONObject contacts = (JSONObject) allContactsWholeResponse.get("contacts");
                 if (contacts.has("contact")) {
                     JSONArray allContactsArray = (JSONArray) contacts.get("contact");
-                    
+
                     // get each contact with its own request
                     for (int i = 0; i < allContactsArray.length(); i++) {
                         JSONObject entry = allContactsArray.getJSONObject(i);
                         if (entry.has("id")) {
                             String contactId = entry.getString("id");
-                            String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", guid).replace("CONTACT_ID", contactId);                            
+                            String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", guid).replace("CONTACT_ID", contactId);
                             OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
                             Response singleContactResponse = singleContactRequest.send();
@@ -163,7 +163,7 @@ public class YahooServiceImpl implements YahooService {
 
         return contactList;
     }
-    
+
     private Contact parseSingleContact(String singleContact) {
         Contact oxContact = new Contact();
         try {
@@ -259,7 +259,7 @@ public class YahooServiceImpl implements YahooService {
                                     }
                                 }
                             }
-                            
+
                             else if (type.equals("otherid")){
                                 if (field.has("value") && field.has("flags")){
                                     String kind = field.getString("flags");
@@ -268,7 +268,7 @@ public class YahooServiceImpl implements YahooService {
                                     if (matcher.find()){
                                         String service = matcher.group(1);
                                         oxContact.setInstantMessenger1(field.getString("value") + " ("+service+")");
-                                    }                                    
+                                    }
                                 }
                             }
 
@@ -314,7 +314,7 @@ public class YahooServiceImpl implements YahooService {
         }
         return oxContact;
     }
-    
+
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
         try {

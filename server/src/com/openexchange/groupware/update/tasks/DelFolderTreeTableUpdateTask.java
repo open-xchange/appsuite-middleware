@@ -67,11 +67,11 @@ import com.openexchange.groupware.update.UpdateTask;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DelFolderTreeTableUpdateTask implements UpdateTask {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelFolderTreeTableUpdateTask.class));
-	
+
 	/* (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
 	@Override
@@ -89,9 +89,9 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 		 */
 		return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
 	}
-	
+
 	private static final String STR_INFO = "Performing update task 'DelFolderTreeTableUpdateTask'";
-	
+
 	private static final String SQL_MODIFY = "ALTER TABLE del_oxfolder_tree MODIFY `fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
 
 	/* (non-Javadoc)

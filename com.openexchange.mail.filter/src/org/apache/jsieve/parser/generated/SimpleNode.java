@@ -22,7 +22,7 @@ public class SimpleNode extends org.apache.jsieve.parser.SieveNode implements No
 
   public void jjtClose() {
   }
-  
+
   public void jjtSetParent(Node n) { parent = n; }
   public Node jjtGetParent() { return parent; }
 

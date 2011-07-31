@@ -64,7 +64,7 @@ public class BooleanConfigPropertyPrefItem extends ConfigurationPropertyPreferen
     public BooleanConfigPropertyPrefItem(String key, ConfigurationService config, String...path) {
         super(key, config, path);
     }
-    
+
     @Override
     public Object convert(String property) {
         if(property == null) {
@@ -73,5 +73,5 @@ public class BooleanConfigPropertyPrefItem extends ConfigurationPropertyPreferen
         return TRUE.equalsIgnoreCase(property);
     }
 
-    
+
 }

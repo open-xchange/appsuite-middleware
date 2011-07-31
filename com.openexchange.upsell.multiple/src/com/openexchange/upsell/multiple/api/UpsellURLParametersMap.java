@@ -15,11 +15,11 @@ public enum UpsellURLParametersMap {
 	MAP_ATTR_LANGUAGE ( "_LANG_"),
 	MAP_ATTR_PURCHASE_TYPE ( "_PURCHASE_TYPE_"),
 	MAP_ATTR_INVITE ( "_INVITE_");
-	
+
 	public String propertyName;
 
 	private UpsellURLParametersMap(String propertyName) {
 		this.propertyName = propertyName;
 	}
-	
+
 }

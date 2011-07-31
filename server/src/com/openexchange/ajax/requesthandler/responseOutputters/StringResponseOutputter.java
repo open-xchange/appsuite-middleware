@@ -84,7 +84,7 @@ public class StringResponseOutputter implements ResponseOutputter {
         if (! (resultObject instanceof String)) {
             resultObject = resultObject.toString();
         }
-        
+
         Map<String, String> headers = result.getHeaders();
         for(Map.Entry<String, String> entry : headers.entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());

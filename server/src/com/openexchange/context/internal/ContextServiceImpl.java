@@ -57,9 +57,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
  * {@link ContextServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ContextServiceImpl implements ContextService {
 

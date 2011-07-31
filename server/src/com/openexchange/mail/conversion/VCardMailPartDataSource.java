@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link VCardMailPartDataSource} - The {@link MailPartDataSource} for VCard parts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VCardMailPartDataSource extends MailPartDataSource {

@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OXFolderUtility} - Provides utility methods for folder operations.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderUtility {
@@ -94,7 +94,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks for duplicate folder name considering locale-sensitive folder names.
-     * 
+     *
      * @param parentFolderId The parent folder ID
      * @param folderName The folder name to check
      * @param locale The user's locale
@@ -128,7 +128,7 @@ public final class OXFolderUtility {
 
     /**
      * Tests if specified folder contains contains duplicate permissions.
-     * 
+     *
      * @param folder The folder whose permissions shall be checked.
      * @param ctx The context
      * @throws OXException If specified folder contains contains duplicate permissions.
@@ -157,7 +157,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks for similar named shared folder
-     * 
+     *
      * @param userIds The user IDs
      * @param allSharedFolders The shared folders
      * @param folderName The folder name of the folder that shall be shared
@@ -208,7 +208,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks for invalid characters in folder name
-     * 
+     *
      * @param checkMe The folder whose name shall be checked
      * @throws OXException If folder name contains invalid characters
      */
@@ -222,7 +222,7 @@ public final class OXFolderUtility {
     /**
      * Checks if permissions from given folder specify (at least) one folder admin and if creating user is the folder admin for his default
      * folders.
-     * 
+     *
      * @param folderObj The folder
      * @param userId The user ID
      * @param ctx The context
@@ -276,7 +276,7 @@ public final class OXFolderUtility {
 
     /**
      * Ensures that an user who does not hold full shared folder access cannot share one of his private folders
-     * 
+     *
      * @param folderObj The folder object
      * @param sessionUserConfig The session user's configuration
      * @param ctx The context
@@ -307,7 +307,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks system folder permissions.
-     * 
+     *
      * @param folderId The folder ID
      * @param newPerms The update-operation permissions
      * @param ctx The context
@@ -401,7 +401,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the permissions without folder access by comparing specified storage-version permissions with update-operation permissions
-     * 
+     *
      * @param newPerms The update-operation permissions
      * @param storagePerms The storage-version permissions
      * @return The permissions without folder access
@@ -443,7 +443,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks every <b>user permission</b> against user configuration settings
-     * 
+     *
      * @param folderObj The folder object
      * @param ctx The context
      * @throws OXException If a composed permission does not obey user's configuration
@@ -492,7 +492,7 @@ public final class OXFolderUtility {
 
     /**
      * This routine ensures that owner of parental shared folder gets full access (incl. folder admin) to shared subfolder
-     * 
+     *
      * @param parentOwner The user ID of parent folder owner
      * @param folderObj The shared subfolder
      * @param userId The user ID
@@ -550,7 +550,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks specified new folder module against parent folder
-     * 
+     *
      * @param parentId The parent folder ID
      * @param parentModule The parent module
      * @param newFolderModule The new folder module
@@ -579,7 +579,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks specified folder type against parent folder
-     * 
+     *
      * @param parentFolder The parent folder
      * @param newFolderType The folder type
      * @return <code>true</code> if parent allows specified folder type; otherwise <code>false</code>
@@ -607,7 +607,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks if specified folder ID is a descendant folder
-     * 
+     *
      * @param parentIDList The parent IDs
      * @param possibleDescendant The ID of possible descendant folder
      * @param readCon A connection with read-only capability
@@ -642,7 +642,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks if given update object indicates to perform a rename-only operation compared to storage object.
-     * 
+     *
      * @param updateObject The update object
      * @param storageObject The storage object
      * @return <code>true</code> if given update object indicates to perform a rename-only operation; otherwise <code>false</code>
@@ -657,7 +657,7 @@ public final class OXFolderUtility {
         }
         /*-
          * Ok, folder name differs. Check other fields.
-         * 
+         *
          * Permissions
          */
         if (updateObject.containsPermissions()) {
@@ -692,7 +692,7 @@ public final class OXFolderUtility {
 
     /**
      * Checks if specified permission lists are different.
-     * 
+     *
      * @param storageList The storage-version permissions
      * @param updateList The update-version permissions
      * @return <code>true</code> if different; otherwise <code>false</code>
@@ -727,7 +727,7 @@ public final class OXFolderUtility {
     /**
      * Gets those entities which are new or updated in given update list compared to given storage list or whole update list if storage list
      * is <code>null</code>.
-     * 
+     *
      * @param storageList The storage list of permissions (if <code>null</code> whole update list entities are added)
      * @param updateList The update list of permissions
      * @param user The user ID
@@ -771,7 +771,7 @@ public final class OXFolderUtility {
     /**
      * Adds permission-associated user ID or group member IDs to specified set dependent on whether given permission denotes an user or a
      * group permission.
-     * 
+     *
      * @param permission The permission
      * @param users The set of user IDs
      * @param ctx The context (possibly needed to resolve group)
@@ -796,7 +796,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the folder name for logging/messaging purpose
-     * 
+     *
      * @param fo The folder
      * @return The folder name for logging/messaging purpose
      */
@@ -807,7 +807,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the folder name for logging/messaging purpose
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @return The folder name for logging/messaging purpose
@@ -822,7 +822,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the user name for logging/messaging purpose.
-     * 
+     *
      * @param session The session
      * @param u The user
      * @return The user name for logging/messaging purpose.
@@ -840,7 +840,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the user name for logging/messaging purpose.
-     * 
+     *
      * @param userId The user ID
      * @param ctx The context
      * @return The user name for logging/messaging purpose.
@@ -862,7 +862,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the user name for logging/messaging purpose.
-     * 
+     *
      * @param session The server session
      * @return The user name for logging/messaging purpose.
      */
@@ -877,7 +877,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the group name for logging/messaging purpose.
-     * 
+     *
      * @param groupId The group ID
      * @param ctx The context
      * @return The group name for logging/messaging purpose.
@@ -907,7 +907,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the given type's string representation
-     * 
+     *
      * @param type The type
      * @return The type's string representation
      */
@@ -938,7 +938,7 @@ public final class OXFolderUtility {
 
     /**
      * Gets the given module's string representation
-     * 
+     *
      * @param module The module
      * @return The module's string representation
      */

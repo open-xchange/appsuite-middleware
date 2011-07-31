@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractAttachmentAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAttachmentAction implements AJAXActionService {

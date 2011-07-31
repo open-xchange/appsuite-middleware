@@ -58,9 +58,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * {@link HostnameServiceCustomizer} - The {@link ServiceTrackerCustomizer
  * service tracker customizer} for {@link HostnameService hostname service}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer {
 

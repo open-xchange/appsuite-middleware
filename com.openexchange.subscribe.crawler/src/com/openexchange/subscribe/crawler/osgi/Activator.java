@@ -74,7 +74,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator implements BundleActivator {

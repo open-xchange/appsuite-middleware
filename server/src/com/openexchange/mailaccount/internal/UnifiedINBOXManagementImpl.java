@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXManagementImpl} - The Unified INBOX management implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement {

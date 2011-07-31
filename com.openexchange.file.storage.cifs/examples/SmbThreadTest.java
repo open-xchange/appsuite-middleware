@@ -72,7 +72,7 @@ public class SmbThreadTest extends Thread {
                 Thread.sleep(Math.abs(rnd.nextInt(2)+1));
             } catch (InterruptedException e) {
 
-            } 
+            }
         }
     }
 

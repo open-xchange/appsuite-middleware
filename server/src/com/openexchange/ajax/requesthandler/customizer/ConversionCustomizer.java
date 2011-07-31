@@ -66,11 +66,11 @@ import com.openexchange.tools.session.ServerSession;
 public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
 
     private Converter converter = null;
-    
+
     public ConversionCustomizer(Converter converter) {
         this.converter = converter;
     }
-    
+
     @Override
     public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
         return request;

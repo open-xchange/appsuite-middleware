@@ -67,8 +67,8 @@ public class OXHCalendarParserTest extends TestCase {
     protected OXHCalendarParser parser;
 
     protected SimpleDateFormat sdf ;
-    
-    protected String fullAppointment = 
+
+    protected String fullAppointment =
         "<div id=\"hcalendar-My-hCalendar-event\" class=\"vevent\">" +
     		"<a href=\"http://microformats.org/code/hcalendar/creator\" class=\"url\">" +
     		    "<abbr title=\"2010-02-01T13:00+01:0000\" class=\"dtstart\">February 1th 1pm</abbr>, " +
@@ -89,7 +89,7 @@ public class OXHCalendarParserTest extends TestCase {
     		     "<a href=\"http://microformats.org/code/hcalendar/creator\">hCalendar Creator</a>." +
     		 "</p>" +
     	"</div>";
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -121,7 +121,7 @@ public class OXHCalendarParserTest extends TestCase {
             assertEquals(dateString + ": Minutes should match", 14, cal.get(Calendar.MINUTE));
             assertEquals(dateString + ": Seconds should match", 6, cal.get(Calendar.SECOND));
     }
-    
+
     public void testShouldParseWhenStartingWithVCalendar(){
         String html =
         "<div id=\"hcalendar-event-title\" class=\"vevent\">" +
@@ -132,23 +132,23 @@ public class OXHCalendarParserTest extends TestCase {
             "</p>" +
         "</div>";
     }
-    
+
     public void testShouldParseWhenStartingWithVEvent() throws OXException, ParseException{
         String html = "<span class=\"vevent\">"+
             "<span class=\"summary\">The microformats.org site was launched</span>"+
-            "on <span class=\"dtstart\">2005-06-20</span>"+ 
+            "on <span class=\"dtstart\">2005-06-20</span>"+
             "at the Supernova Conference "+
             "in <span class=\"location\">San Francisco, CA, USA</span>."+
        "</span>";
         Collection<Appointment> entries = parser.parse(new StringReader(html));
         assertEquals("Should find one entry", 1, entries.size());
         Appointment app = entries.iterator().next();
-        
+
         assertEquals("Location should match", "San Francisco, CA, USA", app.getLocation());
         assertEquals("Summary should match", "The microformats.org site was launched", app.getNote());
         assertEquals("Date should match", OXHCalendarParser.parseDate("2005-06-20"), app.getStartDate());
     }
-    
+
     public void testShouldParseWhenHavingNestedVCalendarAndVEvent() throws OXException{
         String html = "<div class=\"vCalendar\">"
             +fullAppointment
@@ -157,13 +157,13 @@ public class OXHCalendarParserTest extends TestCase {
         Collection<Appointment> entries = parser.parse(new StringReader(html));
         assertEquals("Should find two entries", 2, entries.size());
     }
-    
+
     public void testShouldDealWithMalformedXML(){
-        
+
     }
-    
+
     public void testShouldDealWithHTML401Transitional(){
-        
+
     }
 
 

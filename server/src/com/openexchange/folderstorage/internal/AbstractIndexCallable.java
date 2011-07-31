@@ -54,7 +54,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * {@link AbstractIndexCallable} - Extends {@link Callable} interface by an index field.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -72,7 +72,7 @@ public abstract class AbstractIndexCallable<V> implements Callable<V> {
 
     /**
      * Initializes a new {@link AbstractIndexCallable}.
-     * 
+     *
      * @param index The index assigned to this callable
      * @param log The logger
      */

@@ -67,7 +67,7 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
 
     /**
      * Default constructor.
-     * @param context bundle context 
+     * @param context bundle context
      */
     public DatabaseCustomizer(BundleContext context) {
         super();

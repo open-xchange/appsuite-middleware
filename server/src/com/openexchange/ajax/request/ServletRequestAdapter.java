@@ -64,12 +64,12 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ServletRequestAdapter implements SimpleRequest {
-	
+
 	private final HttpServletRequest req;
 	private final HttpServletResponse res;
 	private PrintWriter w;
 	private Object body;
-	
+
 
 	public ServletRequestAdapter(final HttpServletRequest req, final HttpServletResponse res) {
 		this.req=req;
@@ -113,7 +113,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 				characterEncoding=ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
 			}
 			final String body =  new String(baos.toByteArray(), characterEncoding);
-			
+
 			return this.body = new JSONObject("{\"data\": "+body+'}').get("data");
 		} catch (final IOException e) {
 			return null;
@@ -121,7 +121,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder();

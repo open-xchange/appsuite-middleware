@@ -68,7 +68,7 @@ public class EntityCleanUp {
     public EntityCleanUp(PublicationStorage storage) {
         this.storage = storage;
     }
-    
+
     public void cleanUp(Context ctx, String module, String entityId) throws OXException {
         List<Publication> publications = storage.getPublications(ctx, module, entityId);
         for (Publication publication : publications) {
