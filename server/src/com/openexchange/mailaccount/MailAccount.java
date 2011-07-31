@@ -212,6 +212,13 @@ public interface MailAccount extends Serializable {
     public String getPersonal();
 
     /**
+     * Gets the reply-to address.
+     * 
+     * @return The reply-to address
+     */
+    public String getReplyTo();
+
+    /**
      * Checks if this mail account is a default account.
      * 
      * @return <code>true</code> if this mail account is a default account; otherwise <code>false</code>
