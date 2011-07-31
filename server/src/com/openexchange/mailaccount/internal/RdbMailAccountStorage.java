@@ -990,6 +990,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             } else {
                                 stmt.setString(pos++, personal);
                             }
+                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                            final String replyTo = mailAccount.getReplyTo();
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
+                            }
                         } else if (DEFAULT.contains(attribute)) {
                             if (DEFAULT_FULL_NAMES.contains(attribute)) {
                                 final String fullName =
@@ -1060,6 +1067,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
+                            }
+                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                            final String replyTo = mailAccount.getReplyTo();
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
                             }
                         } else {
                             stmt.setObject(pos++, value);
