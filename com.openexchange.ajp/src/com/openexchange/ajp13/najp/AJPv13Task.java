@@ -496,7 +496,7 @@ public final class AJPv13Task implements Task<Object> {
                 LOG.error(e.getMessage(), e);
             } catch (final AJPv13TimeoutException e) {
                 if (DEBUG_ENABLED) {
-                    LOG.debug("Read timed out", e);
+                    LOG.debug("AJP read timed out");
                 }
                 endResponse = false;
             } catch (final Throwable e) {
