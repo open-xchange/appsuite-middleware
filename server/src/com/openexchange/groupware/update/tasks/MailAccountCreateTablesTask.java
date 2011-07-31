@@ -89,6 +89,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             "password VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
             "primary_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
             "personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
+            "replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
             "default_flag TINYINT unsigned NOT NULL default 0," + 
             "spam_handler VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
             "trash VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
@@ -121,6 +122,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
                 "password VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
                 "send_addr VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
                 "personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
+                "replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," + 
                 "default_flag TINYINT unsigned NOT NULL default 0," + 
                 "unified_inbox TINYINT unsigned default 0," + 
                 "PRIMARY KEY  (cid, id, user)," + 
