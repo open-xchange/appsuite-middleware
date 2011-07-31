@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Request;
@@ -604,25 +605,6 @@ public final class AJPv13Task implements Task<Object> {
         }
     }
 
-    private static final byte[] ERROR_SEND_HEADERS = new byte[] {
-        65, 66, 0, 27, 4, 1, -9, 0, 19, 83, 101, 114, 118, 105, 99, 101, 32, 85, 110, 97, 118, 97, 105, 108, 97, 98, 108, 101, 0, 0, 0 };
-
-    private static final byte[] ERROR_SEND_BODY = new byte[] {
-        65, 66, 1, -110, 3, 1, -114, 60, 33, 68, 79, 67, 84, 89, 80, 69, 32, 72, 84, 77, 76, 32, 80, 85, 66, 76, 73, 67, 32, 34, 45, 47,
-        47, 73, 69, 84, 70, 47, 47, 68, 84, 68, 32, 72, 84, 77, 76, 32, 50, 46, 48, 47, 47, 69, 78, 34, 62, 13, 10, 60, 104, 116, 109, 108,
-        62, 60, 104, 101, 97, 100, 62, 13, 10, 60, 116, 105, 116, 108, 101, 62, 53, 48, 51, 32, 83, 101, 114, 118, 105, 99, 101, 32, 85,
-        110, 97, 118, 97, 105, 108, 97, 98, 108, 101, 60, 47, 116, 105, 116, 108, 101, 62, 13, 10, 60, 47, 104, 101, 97, 100, 62, 60, 98,
-        111, 100, 121, 62, 13, 10, 60, 104, 49, 62, 53, 48, 51, 32, 83, 101, 114, 118, 105, 99, 101, 32, 85, 110, 97, 118, 97, 105, 108,
-        97, 98, 108, 101, 60, 47, 104, 49, 62, 13, 10, 60, 112, 62, 84, 104, 101, 32, 115, 101, 114, 118, 101, 114, 32, 105, 115, 32, 116,
-        101, 109, 112, 111, 114, 97, 114, 105, 108, 121, 32, 117, 110, 97, 98, 108, 101, 32, 116, 111, 32, 115, 101, 114, 118, 105, 99,
-        101, 32, 121, 111, 117, 114, 32, 114, 101, 113, 117, 101, 115, 116, 32, 100, 117, 101, 32, 116, 111, 32, 109, 97, 105, 110, 116,
-        101, 110, 97, 110, 99, 101, 32, 100, 111, 119, 110, 116, 105, 109, 101, 32, 111, 114, 32, 99, 97, 112, 97, 99, 105, 116, 121, 32,
-        112, 114, 111, 98, 108, 101, 109, 115, 46, 32, 80, 108, 101, 97, 115, 101, 32, 116, 114, 121, 32, 97, 103, 97, 105, 110, 32, 108,
-        97, 116, 101, 114, 46, 60, 47, 112, 62, 13, 10, 60, 104, 114, 62, 13, 10, 60, 97, 100, 100, 114, 101, 115, 115, 62, 83, 97, 116,
-        44, 32, 51, 48, 32, 74, 117, 108, 121, 32, 50, 48, 49, 49, 32, 49, 55, 58, 53, 56, 58, 51, 53, 32, 71, 77, 84, 44, 38, 110, 98,
-        115, 112, 59, 79, 112, 101, 110, 45, 88, 99, 104, 97, 110, 103, 101, 32, 118, 54, 46, 50, 48, 46, 48, 45, 82, 101, 118, 50, 48, 60,
-        47, 97, 100, 100, 114, 101, 115, 115, 62, 13, 10, 60, 47, 98, 111, 100, 121, 62, 60, 47, 104, 116, 109, 108, 62, 0 };
-
     /**
      * Closes the accepted client socket.
      * 
@@ -641,17 +623,13 @@ public final class AJPv13Task implements Task<Object> {
                         OutputStream out = null;
                         if (!requestHandler.isHeadersSent()) {
                             out = s.getOutputStream();
-                            /*-
-                             * Write error response
-                             * 
-                             * Send response headers
-                             */
-                            out.write(ERROR_SEND_HEADERS);
+                            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+                            final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
+                            // Write headers
+                            out.write(AJPv13Response.getSendHeadersBytes(response));
                             out.flush();
-                            /*
-                             * Send response body
-                             */
-                            out.write(ERROR_SEND_BODY);
+                            // Write error message
+                            out.write(AJPv13Response.getSendBodyChunkBytes(errMsg));
                             out.flush();
                         }
                         if (!requestHandler.isEndResponseSent()) {
