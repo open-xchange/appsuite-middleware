@@ -92,6 +92,8 @@ public final class MailAccountFields {
 
     public static final String PERSONAL = "personal";
 
+    public static final String REPLY_TO = "reply_to";
+
     public static final String SPAM_HANDLER = "spam_handler";
 
     public static final String TRASH = "trash";
