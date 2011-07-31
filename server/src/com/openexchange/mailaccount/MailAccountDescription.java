@@ -67,7 +67,8 @@ import com.openexchange.tools.net.URITools;
  */
 public final class MailAccountDescription implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountDescription.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountDescription.class));
 
     private static final long serialVersionUID = -2443656355399068302L;
 
@@ -86,6 +87,8 @@ public final class MailAccountDescription implements Serializable {
     private String primaryAddress;
 
     private String personal;
+
+    private String replyTo;
 
     private String spamHandler;
 
@@ -204,6 +207,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public String getPersonal() {
         return personal;
+    }
+
+    /**
+     * Gets the reply-to address
+     * 
+     * @return The reply-to address
+     */
+    public String getReplyTo() {
+        return replyTo;
     }
 
     /**
@@ -564,6 +576,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setPersonal(final String personal) {
         this.personal = personal;
+    }
+
+    /**
+     * Sets the reply-to address
+     * 
+     * @param replyTo The reply-to address
+     */
+    public void setReplyTo(final String replyTo) {
+        this.replyTo = replyTo;
     }
 
     /**
