@@ -66,6 +66,7 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.exception.AJPv13TimeoutException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
@@ -85,6 +86,8 @@ import com.openexchange.tools.servlet.UploadServletException;
 public final class AJPv13Task implements Task<Object> {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+
+    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
     /**
      * Creates a new {@link AJPv13Task} instance.
@@ -332,6 +335,25 @@ public final class AJPv13Task implements Task<Object> {
         return ajpConnection;
     }
 
+    private static final byte[] ERROR_SEND_HEADERS = new byte[] {
+        65, 66, 0, 27, 4, 1, -9, 0, 19, 83, 101, 114, 118, 105, 99, 101, 32, 85, 110, 97, 118, 97, 105, 108, 97, 98, 108, 101, 0, 0, 0 };
+
+    private static final byte[] ERROR_SEND_BODY = new byte[] {
+        65, 66, 1, -110, 3, 1, -114, 60, 33, 68, 79, 67, 84, 89, 80, 69, 32, 72, 84, 77, 76, 32, 80, 85, 66, 76, 73, 67, 32, 34, 45, 47,
+        47, 73, 69, 84, 70, 47, 47, 68, 84, 68, 32, 72, 84, 77, 76, 32, 50, 46, 48, 47, 47, 69, 78, 34, 62, 13, 10, 60, 104, 116, 109, 108,
+        62, 60, 104, 101, 97, 100, 62, 13, 10, 60, 116, 105, 116, 108, 101, 62, 53, 48, 51, 32, 83, 101, 114, 118, 105, 99, 101, 32, 85,
+        110, 97, 118, 97, 105, 108, 97, 98, 108, 101, 60, 47, 116, 105, 116, 108, 101, 62, 13, 10, 60, 47, 104, 101, 97, 100, 62, 60, 98,
+        111, 100, 121, 62, 13, 10, 60, 104, 49, 62, 53, 48, 51, 32, 83, 101, 114, 118, 105, 99, 101, 32, 85, 110, 97, 118, 97, 105, 108,
+        97, 98, 108, 101, 60, 47, 104, 49, 62, 13, 10, 60, 112, 62, 84, 104, 101, 32, 115, 101, 114, 118, 101, 114, 32, 105, 115, 32, 116,
+        101, 109, 112, 111, 114, 97, 114, 105, 108, 121, 32, 117, 110, 97, 98, 108, 101, 32, 116, 111, 32, 115, 101, 114, 118, 105, 99,
+        101, 32, 121, 111, 117, 114, 32, 114, 101, 113, 117, 101, 115, 116, 32, 100, 117, 101, 32, 116, 111, 32, 109, 97, 105, 110, 116,
+        101, 110, 97, 110, 99, 101, 32, 100, 111, 119, 110, 116, 105, 109, 101, 32, 111, 114, 32, 99, 97, 112, 97, 99, 105, 116, 121, 32,
+        112, 114, 111, 98, 108, 101, 109, 115, 46, 32, 80, 108, 101, 97, 115, 101, 32, 116, 114, 121, 32, 97, 103, 97, 105, 110, 32, 108,
+        97, 116, 101, 114, 46, 60, 47, 112, 62, 13, 10, 60, 104, 114, 62, 13, 10, 60, 97, 100, 100, 114, 101, 115, 115, 62, 83, 97, 116,
+        44, 32, 51, 48, 32, 74, 117, 108, 121, 32, 50, 48, 49, 49, 32, 49, 55, 58, 53, 56, 58, 51, 53, 32, 71, 77, 84, 44, 38, 110, 98,
+        115, 112, 59, 79, 112, 101, 110, 45, 88, 99, 104, 97, 110, 103, 101, 32, 118, 54, 46, 50, 48, 46, 48, 45, 82, 101, 118, 50, 48, 60,
+        47, 97, 100, 100, 114, 101, 115, 115, 62, 13, 10, 60, 47, 98, 111, 100, 121, 62, 60, 47, 104, 116, 109, 108, 62, 0 };
+
     /**
      * Processes an accepted client socket for its complete lifetime. Incoming AJP cycles are delegated to a dedicated
      * {@link AJPv13Connection}.
@@ -350,9 +372,10 @@ public final class AJPv13Task implements Task<Object> {
                 ajpCon = new AJPv13ConnectionImpl(this);
             } catch (final AJPv13Exception e) {
                 LOG.error(e.getMessage(), e);
-                terminateAndClose(null);
+                terminateAndClose(false);
                 return null;
             }
+            boolean endResponse = true;
             ajpConnection = ajpCon;
             final AJPv13TaskMonitor monitor = listenerMonitor;
             try {
@@ -388,6 +411,11 @@ public final class AJPv13Task implements Task<Object> {
                     } catch (final ServletException e) {
                         LOG.error(e.getMessage(), e);
                         closeAndKeepAlive(ajpCon);
+                    } catch (final AJPv13TimeoutException e) {
+                        /*
+                         * Read on socket input stream timed out
+                         */
+                        throw e;
                     } catch (final AJPv13Exception e) {
                         if (e.keepAlive()) {
                             LOG.error(e.getMessage(), e);
@@ -427,14 +455,37 @@ public final class AJPv13Task implements Task<Object> {
                 /*
                  * Just as debug info
                  */
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG_ENABLED) {
                     LOG.debug(e.getMessage(), e);
                 }
             } catch (final AJPv13UnknownPrefixCodeException e) {
                 final String dump = e.getDump();
                 LOG.error(e.getMessage() + (dump == null ? "" : "\nCorresponding AJP package:\n" + dump));
+                try {
+                    /*-
+                     * Write error response
+                     * 
+                     * Send response headers
+                     */
+                    final OutputStream out = ajpCon.getOutputStream();
+                    out.write(ERROR_SEND_HEADERS);
+                    out.flush();
+                    /*
+                     * Send response body
+                     */
+                    out.write(ERROR_SEND_BODY);
+                    out.flush();
+                } catch (final Exception ue) {
+                    LOG.error("Failed orderly closure of AJP connection.", ue);
+                    endResponse = false;
+                }
             } catch (final AJPv13Exception e) {
                 LOG.error(e.getMessage(), e);
+            } catch (final AJPv13TimeoutException e) {
+                if (DEBUG_ENABLED) {
+                    LOG.debug("Read timed out", e);
+                }
+                endResponse = false;
             } catch (final Throwable e) {
                 /*
                  * Catch Throwable to catch every throwable object.
@@ -442,7 +493,7 @@ public final class AJPv13Task implements Task<Object> {
                 final AJPv13Exception wrapper = new AJPv13Exception(e);
                 LOG.error(wrapper.getMessage(), wrapper);
             } finally {
-                terminateAndClose(ajpCon);
+                terminateAndClose(endResponse);
                 waitingOnAJPSocket = false;
                 thread = null;
                 if (processing) {
@@ -580,20 +631,7 @@ public final class AJPv13Task implements Task<Object> {
     /**
      * Writes connection-terminating AJP END_RESPONSE package to web server, closes the AJP connection and accepted client socket as well.
      */
-    private void terminateAndClose(final AJPv13ConnectionImpl ajpCon) {
-        /*-
-         * 
-        try {
-            // Release AJP connection
-            if (ajpCon != null) {
-                ajpCon.close();
-            }
-        } catch (final Exception e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
-            }
-        }
-        */
+    private void terminateAndClose(final boolean endResponse) {
         try {
             /*
              * Terminate AJP cycle and close socket
@@ -601,11 +639,11 @@ public final class AJPv13Task implements Task<Object> {
             final Socket s = client;
             if (s != null) {
                 try {
-                    if (!s.isClosed()) {
+                    if (endResponse && !s.isClosed()) {
                         writeEndResponse(s, true);
                     }
                 } catch (final Exception e) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG_ENABLED) {
                         LOG.debug("Writing END_RESPONSE package failed.", e);
                     }
                 } finally {

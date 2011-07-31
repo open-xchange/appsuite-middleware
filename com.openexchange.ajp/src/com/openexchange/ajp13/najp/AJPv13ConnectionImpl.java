@@ -68,6 +68,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.exception.AJPv13TimeoutException;
 import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
@@ -603,6 +604,8 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 decrementWaiting();
             }
             return dataLength;
+        } catch (final java.net.SocketTimeoutException e) {
+            throw new AJPv13TimeoutException(e.getMessage(), e);
         } finally {
             blocker.release();
         }
