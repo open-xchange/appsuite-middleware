@@ -829,7 +829,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
-        Attribute.PERSONAL_LITERAL);
+        Attribute.PERSONAL_LITERAL,
+        Attribute.REPLY_TO_LITERAL);
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
@@ -848,7 +849,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
-            if (!containsUnifiedInbox && !containsPersonal) {
+            final boolean containsReplyTo = attributes.contains(Attribute.REPLY_TO_LITERAL);
+            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo) {
                 /*
                  * Another attribute must not be changed
                  */
@@ -902,6 +904,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  * OK, update PERSONAL string.
                  */
                 updatePersonal(mailAccount.getPersonal(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsReplyTo) {
+                /*
+                 * OK, update reply-to string.
+                 */
+                updateReplyTo(mailAccount.getReplyTo(), MailAccount.DEFAULT_ID, user, cid, con);
             }
         } else {
             /*
@@ -1151,6 +1159,40 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateReplyTo(final String replyTo, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == replyTo) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            // Transport table, too
+            stmt = con.prepareStatement("UPDATE user_transport_account SET replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
+            pos = 1;
+            if (null == replyTo) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
