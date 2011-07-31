@@ -70,10 +70,12 @@ public class MailAccountCreateTablesTask implements UpdateTask {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailAccountCreateTablesTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 40;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGHEST.priority;
     }
@@ -163,6 +165,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         createTable("sequence_mail_service", getCreateSequence(), contextId);
         createTable("user_mail_account", getCreateMailAccount(), contextId);
