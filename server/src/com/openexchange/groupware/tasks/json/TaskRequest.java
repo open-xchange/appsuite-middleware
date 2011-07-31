@@ -194,6 +194,18 @@ public final class TaskRequest {
         }
     }
 
+    public Date checkDate(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        try {
+            return new Date(Long.parseLong(parameter.trim()));
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+        }
+    }
+
     /**
      * Checks for presence of comma-separated <code>String</code> list.
      * 
