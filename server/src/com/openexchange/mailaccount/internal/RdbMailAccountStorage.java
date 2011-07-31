@@ -1164,7 +1164,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void updateReplyTo(final String replyTo, final int id, final int user, final int cid, final Connection con) throws MailAccountException {
+    private void updateReplyTo(final String replyTo, final int id, final int user, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_mail_account SET replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
@@ -1192,7 +1192,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(pos++, user);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            throw MailAccountExceptionFactory.getInstance().create(MailAccountExceptionMessages.SQL_ERROR, e, e.getMessage());
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }

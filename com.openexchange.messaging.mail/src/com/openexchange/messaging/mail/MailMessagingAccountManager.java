@@ -399,6 +399,13 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 }
             }
             {
+                final String replyTo = optString(MailConstants.MAIL_REPLY_TO, configuration);
+                if (null != replyTo) {
+                    accountDescription.setReplyTo(replyTo);
+                    attributes.add(Attribute.REPLY_TO_LITERAL);
+                }
+            }
+            {
                 final String personal = optString(MailConstants.MAIL_PERSONAL, configuration);
                 if (null != personal) {
                     accountDescription.setPersonal(personal);

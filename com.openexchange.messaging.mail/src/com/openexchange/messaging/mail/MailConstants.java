@@ -160,6 +160,8 @@ public final class MailConstants {
 
     public static final String MAIL_PERSONAL = "personal";
 
+    public static final String MAIL_REPLY_TO = "replyTo";
+
     public static final String MAIL_PRIMARY_ADDRESS = "primaryAddress";
 
     public static final String TRANSPORT_LOGIN = "transportLogin";
