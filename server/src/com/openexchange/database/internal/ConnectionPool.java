@@ -106,6 +106,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
         lifecycle.destroy(con);
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return getNumBroken();
     }

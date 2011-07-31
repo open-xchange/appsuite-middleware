@@ -13,6 +13,7 @@ import com.openexchange.tools.file.external.FileStorageFactory;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory {
 
+    @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
         LocalFileStorage standardFS = new LocalFileStorage(uri);
         HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));

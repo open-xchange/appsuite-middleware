@@ -124,11 +124,13 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 		isInit = true;
 	}
 	
-	public boolean isReminderEnabled() {
+	@Override
+    public boolean isReminderEnabled() {
 		return isReminderEnabled;
 	}
 
-	public int getReminderInterval() {
+	@Override
+    public int getReminderInterval() {
 		return reminderInterval;
 	}
 }

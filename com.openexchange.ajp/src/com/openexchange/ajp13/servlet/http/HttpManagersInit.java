@@ -98,6 +98,7 @@ public final class HttpManagersInit implements Initialization {
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
@@ -110,6 +111,7 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
@@ -138,6 +140,7 @@ public final class HttpManagersInit implements Initialization {
                 }
                 final File[] propFiles = dir.listFiles(new FilenameFilter() {
 
+                    @Override
                     public boolean accept(final File dir, final String name) {
                         return toLowerCase(name).endsWith(".properties");
 

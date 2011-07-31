@@ -182,6 +182,7 @@ public final class MIMEMessageConverter {
             this.headerName = headerName;
         }
 
+        @Override
         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
             final String[] header = msg.getHeader(headerName);
             if (null == header || 0 == header.length) {
@@ -552,6 +553,7 @@ public final class MIMEMessageConverter {
         final InternetAddress empty = null;
         CHECKER_MAP.put(MailField.FROM, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsFrom()) {
@@ -560,6 +562,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsFrom()) {
@@ -570,6 +573,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.TO, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsTo()) {
@@ -578,6 +582,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsTo()) {
@@ -588,6 +593,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.CC, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsCc()) {
@@ -596,6 +602,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsCc()) {
@@ -606,6 +613,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.BCC, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsBcc()) {
@@ -614,6 +622,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsBcc()) {
@@ -624,6 +633,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.SUBJECT, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSubject()) {
@@ -632,6 +642,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSubject()) {
@@ -642,6 +653,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.SENT_DATE, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSentDate()) {
@@ -650,6 +662,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsSentDate()) {
@@ -660,6 +673,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
@@ -668,6 +682,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsDispositionNotification()) {
@@ -678,6 +693,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.PRIORITY, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsPriority()) {
@@ -686,6 +702,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsPriority()) {
@@ -696,6 +713,7 @@ public final class MIMEMessageConverter {
         });
         CHECKER_MAP.put(MailField.THREAD_LEVEL, new ExistenceChecker() {
 
+            @Override
             public void check(final MailMessage... mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsThreadLevel()) {
@@ -704,6 +722,7 @@ public final class MIMEMessageConverter {
                 }
             }
 
+            @Override
             public void check(final Collection<MailMessage> mailMessages) {
                 for (final MailMessage mailMessage : mailMessages) {
                     if (null != mailMessage && !mailMessage.containsThreadLevel()) {
@@ -715,6 +734,7 @@ public final class MIMEMessageConverter {
 
         FILLER_MAP_EXT.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
                 /*
@@ -826,12 +846,14 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP_EXT.put(MailField.ID, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setMailId(String.valueOf(((ExtendedMimeMessage) msg).getUid()));
             }
         });
         FILLER_MAP_EXT.put(MailField.FOLDER_ID, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
             }
@@ -839,6 +861,7 @@ public final class MIMEMessageConverter {
 
         FILLER_MAP_EXT.put(MailField.CONTENT_TYPE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws OXException, MessagingException {
                 try {
                     mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
@@ -854,66 +877,77 @@ public final class MIMEMessageConverter {
 
         FILLER_MAP_EXT.put(MailField.FROM, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.TO, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.CC, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.BCC, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSubject(getSubject(msg));
             }
         });
         FILLER_MAP_EXT.put(MailField.SIZE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSize(((ExtendedMimeMessage) msg).getSize());
             }
         });
         FILLER_MAP_EXT.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSentDate(((ExtendedMimeMessage) msg).getSentDate());
             }
         });
         FILLER_MAP_EXT.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setReceivedDate(((ExtendedMimeMessage) msg).getReceivedDate());
             }
         });
         FILLER_MAP_EXT.put(MailField.FLAGS, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
             }
         });
         FILLER_MAP_EXT.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setThreadLevel(((ExtendedMimeMessage) msg).getThreadLevel());
             }
         });
         FILLER_MAP_EXT.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
@@ -931,6 +965,7 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP_EXT.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
                 if (val != null && (val.length > 0)) {
@@ -947,6 +982,7 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP_EXT.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
@@ -1001,6 +1037,7 @@ public final class MIMEMessageConverter {
         final org.apache.commons.logging.Log logger = LOG;
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 /*
                  * From
@@ -1136,6 +1173,7 @@ public final class MIMEMessageConverter {
 
             private final String mixed = "mixed";
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 ContentType ct = null;
                 try {
@@ -1190,60 +1228,70 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP.put(MailField.FROM, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addFrom(getAddressHeader(MessageHeaders.HDR_FROM, msg));
             }
         });
         FILLER_MAP.put(MailField.TO, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addTo(getAddressHeader(MessageHeaders.HDR_TO, msg));
             }
         });
         FILLER_MAP.put(MailField.CC, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addCc(getAddressHeader(MessageHeaders.HDR_CC, msg));
             }
         });
         FILLER_MAP.put(MailField.BCC, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.addBcc(getAddressHeader(MessageHeaders.HDR_BCC, msg));
             }
         });
         FILLER_MAP.put(MailField.SUBJECT, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSubject(getSubject(msg));
             }
         });
         FILLER_MAP.put(MailField.SIZE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSize(msg.getSize());
             }
         });
         FILLER_MAP.put(MailField.SENT_DATE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setSentDate(msg.getSentDate());
             }
         });
         FILLER_MAP.put(MailField.RECEIVED_DATE, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 mailMessage.setReceivedDate(msg.getReceivedDate());
             }
         });
         FILLER_MAP.put(MailField.FLAGS, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 parseFlags(msg.getFlags(), mailMessage);
             }
         });
         FILLER_MAP.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 /*
                  * TODO: Thread level
@@ -1253,6 +1301,7 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP.put(MailField.DISPOSITION_NOTIFICATION_TO, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
                 if ((val != null) && (val.length > 0)) {
@@ -1270,6 +1319,7 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP.put(MailField.PRIORITY, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                 String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
                 if (val != null && (val.length > 0)) {
@@ -1286,6 +1336,7 @@ public final class MIMEMessageConverter {
         });
         FILLER_MAP.put(MailField.COLOR_LABEL, new MailMessageFieldFiller() {
 
+            @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
                 parseFlags(msg.getFlags(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
@@ -1340,6 +1391,7 @@ public final class MIMEMessageConverter {
                 if (MailField.ID.equals(field)) {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
+                        @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                             if (folder instanceof UIDFolder) {
                                 mailMessage.setMailId(String.valueOf(((UIDFolder) folder).getUID(msg)));
@@ -1353,6 +1405,7 @@ public final class MIMEMessageConverter {
                 } else if (MailField.FOLDER_ID.equals(field)) {
                     fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
+                        @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                             mailMessage.setFolder(folder.getFullName());
                         }

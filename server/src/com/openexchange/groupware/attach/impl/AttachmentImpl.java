@@ -82,75 +82,93 @@ public class AttachmentImpl implements AttachmentMetadata {
 	public AttachmentImpl() {
 	}
 
-	public int getCreatedBy() {
+	@Override
+    public int getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(final int createdBy) {
+	@Override
+    public void setCreatedBy(final int createdBy) {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreationDate() {
+	@Override
+    public Date getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(final Date creationDate) {
+	@Override
+    public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public String getFileMIMEType() {
+	@Override
+    public String getFileMIMEType() {
 		return fileMIMEType;
 	}
 
-	public void setFileMIMEType(final String fileMIMEType) {
+	@Override
+    public void setFileMIMEType(final String fileMIMEType) {
 		this.fileMIMEType = fileMIMEType;
 	}
 
-	public String getFilename() {
+	@Override
+    public String getFilename() {
 		return filename;
 	}
 
-	public void setFilename(final String filename) {
+	@Override
+    public void setFilename(final String filename) {
 		this.filename = filename;
 	}
 
-	public long getFilesize() {
+	@Override
+    public long getFilesize() {
 		return filesize;
 	}
 
-	public void setFilesize(final long filesize) {
+	@Override
+    public void setFilesize(final long filesize) {
 		this.filesize = filesize;
 	}
 
-	public int getAttachedId() {
+	@Override
+    public int getAttachedId() {
 		return attachedId;
 	}
 
-	public void setAttachedId(final int attachedId) {
+	@Override
+    public void setAttachedId(final int attachedId) {
 		this.attachedId = attachedId;
 	}
 
-	public boolean getRtfFlag() {
+	@Override
+    public boolean getRtfFlag() {
 		return rtfFlag;
 	}
 
-	public void setRtfFlag(final boolean rtfFlag) {
+	@Override
+    public void setRtfFlag(final boolean rtfFlag) {
 		this.rtfFlag = rtfFlag;
 	}
 
-	public int getModuleId() {
+	@Override
+    public int getModuleId() {
 		return moduleId;
 	}
 
-	public void setModuleId(final int moduleId) {
+	@Override
+    public void setModuleId(final int moduleId) {
 		this.moduleId = moduleId;
 	}
 	
-	public int getId(){
+	@Override
+    public int getId(){
 		return id;
 	}
 	
-	public void setId(final int id){
+	@Override
+    public void setId(final int id){
 		this.id=id;
 	}
 	
@@ -164,27 +182,33 @@ public class AttachmentImpl implements AttachmentMetadata {
 		return o instanceof AttachmentMetadata && ((AttachmentMetadata)o).getId() == id;
 	}
 
-	public int getFolderId() {
+	@Override
+    public int getFolderId() {
 		return folderId;
 	}
 
-	public void setFolderId(final int folderId) {
+	@Override
+    public void setFolderId(final int folderId) {
 		this.folderId = folderId;
 	}
 
-	public String getComment() {
+	@Override
+    public String getComment() {
 		return comment;
 	}
 
-	public void setComment(final String comment) {
+	@Override
+    public void setComment(final String comment) {
 		this.comment = comment;
 	}
 
-	public String getFileId() {
+	@Override
+    public String getFileId() {
 		return fileId;
 	}
 
-	public void setFileId(final String fileId) {
+	@Override
+    public void setFileId(final String fileId) {
 		this.fileId = fileId;
 	}
 	

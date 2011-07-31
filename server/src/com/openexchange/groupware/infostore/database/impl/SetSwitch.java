@@ -79,125 +79,146 @@ public class SetSwitch implements MetadataSwitcher{
 		this.value = value;
 	}
 	
-	public Object lastModified() {
+	@Override
+    public Object lastModified() {
         if(null == value) { return null; }
         impl.setLastModified((Date)value);
 		return null;
 	}
 
-	public Object creationDate() {
+	@Override
+    public Object creationDate() {
         if(null == value) { return null; }
         impl.setCreationDate((Date)value);
 		return null;
 	}
 
-	public Object modifiedBy() {
+	@Override
+    public Object modifiedBy() {
 		nullNumber();
 		impl.setModifiedBy(((Integer)value).intValue());
 		return null;
 	}
 
-	public Object folderId() {
+	@Override
+    public Object folderId() {
 		nullNumberAsLong();
 		impl.setFolderId(((Long)value).longValue());
 		return null;
 	}
 
-	public Object title() {
+	@Override
+    public Object title() {
         if(null == value) { return null; }
         impl.setTitle((String)value);
 		return null;
 	}
 
-	public Object version() {
+	@Override
+    public Object version() {
 		nullNumber();
         impl.setVersion(((Integer)value).intValue());
 		return null;
 	}
 
-	public Object content() {
+	@Override
+    public Object content() {
 		//impl.setContent((String)value);
 		return null;
 	}
 
-	public Object id() {
+	@Override
+    public Object id() {
 		nullNumber();
         impl.setId(((Integer)value).intValue());
 		return null;
 	}
 
-	public Object fileSize() {
+	@Override
+    public Object fileSize() {
 		nullNumberAsLong();
 		impl.setFileSize(((Long)value).longValue());
 		return null;
 	}
 
-	public Object description() {
+	@Override
+    public Object description() {
         if(null == value) { return null; }
         impl.setDescription((String)value);
 		return null;
 	}
 
-	public Object url() {
+	@Override
+    public Object url() {
         if(null == value) { return null; }
         impl.setURL((String)value);
 		return null;
 	}
 
-	public Object createdBy() {
+	@Override
+    public Object createdBy() {
 		nullNumber();
 		impl.setCreatedBy(((Integer)value).intValue());
 		return null;
 	}
 
-	public Object fileName() {
+	@Override
+    public Object fileName() {
         if(null == value) { return null; }
         impl.setFileName((String)value);
 		return null;
 	}
 
-	public Object fileMIMEType() {
+	@Override
+    public Object fileMIMEType() {
         if(null == value) { return null; }
         impl.setFileMIMEType((String)value);
 		return null;
 	}
 
-	public Object sequenceNumber() {
+	@Override
+    public Object sequenceNumber() {
 		//impl.setSequenceNumber((Long)value);
 		return null;
 	}
 	
-	public Object categories(){
+	@Override
+    public Object categories(){
         if(null == value) { return null; }
         impl.setCategories((String)value);
 		return null;
 	}
 	
-	public Object lockedUntil(){
+	@Override
+    public Object lockedUntil(){
         if(null == value) { return null; }
         impl.setLockedUntil((Date)value);
 		return null;
 	}
 	
-	public Object fileMD5Sum(){
+	@Override
+    public Object fileMD5Sum(){
         if(null == value) { return null; }
         impl.setFileMD5Sum((String)value);
 		return null;
 	}
 
-	public Object versionComment() {
+	@Override
+    public Object versionComment() {
         if(null == value) { return null; }
         impl.setVersionComment((String)value);
 		return null;
 	}
 
-	public Object currentVersion() {
+	@Override
+    public Object currentVersion() {
         if(null == value) { return null; }
         impl.setIsCurrentVersion(((Boolean)value).booleanValue());
 		return null;
 	}
 
-	public Object colorLabel() {
+	@Override
+    public Object colorLabel() {
 		nullNumber();
 		impl.setColorLabel(((Integer)value).intValue());
 		return null;
@@ -215,16 +236,19 @@ public class SetSwitch implements MetadataSwitcher{
 		}
 	}
 
-	public Object filestoreLocation() {
+	@Override
+    public Object filestoreLocation() {
         if(null == value) { return null; }
         impl.setFilestoreLocation((String)value);
 		return null;
 	}
 
+    @Override
     public Object lastModifiedUTC() {
        return lastModified();
     }
 
+    @Override
     public Object numberOfVersions() {
         impl.setNumberOfVersions(((Integer)value).intValue());
         return null;

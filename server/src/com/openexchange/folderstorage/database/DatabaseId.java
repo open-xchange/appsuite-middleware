@@ -92,14 +92,17 @@ public final class DatabaseId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         /*
          * At last the database folders
@@ -107,6 +110,7 @@ public final class DatabaseId implements SortableId {
         return Priority.LOW;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof DatabaseId) {
             final int thisVal = ordinal;

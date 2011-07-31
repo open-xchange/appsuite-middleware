@@ -97,14 +97,17 @@ public final class ContactJSONDataHandler implements DataHandler {
         super();
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         try {

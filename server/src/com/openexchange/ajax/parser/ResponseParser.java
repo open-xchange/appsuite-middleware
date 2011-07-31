@@ -241,12 +241,15 @@ public final class ResponseParser {
     private static Truncated parseTruncated(final JSONObject json) throws JSONException {
         final int id = json.getInt(TruncatedFields.ID);
         return new Truncated() {
+            @Override
             public int getId() {
                 return id;
             }
+            @Override
             public int getLength() {
                 return 0;
             }
+            @Override
             public int getMaxSize() {
                 return 0;
             }
@@ -256,6 +259,7 @@ public final class ResponseParser {
     private static Parsing parseParsing(final JSONObject json) throws JSONException {
         final String attribute = json.getString(ParsingFields.NAME);
         return new Parsing() {
+            @Override
             public String getAttribute() {
                 return attribute;
             }
@@ -272,6 +276,7 @@ public final class ResponseParser {
             this.abbr = abbr;
         }
 
+        @Override
         public String getAbbreviation() {
             return abbr;
         }

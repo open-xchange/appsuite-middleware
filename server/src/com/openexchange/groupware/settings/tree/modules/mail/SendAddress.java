@@ -76,6 +76,7 @@ public class SendAddress implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "sendaddress" };
     }
@@ -83,9 +84,11 @@ public class SendAddress implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
@@ -93,14 +96,17 @@ public class SendAddress implements PreferencesItemService {
                 }
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
 
+            @Override
             public boolean isWritable() {
                 return true;
             }
 
+            @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 final String newAlias = setting.getSingleValue().toString();
                 final String[] aliases = user.getAliases();
@@ -126,6 +132,7 @@ public class SendAddress implements PreferencesItemService {
                 }
             }
 
+            @Override
             public int getId() {
                 return -1;
             }

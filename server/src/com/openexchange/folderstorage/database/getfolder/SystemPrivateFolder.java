@@ -241,6 +241,7 @@ public final class SystemPrivateFolder {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final FolderObject folder1, final FolderObject folder2) {
             return collator.compare(folder1.getFolderName(), folder2.getFolderName());
         }

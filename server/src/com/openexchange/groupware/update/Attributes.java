@@ -77,10 +77,12 @@ public class Attributes implements TaskAttributes {
         this(concurrency, SCHEMA);
     }
 
+    @Override
     public UpdateConcurrency getConcurrency() {
         return concurrency;
     }
 
+    @Override
     public WorkingLevel getLevel() {
         return level;
     }

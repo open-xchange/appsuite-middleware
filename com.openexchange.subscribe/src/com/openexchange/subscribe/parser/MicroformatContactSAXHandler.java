@@ -61,6 +61,7 @@ AbstractMicroformatSAXHandler<Contact> {
         super();
     }
 
+    @Override
     public void startElement(String uri, String name, String qName, Attributes atts) {
         String className = atts.getValue("class");
         if(null == className ){

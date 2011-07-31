@@ -165,6 +165,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = timeoutMap.remove(getUserKey(session.getUserId(), accountId, session.getContextId()));
         if (null == mailAccess) {
@@ -182,6 +183,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @param mailAccess The mail access to put into cache
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
+    @Override
     public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleTime = mailAccess.getCacheIdleSeconds();
         if (idleTime <= 0) {
@@ -201,6 +203,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @param accountId The account ID
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
+    @Override
     public boolean containsMailAccess(final Session session, final int accountId) {
         return (timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) != null);
     }
@@ -211,6 +214,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
      * @param session The session
      * @throws OXException If clearing user entries fails
      */
+    @Override
     public void clearUserEntries(final Session session) throws OXException {
         final int user = session.getUserId();
         final int cid = session.getContextId();

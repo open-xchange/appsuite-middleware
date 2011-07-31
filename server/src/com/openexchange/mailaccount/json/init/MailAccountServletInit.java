@@ -81,6 +81,7 @@ public final class MailAccountServletInit implements Initialization {
         super();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -96,6 +97,7 @@ public final class MailAccountServletInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

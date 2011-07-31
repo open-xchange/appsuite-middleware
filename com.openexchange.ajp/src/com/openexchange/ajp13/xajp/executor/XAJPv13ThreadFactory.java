@@ -78,6 +78,7 @@ final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
         len = namePrefix.length() + APPENDIX_LENGTH;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new XAJPv13UncaughtExceptionhandler());

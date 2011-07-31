@@ -375,10 +375,12 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         }
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }

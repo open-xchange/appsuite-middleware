@@ -87,6 +87,7 @@ public final class MailMessageCache {
 
     private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
 
+        @Override
         public void updateField(final MailMessage mail, final Object newValue) {
             int newFlags = mail.getFlags();
             int flags = ((Integer) newValue).intValue();
@@ -125,6 +126,7 @@ public final class MailMessageCache {
 
     private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
 
+        @Override
         public void updateField(final MailMessage mail, final Object newValue) {
             mail.setColorLabel(((Integer) newValue).intValue());
         }

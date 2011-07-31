@@ -193,10 +193,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         this.request = request;
     }
 
+    @Override
     public String encodeRedirectUrl(final String url) {
         return encodeURL(url);
     }
 
+    @Override
     public boolean containsHeader(final String name) {
         return headers.containsKey(name);
     }
@@ -207,6 +209,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         cookies.clear();
     }
 
+    @Override
     public String encodeURL(final String url) {
         if (null == request) {
             return url;
@@ -242,10 +245,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             httpSession == null ? null : httpSession.getId());
     }
 
+    @Override
     public String encodeRedirectURL(final String url) {
         return encodeURL(url);
     }
 
+    @Override
     public String encodeUrl(final String url) {
         return encodeURL(url);
     }
@@ -292,16 +297,19 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return (sb.toString());
     }
 
+    @Override
     public void addDateHeader(final String name, final long l) {
         synchronized (HEADER_DATE_FORMAT) {
             addHeader(name, HEADER_DATE_FORMAT.format(new Date(l)));
         }
     }
 
+    @Override
     public void addIntHeader(final String name, final int i) {
         addHeader(name, String.valueOf(i));
     }
 
+    @Override
     public void addCookie(final Cookie cookie) {
         cookies.add(cookie);
     }
@@ -382,6 +390,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return composer.toString();
     }
 
+    @Override
     public void addHeader(final String name, final String value) {
         if (!headers.containsKey(name)) {
             headers.put(name, new String[] { value });
@@ -404,26 +413,31 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
     }
 
+    @Override
     public void setStatus(final int status) {
         this.status = status;
         statusMsg = STATUS_MSGS.get(Integer.valueOf(status));
     }
 
+    @Override
     public void setStatus(final int status, final String statusMsg) {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
     }
 
+    @Override
     public void setDateHeader(final String name, final long l) {
         synchronized (HEADER_DATE_FORMAT) {
             setHeader(name, HEADER_DATE_FORMAT.format(new Date(l)));
         }
     }
 
+    @Override
     public void setIntHeader(final String name, final int i) {
         setHeader(name, String.valueOf(i));
     }
 
+    @Override
     public final void setHeader(final String name, final String value) {
         if (value == null) {
             /*
@@ -465,6 +479,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return retval.toString();
     }
 
+    @Override
     public final void sendRedirect(final String location) {
         status = HttpServletResponse.SC_MOVED_TEMPORARILY;
         statusMsg = STATUS_MSGS.get(Integer.valueOf(HttpServletResponse.SC_MOVED_TEMPORARILY));
@@ -502,6 +517,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         return errormessage;
     }
 
+    @Override
     public final void sendError(final int status, final String statusMsg) throws IOException {
         this.status = status;
         this.statusMsg = statusMsg == null ? STATUS_MSGS.get(Integer.valueOf(status)) : statusMsg;
@@ -525,6 +541,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         }
     }
 
+    @Override
     public void sendError(final int status) throws IOException {
         sendError(status, STATUS_MSGS.get(Integer.valueOf(status)));
     }
@@ -540,10 +557,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
             int cursor;
 
+            @Override
             public boolean hasMoreElements() {
                 return (cursor < size);
             }
 
+            @Override
             public Object nextElement() {
                 return Array.get(obj, cursor++);
             }

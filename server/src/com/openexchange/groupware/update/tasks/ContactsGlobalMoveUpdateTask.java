@@ -86,6 +86,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
      * 
      * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
      */
+    @Override
     public int addedWithVersion() {
         return 16;
     }
@@ -95,6 +96,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
      * 
      * @see com.openexchange.groupware.update.UpdateTask#getPriority()
      */
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -113,6 +115,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
      *      int)
      */
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         correctTable("prg_contacts", contextId);   
     }

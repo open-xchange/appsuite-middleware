@@ -244,6 +244,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final int BUFLEN = 8192;
 
+    @Override
     public boolean handleAttachment(final MailPart part, final String id) throws OXException {
         if (isVCalendar(part.getContentType().getBaseType())) {
             /*
@@ -271,6 +272,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             /*-
@@ -287,11 +289,13 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
+    @Override
     public boolean handleHeaders(final Iterator<Entry<String, String>> iter) throws OXException {
         generateHeadersObject(iter, currentMailObject);
         return true;
     }
 
+    @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         final String filename = part.getFileName();
         String contentType = MIMETypes.MIME_APPL_OCTET;
@@ -322,6 +326,7 @@ public final class MIMEStructureHandler implements StructureHandler {
          */
         addBodyPart(part.getFileSize(), new InputStreamProvider() {
 
+            @Override
             public InputStream getInputStream() throws IOException {
                 return part.getInputStream();
             }
@@ -329,6 +334,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
+    @Override
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         /*
          * Dummy headers
@@ -341,6 +347,7 @@ public final class MIMEStructureHandler implements StructureHandler {
          */
         addBodyPart(size, new InputStreamProvider() {
 
+            @Override
             public InputStream getInputStream() throws IOException {
                 return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes("UTF-8"));
             }
@@ -348,6 +355,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
+    @Override
     public boolean handleMultipartStart(final ContentType contentType, final int bodyPartCount, final String id) throws OXException {
         try {
             // Increment
@@ -387,6 +395,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
+    @Override
     public boolean handleMultipartEnd() throws OXException {
         // Decrement
         if (--multipartCount > 0) { // Dequeue nested multipart
@@ -398,6 +407,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
+    @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
@@ -453,6 +463,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
+    @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
             if (receivedDate == null) {
@@ -471,6 +482,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
+    @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         try {
             final String key = MailJSONField.FLAGS.getKey();
@@ -486,6 +498,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         }
     }
 
+    @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (null == userFlags || 0 == userFlags.length) {
             return true;

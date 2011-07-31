@@ -145,6 +145,7 @@ public final class JSONMessageCache {
                     JSONMessageCacheConfiguration.getInstance().getShrinkerIntervalUserMap());
             superMap.setDefaultTimeoutListener(new TimeoutListener<TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>>() {
 
+                @Override
                 public void onTimeout(final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> element) {
                     // Perform time out on all entries contained in timed out folder map
                     element.timeoutAll();
@@ -1199,6 +1200,7 @@ public final class JSONMessageCache {
             this.fullname = fullname;
         }
 
+        @Override
         public void onTimeout(final ConcurrentMap<String, FutureTask<JSONObject>> element) {
             final StringBuilder sb = new StringBuilder(64);
             sb.append("Removed ").append(element.size()).append(" messages from JSON message cache belonging to folder ");

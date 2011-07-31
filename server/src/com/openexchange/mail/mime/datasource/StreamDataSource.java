@@ -90,6 +90,7 @@ public final class StreamDataSource implements DataSource {
         this.contentType = contentType == null ? "application/octet-stream" : contentType;
     }
 
+    @Override
     public InputStream getInputStream() throws IOException {
         return provider.getInputStream();
     }
@@ -97,14 +98,17 @@ public final class StreamDataSource implements DataSource {
     /**
      * Not implemented
      */
+    @Override
     public OutputStream getOutputStream() throws IOException {
         throw new IOException(this.getClass().getName() + ".getOutputStream() isn't implemented");
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return provider.getName();
     }

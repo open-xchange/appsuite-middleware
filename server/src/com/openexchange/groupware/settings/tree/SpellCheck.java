@@ -80,12 +80,15 @@ public final class SpellCheck implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null != set && !set.isEmpty()) {
@@ -94,9 +97,11 @@ public final class SpellCheck implements PreferencesItemService {
                     setting.setSingleValue(Boolean.FALSE);
                 }
             }
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
+            @Override
             public boolean isWritable() {
                 return true;
             }

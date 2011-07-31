@@ -66,6 +66,7 @@ public class Element extends Node {
      * Forwards creation request to parent if any, otherwise
      * calls super.createElement. */
 
+    @Override
     public Element createElement(
     		final String namespace,
     		final String name) { 
@@ -199,6 +200,7 @@ public class Element extends Node {
      * parse, an element can take complete control over parsing its 
      * subtree. */
 
+    @Override
     public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
@@ -318,6 +320,7 @@ public class Element extends Node {
     /** 
      * Writes this element and all children to the given XmlWriter. */
 
+    @Override
     public void write(final XmlSerializer writer)
         throws IOException {
 

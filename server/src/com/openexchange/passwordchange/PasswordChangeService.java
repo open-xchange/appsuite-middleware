@@ -260,14 +260,17 @@ public abstract class PasswordChangeService {
             this.pw = pw;
         }
 
+        @Override
         public String getPassword() {
             return pw;
         }
 
+        @Override
         public String getUsername() {
             return loginInfo;
         }
 
+        @Override
         public Map<String, Object> getProperties() {
             return Collections.emptyMap();
         }

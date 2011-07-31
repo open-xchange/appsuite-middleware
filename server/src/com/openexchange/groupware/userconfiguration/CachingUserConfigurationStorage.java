@@ -96,10 +96,12 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         this.delegateStorage = new RdbUserConfigurationStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
+            @Override
             public void handleAbsence() throws OXException {
                 releaseCache();
             }
 
+            @Override
             public void handleAvailability() throws OXException {
                 initCache();
             }

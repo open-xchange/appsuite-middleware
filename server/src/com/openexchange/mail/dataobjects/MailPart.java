@@ -93,6 +93,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * @return <tt>true</tt> if the iterator has more elements.
          */
+        @Override
         public boolean hasNext() {
             return false;
         }
@@ -100,6 +101,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * @return The next element in the iteration.
          */
+        @Override
         public Entry<String, String> next() {
             return null;
         }
@@ -107,6 +109,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * Removes from the underlying collection the last element returned by the iterator (optional operation).
          */
+        @Override
         public void remove() {
             // Nothing to remove
         }

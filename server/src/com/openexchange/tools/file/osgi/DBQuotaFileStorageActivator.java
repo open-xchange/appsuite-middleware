@@ -61,12 +61,14 @@ public class DBQuotaFileStorageActivator implements BundleActivator {
 
     private ServiceTracker track;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final Filter filter = Tools.generateServiceFilter(context, FileStorageFactory.class, DatabaseService.class);
         track = new ServiceTracker(context, filter, new DBQuotaFileStorageRegisterer(context));
         track.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         track.close();
     }

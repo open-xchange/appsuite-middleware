@@ -73,7 +73,8 @@ final class SessionBoundImagesCleaner implements Runnable {
 		toIterate = session2imageMaps;
 	}
 
-	public void run() {
+	@Override
+    public void run() {
 		try {
 			final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
 			if (service == null) {

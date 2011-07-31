@@ -158,6 +158,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             {
                 final EventHandler pushMailEventHandler = new EventHandler() {
 
+                    @Override
                     public void handleEvent(final Event event) {
                         // final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                         // final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
@@ -172,6 +173,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             {
                 final EventHandler folderEventHandler = new EventHandler() {
 
+                    @Override
                     public void handleEvent(final Event event) {
                         // final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                         // final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
@@ -186,6 +188,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             {
                 final EventHandler sessionEventHandler = new EventHandler() {
 
+                    @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {

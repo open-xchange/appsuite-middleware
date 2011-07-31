@@ -327,11 +327,13 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		folder.setCreationDate(date);
 	}
 
-	public List<WebdavResource> getChildren() throws OXException {
+	@Override
+    public List<WebdavResource> getChildren() throws OXException {
 		loadChildren();
 		return new ArrayList<WebdavResource>(children);
 	}
-	public void create() throws OXException {
+	@Override
+    public void create() throws OXException {
 		if(exists) {
 		    throw WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS.create(getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
@@ -340,26 +342,31 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		factory.created(this);
 	}
 
-	public boolean exists() throws OXException {
+	@Override
+    public boolean exists() throws OXException {
 		return exists;
 	}
 
-	public Date getCreationDate() throws OXException {
+	@Override
+    public Date getCreationDate() throws OXException {
 		loadFolder();
 		return folder.getCreationDate();
 	}
 
-	public String getDisplayName() throws OXException {
+	@Override
+    public String getDisplayName() throws OXException {
 		loadFolder();
 		return getFolderName(folder);
 	}
 
-	public Date getLastModified() throws OXException {
+	@Override
+    public Date getLastModified() throws OXException {
 		loadFolder();
 		return folder.getLastModified();
 	}
 
-	public WebdavLock getLock(final String token) throws OXException {
+	@Override
+    public WebdavLock getLock(final String token) throws OXException {
 		final WebdavLock lock = lockHelper.getLock(token);
 		if(lock != null) {
 			return lock;
@@ -367,37 +374,44 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return findParentLock(token);
 	}
 
-	public List<WebdavLock> getLocks() throws OXException {
+	@Override
+    public List<WebdavLock> getLocks() throws OXException {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		addParentLocks(lockList);
 		return lockList;
 	}
 
-	public WebdavLock getOwnLock(final String token) throws OXException {
+	@Override
+    public WebdavLock getOwnLock(final String token) throws OXException {
 		return lockHelper.getLock(token);
 	}
 
-	public List<WebdavLock> getOwnLocks() throws OXException {
+	@Override
+    public List<WebdavLock> getOwnLocks() throws OXException {
 		return lockHelper.getAllLocks();
 	}
 
-	public String getSource() throws OXException { 
+	@Override
+    public String getSource() throws OXException { 
 		// IGNORE
 		return null;
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		if(url == null) {
 			initUrl();
 		}
 		return url;
 	}
 
-	public void lock(final WebdavLock lock) throws OXException {
+	@Override
+    public void lock(final WebdavLock lock) throws OXException {
 		lockHelper.addLock(lock);
 	}
 	
-	public void save() throws OXException {
+	@Override
+    public void save() throws OXException {
 		try {
 			dumpToDB();
             if(propertyHelper.mustWrite()) {
@@ -418,14 +432,16 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		}
 	}
 
-	public void setDisplayName(final String displayName) throws OXException {
+	@Override
+    public void setDisplayName(final String displayName) throws OXException {
 		//loadFolder();
 		//folder.setFolderName(displayName);
 		//changedFields.add(FolderObject.FOLDER_NAME);
 		//FIXME
 	}
 
-	public void unlock(final String token) throws OXException {
+	@Override
+    public void unlock(final String token) throws OXException {
 		lockHelper.removeLock(token);
 	}
 
@@ -639,7 +655,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		// Duplicates?
 	}
 
-	public int getId() {
+	@Override
+    public int getId() {
 		return id;
 	}
 
@@ -665,7 +682,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		children.remove(resource);
 	}
 
-	public int getParentId() throws OXException {
+	@Override
+    public int getParentId() throws OXException {
 		if(exists) {
 			loadFolder();
 			return folder.getParentFolderID();
@@ -674,13 +692,15 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return ((OXWebdavResource) factory.resolveCollection(url.parent())).getId();
 	}
 
-	public void removedParent() throws OXException {
+	@Override
+    public void removedParent() throws OXException {
 		exists = false;
 		factory.removed(this);
 		for(final OXWebdavResource res : children) { res.removedParent(); }
 	}
 
-	public void transferLock(final WebdavLock lock) throws OXException {
+	@Override
+    public void transferLock(final WebdavLock lock) throws OXException {
 		try {
 			lockHelper.transferLock(lock);
 		} catch (final OXException e) {

@@ -82,6 +82,7 @@ public class ContextImpl implements ContextExtended {
         this.contextId = contextId;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
@@ -108,18 +109,22 @@ public class ContextImpl implements ContextExtended {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public int getMailadmin() {
         return mailadmin;
     }
 
+    @Override
     public long getFileStorageQuota() {
         return fileStorageQuota;
     }
 
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
@@ -136,6 +141,7 @@ public class ContextImpl implements ContextExtended {
         this.enabled = enabled;
     }
 
+    @Override
     public int getFilestoreId() {
         return filestoreId;
     }
@@ -144,6 +150,7 @@ public class ContextImpl implements ContextExtended {
         this.filestoreId = filestoreId;
     }
 
+    @Override
     public String getFilestoreName() {
         return filestoreName;
     }
@@ -156,10 +163,12 @@ public class ContextImpl implements ContextExtended {
         this.filestorageAuth = filestoreAuth;
     }
 
+    @Override
     public String[] getFileStorageAuth() {
         return filestorageAuth.clone();
     }
 
+    @Override
     public String[] getLoginInfo() {
         return loginInfo.clone();
     }
@@ -168,23 +177,28 @@ public class ContextImpl implements ContextExtended {
         this.loginInfo = loginInfo.clone();
     }
 
+    @Override
     public void setUpdating(final boolean updating) {
         this.updating = updating;
     }
 
+    @Override
     public boolean isUpdating() {
         return updating;
     }
 
+    @Override
     public boolean isReadOnly() {
         return readOnly;
     }
     
+    @Override
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
         
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }

@@ -76,7 +76,8 @@ public class DateOrderObject implements Comparable<DateOrderObject> {
 		return obj;
 	}
 
-	public int compareTo(final DateOrderObject o) {
+	@Override
+    public int compareTo(final DateOrderObject o) {
 		if (o.getOrderBy() != null) {
 			return orderBy.compareTo(o.getOrderBy());
 		} else {

@@ -624,10 +624,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         releaseCache();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         initCache();
     }

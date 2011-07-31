@@ -128,6 +128,7 @@ public class SessionObject implements Session {
         this.language = language;
     }
 
+    @Override
     public void setLocalIp(final String localip) {
         this.localip = localip;
     }
@@ -152,10 +153,12 @@ public class SessionObject implements Session {
         this.contextId = contextId;
     }
 
+    @Override
     public String getSessionID() {
         return sessionid;
     }
 
+    @Override
     public int getUserId() {
         return Integer.parseInt(username);
     }
@@ -164,10 +167,12 @@ public class SessionObject implements Session {
         return username;
     }
 
+    @Override
     public String getUserlogin() {
         return userlogin;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -176,6 +181,7 @@ public class SessionObject implements Session {
         return language;
     }
 
+    @Override
     public String getLocalIp() {
         return localip;
     }
@@ -196,6 +202,7 @@ public class SessionObject implements Session {
         return creationtime;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
@@ -204,6 +211,7 @@ public class SessionObject implements Session {
         this.loginName = loginName;
     }
 
+    @Override
     public String getLoginName() {
         return loginName;
     }
@@ -212,10 +220,12 @@ public class SessionObject implements Session {
         this.randomToken = randomToken;
     }
 
+    @Override
     public String getRandomToken() {
         return randomToken;
     }
 
+    @Override
     public String getSecret() {
         return secret;
     }
@@ -224,14 +234,17 @@ public class SessionObject implements Session {
         this.secret = secret;
     }
 
+    @Override
     public boolean containsParameter(final String name) {
         return parameters.containsKey(name);
     }
 
+    @Override
     public Object getParameter(final String name) {
         return parameters.get(name);
     }
 
+    @Override
     public void setParameter(final String name, final Object value) {
         if (PARAM_LOCK.equals(name)) {
             return;
@@ -243,10 +256,12 @@ public class SessionObject implements Session {
         }
     }
 
+    @Override
     public void removeRandomToken() {
         randomToken = null;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
@@ -255,6 +270,7 @@ public class SessionObject implements Session {
         this.login = login;
     }
 
+    @Override
     public String getAuthId() {
         return authId;
     }
@@ -263,18 +279,22 @@ public class SessionObject implements Session {
         this.authId = authId;
     }
 
+    @Override
     public void setHash(String hash) {
         this.hash = hash;
     }
 
+    @Override
     public String getHash() {
         return hash;
     }
 
+    @Override
     public String getClient() {
         return client;
     }
 
+    @Override
     public void setClient(String client) {
         this.client = client;
     }

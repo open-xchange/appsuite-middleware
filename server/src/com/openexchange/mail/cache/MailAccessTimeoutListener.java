@@ -67,6 +67,7 @@ public final class MailAccessTimeoutListener implements TimeoutListener<MailAcce
         super();
     }
 
+    @Override
     public void onTimeout(final MailAccess<?, ?> mailAccess) {
         mailAccess.close(false);
     }

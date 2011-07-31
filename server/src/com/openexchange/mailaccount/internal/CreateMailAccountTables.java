@@ -67,10 +67,12 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
         return createStatements;
     }
 
+    @Override
     public String[] requiredTables() {
         return requiredTables;
     }
 
+    @Override
     public String[] tablesToCreate() {
         return createdTables;
     }

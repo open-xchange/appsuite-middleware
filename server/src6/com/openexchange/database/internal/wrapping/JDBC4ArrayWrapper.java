@@ -66,6 +66,7 @@ public class JDBC4ArrayWrapper extends JDBC3ArrayWrapper {
         this.delegate = delegate;
     }
 
+    @Override
     public void free() throws SQLException {
         delegate.free();
     }

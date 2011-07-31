@@ -210,14 +210,17 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         this.url = url;
     }
 
+    @Override
     public int getStatus() {
         return status;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public Object getAdditional() {
         return null;
     }

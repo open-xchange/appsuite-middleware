@@ -68,18 +68,22 @@ public class SimpleDBProvider implements DBProvider {
         this.writeCon = writeCon;
     }
 
+    @Override
     public Connection getReadConnection(Context ctx) {
         return readCon;
     }
 
+    @Override
     public Connection getWriteConnection(Context ctx) {
         return writeCon;
     }
 
+    @Override
     public void releaseReadConnection(Context ctx, Connection con) {
         // Nothing to release.
     }
 
+    @Override
     public void releaseWriteConnection(Context ctx, Connection con) {
         // Nothing to release.
     }

@@ -68,14 +68,17 @@ public abstract class AbstractModules implements PreferencesItemService {
         super();
     }
 
+    @Override
     public IValueHandler getSharedValue() {
 
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

@@ -112,9 +112,11 @@ public class CachingContextStorage extends ContextStorage {
     public ContextExtended loadContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
+            @Override
             public Serializable getKey() {
                 return I(contextId);
             }
+            @Override
             public ContextExtended load() throws OXException {
                 final ContextExtended retval = getPersistantImpl().loadContext(contextId);
                 // TODO We should introduce a logic layer above this context storage layer. That layer should then trigger the update tasks.
@@ -134,6 +136,7 @@ public class CachingContextStorage extends ContextStorage {
                 }
                 return retval;
             }
+            @Override
             public Lock getCacheLock() {
                 return CachingContextStorage.this.getCacheLock();
             }

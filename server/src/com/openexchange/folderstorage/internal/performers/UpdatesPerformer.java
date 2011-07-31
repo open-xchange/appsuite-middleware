@@ -455,6 +455,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     private static final TreeChecker TRUST_ALL_CHECKER = new TreeChecker() {
 
+        @Override
         public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws OXException {
             return true;
         }
@@ -472,6 +473,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
             this.storageParameters = storageParameters;
         }
 
+        @Override
         public boolean containsVirtualFolder(final String folderId, final String treeId, final StorageType storageType) throws OXException {
             /*
              * Check if folders are contained in given tree ID

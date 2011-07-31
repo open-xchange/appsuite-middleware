@@ -75,6 +75,7 @@ public class SmbThreadTest extends Thread {
         }
     }
 
+    @Override
     public void run () {
         SmbFile f = null;
         int runs = 0;

@@ -59,7 +59,7 @@ public class BasicTypesStringParser implements StringParser {
 
     public <T> T parse(String s, Class<T> t) {
         if(s == null) {
-            return (T) null;
+            return null;
         }
         if(t == String.class) {
             return (T) s;

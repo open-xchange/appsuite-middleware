@@ -111,42 +111,52 @@ public abstract class OXServlet extends WebDavServlet {
             this.interfaze = interfaze;
         }
 
+        @Override
         public String getUserAgent() {
             return req.getHeader("user-agent");
         }
 
+        @Override
         public String getPassword() {
             return pass;
         }
 
+        @Override
         public String getLogin() {
             return login;
         }
 
+        @Override
         public Interface getInterface() {
             return interfaze;
         }
 
+        @Override
         public String getClientIP() {
             return req.getRemoteAddr();
         }
 
+        @Override
         public String getAuthId() {
             return UUIDs.getUnformattedString(UUID.randomUUID());
         }
 
+        @Override
         public String getClient() {
             return null;
         }
 
+        @Override
         public String getVersion() {
             return null;
         }
 
+        @Override
         public String getHash() {
             return null;
         }
 
+        @Override
         public Map<String, List<String>> getHeaders() {
             return copyHeaders(req);
         }

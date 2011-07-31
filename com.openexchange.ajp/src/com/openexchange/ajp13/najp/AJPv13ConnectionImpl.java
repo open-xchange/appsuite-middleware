@@ -121,10 +121,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void block() {
         blocker.block();
     }
 
+    @Override
     public void unblock() {
         blocker.unblock();
     }
@@ -233,6 +235,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * 
      * @return The associated AJP request handler.
      */
+    @Override
     public AJPv13RequestHandler getAjpRequestHandler() {
         blocker.acquire();
         try {
@@ -248,6 +251,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return The input stream from AJP client
      * @throws IOException If input stream cannot be returned
      */
+    @Override
     public InputStream getInputStream() throws IOException {
         blocker.acquire();
         try {
@@ -263,6 +267,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
+    @Override
     public BlockableBufferedOutputStream getOutputStream() throws IOException {
         blocker.acquire();
         try {
@@ -278,6 +283,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * @param millis The timeout in milliseconds
      * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
+    @Override
     public void setSoTimeout(final int millis) throws AJPv13Exception {
         blocker.acquire();
         try {
@@ -294,6 +300,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * 
      * @return The number of actual AJP package.
      */
+    @Override
     public int getPackageNumber() {
         blocker.acquire();
         try {
@@ -320,6 +327,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * 
      * @return Current AJP connection's state
      */
+    @Override
     public int getState() {
         blocker.acquire();
         try {
@@ -329,6 +337,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void close() {
         blocker.acquire();
         try {
@@ -440,6 +449,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void blockInputStream(final boolean block) {
         blocker.acquire();
         try {
@@ -453,6 +463,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void blockOutputStream(final boolean block) {
         blocker.acquire();
         try {

@@ -137,6 +137,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             this.allowedContentTypes = allowedContentTypes;
         }
 
+        @Override
         public Permission getOwnPermission(final Folder folder) {
             return CalculatePermission.calculate(folder, session, allowedContentTypes);
         }
@@ -158,6 +159,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             this.allowedContentTypes = allowedContentTypes;
         }
 
+        @Override
         public Permission getOwnPermission(final Folder folder) throws OXException {
             return CalculatePermission.calculate(folder, user, ctx, allowedContentTypes);
         }

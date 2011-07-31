@@ -59,10 +59,12 @@ public class EightBitEncoding implements Encoding {
 
     public static final EightBitEncoding Default = new EightBitEncoding();
 
+    @Override
     public String decode(final String text) throws IOException {
         return text;
     }
 
+    @Override
     public String encode(final String text) throws IOException {
         return text;
     }

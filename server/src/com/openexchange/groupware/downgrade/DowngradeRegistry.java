@@ -144,7 +144,8 @@ public final class DowngradeRegistry {
 		 * 
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
-		public int compare(final DowngradeListener o1, final DowngradeListener o2) {
+		@Override
+        public int compare(final DowngradeListener o1, final DowngradeListener o2) {
 			if (o1.getOrder() > o2.getOrder()) {
 				return 1;
 			} else if (o1.getOrder() < o2.getOrder()) {

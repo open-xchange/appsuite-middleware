@@ -61,15 +61,18 @@ public class WebdavStatusImpl<T> implements WebdavStatus<T> {
 		this.additional = additional;
 	}
 	
-	public T getAdditional() {
+	@Override
+    public T getAdditional() {
 		return additional;
 	}
 
-	public int getStatus() {
+	@Override
+    public int getStatus() {
 		return status;
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return url;
 	}
 

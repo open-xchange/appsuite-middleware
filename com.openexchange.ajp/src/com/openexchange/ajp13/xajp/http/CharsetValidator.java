@@ -102,6 +102,7 @@ final class CharsetValidator {
         if (null == future) {
             FutureTask<Boolean> ft = new FutureTask<Boolean>(new Callable<Boolean>() {
 
+                @Override
                 public Boolean call() throws Exception {
                     "Bla".getBytes(charset);
                     return Boolean.TRUE;
@@ -184,6 +185,7 @@ final class CharsetValidator {
             return hashcode;
         }
 
+        @Override
         public int compareTo(final IgnoreCaseString other) {
             return s.compareToIgnoreCase(other.s);
         }

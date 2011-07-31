@@ -69,14 +69,17 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class));
     
+    @Override
     public int addedWithVersion() {
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId)
             throws OXException {
         try {

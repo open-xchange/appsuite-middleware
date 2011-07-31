@@ -72,10 +72,12 @@ public class ContactFieldsForJapaneseKanaSearch extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { ContactInfoField2Text.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);

@@ -78,6 +78,7 @@ final class LoginResultImpl implements LoginResult {
         this.user = user;
     }
 
+    @Override
     public LoginRequest getRequest() {
         return request;
     }
@@ -86,6 +87,7 @@ final class LoginResultImpl implements LoginResult {
         this.request = request;
     }
 
+    @Override
     public Context getContext() {
         return context;
     }
@@ -94,6 +96,7 @@ final class LoginResultImpl implements LoginResult {
         this.context = context;
     }
 
+    @Override
     public User getUser() {
         return user;
     }
@@ -102,6 +105,7 @@ final class LoginResultImpl implements LoginResult {
         this.user = user;
     }
 
+    @Override
     public Session getSession() {
         return session;
     }

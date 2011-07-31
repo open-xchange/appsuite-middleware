@@ -81,6 +81,7 @@ public class CookieLifetime implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
@@ -88,13 +89,16 @@ public class CookieLifetime implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 /*

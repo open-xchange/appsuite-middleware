@@ -270,6 +270,7 @@ public class Index {
             this.name = name;
         }
 
+        @Override
         public boolean accept(final Index object) {
             return object.getName().equalsIgnoreCase(name);
         }
@@ -284,6 +285,7 @@ public class Index {
             this.columns = columns;
         }
 
+        @Override
         public boolean accept(final Index object) {
             final Set<String> needed = new HashSet<String>(Arrays.asList(columns));
             for (final String col : object.getColumns()) {
@@ -309,6 +311,7 @@ public class Index {
             this.columns = columns;
         }
 
+        @Override
         public boolean accept(final Index object) {
             if (columns.length != object.getColumns().size()) {
                 return false;

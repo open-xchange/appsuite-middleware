@@ -78,6 +78,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         final Object ctx = reference.getProperty(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE);
@@ -99,10 +100,12 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

@@ -85,6 +85,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The file's field name in multipart upload.
      */
+    @Override
     public String getFieldName() {
         return fieldName;
     }
@@ -94,6 +95,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param fieldName The file's field name in multipart upload.
      */
+    @Override
     public void setFieldName(final String fieldName) {
         this.fieldName = fieldName;
     }
@@ -103,6 +105,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The file's content type.
      */
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -112,6 +115,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param contentType The file's content type.
      */
+    @Override
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
@@ -127,6 +131,7 @@ public class UploadFileImpl implements UploadFile {
      * @see #getPreparedFileName()
      * @return The file name.
      */
+    @Override
     public String getFileName() {
         return fileName;
     }
@@ -136,6 +141,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The prepared file name
      */
+    @Override
     public String getPreparedFileName() {
         if (null == preparedFileName) {
             if (null == fileName) {
@@ -164,6 +170,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param fileName The file name
      */
+    @Override
     public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
@@ -173,6 +180,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The file size in bytes.
      */
+    @Override
     public long getSize() {
         return size;
     }
@@ -182,6 +190,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param size The file size in bytes.
      */
+    @Override
     public void setSize(final long size) {
         this.size = size;
     }
@@ -191,6 +200,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The associated unique temporary file on disk.
      */
+    @Override
     public File getTmpFile() {
         return tmpFile;
     }
@@ -200,6 +210,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param tmpFile The associated unique temporary file on disk.
      */
+    @Override
     public void setTmpFile(final File tmpFile) {
         this.tmpFile = tmpFile;
     }
@@ -209,6 +220,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @return The next homonymous file.
      */
+    @Override
     public UploadFile getHomonymous() {
         return homonymous;
     }
@@ -218,6 +230,7 @@ public class UploadFileImpl implements UploadFile {
      * 
      * @param homonymous The next homonymous file.
      */
+    @Override
     public void setHomonymous(final UploadFile homonymous) {
         this.homonymous = homonymous;
     }

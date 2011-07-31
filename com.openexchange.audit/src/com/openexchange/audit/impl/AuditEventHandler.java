@@ -132,7 +132,8 @@ public class AuditEventHandler implements EventHandler {
 		}
 	}
 	
-	public void handleEvent(final Event event) {
+	@Override
+    public void handleEvent(final Event event) {
 		try {
 			final StringBuffer log = new StringBuffer();
 			

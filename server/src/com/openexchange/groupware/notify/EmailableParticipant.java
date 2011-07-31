@@ -169,6 +169,7 @@ public final class EmailableParticipant implements Comparable<EmailableParticipa
         return false;
     }
 
+    @Override
     public int compareTo(final EmailableParticipant other) {
         final String myCompare = displayName == null ? email : displayName;
         final String otherCompare = other.displayName == null ? other.email : other.displayName;

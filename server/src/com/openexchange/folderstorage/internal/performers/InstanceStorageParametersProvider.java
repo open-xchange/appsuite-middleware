@@ -68,6 +68,7 @@ public final class InstanceStorageParametersProvider implements StorageParameter
         this.storageParameters = storageParameters;
     }
 
+    @Override
     public StorageParameters getStorageParameters() {
         return storageParameters;
     }

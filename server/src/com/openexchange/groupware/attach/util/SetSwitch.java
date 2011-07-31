@@ -66,7 +66,8 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		this.value = value;
 	}
 	
-	public Object createdBy() {
+	@Override
+    public Object createdBy() {
 		if(value == null) {
 			value = Integer.valueOf(-1);
 		}
@@ -74,7 +75,8 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object id() {
+	@Override
+    public Object id() {
 		if(value == null) {
 			value = Integer.valueOf(-1);
 		}
@@ -82,7 +84,8 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object moduleId() {
+	@Override
+    public Object moduleId() {
 		if(value == null) {
 			value = Integer.valueOf(-1);
 		}
@@ -90,7 +93,8 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object attachedId() {
+	@Override
+    public Object attachedId() {
 		if(value == null) {
 			value = Integer.valueOf(-1);
 		}
@@ -98,7 +102,8 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object fileSize() {
+	@Override
+    public Object fileSize() {
 		if(value == null) {
 			value = Integer.valueOf(0);
 		}
@@ -106,19 +111,22 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object fileMIMEType() {
+	@Override
+    public Object fileMIMEType() {
         if(value != null) {
             attachment.setFileMIMEType(value.toString());            
         }
         return null;
 	}
 
-	public Object creationDate() {
+	@Override
+    public Object creationDate() {
 		attachment.setCreationDate((Date)value);
 		return null;
 	}
 
-	public Object folderId() {
+	@Override
+    public Object folderId() {
 		if(value == null) {
 			value = Integer.valueOf(-1);
 		}
@@ -126,12 +134,14 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 	
-	public Object fileName(){
+	@Override
+    public Object fileName(){
 		attachment.setFilename((String)value);
 		return null;
 	}
 	
-	public Object rtfFlag(){
+	@Override
+    public Object rtfFlag(){
 		if(value == null) {
 			value = Boolean.FALSE;
 		}
@@ -139,12 +149,14 @@ public class SetSwitch implements AttachmentField.AttachmentSwitch{
 		return null;
 	}
 
-	public Object comment() {
+	@Override
+    public Object comment() {
 		attachment.setComment((String)value);
 		return null;
 	}
 	
-	public Object fileId() {
+	@Override
+    public Object fileId() {
 		attachment.setFileId((String)value);
 		return null;
 	}

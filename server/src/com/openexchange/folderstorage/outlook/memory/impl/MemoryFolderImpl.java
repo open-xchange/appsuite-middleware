@@ -83,6 +83,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         super();
     }
 
+    @Override
     public Boolean getSubscribed() {
         return subscribed;
     }
@@ -97,6 +98,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.subscribed = subscribed;
     }
 
+    @Override
     public String getTreeId() {
         return treeId;
     }
@@ -110,6 +112,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.treeId = treeId;
     }
 
+    @Override
     public String getId() {
         return id;
     }
@@ -123,6 +126,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -136,6 +140,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.name = name;
     }
 
+    @Override
     public String getParentId() {
         return parentId;
     }
@@ -149,6 +154,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.parentId = parentId;
     }
 
+    @Override
     public Permission[] getPermissions() {
         return permissions;
     }
@@ -162,6 +168,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.permissions = permissions;
     }
 
+    @Override
     public int getModifiedBy() {
         return modifiedBy;
     }
@@ -175,6 +182,7 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.modifiedBy = modifiedBy;
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified;
     }

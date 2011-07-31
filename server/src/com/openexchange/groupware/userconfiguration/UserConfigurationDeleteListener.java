@@ -75,7 +75,8 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 		super();
 	}
 
-	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
+	@Override
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
 			throws OXException {
 		if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
 			try {

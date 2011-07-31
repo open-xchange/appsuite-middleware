@@ -79,6 +79,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         super(session);
     }
 
+    @Override
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction) {
             final long size = attachment.getSize();
@@ -103,6 +104,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         attachments.add(attachment);
     }
 
+    @Override
     public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
@@ -111,6 +113,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         return new ComposedMailMessage[] { source };
     }
 
+    @Override
     public void setTextPart(final TextBodyMailPart textPart) {
         this.textPart = textPart;
     }

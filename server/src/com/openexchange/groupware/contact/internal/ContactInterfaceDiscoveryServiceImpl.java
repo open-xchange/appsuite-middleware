@@ -125,6 +125,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         rdbProviderCache.dispose();
     }
 
+    @Override
     public ContactInterfaceProvider getContactInterfaceProvider(final int folderId, final int contextId) throws OXException {
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
         if (provider == null) {
@@ -137,6 +138,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         return provider;
     }
 
+    @Override
     public ContactInterface newContactInterface(final int folderId, final Session session) throws OXException {
         final int contextId = session.getContextId();
         final ContactInterfaceProvider provider = ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId);
@@ -146,10 +148,12 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         return provider.newContactInterface(session);
     }
 
+    @Override
     public boolean hasSpecificContactInterface(final int folderId, final int contextId) {
         return (null != ContactInterfaceProviderRegistry.getInstance().getService(folderId, contextId));
     }
 
+    @Override
     public ContactInterface newDefaultContactInterface(final Session session) throws OXException {
         return rdbBySession(session, session.getContextId());
     }
@@ -165,6 +169,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
         }
     }
     
+    @Override
     public List<ContactInterfaceProviderRegistration> getRegistrations(final int contextId) {
         return ContactInterfaceProviderRegistry.getInstance().getRegistrations(contextId);
     }
@@ -179,6 +184,7 @@ public final class ContactInterfaceDiscoveryServiceImpl implements ContactInterf
             this.ctx = ctx;
         }
 
+        @Override
         public ContactInterface newContactInterface(final Session session) {
             return new RdbContactSQLImpl(session, ctx);
         }

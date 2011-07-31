@@ -122,6 +122,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
         return new StringBuilder(1 + result.length()).append(result).append('\n').toString();
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.CHANGE_EXCEPTIONS;
     }

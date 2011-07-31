@@ -184,6 +184,7 @@ public abstract class DataParser {
             return null;
         }
         final Parsing parsing = new Parsing() {
+            @Override
             public String getAttribute() {
                 return name;
             }

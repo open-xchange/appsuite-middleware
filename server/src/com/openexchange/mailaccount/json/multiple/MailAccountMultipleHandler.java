@@ -80,6 +80,7 @@ public final class MailAccountMultipleHandler implements MultipleHandler {
         super();
     }
 
+    @Override
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = MailAccountActionFactory.getInstance().createActionService(action);
         if (null == actionService) {
@@ -99,6 +100,7 @@ public final class MailAccountMultipleHandler implements MultipleHandler {
         return result.getResultObject();
     }
 
+    @Override
     public Date getTimestamp() {
         if (null == result) {
             return null;
@@ -107,10 +109,12 @@ public final class MailAccountMultipleHandler implements MultipleHandler {
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
+    @Override
     public void close() {
         result = null;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         if (null == result) {
             return Collections.<OXException> emptySet();

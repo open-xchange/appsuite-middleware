@@ -65,6 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class AttachmentDelDelete extends ContextDelete {
 
+    @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(event)) {
             return;

@@ -103,11 +103,13 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         avgProcessingTimeArr = new long[1000];
     }
 
+    @Override
     public int getPoolSize() {
         // There is no more a thread pool for AJP tasks
         return 0;
     }
 
+    @Override
     public int getNumActive() {
         return numActive.get();
     }
@@ -126,11 +128,13 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         numActive.decrementAndGet();
     }
 
+    @Override
     public int getNumIdle() {
         // There is no more a thread pool for AJP tasks
         return 0;
     }
 
+    @Override
     public int getNumWaiting() {
         return numWaiting.get();
     }
@@ -149,6 +153,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         numWaiting.decrementAndGet();
     }
 
+    @Override
     public int getNumProcessing() {
         return numProcessing.get();
     }
@@ -167,6 +172,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         numProcessing.decrementAndGet();
     }
 
+    @Override
     public long getNumRequests() {
         return numRequests.get();
     }
@@ -178,6 +184,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         numRequests.incrementAndGet();
     }
 
+    @Override
     public double getAvgUseTime() {
         long duration = 0;
         for (final long element : avgUseTimeArr) {
@@ -207,6 +214,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         }
     }
 
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
@@ -218,6 +226,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
     }
 
+    @Override
     public void resetMaxUseTime() {
         useTimeLock.lock();
         try {
@@ -227,6 +236,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         }
     }
 
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
@@ -235,6 +245,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         this.minUseTime = Math.min(minUseTime, this.minUseTime);
     }
 
+    @Override
     public void resetMinUseTime() {
         useTimeLock.lock();
         try {
@@ -244,6 +255,7 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         }
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return 0;
     }
@@ -278,14 +290,17 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         this.minProcessingTime = Math.min(this.minProcessingTime, minProcessingTime);
     }
 
+    @Override
     public long getMaxProcessingTime() {
         return maxProcessingTime;
     }
 
+    @Override
     public long getMinProcessingTime() {
         return minProcessingTime;
     }
 
+    @Override
     public double getAvgProcessingTime() {
         long duration = 0;
         for (final long element : avgProcessingTimeArr) {
@@ -294,10 +309,12 @@ public final class AJPv13TaskMonitor extends StandardMBean implements AJPv13Task
         return (((double) duration) / avgProcessingTimeArr.length);
     }
 
+    @Override
     public void resetMaxProcessingTime() {
         maxProcessingTime = 0;
     }
 
+    @Override
     public void resetMinProcessingTime() {
         minProcessingTime = Long.MAX_VALUE;
     }

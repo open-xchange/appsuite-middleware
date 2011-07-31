@@ -78,6 +78,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
         properties = mailAccount.getProperties();
     }
 
+    @Override
     public int getReferencedPartLimit() {
         final String referencedPartLimitStr = properties.get("com.openexchange.mail.transport.referencedPartLimit");
         if (null == referencedPartLimitStr) {

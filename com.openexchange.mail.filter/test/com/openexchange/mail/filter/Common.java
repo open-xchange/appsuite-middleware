@@ -13,6 +13,7 @@ public class Common {
 
     public static void prepare(String passwordSource, String masterPassword) {
         simConfigurationService = new SimConfigurationService() {
+            @Override
             public Properties getFile(String filename) {
                 final Properties properties = new Properties();
                 properties.putAll(stringProperties);

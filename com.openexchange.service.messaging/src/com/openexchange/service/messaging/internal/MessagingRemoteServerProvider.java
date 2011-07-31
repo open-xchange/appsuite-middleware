@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceInfo;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingRemoteServerProvider} - Provides the addresses to remote messaging servers either dynamically looked-up or statically

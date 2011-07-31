@@ -57,7 +57,8 @@ public class HAVING extends Clause {
 		super(predicate);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildHAVING(this);
 	}
 }

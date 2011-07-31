@@ -94,6 +94,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         this.transactional = transactional;
     }
 
+    @Override
     public boolean onConnect(final INonBlockingConnection connection) throws IOException, MaxReadSizeExceededException {
         connection.setAttachment(new XAJPv13Session(this));
         connection.setAutoflush(false);
@@ -103,6 +104,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return true;
     }
 
+    @Override
     public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
         final int dataLength;
 
@@ -192,6 +194,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return AJPv13Utility.parseInt(dataSource.readByte(), dataSource.readByte());
     }
 
+    @Override
     public boolean onDisconnect(final INonBlockingConnection connection) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder(256).append("AJP connection disconnected. Either ").append(
@@ -202,6 +205,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return true;
     }
 
+    @Override
     public boolean onConnectException(final INonBlockingConnection connection, final IOException ioe) throws IOException {
         LOG.error("Establishing AJP connection failed or timed out: " + ioe.getMessage(), ioe);
         return true;

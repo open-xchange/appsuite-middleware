@@ -65,7 +65,6 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 /**
  * {@link SubscriptionExecutionServiceImplTest}

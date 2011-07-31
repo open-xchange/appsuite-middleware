@@ -79,6 +79,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Compose JSON array with id

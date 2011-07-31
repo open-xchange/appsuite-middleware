@@ -331,6 +331,7 @@ public class FolderWriter extends FolderChildWriter {
             this.userConf = userConf;
         }
 
+        @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (fo.isVisible(userId, userConf)) {

@@ -82,6 +82,7 @@ public final class ListAction extends AbstractMailAccountAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final String colString = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 

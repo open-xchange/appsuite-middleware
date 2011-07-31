@@ -71,94 +71,117 @@ public class JDBC4PreparedStatementWrapper extends JDBC3PreparedStatementWrapper
         this.delegate = delegate;
     }
 
+    @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
         delegate.setAsciiStream(parameterIndex, x);
     }
 
+    @Override
     public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
         delegate.setAsciiStream(parameterIndex, x, length);
     }
 
+    @Override
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
         delegate.setBinaryStream(parameterIndex, x);
     }
 
+    @Override
     public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
         delegate.setBinaryStream(parameterIndex, x, length);
     }
 
+    @Override
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
         delegate.setBlob(parameterIndex, inputStream);
     }
 
+    @Override
     public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
         delegate.setBlob(parameterIndex, inputStream, length);
     }
 
+    @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
         delegate.setCharacterStream(parameterIndex, reader);
     }
 
+    @Override
     public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
         delegate.setCharacterStream(parameterIndex, reader, length);
     }
 
+    @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
         delegate.setClob(parameterIndex, reader);
     }
 
+    @Override
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
         delegate.setClob(parameterIndex, reader, length);
     }
 
+    @Override
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
         delegate.setNCharacterStream(parameterIndex, value);
     }
 
+    @Override
     public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
         delegate.setNCharacterStream(parameterIndex, value, length);
     }
 
+    @Override
     public void setNClob(int parameterIndex, NClob value) throws SQLException {
         delegate.setNClob(parameterIndex, value);
     }
 
+    @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
         delegate.setNClob(parameterIndex, reader);
     }
 
+    @Override
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
         delegate.setNClob(parameterIndex, reader, length);
     }
 
+    @Override
     public void setNString(int parameterIndex, String value) throws SQLException {
         delegate.setNString(parameterIndex, value);
     }
 
+    @Override
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
         delegate.setRowId(parameterIndex, x);
     }
 
+    @Override
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
         delegate.setSQLXML(parameterIndex, xmlObject);
     }
 
+    @Override
     public boolean isClosed() throws SQLException {
         return delegate.isClosed();
     }
 
+    @Override
     public boolean isPoolable() throws SQLException {
         return delegate.isPoolable();
     }
 
+    @Override
     public void setPoolable(boolean poolable) throws SQLException {
         delegate.setPoolable(poolable);
     }
 
+    @Override
     public boolean isWrapperFor(Class<?> iface) {
         return iface.isAssignableFrom(delegate.getClass());
     }
 
+    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (iface.isAssignableFrom(delegate.getClass())) {
             return iface.cast(delegate);

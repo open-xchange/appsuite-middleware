@@ -107,10 +107,12 @@ public class SynchronizableBufferedInputStream extends BufferedInputStream imple
         synchronizer = new NonBlockingSynchronizer();
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }

@@ -232,6 +232,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
          * @param user The user ID
          * @throws IOException If writing response fails
          */
+        @Override
         public void actionPerformed(final TasksSQLInterface tasksSQL, final OutputStream os, final int user) throws IOException {
             final XMLOutputter xo = new XMLOutputter();
             try {

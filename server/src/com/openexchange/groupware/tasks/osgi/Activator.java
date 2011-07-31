@@ -72,12 +72,14 @@ public class Activator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         reminderService = context.registerService(TargetService.class.getName(), new ModifyThroughDependant(), props);
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         reminderService.unregister();
     }

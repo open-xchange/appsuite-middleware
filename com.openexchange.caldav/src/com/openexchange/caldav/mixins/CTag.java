@@ -51,7 +51,6 @@ package com.openexchange.caldav.mixins;
 
 import java.util.List;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 

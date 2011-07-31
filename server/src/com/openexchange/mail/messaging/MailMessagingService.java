@@ -90,45 +90,54 @@ public final class MailMessagingService implements MessagingService {
         super();
     }
 
+    @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public MessagingAccountManager getAccountManager() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getDisplayName() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getId() {
         return ID;
     }
 
+    @Override
     public List<MessagingAction> getMessageActions() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public DynamicFormDescription getFormDescription() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Set<String> getSecretProperties() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int[] getStaticRootPermissions() {
         // TODO Auto-generated method stub
         return null;

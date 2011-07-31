@@ -65,6 +65,7 @@ import junit.framework.TestCase;
 public class CompositeSubscriptionSourceDiscoveryServiceTest extends TestCase {
     private CompositeSubscriptionSourceDiscoveryService compositeDiscoverer;
 
+    @Override
     public void setUp() {
         SimSubscriptionSourceDiscoveryService discoverer1 = new SimSubscriptionSourceDiscoveryService();
         SimSubscriptionSourceDiscoveryService discoverer2 = new SimSubscriptionSourceDiscoveryService();

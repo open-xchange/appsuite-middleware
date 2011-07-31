@@ -73,6 +73,7 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<Ti
         this.context = context;
     }
 
+    @Override
     public TimerService addingService(final ServiceReference<TimerService> reference) {
         final TimerService timer = context.getService(reference);
         LOG.info("Injecting TimerService into database bundle.");
@@ -80,10 +81,12 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<Ti
         return timer;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<TimerService> reference, final TimerService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
         LOG.info("Removing TimerService from database bundle.");
         Initialization.getInstance().getTimer().removeTimerService();

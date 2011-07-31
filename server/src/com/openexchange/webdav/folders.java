@@ -244,6 +244,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
             this.lastModifiedCache = new LastModifiedCache();
         }
 
+        @Override
         public void actionPerformed(final FolderSQLInterface foldersSQL, final OutputStream os, final int user)
                 throws IOException {
 

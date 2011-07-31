@@ -76,14 +76,17 @@ public class AllowTextInValuesOfDynamicContextAttributesTask extends ChangeColum
         return new Column("value", "TEXT collate utf8_unicode_ci NOT NULL");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[]{"com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask"};
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return Priority.NORMAL.ordinal();
     }

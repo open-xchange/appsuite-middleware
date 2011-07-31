@@ -89,10 +89,12 @@ public class HashingFileStorage implements FileStorage {
         return new File(storage, identifier);
     }
 
+    @Override
     public boolean deleteFile(final String identifier) throws OXException {
         return file(identifier).delete();
     }
 
+    @Override
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         final Set<String> notDeleted = new HashSet<String>();
         for (final String identifier : identifiers) {
@@ -104,6 +106,7 @@ public class HashingFileStorage implements FileStorage {
         return notDeleted;
     }
 
+    @Override
     public InputStream getFile(final String name) throws OXException {
         try {
             return new BufferedInputStream(new FileInputStream(file(name)));
@@ -112,11 +115,13 @@ public class HashingFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public SortedSet<String> getFileList() throws OXException {
         final SortedSet<String> files = new TreeSet<String>();
         final int beginIndex = storage.getAbsolutePath().length()+1;
         visit(new Visitor() {
 
+            @Override
             public void visit(final File f) {
                 if(f.isFile()) {
                     files.add(f.getAbsolutePath().substring(beginIndex));
@@ -127,22 +132,27 @@ public class HashingFileStorage implements FileStorage {
         return files;
     }
 
+    @Override
     public long getFileSize(final String name) throws OXException {
         return file(name).length();
     }
 
+    @Override
     public String getMimeType(final String name) throws OXException {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(file(name));
     }
 
+    @Override
     public void recreateStateFile() throws OXException {
         // Nope, no state file used.
     }
 
+    @Override
     public void remove() throws OXException {
         visit(new Visitor() {
 
+            @Override
             public void visit(final File f) {
                 f.delete();
             }
@@ -150,6 +160,7 @@ public class HashingFileStorage implements FileStorage {
         });
     }
 
+    @Override
     public String saveNewFile(final InputStream file) throws OXException {
         final String[] filestorePath = generateName();
         final File path = new File(storage, filestorePath[0]);
@@ -218,6 +229,7 @@ public class HashingFileStorage implements FileStorage {
         return new String[] { b.toString(), uuid };
     }
 
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         return true; // We're not using a state file
     }

@@ -74,6 +74,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         super();
     }
 
+    @Override
     public int compareTo(final ParameterizedHeader other) {
         if (this == other) {
             return 0;

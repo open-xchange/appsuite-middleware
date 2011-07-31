@@ -100,10 +100,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
 
         m.put(MailJSONField.CID.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return candidate.getContentId();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -114,6 +116,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.CONTENT.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 try {
                     return candidate.getContent();
@@ -123,6 +126,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 }
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -133,10 +137,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.CONTENT_TYPE.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return candidate.getContentType().toString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -147,10 +153,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.DISPOSITION.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return candidate.getContentDisposition().getDisposition();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -161,11 +169,13 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final InternetAddress dispositionNotification = candidate.getDispositionNotification();
                 return null == dispositionNotification ? null : dispositionNotification.toUnicodeString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -176,10 +186,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.FLAGS.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return Integer.valueOf(candidate.getFlags());
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for flag search: " + operation);
@@ -194,11 +206,13 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.FROM.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final InternetAddress[] from = candidate.getFrom();
                 return null == from || from.length == 0 ? null : from[0].toUnicodeString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for from search: " + operation);
@@ -209,10 +223,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.PRIORITY.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return Integer.valueOf(candidate.getPriority());
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for header search: " + operation);
@@ -244,11 +260,13 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.RECEIVED_DATE.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final Date d = candidate.getReceivedDate();
                 return null == d ? null : Long.valueOf(d.getTime());
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 ComparisonType ct;
                 if (SingleOperation.EQUALS == operation) {
@@ -268,6 +286,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.RECIPIENT_BCC.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final InternetAddress[] internetAddresses = candidate.getBcc();
                 if (null == internetAddresses) {
@@ -285,6 +304,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 return sb.toString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for BCC search: " + operation);
@@ -295,6 +315,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.RECIPIENT_CC.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final InternetAddress[] internetAddresses = candidate.getCc();
                 if (null == internetAddresses) {
@@ -312,6 +333,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 return sb.toString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for CC search: " + operation);
@@ -322,6 +344,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.RECIPIENT_TO.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final InternetAddress[] internetAddresses = candidate.getTo();
                 if (null == internetAddresses) {
@@ -339,6 +362,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 return sb.toString();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for TO search: " + operation);
@@ -349,11 +373,13 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.SENT_DATE.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 final Date d = candidate.getSentDate();
                 return null == d ? null : Long.valueOf(d.getTime());
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 ComparisonType ct;
                 if (SingleOperation.EQUALS == operation) {
@@ -374,10 +400,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.SIZE.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return Long.valueOf(candidate.getSize());
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 ComparisonType ct;
                 if (SingleOperation.EQUALS == operation) {
@@ -398,10 +426,12 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         });
         m.put(MailJSONField.SUBJECT.getKey(), new AttributeGetter() {
 
+            @Override
             public Object getObject(final MailMessage candidate) {
                 return candidate.getSubject();
             }
 
+            @Override
             public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
                 if (SingleOperation.EQUALS != operation) {
                     throw new IllegalArgumentException("Unsupported operation for subject search: " + operation);
@@ -436,6 +466,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         super();
     }
 
+    @Override
     public <T> T getAttribute(final String attributeName, final MailMessage candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {

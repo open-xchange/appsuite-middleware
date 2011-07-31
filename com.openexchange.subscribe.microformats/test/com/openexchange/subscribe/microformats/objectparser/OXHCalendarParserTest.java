@@ -142,7 +142,7 @@ public class OXHCalendarParserTest extends TestCase {
        "</span>";
         Collection<Appointment> entries = parser.parse(new StringReader(html));
         assertEquals("Should find one entry", 1, entries.size());
-        Appointment app = (Appointment) entries.iterator().next();
+        Appointment app = entries.iterator().next();
         
         assertEquals("Location should match", "San Francisco, CA, USA", app.getLocation());
         assertEquals("Summary should match", "The microformats.org site was launched", app.getNote());

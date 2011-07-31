@@ -63,7 +63,8 @@ public class Column extends Value {
 		return new Assignment(this, expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildColumn(this);
 	}
 

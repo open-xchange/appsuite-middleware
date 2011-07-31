@@ -130,18 +130,22 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
         */
     }
 
+    @Override
     public boolean isEventQueueEnabled() {
         return isEventQueueEnabled;
     }
 
+    @Override
     public void setEventQueueEnabled(final boolean isEventQueueEnabled) {
         this.isEventQueueEnabled = isEventQueueEnabled;
     }
 
+    @Override
     public int getEventQueueDelay() {
         return eventQueueDelay;
     }
 
+    @Override
     public void setEventQueueDelay(final int eventQueueDelay) {
         this.eventQueueDelay = eventQueueDelay;
     }

@@ -215,6 +215,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         markSet(Metadata.CREATION_DATE_LITERAL);
     }
 
+    @Override
     public void create() throws OXException {
         if (exists) {
             throw WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS.create(getUrl(),
@@ -232,6 +233,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public void delete() throws OXException {
         if (exists) {
             try {
@@ -251,10 +253,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public boolean exists() {
         return exists;
     }
 
+    @Override
     public InputStream getBody() throws OXException {
         final ServerSession session = getSession();
         try {
@@ -273,21 +277,25 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public String getContentType() throws OXException {
         loadMetadata();
         return metadata.getFileMIMEType();
     }
 
+    @Override
     public Date getCreationDate() throws OXException {
         loadMetadata();
         return metadata.getCreationDate();
     }
 
+    @Override
     public String getDisplayName() throws OXException {
         loadMetadata();
         return metadata.getFileName();
     }
 
+    @Override
     public String getETag() {
         if (!exists && !existsInDB) {
             /*
@@ -303,20 +311,24 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             Integer.valueOf(metadata.getVersion()));
     }
 
+    @Override
     public String getLanguage() {
         return null;
     }
 
+    @Override
     public Date getLastModified() throws OXException {
         loadMetadata();
         return metadata.getLastModified();
     }
 
+    @Override
     public Long getLength() throws OXException {
         loadMetadata();
         return Long.valueOf(metadata.getFileSize());
     }
 
+    @Override
     public WebdavLock getLock(final String token) throws OXException {
         WebdavLock lock;
         try {
@@ -333,12 +345,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return findParentLock(token);
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws OXException {
         final List<WebdavLock> lockList = getOwnLocks();
         addParentLocks(lockList);
         return lockList;
     }
 
+    @Override
     public WebdavLock getOwnLock(final String token) throws OXException {
         try {
             return injectOwner(lockHelper.getLock(token));
@@ -350,6 +364,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws OXException {
         try {
             return injectOwner(lockHelper.getAllLocks());
@@ -390,14 +405,17 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return allLocks;
     }
 
+    @Override
     public String getSource() {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public void lock(final WebdavLock lock) throws OXException {
         try {
             if (!exists) {
@@ -416,6 +434,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public void unlock(final String token) throws OXException {
         lockHelper.removeLock(token);
         try {
@@ -429,6 +448,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public void save() throws OXException {
         try {
             dumpMetadataToDB();
@@ -456,29 +476,34 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public void setContentType(final String type) {
         metadata.setFileMIMEType(type);
         markChanged();
         markSet(Metadata.FILE_MIMETYPE_LITERAL);
     }
 
+    @Override
     public void setDisplayName(final String displayName) {
         metadata.setFileName(displayName);
         markChanged();
         markSet(Metadata.FILENAME_LITERAL);
     }
 
+    @Override
     public void setLength(final Long length) {
         metadata.setFileSize(length.longValue());
         markChanged();
         markSet(Metadata.FILE_SIZE_LITERAL);
     }
 
+    @Override
     public void setSource(final String source) {
         // IGNORE
 
     }
 
+    @Override
     public void setLanguage(final String language) {
         // IGNORE
 
@@ -870,10 +895,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public int getParentId() throws OXException {
         if (metadata == null) {
             loadMetadata();
@@ -881,6 +908,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return (int) metadata.getFolderId();
     }
 
+    @Override
     public void removedParent() throws OXException {
         try {
             exists = false;
@@ -893,6 +921,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
+    @Override
     public void transferLock(final WebdavLock lock) throws OXException {
         try {
             lockHelper.transferLock(lock);

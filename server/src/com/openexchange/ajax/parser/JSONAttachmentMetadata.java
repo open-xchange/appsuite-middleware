@@ -70,6 +70,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         json = new JSONObject();
     }
 
+    @Override
     public int getCreatedBy() {
         if(json.has(AttachmentField.CREATED_BY_LITERAL.getName())) {
             return json.optInt(AttachmentField.CREATED_BY_LITERAL.getName());
@@ -77,6 +78,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return -1;
     }
 
+    @Override
     public void setCreatedBy(final int createdBy) {
         try {
             json.put(AttachmentField.CREATED_BY_LITERAL.getName(),createdBy);
@@ -85,6 +87,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public Date getCreationDate() {
         if(!json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
             return null;
@@ -92,6 +95,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return new Date(json.optLong(AttachmentField.CREATION_DATE_LITERAL.getName()));
     }
 
+    @Override
     public void setCreationDate(final Date creationDate) {
         if(creationDate == null && json.has(AttachmentField.CREATION_DATE_LITERAL.getName())) {
             json.remove(AttachmentField.CREATION_DATE_LITERAL.getName());
@@ -104,6 +108,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public String getFileMIMEType() {
         if(!json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())) {
             return null;
@@ -111,6 +116,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return json.optString(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
     }
 
+    @Override
     public void setFileMIMEType(final String fileMIMEType) {
         if(fileMIMEType == null && json.has(AttachmentField.FILE_MIMETYPE_LITERAL.getName())){
             json.remove(AttachmentField.FILE_MIMETYPE_LITERAL.getName());
@@ -123,6 +129,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public String getFilename() {
         if(!json.has(AttachmentField.FILENAME_LITERAL.getName())) {
             return null;
@@ -130,6 +137,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return json.optString(AttachmentField.FILENAME_LITERAL.getName());
     }
 
+    @Override
     public void setFilename(final String filename) {
         if(filename == null && json.has(AttachmentField.FILENAME_LITERAL.getName())){
             json.remove(AttachmentField.FILENAME_LITERAL.getName());
@@ -142,6 +150,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public long getFilesize() {
         if(!json.has(AttachmentField.FILE_SIZE_LITERAL.getName())) {
             return 0;
@@ -150,6 +159,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     }
 
+    @Override
     public void setFilesize(final long filesize) {
         try {
             json.put(AttachmentField.FILE_SIZE_LITERAL.getName(),filesize);
@@ -158,6 +168,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public int getAttachedId() {
         if(!json.has(AttachmentField.ATTACHED_ID_LITERAL.getName())) {
             return -1;
@@ -166,6 +177,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     }
 
+    @Override
     public void setAttachedId(final int objectId) {
         try {
             json.put(AttachmentField.ATTACHED_ID_LITERAL.getName(),objectId);
@@ -174,10 +186,12 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public boolean getRtfFlag() {
         return json.optBoolean(AttachmentField.RTF_FLAG_LITERAL.getName());
     }
 
+    @Override
     public void setRtfFlag(final boolean rtfFlag) {
         try {
             json.put(AttachmentField.RTF_FLAG_LITERAL.getName(),rtfFlag);
@@ -186,6 +200,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public int getModuleId() {
         if(!json.has(AttachmentField.MODULE_ID_LITERAL.getName())) {
             return -1;
@@ -194,6 +209,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
 
     }
 
+    @Override
     public void setModuleId(final int moduleId) {
         try {
             json.put(AttachmentField.MODULE_ID_LITERAL.getName(),moduleId);
@@ -202,6 +218,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public int getId() {
         if(!json.has(AttachmentField.ID_LITERAL.getName())) {
             return -1;
@@ -209,6 +226,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return json.optInt(AttachmentField.ID_LITERAL.getName());
     }
 
+    @Override
     public void setId(final int id) {
         try {
             json.put(AttachmentField.ID_LITERAL.getName(),id);
@@ -217,6 +235,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public void setFolderId(final int folderId) {
         try {
             json.put(AttachmentField.FOLDER_ID_LITERAL.getName(),folderId);
@@ -225,6 +244,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public int getFolderId() {
         if(!json.has(AttachmentField.FOLDER_ID_LITERAL.getName())) {
             return -1;
@@ -241,6 +261,7 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         return json.toString();
     }
 
+    @Override
     public void setComment(final String string) {
         if(null == string) {
             try {
@@ -257,14 +278,17 @@ public class JSONAttachmentMetadata implements AttachmentMetadata {
         }
     }
 
+    @Override
     public String getComment() {
         return json.optString(AttachmentField.COMMENT_LITERAL.getName());
     }
 
+    @Override
     public String getFileId() {
         return json.optString(AttachmentField.FILE_ID_LITERAL.getName());
     }
 
+    @Override
     public void setFileId(final String string) {
         if(null == string) {
             try {

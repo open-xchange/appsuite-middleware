@@ -66,7 +66,8 @@ public class INSERT extends ModifyCommand {
 		values = new LinkedList<List<Expression>>();
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildINSERT(this);
 	}
 	

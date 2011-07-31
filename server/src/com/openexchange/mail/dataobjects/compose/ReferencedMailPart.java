@@ -283,6 +283,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                     final ManagedFile managedFile = file;
                     final InputStreamProvider isp = new InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return managedFile.getInputStream();
@@ -293,6 +294,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }
@@ -434,6 +436,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         return UUID.randomUUID().toString();
     }
 
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.REFERENCE;
     }

@@ -97,6 +97,7 @@ public class CrawlerCookieManager extends CookieManager {
      * Enables/disables cookie support. Cookies are enabled by default.
      * @param enabled <tt>true</tt> to enable cookie support, <tt>false</tt> otherwise
      */
+    @Override
     public synchronized void setCookiesEnabled(final boolean enabled) {
         cookiesEnabled_ = enabled;
     }
@@ -105,6 +106,7 @@ public class CrawlerCookieManager extends CookieManager {
      * Returns <tt>true</tt> if cookies are enabled. Cookies are enabled by default.
      * @return <tt>true</tt> if cookies are enabled, <tt>false</tt> otherwise
      */
+    @Override
     public synchronized boolean isCookiesEnabled() {
         return cookiesEnabled_;
     }
@@ -113,6 +115,7 @@ public class CrawlerCookieManager extends CookieManager {
      * Returns the currently configured cookies, in an unmodifiable set.
      * @return the currently configured cookies, in an unmodifiable set
      */
+    @Override
     public synchronized Set<Cookie> getCookies() {
         return Collections.unmodifiableSet(cookies_);
     }
@@ -122,6 +125,7 @@ public class CrawlerCookieManager extends CookieManager {
      * @param domain the domain on which to filter the returned cookies
      * @return the currently configured cookies for the specified domain, in an unmodifiable set
      */
+    @Override
     public synchronized Set<Cookie> getCookies(final String domain) {
         final Set<Cookie> cookies = new LinkedHashSet<Cookie>();
         for (Cookie cookie : cookies_) {
@@ -137,6 +141,7 @@ public class CrawlerCookieManager extends CookieManager {
      * @param name the name of the cookie to return
      * @return the currently configured cookie with the specified name, or <tt>null</tt> if one does not exist
      */
+    @Override
     public synchronized Cookie getCookie(final String name) {
         for (Cookie cookie : cookies_) {
             if (StringUtils.equals(cookie.getName(), name)) {
@@ -150,6 +155,7 @@ public class CrawlerCookieManager extends CookieManager {
      * Adds the specified cookie.
      * @param cookie the cookie to add
      */
+    @Override
     public synchronized void addCookie(final Cookie cookie) {
         cookies_.remove(cookie);
         cookies_.add(cookie);
@@ -159,6 +165,7 @@ public class CrawlerCookieManager extends CookieManager {
      * Removes the specified cookie.
      * @param cookie the cookie to remove
      */
+    @Override
     public synchronized void removeCookie(final Cookie cookie) {
         cookies_.remove(cookie);
     }
@@ -166,6 +173,7 @@ public class CrawlerCookieManager extends CookieManager {
     /**
      * Removes all cookies.
      */
+    @Override
     public synchronized void clearCookies() {
         cookies_.clear();
     }
@@ -175,6 +183,7 @@ public class CrawlerCookieManager extends CookieManager {
      * @param state the HTTP state to update
      * @see #updateFromState(HttpState)
      */
+    @Override
     protected synchronized void updateState(final HttpState state) {
         if (!cookiesEnabled_) {
             return;
@@ -190,6 +199,7 @@ public class CrawlerCookieManager extends CookieManager {
      * @param state the HTTP state to update from
      * @see #updateState(HttpState)
      */
+    @Override
     protected synchronized void updateFromState(final HttpState state) {
         if (!cookiesEnabled_) {
             return;

@@ -75,6 +75,7 @@ public class RdbCredentials implements Credentials {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getValue(final String valueName) {
         String retval = null;
         if (USER_ID.equals(valueName)) {

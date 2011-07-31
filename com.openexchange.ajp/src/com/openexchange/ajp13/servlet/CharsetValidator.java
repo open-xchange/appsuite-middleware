@@ -172,6 +172,7 @@ final class CharsetValidator {
             return hashcode;
         }
 
+        @Override
         public int compareTo(final IgnoreCaseString other) {
             return s.compareToIgnoreCase(other.s);
         }

@@ -76,18 +76,22 @@ final class InputStreamDataSource implements DataSource {
         return this;
     }
 
+    @Override
     public String getContentType() {
         return type == null ? "application/octet-stream" : type;
     }
 
+    @Override
     public InputStream getInputStream() throws IOException {
         return inStream;
     }
 
+    @Override
     public String getName() {
         return "InputStreamDataSource";
     }
 
+    @Override
     public OutputStream getOutputStream() throws IOException {
         throw new IOException("Not Supported");
     }

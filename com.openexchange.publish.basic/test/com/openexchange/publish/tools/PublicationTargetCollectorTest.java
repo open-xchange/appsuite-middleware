@@ -91,6 +91,7 @@ public class PublicationTargetCollectorTest extends TestCase {
         target1.setPublicationService(pubService1);
         
         SimPublicationService pubService2 = new SimPublicationService() {
+            @Override
             public boolean knows(Context ctx, int publicationId) {
                 return publicationId == 12;
             }

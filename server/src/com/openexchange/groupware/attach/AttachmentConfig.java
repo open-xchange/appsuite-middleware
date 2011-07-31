@@ -135,6 +135,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
 		return Long.parseLong(sizeS);
 	}
 
+    @Override
     public void start() throws OXException {
         if(!loaded || singleton == null) {
             INIT_LOCK.lock();
@@ -147,6 +148,7 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws ConfigurationException {
         singleton = null;
         loaded = false;

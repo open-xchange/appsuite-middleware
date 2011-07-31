@@ -70,10 +70,12 @@ public class OverridableAttachmentListener implements AttachmentListener {
         this.chooser = chooser;
     }
 
+    @Override
     public long attached(AttachmentEvent e) throws Exception {
         return getDelegate(e).attached(e);
     }
 
+    @Override
     public long detached(AttachmentEvent e) throws Exception {
         return getDelegate(e).detached(e);
     }

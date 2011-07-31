@@ -79,6 +79,7 @@ public final class GetAction extends AbstractMailAccountAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, request);
 

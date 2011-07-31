@@ -95,6 +95,7 @@ public class OXFolderDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon) throws OXException {
         final Context ctx = delEvent.getContext();
         final long lastModified = System.currentTimeMillis();

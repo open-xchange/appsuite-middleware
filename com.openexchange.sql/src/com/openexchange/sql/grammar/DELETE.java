@@ -59,7 +59,8 @@ public class DELETE extends ModifyCommand {
 		from = new FROM();
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildDELETE(this);
 	}
 	

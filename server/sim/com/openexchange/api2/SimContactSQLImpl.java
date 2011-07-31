@@ -80,6 +80,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#deleteContactObject(int, int, java.util.Date)
      */
+    @Override
     public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException {
         // TODO Auto-generated method stub
         
@@ -88,6 +89,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#insertContactObject(com.openexchange.groupware.container.Contact)
      */
+    @Override
     public void insertContactObject(final Contact contactObj) throws OXException {
         // TODO Auto-generated method stub
         
@@ -96,6 +98,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#updateContactObject(com.openexchange.groupware.container.Contact, int, java.util.Date)
      */
+    @Override
     public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException {
         contactsByUUID.put(UUID.fromString(contactObj.getUserField20()), contactObj);        
     }
@@ -104,6 +107,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
      * @see com.openexchange.groupware.contact.ContactInterface#getContactsByExtendedSearch(com.openexchange.groupware.search.ContactSearchObject, int, com.openexchange.groupware.search.Order, int[])
      * 
      */
+    @Override
     public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -112,6 +116,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getContactsInFolder(int, int, int, int, com.openexchange.groupware.search.Order, int[])
      */
+    @Override
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -120,6 +125,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getDeletedContactsInFolder(int, int[], java.util.Date)
      */
+    @Override
     public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -128,6 +134,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getFolderId()
      */
+    @Override
     public int getFolderId() {
         // TODO Auto-generated method stub
         return 0;
@@ -136,6 +143,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getLdapServer()
      */
+    @Override
     public LdapServer getLdapServer() {
         // TODO Auto-generated method stub
         return null;
@@ -144,6 +152,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getModifiedContactsInFolder(int, int[], java.util.Date)
      */
+    @Override
     public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -152,6 +161,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getNumberOfContacts(int)
      */
+    @Override
     public int getNumberOfContacts(final int folderId) throws OXException {
         // TODO Auto-generated method stub
         return 0;
@@ -160,6 +170,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getObjectById(int, int)
      */
+    @Override
     public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -168,6 +179,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getObjectsById(int[][], int[])
      */
+    @Override
     public SearchIterator<Contact> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -176,6 +188,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getUserById(int)
      */
+    @Override
     public Contact getUserById(final int userId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -184,11 +197,13 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#getUserById(int, boolean)
      */
+    @Override
     public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -197,6 +212,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#searchContacts(java.lang.String, int, int, com.openexchange.groupware.search.Order, int[])
      */
+    @Override
     public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -205,6 +221,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.ContactInterface#updateUserContact(com.openexchange.groupware.container.Contact, java.util.Date)
      */
+    @Override
     public void updateUserContact(final Contact contact, final Date lastmodified) throws OXException {
         // TODO Auto-generated method stub
         
@@ -213,6 +230,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.groupware.contact.OverridingContactInterface#forceInsertContactObject(com.openexchange.groupware.container.Contact)
      */
+    @Override
     public void forceInsertContactObject(final Contact co) throws OXException {
         // TODO Auto-generated method stub
         
@@ -221,6 +239,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#associateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
+    @Override
     public void associateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         contactUnificationStates.put(Integer.toString(aggregator.getObjectID()) + "X" + Integer.toString(contributor.getObjectID()), ContactUnificationState.GREEN);
         final UUID uuid = UUID.fromString(aggregator.getUserField20());
@@ -237,6 +256,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#getAssociatedContacts(com.openexchange.groupware.container.Contact)
      */
+    @Override
     public List<UUID> getAssociatedContacts(final Contact contact) throws OXException {
         final UUID uuid = UUID.fromString(contact.getUserField20());
         if (associatedContacts.containsKey(uuid)){
@@ -249,6 +269,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#getAssociationBetween(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
+    @Override
     public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws OXException {
         final String key = Integer.toString(c1.getObjectID()) + "X" + Integer.toString(c2.getObjectID());
         if (contactUnificationStates.containsKey(key)) {
@@ -261,6 +282,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#getContactByUUID(java.util.UUID)
      */
+    @Override
     public Contact getContactByUUID(final UUID uuid) throws OXException {
         return contactsByUUID.get(uuid);
     }
@@ -268,6 +290,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#separateTwoContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact)
      */
+    @Override
     public void separateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         contactUnificationStates.put(Integer.toString(aggregator.getObjectID()) + "X" + Integer.toString(contributor.getObjectID()), ContactUnificationState.RED);
         final UUID uuid = UUID.fromString(aggregator.getUserField20());
@@ -280,6 +303,7 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
     /* (non-Javadoc)
      * @see com.openexchange.api2.FinalContactInterface#setUnificationStateForContacts(com.openexchange.groupware.container.Contact, com.openexchange.groupware.container.Contact, com.openexchange.groupware.contact.ContactUnificationState)
      */
+    @Override
     public void setUnificationStateForContacts(final Contact aggregator, final Contact contributor, final ContactUnificationState state) {
         
     }
@@ -301,7 +325,8 @@ public class SimContactSQLImpl implements ContactSQLInterface, ContactInterface,
 		return null;
 	}
 
-	public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+	@Override
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(
 			final SearchTerm<T> searchterm, final int orderBy, final Order order,
 			final String collation, final int[] cols) throws OXException {
 		// TODO Auto-generated method stub

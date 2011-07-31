@@ -96,6 +96,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         this.defaultPoolConfig = configuration.getPoolConfig();
     }
 
+    @Override
     public ConnectionPool create(final int poolId) throws OXException {
         final ConnectionData data = loadPoolData(poolId);
         try {
@@ -110,6 +111,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return retval;
     }
 
+    @Override
     public boolean destroy(final int poolId) {
         final ConnectionPool toDestroy = pools.remove(I(poolId));
         if (null == toDestroy) {

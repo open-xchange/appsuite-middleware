@@ -95,42 +95,52 @@ public final class CommonEventImpl implements CommonEvent {
         this.session = session;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
 
+    @Override
     public int getModule() {
         return module;
     }
 
+    @Override
     public Object getActionObj() {
         return actionObj;
     }
 
+    @Override
     public Object getOldObj() {
         return oldObj;
     }
 
+    @Override
     public Object getSourceFolder() {
         return sourceFolder;
     }
 
+    @Override
     public Object getDestinationFolder() {
         return destinationFolder;
     }
 
+    @Override
     public int getAction() {
         return action;
     }
 
+    @Override
     public Session getSession() {
         return session;
     }
 
+    @Override
     public Map<Integer, Set<Integer>> getAffectedUsersWithFolder() {
         return affectedUsersWithFolder;
     }

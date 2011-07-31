@@ -81,11 +81,13 @@ public final class InfostoreContentType implements ContentType {
         return "infostore";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.INFOSTORE
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

@@ -76,16 +76,19 @@ public final class CacheFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         // Cache folder storage serves every folder identifier
         return true;
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         // Cache folder storage serves every tree identifier
         return true;
     }
 
+    @Override
     public boolean servesParentId(final String parentId) {
         return true;
     }

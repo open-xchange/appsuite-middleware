@@ -87,6 +87,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 18;
     }
@@ -94,6 +95,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
@@ -102,6 +104,7 @@ public final class EnlargeTaskTitle implements UpdateTask {
      * {@inheritDoc}
      * @throws OXException 
      */
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task EnlargeTaskTitle.");
         final Connection con = Database.get(contextId, true);

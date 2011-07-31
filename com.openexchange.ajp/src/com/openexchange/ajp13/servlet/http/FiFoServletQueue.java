@@ -98,14 +98,17 @@ public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements Se
         this.servletPath = servletPath;
     }
 
+    @Override
     public boolean isSingleton() {
         return singleton;
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
 
+    @Override
     public HttpServlet createServletInstance(final String servletKey) {
         if (servletConstructor == null) {
             return null;

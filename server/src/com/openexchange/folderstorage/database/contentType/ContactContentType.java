@@ -81,11 +81,13 @@ public final class ContactContentType implements ContentType {
         return "contacts";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.CONTACT
         return 3;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

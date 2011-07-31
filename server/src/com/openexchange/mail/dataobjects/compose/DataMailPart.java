@@ -261,6 +261,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                     final String fileName = getFileName();
                     final InputStreamProvider isp = new InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return managedFile.getInputStream();
@@ -271,6 +272,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return fileName;
                         }
@@ -311,6 +313,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
     }
 
+    @Override
     public ComposedPartType getType() {
         return ComposedPartType.DATA;
     }

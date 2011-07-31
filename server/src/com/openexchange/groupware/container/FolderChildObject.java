@@ -95,6 +95,7 @@ public abstract class FolderChildObject extends DataObject {
         b_parent_folder_id = false;
     }
 
+    @Override
     public Set<Integer> findDifferingFields(DataObject otherDataObject) {
         Set<Integer> differingFields = super.findDifferingFields(otherDataObject);
 

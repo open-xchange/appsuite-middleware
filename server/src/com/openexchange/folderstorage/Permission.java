@@ -126,6 +126,7 @@ public interface Permission extends Cloneable {
     /**
      * Indicates whether some other object is "equal to" this one.
      */
+    @Override
     public boolean equals(Object obj);
 
     /**

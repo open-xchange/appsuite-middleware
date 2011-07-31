@@ -73,10 +73,12 @@ public final class HttpServiceImpl implements HttpService {
         super();
     }
 
+    @Override
     public HttpContext createDefaultHttpContext() {
         return new HttpContextImpl();
     }
 
+    @Override
     public void registerResources(final String alias, final String name, final HttpContext context) throws NamespaceException {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HttpServiceImpl.class));
         if (log.isTraceEnabled()) {
@@ -84,6 +86,7 @@ public final class HttpServiceImpl implements HttpService {
         }
     }
 
+    @Override
     public void registerServlet(final String alias, final Servlet servlet, @SuppressWarnings("unchecked") final Dictionary initparams, final HttpContext context) throws ServletException {
         try {
             @SuppressWarnings("unchecked") final Dictionary<String, String> dic = initparams;
@@ -95,6 +98,7 @@ public final class HttpServiceImpl implements HttpService {
         }
     }
 
+    @Override
     public void unregister(final String alias) {
         HttpServletManager.unregisterServlet(alias);
     }

@@ -117,6 +117,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
      * The unblock() methods disables the 1 bit, then allowing other threads to acquire.
      */
 
+    @Override
     public void block() {
         final Thread cur = Thread.currentThread();
         if (cur == owner) {
@@ -146,6 +147,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         }
     }
 
+    @Override
     public void acquire() {
         final Thread currentThread = Thread.currentThread();
         if (currentThread == owner) {
@@ -170,6 +172,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         }
     }
 
+    @Override
     public void unblock() {
         if (null == owner || Thread.currentThread() != owner) {
             throw new IllegalMonitorStateException(new StringBuilder(32).append("Thread ").append(Thread.currentThread().getName()).append(
@@ -180,6 +183,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         owner = null;
     }
 
+    @Override
     public void release() {
         final Thread currentThread = Thread.currentThread();
         if (currentThread == owner) {
@@ -189,6 +193,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         running.remove(currentThread);
     }
 
+    @Override
     public void run() {
         acquire();
         try {

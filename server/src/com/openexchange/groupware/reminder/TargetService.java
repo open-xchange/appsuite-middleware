@@ -64,9 +64,11 @@ public interface TargetService {
     String MODULE_PROPERTY = "MODULE";
 
     TargetService EMPTY = new TargetService() {
+        @Override
         public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
             // Nothing to do.
         }
+        @Override
         public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
             // Nothing to do.
         }

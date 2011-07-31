@@ -188,6 +188,7 @@ public class LocalFileStorage implements FileStorage {
      * @return True if Statefile is correct
      * @throws OXException
      */
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
@@ -324,6 +325,7 @@ public class LocalFileStorage implements FileStorage {
      * @return the identifier of the newly created file.
      * @throws OXException if an error occurs while storing the file.
      */
+    @Override
     public String saveNewFile(final InputStream input) throws OXException {
     	initialize();
         String nextentry = null;
@@ -394,6 +396,7 @@ public class LocalFileStorage implements FileStorage {
      * @return an inputstream from that the file can be read once.
      * @throws OXException if an error occurs.
      */
+    @Override
     public InputStream getFile(final String identifier) throws OXException {
         
         return load(identifier);
@@ -402,6 +405,7 @@ public class LocalFileStorage implements FileStorage {
     /**
      * @return a complete list of files in this filestorage
      */
+    @Override
     public SortedSet<String> getFileList() {
         final SortedSet<String> allIds = new TreeSet<String>();
         listRecursively(allIds, "", storage);
@@ -429,6 +433,7 @@ public class LocalFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public long getFileSize(final String name) throws OXException {
         final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
@@ -437,6 +442,7 @@ public class LocalFileStorage implements FileStorage {
         return dataFile.length();
     }
 
+    @Override
     public String getMimeType(final String name) {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(new File(storage, name));
@@ -449,6 +455,7 @@ public class LocalFileStorage implements FileStorage {
      * @return true if the file has been deleted successfully.
      * @throws OXException if an error occurs.
      */
+    @Override
     public boolean deleteFile(final String identifier) throws OXException {
         final boolean retval = delete(new String[] { identifier }).isEmpty();
         if (retval) {
@@ -471,6 +478,7 @@ public class LocalFileStorage implements FileStorage {
      * @return a set of identifiers that could not be deleted.
      * @throws OXException if an error occurs.
      */
+    @Override
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         final Set<String> notDeleted = delete(identifiers);
         if (notDeleted.size() < identifiers.length) {
@@ -495,6 +503,7 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @throws OXException if removing fails.
      */
+    @Override
     public void remove() throws OXException {
         // Already initialized?
         if (!alreadyInitialized || !storage.exists()) {
@@ -510,6 +519,7 @@ public class LocalFileStorage implements FileStorage {
      * 
      * @throws OXException if an error occurs.
      */
+    @Override
     public void recreateStateFile() throws OXException {
         lock(LOCK_TIMEOUT);
         try {

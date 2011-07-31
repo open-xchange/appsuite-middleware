@@ -228,6 +228,7 @@ public final class SystemSharedFolder {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String displayName1, final String displayName2) {
             return collator.compare(displayName1, displayName2);
         }

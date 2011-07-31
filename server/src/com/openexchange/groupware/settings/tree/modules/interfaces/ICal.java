@@ -68,6 +68,7 @@ public class ICal extends AbstractModules {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "interfaces", "ical" };
     }

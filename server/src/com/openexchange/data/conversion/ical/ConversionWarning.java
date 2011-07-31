@@ -220,6 +220,7 @@ public class ConversionWarning extends OXException {
             this.number = number;
         }
 
+        @Override
         public String getPrefix() {
             return "ICA";
         }
@@ -227,6 +228,7 @@ public class ConversionWarning extends OXException {
         /**
          * @return the message
          */
+        @Override
         public String getMessage() {
             return message;
         }
@@ -234,6 +236,7 @@ public class ConversionWarning extends OXException {
         /**
          * @return the category
          */
+        @Override
         public Category getCategory() {
             return category;
         }
@@ -241,10 +244,12 @@ public class ConversionWarning extends OXException {
         /**
          * @return the number
          */
+        @Override
         public int getNumber() {
             return number;
         }
 
+        @Override
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }

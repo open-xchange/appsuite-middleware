@@ -368,7 +368,7 @@ public class SIPChannelInfo {
      *     
      */
     public void setConcurentCalls(JAXBElement<BigDecimal> value) {
-        this.concurentCalls = ((JAXBElement<BigDecimal> ) value);
+        this.concurentCalls = value;
     }
 
     /**
@@ -608,7 +608,7 @@ public class SIPChannelInfo {
      *     
      */
     public void setQualify(JAXBElement<BigDecimal> value) {
-        this.qualify = ((JAXBElement<BigDecimal> ) value);
+        this.qualify = value;
     }
 
     /**

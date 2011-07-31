@@ -340,6 +340,7 @@ public final class GetAction extends AbstractMailAction {
                                 final MailServletInterface msi = mailInterface;
                                 final Callable<Object> seenCallable = new Callable<Object>() {
 
+                                    @Override
                                     public Object call() throws Exception {
                                         try {
                                             msi.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);

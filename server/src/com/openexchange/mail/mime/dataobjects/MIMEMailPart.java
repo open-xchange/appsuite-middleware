@@ -268,6 +268,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
         }
     }
 
+    @Override
     public InputStream getRawInputStream() throws OXException {
         if (null == part) {
             throw new IllegalStateException(ERR_NULL_PART);
@@ -793,10 +794,12 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             this.multipartMailPart = multipartMailPart;
         }
 
+        @Override
         public int getCount() throws OXException {
             return multipartMailPart.getEnclosedCount();
         }
 
+        @Override
         public MailPart getMailPart(final int index) throws OXException {
             return multipartMailPart.getEnclosedMailPart(index);
         }
@@ -812,6 +815,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             this.jmMultipart = multipart;
         }
 
+        @Override
         public int getCount() throws OXException {
             try {
                 return jmMultipart.getCount();
@@ -820,6 +824,7 @@ public final class MIMEMailPart extends MailPart implements MIMERawSource {
             }
         }
 
+        @Override
         public MailPart getMailPart(final int index) throws OXException {
             try {
                 return MIMEMessageConverter.convertPart(jmMultipart.getBodyPart(index), false);

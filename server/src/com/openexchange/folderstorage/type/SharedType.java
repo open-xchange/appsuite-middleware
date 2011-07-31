@@ -76,6 +76,7 @@ public final class SharedType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.SHARED
         return 3;

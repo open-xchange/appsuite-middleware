@@ -69,16 +69,19 @@ public class InfostoreActivator implements BundleActivator {
 
     private final Stack<ServiceRegistration> registrations = new Stack<ServiceRegistration>();
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         final InfostoreFilenameReservationsCreateTableTask task = new InfostoreFilenameReservationsCreateTableTask();
         registrations.push(context.registerService(CreateTableService.class.getName(), task, null));
         registrations.push(context.registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(((UpdateTaskV2) task));
             }
         }, null));
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         while (!registrations.empty()) {
             registrations.pop().unregister();

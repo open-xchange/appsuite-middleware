@@ -27,6 +27,7 @@ public class AuthListFiles extends NtlmAuthenticator {
         System.out.println();
     }
 
+    @Override
     protected NtlmPasswordAuthentication getNtlmPasswordAuthentication() {
         System.out.println( getRequestingException().getMessage() + " for " + getRequestingURL() );
         try {

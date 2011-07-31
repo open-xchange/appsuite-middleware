@@ -143,6 +143,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return true;
     }
 
+    @Override
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -169,6 +170,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return null;
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -197,6 +199,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return l.toArray(new FolderStorage[l.size()]);
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -219,6 +222,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -241,6 +245,7 @@ public final class CacheFolderStorageRegistry implements FolderStorageDiscoverer
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return CacheContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }

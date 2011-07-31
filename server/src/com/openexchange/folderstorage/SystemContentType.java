@@ -79,11 +79,13 @@ public final class SystemContentType implements ContentType {
         return "system";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.SYSTEM_MODULE
         return 5;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

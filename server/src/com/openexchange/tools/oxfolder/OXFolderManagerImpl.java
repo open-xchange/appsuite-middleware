@@ -1474,6 +1474,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             this.type = type;
         }
 
+        @Override
         public boolean execute(final int folderId, final TIntObjectHashMap<?> hashMap) {
             if (null == error) {
                 try {
@@ -1955,14 +1956,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int length = -1 == tmp2 ? 0 : tmp2;
             truncateds[i] = new OXException.Truncated() {
 
+                @Override
                 public int getId() {
                     return fieldId;
                 }
 
+                @Override
                 public int getLength() {
                     return valueLength;
                 }
 
+                @Override
                 public int getMaxSize() {
                     return length;
                 }

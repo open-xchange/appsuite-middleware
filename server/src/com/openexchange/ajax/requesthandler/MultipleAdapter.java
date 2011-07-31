@@ -109,6 +109,7 @@ public class MultipleAdapter implements MultipleHandler {
         return request;
     }
     
+    @Override
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
@@ -120,6 +121,7 @@ public class MultipleAdapter implements MultipleHandler {
         return ret.getResultObject();
     }
 
+    @Override
     public Date getTimestamp() {
         final AJAXRequestResult result = this.result.get();
         if (null == result) {
@@ -129,10 +131,12 @@ public class MultipleAdapter implements MultipleHandler {
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
+    @Override
     public void close() {
         result.set(null);
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         if (null == result.get()) {
             return Collections.<OXException> emptySet();

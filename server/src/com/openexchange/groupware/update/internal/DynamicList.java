@@ -114,6 +114,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
         }
     }
 
+    @Override
     public List<UpdateTask> getTaskList() {
         final List<UpdateTask> retval = new ArrayList<UpdateTask>(taskList.size());
         retval.addAll(taskList.values());

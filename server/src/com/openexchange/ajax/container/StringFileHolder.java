@@ -94,18 +94,22 @@ public final class StringFileHolder implements IFileHolder {
         }
     }
 
+    @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
     }
 
+    @Override
     public long getLength() {
         return bytes.length;
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -128,6 +132,7 @@ public final class StringFileHolder implements IFileHolder {
         this.name = name;
     }
 
+    @Override
     public String getDisposition() {
         return disposition;
     }

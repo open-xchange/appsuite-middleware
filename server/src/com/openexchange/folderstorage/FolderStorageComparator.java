@@ -77,6 +77,7 @@ public final class FolderStorageComparator implements Comparator<FolderStorage> 
         super();
     }
 
+    @Override
     public int compare(final FolderStorage o1, final FolderStorage o2) {
         final int firstOrdinal = o1.getStoragePriority().ordinal();
         final int secondOrdinal = o2.getStoragePriority().ordinal();

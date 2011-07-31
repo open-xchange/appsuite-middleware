@@ -90,26 +90,32 @@ public final class RemoteEventImpl implements RemoteEvent {
         this.timestamp = timestamp;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
 
+    @Override
     public int getModule() {
         return module;
     }
 
+    @Override
     public int getAction() {
         return action;
     }
 
+    @Override
     public int getFolderId() {
         return folderId;
     }
 
+    @Override
     public long getTimestamp() {
         return timestamp;
     }

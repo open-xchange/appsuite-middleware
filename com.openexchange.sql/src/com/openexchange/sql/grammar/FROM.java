@@ -95,7 +95,8 @@ public class FROM extends Element {
 		return tables;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildFROM(this);
 	}
 }

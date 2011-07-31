@@ -77,6 +77,7 @@ public final class AJPv13ThreadFactory implements java.util.concurrent.ThreadFac
         len = namePrefix.length() + 7;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         // final Thread t = new Thread(group, r, getThreadName(
         // threadNumber.getAndIncrement(),

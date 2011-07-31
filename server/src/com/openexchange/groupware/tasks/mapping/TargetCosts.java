@@ -66,18 +66,22 @@ public final class TargetCosts implements Mapper<Float> {
         super();
     }
 
+    @Override
     public int getId() {
         return Task.TARGET_COSTS;
     }
 
+    @Override
     public boolean isSet(Task task) {
         return task.containsTargetCosts();
     }
 
+    @Override
     public String getDBColumnName() {
         return "target_costs";
     }
 
+    @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getTargetCosts()) {
             stmt.setNull(pos, Types.FLOAT);
@@ -86,6 +90,7 @@ public final class TargetCosts implements Mapper<Float> {
         }
     }
 
+    @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         float targetCosts = result.getFloat(pos);
         if (!result.wasNull()) {
@@ -93,14 +98,17 @@ public final class TargetCosts implements Mapper<Float> {
         }
     }
 
+    @Override
     public boolean equals(Task task1, Task task2) {
         return task1.getTargetCosts().equals(task2.getTargetCosts());
     }
 
+    @Override
     public Float get(Task task) {
         return task.getTargetCosts();
     }
 
+    @Override
     public void set(Task task, Float value) {
         task.setTargetCosts(value);
     }

@@ -213,7 +213,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         @Override
         public boolean equals(Object obj) {
             if (String.class.isInstance(obj)) {
-                return session.getSessionID().equals((String) obj);
+                return session.getSessionID().equals(obj);
             }
             return session.getSessionID().equals(((SessionKey) obj).session.getSessionID());
         }

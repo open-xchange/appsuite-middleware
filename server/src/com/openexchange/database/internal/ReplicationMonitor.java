@@ -88,6 +88,7 @@ public final class ReplicationMonitor {
     }
 
     static final FetchAndSchema TIMEOUT = new FetchAndSchema() {
+        @Override
         public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
             final int poolId;
             if (write) {
@@ -120,6 +121,7 @@ public final class ReplicationMonitor {
     };
 
     static final FetchAndSchema NOTIMEOUT = new FetchAndSchema() {
+        @Override
         public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
             final int poolId;
             if (write) {

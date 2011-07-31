@@ -98,6 +98,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("Duplicate initialization of mail module aborted.");
@@ -112,21 +113,25 @@ public final class MailInitialization implements Initialization, CacheAvailabili
             startUp(MailCacheConfiguration.getInstance(), startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     MailAccessWatcher.init();
                 }
 
+                @Override
                 public void stop() {
                     MailAccessWatcher.stop();
                 }
             }, startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     JSONMessageCacheConfiguration.initInstance();
                     JSONMessageCacheConfiguration.getInstance().loadProperties();
                 }
 
+                @Override
                 public void stop() throws OXException {
                     JSONMessageCacheConfiguration.releaseInstance();
                 }
@@ -144,20 +149,24 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 //            }, startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     EventPool.initInstance();
                 }
 
+                @Override
                 public void stop() {
                     EventPool.releaseInstance();
                 }
             }, startedStack);
             startUp(new Initialization() {
                 
+                @Override
                 public void stop() {
                     // Nothing to do
                 }
                 
+                @Override
                 public void start() {
                     /*-
                      * Add handlers for main MIME types
@@ -215,6 +224,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         startedStack.push(initialization);
     }
 
+    @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.warn("Duplicate shut-down of mail module aborted.");
@@ -269,10 +279,12 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         MailMessageCache.getInstance().initCache();
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         shutDownCaches();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         startUpCaches();
     }

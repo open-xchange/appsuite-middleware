@@ -270,6 +270,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * (non-Javadoc)
      * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
      */
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.FILE;
     }

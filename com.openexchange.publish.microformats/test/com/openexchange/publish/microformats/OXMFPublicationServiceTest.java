@@ -60,7 +60,6 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
 

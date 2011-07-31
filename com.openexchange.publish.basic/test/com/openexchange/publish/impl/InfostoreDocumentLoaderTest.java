@@ -78,6 +78,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     private Publication publication;
     private InfostoreDocumentLoader loader;
 
+    @Override
     public void setUp() {
         infostoreFacade = new SimInfostoreFacade();
         

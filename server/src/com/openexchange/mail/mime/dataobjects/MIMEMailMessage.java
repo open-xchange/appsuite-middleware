@@ -180,6 +180,7 @@ public final class MIMEMailMessage extends MailMessage implements MIMERawSource 
         return mailPart.getEnclosedMailPart(index);
     }
 
+    @Override
     public InputStream getRawInputStream() throws OXException {
         return mailPart.getRawInputStream();
     }

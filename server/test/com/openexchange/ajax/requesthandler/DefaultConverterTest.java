@@ -157,18 +157,22 @@ public class DefaultConverterTest extends TestCase {
             this.quality = quality;
         }
 
+        @Override
         public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
 
         }
 
+        @Override
         public String getInputFormat() {
             return input;
         }
 
+        @Override
         public String getOutputFormat() {
             return output;
         }
 
+        @Override
         public Quality getQuality() {
             return quality;
         }

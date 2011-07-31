@@ -89,7 +89,7 @@ public class CallCostInfo {
      *     
      */
     public void setCost(JAXBElement<Float> value) {
-        this.cost = ((JAXBElement<Float> ) value);
+        this.cost = value;
     }
 
     /**
@@ -113,7 +113,7 @@ public class CallCostInfo {
      *     
      */
     public void setProfit(JAXBElement<Float> value) {
-        this.profit = ((JAXBElement<Float> ) value);
+        this.profit = value;
     }
 
     /**

@@ -86,6 +86,7 @@ public class WbxmlParser implements XmlPullParser {
     private boolean degenerated;
     private boolean isWhitespace;
 
+    @Override
     public boolean getFeature(String feature) {
         if (XmlPullParser
             .FEATURE_PROCESS_NAMESPACES
@@ -95,11 +96,13 @@ public class WbxmlParser implements XmlPullParser {
 		return false;
     }
 
+    @Override
     public String getInputEncoding() {
         // should return someting depending on charSet here!!!!!
         return null;
     }
 
+    @Override
     public void defineEntityReplacementText(
     		final String entity,
     		final String value)
@@ -108,10 +111,12 @@ public class WbxmlParser implements XmlPullParser {
         // just ignore, has no effect
     }
 
+    @Override
     public Object getProperty(final String property) {
         return null;
     }
 
+    @Override
     public int getNamespaceCount(final int depth) {
         if (depth > this.depth) {
 			throw new IndexOutOfBoundsException();
@@ -119,14 +124,17 @@ public class WbxmlParser implements XmlPullParser {
         return nspCounts[depth];
     }
 
+    @Override
     public String getNamespacePrefix(final int pos) {
         return nspStack[pos << 1];
     }
 
+    @Override
     public String getNamespaceUri(final int pos) {
         return nspStack[(pos << 1) + 1];
     }
 
+    @Override
     public String getNamespace(final String prefix) {
 
         if ("xml".equals(prefix)) {
@@ -151,10 +159,12 @@ public class WbxmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public int getDepth() {
         return depth;
     }
 
+    @Override
     public String getPositionDescription() {
 
     	final StringBuilder buf =
@@ -204,14 +214,17 @@ public class WbxmlParser implements XmlPullParser {
         return buf.toString();
     }
 
+    @Override
     public int getLineNumber() {
         return -1;
     }
 
+    @Override
     public int getColumnNumber() {
         return -1;
     }
 
+    @Override
     public boolean isWhitespace()
         throws XmlPullParserException {
         if (type != TEXT
@@ -222,10 +235,12 @@ public class WbxmlParser implements XmlPullParser {
         return isWhitespace;
     }
 
+    @Override
     public String getText() {
         return text;
     }
 
+    @Override
     public char[] getTextCharacters(int[] poslen) {
         if (type >= TEXT) {
             poslen[0] = 0;
@@ -240,18 +255,22 @@ public class WbxmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public String getNamespace() {
         return namespace;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getPrefix() {
         return prefix;
     }
 
+    @Override
     public boolean isEmptyElementTag()
         throws XmlPullParserException {
         if (type != START_TAG) {
@@ -260,18 +279,22 @@ public class WbxmlParser implements XmlPullParser {
         return degenerated;
     }
 
+    @Override
     public int getAttributeCount() {
         return attributeCount;
     }
 
+    @Override
     public String getAttributeType(final int index) {
         return "CDATA";
     }
 
+    @Override
     public boolean isAttributeDefault(final int index) {
         return false;
     }
 
+    @Override
     public String getAttributeNamespace(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -279,6 +302,7 @@ public class WbxmlParser implements XmlPullParser {
         return attributes[index << 2];
     }
 
+    @Override
     public String getAttributeName(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -286,6 +310,7 @@ public class WbxmlParser implements XmlPullParser {
         return attributes[(index << 2) + 2];
     }
 
+    @Override
     public String getAttributePrefix(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -293,6 +318,7 @@ public class WbxmlParser implements XmlPullParser {
         return attributes[(index << 2) + 1];
     }
 
+    @Override
     public String getAttributeValue(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -300,6 +326,7 @@ public class WbxmlParser implements XmlPullParser {
         return attributes[(index << 2) + 3];
     }
 
+    @Override
     public String getAttributeValue(
     		final String namespace,
     		final String name) {
@@ -317,10 +344,12 @@ public class WbxmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public int getEventType() throws XmlPullParserException {
         return type;
     }
 
+    @Override
     public int next() throws XmlPullParserException, IOException {
 
         isWhitespace = true;
@@ -369,6 +398,7 @@ public class WbxmlParser implements XmlPullParser {
     }
 
 
+    @Override
     public int nextToken() throws XmlPullParserException, IOException {
 
         isWhitespace = true;
@@ -378,6 +408,7 @@ public class WbxmlParser implements XmlPullParser {
 
 
 
+    @Override
     public int nextTag() throws XmlPullParserException, IOException {
 
         next();
@@ -393,6 +424,7 @@ public class WbxmlParser implements XmlPullParser {
     }
 
 
+    @Override
     public String nextText() throws XmlPullParserException, IOException {
         if (type != START_TAG) {
 			exception("precondition: START_TAG");
@@ -417,6 +449,7 @@ public class WbxmlParser implements XmlPullParser {
     }
 
 
+    @Override
     public void require(final int type, final String namespace, final String name)
         throws XmlPullParserException, IOException {
 
@@ -429,10 +462,12 @@ public class WbxmlParser implements XmlPullParser {
     }
 
 
-	public void setInput(final Reader reader) throws XmlPullParserException {
+	@Override
+    public void setInput(final Reader reader) throws XmlPullParserException {
 		exception("InputStream required");
 	}
 
+    @Override
     public void setInput(final InputStream in, final String enc)
         throws XmlPullParserException {
 
@@ -468,6 +503,7 @@ public class WbxmlParser implements XmlPullParser {
         }
     }
 
+    @Override
     public void setFeature(final String feature, final boolean value)
         throws XmlPullParserException {
         if (XmlPullParser.FEATURE_PROCESS_NAMESPACES.equals(feature)) {
@@ -477,6 +513,7 @@ public class WbxmlParser implements XmlPullParser {
 		}
     }
 
+    @Override
     public void setProperty(final String property, final Object value)
         throws XmlPullParserException {
         throw new XmlPullParserException("unsupported property: " + property);

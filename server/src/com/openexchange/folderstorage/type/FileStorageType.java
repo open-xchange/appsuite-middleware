@@ -76,6 +76,7 @@ public final class FileStorageType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.FILE
         return 14;

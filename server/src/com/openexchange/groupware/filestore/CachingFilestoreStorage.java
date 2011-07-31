@@ -105,14 +105,17 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             this.delegate = delegate;
         }
         
+        @Override
         public Serializable getKey() {
             return id;
         }
 
+        @Override
         public Filestore load() throws OXException {
             return delegate.getFilestore(id.intValue());
         }
 
+        @Override
         public Lock getCacheLock() {
             return CACHE_LOCK;
         }

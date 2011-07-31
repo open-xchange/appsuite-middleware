@@ -115,27 +115,33 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		}
 	}
 	
-	public String getProperty(final String key) {
+	@Override
+    public String getProperty(final String key) {
 		return properties.get(key);
 	}
 
-	public Set<String> getPropertyNames() {
+	@Override
+    public Set<String> getPropertyNames() {
 		return properties.keySet();
 	}
 	
-	public Date getCreationDate() {
+	@Override
+    public Date getCreationDate() {
 		return creationDate;
 	}
 
-	public long getFolderId() {
+	@Override
+    public long getFolderId() {
 		return folderId;
 	}
 
-	public Date getLastModified() {
+	@Override
+    public Date getLastModified() {
 		return lastModified;
 	}
 
-	public String getTitle() {
+	@Override
+    public String getTitle() {
 		return name;
 	}
 
@@ -143,7 +149,8 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return relevance;
 	}
 
-	public int getVersion() {
+	@Override
+    public int getVersion() {
 		return version;
 	}
 
@@ -169,52 +176,64 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		this.properties = properties;
 	}
 
-	public void setCreationDate(final Date creationDate) {
+	@Override
+    public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
 	}
 
-	public void setFolderId(final long folderId) {
+	@Override
+    public void setFolderId(final long folderId) {
 		this.folderId = folderId;
 	}
 
 
-	public void setLastModified(final Date lastModified) {
+	@Override
+    public void setLastModified(final Date lastModified) {
 		this.lastModified = lastModified;
 	}
 
-	public void setTitle(final String name) {
+	@Override
+    public void setTitle(final String name) {
 		this.name = name;
 	}
 
-	public void setVersion(final int version) {
+	@Override
+    public void setVersion(final int version) {
 		this.version = version;
 	}
 	
-	public String getContent(){
+	@Override
+    public String getContent(){
 		return content;
 	}
 	
-	public int getId(){
+	@Override
+    public int getId(){
 		return id;
 	}
 	
-	public long getFileSize(){
+	@Override
+    public long getFileSize(){
 		return contentLength;
 	}
 
-	public String getDescription() {
+	@Override
+    public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(final String description) {
+	@Override
+    public void setDescription(final String description) {
 		this.description = description;
 	}
 
-	public String getURL() {
+	@Override
+    public String getURL() {
 		return url;
 	}
 
-	public void setURL(final String url) {
+	@Override
+    public void setURL(final String url) {
 		this.url = url;
 	}
 
@@ -222,50 +241,61 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		this.content = content;
 	}
 
-	public void setFileSize(final long contentLength) {
+	@Override
+    public void setFileSize(final long contentLength) {
 		this.contentLength = contentLength;
 	}
 
-	public void setId(final int id) {
+	@Override
+    public void setId(final int id) {
 		this.id = id;
 	}
 
-	public String getFileMIMEType() {
+	@Override
+    public String getFileMIMEType() {
         if(contentType == null) {
             return DEFAULT_TYPE;
         }
         return contentType;
 	}
 
-	public void setFileMIMEType(final String contentType) {
+	@Override
+    public void setFileMIMEType(final String contentType) {
 		this.contentType = contentType;
 	}
 
-	public int getCreatedBy() {
+	@Override
+    public int getCreatedBy() {
 		return createdBy;
 	}
 
-	public void setCreatedBy(final int createdBy) {
+	@Override
+    public void setCreatedBy(final int createdBy) {
 		this.createdBy = createdBy;
 	}
 
-	public String getFileName() {
+	@Override
+    public String getFileName() {
 		return filename;
 	}
 
-	public void setFileName(final String filename) {
+	@Override
+    public void setFileName(final String filename) {
 		this.filename = filename;
 	}
 
-	public int getModifiedBy() {
+	@Override
+    public int getModifiedBy() {
 		return modifiedBy;
 	}
 
-	public void setModifiedBy(final int modifiedBy) {
+	@Override
+    public void setModifiedBy(final int modifiedBy) {
 		this.modifiedBy = modifiedBy;
 	}
 
-	public long getSequenceNumber() {
+	@Override
+    public long getSequenceNumber() {
 		if(lastModified == null) {
 			return 0;
 		}
@@ -276,27 +306,33 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	    // Nothing to do, yet
 	}
 	
-	public void setCategories(final String categories) {
+	@Override
+    public void setCategories(final String categories) {
 		this.categories = categories;
 	}
 	
-	public String getCategories(){
+	@Override
+    public String getCategories(){
 		return this.categories;
 	}
 	
-	public Date getLockedUntil() {
+	@Override
+    public Date getLockedUntil() {
 		return lockedUntil;
 	}
 
-	public void setLockedUntil(final Date lockedUntil) {
+	@Override
+    public void setLockedUntil(final Date lockedUntil) {
 		this.lockedUntil = lockedUntil;
 	}
 	
-	public void setFileMD5Sum(final String sum){
+	@Override
+    public void setFileMD5Sum(final String sum){
 		this.md5 = sum;
 	}
 	
-	public String getFileMD5Sum(){
+	@Override
+    public String getFileMD5Sum(){
 		return this.md5;
 	}
 	
@@ -308,42 +344,52 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 		return this.filespoolPath;
 	}
 
-	public int getColorLabel() {
+	@Override
+    public int getColorLabel() {
 		return colorLabel;
 	}
 
-	public void setColorLabel(final int color) {
+	@Override
+    public void setColorLabel(final int color) {
 		this.colorLabel=color;
 	}
 
-	public boolean isCurrentVersion() {
+	@Override
+    public boolean isCurrentVersion() {
 		return currentVersion;
 	}
 
-	public void setIsCurrentVersion(final boolean bool) {
+	@Override
+    public void setIsCurrentVersion(final boolean bool) {
 		this.currentVersion=bool;
 	}
 
-	public String getVersionComment() {
+	@Override
+    public String getVersionComment() {
 		return versionComment;
 	}
 
-	public void setVersionComment(final String comment) {
+	@Override
+    public void setVersionComment(final String comment) {
 		this.versionComment=comment;
 	}
 
-	public String getFilestoreLocation() {
+	@Override
+    public String getFilestoreLocation() {
 		return getFileSpoolPath();
 	}
 
-	public void setFilestoreLocation(final String string) {
+	@Override
+    public void setFilestoreLocation(final String string) {
 		setFileSpoolPath(string);
 	}
 
+    @Override
     public int getNumberOfVersions() {
         return numberOfVersions;
     }
 
+    @Override
     public void setNumberOfVersions(final int numberOfVersions) {
         this.numberOfVersions = numberOfVersions;
     }

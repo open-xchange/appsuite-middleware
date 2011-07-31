@@ -571,6 +571,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     }
 
+    @Override
     public boolean hasNext() throws com.openexchange.exception.OXException {
         if (isClosed) {
             return false;
@@ -578,6 +579,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return next != null;
     }
 
+    @Override
     public FolderObject next() throws OXException, com.openexchange.exception.OXException {
         if (isClosed) {
             throw SearchIteratorExceptionCodes.CLOSED.create().setPrefix("FLD");
@@ -666,6 +668,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return loadFolderPermissions(folderId, ctx.getContextId(), con);
     }
 
+    @Override
     public void close() throws com.openexchange.exception.OXException {
         if (isClosed) {
             return;
@@ -694,6 +697,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         isClosed = true;
     }
 
+    @Override
     public int size() {
         if (prefetchQueue != null) {
             return prefetchQueue.size() + (next == null ? 0 : 1);
@@ -708,14 +712,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return (prefetchQueue != null);
     }
 
+    @Override
     public void addWarning(final com.openexchange.exception.OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public com.openexchange.exception.OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -798,6 +805,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
         private static final Callable<OCLPermission[]> DUMMY = new Callable<OCLPermission[]>() {
             
+            @Override
             public OCLPermission[] call() throws Exception {
                 return null;
             }
@@ -855,6 +863,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                         }
                     }
 
+                    @Override
                     public Object call() throws Exception {
                         //try {
                             final Connection readCon = Database.get(ctx, false);
@@ -917,6 +926,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 final AtomicBoolean fl = flag;
                 tps.submit(ThreadPools.task(new Callable<Object>() {
     
+                    @Override
                     public Object call() throws Exception {
                         while (!q.isEmpty()) {
                             // Nope

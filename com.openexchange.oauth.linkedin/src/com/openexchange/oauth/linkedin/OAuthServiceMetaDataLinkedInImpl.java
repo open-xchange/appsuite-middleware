@@ -87,14 +87,17 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
         return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apisecret");
     }
 
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
 
+    @Override
     public String getScope() {
         return null;
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }

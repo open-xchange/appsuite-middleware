@@ -153,10 +153,12 @@ public class Links {
         modules = new HashMap<Integer, ModuleAccess>(4);
         modules.put(Integer.valueOf(Types.APPOINTMENT), new ModuleAccess() {
             CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            @Override
             public boolean supportsAccessByID() {
                 return true;
             }
 
+            @Override
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
@@ -171,6 +173,7 @@ public class Links {
                 }
             }
 
+            @Override
             public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasCalendar()) {
@@ -179,6 +182,7 @@ public class Links {
                 return true;
             }
 
+            @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
@@ -201,10 +205,12 @@ public class Links {
             }
         });
         modules.put(Integer.valueOf(Types.TASK), new ModuleAccess() {
+            @Override
             public boolean supportsAccessByID() {
                 return true;
             }
 
+            @Override
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
@@ -215,6 +221,7 @@ public class Links {
                 return com.openexchange.groupware.tasks.Task2Links.checkMayReadTask(so, ctx, userConfig, oid, fid);
             }
 
+            @Override
             public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasTask()) {
@@ -223,6 +230,7 @@ public class Links {
                 return true;
             }
 
+            @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) throws OXException {
                 final Context ctx = ContextStorage.getStorageContext(so.getContextId());
                 final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx);
@@ -233,10 +241,12 @@ public class Links {
             }
         });
         modules.put(Integer.valueOf(Types.CONTACT), new ModuleAccess() {
+            @Override
             public boolean supportsAccessByID() {
                 return false;
             }
 
+            @Override
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
@@ -254,6 +264,7 @@ public class Links {
                 }
             }
 
+            @Override
             public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()) {
@@ -262,15 +273,18 @@ public class Links {
                 return true;
             }
 
+            @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) {
                 throw new UnsupportedOperationException("isReadableByID() not supported for contact module");
             }
         });
         modules.put(Integer.valueOf(Types.INFOSTORE), new ModuleAccess() {
+            @Override
             public boolean supportsAccessByID() {
                 return false;
             }
 
+            @Override
             public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so)
                     throws OXException {
                 final InfostoreFacade DATABASE = new InfostoreFacadeImpl(new DBPoolProvider());
@@ -285,6 +299,7 @@ public class Links {
                 }
             }
 
+            @Override
             public boolean hasModuleRights(final Session so) throws OXException {
                 final Context ct = ContextStorage.getStorageContext(so.getContextId());
                 if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasInfostore()) {
@@ -293,6 +308,7 @@ public class Links {
                 return true;
             }
 
+            @Override
             public boolean isReadableByID(final int oid, final int user, final int[] group, final Session so) {
                 throw new UnsupportedOperationException("isReadableByID() not supported for infostore module");
             }

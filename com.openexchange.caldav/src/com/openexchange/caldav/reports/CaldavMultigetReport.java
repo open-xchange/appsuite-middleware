@@ -82,6 +82,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         super(protocol);
     }
 
+    @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws OXException {
         final Element response = new Element("multistatus", DAV_NS);
 

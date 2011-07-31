@@ -147,7 +147,7 @@ public class CallRuleInfo {
      *     
      */
     public void setIntervalID(JAXBElement<BigInteger> value) {
-        this.intervalID = ((JAXBElement<BigInteger> ) value);
+        this.intervalID = value;
     }
 
     /**

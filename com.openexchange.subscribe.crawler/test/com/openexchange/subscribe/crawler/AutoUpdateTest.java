@@ -80,6 +80,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
     private File availableUpdatesDirectory = new File(availableUpdatesPath);
     private Activator activator;
     
+    @Override
     public void setUp(){
         configurationService = new SimConfigurationService();
         //set the local crawler path
@@ -100,6 +101,7 @@ public class AutoUpdateTest extends GenericSubscribeServiceTestHelpers {
         copyFileFromRepository("Facebook_standard.yml", installedDirectoryPath);
     }
     
+    @Override
     public void tearDown(){
         clearWorkingDirectory(installedDirectory);
         clearWorkingDirectory(availableUpdatesDirectory);

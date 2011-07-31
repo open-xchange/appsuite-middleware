@@ -89,6 +89,7 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
         fallback = Notifications.NO_START_DATE;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.START;
     }

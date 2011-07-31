@@ -69,137 +69,169 @@ import com.openexchange.tools.session.ServerSession;
 
 public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
+    @Override
     public int countDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) {
         return 0;
     }
 
+    @Override
     public boolean exists(final int id, final int version, final Context ctx, final User user, final UserConfiguration userConfig) {
         return false;
     }
 
+    @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
         return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
     }
 
+    @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final SearchIterator<DocumentMetadata> emptyIter = SearchIteratorAdapter.emptyIterator();
         return new DeltaImpl<DocumentMetadata>(emptyIter,emptyIter,emptyIter,System.currentTimeMillis());
     }
 
+    @Override
     public InputStream getDocument(final int id, final int version, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         virtualFolder(); return null;
     }
 
+    @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version,
             final Context ctx, final User user, final UserConfiguration userConfig)
             throws OXException {
         virtualFolder(); return null;
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, final Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getDocuments(final int[] ids, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) {
         return new EmptyTimedResult();
     }
 
+    @Override
     public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user, final UserConfiguration userConfig) {
         return false;
     }
 
+    @Override
     public boolean isFolderEmpty(final long folderId, final Context ctx) {
         return true;
     }
 
+    @Override
     public void lock(final int id, final long diff, final ServerSession sessionObj)
             throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void removeDocument(final long folderId, final long date,
             final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public int[] removeDocument(final int[] id, final long date, final ServerSession sessionObj) {
         return id;
     }
 
+    @Override
     public void removeUser(final int id, final Context context, final ServerSession session) {
         // Nothing to do.
     }
 
+    @Override
     public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj) {
         return versionId;
     }
 
+    @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void unlock(final int id, final ServerSession sessionObj) {
         // Nothing to do. 
     }
 
+    @Override
     public void commit() {
         // Nothing to do.
     }
 
+    @Override
     public void finish() {
         // Nothing to do.
     }
 
+    @Override
     public void rollback() {
         // Nothing to to.
     }
 
+    @Override
     public void setRequestTransactional(final boolean transactional) {
         // Nothing to to.
     }
 
+    @Override
     public void setCommitsTransaction(final boolean commits) {
         // Nothing to to.
     }
 
+    @Override
     public void setTransactional(final boolean transactional) {
         // Nothing to to.
     }
 
+    @Override
     public void startTransaction() {
         // Nothing to to.
     }
@@ -213,18 +245,22 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         public EmptyTimedResult() {
             super(new SearchIterator<DocumentMetadata>() {
 
+                @Override
                 public void addWarning(final OXException warning) {
                     // Nothing to to.
                 }
 
+                @Override
                 public void close() throws OXException {
                     // Nothing to do.
                 }
 
+                @Override
                 public OXException[] getWarnings() {
                     return new OXException[0];
                 }
 
+                @Override
                 public boolean hasNext() throws OXException {
                     return false;
                 }
@@ -233,14 +269,17 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
                     return true;
                 }
 
+                @Override
                 public boolean hasWarnings() {
                     return false;
                 }
 
+                @Override
                 public DocumentMetadata next() throws OXException {
                     return null;
                 }
 
+                @Override
                 public int size() {
                     return 0;
                 }
@@ -254,10 +293,12 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     }
 
+    @Override
     public void touch(final int id, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
+    @Override
     public void setSessionHolder(final SessionHolder sessionHolder) {
         // Nothing to do.
     }

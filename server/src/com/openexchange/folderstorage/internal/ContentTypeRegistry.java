@@ -226,6 +226,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
         return types.get(contentType);
     }
 
+    @Override
     public ContentType getByString(final String contentTypeString) {
         for (final Entry<String, Element> entry : registry.entrySet()) {
             final Queue<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();

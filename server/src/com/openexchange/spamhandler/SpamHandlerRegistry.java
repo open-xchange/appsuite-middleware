@@ -355,6 +355,7 @@ public final class SpamHandlerRegistry {
             this.mailProvider = mailProvider;
         }
 
+        @Override
         public MailProvider getMailProvider() {
             return mailProvider;
         }
@@ -372,6 +373,7 @@ public final class SpamHandlerRegistry {
             this.accountId = accountId;
         }
 
+        @Override
         public MailProvider getMailProvider() throws OXException {
             return MailProviderRegistry.getMailProviderBySession(session, accountId);
         }
@@ -386,6 +388,7 @@ public final class SpamHandlerRegistry {
             this.mailAccount = mailAccount;
         }
 
+        @Override
         public MailProvider getMailProvider() {
             return MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount));
         }

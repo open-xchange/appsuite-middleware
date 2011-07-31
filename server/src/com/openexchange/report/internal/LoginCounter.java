@@ -88,6 +88,7 @@ public class LoginCounter implements LoginCounterMBean {
         logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
     }
 
+    @Override
     public int getNumberOfLogins(final Date startDate, final Date endDate) throws MBeanException {
         /*
          * Compile pattern
@@ -179,10 +180,12 @@ public class LoginCounter implements LoginCounterMBean {
         return counter;
     }
 
+    @Override
     public void setDeviceWildcard(final String wildcard) {
         this.wildcard = wildcard;
     }
 
+    @Override
     public String getDeviceWildcard() {
         return wildcard;
     }

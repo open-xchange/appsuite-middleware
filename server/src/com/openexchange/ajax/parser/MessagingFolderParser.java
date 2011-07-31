@@ -101,6 +101,7 @@ public final class MessagingFolderParser {
             super();
         }
 
+        @Override
         public boolean isGlobalID() {
             return false;
         }

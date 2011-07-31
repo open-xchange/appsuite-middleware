@@ -103,18 +103,21 @@ public class UserAgentBehaviour implements Behaviour{
 		setChanges(new HashSet(Arrays.asList(implementation)));
 	}
 
-	public <T> T get(final Class<T> clazz) {
+	@Override
+    public <T> T get(final Class<T> clazz) {
 		return (T) classes.get(clazz);
 	}
 
-	public boolean matches(final WebdavRequest req) {
+	@Override
+    public boolean matches(final WebdavRequest req) {
 		if(req.getHeader("user-agent") == null) {
 			return false;
 		}
 		return pattern.matcher(req.getHeader("user-agent")).find();
 	}
 
-	public Set<Class<? extends Object>> provides() {
+	@Override
+    public Set<Class<? extends Object>> provides() {
 		return classes.keySet();
 	}
 	

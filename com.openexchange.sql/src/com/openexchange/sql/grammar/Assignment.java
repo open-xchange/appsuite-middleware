@@ -69,11 +69,13 @@ public class Assignment extends Expression {
 		this(new Column(column), right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildAssignment(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "=";
 	}
 	

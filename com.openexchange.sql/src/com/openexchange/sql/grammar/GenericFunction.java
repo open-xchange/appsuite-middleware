@@ -61,7 +61,8 @@ public class GenericFunction extends Function {
 		this.arguments = arguments;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildGenericFunction(this);
 	}
 
@@ -69,7 +70,8 @@ public class GenericFunction extends Function {
 		return arguments;
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return keyword;
 	}
 }

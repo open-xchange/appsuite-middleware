@@ -103,38 +103,46 @@ public abstract class AbstractResource implements WebdavResource {
 		}
 	}
 	
-	public void putBody(final InputStream body) throws OXException{
+	@Override
+    public void putBody(final InputStream body) throws OXException{
 		putBody(body,false);
 	}
 	
-	public void putBodyAndGuessLength(final InputStream body) throws OXException{
+	@Override
+    public void putBodyAndGuessLength(final InputStream body) throws OXException{
 		putBody(body, true);
 	}
 	
-	public String getResourceType() throws OXException{
+	@Override
+    public String getResourceType() throws OXException{
 		return null;
 	}
 	
-	public WebdavResource move(final WebdavPath string) throws OXException {
+	@Override
+    public WebdavResource move(final WebdavPath string) throws OXException {
 		return move(string,false, true);
 	}
 
-	public WebdavResource copy(final WebdavPath string) throws OXException {
+	@Override
+    public WebdavResource copy(final WebdavPath string) throws OXException {
 		return copy(string,false, true);
 	}
 	
-	public WebdavResource reload() throws OXException {
+	@Override
+    public WebdavResource reload() throws OXException {
 		return this.getFactory().resolveResource(getUrl());
 	}
 	
-	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
+	@Override
+    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 		final WebdavResource copy = copy(dest);
 		delete();
 		((AbstractResource)copy).setCreationDate(getCreationDate());
 		return copy;
 	}
 	
-	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
+	@Override
+    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 		final AbstractResource clone = instance(dest);
 		if(hasBody()) {
 			clone.putBody(getBody());
@@ -151,11 +159,13 @@ public abstract class AbstractResource implements WebdavResource {
 		return (AbstractResource) getFactory().resolveResource(dest);
 	}
 	
-	public void removeProperty(final String namespace, final String name) throws OXException {
+	@Override
+    public void removeProperty(final String namespace, final String name) throws OXException {
 		internalRemoveProperty(namespace,name);
 	}
 	
-	public void putProperty(final WebdavProperty prop) throws OXException {
+	@Override
+    public void putProperty(final WebdavProperty prop) throws OXException {
 		if(handleSpecialPut(prop)) {
 			return;
 		}
@@ -163,7 +173,8 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 
 
-	public WebdavProperty getProperty(final String namespace, final String name) throws OXException {
+	@Override
+    public WebdavProperty getProperty(final String namespace, final String name) throws OXException {
 		WebdavProperty prop = handleSpecialGet(namespace, name);
 		if(prop != null) {
 			return prop;
@@ -176,6 +187,7 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 	
 
+    @Override
     public List<WebdavProperty> getAllProps() throws OXException{
 		final List<WebdavProperty> props = internalGetAllProps();
 		props.addAll(getAllFromMixin());
@@ -225,19 +237,23 @@ public abstract class AbstractResource implements WebdavResource {
         return null;
     }
 	
-	public boolean isCollection() {
+	@Override
+    public boolean isCollection() {
 		return false;
 	}
 	
-	public boolean isLockNull(){
+	@Override
+    public boolean isLockNull(){
 		return false;
 	}
 	
-	public WEBDAV_METHOD[] getOptions(){
+	@Override
+    public WEBDAV_METHOD[] getOptions(){
 		return OPTIONS;
 	}
 	
-	public WebdavCollection toCollection(){
+	@Override
+    public WebdavCollection toCollection(){
 		throw new IllegalStateException("This resource is no collection");
 	}
 	
@@ -340,7 +356,8 @@ public abstract class AbstractResource implements WebdavResource {
 		return getUrl().toString();
 	}
 	
-	public Protocol getProtocol() {
+	@Override
+    public Protocol getProtocol() {
 	    return getFactory().getProtocol();
 	}
 	
@@ -364,19 +381,23 @@ public abstract class AbstractResource implements WebdavResource {
 	
 	public class SpecialGetSwitch implements PropertySwitch{
 
-		public Object creationDate() throws OXException {
+		@Override
+        public Object creationDate() throws OXException {
 			return Utils.convert(getCreationDate());
 		}
 
-		public Object displayName() throws OXException {
+		@Override
+        public Object displayName() throws OXException {
 			return getDisplayName();
 		}
 
-		public Object contentLanguage() throws OXException {
+		@Override
+        public Object contentLanguage() throws OXException {
 			return getLanguage();
 		}
 
-		public Object contentLength() throws OXException {
+		@Override
+        public Object contentLength() throws OXException {
 			final Long l = getLength();
 			if(l == null) {
 				return null;
@@ -384,23 +405,28 @@ public abstract class AbstractResource implements WebdavResource {
 			return l.toString();
 		}
 
-		public Object contentType() throws OXException {
+		@Override
+        public Object contentType() throws OXException {
 			return getContentType();
 		}
 
-		public Object etag() throws OXException {
+		@Override
+        public Object etag() throws OXException {
 			return getETag();
 		}
 
-		public Object lastModified() throws OXException {
+		@Override
+        public Object lastModified() throws OXException {
 			return Utils.convert(getLastModified());
 		}
 
-		public Object resourceType() throws OXException {
+		@Override
+        public Object resourceType() throws OXException {
 			return getResourceType();
 		}
 
-		public Object lockDiscovery() throws OXException {
+		@Override
+        public Object lockDiscovery() throws OXException {
 			final StringBuffer activeLocks = new StringBuffer();
 			final WebdavLockWriter writer = new WebdavLockWriter();
 			for(final WebdavLock lock : getLocks()){
@@ -409,11 +435,13 @@ public abstract class AbstractResource implements WebdavResource {
 			return activeLocks.toString();
 		}
 
-		public Object supportedLock() throws OXException {
+		@Override
+        public Object supportedLock() throws OXException {
 			return "<D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry>";
 		}
 
-		public Object source() throws OXException {
+		@Override
+        public Object source() throws OXException {
 			return getSource();
 		}
 		
@@ -427,51 +455,62 @@ public abstract class AbstractResource implements WebdavResource {
 			this.value = value;
 		}
 		
-		public Object creationDate() throws OXException {
+		@Override
+        public Object creationDate() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object displayName() throws OXException {
+		@Override
+        public Object displayName() throws OXException {
 			setDisplayName(value);
 			return Boolean.TRUE;
 		}
 
-		public Object contentLanguage() throws OXException {
+		@Override
+        public Object contentLanguage() throws OXException {
 			setLanguage(value);
 			return Boolean.TRUE;
 		}
 
-		public Object contentLength() throws OXException {
+		@Override
+        public Object contentLength() throws OXException {
 			setLength(new Long(value));
 			return Boolean.TRUE;
 		}
 
-		public Object contentType() throws OXException {
+		@Override
+        public Object contentType() throws OXException {
 			setContentType(value);
 			return Boolean.TRUE;
 		}
 
-		public Object etag() throws OXException {
+		@Override
+        public Object etag() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object lastModified() throws OXException {
+		@Override
+        public Object lastModified() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object resourceType() throws OXException {
+		@Override
+        public Object resourceType() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object lockDiscovery() throws OXException {
+		@Override
+        public Object lockDiscovery() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object supportedLock() throws OXException {
+		@Override
+        public Object supportedLock() throws OXException {
 			return Boolean.TRUE;
 		}
 
-		public Object source() throws OXException {
+		@Override
+        public Object source() throws OXException {
 			setSource(value);
 			return Boolean.TRUE;
 		}

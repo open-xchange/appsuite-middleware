@@ -245,6 +245,7 @@ public final class contacts extends XmlServlet<ContactInterface> {
             this.session = session;
         }
 
+        @Override
         public void actionPerformed(final ContactInterface nullInterface, final OutputStream os, final int user)
                 throws IOException {
 

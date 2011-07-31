@@ -65,6 +65,7 @@ public abstract class LoginEventListener implements EventHandler {
 
     public abstract void handle(LoginEvent event);
 
+    @Override
     public final void handleEvent(final Event event) {
         handle(new LoginEvent(event));
     }

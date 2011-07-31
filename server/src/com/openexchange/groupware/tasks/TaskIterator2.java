@@ -156,6 +156,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
+    @Override
     public void close() throws OXException {
         try {
             runner.join();
@@ -164,6 +165,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return !ready.isEmpty() || preread.hasNext() || null != exc;
     }
@@ -172,6 +174,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         return false;
     }
 
+    @Override
     public Task next() throws OXException {
         if (ready.isEmpty() && !preread.hasNext()) {
             throw exc;
@@ -213,14 +216,17 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         return ready.poll();
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -264,10 +270,12 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }
 
+    @Override
     public void run() {
         Connection con = null;
         PreparedStatement stmt = null;

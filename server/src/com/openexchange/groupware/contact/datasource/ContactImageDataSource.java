@@ -82,6 +82,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         super();
     }
 
+    @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
@@ -151,18 +152,21 @@ public final class ContactImageDataSource implements ImageDataSource {
      * <li><code>&quot;com.openexchange.groupware.contact.id&quot;</code></li>
      * </ul>
      */
+    @Override
     public String[] getRequiredArguments() {
         final String[] args = new String[ARGS.length];
         System.arraycopy(ARGS, 0, args, 0, ARGS.length);
         return args;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return new Class<?>[] { InputStream.class };
     }
 
     private static final String REGISTRATION_NAME = "com.openexchange.contact.image";
 
+    @Override
     public String getRegistrationName() {
         return REGISTRATION_NAME;
     }

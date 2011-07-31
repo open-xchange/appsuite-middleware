@@ -232,6 +232,7 @@ public final class Tools {
 
     private static final CookieNameMatcher OX_COOKIE_MATCHER = new CookieNameMatcher() {
 
+        @Override
         public boolean matches(final String cookieName) {
             return (null != cookieName && (cookieName.startsWith(Login.SESSION_PREFIX) || JSESSIONID_COOKIE.equals(cookieName)));
         }

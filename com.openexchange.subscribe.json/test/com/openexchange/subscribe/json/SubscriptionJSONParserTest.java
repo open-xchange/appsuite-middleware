@@ -72,6 +72,7 @@ public class SubscriptionJSONParserTest extends TestCase {
     private SimSubscriptionSourceDiscoveryService discovery;
     private DynamicFormDescription form = null;
     
+    @Override
     public void setUp() throws Exception{
         object = new JSONObject();
         object.put("id", 2);

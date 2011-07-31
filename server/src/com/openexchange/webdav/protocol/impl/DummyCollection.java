@@ -208,15 +208,18 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final WebdavPath subPath) throws OXException {
+	@Override
+    public WebdavResource resolveResource(final WebdavPath subPath) throws OXException {
 		return mgr.resolveResource(url.dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
+	@Override
+    public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
 		return mgr.resolveCollection(url.dup().append(subPath));
 	}
 	
-	public List<WebdavResource> getChildren(){
+	@Override
+    public List<WebdavResource> getChildren(){
 		return new ArrayList<WebdavResource>(children );
 	}
 	
@@ -228,11 +231,13 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		children.remove(child);
 	}
 
-	public Iterator<WebdavResource> iterator() {
+	@Override
+    public Iterator<WebdavResource> iterator() {
 		return new ChildTreeIterator(children.iterator());
 	}
 	
-	public Iterable<WebdavResource> toIterable(final int depth) {
+	@Override
+    public Iterable<WebdavResource> toIterable(final int depth) {
 		switch(depth) {
 		case 0: return new LinkedList<WebdavResource>();
 		case 1: return getChildren();
@@ -250,7 +255,8 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			this.childIterator = childIterator;
 		}
 		
-		public boolean hasNext() {
+		@Override
+        public boolean hasNext() {
 			if(subIterator != null) {
 				if(subIterator.hasNext()) {
 					return true;
@@ -260,7 +266,8 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			return childIterator.hasNext();
 		}
 
-		public WebdavResource next() {
+		@Override
+        public WebdavResource next() {
 			if(subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
 			}
@@ -271,7 +278,8 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			return res;
 		}
 
-		public void remove() {
+		@Override
+        public void remove() {
 			throw new UnsupportedOperationException();
 		}
 		

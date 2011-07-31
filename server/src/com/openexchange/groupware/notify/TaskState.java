@@ -109,7 +109,8 @@ public class TaskState extends LinkableState {
 		this.type = type;
 	}
 
-	public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
+	@Override
+    public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
         if(participant == modificationUser) { return false; }
 
          switch(type) {
@@ -122,35 +123,43 @@ public class TaskState extends LinkableState {
         }
 	}
 
-	public int getModule() {
+	@Override
+    public int getModule() {
 		return Types.TASK;
 	}
 
-	public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+	@Override
+    public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
 		// Nothing to do
 	}
 
-	public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
+	@Override
+    public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
 		// Nothing to do
 	}
 
-	public DateFormat getDateFormat(final Locale locale) {
+	@Override
+    public DateFormat getDateFormat(final Locale locale) {
 		return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 	}
 
-	public Template getTemplate() {
+	@Override
+    public Template getTemplate() {
 		return new StringTemplate(messageTemplate);
 	}
 
-	public TemplateReplacement getAction() {
+	@Override
+    public TemplateReplacement getAction() {
 		return actionRepl;
 	}
 
-	public TemplateReplacement getConfirmationAction() {
+	@Override
+    public TemplateReplacement getConfirmationAction() {
 		return confirmationActionRepl;
 	}
 
-	public Type getType() {
+	@Override
+    public Type getType() {
 		return type;
 	}
 	
@@ -159,6 +168,7 @@ public class TaskState extends LinkableState {
 	    Task.LAST_MODIFIED
 	));
 	
+    @Override
     public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
         Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);

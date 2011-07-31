@@ -157,22 +157,27 @@ public enum ContactExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public String getPrefix() {
         return "CON";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

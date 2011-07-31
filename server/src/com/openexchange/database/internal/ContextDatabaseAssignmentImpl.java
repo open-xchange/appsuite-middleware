@@ -98,6 +98,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         this.configDatabaseService = configDatabaseService;
     }
 
+    @Override
     public Assignment getAssignment(final int contextId) throws OXException {
         Assignment retval;
         if (null == cache) {
@@ -148,6 +149,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
+    @Override
     public void removeAssignments(final int contextId) throws OXException {
         if (null != cache) {
             try {

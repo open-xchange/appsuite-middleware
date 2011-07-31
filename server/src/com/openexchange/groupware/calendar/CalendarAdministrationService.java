@@ -58,6 +58,7 @@ import com.openexchange.groupware.downgrade.DowngradeListener;
 
 public interface CalendarAdministrationService extends DeleteListener {
 
+    @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException;
 
     public void downgradePerformed(final DowngradeEvent downgradeEvent) throws OXException;

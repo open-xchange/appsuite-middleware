@@ -69,17 +69,21 @@ public class CharacterSearch implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "contacts", "characterSearch" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasContact();
             }
 
+            @Override
             public void getValue(final Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.CHARACTER_SEARCH));
             }

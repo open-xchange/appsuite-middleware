@@ -75,7 +75,7 @@ public class Limits {
      *     
      */
     public void setLimitIn(JAXBElement<String> value) {
-        this.limitIn = ((JAXBElement<String> ) value);
+        this.limitIn = value;
     }
 
     /**

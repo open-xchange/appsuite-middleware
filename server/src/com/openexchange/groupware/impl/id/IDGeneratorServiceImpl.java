@@ -73,6 +73,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         super();
     }
 
+    @Override
     public int getId(final String type, final int contextId) throws OXException {
         /*
          * Get appropriate connection

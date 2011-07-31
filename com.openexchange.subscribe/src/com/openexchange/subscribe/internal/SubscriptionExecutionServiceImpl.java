@@ -70,7 +70,6 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}

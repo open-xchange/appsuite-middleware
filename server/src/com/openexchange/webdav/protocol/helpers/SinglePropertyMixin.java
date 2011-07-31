@@ -71,10 +71,12 @@ public abstract class SinglePropertyMixin implements PropertyMixin {
         this.name = name;
     }
 
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         if (this.namespace.equals(namespace) && this.name.equals(name)) {
             WebdavProperty property = new WebdavProperty(namespace, name);

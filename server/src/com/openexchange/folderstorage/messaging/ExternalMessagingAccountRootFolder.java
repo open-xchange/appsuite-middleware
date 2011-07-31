@@ -164,6 +164,7 @@ public final class ExternalMessagingAccountRootFolder extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }

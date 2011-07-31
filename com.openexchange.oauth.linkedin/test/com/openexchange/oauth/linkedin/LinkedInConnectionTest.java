@@ -77,6 +77,7 @@ public class LinkedInConnectionTest extends TestCase {
     private String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
     private String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
     
+    @Override
     public void setUp(){
         Activator activator = new Activator();
 //        OAuthServiceMetaDataLinkedInImpl linkedInMetadata = new OAuthServiceMetaDataLinkedInImpl();
@@ -85,6 +86,7 @@ public class LinkedInConnectionTest extends TestCase {
         activator.setOauthService(new MockOAuthService());
     }
     
+    @Override
     public void tearDown(){
         
     }    

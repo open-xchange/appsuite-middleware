@@ -87,30 +87,37 @@ public final class MessagingAccountAccessFullnameProvider implements DefaultFold
         return folderAccess;
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         return getFolderStorage().getConfirmedHamFolder();
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         return getFolderStorage().getConfirmedSpamFolder();
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         return getFolderStorage().getDraftsFolder();
     }
 
+    @Override
     public String getINBOXFolder() throws OXException {
         return "INBOX";
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         return getFolderStorage().getSentFolder();
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         return getFolderStorage().getSpamFolder();
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         return getFolderStorage().getTrashFolder();
     }

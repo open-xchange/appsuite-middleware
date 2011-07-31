@@ -91,7 +91,8 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 13;
 	}
 
@@ -100,11 +101,13 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		return UpdateTaskPriority.HIGH.priority;
 	}
 
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {

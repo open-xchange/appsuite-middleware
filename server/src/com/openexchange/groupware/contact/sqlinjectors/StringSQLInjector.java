@@ -79,6 +79,7 @@ public class StringSQLInjector implements SQLInjector {
         this.value = builder.toString();
     }
 
+    @Override
     public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
         if (null == value) {
             ps.setNull(parameterIndex, Types.VARCHAR);

@@ -78,14 +78,17 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
 
     private static final String ALTER_TABLE = "ALTER TABLE " + TABLE + " ADD (";
 
+    @Override
     public int addedWithVersion() {
         return 92;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = Database.getNoTimeout(contextId, true);
         try {

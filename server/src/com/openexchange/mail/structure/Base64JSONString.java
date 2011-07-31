@@ -110,6 +110,7 @@ public final class Base64JSONString implements JSONString {
         }
     }
 
+    @Override
     public String toJSONString() {
         return value;
     }

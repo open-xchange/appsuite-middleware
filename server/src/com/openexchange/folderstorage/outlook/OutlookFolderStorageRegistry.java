@@ -155,6 +155,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return true;
     }
 
+    @Override
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -204,6 +205,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return null;
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -232,6 +234,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return l.toArray(new FolderStorage[l.size()]);
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -254,6 +257,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -276,6 +280,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         final FolderStorage folderStorage = contentTypes.get(contentType);
         if (null == folderStorage) {

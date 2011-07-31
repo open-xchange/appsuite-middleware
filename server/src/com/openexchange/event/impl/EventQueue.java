@@ -106,6 +106,7 @@ public final class EventQueue {
             this.closing = shuttingDown;
         }
 
+        @Override
         public void run() {
             try {
                 if (useFirst.compareAndSet(true, false)) {

@@ -70,6 +70,7 @@ public class Negation extends ContextSetTerm {
         return !term.matches(tags);
     }
     
+    @Override
     public String toString() {
         return "!("+term.toString()+")";
     }

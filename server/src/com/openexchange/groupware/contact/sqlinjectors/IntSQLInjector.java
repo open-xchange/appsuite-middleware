@@ -60,7 +60,8 @@ public class IntSQLInjector implements SQLInjector {
 		this.value = value;
 	}
 
-	public void inject(final PreparedStatement ps, final int parameterIndex)
+	@Override
+    public void inject(final PreparedStatement ps, final int parameterIndex)
 			throws SQLException {
 		ps.setInt(parameterIndex, value);
 	}

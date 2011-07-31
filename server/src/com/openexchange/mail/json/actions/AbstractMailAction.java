@@ -136,6 +136,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return mailInterface;
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         return perform(new MailRequest(request, session));
     }

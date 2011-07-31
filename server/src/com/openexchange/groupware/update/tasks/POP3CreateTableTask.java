@@ -72,10 +72,12 @@ public class POP3CreateTableTask implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(POP3CreateTableTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 42;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGHEST.priority;
     }
@@ -106,6 +108,7 @@ public class POP3CreateTableTask implements UpdateTask {
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         createTable("pop3_storage_ids", getCreatePOP3IDsMapping(), contextId);
         createTable("pop3_storage_deleted", getCreatePOP3DeletedContainer(), contextId);

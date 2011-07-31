@@ -87,6 +87,7 @@ public class OSGiPropertyMixin implements PropertyMixin {
         factoryTracker.close();
     }
 
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         Object[] mixins = mixinTracker.getServices();
         List<WebdavProperty> allProperties = new ArrayList<WebdavProperty>();
@@ -109,6 +110,7 @@ public class OSGiPropertyMixin implements PropertyMixin {
         return allProperties;
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         Object[] mixins = mixinTracker.getServices();
         if (mixins != null) {

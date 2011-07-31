@@ -81,7 +81,8 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#start()
 	 */
-	public void start() throws OXException {
+	@Override
+    public void start() throws OXException {
 		CacheAvailabilityRegistry.initInstance();
 	}
 
@@ -90,7 +91,8 @@ public final class CacheAvailabilityRegistryInit implements Initialization {
 	 * 
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
-	public void stop() throws OXException {
+	@Override
+    public void stop() throws OXException {
 		CacheAvailabilityRegistry.releaseInstance();
 	}
 

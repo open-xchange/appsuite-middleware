@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;

@@ -675,18 +675,22 @@ public class InfostoreRequest extends CommonRequest {
             private SearchIteratorException se;
             private OXException oxe;
 
+            @Override
             public void addWarning(final OXException warning) {
                 iter.addWarning(warning);
             }
 
+            @Override
             public void close() throws OXException {
                 iter.close();
             }
 
+            @Override
             public OXException[] getWarnings() {
                 return iter.getWarnings();
             }
 
+            @Override
             public boolean hasNext() throws OXException{
                 try {
                     scrollToNext();
@@ -697,10 +701,12 @@ public class InfostoreRequest extends CommonRequest {
             }
 
 
+            @Override
             public boolean hasWarnings() {
                 return iter.hasWarnings();
             }
 
+            @Override
             public DocumentMetadata next() throws OXException {
                 if(se != null) {
                     throw se;
@@ -727,6 +733,7 @@ public class InfostoreRequest extends CommonRequest {
                 }
             }
 
+            @Override
             public int size() {
                 return -1;
             }

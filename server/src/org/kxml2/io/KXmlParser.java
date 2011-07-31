@@ -978,6 +978,7 @@ public class KXmlParser implements XmlPullParser {
 
     //--------------- public part starts here... ---------------
 
+    @Override
     public void setInput(final Reader reader) throws XmlPullParserException {
         this.reader = reader;
 
@@ -1009,6 +1010,7 @@ public class KXmlParser implements XmlPullParser {
         entityMap.put("quot", "\"");
     }
 
+    @Override
     public void setInput(final InputStream is, final String _enc)
         throws XmlPullParserException {
 
@@ -1136,6 +1138,7 @@ public class KXmlParser implements XmlPullParser {
         }
     }
 
+    @Override
     public boolean getFeature(final String feature) {
     	if (feature.equals("open-xchange.org/preserveText")) {
 			return preserveText;
@@ -1149,10 +1152,12 @@ public class KXmlParser implements XmlPullParser {
 		}
     }
 
+    @Override
     public String getInputEncoding() {
         return encoding;
     }
 
+    @Override
     public void defineEntityReplacementText(final String entity, final String value)
         throws XmlPullParserException {
         if (entityMap == null) {
@@ -1161,6 +1166,7 @@ public class KXmlParser implements XmlPullParser {
         entityMap.put(entity, value);
     }
 
+    @Override
     public Object getProperty(final String property) {
         if (isProp(property, true, "xmldecl-version")) {
 			return version;
@@ -1174,6 +1180,7 @@ public class KXmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public int getNamespaceCount(final int depth) {
         if (depth > this.depth) {
 			throw new IndexOutOfBoundsException();
@@ -1181,14 +1188,17 @@ public class KXmlParser implements XmlPullParser {
         return nspCounts[depth];
     }
 
+    @Override
     public String getNamespacePrefix(final int pos) {
         return nspStack[pos << 1];
     }
 
+    @Override
     public String getNamespaceUri(final int pos) {
         return nspStack[(pos << 1) + 1];
     }
 
+    @Override
     public String getNamespace(final String prefix) {
 
         if ("xml".equals(prefix)) {
@@ -1211,10 +1221,12 @@ public class KXmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public int getDepth() {
         return depth;
     }
 
+    @Override
     public String getPositionDescription() {
 
     	final StringBuilder buf =
@@ -1273,14 +1285,17 @@ public class KXmlParser implements XmlPullParser {
         return buf.toString();
     }
 
+    @Override
     public int getLineNumber() {
         return line;
     }
 
+    @Override
     public int getColumnNumber() {
         return column;
     }
 
+    @Override
     public boolean isWhitespace() throws XmlPullParserException {
         if (type != TEXT && type != IGNORABLE_WHITESPACE && type != CDSECT) {
 			exception(ILLEGAL_TYPE);
@@ -1288,11 +1303,13 @@ public class KXmlParser implements XmlPullParser {
         return isWhitespace;
     }
 
+    @Override
     public String getText() {
         return type < TEXT
             || (type == ENTITY_REF && unresolved) ? null : get(0);
     }
 
+    @Override
     public char[] getTextCharacters(final int[] poslen) {
         if (type >= TEXT) {
             if (type == ENTITY_REF) {
@@ -1315,18 +1332,22 @@ public class KXmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public String getNamespace() {
         return namespace;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getPrefix() {
         return prefix;
     }
 
+    @Override
     public boolean isEmptyElementTag() throws XmlPullParserException {
         if (type != START_TAG) {
 			exception(ILLEGAL_TYPE);
@@ -1334,18 +1355,22 @@ public class KXmlParser implements XmlPullParser {
         return degenerated;
     }
 
+    @Override
     public int getAttributeCount() {
         return attributeCount;
     }
 
+    @Override
     public String getAttributeType(final int index) {
         return "CDATA";
     }
 
+    @Override
     public boolean isAttributeDefault(final int index) {
         return false;
     }
 
+    @Override
     public String getAttributeNamespace(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -1353,6 +1378,7 @@ public class KXmlParser implements XmlPullParser {
         return attributes[index << 2];
     }
 
+    @Override
     public String getAttributeName(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -1360,6 +1386,7 @@ public class KXmlParser implements XmlPullParser {
         return attributes[(index << 2) + 2];
     }
 
+    @Override
     public String getAttributePrefix(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -1367,6 +1394,7 @@ public class KXmlParser implements XmlPullParser {
         return attributes[(index << 2) + 1];
     }
 
+    @Override
     public String getAttributeValue(final int index) {
         if (index >= attributeCount) {
 			throw new IndexOutOfBoundsException();
@@ -1374,6 +1402,7 @@ public class KXmlParser implements XmlPullParser {
         return attributes[(index << 2) + 3];
     }
 
+    @Override
     public String getAttributeValue(final String namespace, final String name) {
 
         for (int i = (attributeCount << 2) - 4; i >= 0; i -= 4) {
@@ -1386,10 +1415,12 @@ public class KXmlParser implements XmlPullParser {
         return null;
     }
 
+    @Override
     public int getEventType() throws XmlPullParserException {
         return type;
     }
 
+    @Override
     public int next() throws XmlPullParserException, IOException {
 
         txtPos = 0;
@@ -1415,6 +1446,7 @@ public class KXmlParser implements XmlPullParser {
         return type;
     }
 
+    @Override
     public int nextToken() throws XmlPullParserException, IOException {
 
         isWhitespace = true;
@@ -1428,6 +1460,7 @@ public class KXmlParser implements XmlPullParser {
     //----------------------------------------------------------------------
     // utility methods to make XML parsing easier ...
 
+    @Override
     public int nextTag() throws XmlPullParserException, IOException {
 
         next();
@@ -1442,6 +1475,7 @@ public class KXmlParser implements XmlPullParser {
         return type;
     }
 
+    @Override
     public void require(final int type, final String namespace, final String name)
         throws XmlPullParserException, IOException {
 
@@ -1453,6 +1487,7 @@ public class KXmlParser implements XmlPullParser {
 		}
     }
 
+    @Override
     public String nextText() throws XmlPullParserException, IOException {
         if (type != START_TAG) {
 			exception("precondition: START_TAG");
@@ -1476,6 +1511,7 @@ public class KXmlParser implements XmlPullParser {
         return result;
     }
 
+    @Override
     public void setFeature(final String feature, final boolean value)
         throws XmlPullParserException {
     	if (feature.equals("open-xchange.org/preserveText")) {
@@ -1489,6 +1525,7 @@ public class KXmlParser implements XmlPullParser {
 		}
     }
 
+    @Override
     public void setProperty(final String property, final Object value)
         throws XmlPullParserException {
         if (isProp(property, true, "location")) {

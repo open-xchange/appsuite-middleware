@@ -72,14 +72,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contact_collect_enabled";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (null == value) {
                 pstmt.setNull(1, Types.BOOLEAN);
@@ -92,15 +95,18 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             final int retval = rs.getInt(getColumnName());
             return rs.wasNull() ? null : I(retval);
         }
 
+        @Override
         public String getColumnName() {
             return "contact_collect_folder";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (null == value) {
                 pstmt.setNull(1, Types.INTEGER);
@@ -113,14 +119,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_ACCESS = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contactCollectOnMailAccess";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
@@ -133,14 +142,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_TRANSPORT = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contactCollectOnMailTransport";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
@@ -153,14 +165,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             return I(rs.getInt(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "defaultStatusPrivate";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
@@ -173,14 +188,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> DEFAULT_STATUS_PUBLIC = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             return I(rs.getInt(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "defaultStatusPublic";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
@@ -193,6 +211,7 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> FOLDER_TREE = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             final int tmp = rs.getInt(getColumnName());
             final Integer retval;
@@ -204,10 +223,12 @@ public class ServerUserSetting {
             return retval;
         }
 
+        @Override
         public String getColumnName() {
             return "folderTree";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);

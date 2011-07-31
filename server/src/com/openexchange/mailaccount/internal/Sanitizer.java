@@ -86,6 +86,7 @@ final class Sanitizer {
             this.contextId = contextId;
         }
 
+        @Override
         public boolean execute(final int accountId) {
             try {
                 storageService.invalidateMailAccount(accountId, user, contextId);
@@ -111,6 +112,7 @@ final class Sanitizer {
             this.stmt = stmt;
         }
 
+        @Override
         public boolean execute(final int accountId, final String uri) {
             try {
                 stmt.setString(1, uri);

@@ -61,6 +61,7 @@ public class Document extends Node {
     /** Adds a child at the given index position. Throws
     an exception when a second root element is added */
 
+    @Override
     public void addChild(final int index, final int type, final Object child) {
         if (type == ELEMENT) {
          //   if (rootIndex != -1)
@@ -80,6 +81,7 @@ public class Document extends Node {
     The end event is consumed. For parsing partial
         XML structures, consider using Node.parse (). */
 
+    @Override
     public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
@@ -97,6 +99,7 @@ public class Document extends Node {
 
     }
 
+    @Override
     public void removeChild(final int index) {
         if (index == rootIndex) {
 			rootIndex = -1;
@@ -122,6 +125,7 @@ public class Document extends Node {
         this method is identical to writeChildren, except that the
         stream is flushed automatically. */
 
+    @Override
     public void write(final XmlSerializer writer)
         throws IOException {
         

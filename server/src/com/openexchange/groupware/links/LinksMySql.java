@@ -83,29 +83,35 @@ public class LinksMySql implements LinksSql {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksMySql.class));
 
-	public String iFperformLinkStorage(final LinkObject l, final int cid){
+	@Override
+    public String iFperformLinkStorage(final LinkObject l, final int cid){
 		return new StringBuilder("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid FROM prg_links WHERE ((firstid = ").append(l.getFirstId()).append(SQL_AND_FIRSTMODULE).append(l.getFirstType()).append(SQL_AND_SECONDID).append(l.getSecondId()).append(SQL_AND_SECONDMODULE).append(l.getSecondType()).append(") OR (firstid = ").append(l.getSecondId()).append(SQL_AND_FIRSTMODULE).append(l.getSecondType()).append(SQL_AND_SECONDID).append(l.getFirstId()).append(SQL_AND_SECONDMODULE).append(l.getFirstType()).append(")) AND cid = ").append(cid).toString();
 	}
 
 	private static final String SQL_INSERT = "INSERT INTO prg_links (firstid, firstmodule, firstfolder,secondid,secondmodule,secondfolder,cid) VALUES (?,?,?,?,?,?,?)";
 	
-	public String iFperformLinkStorageInsertString(){
+	@Override
+    public String iFperformLinkStorageInsertString(){
 		return SQL_INSERT;
 	}
 
-	public String iFgetLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int cid) {
+	@Override
+    public String iFgetLinkFromObject(final int first_id, final int first_type, final int second_id, final int second_type, final int cid) {
 		return new StringBuilder(SQL_START_SELECT).append(first_id).append(SQL_AND_FIRSTMODULE).append(first_type).append(SQL_AND_SECONDID).append(second_id).append(SQL_AND_SECONDMODULE).append(second_type).append(')').append(SQL_AND_CID).append(cid).toString();
 	}
 	
-	public String iFgetAllLinksFromObject(final int id, final int type, final int folder, final int cid) {
+	@Override
+    public String iFgetAllLinksFromObject(final int id, final int type, final int folder, final int cid) {
 		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(SQL_AND_FIRSTFOLDER).append(folder).append(") OR (secondid=").append(id).append(SQL_AND_SECONDMODULE).append(type).append(SQL_AND_SECONDFOLDER).append(folder).append(")) AND cid=").append(cid).toString();
 	}
 
-	public String iFgetAllLinksByObjectID(final int id, final int type, final int cid) {
+	@Override
+    public String iFgetAllLinksByObjectID(final int id, final int type, final int cid) {
 		return new StringBuilder(SQL_START_SELECT).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(") OR (secondid=").append(id).append(SQL_AND_SECONDMODULE).append(type).append(")) AND cid=").append(cid).toString();
 	}
 
-	public void iFDeleteLinkFromObject(final Statement del, final boolean second, final int id, final int type, final int folder, final int loadid, final int loadfolder, final int loadtype, final int cid) throws SQLException {	
+	@Override
+    public void iFDeleteLinkFromObject(final Statement del, final boolean second, final int id, final int type, final int folder, final int loadid, final int loadfolder, final int loadtype, final int cid) throws SQLException {	
 		if (second){
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(SQL_DELETE_START+id+SQL_AND_FIRSTMODULE+type+SQL_AND_FIRSTFOLDER+folder+SQL_AND_SECONDID+loadid+SQL_AND_SECONDMODULE+loadtype+SQL_AND_SECONDFOLDER+loadfolder+SQL_AND_CID+cid));
@@ -119,13 +125,15 @@ public class LinksMySql implements LinksSql {
 		}
 	}
 	
-	public String iFdeleteAllObjectLinks() {
+	@Override
+    public String iFdeleteAllObjectLinks() {
 		return "DELETE FROM prg_links WHERE ((firstid = ? AND firstmodule = ?) OR (secondid = ? AND secondmodule = ?)) AND cid = ?";
 	}
 
 	private static final String SQL_LINKS_DEL2 = "DELETE FROM prg_links WHERE ((firstfolder = ?) OR (secondfolder = ?)) AND cid = ?";
 
-	public String iFdeleteAllFolderLinks() {
+	@Override
+    public String iFdeleteAllFolderLinks() {
 		return SQL_LINKS_DEL2;
 	}
 }

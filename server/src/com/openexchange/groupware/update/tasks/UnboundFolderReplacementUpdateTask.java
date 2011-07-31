@@ -80,7 +80,8 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 5;
 	}
 
@@ -89,7 +90,8 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
 		 */
@@ -107,7 +109,8 @@ public final class UnboundFolderReplacementUpdateTask implements UpdateTask {
 	private static final String SQL_UPDATE = "UPDATE " + TABLE_REPL + " AS ot SET ot.module = " + FolderObject.CONTACT
 			+ " WHERE ot.module = " + FolderObject.UNBOUND;
 
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

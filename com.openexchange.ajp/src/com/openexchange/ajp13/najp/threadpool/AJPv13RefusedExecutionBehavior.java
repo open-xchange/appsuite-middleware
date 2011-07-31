@@ -84,6 +84,7 @@ final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<O
         this.watcher = watcher;
     }
 
+    @Override
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPoolService) {
         if (threadPoolService.isShutdown()) {
             // Proper logging

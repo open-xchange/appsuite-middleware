@@ -60,51 +60,63 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 		this.attachment = attachment;
 	}
 	
-	public Object createdBy() {
+	@Override
+    public Object createdBy() {
 		return attachment.getCreatedBy();
 	}
 
-	public Object id() {
+	@Override
+    public Object id() {
 		return attachment.getId();
 	}
 
-	public Object moduleId() {
+	@Override
+    public Object moduleId() {
 		return attachment.getModuleId();
 	}
 
-	public Object attachedId() {
+	@Override
+    public Object attachedId() {
 		return attachment.getAttachedId();
 	}
 
-	public Object fileSize() {
+	@Override
+    public Object fileSize() {
 		return attachment.getFilesize();
 	}
 
-	public Object fileMIMEType() {
+	@Override
+    public Object fileMIMEType() {
 		return attachment.getFileMIMEType();
 	}
 
-	public Object creationDate() {
+	@Override
+    public Object creationDate() {
 		return attachment.getCreationDate();
 	}
 
-	public Object folderId() {
+	@Override
+    public Object folderId() {
 		return attachment.getFolderId();
 	}
 	
-	public Object fileName(){
+	@Override
+    public Object fileName(){
 		return attachment.getFilename();
 	}
 	
-	public Object rtfFlag(){
+	@Override
+    public Object rtfFlag(){
 		return attachment.getRtfFlag();
 	}
 
-	public Object comment() {
+	@Override
+    public Object comment() {
 		return attachment.getComment();
 	}
 
-	public Object fileId() {
+	@Override
+    public Object fileId() {
 		return attachment.getFileId();
 	}
 

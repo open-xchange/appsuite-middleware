@@ -81,6 +81,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         super();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -128,6 +129,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         }
     }
 
+    @Override
     public void registerService(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
@@ -136,6 +138,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
 
+    @Override
     public void unregisterService() {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();

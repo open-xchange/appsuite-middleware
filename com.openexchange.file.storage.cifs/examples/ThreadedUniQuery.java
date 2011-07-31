@@ -11,6 +11,7 @@ public class ThreadedUniQuery {
             this.name = name;
         }
 
+        @Override
         public void run() {
             try {
                 System.out.println( getName() + ": started" );

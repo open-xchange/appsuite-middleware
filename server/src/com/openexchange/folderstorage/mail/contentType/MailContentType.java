@@ -81,11 +81,13 @@ public class MailContentType implements ContentType {
         return "mail";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.MAIL
         return 7;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

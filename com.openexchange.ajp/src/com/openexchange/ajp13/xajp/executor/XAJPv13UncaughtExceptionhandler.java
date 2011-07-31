@@ -67,6 +67,7 @@ final class XAJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler 
         super();
     }
 
+    @Override
     public void uncaughtException(final Thread t, final Throwable e) {
         LOG.fatal("Thread terminated with exception: " + t.getName(), e);
     }

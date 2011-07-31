@@ -339,42 +339,52 @@ public class CompositingFileStorageTest extends TestCase {
         
         protected List<Object> remember = new ArrayList<Object>();
     
+        @Override
         public boolean deleteFile(String identifier) throws OXException {
             return false;
         }
 
+        @Override
         public Set<String> deleteFiles(String[] identifiers) throws OXException {
             return null;
         }
 
+        @Override
         public InputStream getFile(String name) throws OXException {
             return null;
         }
 
+        @Override
         public SortedSet<String> getFileList() throws OXException {
             return null;
         }
 
+        @Override
         public long getFileSize(String name) throws OXException {
             return 0;
         }
 
+        @Override
         public String getMimeType(String name) throws OXException {
             return null;
         }
 
+        @Override
         public void recreateStateFile() throws OXException {
             
         }
 
+        @Override
         public void remove() throws OXException {
             
         }
 
+        @Override
         public String saveNewFile(InputStream file) throws OXException {
             return null;
         }
 
+        @Override
         public boolean stateFileIsCorrect() throws OXException {
             return false;
         }

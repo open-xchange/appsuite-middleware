@@ -94,6 +94,7 @@ public class RootCollection extends AbstractStandardCaldavCollection {
         return "";
     }
     
+    @Override
     protected WebdavProperty internalGetProperty(String namespace, String name) throws OXException {
         return null;
     }

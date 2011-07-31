@@ -71,14 +71,17 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
         super(null, "user_attribute", "value", "TEXT");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return Priority.NORMAL.ordinal();
     }

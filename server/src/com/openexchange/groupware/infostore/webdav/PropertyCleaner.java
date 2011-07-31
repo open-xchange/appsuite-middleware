@@ -73,11 +73,13 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 		
 	}
 
-	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
+	@Override
+    public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
-	public void folderDeleted(final FolderObject folderObj, final Session session) {
+	@Override
+    public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             folderProperties.startTransaction();
@@ -94,16 +96,19 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 		}
 	}
 
-	public void folderModified(final FolderObject folderObj, final Session sessionObj) {
+	@Override
+    public void folderModified(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
-	public void infoitemCreated(final DocumentMetadata metadata,
+	@Override
+    public void infoitemCreated(final DocumentMetadata metadata,
 			final Session sessionObject) {
 
 	}
 
-	public void infoitemDeleted(final DocumentMetadata metadata,
+	@Override
+    public void infoitemDeleted(final DocumentMetadata metadata,
 			final Session session) {
 		try {
             final ServerSession sessionObject = new ServerSessionAdapter(session);
@@ -121,7 +126,8 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 		}
 	}
 
-	public void infoitemModified(final DocumentMetadata metadata,
+	@Override
+    public void infoitemModified(final DocumentMetadata metadata,
 			final Session sessionObj) {
 		
 	}

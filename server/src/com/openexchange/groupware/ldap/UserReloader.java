@@ -119,6 +119,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getAliases() {
         updateDelegate();
         return delegate.getAliases();
@@ -127,6 +128,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, Set<String>> getAttributes() {
         updateDelegate();
         return delegate.getAttributes();
@@ -135,6 +137,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getContactId() {
         return delegate.getContactId();
     }
@@ -142,6 +145,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         updateDelegate();
         return delegate.getDisplayName();
@@ -150,6 +154,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getGivenName() {
         updateDelegate();
         return delegate.getGivenName();
@@ -158,6 +163,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int[] getGroups() {
         updateDelegate();
         return delegate.getGroups();
@@ -166,6 +172,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return delegate.getId();
     }
@@ -173,6 +180,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getImapLogin() {
         updateDelegate();
         return delegate.getImapLogin();
@@ -181,6 +189,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getImapServer() {
         updateDelegate();
         return delegate.getImapServer();
@@ -189,6 +198,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale getLocale() {
         updateDelegate();
         return delegate.getLocale();
@@ -197,6 +207,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLoginInfo() {
         updateDelegate();
         return delegate.getLoginInfo();
@@ -205,6 +216,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMail() {
         updateDelegate();
         return delegate.getMail();
@@ -213,6 +225,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMailDomain() {
         updateDelegate();
         return delegate.getMailDomain();
@@ -221,6 +234,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPasswordMech() {
         updateDelegate();
         return delegate.getPasswordMech();
@@ -229,6 +243,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPreferredLanguage() {
         updateDelegate();
         return delegate.getPreferredLanguage();
@@ -237,6 +252,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getShadowLastChange() {
         updateDelegate();
         return delegate.getShadowLastChange();
@@ -245,6 +261,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSmtpServer() {
         updateDelegate();
         return delegate.getSmtpServer();
@@ -253,6 +270,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSurname() {
         updateDelegate();
         return delegate.getSurname();
@@ -261,6 +279,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimeZone() {
         updateDelegate();
         return delegate.getTimeZone();
@@ -269,6 +288,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getUserPassword() {
         updateDelegate();
         return delegate.getUserPassword();
@@ -277,6 +297,7 @@ final class UserReloader extends Refresher<User> implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMailEnabled() {
         updateDelegate();
         return delegate.isMailEnabled();

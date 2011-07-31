@@ -78,6 +78,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
+    @Override
     public InputStream getStream() {
         return is;
     }
@@ -88,6 +89,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
+    @Override
     public long getLength() {
         return length;
     }
@@ -98,6 +100,7 @@ public class FileHolder implements IFileHolder {
     }
 
     
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -108,6 +111,7 @@ public class FileHolder implements IFileHolder {
     }
 
 
+    @Override
     public String getName() {
         return name;
     }
@@ -116,6 +120,7 @@ public class FileHolder implements IFileHolder {
         this.name = name;
     }
     
+    @Override
     public String getDisposition() {
         return disposition;
     }

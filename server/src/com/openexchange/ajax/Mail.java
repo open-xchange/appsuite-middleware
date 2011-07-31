@@ -1345,6 +1345,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                     final MailServletInterface msi = mailInterface;
                                     final Callable<Object> seenCallable = new Callable<Object>() {
 
+                                        @Override
                                         public Object call() throws Exception {
                                             try {
                                                 msi.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);
@@ -3368,10 +3369,12 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 data = new PutNewMailData() {
 
+                    @Override
                     public MailMessage getMail() {
                         return mail;
                     }
 
+                    @Override
                     public InternetAddress getFromAddress() {
                         return fromAddress;
                     }
@@ -3574,6 +3577,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         }
 
+        @Override
         public Object call() throws Exception {
             final List<String> idList = new ArrayList<String>();
             try {
@@ -4416,6 +4420,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return req.getParameter(PARAMETER_ACTION) != null && req.getParameter(PARAMETER_ACTION).equalsIgnoreCase(ACTION_APPEND);
     }
 
+    @Override
     public boolean action(final UploadEvent uploadEvent) throws OXException {
         if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
             return false;
@@ -4655,6 +4660,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
+    @Override
     public UploadRegistry getRegistry() {
         return this;
     }
@@ -4760,10 +4766,12 @@ public class Mail extends PermissionServlet implements UploadListener {
             this.string = string;
         }
 
+        @Override
         public String getString() throws IOException {
             return string;
         }
 
+        @Override
         public boolean isEmpty() {
             return null == string || 0 == string.length();
         }
@@ -4782,10 +4790,12 @@ public class Mail extends PermissionServlet implements UploadListener {
             this.req = req;
         }
 
+        @Override
         public String getString() throws IOException {
             return AJAXServlet.getBody(req);
         }
 
+        @Override
         public boolean isEmpty() {
             return false;
         }

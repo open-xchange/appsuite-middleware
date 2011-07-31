@@ -77,6 +77,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
         this.order = order;
     }
 
+    @Override
     public int compare(final Contact o1, final Contact o2) {
         if (field <= 0 || Order.NO_ORDER.equals(order)) {
             return 0;

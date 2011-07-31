@@ -51,6 +51,7 @@ public class MobileConfigSignerTest {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+            @Override
             protected String[] getCommand() throws ConfigurationException {
                 return new String[]{ "sleep", "10" };
             }
@@ -75,6 +76,7 @@ public class MobileConfigSignerTest {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+            @Override
             protected String[] getCommand() throws ConfigurationException {
                 return new String[]{ "/bin/false" };
             }

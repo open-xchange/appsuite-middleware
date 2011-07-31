@@ -67,11 +67,13 @@ public class PipesAndFiltersActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         tracker = new ServiceTracker(context, ThreadPoolService.class.getName(), new PipesAndFiltersRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         tracker.close();
     }

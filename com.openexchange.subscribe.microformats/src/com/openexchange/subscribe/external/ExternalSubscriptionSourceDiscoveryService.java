@@ -67,7 +67,6 @@ import com.openexchange.subscribe.external.parser.ListingParser;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.datasources.HTTPFormSubmittingOXMFDataSource;
 import com.openexchange.subscribe.microformats.datasources.HTTPToolkit;
 import com.openexchange.subscribe.microformats.parser.OXMFForm;

@@ -73,10 +73,12 @@ public final class ConstantOperand<V> implements Operand<V> {
         this.value = value;
     }
 
+    @Override
     public com.openexchange.search.Operand.Type getType() {
         return Type.CONSTANT;
     }
 
+    @Override
     public V getValue() {
         return value;
     }

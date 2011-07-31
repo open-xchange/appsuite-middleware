@@ -87,18 +87,22 @@ public final class ResourceServiceImpl implements ResourceService {
         super();
     }
 
+    @Override
     public void create(final User user, final Context ctx, final Resource resource) throws OXException {
         new ResourceCreate(user, ctx, resource).perform();
     }
 
+    @Override
     public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceUpdate(user, ctx, resource, clientLastModified).perform();
     }
 
+    @Override
     public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceDelete(user, ctx, resource, clientLastModified).perform();
     }
 
+    @Override
     public Resource getResource(final int resourceId, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().getResource(resourceId, context);
@@ -107,6 +111,7 @@ public final class ResourceServiceImpl implements ResourceService {
         }
     }
 
+    @Override
     public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().listModified(modifiedSince, context);
@@ -115,6 +120,7 @@ public final class ResourceServiceImpl implements ResourceService {
         }
     }
     
+    @Override
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
@@ -123,6 +129,7 @@ public final class ResourceServiceImpl implements ResourceService {
         }
     }
 
+    @Override
     public Resource[] searchResources(final String pattern, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().searchResources(pattern, context);
@@ -131,6 +138,7 @@ public final class ResourceServiceImpl implements ResourceService {
         }
     }
 
+    @Override
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
         try {
             return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);

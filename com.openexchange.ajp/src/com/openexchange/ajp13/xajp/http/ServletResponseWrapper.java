@@ -117,6 +117,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     private static final Pattern CONTENT_TYPE_CHARSET_PARAM = Pattern.compile("(;\\s*charset=)([^\\s|^;]+)");
 
+    @Override
     public void setContentType(final String contentType) {
         final Matcher m = CONTENT_TYPE_CHARSET_PARAM.matcher(contentType);
         if (m.find()) {
@@ -139,14 +140,17 @@ public class ServletResponseWrapper implements ServletResponse {
         headers.put(CONTENT_TYPE, new String[] { contentType });
     }
 
+    @Override
     public String getContentType() {
         return (headers.get(CONTENT_TYPE))[0];
     }
 
+    @Override
     public void setLocale(final Locale locale) {
         this.locale = locale;
     }
 
+    @Override
     public void setContentLength(final int contentLength) {
         headers.put(CONTENT_LENGTH, new String[] { String.valueOf(contentLength) });
     }
@@ -155,6 +159,7 @@ public class ServletResponseWrapper implements ServletResponse {
         return headers.containsKey(CONTENT_LENGTH) ? Integer.parseInt((headers.get(CONTENT_LENGTH))[0]) : 0;
     }
 
+    @Override
     public void flushBuffer() throws IOException {
         if (outputSelection == OUTPUT_WRITER && writer != null) {
             writer.flush();
@@ -168,6 +173,7 @@ public class ServletResponseWrapper implements ServletResponse {
      * 
      * @param characterEncoding
      */
+    @Override
     public void setCharacterEncoding(final String characterEncoding) {
         /*
          * Check if getWriter() was already called
@@ -215,10 +221,12 @@ public class ServletResponseWrapper implements ServletResponse {
         }
     }
 
+    @Override
     public String getCharacterEncoding() {
         return characterEncoding == null ? (characterEncoding = DEFAULT_CHARSET) : characterEncoding;
     }
 
+    @Override
     public void resetBuffer() {
         if (committed) {
             throw new IllegalStateException("resetBuffer(): The response has already been committed");
@@ -240,10 +248,12 @@ public class ServletResponseWrapper implements ServletResponse {
         }
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }
 
+    @Override
     public PrintWriter getWriter() throws UnsupportedEncodingException, IOException {
         if (writer != null) {
             return writer;
@@ -280,6 +290,7 @@ public class ServletResponseWrapper implements ServletResponse {
         return writer;
     }
 
+    @Override
     public boolean isCommitted() {
         return committed;
     }
@@ -293,6 +304,7 @@ public class ServletResponseWrapper implements ServletResponse {
         this.committed = committed;
     }
 
+    @Override
     public void setBufferSize(final int bufferSize) {
         if (outputSelection != OUTPUT_NOT_SELECTED) {
             throw new IllegalStateException("Buffer size MUSTN'T be altered when body content has already been written/selected.");
@@ -300,6 +312,7 @@ public class ServletResponseWrapper implements ServletResponse {
         this.bufferSize = bufferSize;
     }
 
+    @Override
     public int getBufferSize() {
         return bufferSize;
     }
@@ -327,6 +340,7 @@ public class ServletResponseWrapper implements ServletResponse {
         servletOutputStream = null;
     }
 
+    @Override
     public ServletOutputStream getOutputStream() throws IOException {
         if (servletOutputStream == null) {
             throw new IOException("no ServletOutputStream found!");
@@ -343,6 +357,7 @@ public class ServletResponseWrapper implements ServletResponse {
         return servletOutputStream;
     }
 
+    @Override
     public void reset() {
         if (committed) {
             throw new IllegalStateException("Servlet can not be resetted cause it has already been committed");

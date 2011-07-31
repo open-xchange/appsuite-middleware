@@ -167,6 +167,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         COMPARERS = new EnumMap<MailSortField, FieldComparer>(MailSortField.class);
         COMPARERS.put(MailSortField.SENT_DATE, new FieldComparer() {
 
+            @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final Date d1 = msg1.getSentDate();
                 final Date d2 = msg2.getSentDate();
@@ -184,6 +185,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         });
         COMPARERS.put(MailSortField.RECEIVED_DATE, new FieldComparer() {
 
+            @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final Date d1 = msg1.getReceivedDate();
                 final Date d2 = msg2.getReceivedDate();
@@ -201,6 +203,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         });
         COMPARERS.put(MailSortField.FLAG_SEEN, new FieldComparer() {
 
+            @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final boolean isSeen1 = msg1.isSeen();
                 final boolean isSeen2 = msg2.isSeen();
@@ -226,12 +229,14 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         });
         COMPARERS.put(MailSortField.SIZE, new FieldComparer() {
 
+            @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 return Long.valueOf(msg1.getSize()).compareTo(Long.valueOf(msg2.getSize()));
             }
         });
         COMPARERS.put(MailSortField.COLOR_LABEL, new FieldComparer() {
 
+            @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 final Integer cl1 = Integer.valueOf(msg1.getColorLabel());
                 final Integer cl2 = Integer.valueOf(msg2.getColorLabel());
@@ -242,6 +247,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static FieldComparer DUMMY_COMPARER = new FieldComparer() {
 
+        @Override
         public int compareFields(final MailMessage msg1, final MailMessage msg2) {
             return 0;
         }
@@ -252,6 +258,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         case FROM:
             return new LocalizedFieldComparer(locale) {
 
+                @Override
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     return compareAddrs(msg1.getFrom(), msg2.getFrom(), locale, collator);
                 }
@@ -259,6 +266,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         case TO:
             return new LocalizedFieldComparer(locale) {
 
+                @Override
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     return compareAddrs(msg1.getTo(), msg2.getTo(), locale, collator);
                 }
@@ -266,6 +274,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         case CC:
             return new LocalizedFieldComparer(locale) {
 
+                @Override
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     return compareAddrs(msg1.getCc(), msg2.getCc(), locale, collator);
                 }
@@ -273,6 +282,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         case SUBJECT:
             return new LocalizedFieldComparer(locale) {
 
+                @Override
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     final String sub1 = msg1.getSubject();
                     final String sub2 = msg2.getSubject();
@@ -282,6 +292,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         case ACCOUNT_NAME:
             return new LocalizedFieldComparer(locale) {
 
+                @Override
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     final String name1 = msg1.getAccountName();
                     final String name2 = msg2.getAccountName();
@@ -307,6 +318,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         return COLOR_FLAG_MIN;
     }
 
+    @Override
     public int compare(final MailMessage msg1, final MailMessage msg2) {
         try {
             int comparedTo = fieldComparer.compareFields(msg1, msg2);

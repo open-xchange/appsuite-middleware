@@ -77,6 +77,7 @@ public class Activator extends HousekeepingActivator {
         return NEEDED;
     }
 
+    @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
         ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        

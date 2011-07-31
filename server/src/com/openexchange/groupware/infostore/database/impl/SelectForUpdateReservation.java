@@ -101,6 +101,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         this.provider = provider;
     }
 
+    @Override
     public void destroySilently() {
         try {
             openConnection();
@@ -251,6 +252,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
     }
     
     
+    @Override
     public String getFilename() {
         return fileName;
     }

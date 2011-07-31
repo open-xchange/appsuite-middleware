@@ -73,6 +73,7 @@ public class CompositePublicationTargetDiscovererTest extends TestCase {
  
     private CompositePublicationTargetDiscoveryService composite;
 
+    @Override
     public void setUp() throws Exception {
         SimPublicationTargetDiscoveryService discovery1 = new SimPublicationTargetDiscoveryService();
         SimPublicationTargetDiscoveryService discovery2 = new SimPublicationTargetDiscoveryService();

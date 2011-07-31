@@ -109,12 +109,15 @@ public final class Authentication {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
         }
         return auth.handleLoginInfo(new LoginInfo() {
+            @Override
             public String getPassword() {
                 return pass;
             }
+            @Override
             public String getUsername() {
                 return login;
             }
+            @Override
             public Map<String, Object> getProperties() {
                 return properties;
             }

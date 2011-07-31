@@ -227,6 +227,7 @@ public final class MailProperties implements IMailProperties {
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
      *             loading the properties.
      */
+    @Override
     public void waitForLoading() throws InterruptedException {
         if (!loaded.get()) {
             synchronized (loaded) {
@@ -665,10 +666,12 @@ public final class MailProperties implements IMailProperties {
         }
     }
 
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return allowNestedDefaultFolderOnAltNamespace;
     }
 
+    @Override
     public int getAttachDisplaySize() {
         return attachDisplaySize;
     }
@@ -700,10 +703,12 @@ public final class MailProperties implements IMailProperties {
         return adminMailLoginEnabled;
     }
 
+    @Override
     public char getDefaultSeparator() {
         return defaultSeparator;
     }
 
+    @Override
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
     }
@@ -712,6 +717,7 @@ public final class MailProperties implements IMailProperties {
         return hidePOP3StorageFolders;
     }
 
+    @Override
     public boolean isSupportSubscription() {
         return supportSubscription;
     }
@@ -770,6 +776,7 @@ public final class MailProperties implements IMailProperties {
         return transportServerSource;
     }
 
+    @Override
     public int getMailFetchLimit() {
         return mailFetchLimit;
     }
@@ -837,22 +844,27 @@ public final class MailProperties implements IMailProperties {
         return transportServer;
     }
 
+    @Override
     public boolean isUserFlagsEnabled() {
         return userFlagsEnabled;
     }
 
+    @Override
     public boolean isWatcherEnabled() {
         return watcherEnabled;
     }
 
+    @Override
     public int getWatcherFrequency() {
         return watcherFrequency;
     }
 
+    @Override
     public boolean isWatcherShallClose() {
         return watcherShallClose;
     }
 
+    @Override
     public int getWatcherTime() {
         return watcherTime;
     }
@@ -871,10 +883,12 @@ public final class MailProperties implements IMailProperties {
         return retval;
     }
 
+    @Override
     public int getMailAccessCacheShrinkerSeconds() {
         return mailAccessCacheShrinkerSeconds;
     }
 
+    @Override
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
     }

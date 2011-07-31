@@ -124,6 +124,7 @@ public final class AJPv13Config implements Initialization {
 
     private boolean logForwardRequest;
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
@@ -132,6 +133,7 @@ public final class AJPv13Config implements Initialization {
         init();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");

@@ -71,6 +71,7 @@ public interface Type {
      * 
      * @return A string representation of this type
      */
+    @Override
     String toString();
 
 }

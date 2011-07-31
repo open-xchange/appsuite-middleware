@@ -62,7 +62,6 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.exception.OXException;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;

@@ -157,10 +157,12 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }
 
+    @Override
     public void insertContactObject(final Contact co) throws OXException {
         insertContactObject(co, false);
     }
 
+    @Override
     public void forceInsertContactObject(final Contact co) throws OXException {
         insertContactObject(co, true);
     }
@@ -175,6 +177,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public void updateContactObject(final Contact co, final int fid, final java.util.Date d) throws OXException {
 
         try {
@@ -187,6 +190,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public void updateUserContact(final Contact contact, final java.util.Date lastModified) throws OXException {
         try {
             final Contact storageVersion = Contacts.getContactById(contact.getObjectID(), session);
@@ -198,6 +202,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public int getNumberOfContacts(final int folderId) throws OXException {
         final Connection readCon;
         try {
@@ -247,6 +252,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final Order orderMechanism, final String collation2, final int[] cols) throws OXException {
         int[] extendedCols = checkColumns(cols);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -318,7 +324,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new ArrayIterator<Contact>(contacts);
     }
 
-	public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final Order order, final String collation, final int[] cols) throws OXException, OXException {
+	@Override
+    public <T> SearchIterator<Contact> getContactsByExtendedSearch(final SearchTerm<T> searchterm, final int order_field, final Order order, final String collation, final int[] cols) throws OXException, OXException {
         final ContactSql cs = new ContactMySql(session, ctx);
         final ContactSearchtermSqlConverter conv = new ContactSearchtermSqlConverter();
         conv.setCharset(collation);
@@ -441,7 +448,8 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return sb.toString();
 	}
 
-	public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final Order order, final String collation, final int[] cols) throws OXException, OXException {
+	@Override
+    public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int order_field, final Order order, final String collation, final int[] cols) throws OXException, OXException {
         int[] extendedCols = cols;
         final OXFolderAccess oxfs = new OXFolderAccess(ctx);
         final ContactSql cs = new ContactMySql(session, ctx);
@@ -600,6 +608,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
+    @Override
     public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int order_field, final Order order, final int[] cols) throws OXException {
         boolean error = false;
         String orderDir = forSQLCommand(order);
@@ -695,6 +704,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public Contact getObjectById(final int objectId, final int fid) throws OXException {
         if (objectId <= 0) {
             throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectId), I(ctx.getContextId()));
@@ -730,14 +740,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return co;
     }
 
+    @Override
     public Contact getUserById(final int userid) throws OXException {
         return getUsersById(new int[] { userid }, true)[0];
     }
 
+    @Override
     public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
         return getUsersById(new int[] { userId }, performReadCheck)[0];
     }
 
+    @Override
     public Contact[] getUsersById(final int[] userIds, final boolean performReadCheck) throws OXException {
         Connection readCon = null;
         final Contact[] contacts;
@@ -787,6 +800,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return co;
     }
 
+    @Override
     public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         boolean error = false;
         Connection readCon = null;
@@ -866,6 +880,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
         boolean error = false;
         SearchIterator<Contact> si = null;
@@ -911,6 +926,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
 
+    @Override
     public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXException {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID == fuid) {
             throw ContactExceptionCodes.NO_USER_CONTACT_DELETE.create();
@@ -1005,6 +1021,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         }
     }
  
+    @Override
     public SearchIterator<Contact> getObjectsById(final int[][] object_id, final int[] cols) throws OXException, OXException {
         final int[] myCols = checkColumns(cols);
         try {
@@ -1251,6 +1268,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
+        @Override
         public void close() throws OXException {
             closeSQLStuff(rs, stmt);
             if (readcon != null) {
@@ -1258,6 +1276,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             if (!first) {
                 nexto = pre;
@@ -1265,6 +1284,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             return nexto != null;
         }
 
+        @Override
         public Contact next() throws SearchIteratorException, OXException {
             try {
                 if (rs.next()) {
@@ -1290,6 +1310,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             }
         }
 
+        @Override
         public int size() {
             return -1;
         }
@@ -1298,27 +1319,33 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
             return false;
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
+        @Override
         public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
+        @Override
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }
     }
 
+    @Override
     public int getFolderId() {
         return 0;
     }
 
+    @Override
     public LdapServer getLdapServer() {
         return null;
     }
 
+    @Override
     public void setUnificationStateForContacts(final Contact aggregator, final Contact contributor, final ContactUnificationState state) throws OXException{
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1389,14 +1416,17 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return UUIDs.toByteArray(UUID.fromString(c.getUserField20()));
     }
 
+    @Override
     public void associateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.GREEN);
     }
 
+    @Override
     public void separateTwoContacts(final Contact aggregator, final Contact contributor) throws OXException {
         setUnificationStateForContacts(aggregator, contributor, ContactUnificationState.RED);
     }
 
+    @Override
     public List<UUID> getAssociatedContacts(final Contact contact) throws OXException{
         if(!contact.containsUserField20()) {
             return new LinkedList<UUID>();
@@ -1435,6 +1465,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
     }
 
 
+    @Override
     public ContactUnificationState getAssociationBetween(final Contact c1, final Contact c2) throws OXException{
         if(! c1.containsUserField20() || ! c2.containsUserField20()) {
             return ContactUnificationState.UNDEFINED;
@@ -1478,6 +1509,7 @@ public class RdbContactSQLImpl implements ContactSQLInterface, OverridingContact
         return null; // TODO: Throw exception
     }
 
+    @Override
     public Contact getContactByUUID(final UUID uuid) throws OXException {
         final Contact contact = null;
         Connection con = null;

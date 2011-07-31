@@ -76,7 +76,8 @@ public class SpamUpdateTask implements UpdateTask {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpamUpdateTask.class));
 
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 1;
 	}
 
@@ -85,7 +86,8 @@ public class SpamUpdateTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
 		 */
@@ -104,7 +106,8 @@ public class SpamUpdateTask implements UpdateTask {
 	
 	private static final String CONFIRMED_HAM = "confirmed_ham";
 
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

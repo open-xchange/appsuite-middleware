@@ -70,6 +70,7 @@ public interface ContentType {
      * 
      * @return A string representation of this content type
      */
+    @Override
     String toString();
 
     /**

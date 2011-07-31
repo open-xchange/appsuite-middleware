@@ -82,6 +82,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         super(serviceLookup);
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         require(
             request,

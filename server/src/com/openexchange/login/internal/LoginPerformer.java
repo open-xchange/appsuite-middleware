@@ -50,7 +50,6 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -274,6 +273,7 @@ public final class LoginPerformer {
                 final LoginHandlerService handler = it.next();
                 executor.submit(new LoginPerformerTask() {
 
+                    @Override
                     public Object call() {
                         try {
                             handler.handleLogin(login);
@@ -301,6 +301,7 @@ public final class LoginPerformer {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 executor.submit(new LoginPerformerTask() {
+                    @Override
                     public Object call() {
                         try {
                             handler.handleLogout(logout);

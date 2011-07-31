@@ -72,6 +72,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
     }
 
+    @Override
     public ConnectionPool create(final int poolId) throws OXException {
         switch (poolId) {
         case Constants.CONFIGDB_WRITE_ID:
@@ -83,6 +84,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         }
     }
 
+    @Override
     public boolean destroy(final int poolId) {
         // Pools to configuration database will not be destroyed.
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;

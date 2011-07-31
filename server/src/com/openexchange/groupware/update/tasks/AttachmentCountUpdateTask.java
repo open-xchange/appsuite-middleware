@@ -89,10 +89,12 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
     
     private static final String REPAIR = "UPDATE prg_dates SET intfield08 = ? WHERE cid = ? AND intfield01 = ?";
 
+    @Override
     public String[] getDependencies() {
         return new String[]{};
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);

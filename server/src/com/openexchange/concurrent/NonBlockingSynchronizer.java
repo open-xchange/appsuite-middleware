@@ -150,6 +150,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         return this;
     }
 
+    @Override
     public Lock acquire() {
         if (reentrant.containsKey(Thread.currentThread())) {
             // Reentrant thread
@@ -171,6 +172,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         return lock;
     }
 
+    @Override
     public void release(final Lock lock) {
         if (null != lock) {
             lock.unlock();
@@ -184,6 +186,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * <p>
      * This method does nothing if runnable is <code>null</code>.
      */
+    @Override
     public void run() {
         final Lock lock = acquire();
         try {
@@ -195,10 +198,12 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         }
     }
 
+    @Override
     public void synchronize() {
         setSynchronized(true);
     }
 
+    @Override
     public void unsynchronize() {
         setSynchronized(false);
     }

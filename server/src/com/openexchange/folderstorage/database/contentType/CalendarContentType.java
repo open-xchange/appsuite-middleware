@@ -81,11 +81,13 @@ public final class CalendarContentType implements ContentType {
         return "calendar";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.CALENDAR
         return 2;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

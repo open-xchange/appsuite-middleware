@@ -70,38 +70,47 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
         super();
     }
 
+    @Override
     public void clearStorage() throws OXException {
         UserConfigurationStorage.getInstance().clearStorage();
     }
 
+    @Override
     public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 
+    @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
     }
 
+    @Override
     public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
     }
 
+    @Override
     public void removeUserConfiguration(final int userId, final Context ctx) throws OXException {
         UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
     }
 
+    @Override
     public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException {
         UserConfigurationStorage.getInstance().saveUserConfiguration(userConfiguration);
     }
 
+    @Override
     public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         UserConfigurationStorage.getInstance().saveUserConfiguration(permissionBits, userId, ctx);
     }
 
+    @Override
     public UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx) {
         return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
     }
 
+    @Override
     public UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
         return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, groups, ctx);
     }

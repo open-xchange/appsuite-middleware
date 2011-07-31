@@ -74,10 +74,12 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddPermColumnUpdateTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 28;
     }
 
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -93,6 +95,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (checkColumn(contextId)) {
             if (LOG.isInfoEnabled()) {

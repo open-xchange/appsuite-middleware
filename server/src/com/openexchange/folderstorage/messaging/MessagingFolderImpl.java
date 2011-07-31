@@ -258,6 +258,7 @@ public final class MessagingFolderImpl extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }
@@ -393,18 +394,22 @@ public final class MessagingFolderImpl extends AbstractFolder {
             return hashcode;
         }
 
+        @Override
         public int compareTo(final IgnoreCaseString other) {
             return s.compareToIgnoreCase(other.s);
         }
 
+        @Override
         public char charAt(final int index) {
             return s.charAt(index);
         }
 
+        @Override
         public int length() {
             return s.length();
         }
 
+        @Override
         public CharSequence subSequence(final int start, final int end) {
             return s.subSequence(start, end);
         }

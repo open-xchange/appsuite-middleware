@@ -121,14 +121,17 @@ public final class MailMessageParser {
 
     private static final Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
 
+        @Override
         public boolean hasNext() {
             return false;
         }
 
+        @Override
         public Entry<String, String> next() {
             throw new NoSuchElementException("Iterator is empty");
         }
 
+        @Override
         public void remove() {
             // Nothing to do
         }
@@ -145,6 +148,7 @@ public final class MailMessageParser {
      */
     private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
         }
@@ -156,6 +160,7 @@ public final class MailMessageParser {
      */
     private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
         }

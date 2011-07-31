@@ -97,6 +97,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         unsupportedEnc = new ConcurrentHashMap<String, Integer>();
     }
 
+    @Override
     public int getNumActive() {
         return MailAccess.getCounter();
     }
@@ -108,6 +109,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         // Delete this method
     }
 
+    @Override
     public double getAvgUseTime() {
         long duration = 0;
         for (int i = 0; i < avgUseTimeArr.length; i++) {
@@ -135,6 +137,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         }
     }
 
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
@@ -146,10 +149,12 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
     }
 
+    @Override
     public void resetMaxUseTime() {
         maxUseTime = 0;
     }
 
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
@@ -158,10 +163,12 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         this.minUseTime = Math.min(minUseTime, this.minUseTime);
     }
 
+    @Override
     public void resetMinUseTime() {
         minUseTime = Long.MAX_VALUE;
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return numBrokenConnections.get();
     }
@@ -177,6 +184,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         }
     }
 
+    @Override
     public int getNumTimeoutConnections() {
         return numTimeoutConnections.get();
     }
@@ -192,6 +200,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         }
     }
 
+    @Override
     public int getNumSuccessfulLogins() {
         return numSuccessfulLogins.get();
     }
@@ -207,6 +216,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         }
     }
 
+    @Override
     public int getNumFailedLogins() {
         return numFailedLogins.get();
     }
@@ -222,22 +232,27 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
         }
     }
 
+    @Override
     public void resetNumBrokenConnections() {
         numBrokenConnections.set(0);
     }
 
+    @Override
     public void resetNumTimeoutConnections() {
         numTimeoutConnections.set(0);
     }
 
+    @Override
     public void resetNumSuccessfulLogins() {
         numSuccessfulLogins.set(0);
     }
 
+    @Override
     public void resetNumFailedLogins() {
         numFailedLogins.set(0);
     }
 
+    @Override
     public String getUnsupportedEncodingExceptions() {
         final int size = unsupportedEnc.size();
         if (size == 0) {

@@ -103,58 +103,71 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
     }
 
+    @Override
     public void invalidate(final int contextId) throws OXException {
         assignmentService.removeAssignments(contextId);
     }
 
     // Delegate config database service methods.
 
+    @Override
     public Connection getReadOnly() throws OXException {
         return configDatabaseService.getReadOnly();
     }
 
+    @Override
     public Connection getWritable() throws OXException {
         return configDatabaseService.getWritable();
     }
 
+    @Override
     public void backReadOnly(final Connection con) {
         configDatabaseService.backReadOnly(con);
     }
 
+    @Override
     public void backWritable(final Connection con) {
         configDatabaseService.backWritable(con);
     }
 
+    @Override
     public int[] listContexts(final int poolId) throws OXException {
         return configDatabaseService.listContexts(poolId);
     }
 
+    @Override
     public int getServerId() throws OXException {
         return configDatabaseService.getServerId();
     }
 
     // Implemented database service methods.
 
+    @Override
     public Connection getReadOnly(final Context ctx) throws OXException {
         return get(ctx.getContextId(), false, false);
     }
 
+    @Override
     public Connection getReadOnly(final int contextId) throws OXException {
         return get(contextId, false, false);
     }
 
+    @Override
     public Connection getWritable(final Context ctx) throws OXException {
         return get(ctx.getContextId(), true, false);
     }
 
+    @Override
     public Connection getWritable(final int contextId) throws OXException {
         return get(contextId, true, false);
     }
 
+    @Override
     public Connection getForUpdateTask(final int contextId) throws OXException {
         return get(contextId, true, true);
     }
 
+    @Override
     public Connection get(final int poolId, final String schema) throws OXException {
         final Connection con;
         try {
@@ -177,6 +190,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return con;
     }
 
+    @Override
     public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
         final Connection con;
         try {
@@ -199,26 +213,32 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return con;
     }
 
+    @Override
     public void backReadOnly(final Context ctx, final Connection con) {
         back(con);
     }
 
+    @Override
     public void backReadOnly(final int contextId, final Connection con) {
         back(con);
     }
 
+    @Override
     public void backWritable(final Context ctx, final Connection con) {
         back(con);
     }
 
+    @Override
     public void backWritable(final int contextId, final Connection con) {
         back(con);
     }
 
+    @Override
     public void backForUpdateTask(final int contextId, final Connection con) {
         back(con);
     }
 
+    @Override
     public void back(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).back(con);
@@ -230,6 +250,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
     }
 
+    @Override
     public void backNoTimeoout(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
@@ -238,15 +259,18 @@ public final class DatabaseServiceImpl implements DatabaseService {
         }
     }
 
+    @Override
     public int getWritablePool(final int contextId) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         return assign.getWritePoolId();
     }
 
+    @Override
     public String getSchemaName(final int contextId) throws OXException {
         return assignmentService.getAssignment(contextId).getSchema();
     }
 
+    @Override
     public int[] getContextsInSameSchema(final int contextId) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
         final ConfigDBStorage configDBStorage = new ConfigDBStorage(configDatabaseService);

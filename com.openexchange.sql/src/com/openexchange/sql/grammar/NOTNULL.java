@@ -61,11 +61,13 @@ public class NOTNULL extends UnaryPredicate {
 		this(new Column(column));
 	}
 	
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildNOTNULL(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "IS NOT NULL";
 	}
 }

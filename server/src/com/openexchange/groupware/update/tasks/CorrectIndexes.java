@@ -79,6 +79,7 @@ public class CorrectIndexes implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 30;
     }
@@ -86,10 +87,12 @@ public class CorrectIndexes implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);

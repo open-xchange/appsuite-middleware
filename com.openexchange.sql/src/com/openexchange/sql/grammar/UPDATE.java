@@ -67,7 +67,8 @@ public class UPDATE extends ModifyCommand {
 	    this(table.getName());
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildUPDATE(this);
 	}
 	

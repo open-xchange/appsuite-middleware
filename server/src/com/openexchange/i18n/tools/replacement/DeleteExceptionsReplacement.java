@@ -94,6 +94,7 @@ public final class DeleteExceptionsReplacement extends AbstractFormatMultipleDat
         return new StringBuilder(repl.length() + 1).append(repl).append('\n').toString();
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.DELETE_EXCEPTIONS;
     }

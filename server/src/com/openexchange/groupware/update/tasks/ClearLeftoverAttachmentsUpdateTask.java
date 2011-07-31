@@ -75,14 +75,17 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 11;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         try {
             filestorages.set(new HashMap<Integer, FileStorage>());

@@ -242,14 +242,17 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             this.detached = ids.clone();
         }
 
+        @Override
         public int[] getDetached() {
             return detached.clone();
         }
 
+        @Override
         public AttachmentMetadata getAttachment() {
             return attachment;
         }
 
+        @Override
         public InputStream getAttachedFile() throws OXException {
             if(attachment != null) {
                 return base.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(),    ctx, user, userConfig);
@@ -257,10 +260,12 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             return null;
         }
 
+        @Override
         public AttachmentBase getSource() {
             return base;
         }
 
+        @Override
         public Connection getWriteConnection() throws OXException {
             if (writeCon == null) {
                 writeCon = provider.getWriteConnection(ctx);
@@ -268,26 +273,32 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
             return writeCon;
         }
 
+        @Override
         public Context getContext() {
             return ctx;
         }
 
+        @Override
         public User getUser() {
             return user;
         }
 
+        @Override
         public UserConfiguration getUserConfig(){
             return userConfig;
         }
 
+        @Override
         public int getFolderId() {
             return folderId;
         }
 
+        @Override
         public int getAttachedId() {
             return attachedId;
         }
 
+        @Override
         public int getModuleId() {
             return moduleId;
         }
@@ -295,6 +306,7 @@ public abstract class AttachmentEventAction extends AbstractUndoable implements
         /* (non-Javadoc)
          * @see com.openexchange.groupware.attach.AttachmentEvent#getSession()
          */
+        @Override
         public Session getSession() {
             return session;
         }

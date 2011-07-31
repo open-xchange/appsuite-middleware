@@ -167,6 +167,7 @@ public class AJPv13TaskWatcher {
             this.threadPoolService = threadPoolService;
         }
 
+        @Override
         public void run() {
             try {
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
@@ -293,6 +294,7 @@ public class AJPv13TaskWatcher {
             info = log.isInfoEnabled();
         }
 
+        @Override
         public Object call() {
             if (hasPermission) {
                 if (task.isWaitingOnAJPSocket()) {
@@ -342,14 +344,17 @@ public class AJPv13TaskWatcher {
             }
         }
 
+        @Override
         public void afterExecute(final Throwable t) {
             // NOP
         }
 
+        @Override
         public void beforeExecute(final Thread t) {
             // NOP
         }
 
+        @Override
         public void setThreadName(final ThreadRenamer threadRenamer) {
             // NOP
         }

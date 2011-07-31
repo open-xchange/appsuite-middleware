@@ -82,6 +82,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 14;
     }
@@ -89,6 +90,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -100,6 +102,7 @@ public final class ContactsChangedFromUpdateTask implements UpdateTask {
 
     private static final String SQL_FIX = "UPDATE prg_contacts SET changed_from=created_from WHERE changed_from IS NULL"; 
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);

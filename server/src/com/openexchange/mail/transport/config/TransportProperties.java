@@ -244,6 +244,7 @@ public final class TransportProperties implements ITransportProperties {
         }
     }
 
+    @Override
     public int getReferencedPartLimit() {
         return referencedPartLimit;
     }

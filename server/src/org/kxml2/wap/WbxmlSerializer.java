@@ -65,6 +65,7 @@ public class WbxmlSerializer implements XmlSerializer {
 	private int tagPage;
 
 
+    @Override
     public XmlSerializer attribute(final String namespace, final String name, final String value) {
         attributes.add(name);
         attributes.add(value);
@@ -72,6 +73,7 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
+    @Override
     public void cdsect (final String cdsect) throws IOException{
         text (cdsect);
     }
@@ -80,49 +82,60 @@ public class WbxmlSerializer implements XmlSerializer {
 
     /* silently ignore comment */
 
+    @Override
     public void comment (final String comment) {
     }
 
     
+    @Override
     public void docdecl (final String docdecl) {
         throw new RuntimeException ("Cannot write docdecl for WBXML");
     }
 
 
+    @Override
     public void entityRef (final String er) {
         throw new RuntimeException ("EntityReference not supported for WBXML");
     }
     
+    @Override
     public int getDepth() {
     	return depth;
     }
 
 
+    @Override
     public boolean getFeature (final String name) {
         return false;
     }
     
-	public String getNamespace() {
+	@Override
+    public String getNamespace() {
 		throw new RuntimeException(ERR_NYI);
 	}
 	
-	public String getName() {
+	@Override
+    public String getName() {
 		throw new RuntimeException(ERR_NYI);
 	}
 	
-	public String getPrefix(final String nsp, final boolean create) {
+	@Override
+    public String getPrefix(final String nsp, final boolean create) {
         throw new RuntimeException (ERR_NYI);
     }
     
     
+    @Override
     public Object getProperty (final String name) {
         return null;
     }
 
+    @Override
     public void ignorableWhitespace (final String sp) {
     }
     
 
+    @Override
     public void endDocument() throws IOException {
         writeInt(out, stringTableBuf.size());
 
@@ -143,6 +156,7 @@ public class WbxmlSerializer implements XmlSerializer {
     /** ATTENTION: flush cannot work since Wbxml documents require
     need buffering. Thus, this call does nothing. */
 
+    @Override
     public void flush() {
     }
 
@@ -221,21 +235,25 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
+    @Override
     public void processingInstruction(final String pi) {
         throw new RuntimeException ("PI NYI");
     }
 
 
+    @Override
     public void setFeature(final String name, final boolean value) {
         throw new IllegalArgumentException ("unknown feature "+name);
     }
         
 
 
+    @Override
     public void setOutput (final Writer writer) {
         throw new RuntimeException ("Wbxml requires an OutputStream!");
     }
 
+    @Override
     public void setOutput (final OutputStream out, final String encoding) throws IOException {
         
         if (encoding != null) {
@@ -251,15 +269,18 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
+    @Override
     public void setPrefix(final String prefix, final String nsp) {
         throw new RuntimeException(ERR_NYI);
     }
 
+    @Override
     public void setProperty(final String property, final Object value) {
         throw new IllegalArgumentException ("unknown property "+property);
     }
 
     
+    @Override
     public void startDocument(final String s, final Boolean b) throws IOException{
         out.write(0x01); // version
         out.write(0x01); // unknown or missing public identifier
@@ -267,6 +288,7 @@ public class WbxmlSerializer implements XmlSerializer {
     }
 
 
+    @Override
     public XmlSerializer startTag(final String namespace, final String name) throws IOException {
 
         if (namespace != null && !"".equals(namespace)) {
@@ -282,6 +304,7 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public XmlSerializer text(final char[] chars, final int start, final int len) throws IOException {
 
         checkPending(false);
@@ -292,6 +315,7 @@ public class WbxmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public XmlSerializer text(final String text) throws IOException {
 
         checkPending(false);
@@ -304,6 +328,7 @@ public class WbxmlSerializer implements XmlSerializer {
     
     
 
+    @Override
     public XmlSerializer endTag(final String namespace, final String name) throws IOException {
 
 //        current = current.prev;

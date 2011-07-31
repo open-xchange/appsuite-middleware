@@ -113,6 +113,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
         this.threadPool = threadPool;
     }
 
+    @Override
     public Object call() throws Exception {
         final JSONMessageCache cache = JSONMessageCache.getInstance();
         if (null == cache) {
@@ -175,6 +176,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
                     {
                         final Callable<Object> producerCallable = new Callable<Object>() {
 
+                            @Override
                             public Object call() throws Exception {
                                 for (final SetableFutureTask<JSONObject> f : futures) {
                                     try {
@@ -294,6 +296,7 @@ public final class MailPrefetcherCallable implements Callable<Object> {
             this.logger = logger;
         }
 
+        @Override
         public JSONObject call() throws Exception {
             try {
                 final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);

@@ -59,6 +59,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 
+@Deprecated
 public class EnglishOutlookMapper extends AbstractOutlookMapper {
 
     public EnglishOutlookMapper() {

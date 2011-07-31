@@ -280,6 +280,7 @@ public class Protocol implements Component, Serializable {
         return sb.toString();
     }
 
+    @Override
     public String getAbbreviation() {
         if (null == abbr) {
             abbr = name.toUpperCase(Locale.ENGLISH);

@@ -425,12 +425,15 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             final int maxSize = tmp;
             truncateds[i] = new OXException.Truncated() {
+                @Override
                 public int getId() {
                     return -1; // No ID defined here
                 }
+                @Override
                 public int getLength() {
                     return maxLength;
                 }
+                @Override
                 public int getMaxSize() {
                     return maxSize;
                 }
@@ -526,12 +529,15 @@ public class RdbParticipantStorage extends ParticipantStorage {
         final OXException tske = TaskExceptionCode.TRUNCATED.create(dt,
             field, Integer.valueOf(maxSize), Integer.valueOf(maxLength));
         tske.addProblematic(new OXException.Truncated() {
+            @Override
             public int getId() {
                 return -1; // No ID defined here
             }
+            @Override
             public int getLength() {
                 return maxLength;
             }
+            @Override
             public int getMaxSize() {
                 return maxSize;
             }

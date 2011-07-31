@@ -126,6 +126,7 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
         return cal.get(Calendar.DAY_OF_MONTH) == 1;
     }
 
+    @Override
     protected boolean isMissingDaysInbetween(CPAppointment first, CPAppointment second) {
         Date firstDate = null;
         if (first == null) {
@@ -139,6 +140,7 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
         return isMissingDaysInbetween(firstDate, second.getStartDate());
     }
 
+    @Override
     protected List<Date> getMissingDaysInbetween(CPAppointment first, CPAppointment second) {
         Date firstDate = null, secondDate = null;
         if (first == null) {

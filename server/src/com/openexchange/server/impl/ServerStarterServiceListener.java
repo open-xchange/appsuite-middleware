@@ -79,7 +79,8 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 	 * 
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
 	 */
-	public void onServiceAvailable(final ConfigurationService service) throws OXException {
+	@Override
+    public void onServiceAvailable(final ConfigurationService service) throws OXException {
 		/*
 		 * Start server
 		 */
@@ -101,7 +102,8 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 	 * 
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceRelease()
 	 */
-	public void onServiceRelease() {
+	@Override
+    public void onServiceRelease() {
 		starter.stop();
 	}
 

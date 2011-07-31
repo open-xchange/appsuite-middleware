@@ -70,6 +70,7 @@ public class FormContentWriterTest extends TestCase {
     private Map<String, Object> content = null;
     private DynamicFormDescription form = null;
     
+    @Override
     public void setUp() throws Exception {
         content = new HashMap<String, Object>();
         form = new DynamicFormDescription();

@@ -244,7 +244,7 @@ public class ConferenceInfo
      *     
      */
     public void setMohFolder(JAXBElement<String> value) {
-        this.mohFolder = ((JAXBElement<String> ) value);
+        this.mohFolder = value;
     }
 
     /**

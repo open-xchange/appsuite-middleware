@@ -135,6 +135,7 @@ public class RdbTaskSearch extends TaskSearch {
         }
         final TaskIterator iter1 = new TaskIterator2(ctx, userId, sql1.toString(),
             new StatementSetter() {
+                @Override
                 public void perform(final PreparedStatement stmt)
                     throws SQLException {
                     int pos = 1;
@@ -185,6 +186,7 @@ public class RdbTaskSearch extends TaskSearch {
             final TaskIterator iter2 = new TaskIterator2(ctx, userId,
                 sql2.toString(),
                 new StatementSetter() {
+                    @Override
                     public void perform(final PreparedStatement stmt)
                         throws SQLException {
                         int pos = 1;

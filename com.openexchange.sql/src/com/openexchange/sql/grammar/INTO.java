@@ -62,7 +62,8 @@ public class INTO extends Element {
 	    this(table.getName());
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildINTO(this);
 	}
 

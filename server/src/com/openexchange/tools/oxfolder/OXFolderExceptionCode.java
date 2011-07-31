@@ -516,6 +516,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
         this.generic = generic;
     }
 
+    @Override
     public String getPrefix() {
         return "FLD";
     }
@@ -525,6 +526,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * 
      * @return The (detail) number.
      */
+    @Override
     public int getNumber() {
         return number;
     }
@@ -534,6 +536,7 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * 
      * @return The (unformatted) message.
      */
+    @Override
     public String getMessage() {
         return message;
     }
@@ -543,10 +546,12 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
      * 
      * @return The category.
      */
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

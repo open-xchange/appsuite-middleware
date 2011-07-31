@@ -163,6 +163,7 @@ public class Login extends AJAXServlet {
         final Map<String, JSONRequestHandler> map = new ConcurrentHashMap<String, Login.JSONRequestHandler>(8);
         map.put(ACTION_LOGIN, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 // Look-up necessary credentials
                 try {
@@ -174,6 +175,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_STORE, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doStore(req, resp);
@@ -187,6 +189,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_REFRESH_SECRET, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doRefreshSecret(req, resp);
@@ -200,6 +203,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_LOGOUT, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -232,6 +236,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_REDIRECT, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -302,6 +307,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_REDEEM, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
              // The magic spell to disable caching
                 Tools.disableCaching(resp);
@@ -378,6 +384,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_AUTOLOGIN, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -490,6 +497,7 @@ public class Login extends AJAXServlet {
         });
         map.put(ACTION_FORMLOGIN, new JSONRequestHandler() {
 
+            @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 try {
                     doFormLogin(req, resp);
@@ -785,42 +793,52 @@ public class Login extends AJAXServlet {
 
             private String hash = HashCalculator.getHash(req, client);
 
+            @Override
             public String getLogin() {
                 return login;
             }
 
+            @Override
             public String getPassword() {
                 return password;
             }
 
+            @Override
             public String getClientIP() {
                 return clientIP;
             }
 
+            @Override
             public String getUserAgent() {
                 return userAgent;
             }
 
+            @Override
             public String getAuthId() {
                 return authId;
             }
 
+            @Override
             public String getClient() {
                 return client;
             }
 
+            @Override
             public String getVersion() {
                 return version;
             }
 
+            @Override
             public Interface getInterface() {
                 return HTTP_JSON;
             }
 
+            @Override
             public String getHash() {
                 return hash;
             }
 
+            @Override
             public Map<String, List<String>> getHeaders() {
                 return headers;
             }
@@ -933,33 +951,43 @@ public class Login extends AJAXServlet {
         final Map<String, List<String>> headers = copyHeaders(req);
         final LoginRequest request = new LoginRequest() {
             private String hash = HashCalculator.getHash(req, client);
+            @Override
             public String getVersion() {
                 return version;
             }
+            @Override
             public String getUserAgent() {
                 return userAgent;
             }
+            @Override
             public String getPassword() {
                 return creds.getPassword();
             }
+            @Override
             public String getLogin() {
                 return creds.getLogin();
             }
+            @Override
             public Interface getInterface() {
                 return Interface.HTTP_JSON;
             }
+            @Override
             public String getHash() {
                 return hash;
             }
+            @Override
             public String getClientIP() {
                 return clientIP;
             }
+            @Override
             public String getClient() {
                 return client;
             }
+            @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            @Override
             public Map<String, List<String>> getHeaders() {
                 return headers;
             }

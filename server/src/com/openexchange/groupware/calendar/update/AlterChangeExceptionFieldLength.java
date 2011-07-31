@@ -70,14 +70,17 @@ public class AlterChangeExceptionFieldLength implements UpdateTask {
     private static final String UPDATE_PRG_DATES = "ALTER TABLE prg_dates CHANGE COLUMN field08 field08 TEXT";
     private static final String UPDATE_DEL_DATES = "ALTER TABLE del_dates CHANGE COLUMN field08 field08 TEXT";
 
+    @Override
     public int addedWithVersion() {
         return 56;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
         Statement stmt = null;

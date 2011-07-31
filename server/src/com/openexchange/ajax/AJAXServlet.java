@@ -639,6 +639,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
+    @Override
     public UploadEvent processUpload(final HttpServletRequest req) throws OXException {
         return processUploadStatic(req);
     }
@@ -806,6 +807,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
+    @Override
     public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws OXException {
         try {
             for (final UploadListener uploadListener : uploadListeners) {

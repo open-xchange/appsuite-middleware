@@ -79,6 +79,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object service = context.getService(reference);
         boolean needsRegistration = false;
@@ -104,10 +105,12 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         boolean needsUnregistration = false;
         final ServiceRegistration reg = registration;

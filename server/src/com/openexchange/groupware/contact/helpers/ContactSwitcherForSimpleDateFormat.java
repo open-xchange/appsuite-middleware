@@ -79,6 +79,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
 
     private static final DateValidator DEFAULT_VALIDATOR = new DateValidator() {
         
+        @Override
         public boolean isValid(final String dateString) {
             return true;
         }
@@ -93,6 +94,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
             this.invalidPattern = pattern;
         }
 
+        @Override
         public boolean isValid(final String dateString) {
             return !invalidPattern.matcher(dateString).matches();
         }

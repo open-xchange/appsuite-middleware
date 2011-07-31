@@ -78,14 +78,17 @@ public final class FileStorageId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         /*
          * Mail folders at second position
@@ -93,6 +96,7 @@ public final class FileStorageId implements SortableId {
         return Priority.NORMAL;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof FileStorageId) {
             final int thisVal = ordinal;

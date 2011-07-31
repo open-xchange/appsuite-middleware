@@ -93,10 +93,12 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { ContactsAddIndex4AutoCompleteSearch.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int triggeringContextId = params.getContextId();
         final int[] ctxIds = Database.getContextsInSameSchema(triggeringContextId);

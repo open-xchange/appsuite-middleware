@@ -136,9 +136,11 @@ class UpdateTaskCollection {
             }
         }
         return new SeparatedTasks() {
+            @Override
             public List<UpdateTask> getBlocking() {
                 return blocking;
             }
+            @Override
             public List<UpdateTaskV2> getBackground() {
                 return background;
             }

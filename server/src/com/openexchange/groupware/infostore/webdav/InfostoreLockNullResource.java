@@ -192,7 +192,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		// IGNORE
 	}
 
-	public void create() throws OXException {
+	@Override
+    public void create() throws OXException {
 		delete();
 		resource.create();
 		transferLocks();
@@ -240,7 +241,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 
-	public boolean exists() throws OXException {
+	@Override
+    public boolean exists() throws OXException {
 		return exists;
 	}
 
@@ -254,11 +256,13 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return null;
 	}
 
-	public Date getCreationDate() throws OXException {
+	@Override
+    public Date getCreationDate() throws OXException {
 		return null;
 	}
 
-	public String getDisplayName() throws OXException {
+	@Override
+    public String getDisplayName() throws OXException {
 		return null;
 	}
 
@@ -272,7 +276,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return null;
 	}
 
-	public Date getLastModified() throws OXException {
+	@Override
+    public Date getLastModified() throws OXException {
 		return null;
 	}
 
@@ -281,7 +286,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return null;
 	}
 
-	public WebdavLock getLock(final String token) throws OXException {
+	@Override
+    public WebdavLock getLock(final String token) throws OXException {
 		final WebdavLock lock = lockHelper.getLock(token);
 		if(lock != null) {
 			return lock;
@@ -289,29 +295,35 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return findParentLock(token);
 	}
 
-	public List<WebdavLock> getLocks() throws OXException {
+	@Override
+    public List<WebdavLock> getLocks() throws OXException {
 		final List<WebdavLock> lockList =  getOwnLocks();
 		addParentLocks(lockList);
 		return lockList;
 	}
 
-	public WebdavLock getOwnLock(final String token) throws OXException {
+	@Override
+    public WebdavLock getOwnLock(final String token) throws OXException {
 		return lockHelper.getLock(token);
 	}
 
-	public List<WebdavLock> getOwnLocks() throws OXException {
+	@Override
+    public List<WebdavLock> getOwnLocks() throws OXException {
 		return lockHelper.getAllLocks();
 	}
 
-	public String getSource() throws OXException {
+	@Override
+    public String getSource() throws OXException {
 		return null;
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return resource.getUrl();
 	}
 
-	public void lock(final WebdavLock lock) throws OXException {
+	@Override
+    public void lock(final WebdavLock lock) throws OXException {
 		try {
 			dumpToDB();
 			lockHelper.addLock(lock);
@@ -321,7 +333,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 
-	public void save() throws OXException {
+	@Override
+    public void save() throws OXException {
 		throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 	}
 
@@ -330,7 +343,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		// IGNORE
 	}
 
-	public void setDisplayName(final String displayName) throws OXException {
+	@Override
+    public void setDisplayName(final String displayName) throws OXException {
 		// IGNORE
 	}
 
@@ -364,7 +378,8 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 	
-	public void unlock(final String token) throws OXException {
+	@Override
+    public void unlock(final String token) throws OXException {
 		lockHelper.removeLock(token);
 		if(getOwnLocks().isEmpty()) {
 			delete();
@@ -411,15 +426,18 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		}
 	}
 
-	public int getId() {
+	@Override
+    public int getId() {
 		return id;
 	}
 
-	public int getParentId() throws OXException {
+	@Override
+    public int getParentId() throws OXException {
 		return ((OXWebdavResource) parent()).getId();
 	}
 
-	public void removedParent() throws OXException {
+	@Override
+    public void removedParent() throws OXException {
 		// IGNORE
 	}
 
@@ -432,11 +450,13 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		//IGNORE
 	}
 
-	public List<WebdavResource> getChildren() throws OXException {
+	@Override
+    public List<WebdavResource> getChildren() throws OXException {
 		return Collections.emptyList();
 	}
 
-	public void transferLock(final WebdavLock lock) {
+	@Override
+    public void transferLock(final WebdavLock lock) {
 		// TODO Auto-generated method stub
 		
 	}

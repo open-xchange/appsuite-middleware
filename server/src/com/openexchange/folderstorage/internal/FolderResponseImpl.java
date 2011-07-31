@@ -89,10 +89,12 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
         this.warnings = null == warnings ? Collections.<OXException> emptySet() : warnings;
     }
 
+    @Override
     public R getResponse() {
         return response;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return warnings;
     }

@@ -82,6 +82,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String render(final Locale locale, final RenderMap renderMap) {
         final char[] content = new StringHelper(locale).getString(getContent()).toCharArray();
         if (null == content) {

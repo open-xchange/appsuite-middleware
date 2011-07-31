@@ -131,82 +131,98 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			}
 		}
 	
-		public Object lastModified() {
+		@Override
+        public Object lastModified() {
 			writeDate(dm.getLastModified());
 			return null;
 		}
 	
-		public Object creationDate() {
+		@Override
+        public Object creationDate() {
 			writeDate(dm.getCreationDate());
 			return null;
 		}
 	
-		public Object modifiedBy() {
+		@Override
+        public Object modifiedBy() {
 			writeId(dm.getModifiedBy());
 			return null;
 		}
 	
-		public Object folderId() {
+		@Override
+        public Object folderId() {
 			writeId(dm.getFolderId());
 			return null;
 		}
 	
-		public Object title() {
+		@Override
+        public Object title() {
 			writeString(dm.getTitle());
 			return null;
 		}
 		
-		public Object version() {
+		@Override
+        public Object version() {
 			writeInteger(dm.getVersion());
 			return null;
 		}
 	
-		public Object content() {
+		@Override
+        public Object content() {
 			writeString(dm.getContent());
 			return null;
 		}
 	
-		public Object id() {
+		@Override
+        public Object id() {
 			writeId(dm.getId());
 			return null;
 		}
 	
-		public Object fileSize() {
+		@Override
+        public Object fileSize() {
 			writeInteger(dm.getFileSize());
 			return null;
 		}
 	
-		public Object description() {
+		@Override
+        public Object description() {
 			writeString(dm.getDescription());
 			return null;
 		}
 	
-		public Object url() {
+		@Override
+        public Object url() {
 			writeString(dm.getURL());
 			return null;
 		}
 	
-		public Object createdBy() {
+		@Override
+        public Object createdBy() {
 			writeId(dm.getCreatedBy());
 			return null;
 		}
 	
-		public Object fileName() {
+		@Override
+        public Object fileName() {
 			writeString(dm.getFileName());
 			return null;
 		}
 	
-		public Object fileMIMEType() {
+		@Override
+        public Object fileMIMEType() {
 			writeString(dm.getFileMIMEType());
 			return null;
 		}
 	
-		public Object sequenceNumber() {
+		@Override
+        public Object sequenceNumber() {
 			return null;
 			
 		}
 	
-		public Object categories() {
+		@Override
+        public Object categories() {
 			final String categoriesString = dm.getCategories();
 			if(categoriesString==null || categoriesString.equals("")) {
 				try {
@@ -231,22 +247,26 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			return null;
 		}
 
-		public Object versionComment() {
+		@Override
+        public Object versionComment() {
 			writeString(dm.getVersionComment());
 			return null;
 		}
 
-		public Object currentVersion() {
+		@Override
+        public Object currentVersion() {
 			writeBoolean(dm.isCurrentVersion());
 			return null;
 		}
 
-		public Object colorLabel() {
+		@Override
+        public Object colorLabel() {
 			writeInteger(dm.getColorLabel());
 			return null;
 		}
 
-		public Object lockedUntil() {
+		@Override
+        public Object lockedUntil() {
 			if(dm.getLockedUntil() != null && dm.getLockedUntil().getTime()>System.currentTimeMillis()) {
 				writeDate(dm.getLockedUntil());
 			} else {
@@ -255,7 +275,8 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			return null;
 		}
 	
-		public Object fileMD5Sum() {
+		@Override
+        public Object fileMD5Sum() {
 			writeString(dm.getFileMD5Sum());
 			return null;
 		}
@@ -314,11 +335,13 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			}
 		}
 
-		public Object filestoreLocation() {
+		@Override
+        public Object filestoreLocation() {
 			writeString(dm.getFilestoreLocation());
 			return null;
 		}
 
+        @Override
         public Object lastModifiedUTC() {
             if(dm.getLastModified() == null) {
                 writeNull();
@@ -328,6 +351,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             return null;
         }
 
+        @Override
         public Object numberOfVersions() {
             writeInteger(dm.getNumberOfVersions());
             return null;

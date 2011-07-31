@@ -35,22 +35,27 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public String getPrefix() {
         return "DOW";
     }
 
+    @Override
     public final Category getCategory() {
         return category;
     }
 
+    @Override
     public final int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public final String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

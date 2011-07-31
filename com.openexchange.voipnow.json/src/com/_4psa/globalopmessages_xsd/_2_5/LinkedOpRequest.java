@@ -208,7 +208,7 @@ public class LinkedOpRequest {
          *     byte[]
          */
         public void setPackage(byte[] value) {
-            this._package = ((byte[]) value);
+            this._package = value;
         }
 
         /**

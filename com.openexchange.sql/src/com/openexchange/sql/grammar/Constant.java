@@ -66,6 +66,7 @@ public class Constant extends Value {
         this.value = value;
     }
 
+    @Override
     public void build(IStatementBuilder builder) {
         builder.buildConstant(this);
     }
@@ -74,6 +75,7 @@ public class Constant extends Value {
         return value;
     }
 
+    @Override
     public String toString() {
         return value.toString();
     }

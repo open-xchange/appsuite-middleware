@@ -98,14 +98,17 @@ public final class Collections {
 
         return new Iterator<T>() {
 
+            @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
+            @Override
             public T next() {
                 return iterator.next();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -504,6 +507,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#hasMoreElements()
          */
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
@@ -512,6 +516,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#nextElement()
          */
+        @Override
         public T nextElement() {
             return iter.next();
         }

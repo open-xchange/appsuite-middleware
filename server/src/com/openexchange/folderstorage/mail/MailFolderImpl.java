@@ -483,6 +483,7 @@ public final class MailFolderImpl extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }

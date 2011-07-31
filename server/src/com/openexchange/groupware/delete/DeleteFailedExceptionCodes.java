@@ -36,22 +36,27 @@ public enum DeleteFailedExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
     }
 
+    @Override
     public final Category getCategory() {
         return category;
     }
 
+    @Override
     public final int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public final String getMessage() {
         return message;
     }
     
+    @Override
     public String getPrefix() {
         return "DEL";
     }
     
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

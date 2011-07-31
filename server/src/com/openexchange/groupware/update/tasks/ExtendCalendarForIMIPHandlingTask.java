@@ -102,10 +102,12 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         "FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask" };
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {

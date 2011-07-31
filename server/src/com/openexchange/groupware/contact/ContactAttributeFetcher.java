@@ -77,6 +77,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.ANNIVERSARY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getAnniversary();
             }
@@ -84,6 +85,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.ASSISTANT_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getAssistantName();
             }
@@ -91,6 +93,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.BIRTHDAY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getBirthday();
             }
@@ -98,6 +101,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.BRANCHES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getBranches();
             }
@@ -105,6 +109,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.BUSINESS_CATEGORY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getBusinessCategory();
             }
@@ -112,6 +117,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CELLULAR_TELEPHONE1, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCellularTelephone1();
             }
@@ -119,6 +125,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CELLULAR_TELEPHONE2, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCellularTelephone2();
             }
@@ -126,6 +133,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CITY_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCityBusiness();
             }
@@ -133,6 +141,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CITY_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCityHome();
             }
@@ -140,6 +149,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CITY_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCityOther();
             }
@@ -147,6 +157,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COMMERCIAL_REGISTER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCommercialRegister();
             }
@@ -154,6 +165,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COMPANY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCompany();
             }
@@ -161,6 +173,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COUNTRY_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCountryBusiness();
             }
@@ -168,6 +181,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COUNTRY_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCountryHome();
             }
@@ -175,6 +189,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COUNTRY_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCountryOther();
             }
@@ -182,6 +197,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.DEPARTMENT, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getDepartment();
             }
@@ -189,6 +205,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.DISPLAY_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getDisplayName();
             }
@@ -196,6 +213,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.DISTRIBUTIONLIST, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getDistributionList();
             }
@@ -203,6 +221,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.EMAIL1, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getEmail1();
             }
@@ -210,6 +229,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.EMAIL2, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getEmail2();
             }
@@ -217,6 +237,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.EMAIL3, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getEmail3();
             }
@@ -224,6 +245,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.EMPLOYEE_TYPE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getEmployeeType();
             }
@@ -231,6 +253,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.FAX_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getFaxBusiness();
             }
@@ -238,6 +261,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.FAX_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getFaxHome();
             }
@@ -245,6 +269,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.FAX_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getFaxOther();
             }
@@ -252,6 +277,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.FIRST_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getGivenName();
             }
@@ -259,6 +285,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.INFO, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getInfo();
             }
@@ -266,6 +293,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.INSTANT_MESSENGER1, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getInstantMessenger1();
             }
@@ -273,6 +301,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.INSTANT_MESSENGER2, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getInstantMessenger2();
             }
@@ -280,6 +309,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.LAST_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getSurName();
             }
@@ -287,6 +317,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.LINKS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getLinks();
             }
@@ -294,6 +325,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.MANAGER_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getManagerName();
             }
@@ -301,6 +333,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.MARITAL_STATUS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getMaritalStatus();
             }
@@ -308,6 +341,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.NICKNAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getNickname();
             }
@@ -315,6 +349,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.NOTE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getNote();
             }
@@ -322,6 +357,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.NUMBER_OF_CHILDREN, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getNumberOfChildren();
             }
@@ -329,6 +365,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.NUMBER_OF_EMPLOYEE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getNumberOfEmployee();
             }
@@ -336,6 +373,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.POSITION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getPosition();
             }
@@ -343,6 +381,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.POSTAL_CODE_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getPostalCodeBusiness();
             }
@@ -350,6 +389,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.POSTAL_CODE_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getPostalCodeHome();
             }
@@ -357,6 +397,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.POSTAL_CODE_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getPostalCodeOther();
             }
@@ -364,6 +405,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.PROFESSION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getProfession();
             }
@@ -371,6 +413,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.ROOM_NUMBER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getRoomNumber();
             }
@@ -378,6 +421,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.SALES_VOLUME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getSalesVolume();
             }
@@ -385,6 +429,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.SECOND_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getMiddleName();
             }
@@ -392,6 +437,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.SPOUSE_NAME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getSpouseName();
             }
@@ -399,6 +445,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STATE_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStateBusiness();
             }
@@ -406,6 +453,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STATE_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStateHome();
             }
@@ -413,6 +461,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STATE_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStreetOther();
             }
@@ -420,6 +469,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STREET_BUSINESS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStreetBusiness();
             }
@@ -427,6 +477,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STREET_HOME, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStreetHome();
             }
@@ -434,6 +485,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.STREET_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getStreetOther();
             }
@@ -441,6 +493,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.SUFFIX, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getSuffix();
             }
@@ -448,6 +501,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TAX_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTaxID();
             }
@@ -455,6 +509,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_ASSISTANT, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneAssistant();
             }
@@ -462,6 +517,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_BUSINESS1, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneBusiness1();
             }
@@ -469,6 +525,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_BUSINESS2, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneBusiness2();
             }
@@ -476,6 +533,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_CALLBACK, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneCallback();
             }
@@ -483,6 +541,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_CAR, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneCar();
             }
@@ -490,6 +549,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_COMPANY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneCompany();
             }
@@ -497,6 +557,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_HOME1, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneHome1();
             }
@@ -504,6 +565,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_HOME2, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneHome2();
             }
@@ -511,6 +573,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_IP, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneIP();
             }
@@ -518,6 +581,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_ISDN, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneISDN();
             }
@@ -525,6 +589,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_OTHER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneOther();
             }
@@ -532,6 +597,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_PAGER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephonePager();
             }
@@ -539,6 +605,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_PRIMARY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephonePrimary();
             }
@@ -546,6 +613,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_RADIO, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneRadio();
             }
@@ -553,6 +621,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_TELEX, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneTelex();
             }
@@ -560,6 +629,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TELEPHONE_TTYTDD, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTelephoneTTYTTD();
             }
@@ -567,6 +637,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.TITLE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getTitle();
             }
@@ -574,6 +645,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.URL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getURL();
             }
@@ -581,6 +653,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.USER_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getInternalUserId());
             }
@@ -594,6 +667,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CATEGORIES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCategories();
             }
@@ -601,6 +675,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.COLORLABEL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getLabel());
             }
@@ -608,6 +683,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CREATED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getCreatedBy());
             }
@@ -615,6 +691,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.CREATION_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getCreationDate();
             }
@@ -622,6 +699,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.FOLDER_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getParentFolderID());
             }
@@ -629,6 +707,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getObjectID());
             }
@@ -636,6 +715,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.LAST_MODIFIED, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return candidate.getLastModified();
             }
@@ -643,6 +723,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.MODIFIED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Integer.valueOf(candidate.getModifiedBy());
             }
@@ -650,6 +731,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
 
         m.put(ContactFields.PRIVATE_FLAG, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Contact candidate) {
                 return Boolean.valueOf(candidate.getPrivateFlag());
             }
@@ -676,6 +758,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
         super();
     }
 
+    @Override
     public <T> T getAttribute(final String attributeName, final Contact candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {

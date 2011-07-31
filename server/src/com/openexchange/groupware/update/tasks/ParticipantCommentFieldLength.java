@@ -68,10 +68,12 @@ import com.openexchange.tools.update.Column;
  */
 public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.ExtendCalendarForIMIPHandlingTask" };
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {

@@ -164,6 +164,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         final byte[] data = bodyPart;
         final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+            @Override
             public InputStream getInputStream() throws IOException {
                 try {
                     return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(data), "uuencode");
@@ -174,6 +175,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 }
             }
 
+            @Override
             public String getName() {
                 return null;
             }

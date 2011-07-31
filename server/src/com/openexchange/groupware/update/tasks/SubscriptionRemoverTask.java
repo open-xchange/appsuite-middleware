@@ -82,26 +82,32 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
         this.subscriptionSourceId = subscriptionSourceId;
     }
     
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         

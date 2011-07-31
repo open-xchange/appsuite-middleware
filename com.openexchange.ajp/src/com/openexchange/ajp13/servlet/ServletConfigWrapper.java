@@ -113,18 +113,22 @@ public class ServletConfigWrapper implements ServletConfig {
         this.servletContextWrapper = servletContextWrapper;
     }
 
+    @Override
     public String getInitParameter(final String name) {
         return initParameters.get(name);
     }
 
+    @Override
     public String getServletName() {
         return servletName;
     }
 
+    @Override
     public ServletContext getServletContext() {
         return servletContextWrapper;
     }
 
+    @Override
     public Enumeration<String> getInitParameterNames() {
         return new IteratorEnumeration<String>(initParameters.keySet().iterator());
     }
@@ -142,10 +146,12 @@ public class ServletConfigWrapper implements ServletConfig {
             this.iter = iter;
         }
 
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
+        @Override
         public E nextElement() {
             return iter.next();
         }

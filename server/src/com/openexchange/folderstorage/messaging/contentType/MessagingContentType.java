@@ -81,11 +81,13 @@ public class MessagingContentType implements ContentType {
         return "messaging";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.MESSAGING
         return 13;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

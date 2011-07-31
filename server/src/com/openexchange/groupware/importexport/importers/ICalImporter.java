@@ -119,7 +119,8 @@ public class ICalImporter extends AbstractImporter {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
 
-	public boolean canImport(final ServerSession session, final Format format,
+	@Override
+    public boolean canImport(final ServerSession session, final Format format,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
 			throws OXException {
@@ -217,7 +218,8 @@ public class ICalImporter extends AbstractImporter {
 		return result;
 	}
 
-	public List<ImportResult> importData(final ServerSession session,
+	@Override
+    public List<ImportResult> importData(final ServerSession session,
 			final Format format, final InputStream is,
 			final List<String> folders,
 			final Map<String, String[]> optionalParams)
@@ -321,7 +323,8 @@ public class ICalImporter extends AbstractImporter {
 		if (!errorMap.isEmpty()) {
 			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-				public boolean execute(final ConversionError error) {
+				@Override
+                public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
 					importResult.setException(new OXException(
@@ -444,7 +447,8 @@ public class ICalImporter extends AbstractImporter {
 		if (!errorMap.isEmpty()) {
 			errorMap.forEachValue(new TObjectProcedure<ConversionError>() {
 
-				public boolean execute(final ConversionError error) {
+				@Override
+                public boolean execute(final ConversionError error) {
 					final ImportResult importResult = new ImportResult();
 					importResult.setEntryNumber(error.getIndex());
 					importResult.setException(new OXException(
@@ -468,7 +472,8 @@ public class ICalImporter extends AbstractImporter {
 
 	private void sortSeriesMastersFirst(final List<CalendarDataObject> appointments) {
 		Collections.sort(appointments, new Comparator<CalendarDataObject>(){
-			public int compare(final CalendarDataObject o1, final CalendarDataObject o2) {
+			@Override
+            public int compare(final CalendarDataObject o1, final CalendarDataObject o2) {
 				if( o1.containsRecurrenceType() && !o2.containsRecurrenceType()) {
                     return -1;
                 }

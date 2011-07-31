@@ -197,7 +197,7 @@ public class LinkedOpResponse {
          *     byte[]
          */
         public void setOutput(byte[] value) {
-            this.output = ((byte[]) value);
+            this.output = value;
         }
 
         /**

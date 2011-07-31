@@ -99,35 +99,43 @@ public class StringReplacement implements TemplateReplacement {
         return super.clone();
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public String getReplacement() {
         return replacement;
     }
 
+    @Override
     public TemplateToken getToken() {
         return token;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!StringReplacement.class.isInstance(other)) {
             /*

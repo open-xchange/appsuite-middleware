@@ -70,6 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DebugConverter implements ResultConverter {
 
+    @Override
     public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(request.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(request.getAction()).append("</h1>");
         out.append("<h2>Parameters:</h2>");
@@ -116,14 +117,17 @@ public class DebugConverter implements ResultConverter {
         result.setResultObject(out.toString());
     }
 
+    @Override
     public String getInputFormat() {
         return "json";
     }
 
+    @Override
     public String getOutputFormat() {
         return "debug";
     }
 
+    @Override
     public Quality getQuality() {
         return Quality.GOOD;
     }

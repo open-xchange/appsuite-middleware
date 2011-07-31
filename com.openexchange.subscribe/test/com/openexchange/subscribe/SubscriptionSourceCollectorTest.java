@@ -70,6 +70,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private SubscribeService testService1;
 
+    @Override
     public void setUp() {
         collector = new SubscriptionSourceCollector();
         collector.addSubscribeService(testService1 = service("com.openexchange.subscription.test1"));

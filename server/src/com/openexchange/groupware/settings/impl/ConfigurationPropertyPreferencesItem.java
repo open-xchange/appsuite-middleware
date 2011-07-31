@@ -80,20 +80,24 @@ public class ConfigurationPropertyPreferencesItem implements PreferencesItemServ
         this.key = key;
     }
 
+    @Override
     public String[] getPath() {
         return path;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new Property();
     }
 
     protected final class Property extends ReadOnlyValue {
 
+        @Override
         public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
             setting.setSingleValue(convert(config.getProperty(key)));
         }
 
+        @Override
         public boolean isAvailable(UserConfiguration userConfig) {
             return config.getProperty(key) != null;
         }

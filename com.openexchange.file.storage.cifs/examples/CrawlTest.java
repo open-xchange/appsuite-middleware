@@ -36,6 +36,7 @@ public class CrawlTest extends Thread {
         }
     }
 
+    @Override
     public void run() {
         try {
             traverse( f, maxDepth );

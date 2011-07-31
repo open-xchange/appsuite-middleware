@@ -65,14 +65,17 @@ import com.openexchange.ajax.requesthandler.ResponseOutputter;
  */
 public class StringResponseOutputter implements ResponseOutputter {
 
+    @Override
     public int getPriority() {
         return Integer.MIN_VALUE;
     }
 
+    @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return true;
     }
 
+    @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         Object resultObject = result.getResultObject();
         if (resultObject == null) {

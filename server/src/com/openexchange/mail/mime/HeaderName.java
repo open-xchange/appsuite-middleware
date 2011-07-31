@@ -224,18 +224,22 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
         return hashcode;
     }
 
+    @Override
     public int compareTo(final HeaderName other) {
         return s.compareToIgnoreCase(other.s);
     }
 
+    @Override
     public char charAt(final int index) {
         return s.charAt(index);
     }
 
+    @Override
     public int length() {
         return s.length();
     }
 
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         return s.subSequence(start, end);
     }

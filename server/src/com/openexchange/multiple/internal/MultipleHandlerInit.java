@@ -82,6 +82,7 @@ public final class MultipleHandlerInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -102,6 +103,7 @@ public final class MultipleHandlerInit implements Initialization {
         registry.addFactoryService(new MailAccountMultipleHandlerFactory());
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

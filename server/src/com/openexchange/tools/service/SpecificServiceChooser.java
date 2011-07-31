@@ -264,6 +264,7 @@ public class SpecificServiceChooser<T> {
             this.ranking = ranking;
         }
 
+        @Override
         public int compareTo(final WeightedRegistration<T> o) {
             return o.ranking - ranking;
         }

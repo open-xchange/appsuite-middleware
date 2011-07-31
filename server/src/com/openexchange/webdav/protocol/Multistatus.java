@@ -81,7 +81,8 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 		collocated.add(status);
 	}
 
-	public Iterator<WebdavStatus<T>> iterator() {
+	@Override
+    public Iterator<WebdavStatus<T>> iterator() {
 		return stadi.iterator();
 	}
 	

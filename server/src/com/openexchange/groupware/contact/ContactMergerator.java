@@ -118,27 +118,33 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
     }
 
+    @Override
     public void addWarning(final OXException warning) {
     }
 
+    @Override
     public void close() throws OXException {
         for (final SearchIterator<Contact> iter : delegates) {
             iter.close();
         }
     }
 
+    @Override
     public OXException[] getWarnings() {
         return null;
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return next != null;
     }
 
+    @Override
     public boolean hasWarnings() {
         return false;
     }
 
+    @Override
     public Contact next() throws OXException {
         throwExceptions();
         final Contact nextContact = next;
@@ -155,6 +161,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }
@@ -197,6 +204,7 @@ public class ContactMergerator implements SearchIterator<Contact>{
             this.contactComparator = comparator;
         }
         
+        @Override
         public int compare(final RememberingIterator o1, final RememberingIterator o2) {
             try {
                 final Contact v1 = o1.currentOrNext();

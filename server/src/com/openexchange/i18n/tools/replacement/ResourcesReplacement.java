@@ -87,6 +87,7 @@ public final class ResourcesReplacement implements TemplateReplacement {
         this.resourcesSet = resourcesSet;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
@@ -103,10 +104,12 @@ public final class ResourcesReplacement implements TemplateReplacement {
         return clone;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public String getReplacement() {
         if (resourcesSet.isEmpty()) {
             return getStringHelper().getString(Notifications.NO_RESOURCES);
@@ -170,10 +173,12 @@ public final class ResourcesReplacement implements TemplateReplacement {
         return false;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.RESOURCES;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
@@ -193,6 +198,7 @@ public final class ResourcesReplacement implements TemplateReplacement {
         return stringHelper;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         if (locale == null || locale.equals(this.locale)) {
             return this;
@@ -202,10 +208,12 @@ public final class ResourcesReplacement implements TemplateReplacement {
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!ResourcesReplacement.class.isInstance(other)) {
             /*

@@ -350,12 +350,14 @@ public class DefaultDispatcherTest extends TestCase {
             this.name = name;
         }
 
+        @Override
         public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
             this.request = request;
             LOG.add(name+":incoming");
             return request;
         }
 
+        @Override
         public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
             this.result = result;
             LOG.add(name+":outgoing");
@@ -381,6 +383,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.customizer = customizer;
         }
 
+        @Override
         public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
             return customizer;
         }
@@ -399,6 +402,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.result = result;
         }
 
+        @Override
         public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
             this.request = request;
             this.session = session;
@@ -426,6 +430,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.actionService = actionService;
         }
 
+        @Override
         public AJAXActionService createActionService(final String action) throws OXException {
             this.action = action;
             return actionService;

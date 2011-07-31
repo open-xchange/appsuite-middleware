@@ -71,6 +71,7 @@ public final class MailPath implements Cloneable, Serializable {
      */
     public static final Comparator<MailPath> COMPARATOR = new Comparator<MailPath>() {
 
+        @Override
         public int compare(final MailPath mailPath1, final MailPath mailPath2) {
             final int accountComp = (mailPath1.getAccountId() < mailPath2.getAccountId() ? -1 : (mailPath1.getAccountId() == mailPath2.getAccountId() ? 0 : 1));
             if (accountComp == 0) {

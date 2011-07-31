@@ -76,11 +76,13 @@ public final class DowngradeRegistryInit implements Initialization {
 		super();
 	}
 
-	public void start() throws OXException {
+	@Override
+    public void start() throws OXException {
 		DowngradeRegistry.initInstance();
 	}
 
-	public void stop() throws OXException {
+	@Override
+    public void stop() throws OXException {
 		DowngradeRegistry.releaseInstance();
 	}
 

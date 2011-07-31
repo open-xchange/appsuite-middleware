@@ -136,22 +136,27 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         // }
     }
 
+    @Override
     public Connection getReadOnly() throws OXException {
         return get(false);
     }
 
+    @Override
     public Connection getWritable() throws OXException {
         return get(true);
     }
 
+    @Override
     public void backReadOnly(final Connection con) {
         back(con, false);
     }
 
+    @Override
     public void backWritable(final Connection con) {
         back(con, true);
     }
 
+    @Override
     public int[] listContexts(final int poolId) throws OXException {
         final List<Integer> tmp = new ArrayList<Integer>();
         final Connection con = getReadOnly();
@@ -179,6 +184,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         return retval;
     }
 
+    @Override
     public int getServerId() throws OXException {
         return Server.getServerId();
     }

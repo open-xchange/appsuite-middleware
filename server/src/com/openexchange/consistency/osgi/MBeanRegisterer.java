@@ -80,6 +80,7 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ManagementService managementService = (ManagementService) context.getService(reference);
         try {
@@ -99,10 +100,12 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer {
         return managementService;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         ManagementService managementService = (ManagementService) service;
         LOG.info("Unregistering consistency MBean with name " + name);

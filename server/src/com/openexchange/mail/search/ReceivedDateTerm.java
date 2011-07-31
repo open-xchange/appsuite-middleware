@@ -77,10 +77,12 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         super();
         pattern = new ComparablePattern<java.util.Date>() {
 
+            @Override
             public ComparisonType getComparisonType() {
                 return comparisonType;
             }
 
+            @Override
             public Date getPattern() {
                 return receivedDate;
             }

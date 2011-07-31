@@ -64,6 +64,7 @@ import com.openexchange.publish.Publication;
 public class InfostoreDocumentPublicationServiceTest extends TestCase{
     private InfostoreDocumentPublicationService publicationService;
 
+    @Override
     public void setUp() {
         publicationService = new InfostoreDocumentPublicationService();
     }

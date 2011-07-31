@@ -68,6 +68,7 @@ public class Module extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mailaccount", "module" };
     }

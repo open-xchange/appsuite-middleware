@@ -88,10 +88,12 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         super();
     }
 
+    @Override
     public void createUnifiedINBOX(final int userId, final int contextId) throws OXException {
         createUnifiedINBOX(userId, contextId, null);
     }
 
+    @Override
     public void createUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final MailAccountStorageService storageService =
@@ -146,10 +148,12 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
 
     }
 
+    @Override
     public void deleteUnifiedINBOX(final int userId, final int contextId) throws OXException {
         deleteUnifiedINBOX(userId, contextId, null);
     }
 
+    @Override
     public void deleteUnifiedINBOX(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final MailAccountStorageService storageService =
@@ -176,6 +180,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
+    @Override
     public boolean exists(final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, false);
         try {
@@ -185,6 +190,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
+    @Override
     public boolean exists(final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -208,6 +214,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
+    @Override
     public boolean isEnabled(final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, false);
         try {
@@ -217,6 +224,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
+    @Override
     public boolean isEnabled(final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -233,10 +241,12 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         }
     }
 
+    @Override
     public int getUnifiedINBOXAccountID(final int userId, final int contextId) throws OXException {
         return getUnifiedINBOXAccountID(userId, contextId, null);
     }
 
+    @Override
     public int getUnifiedINBOXAccountID(final int userId, final int contextId, final Connection con) throws OXException {
         try {
             final DatabaseService databaseService;

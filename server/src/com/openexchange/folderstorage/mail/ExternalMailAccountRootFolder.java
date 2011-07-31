@@ -205,6 +205,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }

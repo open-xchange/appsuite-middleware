@@ -83,6 +83,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object addingService(final ServiceReference reference) {
         final PreferencesItemService item = (PreferencesItemService) context
             .getService(reference);
@@ -105,6 +106,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
@@ -112,6 +114,7 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         final PreferencesItemService item = (PreferencesItemService) service;
         ConfigTree.removePreferencesItem(item);

@@ -87,10 +87,12 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
         synchronizer = new NonBlockingSynchronizer();
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }

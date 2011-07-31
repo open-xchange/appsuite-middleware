@@ -2458,14 +2458,17 @@ public final class Contacts {
                     final int attributeId = j;
                     truncateds[i] = new OXException.Truncated() {
 
+                        @Override
                         public int getId() {
                             return attributeId;
                         }
 
+                        @Override
                         public int getLength() {
                             return Charsets.getBytes(mapping[attributeId].getValueAsString(co), Charsets.UTF_8).length;
                         }
 
+                        @Override
                         public int getMaxSize() {
                             return maxSize;
                         }
@@ -2540,10 +2543,12 @@ public final class Contacts {
         /** ************** * field01 * * ************ */
         mapping[Contact.DISPLAY_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field01";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2551,14 +2556,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsDisplayName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getDisplayName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getDisplayName();
                 final String y = original.getDisplayName();
@@ -2566,10 +2574,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getDisplayName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Display name";
             }
@@ -2577,10 +2587,12 @@ public final class Contacts {
         /** ************** * field02 * * ************ */
         mapping[Contact.SUR_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field02";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2588,14 +2600,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsSurName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getSurName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getSurName();
                 final String y = original.getSurName();
@@ -2603,10 +2618,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getSurName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Sur name";
             }
@@ -2614,10 +2631,12 @@ public final class Contacts {
         /** ************** * field03 * * ************ */
         mapping[Contact.GIVEN_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field03";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2625,14 +2644,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsGivenName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getGivenName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getGivenName();
                 final String y = original.getGivenName();
@@ -2640,10 +2662,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getGivenName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Given name";
             }
@@ -2651,10 +2675,12 @@ public final class Contacts {
         /** ************** * field04 * * ************ */
         mapping[Contact.MIDDLE_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field04";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2662,14 +2688,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsMiddleName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getMiddleName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getMiddleName();
                 final String y = original.getMiddleName();
@@ -2677,11 +2706,13 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
 
                 return co.getMiddleName();
             }
 
+            @Override
             public String getReadableTitle() {
 
                 return "Middle name";
@@ -2690,10 +2721,12 @@ public final class Contacts {
         /** ************** * field05 * * ************ */
         mapping[Contact.SUFFIX] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field05";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2701,14 +2734,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsSuffix();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getSuffix());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getSuffix();
                 final String y = original.getSuffix();
@@ -2716,10 +2752,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getSuffix();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Suffix";
             }
@@ -2727,10 +2765,12 @@ public final class Contacts {
         /** ************** * field06 * * ************ */
         mapping[Contact.TITLE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field06";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2738,14 +2778,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTitle();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTitle());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTitle();
                 final String y = original.getTitle();
@@ -2753,10 +2796,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTitle();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Title";
             }
@@ -2764,10 +2809,12 @@ public final class Contacts {
         /** ************** * field07 * * ************ */
         mapping[Contact.STREET_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field07";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2775,14 +2822,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStreetHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStreetHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStreetHome();
                 final String y = original.getStreetHome();
@@ -2790,10 +2840,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStreetHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Street home";
             }
@@ -2801,10 +2853,12 @@ public final class Contacts {
         /** ************** * field08 * * ************ */
         mapping[Contact.POSTAL_CODE_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field08";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2812,14 +2866,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsPostalCodeHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getPostalCodeHome();
                 final String y = original.getPostalCodeHome();
@@ -2827,10 +2884,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Postal code home";
             }
@@ -2838,10 +2897,12 @@ public final class Contacts {
         /** ************** * field09 * * ************ */
         mapping[Contact.CITY_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field09";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2849,14 +2910,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCityHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCityHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCityHome();
                 final String y = original.getCityHome();
@@ -2864,10 +2928,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCityHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "City home";
             }
@@ -2875,10 +2941,12 @@ public final class Contacts {
         /** ************** * field10 * * ************ */
         mapping[Contact.STATE_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field10";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2886,14 +2954,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStateHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStateHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStateHome();
                 final String y = original.getStateHome();
@@ -2901,10 +2972,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStateHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "State home";
             }
@@ -2912,10 +2985,12 @@ public final class Contacts {
         /** ************** * field11 * * ************ */
         mapping[Contact.COUNTRY_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field11";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2923,14 +2998,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCountryHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCountryHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCountryHome();
                 final String y = original.getCountryHome();
@@ -2938,10 +3016,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCountryHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Country home";
             }
@@ -2950,10 +3030,12 @@ public final class Contacts {
         /** ************** * field12 * * ************ */
         mapping[Contact.MARITAL_STATUS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field12";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2961,14 +3043,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsMaritalStatus();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getMaritalStatus());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getMaritalStatus();
                 final String y = original.getMaritalStatus();
@@ -2976,10 +3061,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getMaritalStatus();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Martial status";
             }
@@ -2987,10 +3074,12 @@ public final class Contacts {
         /** ************** * field13 * * ************ */
         mapping[Contact.NUMBER_OF_CHILDREN] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field13";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -2998,14 +3087,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNumberOfChildren();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getNumberOfChildren());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getNumberOfChildren();
                 final String y = original.getNumberOfChildren();
@@ -3013,10 +3105,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getNumberOfChildren();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Number of children";
             }
@@ -3024,10 +3118,12 @@ public final class Contacts {
         /** ************** * field14 * * ************ */
         mapping[Contact.PROFESSION] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field14";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3035,14 +3131,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsProfession();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getProfession());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getProfession();
                 final String y = original.getProfession();
@@ -3050,10 +3149,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getProfession();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Profession";
             }
@@ -3061,10 +3162,12 @@ public final class Contacts {
         /** ************** * field15 * * ************ */
         mapping[Contact.NICKNAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field15";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3072,14 +3175,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNickname();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getNickname());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getNickname();
                 final String y = original.getNickname();
@@ -3087,10 +3193,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getNickname();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Nickname";
             }
@@ -3098,10 +3206,12 @@ public final class Contacts {
         /** ************** * field16 * * ************ */
         mapping[Contact.SPOUSE_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field16";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3109,14 +3219,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsSpouseName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getSpouseName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getSpouseName();
                 final String y = original.getSpouseName();
@@ -3124,10 +3237,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getSpouseName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Spouse name";
             }
@@ -3135,10 +3250,12 @@ public final class Contacts {
         /** ************** * field17 * * ************ */
         mapping[Contact.NOTE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field17";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3146,14 +3263,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNote();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getNote());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getNote();
                 final String y = original.getNote();
@@ -3161,10 +3281,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getNote();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Note";
             }
@@ -3172,10 +3294,12 @@ public final class Contacts {
         /** ************** * field18 * * ************ */
         mapping[Contact.COMPANY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field18";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3183,14 +3307,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCompany();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCompany());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCompany();
                 final String y = original.getCompany();
@@ -3198,10 +3325,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCompany();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Company";
             }
@@ -3209,10 +3338,12 @@ public final class Contacts {
         /** ************** * field19 * * ************ */
         mapping[Contact.DEPARTMENT] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field19";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3220,14 +3351,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsDepartment();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getDepartment());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getDepartment();
                 final String y = original.getDepartment();
@@ -3235,10 +3369,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getDepartment();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Department";
             }
@@ -3246,10 +3382,12 @@ public final class Contacts {
         /** ************** * field20 * * ************ */
         mapping[Contact.POSITION] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field20";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3257,14 +3395,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsPosition();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getPosition());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getPosition();
                 final String y = original.getPosition();
@@ -3272,10 +3413,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getPosition();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Position";
             }
@@ -3283,10 +3426,12 @@ public final class Contacts {
         /** ************** * field21 * * ************ */
         mapping[Contact.EMPLOYEE_TYPE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field21";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3294,14 +3439,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsEmployeeType();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getEmployeeType());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getEmployeeType();
                 final String y = original.getEmployeeType();
@@ -3309,10 +3457,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getEmployeeType();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Employee type";
             }
@@ -3320,10 +3470,12 @@ public final class Contacts {
         /** ************** * field22 * * ************ */
         mapping[Contact.ROOM_NUMBER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field22";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3331,14 +3483,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsRoomNumber();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getRoomNumber());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getRoomNumber();
                 final String y = original.getRoomNumber();
@@ -3346,10 +3501,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getRoomNumber();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Room number";
             }
@@ -3357,10 +3514,12 @@ public final class Contacts {
         /** ************** * field23 * * ************ */
         mapping[Contact.STREET_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field23";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3368,14 +3527,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStreetBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStreetBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStreetBusiness();
                 final String y = original.getStreetBusiness();
@@ -3383,10 +3545,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStreetBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Street business";
             }
@@ -3394,10 +3558,12 @@ public final class Contacts {
         /** ************** * field24 * * ************ */
         mapping[Contact.POSTAL_CODE_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field24";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3405,14 +3571,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsPostalCodeBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getPostalCodeBusiness();
                 final String y = original.getPostalCodeBusiness();
@@ -3420,10 +3589,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Postal code business";
             }
@@ -3431,10 +3602,12 @@ public final class Contacts {
         /** ************** * field25 * * ************ */
         mapping[Contact.CITY_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field25";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3442,14 +3615,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCityBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCityBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCityBusiness();
                 final String y = original.getCityBusiness();
@@ -3457,10 +3633,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCityBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "City business";
             }
@@ -3468,10 +3646,12 @@ public final class Contacts {
         /** ************** * field26 * * ************ */
         mapping[Contact.STATE_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field26";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3479,14 +3659,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStateBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStateBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStateBusiness();
                 final String y = original.getStateBusiness();
@@ -3494,10 +3677,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStateBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "State business";
             }
@@ -3505,10 +3690,12 @@ public final class Contacts {
         /** ************** * field27 * * ************ */
         mapping[Contact.COUNTRY_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field27";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3516,14 +3703,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCountryBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCountryBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCountryBusiness();
                 final String y = original.getCountryBusiness();
@@ -3531,10 +3721,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCountryBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Country business";
             }
@@ -3542,10 +3734,12 @@ public final class Contacts {
         /** ************** * field28 * * ************ */
         mapping[Contact.NUMBER_OF_EMPLOYEE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field28";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3553,14 +3747,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNumberOfEmployee();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getNumberOfEmployee());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getNumberOfEmployee();
                 final String y = original.getNumberOfEmployee();
@@ -3568,10 +3765,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getNumberOfEmployee();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Number of employee";
             }
@@ -3579,10 +3778,12 @@ public final class Contacts {
         /** ************** * field29 * * ************ */
         mapping[Contact.SALES_VOLUME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field29";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3590,14 +3791,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsSalesVolume();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getSalesVolume());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getSalesVolume();
                 final String y = original.getSalesVolume();
@@ -3605,10 +3809,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getSalesVolume();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Sales volume";
             }
@@ -3616,10 +3822,12 @@ public final class Contacts {
         /** ************** * field30 * * ************ */
         mapping[Contact.TAX_ID] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field30";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3627,14 +3835,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTaxID();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTaxID());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTaxID();
                 final String y = original.getTaxID();
@@ -3642,10 +3853,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTaxID();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Tax id";
             }
@@ -3653,10 +3866,12 @@ public final class Contacts {
         /** ************** * field31 * * ************ */
         mapping[Contact.COMMERCIAL_REGISTER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field31";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3664,14 +3879,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCommercialRegister();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCommercialRegister());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCommercialRegister();
                 final String y = original.getCommercialRegister();
@@ -3679,10 +3897,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCommercialRegister();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Commercial register";
             }
@@ -3690,10 +3910,12 @@ public final class Contacts {
         /** ************** * field32 * * ************ */
         mapping[Contact.BRANCHES] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field32";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3701,14 +3923,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsBranches();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getBranches());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getBranches();
                 final String y = original.getBranches();
@@ -3716,10 +3941,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getBranches();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Branches";
             }
@@ -3727,10 +3954,12 @@ public final class Contacts {
         /** ************** * field33 * * ************ */
         mapping[Contact.BUSINESS_CATEGORY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field33";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3738,14 +3967,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsBusinessCategory();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getBusinessCategory());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getBusinessCategory();
                 final String y = original.getBusinessCategory();
@@ -3753,10 +3985,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getBusinessCategory();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Business category";
             }
@@ -3764,10 +3998,12 @@ public final class Contacts {
         /** ************** * field34 * * ************ */
         mapping[Contact.INFO] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field34";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3775,14 +4011,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsInfo();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getInfo());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getInfo();
                 final String y = original.getInfo();
@@ -3790,10 +4029,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getInfo();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Info";
             }
@@ -3801,10 +4042,12 @@ public final class Contacts {
         /** ************** * field35 * * ************ */
         mapping[Contact.MANAGER_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field35";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3812,14 +4055,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsManagerName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getManagerName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getManagerName();
                 final String y = original.getManagerName();
@@ -3827,10 +4073,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getManagerName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Manager's name";
             }
@@ -3838,10 +4086,12 @@ public final class Contacts {
         /** ************** * field36 * * ************ */
         mapping[Contact.ASSISTANT_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field36";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3849,14 +4099,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsAssistantName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getAssistantName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getAssistantName();
                 final String y = original.getAssistantName();
@@ -3864,10 +4117,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getAssistantName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Assistant's name";
             }
@@ -3875,10 +4130,12 @@ public final class Contacts {
         /** ************** * field37 * * ************ */
         mapping[Contact.STREET_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field37";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3886,14 +4143,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStreetOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStreetOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStreetOther();
                 final String y = original.getStreetOther();
@@ -3901,10 +4161,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStreetOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Street other";
             }
@@ -3912,10 +4174,12 @@ public final class Contacts {
         /** ************** * field38 * * ************ */
         mapping[Contact.POSTAL_CODE_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field38";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3923,14 +4187,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsPostalCodeOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getPostalCodeOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getPostalCodeOther();
                 final String y = original.getPostalCodeOther();
@@ -3938,10 +4205,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getPostalCodeOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Postal code other";
             }
@@ -3949,10 +4218,12 @@ public final class Contacts {
         /** ************** * field39 * * ************ */
         mapping[Contact.CITY_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field39";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3960,14 +4231,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCityOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCityOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCityOther();
                 final String y = original.getCityOther();
@@ -3975,10 +4249,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCityOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "City other";
             }
@@ -3986,10 +4262,12 @@ public final class Contacts {
         /** ************** * field40 * * ************ */
         mapping[Contact.STATE_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field40";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -3997,14 +4275,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsStateOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getStateOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getStateOther();
                 final String y = original.getStateOther();
@@ -4012,10 +4293,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getStateOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "State other";
             }
@@ -4023,10 +4306,12 @@ public final class Contacts {
         /** ************** * field41 * * ************ */
         mapping[Contact.COUNTRY_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field41";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4034,14 +4319,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCountryOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCountryOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCountryOther();
                 final String y = original.getCountryOther();
@@ -4049,10 +4337,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCountryOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Country other";
             }
@@ -4060,10 +4350,12 @@ public final class Contacts {
         /** ************** * field42 * * ************ */
         mapping[Contact.TELEPHONE_ASSISTANT] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field42";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4071,14 +4363,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneAssistant();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneAssistant());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneAssistant();
                 final String y = original.getTelephoneAssistant();
@@ -4086,10 +4381,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneAssistant();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone assistant";
             }
@@ -4097,10 +4394,12 @@ public final class Contacts {
         /** ************** * field43 * * ************ */
         mapping[Contact.TELEPHONE_BUSINESS1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field43";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4108,14 +4407,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneBusiness1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneBusiness1());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneBusiness1();
                 final String y = original.getTelephoneBusiness1();
@@ -4123,10 +4425,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneBusiness1();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone business 1";
             }
@@ -4134,10 +4438,12 @@ public final class Contacts {
         /** ************** * field44 * * ************ */
         mapping[Contact.TELEPHONE_BUSINESS2] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field44";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4145,14 +4451,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneBusiness2();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneBusiness2());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneBusiness2();
                 final String y = original.getTelephoneBusiness2();
@@ -4160,10 +4469,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneBusiness2();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone business 2";
             }
@@ -4171,10 +4482,12 @@ public final class Contacts {
         /** ************** * field45 * * ************ */
         mapping[Contact.FAX_BUSINESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field45";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4182,14 +4495,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsFaxBusiness();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getFaxBusiness());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getFaxBusiness();
                 final String y = original.getFaxBusiness();
@@ -4197,10 +4513,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getFaxBusiness();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "FAX business";
             }
@@ -4208,10 +4526,12 @@ public final class Contacts {
         /** ************** * field46 * * ************ */
         mapping[Contact.TELEPHONE_CALLBACK] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field46";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4219,14 +4539,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneCallback();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCallback());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneCallback();
                 final String y = original.getTelephoneCallback();
@@ -4234,10 +4557,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCallback();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone callback";
             }
@@ -4245,10 +4570,12 @@ public final class Contacts {
         /** ************** * field47 * * ************ */
         mapping[Contact.TELEPHONE_CAR] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field47";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4256,14 +4583,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneCar();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCar());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneCar();
                 final String y = original.getTelephoneCar();
@@ -4271,10 +4601,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCar();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone car";
             }
@@ -4282,10 +4614,12 @@ public final class Contacts {
         /** ************** * field48 * * ************ */
         mapping[Contact.TELEPHONE_COMPANY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field48";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4293,14 +4627,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneCompany();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneCompany());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneCompany();
                 final String y = original.getTelephoneCompany();
@@ -4308,10 +4645,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneCompany();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone company";
             }
@@ -4319,10 +4658,12 @@ public final class Contacts {
         /** ************** * field49 * * ************ */
         mapping[Contact.TELEPHONE_HOME1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field49";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4330,14 +4671,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneHome1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneHome1());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneHome1();
                 final String y = original.getTelephoneHome1();
@@ -4345,10 +4689,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneHome1();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone home 1";
             }
@@ -4356,10 +4702,12 @@ public final class Contacts {
         /** ************** * field50 * * ************ */
         mapping[Contact.TELEPHONE_HOME2] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field50";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4367,14 +4715,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneHome2();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneHome2());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneHome2();
                 final String y = original.getTelephoneHome2();
@@ -4382,10 +4733,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneHome2();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone home 2";
             }
@@ -4393,10 +4746,12 @@ public final class Contacts {
         /** ************** * field51 * * ************ */
         mapping[Contact.FAX_HOME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field51";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4404,14 +4759,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsFaxHome();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getFaxHome());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getFaxHome();
                 final String y = original.getFaxHome();
@@ -4419,10 +4777,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getFaxHome();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "FAX home";
             }
@@ -4430,10 +4790,12 @@ public final class Contacts {
         /** ************** * field52 * * ************ */
         mapping[Contact.TELEPHONE_ISDN] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field52";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4441,14 +4803,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneISDN();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneISDN());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneISDN();
                 final String y = original.getTelephoneISDN();
@@ -4456,10 +4821,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneISDN();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone ISDN";
             }
@@ -4467,10 +4834,12 @@ public final class Contacts {
         /** ************** * field53 * * ************ */
         mapping[Contact.CELLULAR_TELEPHONE1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field53";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4478,14 +4847,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCellularTelephone1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCellularTelephone1());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCellularTelephone1();
                 final String y = original.getCellularTelephone1();
@@ -4493,10 +4865,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCellularTelephone1();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Cellular telephone 1";
             }
@@ -4504,10 +4878,12 @@ public final class Contacts {
         /** ************** * field54 * * ************ */
         mapping[Contact.CELLULAR_TELEPHONE2] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field54";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4515,14 +4891,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCellularTelephone2();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCellularTelephone2());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCellularTelephone2();
                 final String y = original.getCellularTelephone2();
@@ -4530,10 +4909,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCellularTelephone2();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Cellular telephone 2";
             }
@@ -4541,10 +4922,12 @@ public final class Contacts {
         /** ************** * field55 * * ************ */
         mapping[Contact.TELEPHONE_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field55";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4552,14 +4935,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneOther();
                 final String y = original.getTelephoneOther();
@@ -4567,10 +4953,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone other";
             }
@@ -4578,10 +4966,12 @@ public final class Contacts {
         /** ************** * field56 * * ************ */
         mapping[Contact.FAX_OTHER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field56";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4589,14 +4979,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsFaxOther();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getFaxOther());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getFaxOther();
                 final String y = original.getFaxOther();
@@ -4604,10 +4997,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getFaxOther();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "FAX other";
             }
@@ -4615,10 +5010,12 @@ public final class Contacts {
         /** ************** * field57 * * ************ */
         mapping[Contact.TELEPHONE_PAGER] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field57";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4626,14 +5023,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephonePager();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephonePager());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephonePager();
                 final String y = original.getTelephonePager();
@@ -4641,10 +5041,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephonePager();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone pager";
             }
@@ -4652,10 +5054,12 @@ public final class Contacts {
         /** ************** * field58 * * ************ */
         mapping[Contact.TELEPHONE_PRIMARY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field58";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4663,14 +5067,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephonePrimary();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephonePrimary());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephonePrimary();
                 final String y = original.getTelephonePrimary();
@@ -4678,10 +5085,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephonePrimary();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone primary";
             }
@@ -4689,10 +5098,12 @@ public final class Contacts {
         /** ************** * field59 * * ************ */
         mapping[Contact.TELEPHONE_RADIO] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field59";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4700,14 +5111,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneRadio();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneRadio());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneRadio();
                 final String y = original.getTelephoneRadio();
@@ -4715,10 +5129,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneRadio();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone radio";
             }
@@ -4726,10 +5142,12 @@ public final class Contacts {
         /** ************** * field60 * * ************ */
         mapping[Contact.TELEPHONE_TELEX] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field60";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4737,14 +5155,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneTelex();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneTelex());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneTelex();
                 final String y = original.getTelephoneTelex();
@@ -4752,10 +5173,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneTelex();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone telex";
             }
@@ -4763,10 +5186,12 @@ public final class Contacts {
         /** ************** * field61 * * ************ */
         mapping[Contact.TELEPHONE_TTYTDD] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field61";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4774,14 +5199,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneTTYTTD();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneTTYTTD());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneTTYTTD();
                 final String y = original.getTelephoneTTYTTD();
@@ -4789,10 +5217,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneTTYTTD();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone TTY/TDD";
             }
@@ -4800,10 +5230,12 @@ public final class Contacts {
         /** ************** * field62 * * ************ */
         mapping[Contact.INSTANT_MESSENGER1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field62";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4811,14 +5243,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsInstantMessenger1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getInstantMessenger1());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getInstantMessenger1();
                 final String y = original.getInstantMessenger1();
@@ -4826,10 +5261,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getInstantMessenger1();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Instantmessenger 1";
             }
@@ -4838,10 +5275,12 @@ public final class Contacts {
         /** ************** * field63 * * ************ */
         mapping[Contact.INSTANT_MESSENGER2] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field63";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4849,14 +5288,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsInstantMessenger2();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getInstantMessenger2());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getInstantMessenger2();
                 final String y = original.getInstantMessenger2();
@@ -4864,10 +5306,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getInstantMessenger2();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Instantmessenger 2";
             }
@@ -4876,10 +5320,12 @@ public final class Contacts {
         /** ************** * field64 * * ************ */
         mapping[Contact.TELEPHONE_IP] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field64";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4887,14 +5333,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsTelephoneIP();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getTelephoneIP());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getTelephoneIP();
                 final String y = original.getTelephoneIP();
@@ -4902,10 +5351,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getTelephoneIP();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Telephone IP";
             }
@@ -4913,10 +5364,12 @@ public final class Contacts {
         /** ************** * field65 * * ************ */
         mapping[Contact.EMAIL1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field65";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4924,14 +5377,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsEmail1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getEmail1());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getEmail1();
                 final String y = original.getEmail1();
@@ -4939,10 +5395,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getEmail1();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Email 1";
             }
@@ -4950,10 +5408,12 @@ public final class Contacts {
         /** ************** * field66 * * ************ */
         mapping[Contact.EMAIL2] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field66";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4961,14 +5421,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsEmail2();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getEmail2());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getEmail2();
                 final String y = original.getEmail2();
@@ -4976,10 +5439,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getEmail2();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Email 2";
             }
@@ -4987,10 +5452,12 @@ public final class Contacts {
         /** ************** * field67 * * ************ */
         mapping[Contact.EMAIL3] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field67";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -4998,14 +5465,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsEmail3();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getEmail3());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getEmail3();
                 final String y = original.getEmail3();
@@ -5013,10 +5483,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getEmail3();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Email 3";
             }
@@ -5024,10 +5496,12 @@ public final class Contacts {
         /** ************** * field68 * * ************ */
         mapping[Contact.URL] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field68";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5035,14 +5509,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsURL();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getURL());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getURL();
                 final String y = original.getURL();
@@ -5050,10 +5527,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getURL();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "URL";
             }
@@ -5061,10 +5540,12 @@ public final class Contacts {
         /** ************** * field69 * * ************ */
         mapping[Contact.CATEGORIES] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field69";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5072,14 +5553,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCategories();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getCategories());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getCategories();
                 final String y = original.getCategories();
@@ -5087,10 +5571,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCategories();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Categories";
             }
@@ -5098,10 +5584,12 @@ public final class Contacts {
         /** ************** * field70 * * ************ */
         mapping[Contact.USERFIELD01] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field70";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5109,14 +5597,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField01();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField01());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField01();
                 final String y = original.getUserField01();
@@ -5124,10 +5615,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField01();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 1";
             }
@@ -5135,10 +5628,12 @@ public final class Contacts {
         /** ************** * field71 * * ************ */
         mapping[Contact.USERFIELD02] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field71";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5146,14 +5641,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField02();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField02());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField02();
                 final String y = original.getUserField02();
@@ -5161,10 +5659,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField02();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 2";
             }
@@ -5172,10 +5672,12 @@ public final class Contacts {
         /** ************** * field72 * * ************ */
         mapping[Contact.USERFIELD03] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field72";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5183,14 +5685,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField03();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField03());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField03();
                 final String y = original.getUserField03();
@@ -5198,10 +5703,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField03();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 3";
             }
@@ -5209,10 +5716,12 @@ public final class Contacts {
         /** ************** * field73 * * ************ */
         mapping[Contact.USERFIELD04] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field73";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5220,14 +5729,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField04();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField04());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField04();
                 final String y = original.getUserField04();
@@ -5235,10 +5747,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField04();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 4";
             }
@@ -5246,10 +5760,12 @@ public final class Contacts {
         /** ************** * field74 * * ************ */
         mapping[Contact.USERFIELD05] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field74";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5257,14 +5773,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField05();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField05());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField05();
                 final String y = original.getUserField05();
@@ -5272,10 +5791,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField05();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 5";
             }
@@ -5283,10 +5804,12 @@ public final class Contacts {
         /** ************** * field75 * * ************ */
         mapping[Contact.USERFIELD06] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field75";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5294,14 +5817,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField06();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField06());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField06();
                 final String y = original.getUserField06();
@@ -5309,10 +5835,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField06();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 6";
             }
@@ -5320,10 +5848,12 @@ public final class Contacts {
         /** ************** * field76 * * ************ */
         mapping[Contact.USERFIELD07] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field76";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5331,14 +5861,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField07();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField07());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField07();
                 final String y = original.getUserField07();
@@ -5346,10 +5879,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField07();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 7";
             }
@@ -5357,10 +5892,12 @@ public final class Contacts {
         /** ************** * field77 * * ************ */
         mapping[Contact.USERFIELD08] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field77";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5368,14 +5905,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField08();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField08());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField08();
                 final String y = original.getUserField08();
@@ -5383,10 +5923,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField08();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 8";
             }
@@ -5394,10 +5936,12 @@ public final class Contacts {
         /** ************** * field78 * * ************ */
         mapping[Contact.USERFIELD09] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field78";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5405,14 +5949,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField09();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField09());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField09();
                 final String y = original.getUserField09();
@@ -5420,10 +5967,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField09();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 9";
             }
@@ -5431,10 +5980,12 @@ public final class Contacts {
         /** ************** * field79 * * ************ */
         mapping[Contact.USERFIELD10] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field79";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5442,14 +5993,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField10();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField10());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField10();
                 final String y = original.getUserField10();
@@ -5457,10 +6011,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField10();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 10";
             }
@@ -5468,10 +6024,12 @@ public final class Contacts {
         /** ************** * field80 * * ************ */
         mapping[Contact.USERFIELD11] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field80";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5479,14 +6037,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField11();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField11());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField11();
                 final String y = original.getUserField11();
@@ -5494,10 +6055,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField11();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 11";
             }
@@ -5505,10 +6068,12 @@ public final class Contacts {
         /** ************** * field81 * * ************ */
         mapping[Contact.USERFIELD12] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field81";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5516,14 +6081,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField12();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField12());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField12();
                 final String y = original.getUserField12();
@@ -5531,10 +6099,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField12();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 12";
             }
@@ -5542,10 +6112,12 @@ public final class Contacts {
         /** ************** * field82 * * ************ */
         mapping[Contact.USERFIELD13] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field82";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5553,14 +6125,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField13();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField13());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField13();
                 final String y = original.getUserField13();
@@ -5568,10 +6143,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField13();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 13";
             }
@@ -5579,10 +6156,12 @@ public final class Contacts {
         /** ************** * field83 * * ************ */
         mapping[Contact.USERFIELD14] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field83";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5590,14 +6169,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField14();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField14());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField14();
                 final String y = original.getUserField14();
@@ -5605,10 +6187,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField14();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 14";
             }
@@ -5616,10 +6200,12 @@ public final class Contacts {
         /** ************** * field84 * * ************ */
         mapping[Contact.USERFIELD15] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field84";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5627,14 +6213,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField15();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField15());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField15();
                 final String y = original.getUserField15();
@@ -5642,10 +6231,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField15();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 15";
             }
@@ -5653,10 +6244,12 @@ public final class Contacts {
         /** ************** * field85 * * ************ */
         mapping[Contact.USERFIELD16] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field85";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5664,14 +6257,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField16();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField16());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField16();
                 final String y = original.getUserField16();
@@ -5679,10 +6275,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField16();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 16";
             }
@@ -5690,10 +6288,12 @@ public final class Contacts {
         /** ************** * field86 * * ************ */
         mapping[Contact.USERFIELD17] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field86";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5701,14 +6301,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField17();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField17());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField17();
                 final String y = original.getUserField17();
@@ -5716,10 +6319,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField17();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 17";
             }
@@ -5727,10 +6332,12 @@ public final class Contacts {
         /** ************** * field87 * * ************ */
         mapping[Contact.USERFIELD18] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field87";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5738,14 +6345,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField18();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField18());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField18();
                 final String y = original.getUserField18();
@@ -5753,10 +6363,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField18();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 18";
             }
@@ -5764,10 +6376,12 @@ public final class Contacts {
         /** ************** * field88 * * ************ */
         mapping[Contact.USERFIELD19] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field88";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5775,14 +6389,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField19();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField19());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField19();
                 final String y = original.getUserField19();
@@ -5790,10 +6407,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField19();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 19";
             }
@@ -5801,10 +6420,12 @@ public final class Contacts {
         /** ************** * field89 * * ************ */
         mapping[Contact.USERFIELD20] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field89";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -5812,14 +6433,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUserField20();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getUserField20());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getUserField20();
                 final String y = original.getUserField20();
@@ -5827,10 +6451,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getUserField20();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Dynamic Field 20";
             }
@@ -5838,10 +6464,12 @@ public final class Contacts {
         /** ************** * intfield01 * * ************ */
         mapping[Contact.OBJECT_ID] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield01";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -5849,22 +6477,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsObjectID();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getObjectID());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (original.getObjectID() == co.getObjectID());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getObjectID());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Object id";
             }
@@ -5872,10 +6505,12 @@ public final class Contacts {
         /** ************** * intfield02 * * ************ */
         mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield02";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull() && (t > 0)) {
@@ -5883,22 +6518,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNumberOfDistributionLists();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getNumberOfDistributionLists());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (original.getNumberOfDistributionLists() == co.getNumberOfDistributionLists());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getNumberOfDistributionLists());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Number of distributionlists";
             }
@@ -5906,10 +6546,12 @@ public final class Contacts {
         /** ************** * intfield03 * * ************ */
         mapping[Contact.NUMBER_OF_LINKS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield03";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull() && (t > 0)) {
@@ -5917,22 +6559,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNumberOfLinks();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getNumberOfLinks());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (original.getNumberOfLinks() == co.getNumberOfLinks());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getNumberOfLinks());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Number of links";
             }
@@ -5940,10 +6587,12 @@ public final class Contacts {
         /** ************** * intfield02 Part 2 * * ************ */
         mapping[Contact.DISTRIBUTIONLIST] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield02";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
@@ -5955,22 +6604,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsDistributionLists();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // nix
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -5978,10 +6632,12 @@ public final class Contacts {
         /** ************** * intfield03 Part 2 * * ************ */
         mapping[Contact.LINKS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield03";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
@@ -5993,22 +6649,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsLinks();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // nix
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6016,10 +6677,12 @@ public final class Contacts {
         /** ************** * fid * * ************ */
         mapping[Contact.FOLDER_ID] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "fid";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -6027,22 +6690,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsParentFolderID();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getParentFolderID());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getParentFolderID());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Folder id";
             }
@@ -6050,10 +6718,12 @@ public final class Contacts {
         /** ************** * cid * * ************ */
         mapping[Contact.CONTEXTID] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "cid";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -6061,22 +6731,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsContextId();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getContextId());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (original.getContextId() == co.getContextId());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getContextId());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Context id";
             }
@@ -6085,10 +6760,12 @@ public final class Contacts {
         /** ************** * created_from * * ************ */
         mapping[Contact.CREATED_BY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "created_from";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -6096,22 +6773,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCreatedBy();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getCreatedBy());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getCreatedBy());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Created by";
             }
@@ -6119,10 +6801,12 @@ public final class Contacts {
         /** ************** * changed_from * * ************ */
         mapping[Contact.MODIFIED_BY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "changed_from";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int t = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -6130,22 +6814,27 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsModifiedBy();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setInt(pos, co.getModifiedBy());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (co.getModifiedBy() == original.getModifiedBy());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getModifiedBy());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Modified by";
             }
@@ -6153,10 +6842,12 @@ public final class Contacts {
         /** ************** * creating_date * * ************ */
         mapping[Contact.CREATION_DATE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "creating_date";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final long dong = rs.getLong(pos);
                 if (!rs.wasNull()) {
@@ -6165,23 +6856,28 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsCreationDate();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 final java.util.Date d = co.getCreationDate();
                 ps.setLong(pos, d.getTime());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getCreationDate() == null ? null : co.getCreationDate().toString();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Creation date";
             }
@@ -6189,10 +6885,12 @@ public final class Contacts {
         /** ************** * changing_date * * ************ */
         mapping[Contact.LAST_MODIFIED] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "changing_date";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final long dong = rs.getLong(pos);
                 if (!rs.wasNull()) {
@@ -6201,23 +6899,28 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsLastModified();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 final java.util.Date d = co.getLastModified();
                 ps.setLong(pos, d.getTime());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getLastModified() == null ? null : co.getLastModified().toString();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Changing date";
             }
@@ -6225,10 +6928,12 @@ public final class Contacts {
         /** ************** * timestampfield01 * * ************ */
         mapping[Contact.BIRTHDAY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "timestampfield01";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final Timestamp t = rs.getTimestamp(pos);
                 if (!rs.wasNull()) {
@@ -6236,10 +6941,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsBirthday();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.getBirthday() == null) {
                     ps.setTimestamp(pos, null);
@@ -6248,6 +6955,7 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final java.util.Date x = co.getBirthday();
                 final java.util.Date y = original.getBirthday();
@@ -6263,10 +6971,12 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getBirthday() == null ? null : co.getBirthday().toString();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Birthday";
             }
@@ -6274,10 +6984,12 @@ public final class Contacts {
         /** ************** * timestampfield02 * * ************ */
         mapping[Contact.ANNIVERSARY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "timestampfield02";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final Timestamp t = rs.getTimestamp(pos);
                 if (!rs.wasNull()) {
@@ -6285,10 +6997,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsAnniversary();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.getAnniversary() == null) {
                     ps.setTimestamp(pos, null);
@@ -6297,6 +7011,7 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final java.util.Date x = co.getAnniversary();
                 final java.util.Date y = original.getAnniversary();
@@ -6312,10 +7027,12 @@ public final class Contacts {
                 return (x.getTime() == y.getTime());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getAnniversary() == null ? null : co.getAnniversary().toString();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Anniversary";
             }
@@ -6324,10 +7041,12 @@ public final class Contacts {
         /** ************** * image01 * * ************ */
         mapping[Contact.IMAGE1] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield04";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
@@ -6339,10 +7058,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsImage1();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsImage1()) {
                     ps.setInt(pos, 1);
@@ -6351,6 +7072,7 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
 
                 if ((co.getImage1() != null) && (original.getImage1() != null)) {
@@ -6365,10 +7087,12 @@ public final class Contacts {
                 return true;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6376,10 +7100,12 @@ public final class Contacts {
         /** ************** * intfield04 * * ************ */
         mapping[Contact.IMAGE_LAST_MODIFIED] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield04";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
@@ -6394,10 +7120,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsImageLastModified();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsImage1()) {
                     ps.setInt(pos, 1);
@@ -6406,14 +7134,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6421,10 +7152,12 @@ public final class Contacts {
         /** ************** * intfield04 * * ************ */
         mapping[Contact.IMAGE1_CONTENT_TYPE] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield04";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 try {
                     final int t = rs.getInt(pos);
@@ -6439,10 +7172,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsImageContentType();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsImage1()) {
                     ps.setInt(pos, 1);
@@ -6451,14 +7186,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6466,30 +7204,37 @@ public final class Contacts {
         /** ************** * intfield04 * * ************ */
         mapping[Contact.NUMBER_OF_IMAGES] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield04";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
                 //
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return false;
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
                 // false
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6497,10 +7242,12 @@ public final class Contacts {
         /** ************** * userid * * ************ */
         mapping[Contact.INTERNAL_USERID] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "userid";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
@@ -6508,10 +7255,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsInternalUserId();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsInternalUserId()) {
                     ps.setInt(pos, co.getInternalUserId());
@@ -6520,14 +7269,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return false;
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6535,10 +7287,12 @@ public final class Contacts {
         /** ************** * intfield05 * * ************ */
         mapping[Contact.COLOR_LABEL] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield05";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
@@ -6546,10 +7300,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsLabel();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsLabel()) {
                     ps.setInt(pos, co.getLabel());
@@ -6558,14 +7314,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (co.getLabel() == original.getLabel());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6573,10 +7332,12 @@ public final class Contacts {
         /** ************** * field90 * * ************ */
         mapping[Contact.FILE_AS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "field90";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -6584,14 +7345,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsFileAs();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getFileAs());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getFileAs();
                 final String y = original.getFileAs();
@@ -6599,10 +7363,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6610,10 +7376,12 @@ public final class Contacts {
         /** ************** * intfield06 * * ************ */
         mapping[Contact.DEFAULT_ADDRESS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield06";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
@@ -6621,10 +7389,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsDefaultAddress();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsDefaultAddress()) {
                     ps.setInt(pos, co.getDefaultAddress());
@@ -6633,14 +7403,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (co.getDefaultAddress() == original.getDefaultAddress());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return String.valueOf(co.getDefaultAddress());
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Default address";
             }
@@ -6648,10 +7421,12 @@ public final class Contacts {
         /** ************** * intfield07 * * ************ */
         mapping[Contact.MARK_AS_DISTRIBUTIONLIST] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield07";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
@@ -6659,10 +7434,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsMarkAsDistributionlist();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsMarkAsDistributionlist()) {
                     if (co.getMarkAsDistribtuionlist()) {
@@ -6675,6 +7452,7 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 if (co.getMarkAsDistribtuionlist() && (!original.getMarkAsDistribtuionlist())) {
                     return false;
@@ -6687,10 +7465,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6698,10 +7478,12 @@ public final class Contacts {
         /** ************** * intfield08 * * ************ */
         mapping[Contact.NUMBER_OF_ATTACHMENTS] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "intfield08";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull()) {
@@ -6709,10 +7491,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsNumberOfAttachments();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsNumberOfAttachments()) {
                     ps.setInt(pos, co.getNumberOfAttachments());
@@ -6721,14 +7505,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (co.getNumberOfAttachments() == original.getNumberOfAttachments());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6736,10 +7523,12 @@ public final class Contacts {
         /** ************** * useCount * * ************ */
         mapping[Contact.USE_COUNT] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "useCount";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final int i = rs.getInt(pos);
                 if (!rs.wasNull() && (i > 0)) {
@@ -6747,10 +7536,12 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsUseCount();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 if (co.containsUseCount()) {
                     ps.setInt(pos, co.getUseCount());
@@ -6759,14 +7550,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 return (co.getUseCount() == original.getUseCount());
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return null;
             }
 
+            @Override
             public String getReadableTitle() {
                 return null;
             }
@@ -6774,10 +7568,12 @@ public final class Contacts {
         /** ************** * yomiFirstName * * ************ */
         mapping[Contact.YOMI_FIRST_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "yomiFirstName";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -6785,14 +7581,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsYomiFirstName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getYomiFirstName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getYomiFirstName();
                 final String y = original.getYomiFirstName();
@@ -6800,10 +7599,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getYomiFirstName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Yomi First Name";
             }
@@ -6811,10 +7612,12 @@ public final class Contacts {
         /** ************** * yomiLastName * * ************ */
         mapping[Contact.YOMI_LAST_NAME] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "yomiLastName";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -6822,14 +7625,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsYomiLastName();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getYomiLastName());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getYomiLastName();
                 final String y = original.getYomiLastName();
@@ -6837,10 +7643,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getYomiLastName();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Yomi Last Name";
             }
@@ -6848,10 +7656,12 @@ public final class Contacts {
         /** ************** * Yomi Company * * ************ */
         mapping[Contact.YOMI_COMPANY] = new Mapper() {
 
+            @Override
             public String getDBFieldName() {
                 return "yomiCompany";
             }
 
+            @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
                 final String t = rs.getString(pos);
                 if (!rs.wasNull()) {
@@ -6859,14 +7669,17 @@ public final class Contacts {
                 }
             }
 
+            @Override
             public boolean containsElement(final Contact co) {
                 return co.containsYomiCompany();
             }
 
+            @Override
             public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
                 ps.setString(pos, co.getYomiCompany());
             }
 
+            @Override
             public boolean compare(final Contact co, final Contact original) {
                 final String x = co.getYomiCompany();
                 final String y = original.getYomiCompany();
@@ -6874,10 +7687,12 @@ public final class Contacts {
                 return areEqual(x, y);
             }
 
+            @Override
             public String getValueAsString(final Contact co) {
                 return co.getYomiCompany();
             }
 
+            @Override
             public String getReadableTitle() {
                 return "Yomi Company";
             }

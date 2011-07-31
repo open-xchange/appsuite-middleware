@@ -69,6 +69,7 @@ public class MicroformatAppointmentSAXHandler extends AbstractMicroformatSAXHand
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z"); //iso 8601, this one should be locale-independend    
     private List<Exception> exceptions = new LinkedList<Exception>();
     
+    @Override
     public void startElement(String uri, String name, String qName, Attributes atts) {
         String className = atts.getValue("class");
         if(null == className ){

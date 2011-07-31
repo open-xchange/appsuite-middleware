@@ -159,14 +159,17 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
+    @Override
     public String getPrefix() {
         return EnumComponent.IMPORT_EXPORT.getAbbreviation();
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -175,10 +178,12 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

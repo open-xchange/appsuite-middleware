@@ -648,14 +648,17 @@ public class HeaderCollection implements Serializable {
 
     private static final transient Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
 
+        @Override
         public boolean hasNext() {
             return false;
         }
 
+        @Override
         public Entry<String, String> next() {
             throw new NoSuchElementException();
         }
 
+        @Override
         public void remove() {
             // Nothing to remove
         }
@@ -689,6 +692,7 @@ public class HeaderCollection implements Serializable {
             this.headers = headers;
         }
 
+        @Override
         public boolean hasNext() {
             if (entry == null || index >= size) {
                 while (iter.hasNext()) {
@@ -705,6 +709,7 @@ public class HeaderCollection implements Serializable {
             return (index < size);
         }
 
+        @Override
         public Entry<String, String> next() {
             if (entry == null || index >= size) {
                 while (iter.hasNext()) {
@@ -721,6 +726,7 @@ public class HeaderCollection implements Serializable {
             return new HeaderEntry(entry, index++);
         }
 
+        @Override
         public void remove() {
             if (entry == null) {
                 throw new IllegalStateException(
@@ -748,14 +754,17 @@ public class HeaderCollection implements Serializable {
             this.index = index;
         }
 
+        @Override
         public String getKey() {
             return entry.getKey().toString();
         }
 
+        @Override
         public String getValue() {
             return entry.getValue().get(index);
         }
 
+        @Override
         public String setValue(final String value) {
             return entry.getValue().set(index, value);
         }

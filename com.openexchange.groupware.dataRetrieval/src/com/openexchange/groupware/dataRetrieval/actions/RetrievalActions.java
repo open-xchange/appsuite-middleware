@@ -67,7 +67,6 @@ import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.session.RandomTokenContainer;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

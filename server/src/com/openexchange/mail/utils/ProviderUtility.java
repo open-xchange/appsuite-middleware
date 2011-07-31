@@ -84,15 +84,19 @@ public final class ProviderUtility {
         final URI uri;
         try {
             uri = URIParser.parse(serverUrl, new URIDefaults() {
+                @Override
                 public String getProtocol() {
                     return null;
                 }
+                @Override
                 public String getSSLProtocol() {
                     return null;
                 }
+                @Override
                 public int getPort() {
                     return defaultPort;
                 }
+                @Override
                 public int getSSLPort() {
                     return defaultPort;
                 }});

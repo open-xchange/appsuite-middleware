@@ -77,14 +77,17 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 74;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

@@ -71,7 +71,8 @@ public class WebdavLogAction extends AbstractAction {
 	private boolean logBody;
 	private boolean logResponse;
 	
-	public void perform(WebdavRequest req, WebdavResponse res)
+	@Override
+    public void perform(WebdavRequest req, WebdavResponse res)
 			throws OXException {
 		StringBuilder b = new StringBuilder();
 		try {

@@ -73,6 +73,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
         this.attachmentBase = attachmentBase;
     }
 
+    @Override
     public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment exception,final int inFolder, final ServerSession session) throws OXException {
         try {
             attachmentBase.startTransaction();

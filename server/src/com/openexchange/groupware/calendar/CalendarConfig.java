@@ -126,6 +126,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (isPropertiesLoadInternal()) {
             LOG.error("Duplicate initialization of CalendarConfig.");
@@ -137,6 +138,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         if (!isPropertiesLoadInternal()) {
             LOG.error("Duplicate shutdown of CalendarConfig.");

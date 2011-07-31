@@ -72,10 +72,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ConfigFactoryService implements MultipleHandlerFactoryService {
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new ConfigMultipleHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "config";
     }
@@ -84,18 +86,22 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
 
         private String path;
 
+        @Override
         public void close() {
             
         }
 
+        @Override
         public Date getTimestamp() {
             return null;
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.emptyList();
         }
 
+        @Override
         public Object performRequest(String action, JSONObject jsonObject, ServerSession session, boolean secure) throws JSONException, OXException {
            
             final SettingStorage stor = SettingStorage.getInstance(session);
@@ -144,6 +150,7 @@ public class ConfigFactoryService implements MultipleHandlerFactoryService {
             return retval;
         }
 
+        @Override
         public void setPath(String path) {
             if(path == null) {
                 path = "";

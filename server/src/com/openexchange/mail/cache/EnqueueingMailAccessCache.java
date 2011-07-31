@@ -178,6 +178,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
         final Key key = keyFor(accountId, session);
         final MailAccessQueue accessQueue = map.get(key);
@@ -209,6 +210,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @param mailAccess The mail access to put into cache
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
+    @Override
     public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleSeconds = mailAccess.getCacheIdleSeconds();
         if (idleSeconds <= 0) {
@@ -260,6 +262,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @param accountId The account ID
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
+    @Override
     public boolean containsMailAccess(final Session session, final int accountId) {
         final MailAccessQueue accessQueue = map.get(keyFor(accountId, session));
         if (null == accessQueue) {
@@ -310,6 +313,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
      * @param session The session
      * @throws OXException If clearing user entries fails
      */
+    @Override
     public void clearUserEntries(final Session session) throws OXException {
         /*
          * Check if last...
@@ -340,6 +344,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             this.map = map;
         }
 
+        @Override
         public void run() {
             try {
                 /*

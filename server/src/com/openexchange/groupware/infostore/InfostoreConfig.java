@@ -138,6 +138,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 		return Long.parseLong(sizeS);
 	}
 
+    @Override
     public void start() throws OXException {
         if (!loaded || singleton == null) {
 			INIT_LOCK.lock();
@@ -150,6 +151,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 		}   
     }
 
+    @Override
     public void stop() throws OXException {
         singleton = null;
         loaded = false;

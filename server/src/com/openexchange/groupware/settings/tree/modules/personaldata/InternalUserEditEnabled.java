@@ -68,6 +68,7 @@ public class InternalUserEditEnabled extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.personaldata", "internal_user_edit" };
     }

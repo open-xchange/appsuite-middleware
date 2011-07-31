@@ -137,6 +137,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
 
 
 
+    @Override
     public void endElement(String uri, String name, String qName) {
         currentlyReading = null;
     }

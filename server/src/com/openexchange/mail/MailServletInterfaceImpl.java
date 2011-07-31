@@ -2160,6 +2160,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final org.apache.commons.logging.Log l = LOG;
         final Runnable r = new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     final RetentionData retentionData = retentionService.newInstance();
@@ -2804,6 +2805,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return ret;
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             if (o1.isDefaultFolder()) {
                 if (o2.isDefaultFolder()) {
@@ -2828,6 +2830,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             return collator.compare(o1.getName(), o2.getName());
         }

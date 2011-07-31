@@ -69,10 +69,12 @@ public final class PrivateFlag implements Mapper {
         super();
     }
 
+    @Override
     public String getDBFieldName() {
         return "pflag";
     }
 
+    @Override
     public void addToContactObject(ResultSet rs, int pos, Contact co, Connection readcon, int user, int[] group, Context ctx, UserConfiguration uc) throws SQLException {
         final int t = rs.getInt(pos);
         if (t == 1) {
@@ -82,10 +84,12 @@ public final class PrivateFlag implements Mapper {
         }
     }
 
+    @Override
     public boolean containsElement(Contact co) {
         return co.containsPrivateFlag();
     }
 
+    @Override
     public void fillPreparedStatement(PreparedStatement ps, int pos, Contact co) throws SQLException {
         if (co.getPrivateFlag()) {
             ps.setInt(pos, 1);
@@ -94,14 +98,17 @@ public final class PrivateFlag implements Mapper {
         }
     }
 
+    @Override
     public boolean compare(Contact co, Contact original) {
         return (co.getPrivateFlag() == original.getPrivateFlag());
     }
 
+    @Override
     public String getValueAsString(final Contact co) {
         return null;
     }
 
+    @Override
     public String getReadableTitle() {
         return null;
     }

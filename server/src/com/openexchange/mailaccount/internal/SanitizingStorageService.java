@@ -88,10 +88,12 @@ final class SanitizingStorageService implements MailAccountStorageService {
         return PREFIX.equals(candidate.getPrefix()) && URI_ERROR_NUMBER == candidate.getCode();
     }
 
+    @Override
     public void invalidateMailAccount(final int id, final int user, final int cid) throws OXException {
         storageService.invalidateMailAccount(id, user, cid);
     }
 
+    @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid);
@@ -104,6 +106,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid);
@@ -116,6 +119,7 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws OXException {
         try {
             return storageService.getUserMailAccounts(user, cid, con);
@@ -128,62 +132,77 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount getDefaultMailAccount(final int user, final int cid) throws OXException {
         return storageService.getDefaultMailAccount(user, cid);
     }
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
     }
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
     }
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
         storageService.updateMailAccount(mailAccount, user, cid, sessionPassword);
     }
 
+    @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
         return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword);
     }
 
+    @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
         return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid);
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid, deletePrimary);
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
     }
 
+    @Override
     public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
         return storageService.resolveLogin(login, cid);
     }
 
+    @Override
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
         return storageService.resolveLogin(login, server, cid);
     }
 
+    @Override
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws OXException {
         return storageService.resolvePrimaryAddr(primaryAddress, cid);
     }
 
+    @Override
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws OXException {
         return storageService.getByPrimaryAddress(primaryAddress, user, cid);
     }
 
+    @Override
     public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         return storageService.getByHostNames(hostNames, user, cid);
     }
 
+    @Override
     public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getTransportAccountForID(id, user, cid);
@@ -196,10 +215,12 @@ final class SanitizingStorageService implements MailAccountStorageService {
         }
     }
 
+    @Override
     public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
         return storageService.checkCanDecryptPasswords(user, cid, secret);
     }
 
+    @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         storageService.migratePasswords(user, cid, oldSecret, newSecret);
     }

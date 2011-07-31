@@ -85,27 +85,33 @@ public final class ModuleReplacement implements TemplateReplacement {
         repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
     }
 
+    @Override
     public String getReplacement() {
         return repl;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.MODULE;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
@@ -115,10 +121,12 @@ public final class ModuleReplacement implements TemplateReplacement {
         return super.clone();
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!ModuleReplacement.class.isInstance(other)) {
             /*

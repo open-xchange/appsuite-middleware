@@ -131,6 +131,7 @@ public class ReportingMBean implements DynamicMBean {
         mbeanInfo = buildMBeanInfo();
     }
 
+    @Override
     public Object getAttribute(final String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
         if (attribute == null) {
             throw new RuntimeOperationsException(
@@ -294,6 +295,7 @@ public class ReportingMBean implements DynamicMBean {
         return new Date(0);
     }
 
+    @Override
     public AttributeList getAttributes(final String[] attributes) {
         if (attributes == null) {
             throw new RuntimeOperationsException(
@@ -315,20 +317,24 @@ public class ReportingMBean implements DynamicMBean {
         return (resultList);
     }
 
+    @Override
     public MBeanInfo getMBeanInfo() {
         return mbeanInfo;
     }
 
+    @Override
     public Object invoke(final String actionName, final Object[] params, final String[] signature) {
         throw new RuntimeOperationsException(
             new UnsupportedOperationException("invoke is not supported"),
             "The method invoke is not supported.");
     }
 
+    @Override
     public void setAttribute(final Attribute attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be set in this MBean");
     }
 
+    @Override
     public AttributeList setAttributes(final AttributeList attributes) {
         return new AttributeList();
     }

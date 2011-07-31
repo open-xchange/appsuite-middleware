@@ -103,6 +103,7 @@ final class AJPv13Listener implements Runnable {
             this.num = num;
         }
 
+        @Override
         public void execute(final Runnable command) {
             listenerThread = new AJPv13ListenerThread(command);
             listenerThread.setName(getThreadName(this.num, new StringBuilder(NAME_LENGTH).append("AJPListener-")));
@@ -300,6 +301,7 @@ final class AJPv13Listener implements Runnable {
      * (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @Override
     public void run() {
         boolean keepOnRunning = true;
         changeNumberOfRunningAJPListeners(true);

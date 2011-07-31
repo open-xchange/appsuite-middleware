@@ -65,6 +65,7 @@ public final class DefaultMailAccount extends AbstractMailAccount {
         super();
     }
 
+    @Override
     public boolean isDefaultAccount() {
         return true;
     }

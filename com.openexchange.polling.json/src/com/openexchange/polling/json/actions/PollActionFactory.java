@@ -6,7 +6,6 @@ import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceHolder;
 import com.openexchange.server.ServiceLookup;
 
 public class PollActionFactory implements AJAXActionServiceFactory {

@@ -360,6 +360,7 @@ public final class CompositeMailMessage extends MailMessage {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
@@ -370,6 +371,7 @@ public final class CompositeMailMessage extends MailMessage {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }
@@ -403,6 +405,7 @@ public final class CompositeMailMessage extends MailMessage {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
@@ -413,6 +416,7 @@ public final class CompositeMailMessage extends MailMessage {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }

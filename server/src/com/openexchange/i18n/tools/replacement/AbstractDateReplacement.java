@@ -118,14 +118,17 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         return clone;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public final boolean changed() {
         return changed;
     }
 
+    @Override
     public final TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
@@ -134,6 +137,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
     /**
      * Gets the replacement for associated date template or an empty string if applied {@link Date} object is <code>null</code>
      */
+    @Override
     public String getReplacement() {
         return date == null ? "" : dateFormat.format(date);
     }
@@ -146,6 +150,7 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * @param timeZone The new time zone to apply
      * @return This replacement with new time zone applied
      */
+    @Override
     public final TemplateReplacement setTimeZone(final TimeZone timeZone) {
         applyTimeZone(timeZone);
         return this;
@@ -159,11 +164,13 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
      * @param locale The new locale to apply
      * @return This replacement with new locale applied
      */
+    @Override
     public final TemplateReplacement setLocale(final Locale locale) {
         applyLocale(locale);
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!AbstractDateReplacement.class.isInstance(other)) {
             /*

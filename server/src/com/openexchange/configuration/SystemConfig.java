@@ -141,6 +141,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (isPropertiesLoadInternal()) {
             LOG.error("Duplicate initialization of SystemConfig.");
@@ -152,6 +153,7 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() {
         clearProperties();
     }

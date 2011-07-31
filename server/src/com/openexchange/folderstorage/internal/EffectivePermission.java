@@ -126,6 +126,7 @@ public final class EffectivePermission implements Permission {
         }
     }
 
+    @Override
     public boolean isVisible() {
         return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
     }
@@ -190,6 +191,7 @@ public final class EffectivePermission implements Permission {
         return contentType.getModule();
     }
 
+    @Override
     public int getDeletePermission() {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
@@ -206,10 +208,12 @@ public final class EffectivePermission implements Permission {
         return underlyingPerm.getDeletePermission();
     }
 
+    @Override
     public int getEntity() {
         return underlyingPerm.getEntity();
     }
 
+    @Override
     public int getFolderPermission() {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
@@ -223,6 +227,7 @@ public final class EffectivePermission implements Permission {
         return underlyingPerm.getFolderPermission();
     }
 
+    @Override
     public int getReadPermission() {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
@@ -236,10 +241,12 @@ public final class EffectivePermission implements Permission {
         return underlyingPerm.getReadPermission();
     }
 
+    @Override
     public int getSystem() {
         return underlyingPerm.getSystem();
     }
 
+    @Override
     public int getWritePermission() {
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
@@ -253,6 +260,7 @@ public final class EffectivePermission implements Permission {
         return underlyingPerm.getWritePermission();
     }
 
+    @Override
     public boolean isAdmin() {
         if (!hasModuleAccess()) {
             return false;
@@ -262,50 +270,62 @@ public final class EffectivePermission implements Permission {
         return underlyingPerm.isAdmin();
     }
 
+    @Override
     public boolean isGroup() {
         return underlyingPerm.isGroup();
     }
 
+    @Override
     public void setAdmin(final boolean admin) {
         throw new UnsupportedOperationException("EffectivePermission.setAdmin()");
     }
 
+    @Override
     public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
         throw new UnsupportedOperationException("EffectivePermission.setAllPermissions()");
     }
 
+    @Override
     public void setDeletePermission(final int permission) {
         throw new UnsupportedOperationException("EffectivePermission.setDeletePermission()");
     }
 
+    @Override
     public void setEntity(final int entity) {
         throw new UnsupportedOperationException("EffectivePermission.setEntity()");
     }
 
+    @Override
     public void setFolderPermission(final int permission) {
         throw new UnsupportedOperationException("EffectivePermission.setFolderPermission()");
     }
 
+    @Override
     public void setGroup(final boolean group) {
         throw new UnsupportedOperationException("EffectivePermission.setGroup()");
     }
 
+    @Override
     public void setMaxPermissions() {
         throw new UnsupportedOperationException("EffectivePermission.setMaxPermissions()");
     }
 
+    @Override
     public void setNoPermissions() {
         throw new UnsupportedOperationException("EffectivePermission.setNoPermissions()");
     }
 
+    @Override
     public void setReadPermission(final int permission) {
         throw new UnsupportedOperationException("EffectivePermission.setReadPermission()");
     }
 
+    @Override
     public void setSystem(final int system) {
         throw new UnsupportedOperationException("EffectivePermission.setSystem()");
     }
 
+    @Override
     public void setWritePermission(final int permission) {
         throw new UnsupportedOperationException("EffectivePermission.setWritePermission()");
     }

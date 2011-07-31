@@ -107,7 +107,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
         
         output = new CalendarDataObject[events.size()];
         for (int i = 0; i < events.size() && i < output.length; i++) {
-            output[i] = (CalendarDataObject) events.get(i);
+            output[i] = events.get(i);
         }
         executedSuccessfully = true;
     }

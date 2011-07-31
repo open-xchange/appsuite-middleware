@@ -92,65 +92,78 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         return "ContextReloader: " + delegate.toString();
     }
 
+    @Override
     public void setUpdating(final boolean updating) {
         updateDelegate();
         delegate.setUpdating(updating);
     }
 
+    @Override
     public void setReadOnly(final boolean readOnly) {
         updateDelegate();
         delegate.setReadOnly(readOnly);
     }
 
+    @Override
     public int getContextId() {
         return delegate.getContextId();
     }
 
+    @Override
     public String getName() {
         updateDelegate();
         return delegate.getName();
     }
 
+    @Override
     public String[] getFileStorageAuth() {
         updateDelegate();
         return delegate.getFileStorageAuth();
     }
 
+    @Override
     public long getFileStorageQuota() {
         updateDelegate();
         return delegate.getFileStorageQuota();
     }
 
+    @Override
     public int getFilestoreId() {
         updateDelegate();
         return delegate.getFilestoreId();
     }
 
+    @Override
     public String getFilestoreName() {
         updateDelegate();
         return delegate.getFilestoreName();
     }
 
+    @Override
     public String[] getLoginInfo() {
         updateDelegate();
         return delegate.getLoginInfo();
     }
 
+    @Override
     public int getMailadmin() {
         updateDelegate();
         return delegate.getMailadmin();
     }
 
+    @Override
     public boolean isEnabled() {
         updateDelegate();
         return delegate.isEnabled();
     }
 
+    @Override
     public boolean isUpdating() {
         updateDelegate();
         return delegate.isUpdating();
     }
 
+    @Override
     public boolean isReadOnly() {
         updateDelegate();
         return delegate.isReadOnly();
@@ -167,6 +180,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
         }
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         updateDelegate();
         return delegate.getAttributes();

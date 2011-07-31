@@ -80,10 +80,13 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
 
+    @Override
     public abstract String[] appendMessages(String destFolder, MailMessage[] msgs) throws OXException;
 
+    @Override
     public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] mailIds, boolean fast) throws OXException;
 
+    @Override
     public abstract void deleteMessages(String folder, String[] mailIds, boolean hardDelete) throws OXException;
 
     /**
@@ -105,10 +108,12 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws OXException
      */
+    @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
         return searchMessages(folder, indexRange, sortField, order, null, fields);
     }
 
+    @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         final MailMessage mail = getMessage(folder, mailId, false);
         if (null == mail) {
@@ -123,6 +128,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         return ret;
     }
 
+    @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
@@ -150,6 +156,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return Corresponding message
      * @throws OXException If message could not be returned
      */
+    @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
@@ -165,8 +172,10 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         return mail;
     }
 
+    @Override
     public abstract MailMessage[] getMessages(String folder, String[] mailIds, MailField[] fields) throws OXException;
 
+    @Override
     public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         return null;
     }
@@ -185,6 +194,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return Unread messages contained in an array of {@link MailMessage}
      * @throws OXException If unread messages cannot be returned.
      */
+    @Override
     public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int limit) throws OXException {
         if (limit == 0) {
             return EMPTY_RETVAL;
@@ -207,14 +217,17 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return The corresponding mail IDs if copied messages in destination folder
      * @throws OXException If messages cannot be copied.
      */
+    @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] ids = copyMessages(sourceFolder, destFolder, mailIds, fast);
         deleteMessages(sourceFolder, mailIds, true);
         return ids;
     }
 
+    @Override
     public abstract void releaseResources() throws OXException;
 
+    @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
@@ -241,12 +254,15 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         return getMessage(draftFullname, uid, true);
     }
 
+    @Override
     public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
+    @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         // Empty body here
     }
 
+    @Override
     public abstract void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
 
     /**
@@ -257,6 +273,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return All new and modified messages in specified folder
      * @throws OXException If mails cannot be returned
      */
+    @Override
     public MailMessage[] getNewAndModifiedMessages(final String folder, final MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }
@@ -269,6 +286,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return All deleted messages in specified folder
      * @throws OXException If mails cannot be returned
      */
+    @Override
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException {
         return EMPTY_RETVAL;
     }

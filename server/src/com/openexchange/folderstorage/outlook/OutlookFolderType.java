@@ -66,15 +66,18 @@ public final class OutlookFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         // A virtual storage serves every folder ID except null
         return (null != folderId);
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return !FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    @Override
     public boolean servesParentId(final String parentId) {
         return servesFolderId(parentId);
     }

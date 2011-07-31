@@ -93,10 +93,12 @@ public final class MailAccountAddReplyToTask extends UpdateTaskAdapter {
     private static final String[] DEPENDENCIES = {
         GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddPersonalTask.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);

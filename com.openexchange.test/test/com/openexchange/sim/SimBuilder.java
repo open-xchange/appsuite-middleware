@@ -87,7 +87,7 @@ public class SimBuilder {
     }
     
     public <T> T getSim(Class<T> klass, Class...classes) {
-        return DynamicSim.compose(klass, classes, (List<DynamicSim>) expectedCalls); // *shrug*
+        return DynamicSim.compose(klass, classes, expectedCalls); // *shrug*
     }
 
     public List<String> getMissingCalls() {

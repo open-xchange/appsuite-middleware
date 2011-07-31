@@ -212,6 +212,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getUserPassword() {
         return userPassword;
     }
@@ -227,6 +228,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return id;
     }
@@ -242,6 +244,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMailEnabled() {
         return mailEnabled;
     }
@@ -257,6 +260,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getShadowLastChange() {
         return shadowLastChange;
     }
@@ -288,6 +292,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getImapServer() {
         return imapServer;
     }
@@ -303,6 +308,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSmtpServer() {
         return smtpServer;
     }
@@ -318,6 +324,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMailDomain() {
         return mailDomain;
     }
@@ -333,6 +340,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getGivenName() {
         return givenName;
     }
@@ -348,6 +356,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSurname() {
         return surname;
     }
@@ -363,6 +372,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMail() {
         return mail;
     }
@@ -378,6 +388,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -393,6 +404,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimeZone() {
         return timeZone;
     }
@@ -412,6 +424,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPreferredLanguage() {
         return preferredLanguage;
     }
@@ -419,6 +432,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale getLocale() {
         return locale;
     }
@@ -426,6 +440,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int[] getGroups() {
         return groups.clone();
     }
@@ -441,6 +456,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getContactId() {
         return contactId;
     }
@@ -473,6 +489,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * @return the imapLogin
      */
+    @Override
     public String getImapLogin() {
         return imapLogin;
     }
@@ -489,6 +506,7 @@ public class UserImpl implements User, Cloneable {
      * 
      * @return The aliases
      */
+    @Override
     public String[] getAliases() {
         return aliases;
     }
@@ -502,6 +520,7 @@ public class UserImpl implements User, Cloneable {
         this.aliases = aliases;
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return attributes;
     }
@@ -518,6 +537,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPasswordMech() {
         return passwordMech;
     }
@@ -525,6 +545,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLoginInfo() {
         return loginInfo;
     }

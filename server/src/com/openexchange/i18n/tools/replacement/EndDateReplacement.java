@@ -103,6 +103,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
         return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.END;
     }

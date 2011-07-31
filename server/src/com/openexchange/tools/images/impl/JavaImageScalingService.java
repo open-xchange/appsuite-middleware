@@ -67,6 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class JavaImageScalingService implements ImageScalingService {
 
+    @Override
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
         BufferedImage image = ImageIO.read(pictureData);
         

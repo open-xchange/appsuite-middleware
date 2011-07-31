@@ -103,10 +103,12 @@ public final class GlobalAddressBookPermissionsResolverTask extends UpdateTaskAd
 
     private static final String[] DEPENDENCIES = { ContactCollectOnIncomingAndOutgoingMailUpdateTask.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final ProgressState status = params.getProgressState();
         /*

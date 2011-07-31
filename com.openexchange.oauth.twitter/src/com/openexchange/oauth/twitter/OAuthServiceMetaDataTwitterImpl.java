@@ -101,14 +101,17 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
         return configurationService.getProperty("com.openexchange.twitter.consumerSecret", KEY_SECRET);
     }
 
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
 
+    @Override
     public String getScope() {
         return null;
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }

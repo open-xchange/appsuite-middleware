@@ -72,6 +72,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         super(context, toTrack);
     }
     
+    @Override
     public void removedService(int module, T tracked, ServiceReference reference) {
         Integer contextId = getInt(reference, Constants.OX_OVERRIDE_CONTEXT);
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
@@ -98,6 +99,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
     }
     
 
+    @Override
     public void addingService(int module, T tracked, ServiceReference reference) {
         Integer contextId = getInt(reference, Constants.OX_OVERRIDE_CONTEXT);
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
@@ -132,6 +134,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         }
     }
 
+    @Override
     public void modifiedService(int module, T tracked, ServiceReference reference) {
         
     }

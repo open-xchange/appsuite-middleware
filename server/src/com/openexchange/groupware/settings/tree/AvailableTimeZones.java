@@ -77,17 +77,21 @@ public class AvailableTimeZones implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 JSONObject json = new JSONObject();
                 I18nServices i18nServices = I18nServices.getInstance();

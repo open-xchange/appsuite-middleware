@@ -101,10 +101,12 @@ public abstract class MailPartDataSource implements DataSource {
         }
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return new String[] { ARGS[0], ARGS[1], ARGS[2] };
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return new Class<?>[] { InputStream.class };
     }

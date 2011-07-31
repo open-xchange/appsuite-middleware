@@ -73,14 +73,17 @@ public class ContactsAddUseCountColumnUpdateTask implements UpdateTask {
 
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsAddUseCountColumnUpdateTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 50;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;

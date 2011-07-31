@@ -307,7 +307,7 @@ public class Queue
      *     
      */
     public void setWaitFor(JAXBElement<BigInteger> value) {
-        this.waitFor = ((JAXBElement<BigInteger> ) value);
+        this.waitFor = value;
     }
 
     /**
@@ -331,7 +331,7 @@ public class Queue
      *     
      */
     public void setService(JAXBElement<BigDecimal> value) {
-        this.service = ((JAXBElement<BigDecimal> ) value);
+        this.service = value;
     }
 
     /**
@@ -427,7 +427,7 @@ public class Queue
      *     
      */
     public void setCallBetween(JAXBElement<BigInteger> value) {
-        this.callBetween = ((JAXBElement<BigInteger> ) value);
+        this.callBetween = value;
     }
 
     /**

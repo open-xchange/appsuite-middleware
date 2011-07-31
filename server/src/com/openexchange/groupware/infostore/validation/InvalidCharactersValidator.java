@@ -56,7 +56,8 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 public class InvalidCharactersValidator implements InfostoreValidator{
 	
-	public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+	@Override
+    public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 		final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 		final GetSwitch get = new GetSwitch(metadata);
 		for(final Metadata field : Metadata.VALUES_ARRAY){
@@ -75,7 +76,8 @@ public class InvalidCharactersValidator implements InfostoreValidator{
 		return Check.containsInvalidChars(string);
 	}
 
-	public String getName() {
+	@Override
+    public String getName() {
 		return "InvalidCharactersValidator";
 	}
 

@@ -81,6 +81,7 @@ public class EventInit implements Initialization {
 		super();
 	}
 
+    @Override
     public void start() throws OXException {
         if(started) {
 			return;
@@ -132,6 +133,7 @@ public class EventInit implements Initialization {
 		EventQueue.addInfostoreEvent(lockCleaner);
     }
 
+    @Override
     public void stop() throws OXException {
         EventQueue.stop();
         EventQueue.clearAllListeners();

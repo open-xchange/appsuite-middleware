@@ -84,6 +84,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         UserStorage.start();
         ServerServiceRegistry.getInstance().addService(UserService.class, new UserServiceImpl());
@@ -92,6 +93,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         ServerServiceRegistry.getInstance().removeService(UserService.class);
         UserStorage.stop();

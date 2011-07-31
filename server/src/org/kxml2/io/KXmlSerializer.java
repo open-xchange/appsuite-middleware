@@ -142,12 +142,14 @@ public class KXmlSerializer implements XmlSerializer {
     			writer.write(' ');
     	}*/
 
+    @Override
     public void docdecl(final String dd) throws IOException {
         writer.write("<!DOCTYPE");
         writer.write(dd);
         writer.write(">");
     }
 
+    @Override
     public void endDocument() throws IOException {
         while (depth > 0) {
             endTag(
@@ -157,6 +159,7 @@ public class KXmlSerializer implements XmlSerializer {
         flush();
     }
 
+    @Override
     public void entityRef(final String name) throws IOException {
         check(false);
         writer.write('&');
@@ -164,6 +167,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write(';');
     }
 
+    @Override
     public boolean getFeature(final String name) {
         //return false;
         return (
@@ -174,6 +178,7 @@ public class KXmlSerializer implements XmlSerializer {
             : false;
     }
 
+    @Override
     public String getPrefix(final String namespace, final boolean create) {
         try {
             return getPrefix(namespace, false, create);
@@ -239,15 +244,18 @@ public class KXmlSerializer implements XmlSerializer {
         return prefix;
     }
 
+    @Override
     public Object getProperty(final String name) {
         throw new RuntimeException("Unsupported property");
     }
 
+    @Override
     public void ignorableWhitespace(final String s)
         throws IOException {
         text(s);
     }
 
+    @Override
     public void setFeature(final String name, final boolean value) {
         if ("http://xmlpull.org/v1/doc/features.html#indent-output"
             .equals(name)) {
@@ -257,11 +265,13 @@ public class KXmlSerializer implements XmlSerializer {
 		}
     }
 
+    @Override
     public void setProperty(final String name, final Object value) {
         throw new RuntimeException(
             "Unsupported Property:" + value);
     }
 
+    @Override
     public void setPrefix(String prefix, String namespace)
         throws IOException {
 
@@ -293,6 +303,7 @@ public class KXmlSerializer implements XmlSerializer {
         nspStack[pos] = namespace;
     }
 
+    @Override
     public void setOutput(final Writer writer) {
         this.writer = writer;
 
@@ -314,6 +325,7 @@ public class KXmlSerializer implements XmlSerializer {
         unicode = false;
     }
 
+    @Override
     public void setOutput(final OutputStream os, final String encoding)
         throws IOException {
         if (os == null) {
@@ -330,6 +342,7 @@ public class KXmlSerializer implements XmlSerializer {
 		}
     }
 
+    @Override
     public void startDocument(
     		final String encoding,
     		final Boolean standalone)
@@ -358,6 +371,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write("?>");
     }
 
+    @Override
     public XmlSerializer startTag(final String namespace, final String name)
         throws IOException {
         check(false);
@@ -412,6 +426,7 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public XmlSerializer attribute(
         String namespace,
         final String name,
@@ -466,6 +481,7 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public void flush() throws IOException {
         check(false);
         writer.flush();
@@ -476,6 +492,7 @@ public class KXmlSerializer implements XmlSerializer {
     		writer.close();
     	}
     */
+    @Override
     public XmlSerializer endTag(final String namespace, final String name)
         throws IOException {
 
@@ -519,18 +536,22 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public String getNamespace() {
         return getDepth() == 0 ? null : elementStack[getDepth() * 3 - 3];
     }
 
+    @Override
     public String getName() {
         return getDepth() == 0 ? null : elementStack[getDepth() * 3 - 1];
     }
 
+    @Override
     public int getDepth() {
         return pending ? depth + 1 : depth;
     }
 
+    @Override
     public XmlSerializer text(final String text) throws IOException {
         check(false);
         indent[depth] = false;
@@ -538,12 +559,14 @@ public class KXmlSerializer implements XmlSerializer {
         return this;
     }
 
+    @Override
     public XmlSerializer text(final char[] text, final int start, final int len)
         throws IOException {
         text(new String(text, start, len));
         return this;
     }
 
+    @Override
     public void cdsect(final String data) throws IOException {
         check(false);
         writer.write("<![CDATA[");
@@ -551,6 +574,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write("]]>");
     }
 
+    @Override
     public void comment(final String comment) throws IOException {
         check(false);
         writer.write("<!--");
@@ -558,6 +582,7 @@ public class KXmlSerializer implements XmlSerializer {
         writer.write("-->");
     }
 
+    @Override
     public void processingInstruction(final String pi)
         throws IOException {
         check(false);

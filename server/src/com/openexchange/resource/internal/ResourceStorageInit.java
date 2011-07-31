@@ -78,6 +78,7 @@ public final class ResourceStorageInit implements Initialization {
         super();
     }
 
+    @Override
     public void start() {
         if (!initialized.compareAndSet(false, true)) {
             LOG.warn("Duplicate resource storage start-up");
@@ -86,6 +87,7 @@ public final class ResourceStorageInit implements Initialization {
         ServerServiceRegistry.getInstance().addService(ResourceService.class, ResourceServiceImpl.getInstance());
     }
 
+    @Override
     public void stop() {
         if (!initialized.compareAndSet(true, false)) {
             LOG.warn("Duplicate resource storage shut-down");

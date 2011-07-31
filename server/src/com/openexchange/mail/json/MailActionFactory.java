@@ -122,14 +122,17 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("edit", new EditAction(services));
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
 
+    @Override
     public void begin(final AJAXState state) throws OXException {
         // Nope
     }
 
+    @Override
     public void end(final AJAXState state) throws OXException {
         /*
          * Drop possibly opened mail access instances

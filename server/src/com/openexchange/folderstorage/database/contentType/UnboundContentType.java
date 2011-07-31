@@ -81,11 +81,13 @@ public final class UnboundContentType implements ContentType {
         return "unbound";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.UNBOUND
         return 4;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

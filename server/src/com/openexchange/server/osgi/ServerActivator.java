@@ -213,15 +213,18 @@ public final class ServerActivator extends DeferredActivator {
             this.context = context;
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
             context.ungetService(reference);
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nope
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);

@@ -70,6 +70,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IDCreateTableTask.class));
 
+    @Override
     public String[] getDependencies() {
         return new String[] { };
     }
@@ -83,6 +84,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         createTable("sequenceIds", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {

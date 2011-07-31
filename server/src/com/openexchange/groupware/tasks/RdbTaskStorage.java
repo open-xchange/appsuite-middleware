@@ -188,6 +188,7 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append(SQL.getLimit(from, to));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
+            @Override
             public void perform(final PreparedStatement stmt) throws SQLException {
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
@@ -224,6 +225,7 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append(SQL.getOrder(orderBy, order));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
+            @Override
             public void perform(final PreparedStatement stmt) throws SQLException {
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
@@ -492,14 +494,17 @@ public class RdbTaskStorage extends TaskStorage {
             final int length = -1 == tmp2 ? 0 : tmp2;
             truncateds[i] = new OXException.Truncated() {
 
+                @Override
                 public int getId() {
                     return mapper.getId();
                 }
 
+                @Override
                 public int getLength() {
                     return valueLength;
                 }
 
+                @Override
                 public int getMaxSize() {
                     return length;
                 }

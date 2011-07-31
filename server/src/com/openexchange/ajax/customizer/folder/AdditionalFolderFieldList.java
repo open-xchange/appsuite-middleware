@@ -167,18 +167,22 @@ public class AdditionalFolderFieldList {
             this.columnId = columnId;
         }
 
+        @Override
         public int getColumnID() {
             return columnId;
         }
 
+        @Override
         public String getColumnName() {
             return null;
         }
 
+        @Override
         public Object getValue(final FolderObject folder, final ServerSession session) {
             return null;
         }
 
+        @Override
         public Object renderJSON(final Object value) {
             return null;
         }

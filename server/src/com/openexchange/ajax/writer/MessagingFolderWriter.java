@@ -106,6 +106,7 @@ public final class MessagingFolderWriter {
             return this;
         }
 
+        @Override
         public void put(final String key, final Object value) throws JSONException {
             jsonArray.put(value);
         }
@@ -130,6 +131,7 @@ public final class MessagingFolderWriter {
             return this;
         }
 
+        @Override
         public void put(final String key, final Object value) throws JSONException {
             if ((null == value) || JSONObject.NULL.equals(value) || (null == key)) {
                 // Don't write NULL value

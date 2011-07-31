@@ -76,6 +76,7 @@ public final class PublicType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.PUBLIC
         return 2;

@@ -13,7 +13,8 @@ public class ASTcommands extends SimpleNode {
 
 
   /** Accept the visitor. **/
-  public Object jjtAccept(SieveParserVisitor visitor, Object data) throws org.apache.jsieve.SieveException {
+  @Override
+public Object jjtAccept(SieveParserVisitor visitor, Object data) throws org.apache.jsieve.SieveException {
     return visitor.visit(this, data);
   }
 }

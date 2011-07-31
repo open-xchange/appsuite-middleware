@@ -236,10 +236,12 @@ public final class NewAction extends AbstractMailAction {
                 }
                 data = new PutNewMailData() {
 
+                    @Override
                     public MailMessage getMail() {
                         return mail;
                     }
 
+                    @Override
                     public InternetAddress getFromAddress() {
                         return fromAddress;
                     }

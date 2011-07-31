@@ -76,7 +76,8 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer 
 		this.context = context;
 	}
 
-	public Object addingService(final ServiceReference reference) {
+	@Override
+    public Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
@@ -91,13 +92,15 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer 
 		return addedService;
 	}
 
-	public void modifiedService(final ServiceReference reference, final Object service) {
+	@Override
+    public void modifiedService(final ServiceReference reference, final Object service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
 		}
 	}
 
-	public void removedService(final ServiceReference reference, final Object service) {
+	@Override
+    public void removedService(final ServiceReference reference, final Object service) {
 		try {
 			if (PasswordChange.getService() == service) {
 				PasswordChange.setService(null);

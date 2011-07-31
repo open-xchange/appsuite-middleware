@@ -77,6 +77,7 @@ public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListene
 
     }
 
+    @Override
     public void lockExpired(Lock lock) throws OXException {
         ServerSession serverSession;
         serverSession = new ServerSessionAdapter(sessionHolder.getSessionObject(), sessionHolder.getContext());

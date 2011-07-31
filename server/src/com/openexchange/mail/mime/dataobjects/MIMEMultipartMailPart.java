@@ -683,32 +683,39 @@ public final class MIMEMultipartMailPart extends MailPart {
             this.data = data;
         }
 
+        @Override
         public byte[] full() {
             return data;
         }
 
+        @Override
         public int length() {
             return data.length;
         }
 
+        @Override
         public int read(final int index) {
             return (data[index] & 0xff); // As unsigned integer
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) {
             final byte[] ret = new byte[len];
             System.arraycopy(data, off, ret, 0, len);
             return ret;
         }
 
+        @Override
         public void load() throws IOException {
             // Nothing to do
         }
 
+        @Override
         public void prepareForCaching() {
             // Nothing to do
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             out.write(data, 0, data.length);
         }
@@ -729,6 +736,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             length = -1;
         }
 
+        @Override
         public byte[] full() throws IOException {
             final ByteBuffer roBuf = getByteBuffer();
             final int size = length();
@@ -745,6 +753,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             return roBuf;
         }
 
+        @Override
         public int length() throws IOException {
             if (length < 0) {
                 length = (int) randomAccess.length();
@@ -752,25 +761,30 @@ public final class MIMEMultipartMailPart extends MailPart {
             return length;
         }
 
+        @Override
         public int read(final int index) throws IOException {
             return (getByteBuffer().get(index) & 0xff); // As unsigned integer
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) throws IOException {
             final byte[] ret = new byte[len];
             getByteBuffer().get(ret, off, len);
             return ret;
         }
 
+        @Override
         public void load() throws IOException {
             getByteBuffer();
         }
 
+        @Override
         public void prepareForCaching() {
             randomAccess = null;
             roBuf = null;
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             out.write(full());
         }
@@ -795,30 +809,37 @@ public final class MIMEMultipartMailPart extends MailPart {
             return delegate;
         }
 
+        @Override
         public byte[] full() throws IOException {
             return getDelegate().full();
         }
 
+        @Override
         public int length() throws IOException {
             return getDelegate().length();
         }
 
+        @Override
         public int read(final int index) throws IOException {
             return getDelegate().read(index);
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) throws IOException {
             return getDelegate().subarray(off, len);
         }
 
+        @Override
         public void load() throws IOException {
             getDelegate();
         }
 
+        @Override
         public void prepareForCaching() {
             dataSource = null;
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             final InputStream in = dataSource.getInputStream();
             if (null == in) {

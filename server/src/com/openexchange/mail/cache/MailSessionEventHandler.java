@@ -99,6 +99,7 @@ public final class MailSessionEventHandler implements EventHandler {
         super();
     }
 
+    @Override
     public void handleEvent(final Event event) {
         final Runnable r = new CustomRunnable(event);
         /*
@@ -121,6 +122,7 @@ public final class MailSessionEventHandler implements EventHandler {
             this.event = event;
         }
 
+        @Override
         public void run() {
             final String topic = event.getTopic();
             try {

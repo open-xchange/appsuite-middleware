@@ -65,10 +65,13 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
  */
 public abstract class MailFolderStorage implements IMailFolderStorage {
 
+    @Override
     public abstract boolean exists(final String fullname) throws OXException;
 
+    @Override
     public abstract MailFolder getFolder(final String fullname) throws OXException;
 
+    @Override
     public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws OXException;
 
     /**
@@ -80,16 +83,21 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @return The mailbox's root folder
      * @throws OXException If mailbox's default folder cannot be delivered
      */
+    @Override
     public MailFolder getRootFolder() throws OXException {
         return getFolder(MailFolder.DEFAULT_FOLDER_ID);
     }
 
+    @Override
     public abstract void checkDefaultFolders() throws OXException;
 
+    @Override
     public abstract String createFolder(MailFolderDescription toCreate) throws OXException;
 
+    @Override
     public abstract String updateFolder(String fullname, MailFolderDescription toUpdate) throws OXException;
 
+    @Override
     public abstract String moveFolder(String fullname, String newFullname) throws OXException;
 
     /**
@@ -109,6 +117,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @return The new fullname
      * @throws OXException If either folder does not exist or cannot be renamed
      */
+    @Override
     public String renameFolder(final String fullname, final String newName) throws OXException {
         final MailFolder folder = getFolder(fullname);
         if (isEmpty(newName)) {
@@ -125,18 +134,23 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         return moveFolder(fullname, newPath);
     }
 
+    @Override
     public String deleteFolder(final String fullname) throws OXException {
         return deleteFolder(fullname, false);
     }
 
+    @Override
     public abstract String deleteFolder(String fullname, boolean hardDelete) throws OXException;
 
+    @Override
     public void clearFolder(final String fullname) throws OXException {
         clearFolder(fullname, false);
     }
 
+    @Override
     public abstract void clearFolder(String fullname, boolean hardDelete) throws OXException;
 
+    @Override
     public MailFolder[] getPath2DefaultFolder(final String fullname) throws OXException {
         if (fullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
             return new MailFolder[0];
@@ -152,16 +166,19 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
 
     private static final Quota.Type[] STORAGE = { Quota.Type.STORAGE };
 
+    @Override
     public Quota getStorageQuota(final String folder) throws OXException {
         return getQuotas(folder, STORAGE)[0];
     }
 
     private static final Quota.Type[] MESSAGE = { Quota.Type.MESSAGE };
 
+    @Override
     public Quota getMessageQuota(final String folder) throws OXException {
         return getQuotas(folder, MESSAGE)[0];
     }
 
+    @Override
     public abstract Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
 
     /**
@@ -172,6 +189,7 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
      * @return The prefix
      * @throws OXException If a mail error occurs
      */
+    @Override
     public String getDefaultFolderPrefix() throws OXException {
         checkDefaultFolders();
         final String trashFullName = getTrashFolder();
@@ -180,18 +198,25 @@ public abstract class MailFolderStorage implements IMailFolderStorage {
         return pos < 0 ? "" : trashFullName.substring(0, pos + 1);
     }
 
+    @Override
     public abstract String getConfirmedHamFolder() throws OXException;
 
+    @Override
     public abstract String getConfirmedSpamFolder() throws OXException;
 
+    @Override
     public abstract String getDraftsFolder() throws OXException;
 
+    @Override
     public abstract String getSpamFolder() throws OXException;
 
+    @Override
     public abstract String getSentFolder() throws OXException;
 
+    @Override
     public abstract String getTrashFolder() throws OXException;
 
+    @Override
     public abstract void releaseResources() throws OXException;
 
 }

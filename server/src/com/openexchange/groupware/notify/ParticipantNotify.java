@@ -300,6 +300,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
 
+    @Override
     public void appointmentCreated(final Appointment appointmentObj, final Session session) {
         int folderOwner = session.getUserId();
         try {
@@ -311,16 +312,19 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             AppointmentActionReplacement.ACTION_NEW), folderOwner == session.getUserId() ? Notifications.APPOINTMENT_CREATE_MAIL : Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF, State.Type.NEW), false, false, false);
     }
 
+    @Override
     public void appointmentModified(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
         sendNotification(oldAppointment, newAppointment, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_ACCEPTED),
@@ -329,6 +333,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.ACCEPTED), false, false, false);
     }
 
+    @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DECLINED),
@@ -337,6 +342,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DECLINED), false, false, false);
     }
 
+    @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
@@ -345,6 +351,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
+    @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
         /*
          * Clear calendar object from notification pool
@@ -366,6 +373,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             false);
     }
 
+    @Override
     public void taskCreated(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_NEW),
@@ -373,6 +381,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.NEW), false, false, false);
     }
 
+    @Override
     public void taskModified(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
@@ -381,6 +390,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     }
 
+    @Override
     public void taskModified(final Task oldTask, final Task newTask, final Session session) {
         sendNotification(oldTask, newTask, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
@@ -388,6 +398,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void taskAccepted(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
@@ -396,6 +407,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.ACCEPTED), false, false, false);
     }
 
+    @Override
     public void taskDeclined(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
@@ -404,6 +416,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DECLINED), false, false, false);
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
@@ -412,6 +425,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
+    @Override
     public void taskDeleted(final Task taskObj, final Session session) {
         /*
          * Clear calendar object from notification pool

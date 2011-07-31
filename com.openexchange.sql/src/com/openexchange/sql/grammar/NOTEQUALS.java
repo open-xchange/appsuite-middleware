@@ -65,11 +65,13 @@ public class NOTEQUALS extends BinaryPredicate {
 		super(left, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildNOTEQUALS(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "<>";
 	}
 }

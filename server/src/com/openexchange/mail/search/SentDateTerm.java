@@ -77,10 +77,12 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         super();
         pattern = new ComparablePattern<java.util.Date>() {
 
+            @Override
             public ComparisonType getComparisonType() {
                 return comparisonType;
             }
 
+            @Override
             public Date getPattern() {
                 return sentDate;
             }

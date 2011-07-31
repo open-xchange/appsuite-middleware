@@ -105,24 +105,31 @@ public class ConfigJump extends SessionServlet {
                 sessionObj.getContextId());
             final String protocol = Tools.getProtocol(req);
             final URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
+                @Override
                 public int getContextId() {
                     return sessionObj.getContextId();
                 }
+                @Override
                 public String getPassword() {
                     return sessionObj.getPassword();
                 }
+                @Override
                 public String getUsername() {
                     return sessionObj.getUserlogin();
                 }
+                @Override
                 public String getProtocol() {
                     return protocol;
                 }
+                @Override
                 public String getServerName() {
                     return req.getServerName();
                 }
+                @Override
                 public int getServerPort() {
                     return req.getServerPort();
                 }
+                @Override
                 public ICookie[] getCookies() {
                     final Cookie[] cookies = req.getCookies();
                     final ICookie[] retval = new ICookie[cookies.length];
@@ -132,6 +139,7 @@ public class ConfigJump extends SessionServlet {
                     }
                     return retval;
                 }
+                @Override
                 public String[] getContextInfos() {
                     return ctx.getLoginInfo();
                 }
@@ -158,9 +166,11 @@ public class ConfigJump extends SessionServlet {
             this.name = name;
             this.value = value;
         }
+        @Override
         public String getName() {
             return name;
         }
+        @Override
         public String getValue() {
             return value;
         }

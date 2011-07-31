@@ -87,16 +87,19 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 23;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
     private static final String findSQL = "SELECT cid,timestampfield01,timestampfield02,timezone,intfield01,intfield02,intfield04,intfield05,field06 FROM prg_dates WHERE intfield01!=intfield02 AND field08 IS NULL ORDER BY cid ASC";
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
@@ -248,40 +251,52 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             super();
             this.cid = cid;
         }
+        @Override
         public int getContextId() {
             return cid;
         }
+        @Override
         public String[] getFileStorageAuth() {
             throw new UnsupportedOperationException("getFileStorageAuth");
         }
+        @Override
         public long getFileStorageQuota() {
             throw new UnsupportedOperationException("getFileStorageQuota");
         }
+        @Override
         public int getFilestoreId() {
             throw new UnsupportedOperationException("getFilestoreId");
         }
+        @Override
         public String getFilestoreName() {
             throw new UnsupportedOperationException("getFilestoreName");
         }
+        @Override
         public String[] getLoginInfo() {
             throw new UnsupportedOperationException("getLoginInfo");
         }
+        @Override
         public int getMailadmin() {
             throw new UnsupportedOperationException("getMailadmin");
         }
+        @Override
         public String getName() {
             throw new UnsupportedOperationException("getName");
         }
+        @Override
         public boolean isEnabled() {
             throw new UnsupportedOperationException("isEnabled");
         }
+        @Override
         public boolean isUpdating() {
             throw new UnsupportedOperationException("isUpdating");
         }
+        @Override
         public boolean isReadOnly() {
             throw new UnsupportedOperationException("isReadOnly");
         }
 
+        @Override
         public Map<String, Set<String>> getAttributes() {
             throw new UnsupportedOperationException("getAttributes");
         }

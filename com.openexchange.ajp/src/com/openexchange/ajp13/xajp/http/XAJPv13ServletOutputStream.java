@@ -361,10 +361,12 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
         }
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }

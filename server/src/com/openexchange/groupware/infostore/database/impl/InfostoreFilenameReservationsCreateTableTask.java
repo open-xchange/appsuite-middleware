@@ -92,14 +92,17 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         return new String[] { getTableSQL() };
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), contextId);
@@ -109,22 +112,27 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         }
     }
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { INFOSTORE_RESERVED_PATHS };
     }

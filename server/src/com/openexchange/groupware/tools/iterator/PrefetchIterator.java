@@ -93,6 +93,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void close() throws OXException {
         impl.close();
     }
@@ -100,6 +101,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasNext() throws OXException{
         return impl.hasNext();
     }
@@ -107,6 +109,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public T next() throws OXException {
         return impl.next();
     }
@@ -114,6 +117,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int size() {
         return impl.size();
     }
@@ -121,6 +125,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addWarning(final OXException warning) {
         impl.addWarning(warning);
     }
@@ -128,6 +133,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public OXException[] getWarnings() {
         return impl.getWarnings();
     }
@@ -135,6 +141,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean hasWarnings() {
         return impl.hasWarnings();
     }
@@ -200,6 +207,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void close() throws SearchIteratorException, OXException {
             data.clear();
             if (null != closeexc) {
@@ -210,6 +218,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasNext() throws OXException {
             return !data.isEmpty() || (null != oxExc);
         }
@@ -224,6 +233,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public T next() throws OXException {
             if (data.isEmpty()) {
                 if (null != oxExc) {
@@ -237,6 +247,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public int size() {
             return data.size();
         }
@@ -244,6 +255,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
@@ -251,6 +263,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
@@ -258,6 +271,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }
@@ -288,6 +302,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void close() throws OXException {
             delegate.close();
         }
@@ -295,6 +310,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasNext() throws OXException {
             return delegate.hasNext();
         }
@@ -302,6 +318,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public T next() throws OXException {
             return delegate.next();
         }
@@ -309,6 +326,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public int size() {
             return delegate.size();
         }
@@ -316,6 +334,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void addWarning(final OXException warning) {
             delegate.addWarning(warning);
         }
@@ -323,6 +342,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public OXException[] getWarnings() {
             return delegate.getWarnings();
         }
@@ -330,6 +350,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
+        @Override
         public boolean hasWarnings() {
             return delegate.hasWarnings();
         }

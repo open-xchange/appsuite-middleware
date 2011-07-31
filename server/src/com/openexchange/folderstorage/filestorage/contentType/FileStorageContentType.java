@@ -85,6 +85,7 @@ public class FileStorageContentType implements ContentType {
         return "infostore";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.FILE
         /*
@@ -93,6 +94,7 @@ public class FileStorageContentType implements ContentType {
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

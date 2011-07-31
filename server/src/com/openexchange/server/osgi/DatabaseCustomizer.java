@@ -74,6 +74,7 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         DatabaseService service = (DatabaseService) context.getService(reference);
         ServerServiceRegistry.getInstance().addService(DatabaseService.class, service);
@@ -81,10 +82,12 @@ public class DatabaseCustomizer implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         Database.setDatabaseService(null);
         ServerServiceRegistry.getInstance().removeService(DatabaseService.class);

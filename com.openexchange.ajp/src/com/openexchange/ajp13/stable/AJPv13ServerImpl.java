@@ -257,6 +257,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         return running.get();
     }
 
+    @Override
     public void run() {
         boolean keepOnRunning = true;
         AcceptSocket: while (keepOnRunning && running.get()) {
@@ -308,6 +309,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             this.logger = logger;
         }
 
+        @Override
         public void run() {
             try {
                 latch.await();

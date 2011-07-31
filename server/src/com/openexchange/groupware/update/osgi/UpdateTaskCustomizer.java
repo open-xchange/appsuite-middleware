@@ -75,6 +75,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         UpdateTaskProviderService providerService = (UpdateTaskProviderService) context.getService(reference);
         DynamicList registry = DynamicList.getInstance();
@@ -101,10 +102,12 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

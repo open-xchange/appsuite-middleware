@@ -26,13 +26,15 @@ public class FacebookArchiveImporter extends AbstractImporter {
 		return null;
 	}
 
-	public boolean canImport(ServerSession sessObj, Format format,
+	@Override
+    public boolean canImport(ServerSession sessObj, Format format,
 			List<String> folders, Map<String, String[]> optionalParams)
 			throws OXException {
 		return format == Format.FacebookArchive;
 	}
 
-	public List<ImportResult> importData(ServerSession sessObj, Format format,
+	@Override
+    public List<ImportResult> importData(ServerSession sessObj, Format format,
 			InputStream is, List<String> folders,
 			Map<String, String[]> optionalParams) throws OXException {
 		

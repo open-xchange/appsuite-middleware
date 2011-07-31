@@ -89,12 +89,14 @@ public final class PooledMailAccess implements Delayed {
         this.mailAccess = mailAccess;
     }
 
+    @Override
     public long getDelay(final TimeUnit unit) {
         return TimeUnit.MILLISECONDS.equals(unit) ? (timeoutStamp - System.currentTimeMillis()) : unit.convert(
             timeoutStamp - System.currentTimeMillis(),
             TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public int compareTo(final Delayed o) {
         final long thisStamp = timeoutStamp;
         final long otherStamp = ((PooledMailAccess) o).timeoutStamp;

@@ -86,52 +86,64 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         super();
     }
 
+    @Override
     public void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
         // nix
     }
 
+    @Override
     public void appointmentModified(final Appointment appointmentObj, final Session sessionObj) {
         updateLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
         deleteLink(appointmentObj.getObjectID(), Types.APPOINTMENT, appointmentObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void taskCreated(final Task taskObj, final Session sessionObj) {
         // nix
     }
 
+    @Override
     public void taskModified(final Task taskObj, final Session sessionObj) {
         updateLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void taskDeleted(final Task taskObj, final Session sessionObj) {
         deleteLink(taskObj.getObjectID(), Types.TASK, taskObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void contactCreated(final Contact contactObj, final Session sessionObj) {
         // nix
     }
 
+    @Override
     public void contactModified(final Contact contactObj, final Session sessionObj) {
         updateLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void contactDeleted(final Contact contactObj, final Session sessionObj) {
         deleteLink(contactObj.getObjectID(), Types.CONTACT, contactObj.getParentFolderID(), sessionObj);
     }
 
+    @Override
     public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
         // nix
     }
 
+    @Override
     public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
         // BOESE TODO
         final int x = (int) metadata.getFolderId();
         updateLink(metadata.getId(), Types.INFOSTORE, x, sessionObject);
     }
 
+    @Override
     public void infoitemDeleted(final DocumentMetadata metadata, final Session sessionObject) {
         // BOESE TODO
         final int x = (int) metadata.getFolderId();
@@ -286,26 +298,32 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         }
     }
 
+    @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
         // nothing to do
     }
 
+    @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
         // nothing to do
     }
 
+    @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
         // nothing to do
     }
 
+    @Override
     public void taskAccepted(final Task taskObj, final Session sessionObj) {
         // nothing to do
     }
 
+    @Override
     public void taskDeclined(final Task taskObj, final Session sessionObj) {
         // nothing to do
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
         // nothing to do
     }

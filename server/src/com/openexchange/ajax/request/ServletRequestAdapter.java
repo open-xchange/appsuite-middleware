@@ -76,7 +76,8 @@ public class ServletRequestAdapter implements SimpleRequest {
 		this.res=res;
 	}
 
-	public String getParameter(final String param) {
+	@Override
+    public String getParameter(final String param) {
 		return req.getParameter(param);
 	}
 
@@ -87,12 +88,14 @@ public class ServletRequestAdapter implements SimpleRequest {
 		return w;
 	}
 
-	public String[] getParameterValues(final String param) {
+	@Override
+    public String[] getParameterValues(final String param) {
 		final String commaSeparated =  req.getParameter(param);
 		return commaSeparated.split("\\s*,\\s*");
 	}
 
-	public Object getBody() {
+	@Override
+    public Object getBody() {
 		if(null != body) {
 			return body;
 		}

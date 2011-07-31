@@ -66,14 +66,17 @@ public class InfostoreLongerURLFieldTask  implements UpdateTask {
 
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreLongerURLFieldTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 12;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;

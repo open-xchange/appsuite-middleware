@@ -73,6 +73,7 @@ public class CreateVersionAction extends AbstractDocumentListAction {
 
     }
 
+    @Override
     public void perform() throws OXException {
         assureExistence();
         try {

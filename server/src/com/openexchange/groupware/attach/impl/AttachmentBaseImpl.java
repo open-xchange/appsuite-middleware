@@ -128,6 +128,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         super(provider);
     }
 
+    @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream data, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
@@ -161,6 +162,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
+    @Override
     public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
 
@@ -179,6 +181,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return ts;
     }
 
+    @Override
     public AttachmentMetadata getAttachment(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
 
@@ -187,6 +190,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return loadAttachment(folderId, id, ctx);
     }
 
+    @Override
     public InputStream getAttachedFile(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
         contextHolder.set(ctx);
@@ -194,6 +198,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return getFile(id, ctx);
     }
 
+    @Override
     public SortedSet<String> getAttachmentFileStoreLocationsperContext(final Context ctx) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
         Connection readCon = null;
@@ -220,10 +225,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return retval;
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getAttachments(folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
@@ -256,6 +263,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(ctx.getContextId())));
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
@@ -281,10 +289,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(ctx.getContextId())));
     }
 
+    @Override
     public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getDelta(folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
     }
 
+    @Override
     public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
@@ -344,10 +354,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             System.currentTimeMillis());
     }
 
+    @Override
     public void registerAttachmentListener(final AttachmentListener listener, final int moduleId) {
         getListeners(moduleId).add(listener);
     }
 
+    @Override
     public void removeAttachmentListener(final AttachmentListener listener, final int moduleId) {
         getListeners(moduleId).remove(listener);
     }
@@ -404,14 +416,17 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
+    @Override
     public void addAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         getAuthorizors(moduleId).add(authz);
     }
 
+    @Override
     public void removeAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         getAuthorizors(moduleId).remove(authz);
     }
 
+    @Override
     public void deleteAll(final Context context) throws OXException {
         try {
             removeFiles(context);
@@ -676,6 +691,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     }
 
+    @Override
     public int[] removeAttachment(final String file_id, final Context ctx) throws OXException {
         final int[] retval = new int[2];
         final long now = System.currentTimeMillis();
@@ -746,6 +762,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return retval;
     }
 
+    @Override
     public int modifyAttachment(final String file_id, final String new_file_id, final String new_comment, final String new_mime, final Context ctx) throws OXException {
         int retval = -1;
         Connection writeCon = null;
@@ -999,6 +1016,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             this.mode = mode;
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             if (delegate != null) {
                 return delegate.hasNext();
@@ -1023,6 +1041,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         }
 
+        @Override
         public AttachmentMetadata next() throws OXException {
             if (delegate != null) {
                 return delegate.next();
@@ -1062,6 +1081,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return m;
         }
 
+        @Override
         public void close() throws OXException {
             if (delegate != null) {
                 delegate.close();
@@ -1073,6 +1093,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             }
         }
 
+        @Override
         public int size() {
             if (delegate != null) {
                 return delegate.size();
@@ -1087,14 +1108,17 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             return false;
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
+        @Override
         public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
+        @Override
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }
@@ -1140,10 +1164,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
+    @Override
     public Date getNewestCreationDate(final Context ctx, final int moduleId, final int attachedId) throws OXException {
         return getNewestCreationDates(ctx, moduleId, new int[] { attachedId }).get(I(attachedId));
     }
 
+    @Override
     public Map<Integer, Date> getNewestCreationDates(final Context ctx, final int moduleId, final int[] attachedIds) throws OXException {
         final Connection con;
         try {

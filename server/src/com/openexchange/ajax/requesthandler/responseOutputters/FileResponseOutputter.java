@@ -85,6 +85,7 @@ public class FileResponseOutputter implements ResponseOutputter {
 
     private ImageScalingService scaler = null;
     
+    @Override
     public int getPriority() {
         return 0;
     }
@@ -93,6 +94,7 @@ public class FileResponseOutputter implements ResponseOutputter {
         this.scaler = scaler;
     }
 
+    @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
         final Object data = result.getResultObject();
         if (data == null) {
@@ -101,6 +103,7 @@ public class FileResponseOutputter implements ResponseOutputter {
         return IFileHolder.class.isAssignableFrom(data.getClass());
     }
     
+    @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         

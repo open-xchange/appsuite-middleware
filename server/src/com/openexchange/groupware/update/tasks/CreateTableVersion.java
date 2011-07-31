@@ -83,10 +83,12 @@ public final class CreateTableVersion implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 1;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'CreateTableVersion' performed!");
@@ -120,6 +122,7 @@ public final class CreateTableVersion implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
     }

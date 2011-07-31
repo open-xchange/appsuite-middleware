@@ -85,6 +85,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = -2839503961447478423L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new AndTerm();
             }
@@ -96,6 +97,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = 8612089760772780923L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new OrTerm();
             }
@@ -107,6 +109,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = 5131782739497011902L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new NotTerm();
             }
@@ -131,10 +134,12 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             this.pos = pos;
         }
 
+        @Override
         public String getOperation() {
             return str;
         }
 
+        @Override
         public boolean equalsOperation(final String other) {
             return str.equalsIgnoreCase(other);
         }
@@ -157,6 +162,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             return maxTerms;
         }
         
+        @Override
         public OperationPosition getPosition() {
         	return pos;
         }
@@ -202,7 +208,8 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             return (null != getCompositeOperation(operation));
         }
 
-		public String getSqlRepresentation() {
+		@Override
+        public String getSqlRepresentation() {
 			return sql;
 		}
     }
@@ -243,10 +250,12 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         operands = new ArrayList<SearchTerm<?>>(initialCapacity);
     }
 
+    @Override
     public SearchTerm<?>[] getOperands() {
         return operands.toArray(new SearchTerm[operands.size()]);
     }
 
+    @Override
     public Operation getOperation() {
         return operation;
     }

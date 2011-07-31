@@ -61,6 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class StandardIfHeaderApply implements IfHeaderApply {
 
+    @Override
     public boolean matches(final IfHeaderEntity entity, final WebdavResource resource) throws OXException {
         boolean matches = false;
         if(entity.isETag()) {

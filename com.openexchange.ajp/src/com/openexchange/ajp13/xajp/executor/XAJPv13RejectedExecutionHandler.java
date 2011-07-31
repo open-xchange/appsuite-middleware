@@ -89,6 +89,7 @@ final class XAJPv13RejectedExecutionHandler implements RejectedExecutionHandler 
         super();
     }
 
+    @Override
     public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
         if (executor.isShutdown()) {
             // Proper logging

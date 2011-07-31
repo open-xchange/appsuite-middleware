@@ -70,19 +70,23 @@ public class ThreadLocalDBProvider implements DBProvider {
 		writeCon.set(null);
 	}
 	
-	public Connection getReadConnection(final Context ctx) {
+	@Override
+    public Connection getReadConnection(final Context ctx) {
 		return readCon.get();
 	}
 
-	public Connection getWriteConnection(final Context ctx) {
+	@Override
+    public Connection getWriteConnection(final Context ctx) {
 		return writeCon.get();
 	}
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
+	@Override
+    public void releaseReadConnection(final Context ctx, final Connection con) {
 
 	}
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
+	@Override
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
 
 	}
 

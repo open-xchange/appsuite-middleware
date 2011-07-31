@@ -143,10 +143,12 @@ public final class FolderStorageActivator implements BundleActivator {
             cache = new LockBasedConcurrentMap<Key, String>(lock, lock, new MaxCapacityLinkedHashMap<Key, String>(1000));
         }
 
+        @Override
         public Object renderJSON(final Object value) {
             return value;
         }
 
+        @Override
         public Object getValue(final FolderObject folder, final ServerSession session) {
             final int createdBy = folder.getCreatedBy();
             if (createdBy <= 0) {
@@ -157,10 +159,12 @@ public final class FolderStorageActivator implements BundleActivator {
             return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
         }
 
+        @Override
         public String getColumnName() {
             return "com.openexchange.folderstorage.displayName";
         }
 
+        @Override
         public int getColumnID() {
             return 3030;
         }
@@ -182,6 +186,7 @@ public final class FolderStorageActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         try {
             // Register services
@@ -253,6 +258,7 @@ public final class FolderStorageActivator implements BundleActivator {
         LOG.error(sb.toString(), new Throwable());
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         try {
             // Drop activators

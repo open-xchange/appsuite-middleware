@@ -70,12 +70,14 @@ public class LoginActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + "))");
         tracker = new ServiceTracker(context, filter, new LoginServletRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         tracker.close();
     }

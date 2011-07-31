@@ -149,6 +149,7 @@ public class UniversalCache<K, V> {
             this.yielder = yielder;
         }
 
+        @Override
         public V call() throws Exception {
             return yielder.yieldValue(input);
         }

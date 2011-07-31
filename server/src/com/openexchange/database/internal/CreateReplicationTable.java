@@ -62,10 +62,12 @@ public class CreateReplicationTable extends AbstractCreateTableImpl {
         super();
     }
 
+    @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
+    @Override
     public String[] tablesToCreate() {
         return TABLES;
     }

@@ -366,6 +366,7 @@ public final class AJPv13Task implements Task<Object> {
      * <p>
      * The client socket is closed, when executing thread leaves this <code>run()</code> method.
      */
+    @Override
     public Object call() {
         final Thread t = thread = Thread.currentThread();
         if (!t.isInterrupted() && client != null && !client.isClosed()) {
@@ -542,6 +543,7 @@ public final class AJPv13Task implements Task<Object> {
         return control.isDone();
     }
 
+    @Override
     public void afterExecute(final Throwable t) {
         watcher.removeTask(this);
         if (null != scheduledKeepAliveTask) {
@@ -555,6 +557,7 @@ public final class AJPv13Task implements Task<Object> {
         listenerMonitor.decrementNumActive();
     }
 
+    @Override
     public void beforeExecute(final Thread t) {
         watcher.addTask(this);
         final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
@@ -567,6 +570,7 @@ public final class AJPv13Task implements Task<Object> {
         listenerMonitor.incrementNumActive();
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         threadRenamer.renamePrefix("AJPListener");
     }
@@ -722,6 +726,7 @@ public final class AJPv13Task implements Task<Object> {
             info = LOG.isInfoEnabled();
         }
 
+        @Override
         public void run() {
             try {
                 if (task.isProcessing() && ((System.currentTimeMillis() - task.getAJPConnection().getLastWriteAccess()) > max)) {

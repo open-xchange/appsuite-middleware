@@ -69,10 +69,12 @@ public final class MailAccountMultipleHandlerFactory implements MultipleHandlerF
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new MultipleAdapter(MailAccountActionFactory.getInstance());
     }
 
+    @Override
     public String getSupportedModule() {
         return Constants.getModule();
     }

@@ -80,6 +80,7 @@ public final class MinimumSearchCharacters implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
@@ -87,11 +88,14 @@ public final class MinimumSearchCharacters implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 try {
                     setting.setSingleValue(ServerConfig.getInteger(Property.MINIMUM_SEARCH_CHARACTERS));

@@ -145,10 +145,12 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
         }
     }
 
+    @Override
     public void block() {
         blocker.block();
     }
 
+    @Override
     public void unblock() {
         blocker.unblock();
     }

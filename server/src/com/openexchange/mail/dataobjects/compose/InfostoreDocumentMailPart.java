@@ -202,6 +202,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     }
 
 
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.DOCUMENT;
     }
@@ -220,6 +221,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             this.documentId = documentId;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             try {
                 return fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION);
@@ -234,6 +236,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             this.name = name;
         }
 
+        @Override
         public String getName() {
             return name;
         }

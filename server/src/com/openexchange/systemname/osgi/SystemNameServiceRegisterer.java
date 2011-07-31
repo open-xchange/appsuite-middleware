@@ -72,16 +72,19 @@ public final class SystemNameServiceRegisterer implements ServiceTrackerCustomiz
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ConfigurationService configService = (ConfigurationService) context.getService(reference);
         registration = context.registerService(SystemNameService.class.getName(), new JVMRouteSystemNameImpl(configService), null);
         return configService;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         registration.unregister();
     }

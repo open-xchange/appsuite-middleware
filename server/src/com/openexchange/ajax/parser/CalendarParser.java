@@ -316,6 +316,7 @@ public class CalendarParser extends CommonParser {
     }
 
     private static final FieldParser<CalendarObject> CONFIRMATIONS_PARSER = new FieldParser<CalendarObject>() {
+        @Override
         public void parse(final boolean parseAll, final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             if (!parseAll) {
                 return;

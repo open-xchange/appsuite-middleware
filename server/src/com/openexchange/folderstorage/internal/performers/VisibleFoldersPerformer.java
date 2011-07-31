@@ -233,6 +233,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 final Log log = LOG;
                 completionService.submit(new Callable<Object>() {
 
+                    @Override
                     public Object call() throws Exception {
                         final StorageParameters newParameters = paramsProvider.getStorageParameters();
                         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
@@ -399,10 +400,12 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
+            @Override
             public Class<OXException> getType() {
                 return OXException.class;
             }
 
+            @Override
             public OXException newUnexpectedError(final Throwable t) {
                 return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }

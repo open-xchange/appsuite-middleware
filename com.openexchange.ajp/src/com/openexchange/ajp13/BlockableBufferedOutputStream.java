@@ -92,18 +92,22 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
         blocker = nonBlocking ? new NonBlockingBlocker() : new ConcurrentBlocker();
     }
 
+    @Override
     public void block() {
         blocker.block();
     }
 
+    @Override
     public void unblock() {
         blocker.unblock();
     }
 
+    @Override
     public void acquire() {
         blocker.acquire();
     }
 
+    @Override
     public void release() {
         blocker.release();
     }

@@ -74,10 +74,12 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new GroupHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "group";
     }
@@ -90,14 +92,17 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final GroupRequest request = new GroupRequest(session);
             final Object retval = request.action(action, jsonObject);
@@ -105,6 +110,7 @@ public final class GroupFactoryService implements MultipleHandlerFactoryService 
             return retval;
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

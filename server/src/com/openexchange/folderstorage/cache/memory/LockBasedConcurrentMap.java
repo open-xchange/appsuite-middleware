@@ -75,6 +75,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         this.delegate = delegate;
     }
 
+    @Override
     public boolean isEmpty() {
         readLock.lock();
         try {
@@ -84,6 +85,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public int size() {
         readLock.lock();
         try {
@@ -93,6 +95,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public void clear() {
         writeLock.lock();
         try {
@@ -102,6 +105,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public boolean containsKey(final Object key) {
         readLock.lock();
         try {
@@ -111,6 +115,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public boolean containsValue(final Object value) {
         readLock.lock();
         try {
@@ -120,6 +125,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public V get(final Object key) {
         readLock.lock();
         try {
@@ -129,6 +135,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public V put(final K key, final V value) {
         writeLock.lock();
         try {
@@ -138,6 +145,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public V putIfAbsent(final K key, final V value) {
         writeLock.lock();
         try {
@@ -147,6 +155,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public void putAll(final Map<? extends K, ? extends V> map) {
         writeLock.lock();
         try {
@@ -156,6 +165,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public V remove(final Object key) {
         writeLock.lock();
         try {
@@ -165,6 +175,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public boolean remove(final Object key, final Object value) {
         writeLock.lock();
         try {
@@ -174,6 +185,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public boolean replace(final K key, final V oldValue, final V newValue) {
         writeLock.lock();
         try {
@@ -183,6 +195,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public V replace(final K key, final V value) {
         writeLock.lock();
         try {
@@ -192,6 +205,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public Set<K> keySet() {
         readLock.lock();
         try {
@@ -201,6 +215,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public Collection<V> values() {
         readLock.lock();
         try {
@@ -210,6 +225,7 @@ final class LockBasedConcurrentMap<K, V> implements ConcurrentMap<K, V> {
         }
     }
 
+    @Override
     public Set<Entry<K, V>> entrySet() {
         readLock.lock();
         try {

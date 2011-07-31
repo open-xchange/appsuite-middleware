@@ -74,6 +74,7 @@ public class UseCountComparator implements Comparator<Contact> {
     }
 
 
+    @Override
     public int compare(final Contact o1, final Contact o2) {
         if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             if (specialSort) {

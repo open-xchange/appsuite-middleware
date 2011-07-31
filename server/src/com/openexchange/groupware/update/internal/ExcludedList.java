@@ -87,6 +87,7 @@ public class ExcludedList implements UpdateTaskList<String> {
         UpdateTaskCollection.getInstance().dirtyVersion();
     }
 
+    @Override
     public List<String> getTaskList() {
         return taskList;
     }

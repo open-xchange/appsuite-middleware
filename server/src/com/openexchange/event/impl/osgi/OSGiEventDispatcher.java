@@ -96,6 +96,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         taskListeners = new ArrayList<TaskEventInterface>();
     }
 
+    @Override
     public void addListener(final AppointmentEventInterface listener) {
         this.appointmentListeners.add(listener);
     }
@@ -140,6 +141,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
+    @Override
     public void addListener(final TaskEventInterface listener) {
         this.taskListeners.add(listener);
     }
@@ -188,6 +190,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
+    @Override
     public void handleEvent(final Event event) {
         try {
             final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
@@ -234,12 +237,14 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
+    @Override
     public void registerService(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*" });
         serviceRegistration = context.registerService(EventHandler.class.getName(), this, serviceProperties);
     }
 
+    @Override
     public void unregisterService() {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();

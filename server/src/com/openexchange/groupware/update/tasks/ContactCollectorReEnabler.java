@@ -76,6 +76,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { ContactCollectOnIncomingAndOutgoingMailUpdateTask.class.getName() };
     }
@@ -85,6 +86,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND);
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con;

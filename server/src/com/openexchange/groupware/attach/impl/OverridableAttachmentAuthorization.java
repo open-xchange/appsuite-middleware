@@ -73,14 +73,17 @@ public class OverridableAttachmentAuthorization implements AttachmentAuthorizati
         this.chooser = chooser;
     }
 
+    @Override
     public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayAttach(folderId, objectId, user, userConfig, ctx);
     }
 
+    @Override
     public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayDetach(folderId, objectId, user, userConfig, ctx);
     }
 
+    @Override
     public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
     }

@@ -94,10 +94,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
+            @Override
             public void added(final ServiceReference ref, final ResultConverter thing) {
                 defaultConverter.addConverter(thing);
             }
 
+            @Override
             public void removed(final ServiceReference ref, final ResultConverter thing) {
                 defaultConverter.removeConverter(thing);
             }
@@ -116,10 +118,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
 
+            @Override
             public void added(final ServiceReference ref, final ResponseOutputter thing) {
                 DispatcherServlet.registerRenderer(thing);
             }
 
+            @Override
             public void removed(final ServiceReference ref, final ResponseOutputter thing) {
                 DispatcherServlet.unregisterRenderer(thing);    
             }
@@ -131,10 +135,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
+            @Override
             public void added(final ServiceReference ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(thing);
             }
 
+            @Override
             public void removed(final ServiceReference ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(null);
             }
@@ -157,6 +163,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             this.servlet = servlet;
         }
 
+        @Override
         public void added(final ServiceReference ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
@@ -165,6 +172,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             rememberTracker(registration);
         }
         
+        @Override
         public void removed(final ServiceReference ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.remove(module);

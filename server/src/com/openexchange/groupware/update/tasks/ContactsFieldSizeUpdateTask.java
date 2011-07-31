@@ -83,10 +83,12 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 15;
     }
 
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -96,6 +98,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
     private static final String STR_INFO = "Performing update task 'ContactsFieldSizeUpdateTask'";
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);

@@ -206,6 +206,7 @@ public class DatabaseFolder extends AbstractFolder {
         return SystemContentType.getInstance();
     }
 
+    @Override
     public boolean isGlobalID() {
         return global;
     }

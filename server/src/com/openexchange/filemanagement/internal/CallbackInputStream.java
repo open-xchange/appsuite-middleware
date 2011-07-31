@@ -149,6 +149,7 @@ final class CallbackInputStream extends InputStream implements FileRemovedListen
         close0();
     }
 
+    @Override
     public void removePerformed(final File file) {
         try {
             close0();

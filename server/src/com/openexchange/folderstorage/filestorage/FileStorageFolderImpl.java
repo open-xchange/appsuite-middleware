@@ -154,6 +154,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }

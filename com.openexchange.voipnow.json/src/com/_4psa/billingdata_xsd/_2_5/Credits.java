@@ -69,7 +69,7 @@ public class Credits {
      *     
      */
     public void setCreditIn(JAXBElement<String> value) {
-        this.creditIn = ((JAXBElement<String> ) value);
+        this.creditIn = value;
     }
 
     /**

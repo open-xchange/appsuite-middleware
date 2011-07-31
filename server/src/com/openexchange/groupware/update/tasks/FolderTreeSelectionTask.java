@@ -73,10 +73,12 @@ public class FolderTreeSelectionTask extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { TaskCreateUserSettingServer.class.getName() };
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);

@@ -70,6 +70,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
     public CrawlerCookieSpec(){
     }
 
+    @Override
     public void validate(String host, int port, String path, 
         boolean secure, final Cookie cookie) 
         throws MalformedCookieException {

@@ -80,6 +80,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         ranking = -1;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final int refRanking = getServiceReferenceRanking(reference);
         if (refRanking <= ranking) {
@@ -91,10 +92,12 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         return addedService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

@@ -120,6 +120,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     /**
      * {@inheritDoc}
      */
+    @Override
     public WebResponse getResponse(final WebRequestSettings settings) throws IOException {
         
         final URL url = settings.getUrl();
@@ -176,6 +177,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * the HttpMethod's connection. Subclasses may override.
      * @param httpMethod the httpMethod used
      */
+    @Override
     protected void onResponseGenerated(final HttpMethodBase httpMethod) {
         httpMethod.releaseConnection();
     }
@@ -326,6 +328,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
         return httpMethod;
     }
 
+    @Override
     FilePart buildFilePart(final KeyDataPair pairWithFile, final String charset) throws FileNotFoundException {
         final FilePartPageCharSet part;
         if (pairWithFile.getData() != null) {
@@ -393,6 +396,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Lazily initializes the internal HTTP client.
      * @return the initialized HTTP client
      */
+    @Override
     public synchronized HttpClient getHttpClient() {
         if (httpClient_ == null) {
             httpClient_ = createHttpClient();
@@ -424,6 +428,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * must have long running connections explicitly terminated.
      * @return the WebClient's timeout
      */
+    @Override
     protected int getTimeout() {
         return webClient_.getTimeout();
     }
@@ -435,6 +440,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * see feature request 1438216).
      * @return the <tt>HttpClient</tt> that will be used by this WebConnection
      */
+    @Override
     protected HttpClient createHttpClient() {
         //final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
         return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here. 
@@ -445,6 +451,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Sets the virtual host.
      * @param virtualHost the virtualHost to set
      */
+    @Override
     public void setVirtualHost(final String virtualHost) {
         virtualHost_ = virtualHost;
     }
@@ -453,6 +460,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Gets the virtual host.
      * @return virtualHost The current virtualHost
      */
+    @Override
     public String getVirtualHost() {
         return virtualHost_;
     }
@@ -488,6 +496,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * @return the WebResponseData to use for this response
      * @throws IOException if there is a problem reading the response body
      */
+    @Override
     protected WebResponseData newWebResponseDataInstance(
             final String statusMessage,
             final List<NameValuePair> headers,
@@ -506,6 +515,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * @param loadTime How long the response took to be sent
      * @return the new WebResponse
      */
+    @Override
     protected WebResponse newWebResponseInstance(
             final String charset,
             final WebResponseData responseData,

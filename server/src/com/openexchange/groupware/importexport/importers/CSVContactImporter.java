@@ -101,6 +101,7 @@ public class CSVContactImporter extends AbstractImporter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
 
+    @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(getResponsibleFor())) {
             return false;
@@ -154,6 +155,7 @@ public class CSVContactImporter extends AbstractImporter {
         return "UTF-8";
     }
 
+    @Override
     public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         final String folder = folders.get(0);
         if (!canImport(sessObj, format, folders, optionalParams)) {

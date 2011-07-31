@@ -72,6 +72,7 @@ public class HTMLMicroformatParserTest extends ParserTest {
         assertEquals("Bla", first.get("ox_givenName"));
     }
 
+    @Override
     protected List<Map<String, String>> parse(String text) throws OXException {
         HTMLMicroformatParser microformatParser = new HTMLMicroformatParser();
         microformatParser.addContainerElement("ox_contact");

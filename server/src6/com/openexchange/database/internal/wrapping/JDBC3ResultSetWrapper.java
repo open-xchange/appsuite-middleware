@@ -90,562 +90,701 @@ public abstract class JDBC3ResultSetWrapper implements ResultSet {
         this.stmt = stmt;
     }
 
+    @Override
     public boolean absolute(final int row) throws SQLException {
         return delegate.absolute(row);
     }
 
+    @Override
     public void afterLast() throws SQLException {
         delegate.afterLast();
     }
 
+    @Override
     public void beforeFirst() throws SQLException {
         delegate.beforeFirst();
     }
 
+    @Override
     public void cancelRowUpdates() throws SQLException {
         delegate.cancelRowUpdates();
     }
 
+    @Override
     public void clearWarnings() throws SQLException {
         delegate.clearWarnings();
     }
 
+    @Override
     public void close() throws SQLException {
         delegate.close();
     }
 
+    @Override
     public void deleteRow() throws SQLException {
         delegate.deleteRow();
     }
 
+    @Override
     public int findColumn(final String columnName) throws SQLException {
         return delegate.findColumn(columnName);
     }
 
+    @Override
     public boolean first() throws SQLException {
         return delegate.first();
     }
 
+    @Override
     public Array getArray(final int i) throws SQLException {
         return new JDBC4ArrayWrapper(delegate.getArray(i), this);
     }
 
+    @Override
     public Array getArray(final String colName) throws SQLException {
         return new JDBC4ArrayWrapper(delegate.getArray(colName), this);
     }
 
+    @Override
     public InputStream getAsciiStream(final int columnIndex) throws SQLException {
         return delegate.getAsciiStream(columnIndex);
     }
 
+    @Override
     public InputStream getAsciiStream(final String columnName) throws SQLException {
         return delegate.getAsciiStream(columnName);
     }
 
+    @Override
     public BigDecimal getBigDecimal(final int columnIndex) throws SQLException {
         return delegate.getBigDecimal(columnIndex);
     }
 
+    @Override
     public BigDecimal getBigDecimal(final String columnName) throws SQLException {
         return delegate.getBigDecimal(columnName);
     }
 
+    @Override
     @Deprecated
     public BigDecimal getBigDecimal(final int columnIndex, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnIndex, scale);
     }
 
+    @Override
     @Deprecated
     public BigDecimal getBigDecimal(final String columnName, final int scale) throws SQLException {
         return delegate.getBigDecimal(columnName, scale);
     }
 
+    @Override
     public InputStream getBinaryStream(final int columnIndex) throws SQLException {
         return delegate.getBinaryStream(columnIndex);
     }
 
+    @Override
     public InputStream getBinaryStream(final String columnName) throws SQLException {
         return delegate.getBinaryStream(columnName);
     }
 
+    @Override
     public Blob getBlob(final int i) throws SQLException {
         return delegate.getBlob(i);
     }
 
+    @Override
     public Blob getBlob(final String colName) throws SQLException {
         return delegate.getBlob(colName);
     }
 
+    @Override
     public boolean getBoolean(final int columnIndex) throws SQLException {
         return delegate.getBoolean(columnIndex);
     }
 
+    @Override
     public boolean getBoolean(final String columnName) throws SQLException {
         return delegate.getBoolean(columnName);
     }
 
+    @Override
     public byte getByte(final int columnIndex) throws SQLException {
         return delegate.getByte(columnIndex);
     }
 
+    @Override
     public byte getByte(final String columnName) throws SQLException {
         return delegate.getByte(columnName);
     }
 
+    @Override
     public byte[] getBytes(final int columnIndex) throws SQLException {
         return delegate.getBytes(columnIndex);
     }
 
+    @Override
     public byte[] getBytes(final String columnName) throws SQLException {
         return delegate.getBytes(columnName);
     }
 
+    @Override
     public Reader getCharacterStream(final int columnIndex) throws SQLException {
         return delegate.getCharacterStream(columnIndex);
     }
 
+    @Override
     public Reader getCharacterStream(final String columnName) throws SQLException {
         return delegate.getCharacterStream(columnName);
     }
 
+    @Override
     public Clob getClob(final int i) throws SQLException {
         return delegate.getClob(i);
     }
 
+    @Override
     public Clob getClob(final String colName) throws SQLException {
         return delegate.getClob(colName);
     }
 
+    @Override
     public int getConcurrency() throws SQLException {
         return delegate.getConcurrency();
     }
 
+    @Override
     public String getCursorName() throws SQLException {
         return delegate.getCursorName();
     }
 
+    @Override
     public Date getDate(final int columnIndex) throws SQLException {
         return delegate.getDate(columnIndex);
     }
 
+    @Override
     public Date getDate(final String columnName) throws SQLException {
         return delegate.getDate(columnName);
     }
 
+    @Override
     public Date getDate(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getDate(columnIndex, cal);
     }
 
+    @Override
     public Date getDate(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getDate(columnName, cal);
     }
 
+    @Override
     public double getDouble(final int columnIndex) throws SQLException {
         return delegate.getDouble(columnIndex);
     }
 
+    @Override
     public double getDouble(final String columnName) throws SQLException {
         return delegate.getDouble(columnName);
     }
 
+    @Override
     public int getFetchDirection() throws SQLException {
         return delegate.getFetchDirection();
     }
 
+    @Override
     public int getFetchSize() throws SQLException {
         return delegate.getFetchSize();
     }
 
+    @Override
     public float getFloat(final int columnIndex) throws SQLException {
         return delegate.getFloat(columnIndex);
     }
 
+    @Override
     public float getFloat(final String columnName) throws SQLException {
         return delegate.getFloat(columnName);
     }
 
+    @Override
     public int getInt(final int columnIndex) throws SQLException {
         return delegate.getInt(columnIndex);
     }
 
+    @Override
     public int getInt(final String columnName) throws SQLException {
         return delegate.getInt(columnName);
     }
 
+    @Override
     public long getLong(final int columnIndex) throws SQLException {
         return delegate.getLong(columnIndex);
     }
 
+    @Override
     public long getLong(final String columnName) throws SQLException {
         return delegate.getLong(columnName);
     }
 
+    @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         return delegate.getMetaData();
     }
 
+    @Override
     public Object getObject(final int columnIndex) throws SQLException {
         return delegate.getObject(columnIndex);
     }
 
+    @Override
     public Object getObject(final String columnName) throws SQLException {
         return delegate.getObject(columnName);
     }
 
+    @Override
     public Object getObject(final int i, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getObject(i, map);
     }
 
+    @Override
     public Object getObject(final String colName, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getObject(colName, map);
     }
 
+    @Override
     public Ref getRef(final int i) throws SQLException {
         return delegate.getRef(i);
     }
 
+    @Override
     public Ref getRef(final String colName) throws SQLException {
         return delegate.getRef(colName);
     }
 
+    @Override
     public int getRow() throws SQLException {
         return delegate.getRow();
     }
 
+    @Override
     public short getShort(final int columnIndex) throws SQLException {
         return delegate.getShort(columnIndex);
     }
 
+    @Override
     public short getShort(final String columnName) throws SQLException {
         return delegate.getShort(columnName);
     }
 
+    @Override
     public JDBC3StatementWrapper getStatement() {
         return stmt;
     }
 
+    @Override
     public String getString(final int columnIndex) throws SQLException {
         return delegate.getString(columnIndex);
     }
 
+    @Override
     public String getString(final String columnName) throws SQLException {
         return delegate.getString(columnName);
     }
 
+    @Override
     public Time getTime(final int columnIndex) throws SQLException {
         return delegate.getTime(columnIndex);
     }
 
+    @Override
     public Time getTime(final String columnName) throws SQLException {
         return delegate.getTime(columnName);
     }
 
+    @Override
     public Time getTime(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getTime(columnIndex, cal);
     }
 
+    @Override
     public Time getTime(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getTime(columnName, cal);
     }
 
+    @Override
     public Timestamp getTimestamp(final int columnIndex) throws SQLException {
         return delegate.getTimestamp(columnIndex);
     }
 
+    @Override
     public Timestamp getTimestamp(final String columnName) throws SQLException {
         return delegate.getTimestamp(columnName);
     }
 
+    @Override
     public Timestamp getTimestamp(final int columnIndex, final Calendar cal) throws SQLException {
         return delegate.getTimestamp(columnIndex, cal);
     }
 
+    @Override
     public Timestamp getTimestamp(final String columnName, final Calendar cal) throws SQLException {
         return delegate.getTimestamp(columnName, cal);
     }
 
+    @Override
     public int getType() throws SQLException {
         return delegate.getType();
     }
 
+    @Override
     public URL getURL(final int columnIndex) throws SQLException {
         return delegate.getURL(columnIndex);
     }
 
+    @Override
     public URL getURL(final String columnName) throws SQLException {
         return delegate.getURL(columnName);
     }
 
+    @Override
     @Deprecated
     public InputStream getUnicodeStream(final int columnIndex) throws SQLException {
         return delegate.getUnicodeStream(columnIndex);
     }
 
+    @Override
     @Deprecated
     public InputStream getUnicodeStream(final String columnName) throws SQLException {
         return delegate.getUnicodeStream(columnName);
     }
 
+    @Override
     public SQLWarning getWarnings() throws SQLException {
         return delegate.getWarnings();
     }
 
+    @Override
     public void insertRow() throws SQLException {
         delegate.insertRow();
     }
 
+    @Override
     public boolean isAfterLast() throws SQLException {
         return delegate.isAfterLast();
     }
 
+    @Override
     public boolean isBeforeFirst() throws SQLException {
         return delegate.isBeforeFirst();
     }
 
+    @Override
     public boolean isFirst() throws SQLException {
         return delegate.isFirst();
     }
 
+    @Override
     public boolean isLast() throws SQLException {
         return delegate.isLast();
     }
 
+    @Override
     public boolean last() throws SQLException {
         return delegate.last();
     }
 
+    @Override
     public void moveToCurrentRow() throws SQLException {
         delegate.moveToCurrentRow();
     }
 
+    @Override
     public void moveToInsertRow() throws SQLException {
         delegate.moveToInsertRow();
     }
 
+    @Override
     public boolean next() throws SQLException {
         return delegate.next();
     }
 
+    @Override
     public boolean previous() throws SQLException {
         return delegate.previous();
     }
 
+    @Override
     public void refreshRow() throws SQLException {
         delegate.refreshRow();
     }
 
+    @Override
     public boolean relative(final int rows) throws SQLException {
         return delegate.relative(rows);
     }
 
+    @Override
     public boolean rowDeleted() throws SQLException {
         return delegate.rowDeleted();
     }
 
+    @Override
     public boolean rowInserted() throws SQLException {
         return delegate.rowInserted();
     }
 
+    @Override
     public boolean rowUpdated() throws SQLException {
         return delegate.rowUpdated();
     }
 
+    @Override
     public void setFetchDirection(final int direction) throws SQLException {
         delegate.setFetchDirection(direction);
     }
 
+    @Override
     public void setFetchSize(final int rows) throws SQLException {
         delegate.setFetchSize(rows);
     }
 
+    @Override
     public void updateArray(final int columnIndex, final Array x) throws SQLException {
         delegate.updateArray(columnIndex, x);
     }
 
+    @Override
     public void updateArray(final String columnName, final Array x) throws SQLException {
         delegate.updateArray(columnName, x);
     }
 
+    @Override
     public void updateAsciiStream(final int columnIndex, final InputStream x, final int length) throws SQLException {
         delegate.updateAsciiStream(columnIndex, x, length);
     }
 
+    @Override
     public void updateAsciiStream(final String columnName, final InputStream x, final int length) throws SQLException {
         delegate.updateAsciiStream(columnName, x, length);
     }
 
+    @Override
     public void updateBigDecimal(final int columnIndex, final BigDecimal x) throws SQLException {
         delegate.updateBigDecimal(columnIndex, x);
     }
 
+    @Override
     public void updateBigDecimal(final String columnName, final BigDecimal x) throws SQLException {
         delegate.updateBigDecimal(columnName, x);
     }
 
+    @Override
     public void updateBinaryStream(final int columnIndex, final InputStream x, final int length) throws SQLException {
         delegate.updateBinaryStream(columnIndex, x, length);
     }
 
+    @Override
     public void updateBinaryStream(final String columnName, final InputStream x, final int length) throws SQLException {
         delegate.updateBinaryStream(columnName, x, length);
     }
 
+    @Override
     public void updateBlob(final int columnIndex, final Blob x) throws SQLException {
         delegate.updateBlob(columnIndex, x);
     }
 
+    @Override
     public void updateBlob(final String columnName, final Blob x) throws SQLException {
         delegate.updateBlob(columnName, x);
     }
 
+    @Override
     public void updateBoolean(final int columnIndex, final boolean x) throws SQLException {
         delegate.updateBoolean(columnIndex, x);
     }
 
+    @Override
     public void updateBoolean(final String columnName, final boolean x) throws SQLException {
         delegate.updateBoolean(columnName, x);
     }
 
+    @Override
     public void updateByte(final int columnIndex, final byte x) throws SQLException {
         delegate.updateByte(columnIndex, x);
     }
 
+    @Override
     public void updateByte(final String columnName, final byte x) throws SQLException {
         delegate.updateByte(columnName, x);
     }
 
+    @Override
     public void updateBytes(final int columnIndex, final byte[] x) throws SQLException {
         delegate.updateBytes(columnIndex, x);
     }
 
+    @Override
     public void updateBytes(final String columnName, final byte[] x) throws SQLException {
         delegate.updateBytes(columnName, x);
     }
 
+    @Override
     public void updateCharacterStream(final int columnIndex, final Reader x, final int length) throws SQLException {
         delegate.updateCharacterStream(columnIndex, x, length);
     }
 
+    @Override
     public void updateCharacterStream(final String columnName, final Reader reader, final int length) throws SQLException {
         delegate.updateCharacterStream(columnName, reader, length);
     }
 
+    @Override
     public void updateClob(final int columnIndex, final Clob x) throws SQLException {
         delegate.updateClob(columnIndex, x);
     }
 
+    @Override
     public void updateClob(final String columnName, final Clob x) throws SQLException {
         delegate.updateClob(columnName, x);
     }
 
+    @Override
     public void updateDate(final int columnIndex, final Date x) throws SQLException {
         delegate.updateDate(columnIndex, x);
     }
 
+    @Override
     public void updateDate(final String columnName, final Date x) throws SQLException {
         delegate.updateDate(columnName, x);
     }
 
+    @Override
     public void updateDouble(final int columnIndex, final double x) throws SQLException {
         delegate.updateDouble(columnIndex, x);
     }
 
+    @Override
     public void updateDouble(final String columnName, final double x) throws SQLException {
         delegate.updateDouble(columnName, x);
     }
 
+    @Override
     public void updateFloat(final int columnIndex, final float x) throws SQLException {
         delegate.updateFloat(columnIndex, x);
     }
 
+    @Override
     public void updateFloat(final String columnName, final float x) throws SQLException {
         delegate.updateFloat(columnName, x);
     }
 
+    @Override
     public void updateInt(final int columnIndex, final int x) throws SQLException {
         delegate.updateInt(columnIndex, x);
     }
 
+    @Override
     public void updateInt(final String columnName, final int x) throws SQLException {
         delegate.updateInt(columnName, x);
     }
 
+    @Override
     public void updateLong(final int columnIndex, final long x) throws SQLException {
         delegate.updateLong(columnIndex, x);
     }
 
+    @Override
     public void updateLong(final String columnName, final long x) throws SQLException {
         delegate.updateLong(columnName, x);
     }
 
+    @Override
     public void updateNull(final int columnIndex) throws SQLException {
         delegate.updateNull(columnIndex);
     }
 
+    @Override
     public void updateNull(final String columnName) throws SQLException {
         delegate.updateNull(columnName);
     }
 
+    @Override
     public void updateObject(final int columnIndex, final Object x) throws SQLException {
         delegate.updateObject(columnIndex, x);
     }
 
+    @Override
     public void updateObject(final String columnName, final Object x) throws SQLException {
         delegate.updateObject(columnName, x);
     }
 
+    @Override
     public void updateObject(final int columnIndex, final Object x, final int scale) throws SQLException {
         delegate.updateObject(columnIndex, x, scale);
     }
 
+    @Override
     public void updateObject(final String columnName, final Object x, final int scale) throws SQLException {
         delegate.updateObject(columnName, x, scale);
     }
 
+    @Override
     public void updateRef(final int columnIndex, final Ref x) throws SQLException {
         delegate.updateRef(columnIndex, x);
     }
 
+    @Override
     public void updateRef(final String columnName, final Ref x) throws SQLException {
         delegate.updateRef(columnName, x);
     }
 
+    @Override
     public void updateRow() throws SQLException {
         delegate.updateRow();
     }
 
+    @Override
     public void updateShort(final int columnIndex, final short x) throws SQLException {
         delegate.updateShort(columnIndex, x);
     }
 
+    @Override
     public void updateShort(final String columnName, final short x) throws SQLException {
         delegate.updateShort(columnName, x);
     }
 
+    @Override
     public void updateString(final int columnIndex, final String x) throws SQLException {
         delegate.updateString(columnIndex, x);
     }
 
+    @Override
     public void updateString(final String columnName, final String x) throws SQLException {
         delegate.updateString(columnName, x);
     }
 
+    @Override
     public void updateTime(final int columnIndex, final Time x) throws SQLException {
         delegate.updateTime(columnIndex, x);
     }
 
+    @Override
     public void updateTime(final String columnName, final Time x) throws SQLException {
         delegate.updateTime(columnName, x);
     }
 
+    @Override
     public void updateTimestamp(final int columnIndex, final Timestamp x) throws SQLException {
         delegate.updateTimestamp(columnIndex, x);
     }
 
+    @Override
     public void updateTimestamp(final String columnName, final Timestamp x) throws SQLException {
         delegate.updateTimestamp(columnName, x);
     }
 
+    @Override
     public boolean wasNull() throws SQLException {
         return delegate.wasNull();
     }

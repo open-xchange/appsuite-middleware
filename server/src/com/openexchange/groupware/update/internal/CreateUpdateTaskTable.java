@@ -77,10 +77,12 @@ public final class CreateUpdateTaskTable extends AbstractCreateTableImpl {
         return CREATES.clone();
     }
 
+    @Override
     public String[] requiredTables() {
         return NO_TABLES;
     }
 
+    @Override
     public String[] tablesToCreate() {
         return CREATED_TABLES.clone();
     }

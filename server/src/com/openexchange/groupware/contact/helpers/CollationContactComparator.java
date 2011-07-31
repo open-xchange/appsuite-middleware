@@ -86,7 +86,8 @@ public class CollationContactComparator implements Comparator<Contact>{
 		this.collator = (RuleBasedCollator)Collator.getInstance(locale);
 	}
 	
-	public int compare(Contact o1, Contact o2) {
+	@Override
+    public int compare(Contact o1, Contact o2) {
         if(o1 == o2 || orderDir == 0) {
             return 0;
         }

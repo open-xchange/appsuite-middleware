@@ -58,7 +58,8 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  */
 public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverter {
 	
-	public String translateFromJSONtoDB(String fieldname) {
+	@Override
+    public String translateFromJSONtoDB(String fieldname) {
 		ContactField field = ContactField.getByAjaxName(fieldname);
 		if((field != null) && (field.getFieldName() != null))
 			return field.getFieldName();
@@ -69,7 +70,8 @@ public class ContactSearchtermSqlConverter extends BaseContactSearchtermConverte
 	/**
 	 * @return the prefix our database queries usually use to refer to a table.
 	 */
-	protected String getPrefix() {
+	@Override
+    protected String getPrefix() {
 		return "co";
 	}
 }

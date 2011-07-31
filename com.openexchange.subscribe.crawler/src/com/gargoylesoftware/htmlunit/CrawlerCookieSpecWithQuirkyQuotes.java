@@ -67,6 +67,7 @@ public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
     }
     
     // overwriting this to be able to use the quotes needed for linkedin
+    @Override
     public String formatCookie(Cookie cookie) {
         LOG.trace("enter CrawlerCookieSpecWithQuirkyQuotes.formatCookie(Cookie)");
         if (cookie == null) {

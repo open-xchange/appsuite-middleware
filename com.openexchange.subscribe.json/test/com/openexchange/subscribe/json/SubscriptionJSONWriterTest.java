@@ -74,6 +74,7 @@ public class SubscriptionJSONWriterTest extends TestCase {
     private Subscription subscription;
     private DynamicFormDescription form;
 
+    @Override
     public void setUp() {
         subscription = new Subscription();
         subscription.setFolderId("12");

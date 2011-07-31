@@ -76,6 +76,7 @@ public final class MailType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.MAIL
         return 7;

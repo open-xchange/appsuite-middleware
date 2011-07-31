@@ -91,18 +91,22 @@ public final class CacheSortableId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         return Priority.NORMAL;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof CacheSortableId) {
             final int thisVal = ordinal;

@@ -84,6 +84,7 @@ public class ParticipantParser {
     }
 
     private static final FieldParser<JSONParticipant> TYPE_PARSER = new FieldParser<JSONParticipant>() {
+        @Override
         public void parse(boolean parseAll, JSONParticipant obj, TimeZone timeZone, JSONObject json) throws JSONException {
             if (json.has(ParticipantsFields.TYPE)) {
                 obj.setType(json.getInt(ParticipantsFields.TYPE));
@@ -91,6 +92,7 @@ public class ParticipantParser {
         }
     };
     private static final FieldParser<JSONParticipant> MAIL_PARSER = new FieldParser<JSONParticipant>() {
+        @Override
         public void parse(boolean parseAll, JSONParticipant obj, TimeZone timeZone, JSONObject json) {
             if (json.has(ParticipantsFields.MAIL)) {
                 obj.setEmailAddress(json.optString(ParticipantsFields.MAIL));
@@ -98,6 +100,7 @@ public class ParticipantParser {
         }
     };
     private static final FieldParser<JSONParticipant> DISPLAY_NAME_PARSER = new FieldParser<JSONParticipant>() {
+        @Override
         public void parse(boolean parseAll, JSONParticipant obj, TimeZone timeZone, JSONObject json) {
             if (json.has(ParticipantsFields.DISPLAY_NAME)) {
                 obj.setDisplayName(json.optString(ParticipantsFields.DISPLAY_NAME));
@@ -105,6 +108,7 @@ public class ParticipantParser {
         }
     };
     private static final FieldParser<ConfirmableParticipant> STATUS_PARSER = new FieldParser<ConfirmableParticipant>() {
+        @Override
         public void parse(boolean parseAll, ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) {
             if (json.has(ParticipantsFields.STATUS)) {
                 obj.setStatus(ConfirmStatus.byId(json.optInt(ParticipantsFields.STATUS)));
@@ -114,6 +118,7 @@ public class ParticipantParser {
         }
     };
     private static final FieldParser<ConfirmableParticipant> MESSAGE_PARSER = new FieldParser<ConfirmableParticipant>() {
+        @Override
         public void parse(boolean parseAll, ConfirmableParticipant obj, TimeZone timeZone, JSONObject json) {
             if (json.has(ParticipantsFields.CONFIRM_MESSAGE)) {
                 obj.setMessage(json.optString(ParticipantsFields.CONFIRM_MESSAGE));
@@ -148,38 +153,47 @@ public class ParticipantParser {
             ignoreNotification = copy.isIgnoreNotification();
         }
 
+        @Override
         public Participant getClone() {
             return new JSONParticipant(this);
         }
 
+        @Override
         public String getDisplayName() {
             return displayName;
         }
 
+        @Override
         public String getEmailAddress() {
             return emailAddress;
         }
 
+        @Override
         public int getIdentifier() {
             return identifier;
         }
 
+        @Override
         public int getType() {
             return type;
         }
 
+        @Override
         public boolean isIgnoreNotification() {
             return ignoreNotification;
         }
 
+        @Override
         public void setDisplayName(String displayName) {
             this.displayName = displayName;
         }
 
+        @Override
         public void setIdentifier(int id) {
             this.identifier = id;
         }
 
+        @Override
         public void setIgnoreNotification(boolean ignoreNotification) {
             this.ignoreNotification = ignoreNotification;
         }
@@ -220,6 +234,7 @@ public class ParticipantParser {
             return true;
         }
 
+        @Override
         public int compareTo(Participant part) {
             final int retval;
             if (EXTERNAL_USER == part.getType()) {

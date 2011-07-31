@@ -87,6 +87,7 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
         super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.CREATION_DATETIME;
     }

@@ -102,10 +102,12 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { MailAccountCreateTablesTask.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Map<Integer, List<Integer>> m = getAllUsers(contextId);
@@ -311,26 +313,32 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static final FolderNameProvider DEFAULT_NAME_PROVIDER = new FolderNameProvider() {
 
+        @Override
         public String getConfirmedHam() {
             return UserSettingMail.STD_CONFIRMED_HAM;
         }
 
+        @Override
         public String getConfirmedSpam() {
             return UserSettingMail.STD_CONFIRMED_SPAM;
         }
 
+        @Override
         public String getDrafts() {
             return UserSettingMail.STD_DRAFTS;
         }
 
+        @Override
         public String getSent() {
             return UserSettingMail.STD_SENT;
         }
 
+        @Override
         public String getSpam() {
             return UserSettingMail.STD_SPAM;
         }
 
+        @Override
         public String getTrash() {
             return UserSettingMail.STD_TRASH;
         }
@@ -342,26 +350,32 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
         return new FolderNameProvider() {
 
+            @Override
             public String getConfirmedHam() {
                 return usm.getConfirmedHam();
             }
 
+            @Override
             public String getConfirmedSpam() {
                 return usm.getConfirmedSpam();
             }
 
+            @Override
             public String getDrafts() {
                 return usm.getStdDraftsName();
             }
 
+            @Override
             public String getSent() {
                 return usm.getStdSentName();
             }
 
+            @Override
             public String getSpam() {
                 return usm.getStdSpamName();
             }
 
+            @Override
             public String getTrash() {
                 return usm.getStdTrashName();
             }

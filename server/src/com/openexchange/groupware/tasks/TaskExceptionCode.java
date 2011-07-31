@@ -124,22 +124,27 @@ public enum TaskExceptionCode implements OXExceptionCode {
         this.number = number;
     }
     
+    @Override
     public String getPrefix() {
         return "TSK";
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
     
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }

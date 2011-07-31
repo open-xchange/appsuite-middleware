@@ -220,6 +220,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#processPackage()
      */
+    @Override
     public void processPackage() throws AJPv13Exception {
         try {
             if (State.IDLE.equals(state)) {
@@ -333,6 +334,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#createResponse()
      */
+    @Override
     public void createResponse() throws AJPv13Exception, ServletException {
         try {
             if (ajpRequest == null) {
@@ -356,6 +358,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * 
      * @return The forward request's bytes as a formatted string
      */
+    @Override
     public String getForwardRequest() {
         return AJPv13Config.isLogForwardRequest() ? AJPv13Utility.dumpBytes(clonedForwardPackage) : "<not enabled>";
     }
@@ -365,6 +368,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * 
      * @return The AJP connection of this request handler
      */
+    @Override
     public AJPv13Connection getAJPConnection() {
         return ajpCon;
     }
@@ -433,6 +437,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#reset(boolean)
      */
+    @Override
     public void reset(final boolean discardConnection) {
         if (state.equals(State.IDLE)) {
             return;
@@ -496,6 +501,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#setServletInstance(java.lang.String)
      */
+    @Override
     public void setServletInstance(final String pathArg) {
         /*
          * Remove leading slash character
@@ -529,6 +535,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#doServletService()
      */
+    @Override
     public void doServletService() throws ServletException, IOException {
         servlet.service(request, response);
         doResponseFlush();
@@ -547,6 +554,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public void doWriteHeaders(final BlockableBufferedOutputStream out) throws AJPv13Exception, IOException {
         if (!headersSent) {
             out.acquire();
@@ -561,10 +569,12 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public boolean isHeadersSent() {
         return headersSent;
     }
 
+    @Override
     public byte[] getAndClearResponseData() throws IOException {
         if (null == response) {
             return new byte[0];
@@ -580,10 +590,12 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @param newData The new data to set
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public void setData(final byte[] newData) throws IOException {
         request.setData(newData);
     }
 
+    @Override
     public byte[] peekData() throws IOException {
         return ((AJPv13ServletInputStream) request.getInputStream()).peekData();
     }
@@ -592,6 +604,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#doParseQueryString(byte[])
      */
+    @Override
     public void doParseQueryString(final byte[] contentBytes) throws UnsupportedEncodingException {
         String charEnc = request.getCharacterEncoding();
         if (charEnc == null) {
@@ -600,19 +613,23 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
     }
 
+    @Override
     public void setServletRequest(final HttpServletRequestWrapper request) {
         this.request = request;
         supplyRequestWrapperWithServlet();
     }
 
+    @Override
     public void setServletResponse(final HttpServletResponseWrapper response) {
         this.response = response;
     }
 
+    @Override
     public HttpServletRequest getServletRequest() {
         return request;
     }
 
+    @Override
     public HttpServletResponse getServletResponse() {
         return response;
     }
@@ -621,6 +638,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getContentLength()
      */
+    @Override
     public long getContentLength() {
         return contentLength;
     }
@@ -629,6 +647,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#containsContentLength()
      */
+    @Override
     public boolean containsContentLength() {
         return bContentLength;
     }
@@ -638,6 +657,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * 
      * @param contentLength The content length
      */
+    @Override
     public void setContentLength(final long contentLength) {
         this.contentLength = contentLength;
         bContentLength = true;
@@ -647,6 +667,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getTotalRequestedContentLength()
      */
+    @Override
     public long getTotalRequestedContentLength() {
         return totalRequestedContentLength;
     }
@@ -655,6 +676,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#increaseTotalRequestedContentLength(long)
      */
+    @Override
     public void increaseTotalRequestedContentLength(final long increaseBy) {
         totalRequestedContentLength += increaseBy;
     }
@@ -663,6 +685,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isServiceMethodCalled()
      */
+    @Override
     public boolean isServiceMethodCalled() {
         return serviceMethodCalled;
     }
@@ -671,6 +694,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isEndResponseSent()
      */
+    @Override
     public boolean isEndResponseSent() {
         return endResponseSent;
     }
@@ -678,6 +702,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Sets the end response flag
      */
+    @Override
     public void setEndResponseSent() {
         endResponseSent = true;
     }
@@ -686,6 +711,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isFormData()
      */
+    @Override
     public boolean isFormData() {
         return isFormData;
     }
@@ -696,6 +722,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * @param isFormData <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise
      *            <code>false</code>
      */
+    @Override
     public void setFormData(final boolean isFormData) {
         this.isFormData = isFormData;
     }
@@ -704,6 +731,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getNumOfBytesToRequestFor()
      */
+    @Override
     public int getNumOfBytesToRequestFor() {
         final long retval = contentLength - totalRequestedContentLength;
         if (retval > AJPv13Response.MAX_INT_VALUE || retval < 0) {
@@ -716,6 +744,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isAllDataRead()
      */
+    @Override
     public boolean isAllDataRead() {
         /*
          * This method will always return false if content-length is not set unless method makeEqual() is invoked
@@ -727,6 +756,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isMoreDataExpected()
      */
+    @Override
     public boolean isMoreDataExpected() {
         /*
          * No empty data package received AND requested data length is still less than header Content-Length
@@ -738,6 +768,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isNotSet()
      */
+    @Override
     public boolean isNotSet() {
         return (contentLength == NOT_SET);
     }
@@ -746,6 +777,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isMoreDataReadThanExpected()
      */
+    @Override
     public boolean isMoreDataReadThanExpected() {
         return (contentLength != NOT_SET && totalRequestedContentLength > contentLength);
     }
@@ -754,14 +786,17 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#makeEqual()
      */
+    @Override
     public void makeEqual() {
         totalRequestedContentLength = contentLength;
     }
 
+    @Override
     public Cookie getHttpSessionCookie() {
         return httpSessionCookie;
     }
 
+    @Override
     public void setHttpSessionCookie(final Cookie httpSessionCookie, final boolean join) {
         this.httpSessionCookie = httpSessionCookie;
         httpSessionJoined = join;
@@ -771,6 +806,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#isHttpSessionJoined()
      */
+    @Override
     public boolean isHttpSessionJoined() {
         return httpSessionJoined;
     }
@@ -779,6 +815,7 @@ final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * (non-Javadoc)
      * @see com.openexchange.ajp13.IAJPv13RequestHandler#getServletPath()
      */
+    @Override
     public String getServletPath() {
         return servletPath;
     }

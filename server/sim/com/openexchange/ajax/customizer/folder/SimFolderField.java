@@ -66,18 +66,22 @@ public class SimFolderField implements AdditionalFolderField {
     private Object value;
     private Object jsonValue;
 
+    @Override
     public int getColumnID() {
         return columnId;
     }
 
+    @Override
     public String getColumnName() {
         return columnName;
     }
 
+    @Override
     public Object getValue(FolderObject folder, ServerSession session) {
         return value;
     }
 
+    @Override
     public Object renderJSON(Object value) {
         return jsonValue;
     }

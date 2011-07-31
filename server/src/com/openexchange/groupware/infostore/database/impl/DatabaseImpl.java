@@ -1583,6 +1583,7 @@ public class DatabaseImpl extends DBService {
 
     class PrefetchMode implements FetchMode {
 
+        @Override
         public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl, final Context ctx, final Connection con, final boolean closeIfPossible) throws SQLException {
             final List<DocumentMetadata> resultList = new ArrayList<DocumentMetadata>();
             while (result.next()) {
@@ -1601,6 +1602,7 @@ public class DatabaseImpl extends DBService {
 
     static class CloseLaterMode implements FetchMode {
 
+        @Override
         public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl, final Context ctx, final Connection con, final boolean closeIfPossible) throws OXException {
             return new InfostoreIterator(result, stmt, dbColumns, impl, ctx, con);
         }
@@ -1609,6 +1611,7 @@ public class DatabaseImpl extends DBService {
 
     class CloseImmediatelyMode implements FetchMode {
 
+        @Override
         public SearchIterator<DocumentMetadata> buildIterator(final ResultSet result, final PreparedStatement stmt, final int[] dbColumns, final DatabaseImpl impl, final Context ctx, final Connection con, final boolean closeIfPossible) {
             if (closeIfPossible) {
                 close(stmt, result);
@@ -1666,10 +1669,12 @@ public class DatabaseImpl extends DBService {
             this.d = d;
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             return next != null;
         }
 
+        @Override
         public int size() {
             return -1;
         }
@@ -1678,6 +1683,7 @@ public class DatabaseImpl extends DBService {
             return false;
         }
 
+        @Override
         public DocumentMetadata next() throws OXException, OXException {
             try {
                 DocumentMetadata retval = null;
@@ -1703,6 +1709,7 @@ public class DatabaseImpl extends DBService {
             }
         }
 
+        @Override
         public void close() throws OXException {
             next = null;
             try {
@@ -1723,14 +1730,17 @@ public class DatabaseImpl extends DBService {
             }
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
+        @Override
         public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
+        @Override
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }

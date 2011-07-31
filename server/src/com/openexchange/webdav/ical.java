@@ -314,6 +314,7 @@ public final class ical extends PermissionServlet {
 
     private static final TObjectProcedure<SeriesUIDPatcher> PATCH_PROCEDURE = new TObjectProcedure<SeriesUIDPatcher>() {
         
+        @Override
         public boolean execute(final SeriesUIDPatcher patcher) {
             patcher.patchUIDs();
             return true;

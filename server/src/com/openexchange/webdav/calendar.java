@@ -275,6 +275,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             this.lastModifiedCache = new LastModifiedCache();
         }
 
+        @Override
         public void actionPerformed(final AppointmentSQLInterface appointmentsSQL, final OutputStream os, final int user)
                 throws IOException {
 

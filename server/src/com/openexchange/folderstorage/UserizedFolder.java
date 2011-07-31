@@ -71,6 +71,7 @@ public interface UserizedFolder extends Folder {
      * 
      * @return The subfolder IDs or <code>null</code> if not available
      */
+    @Override
     String[] getSubfolderIDs();
 
     /**

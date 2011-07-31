@@ -80,10 +80,12 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
         this.registry = registry;
     }
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(ical, defaultTZ, ctx, errors, warnings));
     }
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return splitIfNeeded(delegate.parseAppointments(icalText, defaultTZ, ctx, errors, warnings));
     }
@@ -108,14 +110,17 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
         return copy;
     }
 
+    @Override
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(ical, defaultTZ, context, errors, warnings);
     }
 
+    @Override
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return delegate.parseTasks(icalText, defaultTZ, context, errors, warnings);
     }
 
+    @Override
     public String parseProperty(final String propertyName, final InputStream ical) {
         return delegate.parseProperty(propertyName, ical);
     }

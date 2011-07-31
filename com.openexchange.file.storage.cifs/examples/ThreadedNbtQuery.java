@@ -9,6 +9,7 @@ public class ThreadedNbtQuery {
             this.name = name;
         }
 
+        @Override
         public void run() {
             try {
                 yield();

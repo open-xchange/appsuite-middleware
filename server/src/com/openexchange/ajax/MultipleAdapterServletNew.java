@@ -99,6 +99,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             this.req = req;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return req.getInputStream();
         }

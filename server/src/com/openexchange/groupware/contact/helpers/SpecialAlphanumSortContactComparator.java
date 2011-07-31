@@ -71,6 +71,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
         this.inverse = sortOrder == Order.DESCENDING ? -1 : 1;
     }
 
+    @Override
     public int compare(final Contact contact1, final Contact contact2) {
         final int nonNullField1 = detectFirstNonNullField(contact1);
         final int nonNullField2 = detectFirstNonNullField(contact2);

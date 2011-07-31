@@ -70,10 +70,12 @@ public final class ColumnOperand implements Operand<String> {
         this.name = name;
     }
 
+    @Override
     public com.openexchange.search.Operand.Type getType() {
         return Type.COLUMN;
     }
 
+    @Override
     public String getValue() {
         return name;
     }

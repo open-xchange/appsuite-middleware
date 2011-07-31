@@ -79,14 +79,17 @@ public final class DatabaseFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0 || DatabaseFolderStorageUtility.hasSharedPrefix(folderId);
     }
 
+    @Override
     public boolean servesParentId(final String parentId) {
         return servesFolderId(parentId);
     }

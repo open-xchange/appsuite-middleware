@@ -86,16 +86,19 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
     }
     
     
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = null;
         try {

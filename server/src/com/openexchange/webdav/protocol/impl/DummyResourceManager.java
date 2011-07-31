@@ -86,6 +86,7 @@ public final class DummyResourceManager implements WebdavFactory {
 	private final Map<WebdavPath,WebdavResource> resources = new HashMap<WebdavPath,WebdavResource>();
 	private final Map<WebdavPath,DummyLockNull> lockNullResources = new HashMap<WebdavPath,DummyLockNull>();
 
+    @Override
     public WebdavResource resolveResource(final WebdavPath url) {
         if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
@@ -98,6 +99,7 @@ public final class DummyResourceManager implements WebdavFactory {
 		return resources.get(url);
     }
 
+    @Override
     public WebdavCollection resolveCollection(final WebdavPath url) {
         if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
@@ -110,11 +112,13 @@ public final class DummyResourceManager implements WebdavFactory {
 		return (WebdavCollection) resources.get(url);
     }
 
+    @Override
     public WebdavResource resolveResource(final String url) {
 		return resolveResource(new WebdavPath(url));
 	}
 
-	public WebdavCollection resolveCollection(final String url) {
+	@Override
+    public WebdavCollection resolveCollection(final String url) {
 		return resolveCollection(new WebdavPath(url));
 	}
 
@@ -140,7 +144,8 @@ public final class DummyResourceManager implements WebdavFactory {
 		return url;
 	}
 
-	public Protocol getProtocol() {
+	@Override
+    public Protocol getProtocol() {
 		return PROTOCOL;
 	}
 
@@ -155,12 +160,14 @@ public final class DummyResourceManager implements WebdavFactory {
 		lockNullResources.remove(url);
 	}
 
-	public void beginRequest() {
+	@Override
+    public void beginRequest() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void endRequest(final int status) {
+	@Override
+    public void endRequest(final int status) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -66,6 +66,7 @@ public class StrategyFolderUpdaterTest extends TestCase {
     private SimFolderUpdaterStrategy simStrategy;
     private StrategyFolderUpdaterService<String> updater;
 
+    @Override
     public void setUp() {
         simStrategy = new SimFolderUpdaterStrategy();
         simStrategy.setDataSet("aaaac", "baaaa");

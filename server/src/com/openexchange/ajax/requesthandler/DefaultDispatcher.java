@@ -73,18 +73,22 @@ public class DefaultDispatcher implements Dispatcher {
 
     private final Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
 
+    @Override
     public AJAXState begin() throws OXException {
         return new AJAXState();
     }
 
+    @Override
     public void end(final AJAXState state) {
         state.close();
     }
     
+    @Override
     public boolean handles(final String module) {
         return actionFactories.containsKey(module);
     }
 
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();

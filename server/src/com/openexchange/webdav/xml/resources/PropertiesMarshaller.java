@@ -99,7 +99,8 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		this.charset = charset;
 	}
 
-	public List<Element> marshal(final WebdavResource resource) throws OXException {
+	@Override
+    public List<Element> marshal(final WebdavResource resource) throws OXException {
 		final Element response =  new Element("response",DAV_NS);
 		response.addContent(marshalHREF(resource.getUrl(), resource.getResourceType() != null)); //TODO: Fix the new bug here
 		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);

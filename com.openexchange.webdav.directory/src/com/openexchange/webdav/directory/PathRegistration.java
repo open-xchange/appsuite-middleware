@@ -49,9 +49,6 @@
 
 package com.openexchange.webdav.directory;
 
-import java.util.Arrays;
-import java.util.Iterator;
-
 
 /**
  * {@link PathRegistration}

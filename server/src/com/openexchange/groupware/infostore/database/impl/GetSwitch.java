@@ -60,98 +60,122 @@ public class GetSwitch implements MetadataSwitcher {
 		this.metadata = metadata;
 	}
 	
-	public Object lastModified() {
+	@Override
+    public Object lastModified() {
 		return metadata.getLastModified();
 	}
 
-	public Object creationDate() {
+	@Override
+    public Object creationDate() {
 		return metadata.getCreationDate();
 	}
 
-	public Object modifiedBy() {
+	@Override
+    public Object modifiedBy() {
 		return metadata.getModifiedBy();
 	}
 
-	public Object folderId() {
+	@Override
+    public Object folderId() {
 		return metadata.getFolderId();
 	}
 
-	public Object title() {
+	@Override
+    public Object title() {
 		return metadata.getTitle();
 	}
 
-	public Object version() {
+	@Override
+    public Object version() {
 		return metadata.getVersion();
 	}
 
-	public Object content() {
+	@Override
+    public Object content() {
 		return metadata.getContent();
 	}
 
-	public Object id() {
+	@Override
+    public Object id() {
 		return metadata.getId();
 	}
 
-	public Object fileSize() {
+	@Override
+    public Object fileSize() {
 		return metadata.getFileSize();
 	}
 
-	public Object description() {
+	@Override
+    public Object description() {
 		return metadata.getDescription();
 	}
 
-	public Object url() {
+	@Override
+    public Object url() {
 		return metadata.getURL();
 	}
 
-	public Object createdBy() {
+	@Override
+    public Object createdBy() {
 		return metadata.getCreatedBy();
 	}
 
-	public Object fileName() {
+	@Override
+    public Object fileName() {
 		return metadata.getFileName();
 	}
 
-	public Object fileMIMEType() {
+	@Override
+    public Object fileMIMEType() {
 		return metadata.getFileMIMEType();
 	}
 
-	public Object sequenceNumber() {
+	@Override
+    public Object sequenceNumber() {
 		return metadata.getSequenceNumber();
 	}
 
-	public Object categories() {
+	@Override
+    public Object categories() {
 		return metadata.getCategories();
 	}
 
-	public Object lockedUntil() {
+	@Override
+    public Object lockedUntil() {
 		return metadata.getLockedUntil();
 	}
 
-	public Object fileMD5Sum() {
+	@Override
+    public Object fileMD5Sum() {
 		return metadata.getFileMD5Sum();
 	}
 
-	public Object versionComment() {
+	@Override
+    public Object versionComment() {
 		return metadata.getVersionComment();
 	}
 
-	public Object currentVersion() {
+	@Override
+    public Object currentVersion() {
 		return metadata.isCurrentVersion();
 	}
 
-	public Object colorLabel() {
+	@Override
+    public Object colorLabel() {
 		return metadata.getColorLabel();
 	}
 
-	public Object filestoreLocation() {
+	@Override
+    public Object filestoreLocation() {
 		return metadata.getFilestoreLocation();
 	}
 
+    @Override
     public Object lastModifiedUTC() {
         return metadata.getLastModified();
     }
 
+    @Override
     public Object numberOfVersions() {
         return metadata.getNumberOfVersions();
     }

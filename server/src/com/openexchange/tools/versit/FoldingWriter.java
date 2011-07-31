@@ -109,10 +109,12 @@ public class FoldingWriter implements VersitDefinition.Writer {
         writeln();
     }
 
+    @Override
     public void flush() throws IOException {
         w.flush();
     }
 
+    @Override
     public void close() throws IOException {
         w.close();
     }

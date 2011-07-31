@@ -77,6 +77,7 @@ public final class ConfigTreeInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         ConfigTree.init();
     }
@@ -84,6 +85,7 @@ public final class ConfigTreeInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() {
         ConfigTree.stop();
     }

@@ -92,6 +92,7 @@ public class TagArgument implements Argument
     /**
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString()
     {
         return (getValue() == null) ? "null" : getValue().toString();

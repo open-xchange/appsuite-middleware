@@ -70,6 +70,7 @@ public class CopyLinksForChangeExceptions implements CalendarListener {
         this.links = links;
     }
 
+    @Override
     public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession session) throws OXException {
         int userId = session.getUserId();
         UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId,session.getContext());

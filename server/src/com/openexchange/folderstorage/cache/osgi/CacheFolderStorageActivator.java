@@ -211,6 +211,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         {
             final EventHandler eventHandler = new EventHandler() {
                 
+                @Override
                 public void handleEvent(final Event event) {
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                     final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
@@ -229,6 +230,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         {
             final EventHandler eventHandler = new EventHandler() {
                 
+                @Override
                 public void handleEvent(final Event event) {
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                     final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
@@ -253,6 +255,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         {
             final EventHandler eventHandler = new EventHandler() {
                 
+                @Override
                 public void handleEvent(final Event event) {
                     final String topic = event.getTopic();
                     if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {

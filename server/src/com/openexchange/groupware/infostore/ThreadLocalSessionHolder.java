@@ -76,14 +76,17 @@ public class ThreadLocalSessionHolder implements SessionHolder {
         session.remove();
     }
     
+    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
+    @Override
     public Session getSessionObject() {
         return session.get();
     }
 
+    @Override
     public User getUser() {
         return session.get().getUser();
     }

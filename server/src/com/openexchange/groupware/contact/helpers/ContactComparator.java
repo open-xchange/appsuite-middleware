@@ -92,6 +92,7 @@ public class ContactComparator implements Comparator<Contact> {
         this.weight = sortOrder == Order.DESCENDING ? -1 : 1;
     }
 
+    @Override
     public int compare(final Contact contact1, final Contact contact2) {
         final String s1 = getFirstNotNull(contact1);
         final String s2 = getFirstNotNull(contact2);

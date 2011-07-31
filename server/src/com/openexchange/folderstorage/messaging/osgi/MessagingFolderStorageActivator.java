@@ -176,6 +176,7 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
             this.context = context;
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final FolderStorage folderStorage = (FolderStorage) context.getService(reference);
             if (Arrays.asList(folderStorage.getSupportedContentTypes()).contains(MailContentType.getInstance())) {
@@ -186,10 +187,12 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             if (null != service) {
                 final FolderStorage folderStorage = (FolderStorage) service;

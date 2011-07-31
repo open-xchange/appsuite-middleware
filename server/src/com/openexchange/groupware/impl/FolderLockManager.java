@@ -59,7 +59,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface FolderLockManager extends LockManager{
 
-	void unlock(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	@Override
+    void unlock(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	int lock(int entity, long timeout, Scope exclusive, Type write, int depth, String ownerDesc, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 

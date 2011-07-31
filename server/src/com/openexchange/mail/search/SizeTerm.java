@@ -78,10 +78,12 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
 
             private final Integer i = Integer.valueOf(size);
 
+            @Override
             public ComparisonType getComparisonType() {
                 return comparisonType;
             }
 
+            @Override
             public Integer getPattern() {
                 return i;
             }

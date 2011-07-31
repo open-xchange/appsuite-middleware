@@ -89,14 +89,17 @@ public class CreateGenconfTablesTask implements UpdateTask {
     
     private static final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_genconf (cid, id) VALUES (?, 0)";
     
+    @Override
     public int addedWithVersion() {
         return 44;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         try {

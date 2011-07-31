@@ -133,11 +133,13 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 			this.sql = sql;
 		}
 		
-		public void close() {
+		@Override
+        public void close() {
 			DBUtils.closeSQLStuff(rs, stmt);
 		}
 
-		public int performUpdate(final Connection writeCon) throws SQLException {
+		@Override
+        public int performUpdate(final Connection writeCon) throws SQLException {
 			stmt = writeCon.prepareStatement(sql);
 			fillStatement();
 			statementString = stmt.toString();
@@ -151,7 +153,8 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 		
 		public abstract void fillStatement() throws SQLException;
 
-		public String getStatement() {
+		@Override
+        public String getStatement() {
 			return statementString == null ? sql : statementString;
 		}
 		

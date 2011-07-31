@@ -72,14 +72,17 @@ public class AlterMailAddressLength implements UpdateTask {
     private static final String UPDATE_PRG_DATE_RIGHTS = "alter table prg_date_rights change column ma ma VARCHAR(286)";
  
     
+    @Override
     public int addedWithVersion() {
         return 2;
     }
     
+    @Override
     public int getPriority() {
         return 3;
     }
     
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
         Statement stmt = null;

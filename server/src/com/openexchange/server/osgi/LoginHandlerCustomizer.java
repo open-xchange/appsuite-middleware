@@ -73,6 +73,7 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         if ((service instanceof LoginHandlerService) && LoginHandlerRegistry.getInstance().addLoginHandler((LoginHandlerService) service)) {
@@ -83,10 +84,12 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference serviceReference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference serviceReference, final Object service) {
         if (null != service) {
             if (service instanceof LoginHandlerService) {

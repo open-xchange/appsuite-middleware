@@ -170,7 +170,7 @@ public class IVR
      *     
      */
     public void setMohFolder(JAXBElement<String> value) {
-        this.mohFolder = ((JAXBElement<String> ) value);
+        this.mohFolder = value;
     }
 
     /**

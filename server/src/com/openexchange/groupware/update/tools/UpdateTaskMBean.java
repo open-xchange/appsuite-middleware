@@ -177,18 +177,22 @@ public final class UpdateTaskMBean implements DynamicMBean {
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations.toArray(new MBeanOperationInfo[operations.size()]), null);
     }
 
+    @Override
     public Object getAttribute(final String attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be obtained in this MBean");
     }
 
+    @Override
     public AttributeList getAttributes(final String[] attributes) {
         return new AttributeList();
     }
 
+    @Override
     public MBeanInfo getMBeanInfo() {
         return mbeanInfo;
     }
 
+    @Override
     public Object invoke(final String actionName, final Object[] params, final String[] signature) throws MBeanException, ReflectionException {
         if (actionName.equals("runUpdate")) {
             try {
@@ -328,10 +332,12 @@ public final class UpdateTaskMBean implements DynamicMBean {
         throw e;
     }
 
+    @Override
     public void setAttribute(final Attribute attribute) throws AttributeNotFoundException {
         throw new AttributeNotFoundException("No attribute can be set in this MBean");
     }
 
+    @Override
     public AttributeList setAttributes(final AttributeList attributes) {
         return new AttributeList();
     }

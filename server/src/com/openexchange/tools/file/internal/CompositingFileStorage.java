@@ -73,11 +73,13 @@ public class CompositingFileStorage implements FileStorage {
 
     private String savePrefix;
 
+    @Override
     public boolean deleteFile(String identifier) throws OXException {
         PreparedName prepared = prepareName(identifier);
         return prepared.fs.deleteFile(prepared.name);
     }
 
+    @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Map<FileStorage, List<String>> partitions = new HashMap<FileStorage, List<String>>();
         Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
@@ -115,11 +117,13 @@ public class CompositingFileStorage implements FileStorage {
         return notDeleted;
     }
 
+    @Override
     public InputStream getFile(String name) throws OXException {
         PreparedName prepared = prepareName(name);
         return prepared.fs.getFile(prepared.name);
     }
 
+    @Override
     public SortedSet<String> getFileList() throws OXException {
         SortedSet<String> fileList = standardFS.getFileList();
         for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
@@ -134,15 +138,18 @@ public class CompositingFileStorage implements FileStorage {
         return fileList;
     }
 
+    @Override
     public long getFileSize(String name) throws OXException {
         PreparedName preparedName = prepareName(name);
         return preparedName.fs.getFileSize(preparedName.name);
     }
 
+    @Override
     public String getMimeType(String name) throws OXException {
         return standardFS.getMimeType(name);
     }
 
+    @Override
     public void recreateStateFile() throws OXException {
         standardFS.recreateStateFile();
         for(FileStorage fs: prefixedStores.values()) {
@@ -150,6 +157,7 @@ public class CompositingFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public void remove() throws OXException {
         standardFS.remove();
         for(FileStorage fs: prefixedStores.values()) {
@@ -157,6 +165,7 @@ public class CompositingFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public String saveNewFile(InputStream file) throws OXException {
         if (savePrefix != null) {
             return saveNewFileInPrefixedSto(savePrefix, file);
@@ -169,6 +178,7 @@ public class CompositingFileStorage implements FileStorage {
         return prefix + "/" + fileStorage.saveNewFile(file);
     }
 
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         boolean stateFileIsCorrect = standardFS.stateFileIsCorrect();
         if(!stateFileIsCorrect) {

@@ -224,14 +224,17 @@ public final class FolderCacheManager {
             this.folderId = folderId;
         }
 
+        @Override
         public Lock getCacheLock() {
             return FolderCacheManager.this.getCacheLock();
         }
 
+        @Override
         public Serializable getKey() {
             return getCacheKey(ctx.getContextId(), folderId);
         }
 
+        @Override
         public FolderObject load() throws OXException {
             return loadFolderObjectInternal(folderId, ctx, null);
         }
@@ -652,10 +655,12 @@ public final class FolderCacheManager {
             this.folderObject = folderObject;
         }
 
+        @Override
         public FolderObject getFolderObject() {
             return folderObject;
         }
 
+        @Override
         public int getObjectID() {
             return folderObject.getObjectID();
         }
@@ -677,6 +682,7 @@ public final class FolderCacheManager {
             this.readCon = readCon;
         }
 
+        @Override
         public FolderObject getFolderObject() throws OXException {
             if (folderId <= 0) {
                 throw OXFolderExceptionCode.NOT_EXISTS.create(folderId, ctx.getContextId());
@@ -684,6 +690,7 @@ public final class FolderCacheManager {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
         }
 
+        @Override
         public int getObjectID() {
             return folderId;
         }

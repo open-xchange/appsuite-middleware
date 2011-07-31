@@ -1823,7 +1823,8 @@ public class Spamc {
 	    super(DestinationOption.SHORT_ARG, DestinationOption.LONG_ARG, true);
 	}
 
-	protected long apply(final String hosts, final Spamc spamc,
+	@Override
+    protected long apply(final String hosts, final Spamc spamc,
 		final long flags) throws UsageException {
 	    long newFlags = super.apply(hosts, spamc, flags);
 	    final String[] splitHosts = hosts.split(",");
@@ -1843,7 +1844,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags)
+	@Override
+    protected long apply(final Spamc spamc, final long flags)
 		throws UsageException {
 	    final long newFlags = super.apply(spamc, flags);
 	    spamc.setRandomize(true);
@@ -1860,7 +1862,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String port, final Spamc spamc,
+	@Override
+    protected long apply(final String port, final Spamc spamc,
 		final long flags) throws UsageException {
 	    final long newFlags = super.apply(port, spamc, flags);
 	    spamc.setPort(Integer.parseInt(port));
@@ -1880,7 +1883,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    spamc.setUseSSL(true);
 	    return flags | FLAG;
 	}
@@ -1895,7 +1899,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String path, final Spamc spamc,
+	@Override
+    protected long apply(final String path, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(path, spamc, flags);
 	    spamc.setUseUnixSockets(true);
@@ -1923,7 +1928,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String timeout, final Spamc spamc,
+	@Override
+    protected long apply(final String timeout, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(timeout, spamc, flags);
 	    spamc.setTimeout(Integer.parseInt(timeout));
@@ -1938,7 +1944,8 @@ public class Spamc {
 	    super(LONG_ARG, true);
 	}
 
-	protected long apply(final String retries, final Spamc spamc,
+	@Override
+    protected long apply(final String retries, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(retries, spamc, flags);
 	    spamc.setConnectRetries(Integer.parseInt(retries));
@@ -1953,7 +1960,8 @@ public class Spamc {
 	    super(LONG_ARG, true);
 	}
 
-	protected long apply(final String sleep, final Spamc spamc,
+	@Override
+    protected long apply(final String sleep, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(sleep, spamc, flags);
 	    spamc.setRetrySleep(Integer.parseInt(sleep));
@@ -1970,7 +1978,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String size, final Spamc spamc,
+	@Override
+    protected long apply(final String size, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(size, spamc, flags);
 	    spamc.setMaxSize(Long.parseLong(size));
@@ -1987,7 +1996,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String userName, final Spamc spamc,
+	@Override
+    protected long apply(final String userName, final Spamc spamc,
 		final long flags) throws UsageException {
 	    super.apply(userName, spamc, flags);
 	    spamc.setUserName(userName);
@@ -2012,7 +2022,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String learntype, final Spamc spamc,
+	@Override
+    protected long apply(final String learntype, final Spamc spamc,
 		final long flags) throws UsageException {
 	    long newFlags = super.apply(learntype, spamc, flags);
 	    if (!LearnTypeOption.SPAM.equals(learntype)
@@ -2040,7 +2051,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, true);
 	}
 
-	protected long apply(final String reportType, final Spamc spamc,
+	@Override
+    protected long apply(final String reportType, final Spamc spamc,
 		final long flags) throws UsageException {
 	    long newFlags = super.apply(reportType, spamc, flags);
 	    if (!ReportTypeOption.REPORT.equals(reportType)
@@ -2083,7 +2095,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    Spamc.useExitCode = true;
 	    return flags | FLAG;
 	}
@@ -2100,7 +2113,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2116,7 +2130,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2132,7 +2147,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2146,7 +2162,8 @@ public class Spamc {
 	    super(HeadersOption.LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2176,7 +2193,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    // turn off the safe fallback flag
 	    return flags & ~SafeFallbackOption.FLAG;
 	}
@@ -2193,7 +2211,8 @@ public class Spamc {
 	    super(SHORT_ARG, LONG_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2226,7 +2245,8 @@ public class Spamc {
          * 
          * @return <code>false</code>
          */
-	protected boolean keepRunning() {
+	@Override
+    protected boolean keepRunning() {
 	    return false;
 	}
     }
@@ -2249,7 +2269,8 @@ public class Spamc {
          * 
          * @return <code>false</code>
          */
-	protected boolean keepRunning() {
+	@Override
+    protected boolean keepRunning() {
 	    return false;
 	}
     }
@@ -2263,7 +2284,8 @@ public class Spamc {
 	    super(SHORT_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    spamc.setCompress(true);
 	    return flags | FLAG;
 	}
@@ -2288,7 +2310,8 @@ public class Spamc {
 	    super(SHORT_ARG, false);
 	}
 
-	protected long apply(final Spamc spamc, final long flags) {
+	@Override
+    protected long apply(final Spamc spamc, final long flags) {
 	    return flags | FLAG;
 	}
     }
@@ -2393,7 +2416,8 @@ public class Spamc {
 		    + (charIndex + 1) + ": ";
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 	    return getMessagePrefix() + message;
 	}
 
@@ -2412,7 +2436,8 @@ public class Spamc {
 	    }
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 	    return getMessagePrefix() + "option not found " + option;
 	}
     }
@@ -2434,7 +2459,8 @@ public class Spamc {
 	    }
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 	    return getMessagePrefix() + "no argument for option " + option;
 	}
     }

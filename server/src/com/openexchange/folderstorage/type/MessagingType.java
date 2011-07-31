@@ -76,6 +76,7 @@ public final class MessagingType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.MESSAGING
         return 13;

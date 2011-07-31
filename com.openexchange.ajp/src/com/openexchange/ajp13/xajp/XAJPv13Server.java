@@ -316,6 +316,7 @@ public final class XAJPv13Server {
             this.writeRate = writeRate;
         }
 
+        @Override
         public boolean onConnect(final INonBlockingConnection connection) throws IOException {
             final String ipAddress = connection.getRemoteAddress().getHostAddress();
             if (!knownIps.contains(ipAddress)) {
@@ -362,10 +363,12 @@ public final class XAJPv13Server {
         // create and add startup listener
         final IServerListener startupListener = new IServerListener() {
 
+            @Override
             public void onInit() {
                 startedSignal.countDown();
             }
 
+            @Override
             public void onDestroy() {
                 // Nothing to do
             }

@@ -56,7 +56,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfMatchAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		check(req, true);
 		check(req, false);

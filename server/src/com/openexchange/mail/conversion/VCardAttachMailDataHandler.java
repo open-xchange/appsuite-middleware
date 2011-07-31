@@ -109,14 +109,17 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         super();
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         final UserSettingMail usm;

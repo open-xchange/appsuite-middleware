@@ -87,14 +87,17 @@ public final class MailId implements SortableId {
         return this;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return fullname;
     }
 
+    @Override
     public Priority getPriority() {
         /*
          * Mail folders come first
@@ -102,6 +105,7 @@ public final class MailId implements SortableId {
         return Priority.HIGH;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof MailId) {
             final int thisVal = ordinal;

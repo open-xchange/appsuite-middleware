@@ -87,6 +87,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final Object invoke(final Object object, final Method method, final Object[] arguments) throws Throwable {
         if (!method.isAnnotationPresent(OXNoRefresh.class) || null == cached) {
             refresh();

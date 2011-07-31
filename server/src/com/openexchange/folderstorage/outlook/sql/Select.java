@@ -913,6 +913,7 @@ public final class Select {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String o1, final String o2) {
             return collator.compare(o1, o2);
         }
@@ -929,6 +930,7 @@ public final class Select {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String[] o1, final String[] o2) {
             {
                 final String privateId = "1";

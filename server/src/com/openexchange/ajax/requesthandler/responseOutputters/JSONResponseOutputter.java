@@ -76,15 +76,18 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class JSONResponseOutputter implements ResponseOutputter {
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
     
+    @Override
     public int getPriority() {
         return 0;
     }
     
+    @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         Object resultObject = result.getResultObject();
         return Response.class.isAssignableFrom(resultObject.getClass());
     }
 
+    @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         final Response response = (Response) result.getResultObject();
         writeResponse(response, request.getAction(), req, resp);

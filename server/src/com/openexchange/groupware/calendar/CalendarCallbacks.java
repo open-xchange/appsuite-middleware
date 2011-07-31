@@ -124,6 +124,7 @@ public class CalendarCallbacks implements CalendarListener {
         return new ServerSessionAdapter(session);
     }
 
+    @Override
     public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession serverSession) throws OXException {
         final List<String> exceptionIDs = new ArrayList<String>();
         for (final CalendarListener listener : getListeners()) {

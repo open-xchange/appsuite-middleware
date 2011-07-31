@@ -66,19 +66,23 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
 
     private PropertyMixin[] mixins;
 
+    @Override
     public void beginRequest() {
 
     }
 
+    @Override
     public void endRequest(final int status) {
 
     }
 
+    @Override
     public WebdavCollection resolveCollection(String url) throws OXException {
         url = normalize(url);
         return resolveCollection(decode(new WebdavPath(url)));
     }
 
+    @Override
     public WebdavResource resolveResource(String url) throws OXException {
         url = normalize(url);
         return resolveResource(decode(new WebdavPath(url)));

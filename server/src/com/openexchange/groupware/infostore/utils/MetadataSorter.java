@@ -79,7 +79,8 @@ public class MetadataSorter {
 			
 		}
 		
-		public int compare(final DocumentMetadata arg0, final DocumentMetadata arg1) {
+		@Override
+        public int compare(final DocumentMetadata arg0, final DocumentMetadata arg1) {
 			final Comparable<Object> v1 = getValue(arg0);
 			final Comparable<Object> v2 = getValue(arg1);
 			if(v2 == null && v1 == null) {

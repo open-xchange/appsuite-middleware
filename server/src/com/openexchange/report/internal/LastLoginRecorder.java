@@ -74,6 +74,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         super();
     }
 
+    @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
         String key;
@@ -107,6 +108,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         }
     }
 
+    @Override
     public void handleLogout(final LoginResult logout) {
         // Nothing to to.
     }

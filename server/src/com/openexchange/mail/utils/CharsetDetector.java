@@ -363,6 +363,7 @@ public final class CharsetDetector {
          * (non-Javadoc)
          * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java. lang.String)
          */
+        @Override
         public void Notify(final String charset) {
             this.charset = charset;
         }

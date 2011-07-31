@@ -93,10 +93,12 @@ public final class FileStorageFolderType implements FolderType {
         serviceRegistry = FileStorageFolderStorageServiceRegistry.getServiceRegistry();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         if (null == folderId) {
             return false;
@@ -121,6 +123,7 @@ public final class FileStorageFolderType implements FolderType {
         return true;
     }
 
+    @Override
     public boolean servesParentId(final String folderId) {
         if (null == folderId) {
             return false;

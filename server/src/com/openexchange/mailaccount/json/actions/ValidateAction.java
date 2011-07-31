@@ -99,6 +99,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final JSONObject jData = (JSONObject) request.getData();
 

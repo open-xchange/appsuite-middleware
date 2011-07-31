@@ -340,6 +340,7 @@ public final class DefaultFolderNamesProvider {
             this.defaultAccount = defaultAccount;
         }
 
+        @Override
         public String getConfirmeHam() {
             final String ret = defaultAccount.getConfirmedHam();
             if (ret == null || ret.length() == 0) {
@@ -348,6 +349,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getConfirmedSpam() {
             final String ret = defaultAccount.getConfirmedSpam();
             if (ret == null || ret.length() == 0) {
@@ -356,6 +358,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getDrafts() {
             final String ret = defaultAccount.getDrafts();
             if (ret == null || ret.length() == 0) {
@@ -364,6 +367,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getSent() {
             final String ret = defaultAccount.getSent();
             if (ret == null || ret.length() == 0) {
@@ -372,6 +376,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getSpam() {
             final String ret = defaultAccount.getSpam();
             if (ret == null || ret.length() == 0) {
@@ -380,6 +385,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getTrash() {
             final String ret = defaultAccount.getTrash();
             if (ret == null || ret.length() == 0) {
@@ -395,26 +401,32 @@ public final class DefaultFolderNamesProvider {
      */
     public static final FallbackProvider DEFAULT_PROVIDER = new FallbackProvider() {
 
+        @Override
         public String getConfirmeHam() {
             return STD_CONFIRMED_HAM;
         }
 
+        @Override
         public String getConfirmedSpam() {
             return STD_CONFIRMED_HAM;
         }
 
+        @Override
         public String getDrafts() {
             return STD_DRAFTS;
         }
 
+        @Override
         public String getSent() {
             return STD_SENT;
         }
 
+        @Override
         public String getSpam() {
             return STD_SPAM;
         }
 
+        @Override
         public String getTrash() {
             return STD_TRASH;
         }

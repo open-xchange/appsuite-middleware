@@ -1601,6 +1601,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 final int index = i;
                                 tasks.add(new AbstractTask<Object>() {
 
+                                    @Override
                                     public Object call() throws Exception {
                                         arrays[index] = null;
                                         return null;
@@ -2439,6 +2440,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             this.index = index;
         }
 
+        @Override
         public Object call() throws OXException {
             final MailAccess<?, ?> mailAccess;
             final int accountId = mailAccount.getId();
@@ -2511,6 +2513,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             this.index = index;
         }
 
+        @Override
         public Object call() throws OXException {
             final MessagingFolder rootFolder;
             final MessagingAccountAccess access;
@@ -2567,6 +2570,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String displayName1, final String displayName2) {
             return collator.compare(displayName1, displayName2);
         }
@@ -2583,6 +2587,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {

@@ -195,6 +195,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * 
      * @return The associated AJP request handler.
      */
+    @Override
     public AJPv13RequestHandler getAjpRequestHandler() {
         return ajpRequestHandler;
     }
@@ -205,6 +206,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The input stream from AJP client
      * @throws IOException If input stream cannot be returned
      */
+    @Override
     public InputStream getInputStream() throws IOException {
         if (inputStream == null) {
             throw new IOException("Input stream not availalbe");
@@ -218,6 +220,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
+    @Override
     public BlockableBufferedOutputStream getOutputStream() throws IOException {
         if (outputStream == null) {
             throw new IOException("Output stream not available");
@@ -231,6 +234,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * @param millis The timeout in milliseconds
      * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
+    @Override
     public void setSoTimeout(final int millis) throws AJPv13Exception {
         try {
             listener.getSocket().setSoTimeout(millis);
@@ -244,6 +248,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * 
      * @return The number of actual AJP package.
      */
+    @Override
     public int getPackageNumber() {
         return packageNumber;
     }
@@ -260,6 +265,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
      * 
      * @return Current AJP connection's state
      */
+    @Override
     public int getState() {
         return state;
     }
@@ -285,6 +291,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
     /**
      * Sets both input and output stream to <code>null</code> and closes associated socket.
      */
+    @Override
     public void close() {
         discardStreams();
         listener.discardSocket();
@@ -374,6 +381,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         }
     }
 
+    @Override
     public void blockInputStream(final boolean block) {
         if (block) {
             inputStream.block();
@@ -382,6 +390,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection {
         }
     }
 
+    @Override
     public void blockOutputStream(final boolean block) {
         if (block) {
             outputStream.block();

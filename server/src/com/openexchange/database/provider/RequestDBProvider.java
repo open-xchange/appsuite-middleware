@@ -199,6 +199,7 @@ public class RequestDBProvider implements DBProvider {
         }
     }
     
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
@@ -233,6 +234,7 @@ public class RequestDBProvider implements DBProvider {
         return readCon;
     }
     
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException{
         checkThreadDeath();
         final DBTransaction tx = getActiveTransaction();
@@ -261,6 +263,7 @@ public class RequestDBProvider implements DBProvider {
         return tx.writeConnection;
     }
     
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
         //if(tx == null) {
@@ -292,6 +295,7 @@ public class RequestDBProvider implements DBProvider {
         
     }
     
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con){
         final DBTransaction tx = getActiveTransaction();
         if(tx == null) {

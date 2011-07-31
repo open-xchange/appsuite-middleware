@@ -67,6 +67,7 @@ public abstract class TagFillerAdapter implements TagFiller {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String replace(final String tag) {
         return EMPTY;
     }
@@ -74,6 +75,7 @@ public abstract class TagFillerAdapter implements TagFiller {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String replace(final String tag, final Object data) {
         return EMPTY;
     }

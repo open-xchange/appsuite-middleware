@@ -104,7 +104,7 @@ public final class SocketFetcher {
         final int port = socket.getPort();
         try {
             // Get SSL socket factory
-            final SSLSocketFactory ssf = (SSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
+            final SSLSocketFactory ssf = TrustAllSSLSocketFactory.getDefault();
             // Create new socket layered over an existing socket connected to the named host, at the given port.
             final Socket newSocket = ssf.createSocket(socket, host, port, true);
             configureSSLSocket(newSocket);

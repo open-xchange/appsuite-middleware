@@ -61,7 +61,8 @@ public class JSONSimpleRequest implements SimpleRequest {
 		this.jsonObject = object;
 	}
 
-	public String getParameter(final String param) {
+	@Override
+    public String getParameter(final String param) {
 		try {
 			return jsonObject.getString(param);
 		} catch (final JSONException e) {
@@ -69,11 +70,13 @@ public class JSONSimpleRequest implements SimpleRequest {
 		}
 	}
 
-	public String[] getParameterValues(final String param) {
+	@Override
+    public String[] getParameterValues(final String param) {
 		return getParameter(param).split("\\s*,\\s*");
 	}
 
-	public Object getBody() {
+	@Override
+    public Object getBody() {
 		try {
 			return jsonObject.get(ResponseFields.DATA);
 		} catch (final JSONException e) {

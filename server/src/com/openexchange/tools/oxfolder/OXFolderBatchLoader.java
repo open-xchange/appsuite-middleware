@@ -86,6 +86,7 @@ public final class OXFolderBatchLoader {
             this.folderPermissions = folderPermissions;
         }
 
+        @Override
         public boolean execute(final FolderObject fo) {
             final int id = fo.getObjectID();
             final List<OCLPermission> permissions = folderPermissions.get(id);
@@ -106,6 +107,7 @@ public final class OXFolderBatchLoader {
             this.subfolderIds = subfolderIds;
         }
 
+        @Override
         public boolean execute(final FolderObject fo) {
             final ArrayList<Integer> ids = subfolderIds.get(fo.getObjectID());
             if (ids == null) {

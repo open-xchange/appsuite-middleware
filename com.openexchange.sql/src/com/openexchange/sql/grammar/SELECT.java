@@ -157,7 +157,8 @@ public class SELECT extends Command {
 		return where;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildSELECT(this);
 	}
 }

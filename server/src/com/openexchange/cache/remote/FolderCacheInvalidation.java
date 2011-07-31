@@ -73,14 +73,16 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 	/* (non-Javadoc)
 	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#getRemoteName()
 	 */
-	public String getRemoteName() {
+	@Override
+    public String getRemoteName() {
 		return REMOTE_NAME;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#invalidateCacheElement(int, int)
 	 */
-	public void invalidateCacheElement(final int contextId, final int objectId) throws RemoteException {
+	@Override
+    public void invalidateCacheElement(final int contextId, final int objectId) throws RemoteException {
 		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
 				FolderCacheManager.getInstance().removeFolderObject(objectId, ContextStorage.getInstance().getContext(contextId));
@@ -94,7 +96,8 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 	/* (non-Javadoc)
 	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#invalidateContext(int)
 	 */
-	public void invalidateContext(final int contextId) throws RemoteException {
+	@Override
+    public void invalidateContext(final int contextId) throws RemoteException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Method invalidateContext() not implemented");
 		}

@@ -151,10 +151,12 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
+    @Override
     public void setTextPart(final TextBodyMailPart textPart) {
         this.textPart = textPart;
     }
 
+    @Override
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
@@ -195,6 +197,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         attachments.add(attachment);
     }
 
+    @Override
     public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         if (!exceeded) {
             /*

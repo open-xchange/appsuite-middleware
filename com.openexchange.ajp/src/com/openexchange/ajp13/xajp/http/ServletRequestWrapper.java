@@ -238,22 +238,27 @@ public class ServletRequestWrapper implements ServletRequest {
         parameters.put(name, values);
     }
 
+    @Override
     public String[] getParameterValues(final String name) {
         return parameters.get(name);
     }
 
+    @Override
     public String getParameter(final String name) {
         return parameters.containsKey(name) ? (parameters.get(name))[0] : null;
     }
 
+    @Override
     public Enumeration<?> getParameterNames() {
         return new IteratorEnumeration(parameters.keySet().iterator());
     }
 
+    @Override
     public Map<?, ?> getParameterMap() {
         return parameters;
     }
 
+    @Override
     public Object getAttribute(final String name) {
         return attributes.get(name);
     }
@@ -262,28 +267,34 @@ public class ServletRequestWrapper implements ServletRequest {
         return attributes.containsKey(name);
     }
 
+    @Override
     public Enumeration<?> getAttributeNames() {
         return new IteratorEnumeration(attributes.keySet().iterator());
     }
 
+    @Override
     public void removeAttribute(final String name) {
         attributes.remove(name);
     }
 
+    @Override
     public void setAttribute(final String name, final Object value) {
         if (value != null) {
             attributes.put(name, value);
         }
     }
 
+    @Override
     public String getRealPath(final String string) {
         return null;
     }
 
+    @Override
     public RequestDispatcher getRequestDispatcher(final String string) {
         return null;
     }
 
+    @Override
     public void setCharacterEncoding(final String characterEncodingArg) throws UnsupportedEncodingException {
         String characterEncoding = characterEncodingArg;
         if (characterEncoding.charAt(0) == '"' && characterEncoding.charAt(characterEncoding.length() - 1) == '"') {
@@ -297,14 +308,17 @@ public class ServletRequestWrapper implements ServletRequest {
         this.protocol = protocol;
     }
 
+    @Override
     public String getProtocol() {
         return protocol;
     }
 
+    @Override
     public Enumeration<?> getLocales() {
         return null;
     }
 
+    @Override
     public Locale getLocale() {
         return null;
     }
@@ -328,6 +342,7 @@ public class ServletRequestWrapper implements ServletRequest {
         servletInputStream.setData(newData);
     }
 
+    @Override
     public ServletInputStream getInputStream() throws IOException {
         if (servletInputStream == null) {
             throw new IOException("no ServletInputStream found!");
@@ -339,14 +354,17 @@ public class ServletRequestWrapper implements ServletRequest {
         servletInputStream = null;
     }
 
+    @Override
     public String getContentType() {
         return getHeader(CONTENT_TYPE);
     }
 
+    @Override
     public int getContentLength() {
         return Integer.parseInt(getHeader(CONTENT_LENGTH));
     }
 
+    @Override
     public String getCharacterEncoding() {
         /*
          * if (characterEncoding == null) { // CHARACTER ENCODING MUST NOT BE NULL characterEncoding =
@@ -355,6 +373,7 @@ public class ServletRequestWrapper implements ServletRequest {
         return characterEncoding;
     }
 
+    @Override
     public BufferedReader getReader() {
         return null;
     }
@@ -363,6 +382,7 @@ public class ServletRequestWrapper implements ServletRequest {
         this.remote_addr = remote_addr;
     }
 
+    @Override
     public String getRemoteAddr() {
         return remote_addr;
     }
@@ -371,10 +391,12 @@ public class ServletRequestWrapper implements ServletRequest {
         this.remote_host = remote_host;
     }
 
+    @Override
     public String getRemoteHost() {
         return remote_host;
     }
 
+    @Override
     public String getScheme() {
         if (scheme == null) {
             if (protocol == null) {
@@ -393,6 +415,7 @@ public class ServletRequestWrapper implements ServletRequest {
         this.server_name = server_name;
     }
 
+    @Override
     public String getServerName() {
         String host = getFromHost();
         
@@ -415,6 +438,7 @@ public class ServletRequestWrapper implements ServletRequest {
         this.server_port = server_port;
     }
 
+    @Override
     public int getServerPort() {
         return server_port;
     }
@@ -423,6 +447,7 @@ public class ServletRequestWrapper implements ServletRequest {
         this.is_secure = is_secure;
     }
 
+    @Override
     public boolean isSecure() {
         return is_secure;
     }
@@ -445,28 +470,34 @@ public class ServletRequestWrapper implements ServletRequest {
 
             int cursor;
 
+            @Override
             public boolean hasMoreElements() {
                 return (cursor < size);
             }
 
+            @Override
             public Object nextElement() {
                 return Array.get(obj, cursor++);
             }
         });
     }
 
+    @Override
     public int getRemotePort() {
         return 0;
     }
 
+    @Override
     public String getLocalName() {
         return null;
     }
 
+    @Override
     public String getLocalAddr() {
         return null;
     }
 
+    @Override
     public int getLocalPort() {
         return 0;
     }
@@ -484,10 +515,12 @@ public class ServletRequestWrapper implements ServletRequest {
             this.iter = iter;
         }
 
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
+        @Override
         public Object nextElement() {
             return iter.next();
         }

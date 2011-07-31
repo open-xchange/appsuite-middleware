@@ -92,6 +92,7 @@ public abstract class LinkableState implements State {
         }
     }
 
+    @Override
     public void addSpecial(final CalendarObject obj, final CalendarObject oldObj, final RenderMap renderMap,
             final EmailableParticipant p) {
         renderMap.put(new StringReplacement(TemplateToken.LINK, generateLink(obj, p)).setChanged(true));

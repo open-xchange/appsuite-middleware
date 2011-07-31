@@ -89,6 +89,7 @@ public final class SharedPrefixFolder {
             this.map = map;
         }
 
+        @Override
         public boolean execute(final int folderId) {
             map.remove(folderId);
             return true;
@@ -106,6 +107,7 @@ public final class SharedPrefixFolder {
             this.toRemove = toRemove;
         }
 
+        @Override
         public boolean execute(final FolderObject folder) {
             /*
              * Check if current folder's parent is contained in map.

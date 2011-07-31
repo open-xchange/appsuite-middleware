@@ -81,11 +81,13 @@ public final class TaskContentType implements ContentType {
         return "tasks";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.TASK
         return 1;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

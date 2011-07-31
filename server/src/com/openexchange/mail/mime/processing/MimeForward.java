@@ -361,6 +361,7 @@ public final class MimeForward {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return originalMsg.getInputStream();
@@ -371,6 +372,7 @@ public final class MimeForward {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }

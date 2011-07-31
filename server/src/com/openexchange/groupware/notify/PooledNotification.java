@@ -113,10 +113,12 @@ public final class PooledNotification implements Delayed {
         this.hash = _hashCode();
     }
 
+    @Override
     public long getDelay(final TimeUnit unit) {
         return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp.get()), TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public int compareTo(final Delayed o) {
         final long thisStamp = this.stamp.get();
         final long otherStamp = ((PooledNotification) o).stamp.get();

@@ -160,10 +160,12 @@ public final class PooledEvent implements Delayed {
         return !immediateDelivery || async;
     }
 
+    @Override
     public long getDelay(final TimeUnit unit) {
         return immediateDelivery ? 0L : unit.convert(EventPool.MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public int compareTo(final Delayed o) {
         final long thisStamp = stamp;
         final long otherStamp = ((PooledEvent) o).stamp;

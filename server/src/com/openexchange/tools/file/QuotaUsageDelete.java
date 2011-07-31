@@ -65,6 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class QuotaUsageDelete extends ContextDelete {
 
+    @Override
     public void deletePerformed(DeleteEvent sqlDelEvent, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(sqlDelEvent)) {
             return;

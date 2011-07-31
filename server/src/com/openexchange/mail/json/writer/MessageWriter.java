@@ -219,6 +219,7 @@ public final class MessageWriter {
             this.headerName = headerName;
         }
 
+        @Override
         public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
             final Object value = getHeaderValue(mail);
             if (withKey) {
@@ -256,6 +257,7 @@ public final class MessageWriter {
     static {
         WRITERS.put(MailListField.ID, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -270,6 +272,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.FOLDER_ID, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -284,6 +287,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.ATTACHMENT, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -298,6 +302,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.FROM, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -312,6 +317,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.TO, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -326,6 +332,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.CC, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -340,6 +347,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.BCC, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -354,6 +362,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.SUBJECT, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     final String subject = mail.getSubject();
@@ -373,6 +382,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.SIZE, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -387,6 +397,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.SENT_DATE, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -415,6 +426,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.RECEIVED_DATE, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -443,6 +455,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.FLAGS, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -457,6 +470,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.THREAD_LEVEL, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -471,6 +485,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.DISPOSITION_NOTIFICATION_TO, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     final Object value;
@@ -494,6 +509,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.PRIORITY, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -508,6 +524,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.MSG_REF, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -524,6 +541,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.COLOR_LABEL, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     final int colorLabel;
@@ -544,6 +562,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.TOTAL, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -558,6 +577,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.NEW, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -572,6 +592,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.UNREAD, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -586,6 +607,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.DELETED, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -600,6 +622,7 @@ public final class MessageWriter {
         });
         WRITERS.put(MailListField.ACCOUNT_NAME, new MailFieldWriter() {
 
+            @Override
             public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
                 try {
                     if (withKey) {
@@ -616,6 +639,7 @@ public final class MessageWriter {
 
     private static final MailFieldWriter UNKNOWN = new MailFieldWriter() {
 
+        @Override
         public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid) throws OXException {
             try {
                 if (withKey) {

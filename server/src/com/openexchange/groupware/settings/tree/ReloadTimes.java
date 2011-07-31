@@ -77,6 +77,7 @@ public final class ReloadTimes implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
@@ -84,18 +85,21 @@ public final class ReloadTimes implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             private static final int MINUTE = 60 * 1000;
             /**
              * {@inheritDoc}
              */
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
             /**
              * {@inheritDoc}
              */
+            @Override
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {

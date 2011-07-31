@@ -61,14 +61,17 @@ public interface FolderType {
      */
     public static final FolderType GLOBAL = new FolderType() {
         
+        @Override
         public boolean servesTreeId(final String treeId) {
             return false;
         }
         
+        @Override
         public boolean servesParentId(final String parentId) {
             return false;
         }
         
+        @Override
         public boolean servesFolderId(final String folderId) {
             return false;
         }
@@ -102,11 +105,13 @@ public interface FolderType {
     /**
      * Must be implemented according to {@link Object#hashCode()}.
      */
+    @Override
     int hashCode();
 
     /**
      * Must be implemented according to {@link Object#equals(Object)}.
      */
+    @Override
     boolean equals(Object obj);
 
 }

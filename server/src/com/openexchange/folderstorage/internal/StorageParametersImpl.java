@@ -141,23 +141,28 @@ public final class StorageParametersImpl implements StorageParameters {
         return m;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warning.addCategory(Category.CATEGORY_WARNING);
         warnings.put(warning, PRESENT);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
 
+    @Override
     public Set<OXException> getWarnings() {
         return Collections.unmodifiableSet(warnings.keySet());
     }
 
+    @Override
     public Context getContext() {
         return context;
     }
 
+    @Override
     public <P> P getParameter(final FolderType folderType, final String name) {
         final Map<String, Object> m = getFolderTypeMap(folderType, false);
         if (null == m) {
@@ -174,6 +179,7 @@ public final class StorageParametersImpl implements StorageParameters {
         }
     }
 
+    @Override
     public <P> P removeParameter(final FolderType folderType, final String name) {
         final Map<String, Object> m = getFolderTypeMap(folderType, false);
         if (null == m) {
@@ -190,14 +196,17 @@ public final class StorageParametersImpl implements StorageParameters {
         }
     }
 
+    @Override
     public Session getSession() {
         return session;
     }
 
+    @Override
     public User getUser() {
         return user;
     }
 
+    @Override
     public void putParameter(final FolderType folderType, final String name, final Object value) {
         if (null == value) {
             final Map<String, Object> m = getFolderTypeMap(folderType, false);
@@ -211,6 +220,7 @@ public final class StorageParametersImpl implements StorageParameters {
         }
     }
 
+    @Override
     public boolean putParameterIfAbsent(final FolderType folderType, final String name, final Object value) {
         if (null == value) {
             throw new IllegalArgumentException("value is null");
@@ -219,30 +229,37 @@ public final class StorageParametersImpl implements StorageParameters {
         return (null == m.putIfAbsent(name, value));
     }
 
+    @Override
     public Date getTimeStamp() {
         return null == timeStamp ? null : new Date(timeStamp.getTime());
     }
 
+    @Override
     public void setTimeStamp(final Date timeStamp) {
         this.timeStamp = null == timeStamp ? null : new Date(timeStamp.getTime());
     }
 
+    @Override
     public FolderServiceDecorator getDecorator() {
         return decorator;
     }
 
+    @Override
     public void setDecorator(final FolderServiceDecorator decorator) {
         this.decorator = decorator;
     }
 
+    @Override
     public int getContextId() {
         return contextId;
     }
 
+    @Override
     public int getUserId() {
         return userId;
     }
 
+    @Override
     public void markCommitted() {
         usingThread = Thread.currentThread();
         /*
@@ -258,6 +275,7 @@ public final class StorageParametersImpl implements StorageParameters {
      * 
      * @return the trace of the thread that lastly obtained this access
      */
+    @Override
     public String getCommittedTrace() {
         final StringBuilder sBuilder = new StringBuilder(512);
         sBuilder.append(toString());

@@ -64,19 +64,23 @@ public class ResolvedImpl implements Resolved {
 		this.document = document;
 	}
 	
-	public WebdavPath getPath() {
+	@Override
+    public WebdavPath getPath() {
 		return path;
 	}
 
-	public boolean isDocument() {
+	@Override
+    public boolean isDocument() {
 		return document;
 	}
 
-	public boolean isFolder() {
+	@Override
+    public boolean isFolder() {
 		return !document;
 	}
 
-	public int getId() {
+	@Override
+    public int getId() {
 		return id;
 	}
 

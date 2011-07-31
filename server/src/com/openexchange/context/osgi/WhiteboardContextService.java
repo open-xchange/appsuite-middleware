@@ -81,40 +81,49 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         tracker.close();
     }
     
+    @Override
     public Object addingService(ServiceReference reference) {
         delegate = (ContextService) context.getService(reference);
         return delegate;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         context.ungetService(reference);
         delegate = null;
     }
 
+    @Override
     public List<Integer> getAllContextIds() throws OXException {
         return getDelegate().getAllContextIds();
     }
 
+    @Override
     public Context getContext(int contextId) throws OXException {
         return getDelegate().getContext(contextId);
     }
 
+    @Override
     public Context loadContext(int contextId) throws OXException {
         return getDelegate().loadContext(contextId);
     }
 
+    @Override
     public int getContextId(String loginContextInfo) throws OXException {
         return getDelegate().getContextId(loginContextInfo);
     }
 
+    @Override
     public void invalidateContext(int contextId) throws OXException {
         getDelegate().invalidateContext(contextId);
     }
 
+    @Override
     public void invalidateLoginInfo(String loginContextInfo) throws OXException {
         getDelegate().invalidateLoginInfo(loginContextInfo);
     }

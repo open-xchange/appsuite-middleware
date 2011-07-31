@@ -89,7 +89,8 @@ public class Table extends Element {
 	    return retVal;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildTable(this);
 	}
 }

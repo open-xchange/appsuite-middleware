@@ -212,6 +212,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return nestedMsgsArr;
     }
 
+    @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -285,6 +286,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -294,6 +296,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -303,6 +306,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
@@ -312,6 +316,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleContentId(final String contentId) throws OXException {
         try {
             jsonObject.put(MailJSONField.CID.getKey(), contentId);
@@ -321,6 +326,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
@@ -339,6 +345,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY,
             MessageHeaders.SUBJECT, MessageHeaders.TO }));
 
+    @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         if (size == 0) {
             return true;
@@ -405,10 +412,12 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         return handleAttachment(part, isInline, baseContentType, fileName, id);
     }
 
+    @Override
     public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         /*
          * Append HTML content as-is
@@ -444,6 +453,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         /*
          * Append plain-text content as-is
@@ -505,6 +515,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -553,10 +564,12 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
     }
 
+    @Override
     public void handleMessageEnd(final MailMessage mail) throws OXException {
         /*
          * Since we obviously touched message's content, mark its corresponding message object as seen
@@ -575,6 +588,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         /*
          * Determine if message is of MIME type multipart/alternative
@@ -591,6 +605,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
@@ -640,6 +655,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handlePriority(final int priority) throws OXException {
         try {
             jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
@@ -649,6 +665,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleMsgRef(final String msgRef) throws OXException {
         try {
             jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
@@ -658,6 +675,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         try {
             if (!seen) {
@@ -669,6 +687,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
             jsonObject.put(
@@ -680,6 +699,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
             jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(sentDate.getTime()));
@@ -689,6 +709,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         /*-
          * 
@@ -716,6 +737,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         return handleAttachment(part, false, baseContentType, fileName, id);
     }
 
+    @Override
     public boolean handleSubject(final String subject) throws OXException {
         try {
             jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
@@ -725,6 +747,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         try {
             if (jsonObject.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
@@ -739,6 +762,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -748,6 +772,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (userFlags == null) {
             return true;

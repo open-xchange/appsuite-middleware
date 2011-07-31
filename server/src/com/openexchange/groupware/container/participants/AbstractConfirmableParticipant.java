@@ -76,37 +76,45 @@ public abstract class AbstractConfirmableParticipant implements ConfirmableParti
         bMessage = copy.containsMessage();
     }
 
+    @Override
     public final boolean containsStatus() {
         return bStatus;
     }
 
+    @Override
     public final int getConfirm() {
         return status.getId();
     }
 
+    @Override
     public final String getMessage() {
         return message;
     }
 
+    @Override
     public final ConfirmStatus getStatus() {
         return status;
     }
 
+    @Override
     public final void setConfirm(int confirm) {
         status = ConfirmStatus.byId(confirm);
         bStatus = true;
     }
 
+    @Override
     public void setMessage(String message) {
         this.message = message;
         bMessage = true;
     }
 
+    @Override
     public void setStatus(ConfirmStatus status) {
         this.status = status;
         bStatus = true;
     }
 
+    @Override
     public boolean containsMessage() {
         return bMessage;
     }

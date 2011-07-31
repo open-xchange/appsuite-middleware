@@ -72,6 +72,7 @@ public class Or extends ContextSetTerm {
         return firstOperand.matches(tags) || otherOperand.matches(tags);
     }
     
+    @Override
     public String toString() {
         return "("+firstOperand.toString()+"|"+otherOperand.toString()+")";
     }

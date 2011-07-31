@@ -1740,14 +1740,17 @@ public class OXContainerConverter {
             size = Array.getLength(array);
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public boolean hasNext() {
             return (cursor < size);
         }
 
+        @Override
         public Object next() {
             if (cursor < size) {
                 return Array.get(array, cursor++);

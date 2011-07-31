@@ -1548,14 +1548,17 @@ public class MIMEMessageFiller {
             this.managedFile = managedFile;
         }
 
+        @Override
         public String getContentType() {
             return managedFile.getContentType();
         }
 
+        @Override
         public DataSource getDataSource() throws OXException {
             return new FileDataSource(managedFile.getFile());
         }
 
+        @Override
         public String getFileName() {
             return managedFile.getFileName();
         }
@@ -1581,10 +1584,12 @@ public class MIMEMessageFiller {
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
+        @Override
         public String getContentType() {
             return contentType;
         }
 
+        @Override
         public DataSource getDataSource() throws OXException {
             try {
                 return new MessageDataSource(data.getData(), contentType);
@@ -1593,6 +1598,7 @@ public class MIMEMessageFiller {
             }
         }
 
+        @Override
         public String getFileName() {
             return fileName;
         }

@@ -94,6 +94,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         this.regex = regex;
     }
 
+    @Override
     public void execute(WebClient webClient) throws OXException {
         MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
         final HttpClient httpClient = new HttpClient(manager);
@@ -112,6 +113,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
 
             webClient.setWebConnection(new CrawlerWebConnection(webClient) {
 
+                @Override
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
                     URL url = settings.getUrl();
                     GetMethod getMethod2 = new GetMethod(url.toString());
@@ -136,6 +138,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
                     return new WebResponseImpl(responseData, url, method, loadTime);
                 }
 
+                @Override
                 public HttpClient getHttpClient() {
                     return httpClient;
                 }

@@ -159,14 +159,17 @@ public abstract class AbstractConfig {
         final Iterator<Object> iter = props.keySet().iterator();
         return new Iterator<String>() {
 
+            @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
 
+            @Override
             public String next() {
                 return (String) iter.next();
             }
 
+            @Override
             public void remove() {
                 iter.remove();
             }

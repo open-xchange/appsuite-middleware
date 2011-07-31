@@ -142,6 +142,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         return PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
     }
 
+    @Override
     public int compareTo(final ParameterList other) {
         if (this == other) {
             return 0;
@@ -560,6 +561,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
             }
         }
 
+        @Override
         public int compareTo(final Parameter other) {
             if (this == other) {
                 return 0;

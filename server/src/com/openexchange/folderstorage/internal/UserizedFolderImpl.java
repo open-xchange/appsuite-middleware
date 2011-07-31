@@ -124,234 +124,292 @@ public final class UserizedFolderImpl implements UserizedFolder {
         }
     }
 
+    @Override
     public int getBits() {
         return folder.getBits();
     }
 
+    @Override
     public void setBits(final int bits) {
         folder.setBits(bits);
     }
 
+    @Override
     public int getCreatedBy() {
         return folder.getCreatedBy();
     }
 
+    @Override
     public Date getCreationDate() {
         return creationDate == null ? folder.getCreationDate() : creationDate;
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified == null ? folder.getLastModified() : lastModified;
     }
 
+    @Override
     public int getModifiedBy() {
         return folder.getModifiedBy();
     }
 
+    @Override
     public void setCreatedBy(final int createdBy) {
         folder.setCreatedBy(createdBy);
     }
 
+    @Override
     public void setCreationDate(final Date creationDate) {
         this.creationDate = creationDate == null ? null : new Date(creationDate.getTime());
     }
 
+    @Override
     public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
+    @Override
     public void setModifiedBy(final int modifiedBy) {
         folder.setModifiedBy(modifiedBy);
     }
 
+    @Override
     public ContentType getContentType() {
         return folder.getContentType();
     }
 
+    @Override
     public String getID() {
         return folder.getID();
     }
 
+    @Override
     public String getLocalizedName(final Locale locale) {
         return folder.getLocalizedName(locale);
     }
 
+    @Override
     public String getName() {
         return folder.getName();
     }
 
+    @Override
     public String getParentID() {
         return null == parentId ? folder.getParentID() : parentId;
     }
 
+    @Override
     public Permission[] getPermissions() {
         return null == permissions ? folder.getPermissions() : permissions;
     }
 
+    @Override
     public String[] getSubfolderIDs() {
         return subfolderIds == null ? folder.getSubfolderIDs() : subfolderIds;
     }
 
+    @Override
     public String getTreeID() {
         return folder.getTreeID();
     }
 
+    @Override
     public Type getType() {
         return null == type ? folder.getType() : type;
     }
 
+    @Override
     public boolean isCacheable() {
         return folder.isCacheable();
     }
 
+    @Override
     public boolean isGlobalID() {
         return folder.isGlobalID();
     }
 
+    @Override
     public boolean isSubscribed() {
         return folder.isSubscribed();
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         return folder.hasSubscribedSubfolders();
     }
 
+    @Override
     public boolean isVirtual() {
         return folder.isVirtual();
     }
 
+    @Override
     public void setContentType(final ContentType contentType) {
         folder.setContentType(contentType);
     }
 
+    @Override
     public void setID(final String id) {
         folder.setID(id);
     }
 
+    @Override
     public void setName(final String name) {
         folder.setName(name);
     }
 
+    @Override
     public void setParentID(final String parentId) {
         this.parentId = parentId;
     }
 
+    @Override
     public void setPermissions(final Permission[] permissions) {
         this.permissions = permissions;
     }
 
+    @Override
     public void setSubfolderIDs(final String[] subfolderIds) {
         this.subfolderIds = subfolderIds;
     }
 
+    @Override
     public void setSubscribed(final boolean subscribed) {
         folder.setSubscribed(subscribed);
     }
 
+    @Override
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         folder.setSubscribedSubfolders(subscribedSubfolders);
     }
 
+    @Override
     public void setTreeID(final String id) {
         folder.setTreeID(id);
     }
 
+    @Override
     public void setType(final Type type) {
         this.type = type;
     }
 
+    @Override
     public Permission getOwnPermission() {
         return ownPermission;
     }
 
+    @Override
     public void setOwnPermission(final Permission ownPermission) {
         this.ownPermission = ownPermission;
     }
 
+    @Override
     public Date getLastModifiedUTC() {
         return lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
     }
 
+    @Override
     public void setLastModifiedUTC(final Date lastModifiedUTC) {
         this.lastModifiedUTC = lastModifiedUTC == null ? null : new Date(lastModifiedUTC.getTime());
     }
 
+    @Override
     public int getCapabilities() {
         return folder.getCapabilities();
     }
 
+    @Override
     public int getDeleted() {
         return folder.getDeleted();
     }
 
+    @Override
     public int getNew() {
         return folder.getNew();
     }
 
+    @Override
     public String getSummary() {
         return folder.getSummary();
     }
 
+    @Override
     public int getTotal() {
         return folder.getTotal();
     }
 
+    @Override
     public int getUnread() {
         return folder.getUnread();
     }
 
+    @Override
     public boolean isDefault() {
         return null == deefault ? folder.isDefault() : deefault.booleanValue();
     }
 
+    @Override
     public void setCapabilities(final int capabilities) {
         folder.setCapabilities(capabilities);
     }
 
+    @Override
     public void setDefault(final boolean deefault) {
         this.deefault = Boolean.valueOf(deefault);
     }
 
+    @Override
     public void setDeleted(final int deleted) {
         folder.setDeleted(deleted);
     }
 
+    @Override
     public void setDefaultType(final int defaultType) {
         this.defaultType = Integer.valueOf(defaultType);
     }
 
+    @Override
     public int getDefaultType() {
         return null == defaultType ? folder.getDefaultType() : defaultType.intValue();
     }
 
+    @Override
     public void setNew(final int nu) {
         folder.setNew(nu);
     }
 
+    @Override
     public void setSummary(final String summary) {
         folder.setSummary(summary);
     }
 
+    @Override
     public void setTotal(final int total) {
         folder.setTotal(total);
     }
 
+    @Override
     public void setUnread(final int unread) {
         folder.setUnread(unread);
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }
 
+    @Override
     public void setLocale(final Locale locale) {
         this.locale = locale;
     }
 
+    @Override
     public String getNewID() {
         throw new UnsupportedOperationException("UserizedFolderImpl.getNewID()");
     }
 
+    @Override
     public void setNewID(final String newId) {
         throw new UnsupportedOperationException("UserizedFolderImpl.setNewID()");
     }

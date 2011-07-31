@@ -80,6 +80,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
      * 
      * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
      */
+    @Override
     public int addedWithVersion() {
         return 7;
     }
@@ -89,6 +90,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
      * 
      * @see com.openexchange.groupware.update.UpdateTask#getPriority()
      */
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -119,6 +121,7 @@ public class NewAdminExtensionsUpdateTask implements UpdateTask {
     private static final String NOSHELL = "/bin/false";
     private static final String SHA     = "{SHA}";    
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);

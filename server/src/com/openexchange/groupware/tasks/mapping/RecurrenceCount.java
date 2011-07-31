@@ -77,6 +77,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return Task.RECURRENCE_COUNT;
     }
@@ -84,6 +85,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(Task task) {
         return task.containsOccurrence();
     }
@@ -91,6 +93,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDBColumnName() {
         return "recurrence_count"; // TODO rename this
     }
@@ -98,6 +101,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (0 == task.getOccurrence()) {
             stmt.setNull(pos, Types.INTEGER);
@@ -109,6 +113,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         int occurence = result.getInt(pos);
         if (!result.wasNull()) {
@@ -119,6 +124,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(Task task1, Task task2) {
         return task1.getOccurrence() == task2.getOccurrence();
     }
@@ -126,6 +132,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Integer get(Task task) {
         return Integer.valueOf(task.getOccurrence());
     }
@@ -133,6 +140,7 @@ public class RecurrenceCount implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void set(Task task, Integer value) {
         task.setOccurrence(value.intValue());
     }

@@ -91,6 +91,7 @@ public class ContextActivator extends HousekeepingActivator {
         
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
+            @Override
             public Collection<? extends UpdateTask> getUpdateTasks() {
                 return Arrays.asList(updateTask);
             }

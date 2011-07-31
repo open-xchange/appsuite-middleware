@@ -127,6 +127,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
             }
             final FutureTask<String> ft = new FutureTask<String>(new Callable<String>() {
 
+                @Override
                 public String call() throws Exception {
                     return new StringHelper(locale).getString(fname);
                 }

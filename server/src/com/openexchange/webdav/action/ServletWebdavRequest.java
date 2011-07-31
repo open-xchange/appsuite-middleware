@@ -86,15 +86,18 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         this.url = toWebdavURL(req.getRequestURI());
 	}
 
-	public InputStream getBody() throws IOException {
+	@Override
+    public InputStream getBody() throws IOException {
 		return req.getInputStream();
 	}
 
-	public String getHeader(final String header) {
+	@Override
+    public String getHeader(final String header) {
 		return req.getHeader(header);
 	}
 
-	public List<String> getHeaderNames() {
+	@Override
+    public List<String> getHeaderNames() {
 		final List<String> headers = new ArrayList<String>();
 		final Enumeration enumeration = req.getHeaderNames();
 		while(enumeration.hasMoreElements()) {
@@ -103,7 +106,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return headers;
 	}
 
-	public String getURLPrefix() {
+	@Override
+    public String getURLPrefix() {
 		return urlPrefix;
 	}
 	
@@ -111,11 +115,13 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         this.urlPrefix = urlPrefix;
     }
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return url;
 	}
 
-	public WebdavPath getDestinationUrl() {
+	@Override
+    public WebdavPath getDestinationUrl() {
 		if(destUrl != null) {
 			return destUrl;
 		}
@@ -158,6 +164,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         return decoder.decode(component, encoding);
     }
 
+    @Override
     public String getCharset() {
 		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}

@@ -82,14 +82,17 @@ public class UpdateFolderIdInReminder implements UpdateTask {
     private static final String DELETE_ENTRIES_RIGTHS = "DELETE FROM prg_date_rights WHERE cid = ? AND object_id = ?";
     private static final String FIND_WITHOUT_REFERENCE = "SELECT reminder.object_id, reminder.cid, reminder.userid, reminder.folder FROM reminder LEFT JOIN prg_dates ON reminder.cid = prg_dates.cid AND reminder.target_id = prg_dates.intfield01 where reminder.module = 1 AND intfield01 is NULL";
     
+    @Override
     public int addedWithVersion() {
         return 10;
     }
     
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
     
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection writecon = null;
         Statement stmt = null;

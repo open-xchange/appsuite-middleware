@@ -157,7 +157,7 @@ public class FacebookServiceImpl implements FacebookService {
                 // No email-addresses available yet via API, sorry
                 // System.out.println(connection.get("email"));
 
-                if (JSONObject.NULL != connection.get("birthday_date") && !"".equals((String) connection.get("birthday_date")) && !"nil".equals((String) connection.get("birthday_date"))) {
+                if (JSONObject.NULL != connection.get("birthday_date") && !"".equals(connection.get("birthday_date")) && !"nil".equals(connection.get("birthday_date"))) {
                     String dateString = (String) connection.get("birthday_date");
                     Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
                     Integer day = Integer.parseInt(dateString.substring(3, 5));
@@ -173,13 +173,13 @@ public class FacebookServiceImpl implements FacebookService {
 
                 if (JSONObject.NULL != connection.get("hometown_location")) {
                     JSONObject hometownLocation = (JSONObject) connection.get("hometown_location");
-                    if (JSONObject.NULL != hometownLocation.get("city") && !"".equals((String) hometownLocation.get("city")) && !"nil".equals((String) hometownLocation.get("city"))) {
+                    if (JSONObject.NULL != hometownLocation.get("city") && !"".equals(hometownLocation.get("city")) && !"nil".equals(hometownLocation.get("city"))) {
                         contact.setCityHome((String) hometownLocation.get("city"));
                     }
-                    if (JSONObject.NULL != hometownLocation.get("country") && !"".equals((String) hometownLocation.get("country")) && !"nil".equals((String) hometownLocation.get("country"))) {
+                    if (JSONObject.NULL != hometownLocation.get("country") && !"".equals(hometownLocation.get("country")) && !"nil".equals(hometownLocation.get("country"))) {
                         contact.setCountryHome((String) hometownLocation.get("country"));
                     }
-                    if (JSONObject.NULL != hometownLocation.get("zip") && !"".equals((String) hometownLocation.get("zip")) && !"nil".equals((String) hometownLocation.get("zip"))) {
+                    if (JSONObject.NULL != hometownLocation.get("zip") && !"".equals(hometownLocation.get("zip")) && !"nil".equals(hometownLocation.get("zip"))) {
                         contact.setPostalCodeHome((String) hometownLocation.get("zip"));
                     }
                 }

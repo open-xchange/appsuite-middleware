@@ -67,7 +67,8 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param contactObj
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void insertContactObject(Contact contactObj) throws OXException;
+	@Override
+    public void insertContactObject(Contact contactObj) throws OXException;
 
 	/**
 	 * update the contact
@@ -76,7 +77,8 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param clientLastModified
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException;
+	@Override
+    public void updateContactObject(Contact contactObj, int inFolder, Date clientLastModified) throws OXException;
 	
 	/**
 	 * deletes the ContactObject
@@ -84,6 +86,7 @@ public interface ContactSQLInterface extends ContactInterface {
 	 * @param contactObj
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
-	public void deleteContactObject(int objectId, int inFolder, Date clientLastModified)throws OXException;
+	@Override
+    public void deleteContactObject(int objectId, int inFolder, Date clientLastModified)throws OXException;
 
 }

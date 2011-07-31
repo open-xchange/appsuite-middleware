@@ -74,14 +74,16 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 	 * 
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 4;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
 		 */
@@ -95,7 +97,8 @@ public class DelFolderTreeTableUpdateTask implements UpdateTask {
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema, int)
 	 */
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

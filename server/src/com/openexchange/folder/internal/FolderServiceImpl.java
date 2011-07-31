@@ -72,10 +72,12 @@ public final class FolderServiceImpl implements FolderService {
         super();
     }
 
+    @Override
     public FolderObject getFolderObject(final int folderId, final int contextId) throws OXException {
         return new OXFolderAccess(ContextStorage.getStorageContext(contextId)).getFolderObject(folderId);
     }
 
+    @Override
     public EffectivePermission getFolderPermission(final int folderId, final int userId, final int contextId) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(contextId);
         return new OXFolderAccess(ctx).getFolderPermission(

@@ -120,6 +120,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         super();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Folder properties have already been started", new Throwable());
@@ -136,6 +137,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         FolderQueryCacheManager.initInstance();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
@@ -161,6 +163,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         reset();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
@@ -172,6 +175,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         }
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
@@ -230,6 +234,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         final org.apache.commons.logging.Log logger = LOG;
         value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
 
+            @Override
             public void onPropertyChange(final PropertyEvent event) {
                 if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
                     final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
@@ -257,6 +262,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     // Run in separate thread
                     final Runnable r = new Runnable() {
                         
+                        @Override
                         public void run() {
                             updatePermissions();
                         }
