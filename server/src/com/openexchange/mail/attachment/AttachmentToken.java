@@ -51,7 +51,6 @@ package com.openexchange.mail.attachment;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -90,32 +89,12 @@ public final class AttachmentToken implements AttachmentTokenConstants {
     /**
      * Initializes a new {@link AttachmentToken}.
      */
-    public AttachmentToken() {
-        super();
-        this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
-        this.ttlMillis = DEFAULT_TIMEOUT;
-        timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
-    }
-
-    /**
-     * Initializes a new {@link AttachmentToken}.
-     */
     public AttachmentToken(final long ttlMillis) {
         super();
         if (ttlMillis <= 0) {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
         this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
-        this.ttlMillis = ttlMillis;
-        timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
-    }
-
-    /**
-     * Initializes a new {@link AttachmentToken}.
-     */
-    public AttachmentToken(final String id, final int ttlMillis) {
-        super();
-        this.id = id;
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
     }
