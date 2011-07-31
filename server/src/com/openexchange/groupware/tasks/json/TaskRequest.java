@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks.json;
 
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -73,7 +74,7 @@ public final class TaskRequest {
 
     private final AJAXRequestData request;
 
-    private final TimeZone timeZone;
+    private TimeZone timeZone;
 
     /**
      * Initializes a new {@link TaskRequest}.
@@ -89,7 +90,16 @@ public final class TaskRequest {
     }
 
     /**
-     * Gets the time zone obtained from session's user.
+     * Sets the time zone.
+     * 
+     * @param timeZone The time zone
+     */
+    public void setTimeZone(final TimeZone timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    /**
+     * Gets the time zone (initially set to session's user one).
      * 
      * @return The time zone
      */
@@ -170,6 +180,18 @@ public final class TaskRequest {
             }
         }
         return ret;
+    }
+
+    public Date getDate(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return null;
+        }
+        try {
+            return new Date(Long.parseLong(parameter.trim()));
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.InvalidParameterValue.create(name, parameter);
+        }
     }
 
     /**

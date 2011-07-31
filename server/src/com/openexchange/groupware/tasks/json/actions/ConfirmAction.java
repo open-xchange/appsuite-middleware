@@ -49,103 +49,57 @@
 
 package com.openexchange.groupware.tasks.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.TIntArrayList;
+import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.tasks.json.TaskRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link AbstractTaskAction}
- * 
+ * {@link ConfirmAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractTaskAction implements AJAXActionService {
-
-    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
-
-    private final ServiceLookup services;
+public final class ConfirmAction extends AbstractTaskAction {
 
     /**
-     * Initializes a new {@link AbstractTaskAction}.
+     * Initializes a new {@link ConfirmAction}.
+     * @param services
      */
-    protected AbstractTaskAction(final ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /**
-     * Gets the service of specified type
-     * 
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     */
-    protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
+    public ConfirmAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            final TaskRequest taskRequest = new TaskRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            if (null != sTimeZone) {
-                taskRequest.setTimeZone(getTimeZone(sTimeZone));
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+        final JSONObject data = (JSONObject) req.getRequest().getData();
+        final Task task = new Task();
+        new TaskParser(req.getTimeZone()).parse(task, data);
+        final ServerSession session = req.getSession();
+        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
+        final int taskIdFromParameter = req.optInt(AJAXServlet.PARAMETER_ID);
+        final int taskId;
+        if (TaskRequest.NOT_FOUND == taskIdFromParameter) {
+            if (!task.containsObjectID()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_ID);
             }
-            return perform(taskRequest);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
+            taskId = task.getObjectID();
+        } else {
+            taskId = taskIdFromParameter;
         }
-    }
+        final Date timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), task.getConfirm(), task.getConfirmMessage());
 
-    /**
-     * Performs specified task request.
-     * 
-     * @param req The task request
-     * @return The result
-     * @throws OXException If an error occurs
-     * @throws JSONException IF a JSON error occurs
-     */
-    protected abstract AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException;
-
-    protected int[] removeVirtualColumns(final int[] columns) {
-        final TIntArrayList tmp = new TIntArrayList(columns.length);
-        for (final int col : columns) {
-            if (col != Task.LAST_MODIFIED_UTC) {
-                tmp.add(col);
-            }
-        }
-        return tmp.toNativeArray();
-    }
-
-    /**
-     * Gets the result filled with JSON <code>NULL</code>.
-     * 
-     * @return The result with JSON <code>NULL</code>.
-     */
-    protected static AJAXRequestResult getJSONNullResult() {
-        return RESULT_JSON_NULL;
-    }
-
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final char[] chars = string.toCharArray();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
-        }
-        return isWhitespace;
+        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
     }
 
 }
