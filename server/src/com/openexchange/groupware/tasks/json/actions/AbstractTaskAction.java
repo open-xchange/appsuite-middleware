@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.TIntArrayList;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -58,11 +59,18 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.json.TaskRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractTaskAction}
@@ -146,6 +154,33 @@ public abstract class AbstractTaskAction implements AJAXActionService {
             isWhitespace = Character.isWhitespace(chars[i]);
         }
         return isWhitespace;
+    }
+
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log){
+        final Participant[] participants = appointmentObj.getParticipants();
+        if(participants == null) {
+            return;
+        }
+
+        final UserService us = ServerServiceRegistry.getInstance().getService(UserService.class);
+
+        for(int pos = 0; pos < participants.length; pos++){
+            final Participant part = participants[pos];
+            if(part.getType() == Participant.EXTERNAL_USER){
+                User foundUser;
+                try {
+                    foundUser = us.searchUser(part.getEmailAddress(), ctx);
+                    if(foundUser == null) {
+                        continue;
+                    }
+                    participants[pos] = new UserParticipant(foundUser.getId());
+                } catch (final OXException e) {
+                    log.error(e); //...and continue doing this for the remaining users
+                }
+            }
+        }
+
+        appointmentObj.setParticipants(participants);
     }
 
 }

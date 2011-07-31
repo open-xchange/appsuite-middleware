@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.json.actions.AbstractTaskAction;
-import com.openexchange.groupware.tasks.json.actions.GetAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -75,8 +74,16 @@ public class TaskActionFactory implements AJAXActionServiceFactory {
     public TaskActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractTaskAction>(8);
-        actions.put("get", new GetAction(services));
-        
+        actions.put("get", new com.openexchange.groupware.tasks.json.actions.GetAction(services));
+        actions.put("all", new com.openexchange.groupware.tasks.json.actions.AllAction(services));
+        actions.put("list", new com.openexchange.groupware.tasks.json.actions.ListAction(services));
+        actions.put("updates", new com.openexchange.groupware.tasks.json.actions.UpdatesAction(services));
+        actions.put("copy", new com.openexchange.groupware.tasks.json.actions.CopyAction(services));
+        actions.put("confirm", new com.openexchange.groupware.tasks.json.actions.ConfirmAction(services));
+        actions.put("update", new com.openexchange.groupware.tasks.json.actions.UpdateAction(services));
+        actions.put("search", new com.openexchange.groupware.tasks.json.actions.SearchAction(services));
+        actions.put("new", new com.openexchange.groupware.tasks.json.actions.NewAction(services));
+        actions.put("delete", new com.openexchange.groupware.tasks.json.actions.DeleteAction(services));
     }
 
     @Override

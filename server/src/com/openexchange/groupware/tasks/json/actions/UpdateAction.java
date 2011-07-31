@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,62 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.groupware.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
-import com.openexchange.groupware.tasks.json.TaskActionFactory;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.groupware.tasks.json.TaskRequest;
+import com.openexchange.log.Log;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link Activator}
+ * {@link UpdateAction}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public final class UpdateAction extends AbstractTaskAction {
 
-    public Activator() {
-        super();
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
+
+    /**
+     * Initializes a new {@link UpdateAction}.
+     * @param services
+     */
+    public UpdateAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
+    protected AJAXRequestResult perform(final TaskRequest req) throws OXException, JSONException {
+        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
+        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
 
-        registerModule(new TaskActionFactory(this), "tasks");
+        final Task task = new Task();
+
+        final JSONObject jsonobject = (JSONObject) req.getRequest().getData();
+
+        final TaskParser taskParser = new TaskParser(req.getTimeZone());
+        taskParser.parse(task, jsonobject);
+
+        task.setObjectID(id);
+
+        convertExternalToInternalUsersIfPossible(task, req.getSession().getContext(), LOG);
+
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
+        sqlinterface.updateTaskObject(task, inFolder, timestamp);
+        timestamp = task.getLastModified();
+
+        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }
