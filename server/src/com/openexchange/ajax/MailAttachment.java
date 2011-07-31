@@ -121,6 +121,25 @@ public class MailAttachment extends AJAXServlet {
             if (null == token) {
                 throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
             }
+            /*-
+             * Security check
+             * 
+             * IP-Check appropriate for roaming mobile devices?
+             */
+            if (false && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
+                AttachmentTokenRegistry.getInstance().removeToken(id);
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
+            /*
+             * At least expect the same user agent as the one which created the attachment token
+             */
+            if (null != token.getUserAgent() && !token.getUserAgent().equals(req.getHeader("user-agent"))) {
+                AttachmentTokenRegistry.getInstance().removeToken(id);
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
+            /*
+             * Write part to output stream
+             */
             final MailPart mailPart = token.getAttachment();
             InputStream attachmentInputStream = null;
             try {

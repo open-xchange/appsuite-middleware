@@ -87,6 +87,8 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
 
+    private String sessionId;
+
     private String clientIp;
 
     private String client;
@@ -119,6 +121,7 @@ public final class AttachmentToken implements AttachmentTokenConstants {
         this.accountId = accountId;
         this.contextId = session.getContextId();
         this.userId = session.getUserId();
+        this.sessionId = session.getSessionID();
         this.clientIp = session.getLocalIp();
         this.client = session.getClient();
         this.userAgent = (String) session.getParameter("user-agent");
@@ -223,6 +226,15 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      */
     public String getClient() {
         return client;
+    }
+
+    /**
+     * Gets the session identifier
+     * 
+     * @return The session identifier
+     */
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**
