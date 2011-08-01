@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -188,8 +189,12 @@ public class DefaultDispatcher implements Dispatcher {
         return action.getClass().getAnnotation(Action.class);
     }
 
-    public void register(final String module, final AJAXActionServiceFactory factory) {
-        actionFactories.put(module, factory);
+    public void register(final String module, final AJAXActionServiceFactory factory, final Collection<String> actions) {
+        final AJAXActionServiceFactory prev = actionFactories.put(module, factory);
+        if (null != prev) {
+            
+        }
+        
     }
 
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {

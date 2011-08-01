@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.osgiservice;
+package com.openexchange.ajax.requesthandler;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.Module;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link AJAXModuleActivator}
+ * {@link CombinedActionFactory}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AJAXModuleActivator extends HousekeepingActivator {
+public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
-    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, true);
+    private final List<AJAXActionServiceFactory> facs;
+
+    /**
+     * Initializes a new {@link CombinedActionFactory}.
+     */
+    public CombinedActionFactory() {
+        super();
+        facs = new ArrayList<AJAXActionServiceFactory>(2);
     }
 
-    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
-        this.registerInternal(factory, module, false);
+    /**
+     * Checks if this combined factory is empty.
+     * 
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return facs.isEmpty();
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put("module", module);
-        properties.put("multiple", multiple ? "true" : "false");
-        final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
-        if (null != moduleAnnotation) {
-            final String[] actions = moduleAnnotation.actions();
-            if (null != actions && actions.length > 0) {
-                final List<String> list = new ArrayList<String>(actions.length);
-                for (int i = 0; i < actions.length; i++) {
-                    final String action = actions[i];
-                    if (action.length() > 0) {
-                        list.add(action);
-                    }
+    /**
+     * Adds specified factory.
+     * 
+     * @param factory The factory to add
+     */
+    public void add(final AJAXActionServiceFactory factory) {
+        facs.add(factory);
+    }
+
+    /**
+     * Removes specified factory.
+     * 
+     * @param factory The factory to remove
+     */
+    public void remove(final AJAXActionServiceFactory factory) {
+        facs.remove(factory);
+    }
+
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        for (final AJAXActionServiceFactory factory : facs) {
+            try {
+                final AJAXActionService service = factory.createActionService(action);
+                if (null != service) {
+                    return service;
                 }
-                properties.put("actions", list);
+            } catch (final OXException e) {
+                // Next
             }
         }
-        registerService(AJAXActionServiceFactory.class, factory, properties);
+        return null;
     }
+
 }
