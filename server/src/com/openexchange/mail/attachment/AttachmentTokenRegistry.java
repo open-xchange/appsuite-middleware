@@ -52,7 +52,7 @@ package com.openexchange.mail.attachment;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -76,9 +76,9 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
      * Gets the singleton instance.
      * 
      * @return The singleton instance
-     * @throws MailException If instance initialization fails
+     * @throws OXException If instance initialization fails
      */
-    public static AttachmentTokenRegistry getInstance() throws MailException {
+    public static AttachmentTokenRegistry getInstance() throws OXException {
         AttachmentTokenRegistry tmp = singleton;
         if (null == tmp) {
             synchronized (AttachmentTokenRegistry.class) {
@@ -114,19 +114,15 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     /**
      * Initializes a new {@link AttachmentTokenRegistry}.
      * 
-     * @throws MailException If initialization fails
+     * @throws OXException If initialization fails
      */
-    private AttachmentTokenRegistry() throws MailException {
+    private AttachmentTokenRegistry() throws OXException {
         super();
-        try {
-            map = new ConcurrentHashMap<AttachmentTokenRegistry.Key, ConcurrentMap<String, AttachmentToken>>();
-            tokens = new ConcurrentHashMap<String, AttachmentToken>();
-            final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-            final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
-            timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
-        } catch (final ServiceException e) {
-            throw new MailException(e);
-        }
+        map = new ConcurrentHashMap<AttachmentTokenRegistry.Key, ConcurrentMap<String, AttachmentToken>>();
+        tokens = new ConcurrentHashMap<String, AttachmentToken>();
+        final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        final Runnable task = new CleanExpiredTokensRunnable(map, tokens);
+        timerTask = timerService.scheduleWithFixedDelay(task, CLEANER_FREQUENCY, CLEANER_FREQUENCY);
     }
 
     /**
