@@ -74,7 +74,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
 
         properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
+        properties.put("multiple", multiple ? "true" : "false");
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }
 }
