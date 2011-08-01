@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.reminder.osgi;
+package com.openexchange.groupware.reminder.json;
 
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.reminder.json.ReminderActionFactory;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.reminder.json.actions.AbstractReminderAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Activator}
+ * {@link ReminderActionFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class ReminderActionFactory implements AJAXActionServiceFactory {
 
-    public Activator() {
+    private final Map<String, AbstractReminderAction> actions;
+
+    /**
+     * Initializes a new {@link ReminderActionFactory}.
+     *
+     * @param services The service look-up
+     */
+    public ReminderActionFactory(final ServiceLookup services) {
         super();
+        actions = new ConcurrentHashMap<String, AbstractReminderAction>(4);
+        actions.put("delete", new com.openexchange.groupware.reminder.json.actions.DeleteAction(services));
+        actions.put("updates", new com.openexchange.groupware.reminder.json.actions.UpdatesAction(services));
+        actions.put("range", new com.openexchange.groupware.reminder.json.actions.RangeAction(services));
+        actions.put("remindAgain", new com.openexchange.groupware.reminder.json.actions.RemindAgainAction(services));
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
-        openTrackers();
-        registerModule(new ReminderActionFactory(this), "reminder");
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }
