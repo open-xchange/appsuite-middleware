@@ -85,11 +85,11 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         cleanUp();
     }
 
-    protected <T> void registerService(final Class<T> klass, final T service, final Dictionary<String, ?> properties) {
+    protected <S> void registerService(final Class<S> klass, final S service, final Dictionary<String, ?> properties) {
         serviceRegistrations.add(context.registerService(klass.getName(), service, properties));
     }
 
-    protected <T> void registerService(final Class<T> klass, final T service) {
+    protected <S> void registerService(final Class<S> klass, final S service) {
         registerService(klass, service, null);
     }
 
