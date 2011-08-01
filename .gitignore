@@ -1,4 +1,5 @@
 *.class
+.cvsignore
 build
 build/
 bin
