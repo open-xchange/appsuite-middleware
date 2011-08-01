@@ -66,9 +66,15 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public abstract class HousekeepingActivator extends DeferredActivator {
 
-    private final List<ServiceTracker<?, ?>> serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+    private final List<ServiceTracker<?, ?>> serviceTrackers;
 
-    private final List<ServiceRegistration<?>> serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
+    private final List<ServiceRegistration<?>> serviceRegistrations;
+
+    public HousekeepingActivator() {
+        super();
+        serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+        serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
+    }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
