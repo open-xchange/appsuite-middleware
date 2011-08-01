@@ -1,5 +1,5 @@
 *.class
-*/build/
+build/
 bin
 bin/*
 open-xchange-config/development/tmp
