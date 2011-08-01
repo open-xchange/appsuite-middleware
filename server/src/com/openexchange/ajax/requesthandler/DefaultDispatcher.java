@@ -50,15 +50,14 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private final Map<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+    private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
 
     private final Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
 
@@ -189,20 +188,39 @@ public class DefaultDispatcher implements Dispatcher {
         return action.getClass().getAnnotation(Action.class);
     }
 
-    public void register(final String module, final AJAXActionServiceFactory factory, final Collection<String> actions) {
-        final AJAXActionServiceFactory prev = actionFactories.put(module, factory);
-        if (null != prev) {
-            
+    public void register(final String module, final AJAXActionServiceFactory factory) {
+        synchronized (actionFactories) {
+            AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
+            if (null != current) {
+                current = actionFactories.get(module);
+                final CombinedActionFactory combinedFactory;
+                if (current instanceof CombinedActionFactory) {
+                    combinedFactory = (CombinedActionFactory) current;
+                } else {
+                    combinedFactory = new CombinedActionFactory();
+                    combinedFactory.add(current);
+                    actionFactories.put(module, combinedFactory);
+                }
+                combinedFactory.add(factory);
+            }
         }
-        
     }
 
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
 
-    public void remove(final String module) {
-        actionFactories.remove(module);
+    public void remove(final String module, final AJAXActionServiceFactory factory) {
+        synchronized (actionFactories) {
+            final AJAXActionServiceFactory removed = actionFactories.remove(module);
+            if (removed instanceof CombinedActionFactory) {
+                final CombinedActionFactory combinedFactory = (CombinedActionFactory) removed;
+                combinedFactory.remove(factory);
+                if (!combinedFactory.isEmpty()) {
+                    actionFactories.put(module, combinedFactory);
+                }
+            }
+        }
     }
 
 }

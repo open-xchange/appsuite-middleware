@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,14 +60,16 @@ import com.openexchange.exception.OXException;
  */
 public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
-    private final List<AJAXActionServiceFactory> facs;
+    private static final Object PRESENT = new Object();
+
+    private final ConcurrentMap<AJAXActionServiceFactory, Object> facs;
 
     /**
      * Initializes a new {@link CombinedActionFactory}.
      */
     public CombinedActionFactory() {
         super();
-        facs = new ArrayList<AJAXActionServiceFactory>(2);
+        facs = new ConcurrentHashMap<AJAXActionServiceFactory, Object>(2);
     }
 
     /**
@@ -80,12 +82,12 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
     }
 
     /**
-     * Adds specified factory.
+     * Adds specified factory (if not already contained).
      * 
      * @param factory The factory to add
      */
     public void add(final AJAXActionServiceFactory factory) {
-        facs.add(factory);
+        facs.put(factory, PRESENT);
     }
 
     /**
@@ -99,7 +101,7 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
-        for (final AJAXActionServiceFactory factory : facs) {
+        for (final AJAXActionServiceFactory factory : facs.keySet()) {
             try {
                 final AJAXActionService service = factory.createActionService(action);
                 if (null != service) {

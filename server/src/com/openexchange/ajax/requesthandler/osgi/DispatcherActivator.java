@@ -180,7 +180,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         @Override
         public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
-            dispatcher.remove(module);
+            dispatcher.remove(module, thing);
 
             final SessionServletRegistration tracker = registrations.remove(module);
             tracker.remove();
