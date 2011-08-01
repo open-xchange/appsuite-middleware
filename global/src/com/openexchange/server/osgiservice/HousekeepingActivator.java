@@ -85,12 +85,12 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         cleanUp();
     }
 
-    protected <S> void registerService(final Class<S> klass, final S service, final Dictionary<String, ?> properties) {
-        serviceRegistrations.add(context.registerService(klass.getName(), service, properties));
+    protected <S> void registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
+        serviceRegistrations.add(context.registerService(clazz.getName(), service, properties));
     }
 
-    protected <S> void registerService(final Class<S> klass, final S service) {
-        registerService(klass, service, null);
+    protected <S> void registerService(final Class<S> clazz, final S service) {
+        registerService(clazz, service, null);
     }
 
     protected void rememberTracker(final ServiceTracker<?, ?> tracker) {
@@ -101,8 +101,8 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         serviceTrackers.remove(tracker);
     }
 
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> klass, final ServiceTrackerCustomizer<S, S> customizer) {
-        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, klass.getName(), customizer);
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final ServiceTrackerCustomizer<S, S> customizer) {
+        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz.getName(), customizer);
         rememberTracker(tracker);
         return tracker;
     }
@@ -113,27 +113,30 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         return tracker;
     }
 
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> klass) {
-        return track(klass, (ServiceTrackerCustomizer<S, S>) null);
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz) {
+        return track(clazz, (ServiceTrackerCustomizer<S, S>) null);
     }
 
     protected <S> ServiceTracker<S, S> track(final Filter filter) {
         return track(filter, (ServiceTrackerCustomizer<S, S>) null);
     }
 
-    protected <S> ServiceTracker<S, S> track(final Class<? extends S> klass, final SimpleRegistryListener<S> listener) {
-        return track(klass, new ServiceTrackerCustomizer<S, S>() {
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final SimpleRegistryListener<S> listener) {
+        return track(clazz, new ServiceTrackerCustomizer<S, S>() {
 
+            @Override
             public S addingService(final ServiceReference<S> arg0) {
                 final S service = context.getService(arg0);
                 listener.added(arg0, service);
                 return service;
             }
 
+            @Override
             public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
                 // Don't care
             }
 
+            @Override
             public void removedService(final ServiceReference<S> arg0, final S arg1) {
                 listener.removed(arg0, arg1);
                 context.ungetService(arg0);
@@ -145,17 +148,20 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     protected <S> ServiceTracker<S, S> track(final Filter filter, final SimpleRegistryListener<S> listener) {
         return track(filter, new ServiceTrackerCustomizer<S, S>() {
 
+            @Override
             public S addingService(final ServiceReference<S> arg0) {
                 final S service = context.getService(arg0);
                 listener.added(arg0, service);
                 return service;
             }
 
+            @Override
             public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
                 // TODO Auto-generated method stub
 
             }
 
+            @Override
             public void removedService(final ServiceReference<S> arg0, final S arg1) {
                 listener.removed(arg0, arg1);
                 context.ungetService(arg0);

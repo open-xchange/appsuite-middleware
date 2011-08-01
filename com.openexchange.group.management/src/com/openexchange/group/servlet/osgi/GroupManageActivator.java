@@ -52,12 +52,10 @@ package com.openexchange.group.servlet.osgi;
 import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;
-import com.openexchange.group.servlet.request.GroupManageRequest;
+import com.openexchange.group.servlet.request.GroupManageActionFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
@@ -72,9 +70,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
 
     private final Lock lock = new ReentrantLock();
 
-    private ServiceRegistration handlerRegistration;
-
-    private ServiceRegistration preferencesItemRegistration;
+    private GroupManageActionFactory factory;
 
     /**
      * {@inheritDoc}
@@ -135,33 +131,22 @@ public class GroupManageActivator extends AJAXModuleActivator {
         } finally {
             lock.unlock();
         }
-        if (needsRegistration && handlerRegistration == null) {
-            handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
-                new GroupManageRequest(), null);
-            preferencesItemRegistration = context.registerService(
-                PreferencesItemService.class.getName(), new Module(), null);
+        if (needsRegistration && factory == null) {
+            factory = new GroupManageActionFactory(this);
+            registerModule(factory, "group");
+            registerService(PreferencesItemService.class, new Module());
         }
     }
 
     private void unregisterService() {
-        ServiceRegistration unregister1 = null;
-        ServiceRegistration unregister2 = null;
         lock.lock();
         try {
-            if (null != handlerRegistration) {
-                unregister1 = handlerRegistration;
-                handlerRegistration = null;
-                unregister2 = preferencesItemRegistration;
-                preferencesItemRegistration = null;
+            if (null != factory) {
+                unregisterServices();
+                factory = null;
             }
         } finally {
             lock.unlock();
-        }
-        if (null != unregister1) {
-            unregister1.unregister();
-        }
-        if (null != unregister2) {
-            unregister2.unregister();
         }
     }
 }

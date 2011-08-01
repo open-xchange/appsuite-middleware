@@ -49,91 +49,46 @@
 
 package com.openexchange.group.servlet.request.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.fields.GroupFields;
+import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.request.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractGroupAction}
- *
+ * {@link NewAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractGroupAction implements AJAXActionService {
-
-    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
-
-    private final ServiceLookup services;
+public final class NewAction extends AbstractGroupAction {
 
     /**
-     * Initializes a new {@link AbstractGroupAction}.
+     * Initializes a new {@link NewAction}.
+     * 
+     * @param services
      */
-    protected AbstractGroupAction(final ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     */
-    protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
+    public NewAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            final GroupAJAXRequest reminderRequest = new GroupAJAXRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            if (null != sTimeZone) {
-                reminderRequest.setTimeZone(getTimeZone(sTimeZone));
-            }
-            return perform(reminderRequest);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Performs specified group request.
-     *
-     * @param req The group request
-     * @return The result
-     * @throws OXException If an error occurs
-     * @throws JSONException IF a JSON error occurs
-     */
-    protected abstract AJAXRequestResult perform(GroupAJAXRequest req) throws OXException, JSONException;
-
-    /**
-     * Gets the result filled with JSON <code>NULL</code>.
-     *
-     * @return The result with JSON <code>NULL</code>.
-     */
-    protected static AJAXRequestResult getJSONNullResult() {
-        return RESULT_JSON_NULL;
-    }
-
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final char[] chars = string.toCharArray();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
-        }
-        return isWhitespace;
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+        final Group group = new Group();
+        final JSONObject jsonobject = req.getData();
+        final GroupParser groupParser = new GroupParser();
+        groupParser.parse(group, jsonobject);
+        final GroupService groupService = getService(GroupService.class);
+        final ServerSession session = req.getSession();
+        groupService.create(session.getContext(), session.getUser(), group);
+        final JSONObject response = new JSONObject();
+        response.put(GroupFields.IDENTIFIER, group.getIdentifier());
+        return new AJAXRequestResult(response, group.getLastModified(), "json");
     }
 
 }

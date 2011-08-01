@@ -56,29 +56,34 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.servlet.request.actions.AbstractGroupAction;
-
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GroupManageActionFactory}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(actions = { "" })
+@Module(actions = { "new", "update", "delete" })
 public final class GroupManageActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractGroupAction> actions;
 
     /**
      * Initializes a new {@link GroupManageActionFactory}.
+     * 
+     * @param services The service look-up
      */
-    public GroupManageActionFactory() {
+    public GroupManageActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractGroupAction>(4);
+        actions.put("new", new com.openexchange.group.servlet.request.actions.NewAction(services));
+        actions.put("update", new com.openexchange.group.servlet.request.actions.UpdateAction(services));
+        actions.put("delete", new com.openexchange.group.servlet.request.actions.DeleteAction(services));
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return actions.get(action);
     }
 
 }
