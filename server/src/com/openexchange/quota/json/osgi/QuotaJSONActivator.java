@@ -50,6 +50,7 @@
 package com.openexchange.quota.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.quota.json.QuotaActionFactory;
 
 
 /**
@@ -64,26 +65,16 @@ public final class QuotaJSONActivator extends AJAXModuleActivator {
      */
     public QuotaJSONActivator() {
         super();
-        // TODO Auto-generated constructor stub
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
-
+        registerModule(new QuotaActionFactory(this), "quota");
     }
 
 }
