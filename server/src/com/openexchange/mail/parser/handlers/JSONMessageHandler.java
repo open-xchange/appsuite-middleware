@@ -168,6 +168,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private PlainTextContent plainText;
 
+    private String tokenFolder;
+
+    private String tokenMailId;
+
     private final boolean token;
 
     private final int ttlMillis;
@@ -246,9 +250,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 /*
                  * Add missing fields
                  */
-                if (mail.containsFolder() && mail.getMailId() != null) {
-                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
-                    jsonObject.put(DataFields.ID, mail.getMailId());
+                final String mailId = mail.getMailId();
+                if (mail.containsFolder() && mailId != null) {
+                    tokenFolder = prepareFullname(accountId, mail.getFolder());
+                    jsonObject.put(FolderChildFields.FOLDER_ID, tokenFolder);
+                    tokenMailId = mailId;
+                    jsonObject.put(DataFields.ID, mailId);
                 }
                 jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
                 jsonObject.put(
@@ -288,7 +295,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     private void addToken(final JSONObject jsonObject, final String attachmentId) {
-        if (token) {
+        if (token && null != tokenFolder && null != tokenMailId) {
             /*
              * Token
              */
@@ -842,6 +849,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 return true;
             }
             final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+            msgHandler.tokenFolder = tokenFolder;
+            msgHandler.tokenMailId = tokenMailId;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
