@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.json.actions.AbstractGroupAction;
 import com.openexchange.server.ServiceLookup;
@@ -62,6 +63,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(actions = { "get", "all", "list", "search", "updates" })
 public class GroupActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractGroupAction> actions;
@@ -73,8 +75,12 @@ public class GroupActionFactory implements AJAXActionServiceFactory {
      */
     public GroupActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4);
-
+        actions = new ConcurrentHashMap<String, AbstractGroupAction>(5);
+        actions.put("get", new com.openexchange.group.json.actions.GetAction(services));
+        actions.put("all", new com.openexchange.group.json.actions.AllAction(services));
+        actions.put("list", new com.openexchange.group.json.actions.ListAction(services));
+        actions.put("search", new com.openexchange.group.json.actions.SearchAction(services));
+        actions.put("updates", new com.openexchange.group.json.actions.UpdatesAction(services));
     }
 
     @Override

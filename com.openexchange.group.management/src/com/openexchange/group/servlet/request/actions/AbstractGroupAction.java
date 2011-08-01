@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.group.json.actions;
+package com.openexchange.group.servlet.request.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import org.json.JSONException;
@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.json.GroupAJAXRequest;
+import com.openexchange.group.servlet.request.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -68,6 +68,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractGroupAction implements AJAXActionService {
+
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractGroupAction.class));
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -91,7 +94,6 @@ public abstract class AbstractGroupAction implements AJAXActionService {
         return services.getService(clazz);
     }
 
-    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             final GroupAJAXRequest reminderRequest = new GroupAJAXRequest(request, session);

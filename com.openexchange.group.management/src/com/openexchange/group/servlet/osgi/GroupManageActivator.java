@@ -54,11 +54,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;
 import com.openexchange.group.servlet.request.GroupManageRequest;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
@@ -66,7 +66,7 @@ import com.openexchange.user.UserService;
  * Activator for the group management requests.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GroupManageActivator extends DeferredActivator {
+public class GroupManageActivator extends AJAXModuleActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
 

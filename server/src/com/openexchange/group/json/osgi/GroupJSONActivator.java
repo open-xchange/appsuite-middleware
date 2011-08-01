@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,17 +47,34 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.group.json.osgi;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+
 
 /**
- * {@link Module}
+ * {@link GroupJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Module {
-    String[] actions();
+public final class GroupJSONActivator extends AJAXModuleActivator {
+
+    /**
+     * Initializes a new {@link GroupJSONActivator}.
+     */
+    public GroupJSONActivator() {
+        super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        s
+        
+    }
+
 }

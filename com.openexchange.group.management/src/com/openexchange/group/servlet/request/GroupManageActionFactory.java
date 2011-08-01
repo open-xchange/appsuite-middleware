@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,17 +47,38 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.group.servlet.request;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.Module;
+import com.openexchange.exception.OXException;
+import com.openexchange.group.servlet.request.actions.AbstractGroupAction;
+
 
 /**
- * {@link Module}
+ * {@link GroupManageActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Module {
-    String[] actions();
+@Module(actions = { "" })
+public final class GroupManageActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AbstractGroupAction> actions;
+
+    /**
+     * Initializes a new {@link GroupManageActionFactory}.
+     */
+    public GroupManageActionFactory() {
+        super();
+        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4);
+    }
+
+    public AJAXActionService createActionService(final String action) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
