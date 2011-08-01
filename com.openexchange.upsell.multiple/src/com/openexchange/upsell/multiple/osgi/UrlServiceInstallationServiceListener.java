@@ -56,7 +56,7 @@ import com.openexchange.upsell.multiple.api.UpsellURLService;
 
 
 /**
- * 
+ *
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
@@ -71,6 +71,7 @@ public class UrlServiceInstallationServiceListener implements ServiceTrackerCust
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         if (service instanceof UpsellURLService) {
@@ -83,10 +84,12 @@ public class UrlServiceInstallationServiceListener implements ServiceTrackerCust
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference arg0, Object arg1) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(ServiceReference arg0, Object o) {
         if (o instanceof UpsellURLService) {
             MyServiceRegistry.getServiceRegistry().removeService(UpsellURLService.class);

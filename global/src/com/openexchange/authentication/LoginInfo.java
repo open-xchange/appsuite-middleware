@@ -53,7 +53,7 @@ import java.util.Map;
 
 /**
  * This information can be retrieved from the login screen for authenticating a user.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface LoginInfo {
@@ -70,7 +70,7 @@ public interface LoginInfo {
 
     /**
      * Gets additional properties possibly needed for authentication.
-     * 
+     *
      * @return The properties as a (possibly empty) unmodifiable {@link Map map}
      */
     Map<String, Object> getProperties();

@@ -71,23 +71,23 @@ public abstract class AbstractFile implements File {
     public File dup() {
         return FileFieldHandling.dup(this);
     }
-    
+
     public void copyInto(final File other) {
         FileFieldHandling.copy(this, other);
     }
-    
+
     public void copyFrom(final File other) {
         FileFieldHandling.copy(other, this);
     }
-    
+
     public void copyInto(final File other, final Field...fields) {
         FileFieldHandling.copy(this, other, fields);
     }
-    
+
     public void copyFrom(final File other, final Field...fields) {
         FileFieldHandling.copy(other, this, fields);
     }
-    
+
     public Set<File.Field> differences(final File other) {
         return Field.inject(new AbstractFileFieldHandler() {
 
@@ -99,13 +99,13 @@ public abstract class AbstractFile implements File {
                 }
                 return set;
             }
-            
+
         }, new HashSet<File.Field>());
     }
-    
+
     public boolean equals(final File other, final Field criterium, final Field...criteria) {
         final List<Field> fields = new ArrayList<Field>(1 + criteria.length);
-        
+
         for (final Field field : fields) {
             if(0 != new FileComparator(field).compare(this, other)) {
                 return false;
@@ -113,12 +113,12 @@ public abstract class AbstractFile implements File {
         }
         return true;
     }
-    
+
     @Override
     public boolean equals(final Object other) {
         return equals((File)other, File.Field.ID, File.Field.values());
     }
-    
+
     @Override
     public String toString() {
         return FileFieldHandling.toString(this);
@@ -138,7 +138,7 @@ public abstract class AbstractFile implements File {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

@@ -63,7 +63,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link TrustAllAdapter} - A trust-all {@link ProtocolSocketFactory protocol socket factory}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TrustAllAdapter implements SecureProtocolSocketFactory {

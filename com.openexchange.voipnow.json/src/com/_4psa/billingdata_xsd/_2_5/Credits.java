@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Charging credits definition: prepaid charging plan
- * 
+ *
  * <p>Java class for Credits complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Credits">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Credits", propOrder = {
@@ -50,11 +50,11 @@ public class Credits {
 
     /**
      * Gets the value of the creditIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public JAXBElement<String> getCreditIn() {
         return creditIn;
@@ -62,23 +62,23 @@ public class Credits {
 
     /**
      * Sets the value of the creditIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public void setCreditIn(JAXBElement<String> value) {
-        this.creditIn = ((JAXBElement<String> ) value);
+        this.creditIn = value;
     }
 
     /**
      * Gets the value of the creditOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCreditOut() {
         return creditOut;
@@ -86,11 +86,11 @@ public class Credits {
 
     /**
      * Sets the value of the creditOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCreditOut(String value) {
         this.creditOut = value;
@@ -98,11 +98,11 @@ public class Credits {
 
     /**
      * Gets the value of the orderNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrderNo() {
         return orderNo;
@@ -110,11 +110,11 @@ public class Credits {
 
     /**
      * Sets the value of the orderNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrderNo(String value) {
         this.orderNo = value;

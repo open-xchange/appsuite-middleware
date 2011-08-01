@@ -55,18 +55,20 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * EmptyReminderDeleteImpl
- * 
- * 
+ *
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class EmptyReminderDeleteImpl implements TargetService {
-	
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
-		
+
+	@Override
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
+
 	}
 
-	public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
-		
+	@Override
+    public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
+
 	}
 }
 

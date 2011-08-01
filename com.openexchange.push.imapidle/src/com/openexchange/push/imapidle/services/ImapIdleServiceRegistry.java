@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link ImapIdleServiceRegistry} - A registry for services needed by IMAP IDLE bundle
- * 
+ *
  */
 public final class ImapIdleServiceRegistry extends AbstractServiceRegistry {
 

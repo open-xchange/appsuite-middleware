@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  *  <dt>id</dt><dd>The id of the file storage service that is to be deleted</dd>
  * </dl>
  * Throws an exception upon an error or returns "1" on success.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -88,14 +88,14 @@ public class DeleteAction extends AbstractFileStorageAccountAction {
         final String messagingServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
 
         final String id = request.getParameter(FileStorageAccountConstants.ID);
-        
+
         final FileStorageService messagingService = registry.getFileStorageService(messagingServiceId);
-        
+
         final DefaultFileStorageAccount messagingAccount = new DefaultFileStorageAccount();
         messagingAccount.setFileStorageService(messagingService);
         messagingAccount.setId(id);
         messagingService.getAccountManager().deleteAccount(messagingAccount, session);
-        
+
         return new AJAXRequestResult(Integer.valueOf(1));
     }
 

@@ -65,7 +65,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 
 /**
  * {@link SelectForUpdateReservation}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SelectForUpdateReservation implements InfostoreFilenameReservation {
@@ -101,6 +101,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         this.provider = provider;
     }
 
+    @Override
     public void destroySilently() {
         try {
             openConnection();
@@ -249,8 +250,9 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
         openConnection();
         con.setAutoCommit(false);
     }
-    
-    
+
+
+    @Override
     public String getFilename() {
         return fileName;
     }

@@ -51,7 +51,7 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13UnknownPrefixCodeException} - Thrown if an unknown prefix code is detected
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
@@ -62,7 +62,7 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13UnknownPrefixCodeException}
-     * 
+     *
      * @param unknownPrefixCode The unknown prefix code
      */
     public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
@@ -71,7 +71,7 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
     /**
      * Gets the dump.
-     * 
+     *
      * @return The dump
      */
     public String getDump() {
@@ -80,7 +80,7 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
     /**
      * Sets the dump.
-     * 
+     *
      * @param dumped The dump
      */
     public void setDump(final String dumped) {

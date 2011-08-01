@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * {@link CalendarExtendDNColumnTask} - Extends size of <tt>VARCHAR</tt> column <i>dn</i> in both working and backup table of
  * <i>prg_date_rights</i>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CalendarExtendDNColumnTask implements UpdateTask {
@@ -76,10 +76,12 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
      */
     private static final int DESIRED_SIZE = 320;
 
+    @Override
     public int addedWithVersion() {
         return 33;
     }
 
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -87,6 +89,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Starting " + CalendarExtendDNColumnTask.class.getSimpleName());

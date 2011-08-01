@@ -76,23 +76,25 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileResponseOutputter implements ResponseOutputter {
-    
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseOutputter.class));
-    
+
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
     protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
     private ImageScalingService scaler = null;
-    
+
+    @Override
     public int getPriority() {
         return 0;
     }
-    
+
     public void setScaler(final ImageScalingService scaler) {
         this.scaler = scaler;
     }
 
+    @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
         final Object data = result.getResultObject();
         if (data == null) {
@@ -100,11 +102,12 @@ public class FileResponseOutputter implements ResponseOutputter {
         }
         return IFileHolder.class.isAssignableFrom(data.getClass());
     }
-    
+
+    @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
-        
-        
+
+
         final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
         final String userAgent = req.getHeader("user-agent");
         String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
@@ -112,7 +115,7 @@ public class FileResponseOutputter implements ResponseOutputter {
             contentDisposition = file.getDisposition();
         }
         final String name = file.getName();
-        
+
         InputStream documentData = null;
         ServletOutputStream outputStream = null;
         try {
@@ -168,41 +171,41 @@ public class FileResponseOutputter implements ResponseOutputter {
     }
 
     /**
-     * @param request 
+     * @param request
      * @param file
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     private IFileHolder scaleIfImage(final AJAXRequestData request, final IFileHolder file) throws IOException {
         if (scaler == null) {
             return file;
         }
-        
+
         String contentType = file.getContentType();
-        
+
         if (!contentType.startsWith("image")) {
             contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file.getName());
             if (!contentType.startsWith("image")) {
                 return file;
             }
         }
-        
+
         int width = -1, height = -1;
-        
+
         if (request.isSet("width")) {
             width = request.getParameter("width", int.class);
         }
-        
+
         if (request.isSet("height")) {
             height = request.getParameter("height", int.class);
         }
-        
+
         if (width == -1 && height == -1) {
             return file;
         }
-        
+
         final InputStream scaled = scaler.scale(file.getStream(), width, height);
-        
+
         return new FileHolder(scaled, -1, "image/jpg", "");
     }
 }

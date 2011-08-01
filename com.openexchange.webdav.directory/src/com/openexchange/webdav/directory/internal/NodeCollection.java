@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.directory.internal;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -62,11 +61,9 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
-import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 
 /**
@@ -76,9 +73,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class NodeCollection extends AbstractCollection {
 
-    private Node node;
-    private DirectoryWebdavFactory factory;
-    private WebdavPath url;
+    private final Node node;
+    private final DirectoryWebdavFactory factory;
+    private final WebdavPath url;
 
     public NodeCollection(Node node, DirectoryWebdavFactory factory, WebdavPath url) {
         super();
@@ -96,7 +93,7 @@ public class NodeCollection extends AbstractCollection {
     @Override
     protected void internalDelete() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -111,12 +108,12 @@ public class NodeCollection extends AbstractCollection {
 
     @Override
     protected void internalPutProperty(WebdavProperty prop) {
-        
+
     }
 
     @Override
     protected void internalRemoveProperty(String namespace, String name) {
-        
+
     }
 
     @Override
@@ -126,7 +123,7 @@ public class NodeCollection extends AbstractCollection {
 
     @Override
     public void setCreationDate(Date date) {
-        
+
     }
 
     public List<WebdavResource> getChildren() throws OXException {
@@ -139,7 +136,7 @@ public class NodeCollection extends AbstractCollection {
     }
 
     public void create() {
-        
+
     }
 
     public boolean exists() {
@@ -183,22 +180,22 @@ public class NodeCollection extends AbstractCollection {
     }
 
     public void lock(WebdavLock lock) {
-        
+
     }
 
     public void save() {
-        
+
     }
 
     public void setDisplayName(String displayName) {
-        
+
     }
 
 
     public void unlock(String token) {
-        
+
     }
 
-   
+
 
 }

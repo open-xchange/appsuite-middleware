@@ -66,7 +66,7 @@ public abstract class AllMailProvider extends MailProvider {
 
     /**
      * Gets the delegating mail provider.
-     * 
+     *
      * @param realProvider The real provider to delegate to
      * @return The delegating mail provider
      */

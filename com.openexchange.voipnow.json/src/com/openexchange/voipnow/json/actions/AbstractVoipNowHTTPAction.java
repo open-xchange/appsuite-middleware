@@ -67,7 +67,7 @@ import com.openexchange.voipnow.json.http.TrustAllAdapter;
 
 /**
  * {@link AbstractVoipNowHTTPAction} - Abstract action for HTTP requests..
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends AbstractVoipNowAction {
@@ -91,28 +91,28 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
 
     /**
      * Gets a newly created {@link HttpMethod HTTP method} instance.
-     * 
+     *
      * @return A newly created {@link HttpMethod HTTP method} instance
      */
     protected abstract M newHttpMethod();
 
     /**
      * Gets the request path.
-     * 
+     *
      * @return The request path
      */
     protected abstract String getPath();
 
     /**
      * Gets the time out.
-     * 
+     *
      * @return The time out
      */
     protected abstract int getTimeout();
 
     /**
      * Creates a new VoipNow exception for a failed request to VoipNow server.
-     * 
+     *
      * @param code The error code
      * @param message The error message or <code>null</code> if none available
      * @return A new VoipNow exception for failed request
@@ -123,7 +123,7 @@ public abstract class AbstractVoipNowHTTPAction<M extends HttpMethod> extends Ab
 
     /**
      * Configures and creates a new HTTP call.
-     * 
+     *
      * @param setting The VoipNow server setting
      * @param queryString The query string to apply to HTTP method
      * @return The executed HTTP method

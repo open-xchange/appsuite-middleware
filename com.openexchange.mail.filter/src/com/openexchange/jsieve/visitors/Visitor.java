@@ -69,9 +69,9 @@ import org.apache.jsieve.parser.generated.Token;
 /**
  * This class uses the visitor pattern to get a sieve script out of the jjtree
  * representation
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class Visitor implements SieveParserVisitor {
 

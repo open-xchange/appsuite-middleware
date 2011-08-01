@@ -81,7 +81,7 @@ import com.openexchange.twitter.TwitterService;
 /**
  * {@link TwitterServiceImpl} - The twitter service implementation based on <a
  * href="http://repo1.maven.org/maven2/net/homeip/yusuke/twitter4j/">twitter4j</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterServiceImpl implements TwitterService {
@@ -179,7 +179,7 @@ public final class TwitterServiceImpl implements TwitterService {
 
     /**
      * Crawls the PIN from specified request token's authorization URL.
-     * 
+     *
      * @param twitterId The twitter account name
      * @param password The twitter account password
      * @param requestToken The request token providing authorization URL

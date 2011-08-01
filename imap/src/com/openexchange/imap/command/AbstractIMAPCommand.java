@@ -63,7 +63,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * {@link AbstractIMAPCommand} - Abstract class for an IMAP command.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractIMAPCommand<T> {
@@ -86,7 +86,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     /**
      * Initializes a new {@link AbstractIMAPCommand}.
-     * 
+     *
      * @param imapFolder The IMAP folder
      */
     protected AbstractIMAPCommand(final IMAPFolder imapFolder) {
@@ -187,7 +187,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     /**
      * Returns the debug info.
-     * 
+     *
      * @param The argument index
      * @return The debug info
      */
@@ -197,7 +197,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     /**
      * Gets the IMAP command to be executed.
-     * 
+     *
      * @param argsIndex - the argument index
      * @return the IMAP command to be executed
      */
@@ -205,28 +205,28 @@ public abstract class AbstractIMAPCommand<T> {
 
     /**
      * Gets the IMAP command's arguments whereas each argument <b>must not</b> exceed 16384 bytes.
-     * 
+     *
      * @return the IMAP command's arguments
      */
     protected abstract String[] getArgs();
 
     /**
      * Define a <code>boolean</code> value that is included in inner response loop.
-     * 
+     *
      * @return A <code>boolean</code> value
      */
     protected abstract boolean addLoopCondition();
 
     /**
      * Gets the default value that ought to be returned if the error <code>"No matching messages"</code> occurs.
-     * 
+     *
      * @return The default value
      */
     protected abstract T getDefaultValue();
 
     /**
      * Handles the current response.
-     * 
+     *
      * @param response The response
      * @throws MessagingException If a message-related error occurs
      */
@@ -234,7 +234,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     /**
      * Gets the return value.
-     * 
+     *
      * @return The return value
      * @throws MessagingException If a message-related error occurs
      */

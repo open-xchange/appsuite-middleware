@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link BetaFeatures} - Configuration tree entry to enabled/disable beta features for a certain user.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BetaFeatures implements PreferencesItemService {
@@ -84,12 +84,15 @@ public final class BetaFeatures implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null == set || set.isEmpty()) {
@@ -100,9 +103,11 @@ public final class BetaFeatures implements PreferencesItemService {
                     setting.setSingleValue(Boolean.valueOf(set.iterator().next()));
                 }
             }
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
+            @Override
             public boolean isWritable() {
                 return true;
             }
@@ -122,7 +127,7 @@ public final class BetaFeatures implements PreferencesItemService {
 
     /**
      * Gets the specified <code>boolean</code> property from configuration service.
-     * 
+     *
      * @param name The property's name
      * @param defaultValue The default <code>boolean</code> value to return if property is missing
      * @return The <code>boolean</code> value

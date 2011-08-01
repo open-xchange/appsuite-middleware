@@ -122,7 +122,7 @@ import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link IMAPCommandsCollection} - A collection of simple IMAP commands.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPCommandsCollection {
@@ -171,7 +171,7 @@ public final class IMAPCommandsCollection {
 
         /**
          * Gets the capabilities.
-         * 
+         *
          * @return The capabilities
          */
         public Set<String> getSet() {
@@ -182,7 +182,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets the IMAP capabilities from the IMAP store associated with given connected IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The IMAP capabilities as an unmodifiable {@link Map}
      * @throws MessagingException If a messaging error occurs
@@ -199,7 +199,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Checks if IMAP root folder allows subfolder creation.
-     * 
+     *
      * @param rootFolder The IMAP root folder
      * @return <code>true</code> if IMAP root folder allows subfolder creation; otherwise <code>false</code>
      * @throws MessagingException If checking IMAP root folder for subfolder creation fails
@@ -238,7 +238,7 @@ public final class IMAPCommandsCollection {
      * Note that there's currently an unresolved problem concerning deletion of mail folders. Since the trash folder is created to hold only
      * messages, no backup of the deleted folder can be copied to trash folder; meaning the folder in question (including messages, its
      * subfolders, and subfolders' contents) is irretrievably lost.
-     * 
+     *
      * @param imapFolder An IMAP folder
      * @param type The folder type to check
      * @return <code>true</code> if IMAP server supports specified folder type; otherwise <code>false</code>
@@ -301,7 +301,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets the separator character of the IMAP server associated with specified IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder to obtain IMAP protocol
      * @return The separator character
      * @throws MessagingException If a messaging error occurs
@@ -331,7 +331,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Checks if IMAP folder's prefix allows subfolder creation.
-     * 
+     *
      * @param prefix The IMAP folder's prefix
      * @param imapFolder The IMAP folder providing the IMAP connection
      * @return <code>true</code> if subfolder are allowed; otherwise <code>false</code>
@@ -364,7 +364,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets total, recent, and unseen counts from given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
      * @throws MessagingException If determining counts fails
@@ -375,7 +375,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets total, recent, and unseen counts from given IMAP folder
-     * 
+     *
      * @param fullName The full name of the folder whose STATUS shall be returned
      * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
      * @return The total, recent, and unseen counts wrapped in an <code>int</code> array
@@ -449,7 +449,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets ACL list from denoted IMAP folder.
-     * 
+     *
      * @param fullName The full name of the folder whose ACL list shall be returned
      * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
      * @param checkCapabilities Whether to check for needed capability
@@ -467,7 +467,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Arguments...
                  */
-                final Argument args = new Argument(); 
+                final Argument args = new Argument();
                 args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Execute
@@ -517,7 +517,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets MYRIGHTS from denoted IMAP folder.
-     * 
+     *
      * @param fullName The full name of the folder whose MYRIGHTS shall be returned
      * @param imapFolder An IMAP folder providing connected {@link IMAPProtocol protocol}
      * @param checkCapabilities Whether to check for needed capability
@@ -534,7 +534,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Arguments...
                  */
-                final Argument args = new Argument(); 
+                final Argument args = new Argument();
                 args.writeString(BASE64MailboxEncoder.encode(fullName));
                 /*
                  * Execute
@@ -577,7 +577,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets unread/unseen message count from given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The unread message count
      * @throws MessagingException If determining counts fails
@@ -642,7 +642,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets recent message count from given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The recent message count
      * @throws MessagingException If determining counts fails
@@ -707,7 +707,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets total message count from given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The total message count
      * @throws MessagingException If determining counts fails
@@ -772,7 +772,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets total/unread message count from given IMAP folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The total/unread message count
      * @throws MessagingException If determining counts fails
@@ -835,7 +835,7 @@ public final class IMAPCommandsCollection {
     /**
      * Parses number of total, recent and unread messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
      * .
-     * 
+     *
      * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
      * @return An array of <code>int</code> with length of <code>3</code> containing number of total (index <code>0</code>), recent (index
      *         <code>1</code>) and unread (index <code>2</code>) messages
@@ -875,7 +875,7 @@ public final class IMAPCommandsCollection {
     /**
      * Parses number of total messages from specified IMAP response whose key is equal to <code>&quot;STATUS&quot;</code>
      * .
-     * 
+     *
      * @param statusResponse The <code>&quot;STATUS&quot;</code> IMAP response to parse.
      * @param counterTypes The counter types; either <code>MESSAGES</code>, <code>RECENT</code> or <code>UNSEEN</code>
      * @return The  number of total messages
@@ -926,7 +926,7 @@ public final class IMAPCommandsCollection {
      * IMAP server. Some servers might implement a single quota-root for all folders owned by a user. Other servers might implement a
      * separate quota-root for each folder. A single folder can even have multiple quota-roots, perhaps controlling quotas for different
      * resources.
-     * 
+     *
      * @param imapFolder The IMAP folder whose quotas shall be determined
      * @return The quotas for the quota-root associated with given IMAP folder
      * @throws MessagingException If determining the quotas fails
@@ -1000,7 +1000,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Parse a QUOTA response.
-     * 
+     *
      * @param r The IMAP response representing QUOTA response
      * @return The parsed instance of {@link Quota}
      * @throws ParsingException If parsing QUOTA response fails
@@ -1079,7 +1079,7 @@ public final class IMAPCommandsCollection {
      * <p>
      * This method imitates the behavior from {@link IMAPFolder#isSubscribed() isSubscribde()} that is a namespace folder's subscription
      * status is checked with specified separator character appended to fullname.
-     * 
+     *
      * @param fullname The folder's fullname
      * @param separator The separator character
      * @param isNamespace <code>true</code> if denoted folder is a namespace folder; otherwise <code>false</code>
@@ -1258,7 +1258,7 @@ public final class IMAPCommandsCollection {
      * All known color labels:
      * <code>$cl_0&nbsp;$cl_1&nbsp;$cl_2&nbsp;$cl_3&nbsp;$cl_4&nbsp;$cl_5&nbsp;$cl_6&nbsp;$cl_7&nbsp;$cl_8&nbsp;$cl_9&nbsp;$cl_10</code>
      * <code>cl_0&nbsp;cl_1&nbsp;cl_2&nbsp;cl_3&nbsp;cl_4&nbsp;cl_5&nbsp;cl_6&nbsp;cl_7&nbsp;cl_8&nbsp;cl_9&nbsp;cl_10</code>
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param msgUIDs - the message UIDs
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
@@ -1314,7 +1314,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Applies the given color flag as an user flag to the messages corresponding to given UIDS.
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param msgUIDs - the message UIDs
      * @param colorLabelFlag - the color label
@@ -1374,7 +1374,7 @@ public final class IMAPCommandsCollection {
      * Force to send a CLOSE command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
      * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
      * thrown.
-     * 
+     *
      * @param f The IMAP folder providing the connected store
      */
     public static void forceCloseCommand(final IMAPFolder f) {
@@ -1404,7 +1404,7 @@ public final class IMAPCommandsCollection {
      * Force to send a NOOP command to IMAP server that is explicitly <b>not</b> handled by JavaMail API. It really does not matter if this
      * command succeeds or breaks up in a <code>MessagingException</code>. Therefore neither a return value is defined nor any exception is
      * thrown.
-     * 
+     *
      * @param f The IMAP folder providing the connected store
      */
     public static void forceNoopCommand(final IMAPFolder f) {
@@ -1430,7 +1430,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Tries to propagate specified client IP through a NOOP command; e.g. "A01 NOOP <CLIENT_IP>".
-     * 
+     *
      * @param f The IMAP folder
      * @param clientIP The client IP address
      */
@@ -1459,7 +1459,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Sorts given messages according to specified sort field and specified sort direction.
-     * 
+     *
      * @param folder The IMAP folder
      * @param sortCrit The IMAP sort criteria
      * @param toSort The messages' sequence numbers to sort or <code>null</code> to sort all
@@ -1472,7 +1472,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Sorts all messages according to specified sort field and specified sort direction.
-     * 
+     *
      * @param folder The IMAP folder
      * @param sortCrit The IMAP sort criteria
      * @return An array of <code>int</code> representing sorted messages' sequence numbers
@@ -1486,7 +1486,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Executes the IMAP <i>SORT</i> command parameterized with given sort criteria and given sort range.
-     * 
+     *
      * @param imapFolder The IMAP folder in which the sort is performed
      * @param sortCrit The sort criteria
      * @param mdat The sort range; if <code>null</code> all messages located in given folder are sorted
@@ -1560,7 +1560,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Determines all unseen messages in specified folder.
-     * 
+     *
      * @param folder The IMAP folder
      * @param fields The desired fields
      * @param sortField The sort-by field
@@ -1702,7 +1702,7 @@ public final class IMAPCommandsCollection {
      * <p>
      * <b>NOTE</b>: The internal message cache of specified instance of {@link IMAPFolder} is left in an inconsistent state cause its kept
      * message references are not marked as expunged. Therefore the folder should be closed afterwards to force a message cache update.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
      * @throws MessagingException - if an error occurs in underlying protocol
@@ -1752,7 +1752,7 @@ public final class IMAPCommandsCollection {
      * </ol>
      * <b>NOTE</b>: The internal message cache of specified instance of {@link IMAPFolder} is left in an inconsistent state cause its kept
      * message references are not marked as expunged. Therefore the folder should be closed afterwards to force a message cache update.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
      * @param supportsUIDPLUS <code>true</code> if IMAP server's capabilities indicate support of UIDPLUS extension; otherwise
@@ -1832,7 +1832,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Determines if given folder is marked as read-only when performing a <code>SELECT</code> command on it.
-     * 
+     *
      * @param folder The IMAP folder
      * @return <code>true</code> is IMAP folder is marked as READ-ONLY; otherwise <code>false</code>
      * @throws OXException
@@ -1877,7 +1877,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Checks if IMAP folder denoted by specified fullname is allowed to be opened in desired mode.
-     * 
+     *
      * @param f The IMAP folder providing protocol access
      * @param fullname The fullname to check
      * @param mode The desired open mode
@@ -1941,7 +1941,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets all messages marked as deleted in given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param filter The filter whose elements are going to be removed from return value
      * @return All messages marked as deleted in given IMAP folder filtered by specified <code>filter</code>
@@ -2032,7 +2032,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Detects the corresponding UIDs to message range according to specified starting/ending sequence numbers.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param startSeqNum The starting sequence number
      * @param endSeqNum The ending sequence number
@@ -2048,7 +2048,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Detects the corresponding UIDs to message range according to specified sequence numbers.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param seqNums The sequence numbers
      * @return The corresponding UIDs
@@ -2060,7 +2060,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Detects the corresponding UIDs to message range according to specified arguments
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param args The arguments
      * @param size The number of messages in folder
@@ -2085,9 +2085,9 @@ public final class IMAPCommandsCollection {
                     /*-
                      * Arguments:  sequence set
                      * message data item names or macro
-                     * 
+                     *
                      * Responses:  untagged responses: FETCH
-                     * 
+                     *
                      * Result:     OK - fetch completed
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
@@ -2132,7 +2132,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Detects the corresponding UIDs from given folder
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The corresponding UIDs
      * @throws MessagingException If an error occurs in underlying protocol
@@ -2154,9 +2154,9 @@ public final class IMAPCommandsCollection {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
-                 * 
+                 *
                  * Responses:  untagged responses: FETCH
-                 * 
+                 *
                  * Result:     OK - fetch completed
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
@@ -2197,7 +2197,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Maps specified UIDs to current corresponding sequence numbers.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
      * @return The current corresponding sequence numbers
@@ -2231,9 +2231,9 @@ public final class IMAPCommandsCollection {
                     /*-
                      * Arguments:  sequence set
                      * message data item names or macro
-                     * 
+                     *
                      * Responses:  untagged responses: FETCH
-                     * 
+                     *
                      * Result:     OK - fetch completed
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
@@ -2284,7 +2284,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Generates a map resolving specified UIDs to current corresponding sequence numbers.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
      * @return A map resolving specified UIDs to current corresponding sequence numbers
@@ -2308,9 +2308,9 @@ public final class IMAPCommandsCollection {
                     /*-
                      * Arguments:  sequence set
                      * message data item names or macro
-                     * 
+                     *
                      * Responses:  untagged responses: FETCH
-                     * 
+                     *
                      * Result:     OK - fetch completed
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
@@ -2356,7 +2356,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Generates a map resolving corresponding sequence numbers to specified UIDs.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param uids The UIDs
      * @return A map resolving corresponding sequence numbers to specified UIDs
@@ -2378,9 +2378,9 @@ public final class IMAPCommandsCollection {
                     /*-
                      * Arguments:  sequence set
                      * message data item names or macro
-                     * 
+                     *
                      * Responses:  untagged responses: FETCH
-                     * 
+                     *
                      * Result:     OK - fetch completed
                      *             NO - fetch error: can't fetch that data
                      *             BAD - command unknown or arguments invalid
@@ -2425,7 +2425,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Fetches all UIDs from given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return All UIDs from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
@@ -2443,9 +2443,9 @@ public final class IMAPCommandsCollection {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
-                 * 
+                 *
                  * Responses:  untagged responses: FETCH
-                 * 
+                 *
                  * Result:     OK - fetch completed
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
@@ -2487,7 +2487,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Parses specified {@link Flags flags} to system flags.
-     * 
+     *
      * @param flags The flags to parse
      * @return The parsed system flags
      */
@@ -2519,7 +2519,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Parses specified {@link Flags flags} to user flags.
-     * 
+     *
      * @param flags The flags to parse
      * @return The parsed user flags
      */
@@ -2536,7 +2536,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Compares given object references being <code>null</code>.
-     * 
+     *
      * @param o1 The first object reference
      * @param o2 The second object reference
      * @return An {@link Integer} of <code>-1</code> if first reference is <code>null</code> but the second is not, an {@link Integer} of
@@ -2565,7 +2565,7 @@ public final class IMAPCommandsCollection {
      * <p>
      * <b>NOTE</b> folder's message cache is left in an inconsistent state cause its kept message references are not marked as expunged.
      * Therefore the folder should be closed afterwards to force message cache update.
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param uids - the message UIDs
      * @return <code>true</code> if everything went fine; otherwise <code>false</code>
@@ -2617,11 +2617,11 @@ public final class IMAPCommandsCollection {
      * Applies the IMAPv4 SELECT command on given folder and returns whether its permanent flags supports user-defined flags or not.
      * <p>
      * User flags are supported if untagged <i>PERMANENTFLAGS</i> response contains "\*", e.g.:
-     * 
+     *
      * <pre>
      * * OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]
      * </pre>
-     * 
+     *
      * @param imapFolder The IMAP folder to check
      * @return <code>true</code> if user flags are supported; otherwise <code>false</code>
      * @throws MessagingException If SELECT command fails
@@ -2685,7 +2685,7 @@ public final class IMAPCommandsCollection {
 
         /**
          * Gets the headers as a {@link String}
-         * 
+         *
          * @param fetchItem The appropriate fetch item representing headers
          * @return The headers as a {@link String} or <code>null</code>
          */
@@ -2733,7 +2733,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Searches the message whose {@link MessageHeaders#HDR_X_OX_MARKER} header is set to specified marker.
-     * 
+     *
      * @param marker The marker to lookup
      * @param numOfAppendedMessages The number of appended messages
      * @param imapFolder The IMAP folder in which to search the message
@@ -2825,7 +2825,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Finds corresponding UID of message whose Message-ID header matches given message ID.
-     * 
+     *
      * @param messageId The message ID
      * @param imapFolder The IMAP folder
      * @return The UID of matching message or <code>-1</code> if none found
@@ -2895,7 +2895,7 @@ public final class IMAPCommandsCollection {
     /**
      * First encodes given fullname by using <code>com.sun.mail.imap.protocol.BASE64MailboxEncoder.encode()</code> method. Afterwards
      * encoded string is checked if it needs quoting and escaping of the special characters '"' and '\'.
-     * 
+     *
      * @param fullname The folder fullname
      * @return Prepared fullname ready for being used in raw IMAP commands
      */
@@ -2928,7 +2928,7 @@ public final class IMAPCommandsCollection {
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response; throws an appropriate protocol exception if not present
      * in given <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
@@ -2945,7 +2945,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
@@ -2966,7 +2966,7 @@ public final class IMAPCommandsCollection {
     /**
      * Generates a new protocol exception according to following template:<br>
      * <code>&quot;Missing &lt;itemName&gt; item in FETCH response.&quot;</code>
-     * 
+     *
      * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
      * @return A new protocol exception with appropriate message.
      */
@@ -2977,7 +2977,7 @@ public final class IMAPCommandsCollection {
 
     /**
      * Generates a new protocol exception wrapping specified exception.
-     * 
+     *
      * @param e The exception to wrap
      * @param causeMessage An optional individual error message; leave to <code>null</code> to pass specified exception's message
      * @return A new protocol exception wrapping specified exception.

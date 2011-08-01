@@ -132,13 +132,13 @@ public class GroupRequest {
         timestamp = new Date(0);
         final GroupStorage groupStorage = GroupStorage.getInstance();
         final Date modifiedSince = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
-        
+
         final Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, session.getContext());
         final Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, session.getContext());
         final GroupWriter groupWriter = new GroupWriter();
         final JSONArray modified = new JSONArray();
         final JSONArray deleted= new JSONArray();
-        
+
         long lm = 0;
         for(final Group group: modifiedGroups){
             final JSONObject temp = new JSONObject();
@@ -154,11 +154,11 @@ public class GroupRequest {
         }
         timestamp = new Date(lm);
         final JSONObject retVal = new JSONObject();
-        
+
         retVal.put("new", modified);
         retVal.put("modified", modified);
         retVal.put("deleted", deleted);
-        
+
         return retVal;
     }
 
@@ -202,7 +202,7 @@ public class GroupRequest {
         if (jData.has(SearchFields.PATTERN)) {
             searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
         }
-        
+
         timestamp = new Date(0);
         final JSONArray jsonResponseArray = new JSONArray();
         final GroupStorage groupStorage = GroupStorage.getInstance();
@@ -226,7 +226,7 @@ public class GroupRequest {
 
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
-        
+
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         boolean loadMembers = false;
@@ -239,7 +239,7 @@ public class GroupRequest {
         	fields.add(field);
         }
 
-        
+
         final JSONArray jsonResponseArray = new JSONArray();
         final GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = null;

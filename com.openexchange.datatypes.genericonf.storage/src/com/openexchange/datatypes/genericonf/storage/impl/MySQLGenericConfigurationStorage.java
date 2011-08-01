@@ -70,13 +70,13 @@ import com.openexchange.groupware.impl.IDGenerator;
 
 /**
  * {@link MySQLGenericConfigurationStorage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MySQLGenericConfigurationStorage.class));
-    
+
     private DBProvider provider;
 
     public void setDBProvider(final DBProvider provider) {
@@ -86,7 +86,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     public int save(final Context ctx, final Map<String, Object> content) throws OXException {
         return save(null, ctx, content);
     }
-    
+
     public int save(final Connection con, final Context ctx, final Map<String, Object> content) throws OXException {
         return ((Integer) write(con, ctx, new TX() {
 
@@ -96,7 +96,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
 
                 final InsertIterator insertIterator = new InsertIterator();
                 insertIterator.prepareStatements(this);
-                
+
                 final int id = IDGenerator.getId(ctx, Types.GENERIC_CONFIGURATION, con);
                 final int cid = ctx.getContextId();
                 insertIterator.setIds(cid, id);
@@ -144,7 +144,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
         }
     }
-    
+
     public void fill(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         fill(null, ctx, id, content);
     }
@@ -178,7 +178,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             while (rs.next()) {
                 final String name = rs.getString("name");
                 final Object value = rs.getObject("value");
-                
+
                 content.put(name, value);
             }
         } catch (final SQLException x) {
@@ -199,12 +199,12 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
         }
     }
-    
-   
+
+
     public void update(final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         update(null, ctx, id, content);
     }
-    
+
     public void update(final Connection con, final Context ctx, final int id, final Map<String, Object> content) throws OXException {
         final Map<String, Object> original = new HashMap<String, Object>();
         fill(con, ctx, id, original);
@@ -218,7 +218,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                     updateIterator.prepareStatements(this);
                     updateIterator.setIds(ctx.getContextId(), id);
                     updateIterator.setOriginal(original);
-                    
+
                     Tools.iterate(content, updateIterator);
                 } finally {
                     updateIterator.close();
@@ -234,7 +234,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     public void delete(final Context ctx, final int id) throws OXException {
         delete(null, ctx, id);
     }
-    
+
     public void delete(final Connection con, final Context ctx, final int id) throws OXException {
 
         write(con, ctx, new TX() {
@@ -245,7 +245,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 clearTable("genconf_attributes_bools");
                 return null;
             }
-            
+
             private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
                 delete = prepare("DELETE FROM "+tablename+" WHERE cid = ? AND id = ?");
@@ -269,7 +269,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 clearTable("genconf_attributes_bools");
                 return null;
             }
-            
+
             private void clearTable(final String tablename) throws SQLException {
                 PreparedStatement delete = null;
                 delete = prepare("DELETE FROM "+tablename+" WHERE cid = ?");
@@ -284,16 +284,16 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
     public List<Integer> search(final Context ctx, final Map<String, Object> query) throws OXException {
         return search(null, ctx, query);
     }
-    
+
     public List<Integer> search(Connection con, final Context ctx, final Map<String, Object> query) throws OXException {
         final boolean handleOwnConnections = con == null;
-            
+
         final LinkedList<Integer> list = new LinkedList<Integer>();
         final StringBuilder builder = new StringBuilder("SELECT DISTINCT p.id FROM ");
         final SearchIterator whereIterator = new SearchIterator();
         Tools.iterate(query, whereIterator);
-        
-        
+
+
         builder.append(whereIterator.getFrom());
         builder.append(" WHERE ");
         builder.append("(");
@@ -309,11 +309,11 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             stmt = con.prepareStatement(builder.toString());
             whereIterator.setReplacements(stmt);
             rs = stmt.executeQuery();
-            
+
             while(rs.next()) {
                 list.add(I(rs.getInt(1)));
             }
-            
+
         } catch (final SQLException e) {
             throw GenericConfigStorageErrorMessage.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
@@ -326,7 +326,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
             if(rs != null) {
                 try {
-                    rs.close(); 
+                    rs.close();
                 } catch (final SQLException x) {
                     // Ignore
                 }
@@ -335,7 +335,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 provider.releaseReadConnection(ctx, con);
             }
         }
-        
+
         return list;
     }
 

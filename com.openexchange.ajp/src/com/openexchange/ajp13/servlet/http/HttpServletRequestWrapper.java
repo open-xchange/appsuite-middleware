@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * HttpServletRequestWrapper
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -109,7 +109,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}
-     * 
+     *
      * @param ajpRequestHandler The AJP request handler
      * @throws AJPv13Exception If instantiation fails
      */
@@ -118,6 +118,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.ajpRequestHandler = ajpRequestHandler;
     }
 
+    @Override
     public String getAuthType() {
         return authType;
     }
@@ -127,6 +128,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         System.arraycopy(cookies, 0, this.cookies, 0, cookies.length);
     }
 
+    @Override
     public Cookie[] getCookies() {
         if (cookies == null) {
             return null;
@@ -136,10 +138,12 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return retval;
     }
 
+    @Override
     public long getDateHeader(final String name) {
         return containsHeader(name) ? getDateValueFromHeaderField(getHeader(name)) : -1;
     }
 
+    @Override
     public int getIntHeader(final String name) {
         return containsHeader(name) ? Integer.parseInt(getHeader(name)) : -1;
     }
@@ -148,6 +152,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.method = method;
     }
 
+    @Override
     public String getMethod() {
         return method;
     }
@@ -156,6 +161,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.pathInfo = pathInfo;
     }
 
+    @Override
     public String getPathInfo() {
         return pathInfo;
     }
@@ -164,6 +170,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         pathTranslated = path_translated;
     }
 
+    @Override
     public String getPathTranslated() {
         return pathTranslated;
     }
@@ -172,6 +179,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.contextPath = contextPath;
     }
 
+    @Override
     public String getContextPath() {
         return contextPath;
     }
@@ -180,6 +188,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.queryString = queryString;
     }
 
+    @Override
     public String getQueryString() {
         return queryString;
     }
@@ -188,10 +197,12 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.remoteUser = remoteUser;
     }
 
+    @Override
     public String getRemoteUser() {
         return remoteUser;
     }
 
+    @Override
     public boolean isUserInRole(final String role) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
@@ -199,6 +210,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return false;
     }
 
+    @Override
     public java.security.Principal getUserPrincipal() {
         return userPrincipal;
     }
@@ -207,6 +219,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.userPrincipal = userPrincipal;
     }
 
+    @Override
     public String getRequestedSessionId() {
         return ajpRequestHandler.getHttpSessionCookie().getValue();
     }
@@ -215,6 +228,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.requestURI = requestURI;
     }
 
+    @Override
     public String getRequestURI() {
         return requestURI;
     }
@@ -229,6 +243,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      */
     private static final int PORT_HTTPS = 443;
 
+    @Override
     public StringBuffer getRequestURL() {
         if (null == requestURL) {
             final StringBuilder tmp = new StringBuilder(256);
@@ -259,6 +274,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         return new StringBuffer(requestURL);
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
@@ -267,6 +283,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.servletPath = servletPath;
     }
 
+    @Override
     public HttpSession getSession(final boolean create) {
         HttpSessionWrapper session = null;
         /*
@@ -328,14 +345,17 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         }
     }
 
+    @Override
     public HttpSession getSession() {
         return getSession(true);
     }
 
+    @Override
     public boolean isRequestedSessionIdValid() {
         return !HttpSessionManagement.isHttpSessionExpired((HttpSessionWrapper) getSession());
     }
 
+    @Override
     public boolean isRequestedSessionIdFromCookie() {
         return requestedSessionIdFromCookie;
     }
@@ -344,10 +364,12 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         this.requestedSessionIdFromCookie = requestedSessionIdFromCookie;
     }
 
+    @Override
     public boolean isRequestedSessionIdFromURL() {
         return requestedSessionIdFromURL;
     }
 
+    @Override
     public boolean isRequestedSessionIdFromUrl() {
         return requestedSessionIdFromURL;
     }

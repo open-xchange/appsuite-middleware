@@ -62,7 +62,7 @@ import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 
 /**
  * {@link ManagedFileImpl} - Implementation of a managed file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
@@ -85,7 +85,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     /**
      * Initializes a new {@link ManagedFileImpl}.
-     * 
+     *
      * @param id The unique ID
      * @param file The kept file
      */
@@ -97,6 +97,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         listeners = new LinkedBlockingQueue<FileRemovedListener>();
     }
 
+    @Override
     public void delete() {
         if (file.exists()) {
             while (!listeners.isEmpty()) {
@@ -112,6 +113,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         ManagedFileManagementImpl.getInstance().removeFromFiles(id);
     }
 
+    @Override
     public File getFile() {
         if (!file.exists()) {
             return null;
@@ -120,22 +122,27 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         return file;
     }
 
+    @Override
     public long getLastAccess() {
         return lastAccessed;
     }
 
+    @Override
     public boolean isDeleted() {
         return !file.exists();
     }
 
+    @Override
     public void touch() {
         lastAccessed = System.currentTimeMillis();
     }
 
+    @Override
     public String getID() {
         return id;
     }
 
+    @Override
     public InputStream getInputStream() throws OXException {
         if (!file.exists()) {
             return null;
@@ -150,30 +157,37 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         }
     }
 
+    @Override
     public void removeListener(final FileRemovedListener listener) {
         listeners.remove(listener);
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getFileName() {
         return fileName;
     }
 
+    @Override
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
+    @Override
     public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
+    @Override
     public long getSize() {
         return size;
     }
 
+    @Override
     public void setSize(final long size) {
         this.size = size;
     }

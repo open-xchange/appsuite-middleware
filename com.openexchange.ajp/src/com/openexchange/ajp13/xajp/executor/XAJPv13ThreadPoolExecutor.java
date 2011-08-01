@@ -64,7 +64,7 @@ public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Initializes a new {@link XAJPv13ThreadPoolExecutor}.
-     * 
+     *
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit The time unit for the <code>keepAliveTime</code> argument.
@@ -83,7 +83,7 @@ public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Initializes a new fixed-size {@link XAJPv13ThreadPoolExecutor}.
-     * 
+     *
      * @param corePoolSize The constant pool size.
      */
     public XAJPv13ThreadPoolExecutor(final int corePoolSize) {
@@ -124,7 +124,7 @@ public final class XAJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Increments/decrements the number of running AJP tasks.
-     * 
+     *
      * @param increment whether to increment or to decrement
      */
     private void changeNumberOfRunningAJPTasks(final boolean increment) {

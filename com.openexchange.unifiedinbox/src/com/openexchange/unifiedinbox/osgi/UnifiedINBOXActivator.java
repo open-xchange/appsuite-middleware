@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXActivator} - The {@link BundleActivator activator} for Unified INBOX bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXActivator extends DeferredActivator {

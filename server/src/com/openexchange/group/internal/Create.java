@@ -100,7 +100,7 @@ public final class Create {
 
     /**
      * Default constructor.
-     * @param user 
+     * @param user
      */
     public Create(final Context ctx, final User user, final Group group) {
         super();
@@ -190,12 +190,12 @@ public final class Create {
             storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }            
+        }
     }
 
     /**
      * Inform the rest of the system about the new group.
-     * @throws OXException 
+     * @throws OXException
      */
     private void propagate() throws OXException {
         final UserStorage storage = UserStorage.getInstance();

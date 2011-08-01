@@ -66,10 +66,12 @@ public class BASE64Encoding implements Encoding {
         super();
     }
 
+    @Override
     public String decode(final String text) throws IOException {
         return new String(Base64.decode(text), "ISO-8859-1");
     }
 
+    @Override
     public String encode(final String text) throws IOException {
         return Base64.encode(text.getBytes("ISO-8859-1"));
     }

@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 /**
  * {@link MailNotifyPushDeleteListener} - Delete listener for the push bundle.
  * Listens for user delete events and performs actions
- * 
+ *
  */
 public final class MailNotifyPushDeleteListener implements DeleteListener {
 

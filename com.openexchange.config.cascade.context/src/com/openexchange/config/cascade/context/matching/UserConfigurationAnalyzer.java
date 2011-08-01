@@ -64,10 +64,10 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UserConfigurationAnalyzer {
-    
+
     // Time for a little reflection magic
     private static final Map<String, Method> getMethods = new HashMap<String, Method>();
-    
+
     static {
         Method[] methods = UserConfiguration.class.getMethods();
         for (Method method : methods) {
@@ -76,14 +76,14 @@ public class UserConfigurationAnalyzer {
             }
         }
     }
-    
-    
+
+
     public Set<String> getTags(UserConfiguration configuration) {
         Set<String> retval = new HashSet<String>();
         for(Map.Entry<String, Method> entry : getMethods.entrySet()) {
             String name = entry.getKey();
             Method m = entry.getValue();
-            
+
             try {
                 Boolean active = (Boolean) m.invoke(configuration);
                 if(active) {
@@ -96,8 +96,8 @@ public class UserConfigurationAnalyzer {
             } catch (InvocationTargetException e) {
                 // Ignore
             }
-            
-            
+
+
         }
         return retval;
     }

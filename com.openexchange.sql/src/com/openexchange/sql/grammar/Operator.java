@@ -50,7 +50,7 @@
 package com.openexchange.sql.grammar;
 
 public abstract class Operator extends Expression {
-	private Expression expression;
+	private final Expression expression;
 
 	public Operator(Expression expression) {
 		super();

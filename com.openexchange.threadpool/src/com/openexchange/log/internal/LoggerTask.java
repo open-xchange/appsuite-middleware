@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link LoggerTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class LoggerTask extends AbstractTask<Object> {
@@ -69,25 +69,29 @@ final class LoggerTask extends AbstractTask<Object> {
      * The poison element.
      */
     private static final Loggable POISON = new Loggable() {
-        
+
         public Throwable getThrowable() {
             return null;
         }
-        
+
         public String getMessage() {
             return null;
         }
-        
+
         public Log getLog() {
             return null;
         }
-        
+
         public Level getLevel() {
             return null;
         }
 
         public StackTraceElement[] getCallerTrace() {
             return null;
+        }
+
+        public boolean isLoggable() {
+            return false;
         }
     };
 
@@ -97,7 +101,7 @@ final class LoggerTask extends AbstractTask<Object> {
 
     /**
      * Initializes a new {@link LoggerTask}.
-     * 
+     *
      * @param queue
      */
     protected LoggerTask(final BlockingQueue<Loggable> queue) {
@@ -149,7 +153,7 @@ final class LoggerTask extends AbstractTask<Object> {
                     for (final Loggable loggable : loggables) {
                         final Throwable t = loggable.getThrowable();
                         final Log log = loggable.getLog();
-                        final String message = loggable.getMessage();
+                        final String message = null == loggable.getMessage() ? "" : loggable.getMessage();
                         switch (loggable.getLevel()) {
                         case FATAL:
                             if (log.isFatalEnabled()) {
@@ -246,7 +250,11 @@ final class LoggerTask extends AbstractTask<Object> {
                         sb.append(')');
                     }
                 }
-                return sb.append("\n").append(message).toString();
+                sb.append("\n");
+                if (null != message) {
+                    sb.append(message);
+                }
+                return sb.toString();
             }
         }
         return message;

@@ -61,22 +61,22 @@ package com.openexchange.groupware.impl;
 public class InvalidCredentialsException extends Exception
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 2624260348811449217L;
 
 	public InvalidCredentialsException() {
 		super();
 	}
-	
+
 	public InvalidCredentialsException(final String message) {
 		super(message);
 	}
-	
+
 	public InvalidCredentialsException(final String message, final Exception exc) {
 		super(message, exc);
 	}
-	
+
 	public InvalidCredentialsException(final Exception exc) {
 		super(exc);
 	}

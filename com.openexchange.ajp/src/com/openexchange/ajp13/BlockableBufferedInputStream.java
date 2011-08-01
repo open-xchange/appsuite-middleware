@@ -60,7 +60,7 @@ import com.openexchange.concurrent.NonBlockingBlocker;
 
 /**
  * {@link BlockableBufferedInputStream} - A blockable version of {@link BufferedInputStream}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class BlockableBufferedInputStream extends BufferedInputStream implements Blockable {
@@ -87,7 +87,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * Initializes a new {@link BlockableBufferedInputStream}.
-     * 
+     *
      * @param in The underlying input stream.
      * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
      */
@@ -99,7 +99,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * Initializes a new {@link BlockableBufferedInputStream}.
-     * 
+     *
      * @param in The underlying input stream.
      * @param size The buffer size.
      * @param nonBlocking Whether a non-blocking or concurrent blocker will be used
@@ -111,7 +111,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * Clears the input buffer.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     public void clearBuffer() throws IOException {
@@ -145,10 +145,12 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
         }
     }
 
+    @Override
     public void block() {
         blocker.block();
     }
 
+    @Override
     public void unblock() {
         blocker.unblock();
     }
@@ -219,7 +221,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * See the general contract of the <code>read</code> method of <code>InputStream</code>.
-     * 
+     *
      * @return the next byte of data, or <code>-1</code> if the end of the stream is reached.
      * @exception IOException if an I/O error occurs.
      * @see java.io.FilterInputStream#in
@@ -281,7 +283,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
      * <code>-1</code>. Otherwise this method returns the number of bytes actually read.
      * <p>
      * Subclasses of this class are encouraged, but not required, to attempt to read as many bytes as possible in the same fashion.
-     * 
+     *
      * @param b destination buffer.
      * @param off offset at which to start storing bytes.
      * @param len maximum number of bytes to read.
@@ -322,7 +324,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * See the general contract of the <code>skip</code> method of <code>InputStream</code>.
-     * 
+     *
      * @param n the number of bytes to be skipped.
      * @return the actual number of bytes skipped.
      * @exception IOException if an I/O error occurs.
@@ -365,7 +367,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
      * The <code>available</code> method of <code>BufferedInputStream</code> returns the sum of the number of bytes remaining to be read in
      * the buffer (<code>count&nbsp;- pos</code>) and the result of calling the <code>available</code> method of the underlying input
      * stream.
-     * 
+     *
      * @return the number of bytes that can be read from this input stream without blocking.
      * @exception IOException if an I/O error occurs.
      * @see java.io.FilterInputStream#in
@@ -382,7 +384,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * See the general contract of the <code>mark</code> method of <code>InputStream</code>.
-     * 
+     *
      * @param readlimit the maximum limit of bytes that can be read before the mark position becomes invalid.
      * @see java.io.BufferedInputStream#reset()
      */
@@ -402,7 +404,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
      * <p>
      * If <code>markpos</code> is <code>-1</code> (no mark has been set or the mark has been invalidated), an <code>IOException</code> is
      * thrown. Otherwise, <code>pos</code> is set equal to <code>markpos</code>.
-     * 
+     *
      * @exception IOException if this stream has not been marked or if the mark has been invalidated.
      * @see java.io.BufferedInputStream#mark(int)
      */
@@ -423,7 +425,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
     /**
      * Tests if this input stream supports the <code>mark</code> and <code>reset</code> methods. The <code>markSupported</code> method of
      * <code>BufferedInputStream</code> returns <code>true</code>.
-     * 
+     *
      * @return a <code>boolean</code> indicating if this stream type supports the <code>mark</code> and <code>reset</code> methods.
      * @see java.io.InputStream#mark(int)
      * @see java.io.InputStream#reset()
@@ -435,7 +437,7 @@ public class BlockableBufferedInputStream extends BufferedInputStream implements
 
     /**
      * Closes this input stream and releases any system resources associated with the stream.
-     * 
+     *
      * @exception IOException if an I/O error occurs.
      */
     @Override

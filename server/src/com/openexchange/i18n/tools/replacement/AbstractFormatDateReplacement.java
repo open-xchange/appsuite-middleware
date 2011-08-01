@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 
 /**
  * {@link AbstractFormatDateReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractFormatDateReplacement extends AbstractDateReplacement {
 
@@ -76,7 +76,7 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 
     /**
      * Initializes a new AbstractFormatDateReplacement
-     * 
+     *
      * @param date The date
      * @param withTime <code>true</code> to include given date's time and time
      *            zone; otherwise <code>false</code>
@@ -89,7 +89,7 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
 
     /**
      * Initializes a new AbstractFormatDateReplacement
-     * 
+     *
      * @param date The date
      * @param withTime <code>true</code> to include given date's time and time
      *            zone; otherwise <code>false</code>
@@ -116,7 +116,7 @@ public abstract class AbstractFormatDateReplacement extends AbstractDateReplacem
     @Override
     public String getReplacement() {
         final String dateRepl = super.getReplacement();
-        
+
         final String result;
         if ((date == null || dateRepl.length() == 0) && fallback != null) {
             final StringHelper sh = new StringHelper(locale == null ? Locale.ENGLISH : locale);

@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -36,8 +36,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -58,11 +58,11 @@ public class GetChannelsRequest {
 
     /**
      * Gets the value of the groupID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getGroupID() {
         return groupID;
@@ -70,11 +70,11 @@ public class GetChannelsRequest {
 
     /**
      * Sets the value of the groupID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setGroupID(BigInteger value) {
         this.groupID = value;
@@ -82,11 +82,11 @@ public class GetChannelsRequest {
 
     /**
      * Gets the value of the enabled property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEnabled() {
         return enabled;
@@ -94,11 +94,11 @@ public class GetChannelsRequest {
 
     /**
      * Sets the value of the enabled property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEnabled(Boolean value) {
         this.enabled = value;
@@ -106,11 +106,11 @@ public class GetChannelsRequest {
 
     /**
      * Gets the value of the flow property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFlow() {
         return flow;
@@ -118,11 +118,11 @@ public class GetChannelsRequest {
 
     /**
      * Sets the value of the flow property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFlow(String value) {
         this.flow = value;
@@ -130,11 +130,11 @@ public class GetChannelsRequest {
 
     /**
      * Gets the value of the filter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFilter() {
         return filter;
@@ -142,11 +142,11 @@ public class GetChannelsRequest {
 
     /**
      * Sets the value of the filter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFilter(String value) {
         this.filter = value;

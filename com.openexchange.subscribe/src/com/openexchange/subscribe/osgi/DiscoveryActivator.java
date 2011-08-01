@@ -141,10 +141,10 @@ public class DiscoveryActivator implements BundleActivator {
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         executionRegistration = context.registerService(SubscriptionExecutionService.class.getName(), executor, null);
-        
+
         folderUpdaterRegistryRegistration = context.registerService(FolderUpdaterRegistry.class.getName(), executor, null);
-        
-        
+
+
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
         final SubscriptionSQLStorage storage = new SubscriptionSQLStorage(provider, genconfStorage, discoveryCollector);
@@ -153,17 +153,17 @@ public class DiscoveryActivator implements BundleActivator {
 
         AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
         AbstractSubscribeService.FOLDERS = folders;
-        
+
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
         listener.setStorageService(genconfStorage);
         listener.setDiscoveryService(discoveryCollector);
-        
-        context.registerService(DeleteListener.class.getName(), listener, null);        
-        
+
+        context.registerService(DeleteListener.class.getName(), listener, null);
+
         final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
         context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null);
         context.registerService(SecretMigrator.class.getName(), secretHandling, null);
-        
+
     }
 
     public void stop(final BundleContext context) throws Exception {

@@ -64,16 +64,18 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public class OverridableAttachmentListener implements AttachmentListener {
 
-    private SpecificServiceChooser<AttachmentListener> chooser;
+    private final SpecificServiceChooser<AttachmentListener> chooser;
 
     public OverridableAttachmentListener(SpecificServiceChooser<AttachmentListener> chooser) {
         this.chooser = chooser;
     }
 
+    @Override
     public long attached(AttachmentEvent e) throws Exception {
         return getDelegate(e).attached(e);
     }
 
+    @Override
     public long detached(AttachmentEvent e) throws Exception {
         return getDelegate(e).detached(e);
     }

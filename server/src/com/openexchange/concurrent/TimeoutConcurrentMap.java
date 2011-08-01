@@ -60,7 +60,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link TimeoutConcurrentMap} - A timed concurrent map.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimeoutConcurrentMap<K, V> {
@@ -81,7 +81,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Initializes a new {@link TimeoutConcurrentMap}.
-     * 
+     *
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @throws OXException If initialization fails due to missing {@link TimerService timer service}
      */
@@ -91,7 +91,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Initializes a new {@link TimeoutConcurrentMap}.
-     * 
+     *
      * @param shrinkerIntervalSeconds The shrinker interval in seconds
      * @param forceTimeout <code>true</code> to force initial time-out of contained elements even if they were "touched"; otherwise
      *            <code>false</code> to keep them alive as long as not timed-out
@@ -107,7 +107,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Checks if map is empty.
-     * 
+     *
      * @return <code>true</code> if map is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -117,7 +117,7 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Returns a set view of the keys contained in this map. The set is backed by the map, so changes to the map are reflected in the set,
      * and vice-versa.
-     * 
+     *
      * @return A set view of the keys contained in this map.
      */
     public Set<K> keySet() {
@@ -155,7 +155,7 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Acts like all values kept in this time-out map receive their time-out event. <br>
      * Furthermore the map is cleared.
-     * 
+     *
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
     public void timeoutAll() {
@@ -174,7 +174,7 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Acts like the value associated with specified key receives its time-out event. <br>
      * Furthermore the value is removed from map.
-     * 
+     *
      * @param key The value's key
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
      */
@@ -190,7 +190,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Puts specified key-value-pair into this time-out map with default time-out listener.
-     * 
+     *
      * @param key The value's key
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
@@ -203,7 +203,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Puts specified key-value-pair into this time-out map.
-     * 
+     *
      * @param key The value's key
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
@@ -225,7 +225,7 @@ public final class TimeoutConcurrentMap<K, V> {
     /**
      * Puts specified key-value-pair into this time-out map with default time-out listener only if the specified key is not already
      * associated with a value.
-     * 
+     *
      * @param key The value's key
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
@@ -238,7 +238,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Puts specified key-value-pair into this time-out map only if the specified key is not already associated with a value.
-     * 
+     *
      * @param key The value's key
      * @param value The value to put
      * @param timeToLiveSeconds The value's time-to-live seconds
@@ -260,7 +260,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Checks if this time-out map contains a mapping for specified key.
-     * 
+     *
      * @param key The key
      * @return <code>true</code> if this time-out map contains a mapping for specified key; otherwise <code>false</code>
      */
@@ -270,7 +270,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Gets the value associated with given key.
-     * 
+     *
      * @param key The key
      * @return The value associated with given key or <code>null</code>
      */
@@ -288,7 +288,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Removes the value associated with given key.
-     * 
+     *
      * @param key The key
      * @return The value associated with given key or <code>null</code>
      * @throws IllegalStateException If this time-out map was {@link #dispose() disposed} before
@@ -306,7 +306,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Gets the default listener triggered on element timeout.
-     * 
+     *
      * @return The default listener triggered on element timeout
      */
     public TimeoutListener<V> getDefaultTimeoutListener() {
@@ -315,7 +315,7 @@ public final class TimeoutConcurrentMap<K, V> {
 
     /**
      * Sets the default listener triggered on element timeout.
-     * 
+     *
      * @param defaultTimeoutListener The default listener triggered on element timeout
      */
     public void setDefaultTimeoutListener(final TimeoutListener<V> defaultTimeoutListener) {
@@ -363,6 +363,7 @@ public final class TimeoutConcurrentMap<K, V> {
             this.tmap = tmap;
         }
 
+        @Override
         public void run() {
             final long now = System.currentTimeMillis();
             for (final Iterator<ValueWrapper<V>> it = tmap.values().iterator(); it.hasNext();) {

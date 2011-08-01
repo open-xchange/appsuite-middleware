@@ -65,7 +65,7 @@ import com.openexchange.dataretention.csv.tasks.OutboundMailWriteTask;
 /**
  * {@link CSVWriter} - The CSV writer creating a write tasks for each call to its <tt>write()</tt> methods, which sequentially processes
  * those tasks in a separate {@link Executor executor}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVWriter {
@@ -74,7 +74,7 @@ public final class CSVWriter {
 
     /**
      * Gets the singleton instance of {@link CSVWriter}.
-     * 
+     *
      * @return The singleton instance of {@link CSVWriter}.
      */
     public static CSVWriter getInstance() {
@@ -109,7 +109,7 @@ public final class CSVWriter {
 
         /**
          * Creates a new instance of {@link AbstractWriteTask}.
-         * 
+         *
          * @param retentionData The retention data passed to created instance
          * @param versionNumber The version number; e.g. <code>1</code>
          * @param sequenceNumber The task's unique sequence number
@@ -154,7 +154,7 @@ public final class CSVWriter {
 
         /**
          * Gets this transaction type's character.
-         * 
+         *
          * @return The character.
          */
         public char getChar() {
@@ -163,7 +163,7 @@ public final class CSVWriter {
 
         /**
          * Creates appropriate write task.
-         * 
+         *
          * @param retentionData The retention data
          * @param versionNumber The version number; e.g. <code>1</code>
          * @param sequenceNumber The unique task's sequence number
@@ -181,7 +181,7 @@ public final class CSVWriter {
 
     /**
      * Initializes a new {@link CSVWriter}.
-     * 
+     *
      * @param directory The parent directory keeping the CSV file
      */
     private CSVWriter(final File directory) {
@@ -200,7 +200,7 @@ public final class CSVWriter {
 
     /**
      * Writes specified retention data as a CSV line with version number set to configured value.
-     * 
+     *
      * @param retentionData The retention data
      * @param transactionType The transaction type
      */
@@ -210,7 +210,7 @@ public final class CSVWriter {
 
     /**
      * Writes specified retention data as a CSV line.
-     * 
+     *
      * @param retentionData The retention data
      * @param versionNumber The version number; e.g. <code>1</code>
      * @param transactionType The transaction type
@@ -221,7 +221,7 @@ public final class CSVWriter {
 
     /**
      * Stops this CSV writer.
-     * 
+     *
      * @throws InterruptedException If awaiting CSV writer's termination is interrupted
      */
     public void stop() throws InterruptedException {

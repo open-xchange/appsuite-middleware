@@ -57,7 +57,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link UserConfigurationStorageInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserConfigurationStorageInit implements Initialization {
@@ -97,7 +97,7 @@ public final class UserConfigurationStorageInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link UserConfigurationStorageInit}
-     * 
+     *
      * @return The singleton instance of {@link UserConfigurationStorageInit}
      */
     public static UserConfigurationStorageInit getInstance() {
@@ -123,6 +123,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         return null;
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
@@ -152,6 +153,7 @@ public final class UserConfigurationStorageInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");

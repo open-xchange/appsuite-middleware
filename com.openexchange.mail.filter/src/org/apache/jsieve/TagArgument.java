@@ -24,15 +24,15 @@ import org.apache.jsieve.parser.generated.Token;
 
 /**
  * <p>A parsed representation of an RFC3028 TAG argument...</p>
- * 
+ *
  * <code>tag = ":" identifier</code>
  */
 public class TagArgument implements Argument
 {
-    
+
     /**
      * The Tag
-     */ 
+     */
     private String fieldTag;
 
     /**
@@ -42,7 +42,7 @@ public class TagArgument implements Argument
     {
         super();
     }
-    
+
     /**
      * Constructor for TagArgument.
      * @param token
@@ -61,7 +61,7 @@ public class TagArgument implements Argument
     {
         setTag(token.image);
     }
-    
+
 
     /**
      * Returns the tag.
@@ -92,6 +92,7 @@ public class TagArgument implements Argument
     /**
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString()
     {
         return (getValue() == null) ? "null" : getValue().toString();

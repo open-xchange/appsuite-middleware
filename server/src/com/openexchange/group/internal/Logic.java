@@ -73,7 +73,7 @@ public final class Logic {
     }
 
     /**
-     * 
+     *
      * @param group
      * @throws OXException
      */
@@ -103,7 +103,7 @@ public final class Logic {
     }
 
     /**
-     * 
+     *
      * @param group
      * @throws OXException
      */

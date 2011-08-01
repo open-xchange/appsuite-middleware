@@ -90,7 +90,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends AbstractMailAction {
@@ -101,7 +101,7 @@ public final class GetAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services
      */
     public GetAction(final ServiceLookup services) {
@@ -340,6 +340,7 @@ public final class GetAction extends AbstractMailAction {
                                 final MailServletInterface msi = mailInterface;
                                 final Callable<Object> seenCallable = new Callable<Object>() {
 
+                                    @Override
                                     public Object call() throws Exception {
                                         try {
                                             msi.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, true);

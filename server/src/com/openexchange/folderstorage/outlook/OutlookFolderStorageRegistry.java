@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link OutlookFolderStorageRegistry} - MS Outlook storage's registry for real folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorageRegistry implements FolderStorageDiscoverer {
@@ -74,7 +74,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Gets the {@link OutlookFolderStorageRegistry} instance.
-     * 
+     *
      * @return The {@link OutlookFolderStorageRegistry} instance
      */
     public static OutlookFolderStorageRegistry getInstance() {
@@ -103,7 +103,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Associates specified folder storage to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to add
      * @return <code>true</code> If registration was successful; otherwise <code>false</code>
@@ -155,6 +155,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return true;
     }
 
+    @Override
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -183,7 +184,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Gets the dedicated folder storage for specified tree-folder-pair.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @return The dedicated folder storage for specified tree-folder-pair or <code>null</code>
@@ -204,6 +205,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return null;
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -232,6 +234,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return l.toArray(new FolderStorage[l.size()]);
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -254,6 +257,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
         if (!genStorages.isEmpty()) {
             /*
@@ -276,6 +280,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         final FolderStorage folderStorage = contentTypes.get(contentType);
         if (null == folderStorage) {
@@ -289,7 +294,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
 
     /**
      * Removes specified folder storage bound to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to remove
      */

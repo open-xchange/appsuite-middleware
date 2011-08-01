@@ -63,12 +63,12 @@ public class PasswordMechanism {
 
     /**
      * Utility method to encode given <code>newPassword</code> according to specified encoding mechanism
-     * 
+     *
      * @param mech The encoding mechanism; currently supported values: <code>&quot;{CRYPT}&quot;</code> and <code>&quot;{SHA}&quot;</code>
      * @param newPassword The new password to encode
      * @return The encoded password
-     * @throws UnsupportedEncodingException 
-     * @throws NoSuchAlgorithmException 
+     * @throws UnsupportedEncodingException
+     * @throws NoSuchAlgorithmException
      * @throws OXException If encoding the new password fails
      */
     public static final String getEncodedPassword(final String mech, final String newPassword) throws UnsupportedEncodingException, NoSuchAlgorithmException {

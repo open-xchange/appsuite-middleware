@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MemorizerTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemorizerTask {
@@ -66,7 +66,7 @@ public final class MemorizerTask {
 
     /**
      * Initializes a new {@link MemorizerTask}.
-     * 
+     *
      * @param address The addresses to memorize
      * @param session The associated session
      */
@@ -78,7 +78,7 @@ public final class MemorizerTask {
 
     /**
      * Gets the addresses
-     * 
+     *
      * @return The addresses
      */
     public List<InternetAddress> getAddresses() {
@@ -87,7 +87,7 @@ public final class MemorizerTask {
 
     /**
      * Gets the session
-     * 
+     *
      * @return The session
      */
     public Session getSession() {

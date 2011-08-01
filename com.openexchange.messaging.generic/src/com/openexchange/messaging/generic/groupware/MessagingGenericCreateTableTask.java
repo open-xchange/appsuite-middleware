@@ -83,18 +83,18 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
     }
 
     private String getMessagingAccountTable() {
-        return "CREATE TABLE messagingAccount (" + 
-        " cid INT4 unsigned NOT NULL," + 
-        " user INT4 unsigned NOT NULL," + 
-        " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " account INT4 unsigned NOT NULL," + 
-        " confId INT4 unsigned NOT NULL," + 
-        " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " PRIMARY KEY (cid, user, serviceId, account)," + 
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        return "CREATE TABLE messagingAccount (" +
+        " cid INT4 unsigned NOT NULL," +
+        " user INT4 unsigned NOT NULL," +
+        " serviceId VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " account INT4 unsigned NOT NULL," +
+        " confId INT4 unsigned NOT NULL," +
+        " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " PRIMARY KEY (cid, user, serviceId, account)," +
+        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
     @Override
     protected String[] getCreateStatements() {
         return new String[] { getMessagingAccountTable() };

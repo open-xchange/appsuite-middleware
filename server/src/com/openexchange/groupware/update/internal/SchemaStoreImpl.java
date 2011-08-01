@@ -72,7 +72,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * Implements loading and storing the schema version information.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

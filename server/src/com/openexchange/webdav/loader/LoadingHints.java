@@ -66,7 +66,7 @@ public class LoadingHints {
 	public void setProps(final Property which) {
 		this.property = which;
 	}
-	
+
 	public Property getProps(){
 		return property;
 	}
@@ -74,7 +74,7 @@ public class LoadingHints {
 	public void addProperty(final String namespaceURI, final String name) {
 		properties.add(new WebdavProperty(namespaceURI, name));
 	}
-	
+
 	public Set<WebdavProperty> getPropterties(){
 		return properties;
 	}
@@ -82,7 +82,7 @@ public class LoadingHints {
 	public void setDepth(final int depth) {
 		this.depth = depth;
 	}
-	
+
 	public int getDepth(){
 		return depth;
 	}
@@ -90,7 +90,7 @@ public class LoadingHints {
 	public void setUrl(final WebdavPath url) {
 		this.url = url;
 	}
-	
+
 	public WebdavPath getUrl(){
 		return url;
 	}
@@ -98,9 +98,9 @@ public class LoadingHints {
 	public void loadLocks(final boolean b) {
 		this.loadLocks = b;
 	}
-	
+
 	public boolean getLoadLocks(){
 		return loadLocks;
 	}
-	
+
 }

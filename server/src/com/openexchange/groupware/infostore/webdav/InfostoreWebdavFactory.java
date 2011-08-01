@@ -209,10 +209,12 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWebdavFactory.class));
 
 
+    @Override
     public Protocol getProtocol() {
         return PROTOCOL;
     }
 
+    @Override
     public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
         final State s = state.get();
         if(s.folders.containsKey(url)) {
@@ -245,6 +247,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return (WebdavCollection) res;
     }
 
+    @Override
     public WebdavResource resolveResource(final WebdavPath url) throws OXException {
         final State s = state.get();
         if(s.resources.containsKey(url)) {
@@ -279,7 +282,7 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         }
     }
 
-   
+
 
     private Set<TransactionAware> services(){
         return this.services;
@@ -335,10 +338,12 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         return collection;
     }
 
+    @Override
     public void load(final LoadingHints loading) {
         load(Arrays.asList(loading));
     }
 
+    @Override
     public void load(final List<LoadingHints> hints) {
         // TODO Auto-generated method stub
 

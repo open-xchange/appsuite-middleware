@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetStructureAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetStructureAction extends AbstractMailAction {
@@ -75,7 +75,7 @@ public final class GetStructureAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetStructureAction}.
-     * 
+     *
      * @param services
      */
     public GetStructureAction(final ServiceLookup services) {

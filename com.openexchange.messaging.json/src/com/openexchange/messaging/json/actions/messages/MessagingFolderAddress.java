@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingExceptionCodes;
 
 /**
  * {@link MessagingFolderAddress}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagingFolderAddress {

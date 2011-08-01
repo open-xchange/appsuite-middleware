@@ -174,7 +174,7 @@ public class TaskRequest extends CalendarRequest {
         taskParser.parse(task, jsonobject);
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
-        
+
         convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
         sqlinterface.insertTaskObject(task);
         timestamp = task.getLastModified();
@@ -200,7 +200,7 @@ public class TaskRequest extends CalendarRequest {
         task.setObjectID(id);
 
         convertExternalToInternalUsersIfPossible(task, session.getContext(), LOG);
-        
+
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         sqlinterface.updateTaskObject(task, inFolder, timestamp);
         timestamp = task.getLastModified();

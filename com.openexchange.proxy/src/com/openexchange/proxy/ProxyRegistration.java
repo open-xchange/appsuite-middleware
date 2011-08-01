@@ -56,7 +56,7 @@ import java.util.Collections;
 
 /**
  * {@link ProxyRegistration} - A registration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyRegistration {
@@ -69,7 +69,7 @@ public final class ProxyRegistration {
 
     /**
      * Initializes a new {@link ProxyRegistration}.
-     * 
+     *
      * @param url The URL
      * @param sessionId The identifier of the session associated with this registration
      * @param restrictions The restrictions
@@ -83,7 +83,7 @@ public final class ProxyRegistration {
 
     /**
      * Initializes a new {@link ProxyRegistration}.
-     * 
+     *
      * @param url The URL
      * @param sessionId The identifier of the session associated with this registration
      * @param restrictions The restrictions
@@ -98,7 +98,7 @@ public final class ProxyRegistration {
 
     /**
      * Gets the URL to proxy.
-     * 
+     *
      * @return The URL
      */
     public URL getURL() {
@@ -107,7 +107,7 @@ public final class ProxyRegistration {
 
     /**
      * Gets the identifier of the session associated with this registration.
-     * 
+     *
      * @return The identifier of the session associated with this registration
      */
     public String getSessionId() {
@@ -116,7 +116,7 @@ public final class ProxyRegistration {
 
     /**
      * Gets the restrictions.
-     * 
+     *
      * @return The restrictions
      */
     public Collection<Restriction> getRestrictions() {

@@ -63,7 +63,7 @@ import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
 
 /**
  * {@link DefaultSpamHandlerActivator} - {@link BundleActivator Activator} for default spam handler bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultSpamHandlerActivator extends DeferredActivator {

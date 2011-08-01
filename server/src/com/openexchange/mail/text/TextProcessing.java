@@ -52,7 +52,7 @@ package com.openexchange.mail.text;
 
 /**
  * {@link TextProcessing} - Various methods for text processing
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextProcessing {
@@ -171,7 +171,7 @@ public final class TextProcessing {
      * excluded.
      * <p>
      * If parameter <code>isHtml</code> is set to <code>true</code> the content is returned unchanged.
-     * 
+     *
      * @param content The plain text content to fold
      * @param linewrap The number of characters which may fit into a line
      * @return The line-folded content

@@ -60,11 +60,13 @@ import com.openexchange.server.Initialization;
 public class LinkInit implements Initialization {
     private CalendarListener copyLinks = null;
 
+    @Override
     public void start() throws OXException {
         copyLinks = new CopyLinksForChangeExceptions(new RdbLinkSQLInterface());
         CalendarCallbacks.getInstance().addListener(copyLinks);
     }
 
+    @Override
     public void stop() throws OXException {
         CalendarCallbacks.getInstance().removeListener(copyLinks);
     }

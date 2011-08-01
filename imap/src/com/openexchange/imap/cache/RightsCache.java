@@ -61,7 +61,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link RightsCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RightsCache {
@@ -75,7 +75,7 @@ public final class RightsCache {
 
     /**
      * Gets cached <code>MYRIGHTS</code> command invoked on given IMAP folder
-     * 
+     *
      * @param f The IMAP folder
      * @param load Whether <code>MYRIGHTS</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -101,7 +101,7 @@ public final class RightsCache {
 
     /**
      * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
-     * 
+     *
      * @param f The IMAP folder
      * @param session The session providing the session-bound cache
      * @param accontId The account ID
@@ -112,7 +112,7 @@ public final class RightsCache {
 
     /**
      * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param session The session providing the session-bound cache
      * @param accontId The account ID

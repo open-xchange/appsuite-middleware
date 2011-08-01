@@ -146,7 +146,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * TODO: userPassword had been initialized with "x" in the past. This, however
      * does not work since we now update the password of a user in {@link RdbUserStorage}
-     * 
+     *
      * OLD comment:
      * The hashed and base64 encoded password. The default value is
      * <code>"x"</code> to cause matches fail.
@@ -212,6 +212,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getUserPassword() {
         return userPassword;
     }
@@ -227,6 +228,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return id;
     }
@@ -242,6 +244,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isMailEnabled() {
         return mailEnabled;
     }
@@ -257,6 +260,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getShadowLastChange() {
         return shadowLastChange;
     }
@@ -288,6 +292,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getImapServer() {
         return imapServer;
     }
@@ -303,6 +308,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSmtpServer() {
         return smtpServer;
     }
@@ -318,6 +324,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMailDomain() {
         return mailDomain;
     }
@@ -333,6 +340,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getGivenName() {
         return givenName;
     }
@@ -348,6 +356,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSurname() {
         return surname;
     }
@@ -363,6 +372,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getMail() {
         return mail;
     }
@@ -378,6 +388,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -393,6 +404,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getTimeZone() {
         return timeZone;
     }
@@ -412,6 +424,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPreferredLanguage() {
         return preferredLanguage;
     }
@@ -419,6 +432,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Locale getLocale() {
         return locale;
     }
@@ -426,6 +440,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int[] getGroups() {
         return groups.clone();
     }
@@ -441,6 +456,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getContactId() {
         return contactId;
     }
@@ -473,6 +489,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * @return the imapLogin
      */
+    @Override
     public String getImapLogin() {
         return imapLogin;
     }
@@ -486,29 +503,31 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Gets this user's aliases.
-     * 
+     *
      * @return The aliases
      */
+    @Override
     public String[] getAliases() {
         return aliases;
     }
 
     /**
      * Sets this user's aliases.
-     * 
+     *
      * @param aliases The aliases to set
      */
     public void setAliases(final String[] aliases) {
         this.aliases = aliases;
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return attributes;
     }
 
     /**
-     * Sets the user attributes as an unmodifiable map. 
-     * 
+     * Sets the user attributes as an unmodifiable map.
+     *
      * @param attributes The attributes to set as an unmodifiable map
      */
     public void setAttributes(final Map<String, Set<String>> attributes) {
@@ -518,6 +537,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getPasswordMech() {
         return passwordMech;
     }
@@ -525,6 +545,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLoginInfo() {
         return loginInfo;
     }

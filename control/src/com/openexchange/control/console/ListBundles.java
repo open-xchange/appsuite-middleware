@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link ListBundles} - The console handler for <code>&quot;listbundles&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ListBundles extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class ListBundles extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link ListBundles} with specified arguments and performs {@link #listBundles() list bundles}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public ListBundles(final String args[]) {

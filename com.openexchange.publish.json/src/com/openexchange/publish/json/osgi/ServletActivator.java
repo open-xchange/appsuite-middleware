@@ -77,9 +77,9 @@ public class ServletActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, PublicationTargetDiscoveryService.class, ConfigurationService.class };
 
     List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
-    
+
     private final List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -96,24 +96,24 @@ public class ServletActivator extends DeferredActivator {
         if(discovery == null) {
             return;
         }
-        
+
         final ConfigurationService config = getService(ConfigurationService.class);
         if(config == null){
         	return;
         }
-        
+
         final PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
         final PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
-        
+
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationHandlerFactory, null));
         serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), publicationTargetHandlerFactory, null));
-        
+
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
-        
+
         servletRegistrations.add(new SessionServletRegistration(context, new PublicationTargetServlet(), TARGET_ALIAS));
         servletRegistrations.add(new SessionServletRegistration(context, new PublicationServlet(), PUB_ALIAS));
-        
+
         for (final SessionServletRegistration reg : servletRegistrations) {
             reg.open();
         }
@@ -127,12 +127,12 @@ public class ServletActivator extends DeferredActivator {
     private void unregister() {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
-        
+
         for(final ServiceRegistration registration : serviceRegistrations) {
             registration.unregister();
         }
         serviceRegistrations.clear();
-        
+
         for (final SessionServletRegistration reg : servletRegistrations) {
             reg.close();
         }

@@ -78,7 +78,7 @@ public abstract class SearchObject {
 
     private int folder = NO_FOLDER;
 
-    private Set<Integer> folders = new HashSet<Integer>();
+    private final Set<Integer> folders = new HashSet<Integer>();
 
     private String pattern = NO_PATTERN;
 
@@ -118,19 +118,19 @@ public abstract class SearchObject {
     public void addFolder(final int folder) {
         folders.add(I(folder));
     }
-    
+
     public void setFolders(final int...folder) {
         folders.clear();
         for (int folderId : folder) {
             folders.add(I(folderId));
         }
     }
-    
+
     public void setFolders(List<Integer> folder) {
         folders.clear();
         folders.addAll(folder);
     }
-    
+
     public void clearFolders() {
         folders.clear();
     }

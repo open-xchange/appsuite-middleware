@@ -54,7 +54,7 @@ import com.openexchange.mail.MailListField;
 
 /**
  * {@link SearchUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchUtility {
@@ -78,7 +78,7 @@ public final class SearchUtility {
      * <li>{@link MailListField#SUBJECT}</li>
      * </ul>
      * All other are mapped to an instance of {@link BodyTerm} to search for certain pattern inside a mail's text body.
-     * 
+     *
      * @param searchFields The search fields as an array of <code>int</code>
      * @param patterns The search patterns
      * @param linkWithOR Whether to link with a logical OR; otherwise to link with a logical AND

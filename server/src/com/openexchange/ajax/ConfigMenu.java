@@ -80,7 +80,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public class ConfigMenu extends SessionServlet {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigMenu.class));
-    
+
     /**
      * Size for the read buffer.
      */

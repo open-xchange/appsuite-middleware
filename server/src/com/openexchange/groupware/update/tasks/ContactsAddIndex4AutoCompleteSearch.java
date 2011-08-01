@@ -66,7 +66,7 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * {@link ContactsAddIndex4AutoCompleteSearch} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
  * search.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
@@ -77,14 +77,17 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 74;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

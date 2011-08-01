@@ -75,14 +75,17 @@ public class TaskCreateUserSettingServer implements UpdateTask {
             "FOREIGN KEY(cid, user) REFERENCES user(cid, id)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
+    @Override
     public int addedWithVersion() {
         return 27;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         try {

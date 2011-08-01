@@ -8,7 +8,9 @@ public class AuthListFiles extends NtlmAuthenticator {
         int c;
         StringBuffer sb = new StringBuffer();
         while(( c = System.in.read() ) != '\n' ) {
-            if( c == -1 ) return "";
+            if( c == -1 ) {
+                return "";
+            }
             sb.append( (char)c );
         }
         return sb.toString().trim();
@@ -27,6 +29,7 @@ public class AuthListFiles extends NtlmAuthenticator {
         System.out.println();
     }
 
+    @Override
     protected NtlmPasswordAuthentication getNtlmPasswordAuthentication() {
         System.out.println( getRequestingException().getMessage() + " for " + getRequestingURL() );
         try {

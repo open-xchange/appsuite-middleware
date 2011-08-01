@@ -66,18 +66,18 @@ import com.openexchange.tools.Collections.SmartIntArray;
 /**
  * {@link OXFolderDowngradeSQL} - Provides several SQL commands in order to
  * delete unused user folder data remaining from a former downgrade.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class OXFolderDowngradeSQL {
 
 	/**
 	 * {@link Permission} - Simple container for a permission.
-	 * 
+	 *
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
 	 *         Betten</a>
-	 * 
+	 *
 	 */
 	private static final class Permission {
 
@@ -99,7 +99,7 @@ public final class OXFolderDowngradeSQL {
 
 		/**
 		 * Initializes a new {@link Permission}
-		 * 
+		 *
 		 * @param entity
 		 *            The entity ID
 		 * @param fuid
@@ -132,7 +132,7 @@ public final class OXFolderDowngradeSQL {
 
 		/**
 		 * Initializes a new {@link Permission} from specified permission
-		 * 
+		 *
 		 * @param The
 		 *            entity ID
 		 * @param src
@@ -152,7 +152,7 @@ public final class OXFolderDowngradeSQL {
 
 		/**
 		 * Initializes a new {@link Permission} from specified permission
-		 * 
+		 *
 		 * @param The
 		 *            entity ID
 		 * @param fuid
@@ -205,7 +205,7 @@ public final class OXFolderDowngradeSQL {
 
 	/**
 	 * Drops all system permissions from public folders of given module
-	 * 
+	 *
 	 * @param module
 	 *            The module
 	 * @param entity
@@ -246,7 +246,7 @@ public final class OXFolderDowngradeSQL {
 	/**
 	 * Gets all user's private folders' IDs of specified module except the
 	 * module's default folder.
-	 * 
+	 *
 	 * @param module
 	 *            The module
 	 * @param owner
@@ -287,7 +287,7 @@ public final class OXFolderDowngradeSQL {
 
 	/**
 	 * Deletes specified folders' permissions from specified permission table.
-	 * 
+	 *
 	 * @param fuids
 	 *            The folder IDs
 	 * @param cid
@@ -322,7 +322,7 @@ public final class OXFolderDowngradeSQL {
 
 	/**
 	 * Deletes specified folders from specified folder table.
-	 * 
+	 *
 	 * @param fuids
 	 *            The folder IDs
 	 * @param cid
@@ -364,7 +364,7 @@ public final class OXFolderDowngradeSQL {
 	/**
 	 * Determines the module's public folders' IDs which hold a permission entry
 	 * for specified entity
-	 * 
+	 *
 	 * @param entity
 	 *            The entity
 	 * @param module
@@ -417,7 +417,7 @@ public final class OXFolderDowngradeSQL {
 	/**
 	 * Removes all shared permissions from module's default folder for specified
 	 * entity
-	 * 
+	 *
 	 * @param entity
 	 *            The entity
 	 * @param module
@@ -473,7 +473,7 @@ public final class OXFolderDowngradeSQL {
 
 	/**
 	 * Handles the affected public folder's permissions
-	 * 
+	 *
 	 * @param entity
 	 *            The entity ID
 	 * @param fuid
@@ -648,7 +648,7 @@ public final class OXFolderDowngradeSQL {
 	/**
 	 * Removes all shared permissions bound to given entity's private folders
 	 * and all shared permissions assigned to given entity by private folders
-	 * 
+	 *
 	 * @param entity
 	 *            The entity ID
 	 * @param cid
@@ -731,7 +731,7 @@ public final class OXFolderDowngradeSQL {
 
 	/**
 	 * Gathers all subfolders below default infostore folder
-	 * 
+	 *
 	 * @param entity
 	 *            The entity
 	 * @param cid

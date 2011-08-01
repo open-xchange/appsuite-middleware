@@ -58,7 +58,7 @@ public class Column {
 
     public final String name;
     public final String definition;
-    
+
     public Column(String name, String definition) {
         super();
         this.name = name;

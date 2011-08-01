@@ -65,18 +65,17 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-import junit.framework.TestCase;
 
 /**
  * {@link SubscriptionExecutionServiceImplTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionExecutionServiceImplTest extends TestCase {
 
 
     /**
-     * 
+     *
      */
     private static final String SOURCE_NAME = "com.openexchange.subscribe.test1";
     private static final String SOURCE_NAME2 = "com.openexchange.subscribe.test2";
@@ -119,15 +118,15 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
     public void testShouldTransferDataCorrectly() throws OXException {
         executionService.executeSubscription(SOURCE_NAME, sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
-        
+
         // correct subscription loaded?
         assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContext().getContextId());
         assertEquals("Wrong id", 12, subscribeService.getSubscriptionIDs().get(0).getId());
-        
+
         // correct data saved?
         assertEquals("Wrong data saved", Arrays.asList("entry1", "entry2", "entry3"), simFolderUpdaterService.getData());
     }
-    
+
     /**
      * @param simContext
      * @return
@@ -144,11 +143,11 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
     public void testShouldGuessCorrectSubscriptionSource() throws OXException {
         executionService.executeSubscription(sessionForContext(new SimContext(2)), 12);
         assertEquals("Wrong source used", SOURCE_NAME, discovery.getLoadedSources().get(0));
-        
+
         // correct subscription loaded?
         assertEquals("Wrong context", 2, subscribeService.getSubscriptionIDs().get(0).getContext().getContextId());
         assertEquals("Wrong id", 12, subscribeService.getSubscriptionIDs().get(0).getId());
-        
+
         // correct data saved?
         assertEquals("Wrong data saved", Arrays.asList("entry1", "entry2", "entry3"), simFolderUpdaterService.getData());
     }
@@ -157,12 +156,12 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         //fail("Not yet implemented");
         assertTrue(true);
     }
-    
-    public void testShouldReturnSingleUpdaterIfItIsTheOnlyOnePresent() throws OXException{                        
+
+    public void testShouldReturnSingleUpdaterIfItIsTheOnlyOnePresent() throws OXException{
         assertEquals("The first Updater should be returned", simFolderUpdaterService,executionService.getFolderUpdater(subscription));
     }
-    
-    public void testShouldReturnSingleUpdaterIfThereIsOnlyOneSubscriptionOnTheFolder() throws OXException{                
+
+    public void testShouldReturnSingleUpdaterIfThereIsOnlyOneSubscriptionOnTheFolder() throws OXException{
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(false);
@@ -175,7 +174,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         assertEquals("The first Updater should be returned", simFolderUpdaterService, executionService.getFolderUpdater(subscription));
     }
 
-    public void testShouldReturnMultipleUpdaterIfThereAreTwoSubscriptionsOnTheFolder() throws OXException{  
+    public void testShouldReturnMultipleUpdaterIfThereAreTwoSubscriptionsOnTheFolder() throws OXException{
         final Subscription subscription2 = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(13);
@@ -183,7 +182,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
         subscriptions.add(subscription);
         subscriptions.add(subscription2);
-        subscribeService.setSubscriptions(subscriptions);        
+        subscribeService.setSubscriptions(subscriptions);
         final SimFolderUpdaterService simFolderUpdaterService2 = new SimFolderUpdaterService();
         simFolderUpdaterService2.setHandles(true);
         simFolderUpdaterService2.setUsesMultipleStrategy(true);
@@ -195,8 +194,8 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         };
         assertEquals("The second Updater should be returned", simFolderUpdaterService2, executionService.getFolderUpdater(subscription));
     }
-    
-    public void testShouldReturnSingleUpdaterIfThereAreTwoSubscriptionsOnTheFolderButNoMultipleStrategyIsAvailable() throws OXException{  
+
+    public void testShouldReturnSingleUpdaterIfThereAreTwoSubscriptionsOnTheFolderButNoMultipleStrategyIsAvailable() throws OXException{
         final Subscription subscription2 = new Subscription();
         subscription.setContext(new SimContext(2));
         subscription.setId(13);
@@ -204,7 +203,7 @@ public class SubscriptionExecutionServiceImplTest extends TestCase {
         final ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
         subscriptions.add(subscription);
         subscriptions.add(subscription2);
-        subscribeService.setSubscriptions(subscriptions);        
+        subscribeService.setSubscriptions(subscriptions);
         executionService = new SubscriptionExecutionServiceImpl(discovery, Arrays.asList((FolderUpdaterService)simFolderUpdaterService), new SimContextService()) {
             @Override
             protected FolderObject getFolder(final TargetFolderSession subscriptionSession, final int contextId, final int folderId) throws OXException {

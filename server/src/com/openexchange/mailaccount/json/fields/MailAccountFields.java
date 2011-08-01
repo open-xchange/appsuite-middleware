@@ -51,7 +51,7 @@ package com.openexchange.mailaccount.json.fields;
 
 /**
  * {@link MailAccountFields} - Provides constants for mail account JSON fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountFields {
@@ -91,6 +91,8 @@ public final class MailAccountFields {
     public static final String PRIMARY_ADDRESS = "primary_address";
 
     public static final String PERSONAL = "personal";
+
+    public static final String REPLY_TO = "reply_to";
 
     public static final String SPAM_HANDLER = "spam_handler";
 

@@ -57,14 +57,14 @@ import java.util.concurrent.TimeUnit;
  * <tt>CompletionFuture</tt> can for example be used to manage asynchronous IO, in which tasks that perform reads are submitted in one part
  * of a program or system, and then acted upon in a different part of the program when the reads complete, possibly in a different order
  * than they were requested..
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CompletionFuture<V> {
 
     /**
      * Retrieves and removes the Future representing the next completed task, waiting if none are yet present.
-     * 
+     *
      * @return The Future representing the next completed task
      * @throws InterruptedException If interrupted while waiting.
      */
@@ -72,7 +72,7 @@ public interface CompletionFuture<V> {
 
     /**
      * Retrieves and removes the Future representing the next completed task or <tt>null</tt> if none are present.
-     * 
+     *
      * @return The Future representing the next completed task, or <tt>null</tt> if none are present.
      */
     Future<V> poll();
@@ -80,7 +80,7 @@ public interface CompletionFuture<V> {
     /**
      * Retrieves and removes the Future representing the next completed task, waiting if necessary up to the specified wait time if none are
      * yet present.
-     * 
+     *
      * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
      * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
      * @return The Future representing the next completed task or <tt>null</tt> if the specified waiting time elapses before one is present.

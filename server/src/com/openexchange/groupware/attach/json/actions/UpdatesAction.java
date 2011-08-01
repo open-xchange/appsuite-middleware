@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdatesAction extends AbstractAttachmentAction {
@@ -88,6 +88,7 @@ public final class UpdatesAction extends AbstractAttachmentAction {
         super(serviceLookup);
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             require(

@@ -52,17 +52,18 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class INTO extends Element {
-	private String tableName;
+	private final String tableName;
 
 	public INTO(String tableName) {
 		this.tableName = tableName;
 	}
-	
+
 	public INTO(Table table) {
 	    this(table.getName());
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildINTO(this);
 	}
 

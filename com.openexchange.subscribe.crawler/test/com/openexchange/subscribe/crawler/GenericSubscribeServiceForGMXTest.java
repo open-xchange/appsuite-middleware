@@ -57,7 +57,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForGMXTest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTestHelpers {
@@ -90,7 +90,7 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         steps.add(new PageByFrameNumberStep("Get the first iframe", 1));
         steps.add(new PageByLinkRegexStep("Click on the manage-Addressbook-Link in the upper right ","categories.*"));
         steps.add(new PageByLinkRegexStep("Click on the Export-link to the left","exportcontacts.*"));
-        
+
         steps.add(new TextPageByMultiselectStep("Select Microsoft Outlook 2003 in the form and submit it.", "", "exportcontacts", 0, "raw_format", "csv_Outlook2003", "export"));
         HashMap<Integer, String> fieldMapping = new HashMap<Integer,String>();
         fieldMapping.put(0, "last_name");
@@ -119,12 +119,12 @@ public class GenericSubscribeServiceForGMXTest extends GenericSubscribeServiceTe
         fieldMapping.put(32, "city_home");
         fieldMapping.put(33, "postal_code_home");
         fieldMapping.put(34, "country_home");
-        fieldMapping.put(35, "street_other");        
+        fieldMapping.put(35, "street_other");
         fieldMapping.put(36, "city_other");
         fieldMapping.put(37, "postal_code_other");
         fieldMapping.put(38, "country_other");
         fieldMapping.put(39, "note");
-        
+
         boolean ignoreFirstLine = true;
         steps.add(new ContactsByCsvFileStep("Map csv fields to Contact-Fields", ignoreFirstLine, fieldMapping));
 

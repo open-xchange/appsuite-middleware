@@ -82,7 +82,7 @@ public final class SourcedImageUtility {
      * Parses possible existing with-source images from specified HTML content and replaces such occurrences with referenced images.
      * <p>
      * <b>Note</b>: Specified {@link StringBuilder}'s content is changed to hold referenced images instead.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The parsed with-source images
      */

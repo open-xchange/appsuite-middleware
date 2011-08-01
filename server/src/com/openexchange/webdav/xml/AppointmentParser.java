@@ -66,13 +66,13 @@ import com.openexchange.webdav.xml.fields.AppointmentFields;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AppointmentParser extends CalendarParser {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentParser.class));
-	
+
 	public AppointmentParser(final Session sessionObj) {
-		this.sessionObj = sessionObj;	
+		this.sessionObj = sessionObj;
 	}
-	
+
 	public void parse(final XmlPullParser parser, final Appointment appointmentobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
@@ -80,7 +80,7 @@ public class AppointmentParser extends CalendarParser {
 					break;
 				}
 
-				parseElementAppointment(appointmentobject, parser);	
+				parseElementAppointment(appointmentobject, parser);
 				parser.nextTag();
 			}
 		} catch (final XmlPullParserException exc) {
@@ -89,7 +89,7 @@ public class AppointmentParser extends CalendarParser {
 			throw new OXException(exc);
 		}
 	}
-	
+
 	protected void parseElementAppointment(final Appointment ao, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
 			if (LOG.isTraceEnabled()) {
@@ -98,28 +98,28 @@ public class AppointmentParser extends CalendarParser {
 			parser.nextText();
 			return ;
 		}
-		
+
 		if (isTag(parser, AppointmentFields.SHOW_AS)) {
 			ao.setShownAs(getValueAsInt(parser));
-			
+
 			return ;
 		} else if (isTag(parser, AppointmentFields.DELETE_EXCEPTIONS)) {
 			try {
 				final String _s = getValue(parser);
-				
+
 				if (_s == null) {
 					return;
 				}
 
 				final String[] _dates = _s.split(",");
 				final java.util.Date[] deleteExceptions = new java.util.Date[_dates.length];
-				
+
 				for (int a = 0; a < _dates.length; a++) {
 					deleteExceptions[a] = parseString2Date(_dates[a]);
 				}
-				
+
 				ao.setDeleteExceptions(deleteExceptions);
-				
+
 				return ;
 			} catch (final Exception exc) {
 				throw new OXException(exc);
@@ -146,7 +146,7 @@ public class AppointmentParser extends CalendarParser {
 			parseElementCalendar(ao, parser);
 		}
 	}
-	
+
 	private Date parseString2Date(final String s) {
 		return new Date(Long.parseLong(s));
 	}

@@ -64,7 +64,7 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * ParamContainer
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ParamContainer {
@@ -586,7 +586,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a parameter as String
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>String</code> or <code>null</code> if not found
      * @throws OXException If parameter could not be found
@@ -595,14 +595,14 @@ public abstract class ParamContainer {
 
     /**
      * Gets the parameter names.
-     * 
+     *
      * @return The parameter names
      */
     public abstract Set<String> getParameterNames();
 
     /**
      * Requires a parameter as <code>String</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>String</code>
      * @throws OXException If parameter could not be found
@@ -611,7 +611,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a parameter as <code>int</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>int</code> or constant <code>NOT_FOUND</code> if not found
      * @throws OXException If parameter could not be found
@@ -620,7 +620,7 @@ public abstract class ParamContainer {
 
     /**
      * Requires a parameter as <code>int</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>int</code>
      * @throws OXException If parameter could not be found
@@ -629,7 +629,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a parameter as <code>long</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>long</code> or constant <code>NOT_FOUND</code> if not found
      * @throws OXException If parameter could not be found
@@ -638,7 +638,7 @@ public abstract class ParamContainer {
 
     /**
      * Requires a parameter as <code>long</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>long</code>
      * @throws OXException If parameter could not be found
@@ -647,7 +647,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a parameter as an array of <code>int</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>int</code> or <code>null</code> if not found
      * @throws OXException If parameter could not be found
@@ -656,7 +656,7 @@ public abstract class ParamContainer {
 
     /**
      * Requires a parameter as an array of <code>int</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>int</code>
      * @throws OXException If parameter could not be found
@@ -665,7 +665,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a parameter as a <code>java.util.Date</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as an array of <code>java.util.Date</code> or <code>null</code> if not found
      * @throws OXException If parameter could not be found
@@ -674,7 +674,7 @@ public abstract class ParamContainer {
 
     /**
      * Requires a parameter as a <code>java.util.Date</code>
-     * 
+     *
      * @param paramName - the parameter name
      * @return parameter value as <code>java.util.Date</code>
      * @throws OXException If parameter could not be found
@@ -683,7 +683,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets a header
-     * 
+     *
      * @param hdrName - the header name
      * @return the header as <code>String</code> or <code>null</code> if not found
      */
@@ -691,7 +691,7 @@ public abstract class ParamContainer {
 
     /**
      * Gets the <code>javax.servlet.http.HttpServletResponse</code> instance
-     * 
+     *
      * @return the <code>javax.servlet.http.HttpServletResponse</code> instance if present; otherwise <code>null</code>
      */
     public abstract HttpServletResponse getHttpServletResponse();

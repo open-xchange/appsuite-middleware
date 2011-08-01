@@ -51,9 +51,9 @@ package com.openexchange.hostname.ldap.configuration;
 
 
 public class Required {
-    
+
     public static Required TRUE = new Required(Value.TRUE);
-    
+
     public static Required FALSE = new Required(Value.FALSE);
 
     public enum Value {
@@ -61,9 +61,9 @@ public class Required {
         FALSE,
         CONDITION;
     }
-    
+
     private final Required.Value value;
-    
+
     private Condition[] condition;
 
     public Required(Required.Value value, Condition[] condition) {
@@ -77,15 +77,15 @@ public class Required {
         this.value = value;
     }
 
-    
+
     public Required.Value getValue() {
         return value;
     }
 
-    
+
     public Condition[] getCondition() {
         return condition;
     }
-    
+
 
 }

@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagedFileManagement} - The file management designed to keep large content as a temporary file on disk.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ManagedFileManagement {
@@ -74,7 +74,7 @@ public interface ManagedFileManagement {
      * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
      * machine.</li>
      * </ol>
-     * 
+     *
      * @return A new temporary file
      * @throws OXException If a temporary file could not be created
      */
@@ -82,7 +82,7 @@ public interface ManagedFileManagement {
 
     /**
      * Creates a new managed file from specified temporary file.
-     * 
+     *
      * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified temporary file
@@ -93,7 +93,7 @@ public interface ManagedFileManagement {
      * Creates a new managed file from specified input stream.
      * <p>
      * Size attribute is already set in returned managed file.
-     * 
+     *
      * @param inputStream The input stream whose content is filled into newly created file
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
@@ -104,7 +104,7 @@ public interface ManagedFileManagement {
      * Creates a new managed file from specified bytes.
      * <p>
      * Size attribute is already set in returned managed file.
-     * 
+     *
      * @param bytes The bytes which are filled into newly created file
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified content
@@ -113,7 +113,7 @@ public interface ManagedFileManagement {
 
     /**
      * Gets an existing managed file by its unique ID and updates its last-accessed time stamp if found.
-     * 
+     *
      * @param id The managed file's unique ID
      * @return The managed file associated with specified unique ID.
      * @throws OXException If no such managed file exists or cannot be returned
@@ -123,7 +123,7 @@ public interface ManagedFileManagement {
     /**
      * Checks for an existing managed file of which unique ID matches given unique ID. If such a managed file is found, its last-accessed
      * time stamp is updated.
-     * 
+     *
      * @param id The managed file's unique ID
      * @return <code>true</code> if such a managed file is found; otherwise <code>false</code>
      */
@@ -131,7 +131,7 @@ public interface ManagedFileManagement {
 
     /**
      * Manually removes an existing managed file by its unique ID.
-     * 
+     *
      * @param id The managed file's unique ID
      * @throws OXException If managed file exists and cannot be removed
      */
@@ -142,7 +142,7 @@ public interface ManagedFileManagement {
      * <p>
      * Bytes are kept in memory unless they exceed default capacity. If capacity is exceeded, bytes are turned into a managed file to reduce
      * memory consumption.
-     * 
+     *
      * @param bytes The bytes held by this input stream
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
      */
@@ -153,7 +153,7 @@ public interface ManagedFileManagement {
      * <p>
      * Bytes are kept in memory unless they exceed specified capacity. If capacity is exceeded, bytes are turned into a managed file to
      * reduce memory consumption.
-     * 
+     *
      * @param bytes The bytes held by this input stream
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @throws OXException If size exceeds memory limit and an appropriate managed file cannot be created.
@@ -165,7 +165,7 @@ public interface ManagedFileManagement {
      * <p>
      * Stream's data is kept in memory unless it exceeds default capacity. If capacity is exceeded, stream's data is turned into a managed
      * file to reduce memory consumption.
-     * 
+     *
      * @param in The input stream to manage
      * @throws OXException If an appropriate managed file cannot be created.
      */
@@ -176,7 +176,7 @@ public interface ManagedFileManagement {
      * <p>
      * Stream's data is kept in memory unless it exceeds specified capacity. If capacity is exceeded, stream's data is turned into a managed
      * file to reduce memory consumption.
-     * 
+     *
      * @param in The input stream to manage
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.
      * @throws OXException If an appropriate managed file cannot be created.
@@ -188,7 +188,7 @@ public interface ManagedFileManagement {
      * <p>
      * OStream's data is kept in memory unless specified size exceeds specified capacity. If capacity is exceeded, stream's data is turned
      * into a managed file to reduce memory consumption.
-     * 
+     *
      * @param in The input stream to manage
      * @param size The stream's size; leave to <code>-1</code> if unknown
      * @param capacity The number of bytes allowed being kept in memory rather than being spooled to disk.

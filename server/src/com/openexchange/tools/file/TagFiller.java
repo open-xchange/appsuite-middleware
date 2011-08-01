@@ -51,14 +51,14 @@ package com.openexchange.tools.file;
 
 /**
  * Replacing of tags in TemplateParser takes place through the methods of this interface.
- * 
+ *
  * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
  */
 public interface TagFiller {
 
     /**
      * Implementation of this method returns the value that should be inserted into the place of the given tag.
-     * 
+     *
      * @param tag The tag that is found by the TemplateParser.
      * @return The replacement for the tag.
      */
@@ -67,7 +67,7 @@ public interface TagFiller {
     /**
      * Implementation of this method returns the value that should be inserted into the place of the given tag. If you use the parse method
      * with parameter data this data object is passed to this replace method.
-     * 
+     *
      * @param tag The tag that is found by the TemplateParser.
      * @param data A user defined data object.
      * @return The replacement for the tag.

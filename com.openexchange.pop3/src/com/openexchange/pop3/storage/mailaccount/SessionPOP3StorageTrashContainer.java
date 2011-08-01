@@ -68,7 +68,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionPOP3StorageTrashContainer} - Session-backed implementation of {@link POP3StorageTrashContainer}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashContainer {
@@ -77,7 +77,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
     /**
      * Gets the trash container bound to specified POP3 access.
-     * 
+     *
      * @param pop3Access The POP3 access
      * @return The trash container bound to specified POP3 access
      * @throws OXException If instance cannot be returned

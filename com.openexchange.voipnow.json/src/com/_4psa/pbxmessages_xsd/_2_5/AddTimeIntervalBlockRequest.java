@@ -15,9 +15,9 @@ import com._4psa.pbxdata_xsd._2_5.TimeInterval;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -46,8 +46,8 @@ import com._4psa.pbxdata_xsd._2_5.TimeInterval;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -76,11 +76,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -88,11 +88,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -100,11 +100,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -112,11 +112,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -124,11 +124,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the timezone property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimezone() {
         return timezone;
@@ -136,11 +136,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the timezone property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimezone(BigInteger value) {
         this.timezone = value;
@@ -148,25 +148,25 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the timeInterval property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the timeInterval property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getTimeInterval().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link TimeInterval }
-     * 
-     * 
+     *
+     *
      */
     public List<TimeInterval> getTimeInterval() {
         if (timeInterval == null) {
@@ -177,11 +177,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -189,11 +189,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -201,11 +201,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -213,11 +213,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -225,11 +225,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Gets the value of the userLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserLogin() {
         return userLogin;
@@ -237,11 +237,11 @@ public class AddTimeIntervalBlockRequest {
 
     /**
      * Sets the value of the userLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserLogin(String value) {
         this.userLogin = value;

@@ -72,11 +72,11 @@ public class MessagingServiceWriter {
     private static final String ID = "id";
 
     private final Translator translator;
-    
+
     public MessagingServiceWriter(final Translator translator) {
         this.translator = translator;
     }
-    
+
     public JSONObject write(final MessagingService messagingService) throws JSONException {
         final JSONObject object = new JSONObject();
         object.put(ID, messagingService.getId());

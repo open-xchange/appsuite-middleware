@@ -55,7 +55,7 @@ import javax.servlet.http.HttpServlet;
 
 /**
  * {@link IHttpServletManager} - Interface for HTTP servlet manager.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IHttpServletManager {
@@ -67,7 +67,7 @@ public interface IHttpServletManager {
 
     /**
      * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>
-     * 
+     *
      * @param path The servlet path to lookup
      * @param pathStorage A container to keep the actual servlet path contained in servlet mapping for later servlet release
      * @return The instance of {@link HttpServlet} or <code>null</code> if no instance is bound to specified path
@@ -76,7 +76,7 @@ public interface IHttpServletManager {
 
     /**
      * Puts a servlet bound to given ID into this servlet manager's pool
-     * 
+     *
      * @param path The servlet's path
      * @param servletObj The servlet instance
      */
@@ -84,7 +84,7 @@ public interface IHttpServletManager {
 
     /**
      * Registers a servlet if not already contained
-     * 
+     *
      * @param id The servlet's ID or alias (e.g. <code>/my/servlet</code>)
      * @param servlet The servlet instance
      * @param initParams The servlet's init parameters
@@ -94,14 +94,14 @@ public interface IHttpServletManager {
 
     /**
      * Unregisters the servlet bound to given ID from mapping.
-     * 
+     *
      * @param id The servlet ID or alias
      */
     public void unregisterServlet(final String id);
 
     /**
      * Destroys the servlet that is bound to given ID.
-     * 
+     *
      * @param id The servlet ID
      * @param servletObj The servlet instance
      */

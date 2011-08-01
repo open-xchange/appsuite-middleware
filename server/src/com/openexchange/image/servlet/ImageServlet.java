@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link ImageServlet} - The servlet serving requests to <i>ajax/image</i>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageServlet extends HttpServlet {
@@ -125,7 +125,7 @@ public final class ImageServlet extends HttpServlet {
 
     /**
      * Writes image denoted by request to given response.
-     * 
+     *
      * @param req The request
      * @param resp The response
      * @param hashSource The hash source
@@ -168,19 +168,19 @@ public final class ImageServlet extends HttpServlet {
             sendErrorAndLog(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, e.getMessage(), e);
         }
     }
-    
+
     private static void sendErrorAndLog(final HttpServletResponse resp, final int errorCode, final String errorMsg, final String logMsg, final Throwable... throwable) throws IOException {
         if (throwable != null && throwable.length > 0) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg, throwable[0]);
         } else {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(logMsg);
         }
-        
+
         if (errorMsg != null) {
             resp.sendError(errorCode, errorMsg);
         } else {
             resp.sendError(errorCode);
-        }        
+        }
     }
 
     private static void outputImageData(final ImageData imageData, final Session session, final HttpServletResponse resp) throws OXException, IOException {

@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListAction extends AbstractAttachmentAction {
@@ -88,6 +88,7 @@ public final class ListAction extends AbstractAttachmentAction {
         super(serviceLookup);
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             require(request, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID);

@@ -56,7 +56,7 @@ import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 
 /**
  * {@link HeaderCacheStaticProperties} - The header cache properties.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheStaticProperties extends AbstractProtocolProperties {
@@ -65,7 +65,7 @@ public final class HeaderCacheStaticProperties extends AbstractProtocolPropertie
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static HeaderCacheStaticProperties getInstance() {

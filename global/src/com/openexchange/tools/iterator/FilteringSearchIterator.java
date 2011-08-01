@@ -61,12 +61,12 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
 
     private T next = null;
     private final SearchIterator<T> delegate;
-    
+
     public FilteringSearchIterator(final SearchIterator<T> delegate) throws OXException {
         this.delegate = delegate;
         initNext();
     }
-    
+
     /**
      * Test whether something should be included in the result or not
      * @param thing
@@ -74,8 +74,8 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
      * @throws AbstractOXException
      */
     public abstract boolean accept(T thing) throws OXException;
-    
-    
+
+
     public void addWarning(final OXException warning) {
         delegate.addWarning(warning);
     }
@@ -105,7 +105,7 @@ public abstract class FilteringSearchIterator<T> implements SearchIterator<T>{
     public int size() {
         return -1;
     }
-    
+
     protected void initNext() throws OXException {
         while(delegate.hasNext()) {
             next = delegate.next();

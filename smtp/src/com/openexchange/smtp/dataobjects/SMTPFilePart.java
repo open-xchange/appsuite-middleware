@@ -58,9 +58,9 @@ import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
  * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
  * reference to a temporary uploaded file that shall be added as an attachment
  * later
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPFilePart extends UploadFileMailPart {
 
@@ -68,7 +68,7 @@ public final class SMTPFilePart extends UploadFileMailPart {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @throws OXException
 	 *             If upload file's content type cannot be parsed
 	 */

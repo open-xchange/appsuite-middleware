@@ -52,9 +52,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public final class Authorization {
-    
+
     private static final AtomicReference<AuthorizationService> SERVICE_REF = new AtomicReference<AuthorizationService>();
-    
+
     /**
      * Default constructor.
      */

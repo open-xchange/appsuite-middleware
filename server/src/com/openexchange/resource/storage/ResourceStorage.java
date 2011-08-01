@@ -59,7 +59,7 @@ import com.openexchange.resource.ResourceGroup;
 /**
  * {@link ResourceStorage} - This class provides abstract methods to read resources and their groups from the directory service. This class
  * is implemented according the DAO design pattern.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.de">Marcus Klein </a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,7 +93,7 @@ public abstract class ResourceStorage {
 
     /**
      * Creates a new instance implementing the resources interface.
-     * 
+     *
      * @param context Context.
      * @return an instance implementing the resources interface.
      */
@@ -114,7 +114,7 @@ public abstract class ResourceStorage {
 
     /**
      * Reads the data of resource group from the underlying persistent data storage.
-     * 
+     *
      * @param groupId Identifier of the resource group.
      * @param context The context.
      * @return a resource group object.
@@ -126,7 +126,7 @@ public abstract class ResourceStorage {
 
     /**
      * Reads a resource from the underlying persistent storage and returns it in a data object.
-     * 
+     *
      * @param resourceId The unique identifier of the resource to return.
      * @param context The context.
      * @return The data object of the resource.
@@ -136,7 +136,7 @@ public abstract class ResourceStorage {
 
     /**
      * Searches all groups whose identifier matches the given pattern.
-     * 
+     *
      * @param pattern The identifier of all returned groups will match this pattern.
      * @param context The context.
      * @return a string array with resource group identifiers. If no identifiers match an empty array will be returned.
@@ -146,7 +146,7 @@ public abstract class ResourceStorage {
 
     /**
      * Gets all resources located in specified context
-     * 
+     *
      * @param context The context
      * @return All resources located in specified context
      * @throws OXException If an exception occurs while reading from the underlying persistent storage.
@@ -157,7 +157,7 @@ public abstract class ResourceStorage {
 
     /**
      * Searches all resources that identifier matches the given pattern.
-     * 
+     *
      * @param pattern The identifier of all returned resources will match this pattern.
      * @param context The context.
      * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
@@ -167,7 +167,7 @@ public abstract class ResourceStorage {
 
     /**
      * Searches all resources whose email address matches the given pattern.
-     * 
+     *
      * @param pattern The email address pattern to search for
      * @param context The context
      * @return An array of {@link Resource resources} whose email address matches the given pattern.
@@ -177,7 +177,7 @@ public abstract class ResourceStorage {
 
     /**
      * This method returns resources that have been modified since the given timestamp.
-     * 
+     *
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
@@ -188,17 +188,17 @@ public abstract class ResourceStorage {
 
     /**
      * This method returns resources that have been deleted since the given timestamp.
-     * 
+     *
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
      * @throws OXException If an error occurs.
      */
     public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws OXException;
-    
+
     /**
      * This method inserts a resource into the storage.
-     * 
+     *
      * @param ctx The context.
      * @param con A writable database connection.
      * @param resource The resource to insert.
@@ -210,7 +210,7 @@ public abstract class ResourceStorage {
 
     /**
      * This method inserts a resource into the storage.
-     * 
+     *
      * @param ctx The context.
      * @param con A writable database connection.
      * @param resource The resource to insert.
@@ -221,7 +221,7 @@ public abstract class ResourceStorage {
 
     /**
      * This method updates the resource in storage referenced by {@link Resource#getIdentifier() resource identifier}.
-     * 
+     *
      * @param ctx The context.
      * @param con A writable database connection.
      * @param resource The resource to update.
@@ -232,7 +232,7 @@ public abstract class ResourceStorage {
     /**
      * A convenience method that invokes {@link #deleteResourceById(Context, Connection, int)} with the latter parameter filled with
      * {@link Resource#getIdentifier()}
-     * 
+     *
      * @param ctx The context
      * @param con A writable database connection.
      * @param resource The resource to delete
@@ -244,7 +244,7 @@ public abstract class ResourceStorage {
 
     /**
      * This method deletes the resource in storage referenced by specified <code>resourceId</code>.
-     * 
+     *
      * @param ctx The context
      * @param con A writable database connection.
      * @param resourceId The ID of the resource to delete

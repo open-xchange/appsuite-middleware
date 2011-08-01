@@ -72,13 +72,13 @@ public interface AttachmentBase extends TransactionAware {
 
     /**
      * @return the timestamp of modified objects to which this attachment was attached
-     * @throws TransactionException 
+     * @throws TransactionException
      */
     public abstract long attachToObject(AttachmentMetadata attachment, InputStream data, Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
     /**
      * @return the timestamp of modified objects to which these attachments were detached
-     * @throws TransactionException 
+     * @throws TransactionException
      */
     public abstract long detachFromObject(int folderId, int objectId, int moduleId, int[] ids, Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
@@ -114,7 +114,7 @@ public interface AttachmentBase extends TransactionAware {
      * @param ctx The Context
      * @return The number of inserted entries in del_attachment in int[0] and the number of removed entries from prg_attachment in int[1]
      * @throws OXException
-     * @throws TransactionException 
+     * @throws TransactionException
      */
     public abstract int[] removeAttachment(String file_id, Context ctx) throws OXException;
 
@@ -128,7 +128,7 @@ public interface AttachmentBase extends TransactionAware {
      * @param ctx The Context
      * @return The number of changed entries
      * @throws OXException
-     * @throws TransactionException 
+     * @throws TransactionException
      */
     public abstract int modifyAttachment(String file_id, String new_file_id, String new_comment, String new_mime, Context ctx) throws OXException;
 

@@ -77,7 +77,7 @@ public final class ParserTools {
         }
         return retval;
     }
-    
+
     /**
      * Parses a date. If the value is a datetime, the timezone will be applied if needed, if the value is a date
      * the time will be 00:00 UTC
@@ -85,7 +85,7 @@ public final class ParserTools {
     public static Date parseDateConsideringDateType(final CalendarComponent component, final DateProperty property, final TimeZone timeZone) {
         return parseDate(component, property, timeZone);
     }
-    
+
     /**
      * Parses a date. If the value is a datetime, the timezone will be applied if needed, if the value is a date
      * the time will be 00:00 UTC
@@ -142,7 +142,7 @@ public final class ParserTools {
         inTimeZone.set(java.util.Calendar.MILLISECOND, 0);
         return inTimeZone.getTime();
     }
-    
+
     /**
      * Transforms date from the default timezone to midnight in the given timezone.
      */

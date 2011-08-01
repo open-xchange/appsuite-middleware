@@ -59,9 +59,9 @@ import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ActionServiceListener implements ServiceTrackerCustomizer {
 
@@ -78,7 +78,7 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
         if (null == service) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        
+
         if (service instanceof ActionService) {
             final Object identifier = serviceReference.getProperty("action");
             if (null == identifier) {
@@ -88,8 +88,8 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
             if (getInstance().getActionService((ActionTypes)identifier) != null) {
                 LOG.error("A action service is already registered for identifier: " + identifier.toString());
                 return service;
-            }            
-            getInstance().putActionService((ActionTypes)identifier, (ActionService) service);            
+            }
+            getInstance().putActionService((ActionTypes)identifier, (ActionService) service);
             LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered"));
         }
         return service;

@@ -96,7 +96,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
     public SubscriptionSQLStorage(final DBProvider dbProvider, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this(dbProvider, DBTransactionPolicy.NORMAL_TRANSACTIONS, storageService, discoveryService);
-    }   
+    }
     public SubscriptionSQLStorage(final DBProvider dbProvider, final DBTransactionPolicy txPolicy, final GenericConfigurationStorageService storageService, final SubscriptionSourceDiscoveryService discoveryService) {
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
@@ -183,7 +183,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new 
+            final SELECT select = new
                 SELECT("id", "user_id", "configuration_id", "source_id", "folder_id", "last_update", "enabled")
                 .FROM(subscriptions)
                 .WHERE(
@@ -214,7 +214,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
         return retval;
     }
-    
+
 
     public List<Subscription> getSubscriptionsOfUser(final Context ctx, final int userId)  throws OXException {
         List<Subscription> retval = null;
@@ -343,7 +343,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         values.add(subscription.getFolderId());
         values.add(L(subscription.getLastUpdate()));
         values.add(subscription.isEnabled());
-        
+
         new StatementBuilder().executeStatement(writeConnection, insert, values);
         return id;
     }
@@ -395,7 +395,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         try {
             readConection = dbProvider.getReadConnection(subscription.getContext());
 
-            final SELECT select = new 
+            final SELECT select = new
                 SELECT("configuration_id")
                 .FROM(subscriptions)
                 .WHERE(
@@ -439,7 +439,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             subscription.setLastUpdate(resultSet.getLong("last_update"));
             subscription.setUserId(resultSet.getInt("user_id"));
             subscription.setEnabled(resultSet.getBoolean("enabled"));
-            
+
             final Map<String, Object> content = new HashMap<String, Object>();
             storageService.fill(readConnection, ctx, resultSet.getInt("configuration_id"), content);
 
@@ -459,7 +459,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         StatementBuilder builder = null;
         try {
             readConnection = dbProvider.getReadConnection(ctx);
-            final SELECT select = new 
+            final SELECT select = new
                 SELECT("id")
                 .FROM(subscriptions)
                 .WHERE(
@@ -524,7 +524,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            final DELETE delete = new 
+            final DELETE delete = new
                 DELETE()
                 .FROM(subscriptions)
                 .WHERE(new EQUALS("cid", PLACEHOLDER));
@@ -561,7 +561,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             final List<Object> values = new ArrayList<Object>(Arrays.asList(null, null, null));
             values.set(0, ctx.getContextId());
             values.set(1, sourceId);
-            
+
             final List<Integer> configIds = storageService.search(ctx, query);
             for (final Integer configId : configIds) {
                 values.set(2, configId);
@@ -586,6 +586,6 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
                 throw SQLException.create(e);
             }
             dbProvider.releaseWriteConnection(ctx, writeConnection);
-        }        
+        }
     }
 }

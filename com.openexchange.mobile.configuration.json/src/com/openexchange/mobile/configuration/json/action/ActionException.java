@@ -50,9 +50,9 @@
 package com.openexchange.mobile.configuration.json.action;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ActionException extends Exception {
 

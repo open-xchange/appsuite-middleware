@@ -172,11 +172,11 @@ public abstract class SQLTestCase extends TestCase {
     public void exec(final String sql, final Object...substitutes) throws SQLException, OXException {
         exec(sql, Arrays.asList(substitutes));
     }
-    
+
     public void exec(final String sql) throws SQLException, OXException {
         exec(sql, new ArrayList<Object>(0));
     }
-    
+
     public void exec(final String sql, final List<Object> substitues) throws SQLException, OXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -198,14 +198,14 @@ public abstract class SQLTestCase extends TestCase {
             }
         }
     }
-    
+
     public List<Map<String, Object>> query(final String sql) throws SQLException, OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        
+
         final List<Map<String, Object>> results = new LinkedList<Map<String, Object>>();
-        
+
         try {
             con = getDBProvider().getReadConnection(null);
             stmt = con.prepareStatement(sql);
@@ -220,7 +220,7 @@ public abstract class SQLTestCase extends TestCase {
                 }
                 results.add(row);
             }
-            
+
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -234,25 +234,25 @@ public abstract class SQLTestCase extends TestCase {
         }
         return results;
     }
-    
+
     protected void copyTableStructure(final String origName, final String newName) throws OXException, SQLException {
         final Map<String, Object> createTableRow = query("SHOW CREATE TABLE "+origName).get(0);
         String createStatement = (String) createTableRow.get("Create Table");
         createStatement = createStatement.replaceAll(origName, newName);
         exec(createStatement);
     }
-    
+
     protected void dropTable(final String tableName) throws OXException, SQLException {
         exec("DROP TABLE IF EXISTS "+tableName);
     }
-    
+
     protected void insert(final String tableName, final Object...attrs) throws OXException, SQLException {
         final StringBuilder builder = new StringBuilder("INSERT INTO ").append(tableName).append(" (");
         final StringBuilder questionMarks = new StringBuilder();
-        
+
         String key = null;
         final List<Object> values = new ArrayList<Object>();
-        
+
         for(final Object attr : attrs) {
             if(key == null) {
                 key = (String) attr;
@@ -263,15 +263,15 @@ public abstract class SQLTestCase extends TestCase {
                 key = null;
             }
         }
-        
+
         builder.setLength(builder.length()-2);
         questionMarks.setLength(questionMarks.length()-2);
         builder.append(") VALUES (").append(questionMarks).append(")");
-        
+
         exec(builder.toString(), values);
     }
 
-    
+
     protected void assertEntry(final String tableName, final Object...attrs) throws OXException, SQLException {
         final StringBuilder builder = new StringBuilder("SELECT 1 FROM ").append(tableName).append(" WHERE ");
         String key = null;

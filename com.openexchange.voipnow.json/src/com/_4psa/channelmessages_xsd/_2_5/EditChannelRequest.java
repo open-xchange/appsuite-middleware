@@ -12,9 +12,9 @@ import com._4psa.channeldata_xsd._2_5.SIPChannelInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import com._4psa.channeldata_xsd._2_5.SIPChannelInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -49,11 +49,11 @@ public class EditChannelRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -61,11 +61,11 @@ public class EditChannelRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -73,11 +73,11 @@ public class EditChannelRequest {
 
     /**
      * Gets the value of the sip property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SIPChannelInfo }
-     *     
+     *
      */
     public SIPChannelInfo getSIP() {
         return sip;
@@ -85,11 +85,11 @@ public class EditChannelRequest {
 
     /**
      * Sets the value of the sip property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SIPChannelInfo }
-     *     
+     *
      */
     public void setSIP(SIPChannelInfo value) {
         this.sip = value;

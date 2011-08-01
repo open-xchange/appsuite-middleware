@@ -56,7 +56,7 @@ package com.openexchange.subscribe.crawler;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GoogleCalendarTest extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testGoogleCalendar(){
         checkSingleCrawler("GoogleCalendar");
     }

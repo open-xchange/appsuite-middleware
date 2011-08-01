@@ -67,35 +67,38 @@ import com.openexchange.groupware.update.UpdateTask;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DelFolderTreeTableUpdateTask implements UpdateTask {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelFolderTreeTableUpdateTask.class));
-	
+
 	/* (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
 	 */
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 4;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
 		 */
 		return UpdateTask.UpdateTaskPriority.HIGHEST.priority;
 	}
-	
+
 	private static final String STR_INFO = "Performing update task 'DelFolderTreeTableUpdateTask'";
-	
+
 	private static final String SQL_MODIFY = "ALTER TABLE del_oxfolder_tree MODIFY `fname` VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL";
 
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema, int)
 	 */
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}

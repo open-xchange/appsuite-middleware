@@ -76,20 +76,20 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link PushActivator} - The push activator.
- * 
+ *
  */
 public final class PushActivator extends DeferredActivator {
 
     private static final String CRLF = "\r\n";
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class));
-    
+
     private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
-    
+
     private static final String PROP_UDP_LISTEN_HOST = "com.openexchange.push.mail.notify.udp_listen_host";
 
     private static final String PROP_UDP_LISTEN_PORT = "com.openexchange.push.mail.notify.udp_listen_port";
-    
+
     private static final String PROP_IMAP_LOGIN_DELIMITER = "com.openexchange.push.mail.notify.imap_login_delimiter";
 
     private static final String PROP_USE_OX_LOGIN = "com.openexchange.push.mail.notify.use_ox_login";

@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ReceiptAckAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReceiptAckAction extends AbstractMailAction {
@@ -74,7 +74,7 @@ public final class ReceiptAckAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link ReceiptAckAction}.
-     * 
+     *
      * @param services
      */
     public ReceiptAckAction(final ServiceLookup services) {

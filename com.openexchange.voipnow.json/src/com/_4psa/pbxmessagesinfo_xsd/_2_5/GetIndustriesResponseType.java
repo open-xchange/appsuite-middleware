@@ -12,9 +12,9 @@ import com._4psa.pbxdata_xsd._2_5.Industry;
 
 /**
  * <p>Java class for GetIndustriesResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetIndustriesResponseType">
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com._4psa.pbxdata_xsd._2_5.Industry;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetIndustriesResponseType", propOrder = {
@@ -42,25 +42,25 @@ public class GetIndustriesResponseType {
 
     /**
      * Gets the value of the industry property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the industry property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getIndustry().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Industry }
-     * 
-     * 
+     *
+     *
      */
     public List<Industry> getIndustry() {
         if (industry == null) {
@@ -71,25 +71,25 @@ public class GetIndustriesResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

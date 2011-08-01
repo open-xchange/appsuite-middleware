@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetDocumentAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetDocumentAction extends AbstractAttachmentAction {
@@ -82,6 +82,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         super(serviceLookup);
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         require(
             request,

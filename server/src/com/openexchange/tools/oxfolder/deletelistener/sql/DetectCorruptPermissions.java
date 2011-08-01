@@ -59,9 +59,9 @@ import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
 
 /**
  * {@link DetectCorruptPermissions}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DetectCorruptPermissions {
 
@@ -78,7 +78,7 @@ public final class DetectCorruptPermissions {
 
 	/**
 	 * Detects corrupt user permissions existing in folders' permission table
-	 * 
+	 *
 	 * @param cid
 	 *            The context ID
 	 * @param readCon
@@ -131,7 +131,7 @@ public final class DetectCorruptPermissions {
 
 	/**
 	 * Detects corrupt group permissions existing in folders' permission table
-	 * 
+	 *
 	 * @param cid
 	 *            The context ID
 	 * @param readCon

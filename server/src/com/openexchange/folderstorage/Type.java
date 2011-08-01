@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link Type} - The type of a folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Type {
@@ -60,7 +60,7 @@ public interface Type {
      * Gets this type's former identifier.
      * <p>
      * This method is for migration convenience only. It is supposed to be removed when new folder API is completed.
-     * 
+     *
      * @return The type's former identifier
      */
     @Deprecated
@@ -68,9 +68,10 @@ public interface Type {
 
     /**
      * Returns a string representation of this type.
-     * 
+     *
      * @return A string representation of this type
      */
+    @Override
     String toString();
 
 }

@@ -53,7 +53,7 @@ import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
 /**
  * {@link ToSQLType}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ToSQLType implements WidgetSwitcher {

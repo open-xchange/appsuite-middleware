@@ -58,7 +58,7 @@ import com.openexchange.caching.internal.cache2jcs.StatisticElement2JCS;
 
 /**
  * {@link JCSStatsDelegator} - The {@link Stats} subclass backed by a {@link Statistics} object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSStatsDelegator extends Stats {
@@ -69,7 +69,7 @@ public final class JCSStatsDelegator extends Stats {
 
     /**
      * Initializes a new {@link JCSStatsDelegator}
-     * 
+     *
      * @param statistics The {@link Statistics} object to delegate to
      */
     public JCSStatsDelegator(final Statistics statistics) {

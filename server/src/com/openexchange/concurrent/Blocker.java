@@ -52,7 +52,7 @@ package com.openexchange.concurrent;
 
 /**
  * {@link Blocker} - Methods to block/unblock access to implementing object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Blocker extends Blockable {

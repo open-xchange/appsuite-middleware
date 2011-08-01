@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link MessagingContentType} - The folder storage content type for messaging.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessagingContentType implements ContentType {
@@ -62,7 +62,7 @@ public class MessagingContentType implements ContentType {
 
     /**
      * Gets the {@link MessagingContentType} instance.
-     * 
+     *
      * @return The {@link MessagingContentType} instance
      */
     public static MessagingContentType getInstance() {
@@ -81,11 +81,13 @@ public class MessagingContentType implements ContentType {
         return "messaging";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.MESSAGING
         return 13;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

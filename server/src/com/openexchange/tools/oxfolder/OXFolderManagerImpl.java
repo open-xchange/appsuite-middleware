@@ -107,7 +107,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXFolderManagerImpl} - The {@link OXFolderManager} implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
@@ -144,7 +144,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Getter for testing purposes.
-     * 
+     *
      * @return
      */
     public AppointmentSQLInterface getCSql() {
@@ -153,7 +153,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Setter for testing purposes.
-     * 
+     *
      * @param sql
      */
     public void setCSql(final AppointmentSQLInterface sql) {
@@ -162,7 +162,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
-     * 
+     *
      * @param session The session providing needed user data
      * @throws OXException If instantiation fails
      */
@@ -173,7 +173,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Constructor which only uses <code>Session</code> and <code>OXFolderAccess</code>. Optional connection are going to be set to
      * <code>null</code>.
-     * 
+     *
      * @throws OXException If instantiation fails
      */
     OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXException {
@@ -182,7 +182,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Constructor which uses <code>Session</code> and also uses a readable and a writable <code>Connection</code>.
-     * 
+     *
      * @throws OXException If instantiation fails
      */
     OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) throws OXException {
@@ -192,7 +192,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     /**
      * Constructor which uses <code>Session</code>, <code>OXFolderAccess</code> and also uses a readable and a writable
      * <code>Connection</code>.
-     * 
+     *
      * @throws OXException If instantiation fails
      */
     OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon, final Connection writeCon) throws OXException {
@@ -900,7 +900,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int parentFolderID = storageObj.getParentFolderID();
             final int folderId = folderObj.getObjectID();
             boolean throwException = false;
-            
+
             /*
              * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
              */
@@ -1019,7 +1019,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int parentFolderID = storageDest.getObjectID();
             final String folderName = storageSrc.getFolderName();
             boolean throwException = false;
-            
+
             /*
              * When the private folder is parent, we have to check if folders with the same name in the same module can be seen by the user.
              */
@@ -1051,7 +1051,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.TARGET_FOLDER_CONTAINS_DUPLICATE.create(OXFolderUtility.getFolderName(storageDest),
                     Integer.valueOf(ctx.getContextId()));
             }
-            
+
             /*
              * Check i18n strings, too
              */
@@ -1444,7 +1444,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Deletes the validated folders.
-     * 
+     *
      * @param deleteableIDs The gathered IDs of validated folders
      * @param lastModified The last-modified time stamp
      * @param type The folder type
@@ -1474,6 +1474,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             this.type = type;
         }
 
+        @Override
         public boolean execute(final int folderId, final TIntObjectHashMap<?> hashMap) {
             if (null == error) {
                 try {
@@ -1504,7 +1505,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Deletes the validated folder.
-     * 
+     *
      * @param folderID The folder ID
      * @param lastModified The last-modified time stamp
      * @param type The folder type
@@ -1955,14 +1956,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int length = -1 == tmp2 ? 0 : tmp2;
             truncateds[i] = new OXException.Truncated() {
 
+                @Override
                 public int getId() {
                     return fieldId;
                 }
 
+                @Override
                 public int getLength() {
                     return valueLength;
                 }
 
+                @Override
                 public int getMaxSize() {
                     return length;
                 }

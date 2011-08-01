@@ -75,7 +75,7 @@ public enum OrderDirection {
 
     /**
      * Get the corresponding order direction
-     * 
+     *
      * @param order The order <code>int</code> value
      * @return The corresponding order direction
      */

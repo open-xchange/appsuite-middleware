@@ -80,12 +80,12 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
     private final MessagingMessageWriter writer;
 
     private final MessagingServiceRegistry registry;
-    
-    
+
+
     public MessagingActionFactory(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super();
         actions = new HashMap<String, AJAXActionService>();
-        
+
         actions.put("all", new AllAction(registry, writer, parser, cache));
         actions.put("get", new GetAction(registry, writer, parser, cache));
         actions.put("list", new ListAction(registry, writer, parser, cache));
@@ -93,17 +93,17 @@ public class MessagingActionFactory implements AJAXActionServiceFactory {
         actions.put("send", new SendAction(registry, writer, parser, cache));
         actions.put("update", new UpdateAction(registry, writer, parser, cache));
         actions.put("updates", new UpdatesAction(registry, writer, parser, cache));
-        
+
         this.writer = writer;
         this.parser = parser;
         this.cache = cache;
         this.registry = registry;
-    } 
-    
+    }
+
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
-    
+
     public MessagingRequestData wrapRequest(final AJAXRequestData req, final ServerSession session) {
         return new MessagingRequestData(req, session, registry, parser, cache);
     }

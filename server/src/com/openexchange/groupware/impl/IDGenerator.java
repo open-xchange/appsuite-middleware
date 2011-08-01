@@ -258,6 +258,7 @@ public final class IDGenerator {
             return retval;
         }
 
+        @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             CallableStatement call = null;
@@ -284,6 +285,7 @@ public final class IDGenerator {
             return newId;
         }
 
+        @Override
         public void registerType(final String sql, final int type) throws SQLException {
             if (TYPES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use");
@@ -338,6 +340,7 @@ public final class IDGenerator {
             return retval;
         }
 
+        @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             int newId = -1;
             PreparedStatement stmt = null;
@@ -385,6 +388,7 @@ public final class IDGenerator {
             TYPES = tmp;
         }
 
+        @Override
         public void registerType(final String sql, final int type) throws SQLException {
             if (TYPES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use");
@@ -418,6 +422,7 @@ public final class IDGenerator {
             return retval;
         }
 
+        @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
             if (type <= -1) {
@@ -511,6 +516,7 @@ public final class IDGenerator {
             TABLES = tmp;
         }
 
+        @Override
         public void registerType(final String sql, final int type) throws SQLException {
             if (TABLES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use.");
@@ -547,6 +553,7 @@ public final class IDGenerator {
             return retval;
         }
 
+        @Override
         public int getId(final int contextId, final int type, final Connection con) throws SQLException {
             final int retval;
             if (type <= -1) {
@@ -639,6 +646,7 @@ public final class IDGenerator {
             TABLES = tmp;
         }
 
+        @Override
         public void registerType(final String sql, final int type) throws SQLException {
             if (TABLES.containsKey(type)) {
                 throw new SQLException("Type " + type + " already in use.");

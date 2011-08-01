@@ -62,7 +62,7 @@ import com.openexchange.management.ManagementService;
 
 /**
  * {@link ManagementAgentImpl} - A JMX agent implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementAgentImpl extends AbstractAgent implements ManagementService {
@@ -71,7 +71,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Gets the singleton instance
-     * 
+     *
      * @return The singleton instance
      */
     public static ManagementAgentImpl getInstance() {
@@ -216,7 +216,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX port
-     * 
+     *
      * @param jmxPort The JMX port
      */
     public void setJmxPort(final int jmxPort) {
@@ -225,7 +225,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX bind address
-     * 
+     *
      * @param jmxBindAddr The JMX bind address or <code>"*"</code>
      */
     public void setJmxBindAddr(final String jmxBindAddr) {
@@ -234,7 +234,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX login
-     * 
+     *
      * @param jmxLogin The JMX login to set
      */
     public void setJmxLogin(final String jmxLogin) {
@@ -243,7 +243,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     /**
      * Sets the JMX password
-     * 
+     *
      * @param jmxPassword the JMX password
      */
     public void setJmxPassword(final String jmxPassword) {

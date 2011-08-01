@@ -61,7 +61,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 
 /**
  * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigActivator implements BundleActivator {

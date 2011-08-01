@@ -83,17 +83,17 @@ public final class ImapIdlePushListener implements PushListener {
     public enum PushMode {
         NEWMAIL("newmail"),
         ALWAYS("always");
-        
+
         private final String text;
-        
+
         private PushMode(final String text) {
             this.text = text;
         }
-        
+
         public final String getText() {
             return text;
         }
-        
+
         public static final PushMode fromString(final String text) {
             if( text != null ) {
                 for(final PushMode m : PushMode.values()) {
@@ -105,7 +105,7 @@ public final class ImapIdlePushListener implements PushListener {
             return null;
         }
     }
-    
+
     /**
      * @param debugEnabled the debugEnabled to set
      */
@@ -113,7 +113,7 @@ public final class ImapIdlePushListener implements PushListener {
         DEBUG_ENABLED = debugEnabled;
     }
 
-    private static PushMode pushMode; 
+    private static PushMode pushMode;
 
     /**
      * @param pushmode the pushmode to set
@@ -121,8 +121,8 @@ public final class ImapIdlePushListener implements PushListener {
     public static final void setPushmode(final PushMode pushmode) {
         pushMode = pushmode;
     }
-    
-    
+
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class));
 
     private static boolean DEBUG_ENABLED = LOG.isDebugEnabled();
@@ -138,7 +138,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Gets the account ID constant.
-     * 
+     *
      * @return The account ID constant
      */
     public static int getAccountId() {
@@ -147,7 +147,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Sets static folder fullname.
-     * 
+     *
      * @param folder The folder fullname
      */
     public static void setFolder(final String folder) {
@@ -156,7 +156,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Gets static folder fullname.
-     * 
+     *
      * @return The folder fullname
      */
     public static String getFolder() {
@@ -165,7 +165,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      * @param startTimerTask <code>true</code> to start a timer task for this listener
      * @return A new {@link ImapIdlePushListener}.
@@ -196,7 +196,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      */
     private ImapIdlePushListener(final Session session) {
@@ -235,7 +235,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Gets the session
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -244,7 +244,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Opens this listener
-     * 
+     *
      * @throws OXException If listener cannot be opened
      */
     public void open() throws OXException {
@@ -273,8 +273,8 @@ public final class ImapIdlePushListener implements PushListener {
                 }
                 /*-
                  * No more needed because watcher recognizes IDLE state if properly set via MailAccess.setWaiting(boolean).
-                 * 
-                 * 
+                 *
+                 *
                 final IMailProperties imcf = IMAPAccess.getInstance(session).getMailConfig().getMailProperties();
                 if( imcf.isWatcherEnabled() ) {
                     LOG.error("com.openexchange.mail.watcherEnabled is enabled, please disable it!");
@@ -304,7 +304,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     /**
      * Check for new mails
-     * 
+     *
      * @throws OXException If check for new mails fails
      */
     public boolean checkNewMail() throws OXException {

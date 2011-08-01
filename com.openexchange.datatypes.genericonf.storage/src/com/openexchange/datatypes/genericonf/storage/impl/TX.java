@@ -64,8 +64,8 @@ import java.util.List;
  */
 public abstract class TX {
     private Connection connection;
-    private List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
-    
+    private final List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
+
     public abstract Object perform() throws SQLException;
 
     public void close() {
@@ -78,15 +78,15 @@ public abstract class TX {
         }
         statements.clear();
     }
-    
+
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
-    
+
     public Connection getConnection() {
         return connection;
     }
-    
+
     public void register(PreparedStatement stmt) {
         statements.add(stmt);
     }

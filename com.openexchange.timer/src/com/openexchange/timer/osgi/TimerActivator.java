@@ -57,7 +57,7 @@ import com.openexchange.timer.internal.TimerImpl;
 
 /**
  * {@link TimerActivator} - Activator for timer bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimerActivator implements BundleActivator {

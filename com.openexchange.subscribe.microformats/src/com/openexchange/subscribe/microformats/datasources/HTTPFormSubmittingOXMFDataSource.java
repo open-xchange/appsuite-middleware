@@ -72,7 +72,7 @@ import com.openexchange.subscribe.microformats.parser.OXMFForm;
  *
  */
 public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class));
 
     public Reader getData(Subscription subscription) throws OXException {
@@ -81,9 +81,9 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         }
 
         Map<String, String> formValues = new HashMap<String, String>(subscription.getSource().getFormDescription().getFormElements().size());
-        
+
         Map<String, Object> values = subscription.getConfiguration();
-        
+
         WidgetSwitcher formSwitcher = new FormSwitcher();
         for(FormElement element : subscription.getSource().getFormDescription().getFormElements()) {
             String name = element.getName();
@@ -92,14 +92,14 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
                 formValues.put(name, stringValue);
             }
         }
-        
+
         ExternalSubscriptionSource source = (ExternalSubscriptionSource) subscription.getSource();
         String address = ((OXMFForm) source.getFormDescription()).getAction();
         if(address == null) {
             address = source.getExternalAddress();
         }
-        
-        
+
+
         try {
             return HTTPToolkit.post(address, formValues);
         } catch (HttpException e) {
@@ -111,8 +111,8 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         }
 
     }
-    
-    
+
+
     private static final class FormSwitcher implements WidgetSwitcher {
 
         public Object checkbox(Object... args) {
@@ -141,7 +141,7 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         public Object custom(Object... args) {
             return null;
         }
-        
+
     }
 
 }

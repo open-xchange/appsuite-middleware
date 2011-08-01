@@ -139,7 +139,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         subscription.setSource(subscriptionSource);
         subscription.setConfiguration(configuration);
         subscription.setEnabled(true);
-        
+
         // Second
         final FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");

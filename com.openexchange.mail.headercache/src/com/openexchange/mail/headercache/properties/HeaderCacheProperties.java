@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link HeaderCacheProperties} - Properties for an account's header cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HeaderCacheProperties {
@@ -70,7 +70,7 @@ public interface HeaderCacheProperties {
 
     /**
      * Gets the property value associated with specified property name.
-     * 
+     *
      * @param propertyName The property name
      * @return The property value associated with specified property name or <code>null</code>
      * @throws OXException If property retrieval fails
@@ -79,7 +79,7 @@ public interface HeaderCacheProperties {
 
     /**
      * Maps given property name to given property value.
-     * 
+     *
      * @param propertyName The property name
      * @param propertyValue The property value
      * @throws OXException If property mapping cannot be added
@@ -88,7 +88,7 @@ public interface HeaderCacheProperties {
 
     /**
      * Removes the property value associated with specified property name.
-     * 
+     *
      * @param propertyName The property name
      * @throws OXException If property removal fails
      */

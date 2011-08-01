@@ -68,7 +68,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes TextPages (sourcecode of a HtmlPage) that each contain a vcard and converts them to ContactObjects for OX
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], List<TextPage>>{
@@ -108,7 +108,7 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], 
         if (input.isEmpty()) {
             executedSuccessfully = true;
         }
-        
+
         output = new Contact[contactObjects.size()];
         for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
             output[i] = contactObjects.get(i);

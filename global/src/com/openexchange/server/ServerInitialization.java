@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ServerInitialization} - The {@link Initialization initialization} for server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ServerInitialization implements Initialization {

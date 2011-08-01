@@ -65,7 +65,7 @@ import com.openexchange.twitter.User;
 /**
  * {@link TwitterAccessImpl} - The twitter access implementation based on <a
  * href="http://repo1.maven.org/maven2/net/homeip/yusuke/twitter4j/">twitter4j</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterAccessImpl implements TwitterAccess {
@@ -76,7 +76,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
 
     /**
      * Initializes a new {@link TwitterAccessImpl}.
-     * 
+     *
      * @param twitter4jTwitter The authenticated <code>twitter4j.Twitter</code> instance
      * @throws IllegalArgumentException If specified <code>twitter4jTwitter</code> argument is <code>null</code>
      */

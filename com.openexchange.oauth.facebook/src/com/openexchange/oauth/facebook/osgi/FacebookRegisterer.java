@@ -150,7 +150,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
                 LOG.info("Unregistering facebook service.");
                 registration2.unregister();
             }
-            
+
         }
         context.ungetService(reference);
     }

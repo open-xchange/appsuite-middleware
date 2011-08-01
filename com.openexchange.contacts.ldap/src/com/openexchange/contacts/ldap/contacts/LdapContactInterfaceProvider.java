@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link LdapContactInterfaceProvider} - Provider for LDAP contact interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LdapContactInterfaceProvider implements ContactInterfaceProvider {
@@ -73,19 +73,19 @@ public final class LdapContactInterfaceProvider implements ContactInterfaceProvi
     private final int folderId;
 
     private final int contextId;
-    
+
     public List<Contact> cached_contacts;
-    
+
     // Mapping tables - only used if the folder content is the same for all user (admin dn auth)
     public volatile Map<Integer, String> keytable;
-    
+
     public volatile Map<String, Integer> valuetable;
-    
+
     public ReentrantReadWriteLock rwlock_cached_contacts = new ReentrantReadWriteLock(true);
 
     /**
      * Initializes a new {@link LdapContactInterfaceProvider}.
-     * 
+     *
      * @param folderProperties The folder properties
      * @param adminId The admin ID
      * @param folderId The folder ID

@@ -229,6 +229,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
         super(provider);
     }
 
+    @Override
     public void delete(final int[] ids, final Context ctx) throws OXException {
         final StringBuilder del = new StringBuilder("DELETE FROM infostore WHERE id IN (");
         final StringBuilder delVers = new StringBuilder("DELETE FROM infostore_document WHERE infostore_id IN (");
@@ -246,14 +247,17 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     }
 
+    @Override
     public void insertDocument(final DocumentMetadata document, final Context ctx) throws OXException {
         executeUpdate(INSERT_INFOSTORE, Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()));
     }
 
+    @Override
     public void insertVersion(final DocumentMetadata document, final Context ctx) throws OXException {
         executeUpdate(INSERT_INFOSTORE_DOCUMENT,Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()));
     }
 
+    @Override
     public void insertVersion(final DocumentMetadata document, final Context ctx, final String filestoreLocation) throws OXException {
         executeUpdate(INSERT_INFOSTORE_DOCUMENT_WITH_FILESTORE_LOC,Table.INFOSTORE.getFields(), document, ctx, Integer.valueOf(ctx.getContextId()), filestoreLocation);
     }
@@ -392,99 +396,123 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     static final class InfostoreColumnsSwitch implements MetadataSwitcher{
 
+        @Override
         public Object categories() {
             return null;
         }
 
+        @Override
         public Object colorLabel() {
             return "color_label";
         }
 
+        @Override
         public Object content() {
             return null;
         }
 
+        @Override
         public Object createdBy() {
             return "created_by";
         }
 
+        @Override
         public Object creationDate() {
             return "creating_date";
         }
 
+        @Override
         public Object currentVersion() {
             return null;
         }
 
+        @Override
         public Object description() {
             return null;
         }
 
+        @Override
         public Object fileMD5Sum() {
             return null;
         }
 
+        @Override
         public Object fileMIMEType() {
             return null;
         }
 
+        @Override
         public Object fileName() {
             return null;
         }
 
+        @Override
         public Object fileSize() {
             return null;
         }
 
+        @Override
         public Object folderId() {
             return "folder_id";
         }
 
+        @Override
         public Object id() {
             return "id";
         }
 
+        @Override
         public Object lastModified() {
             return "last_modified";
         }
 
+        @Override
         public Object lockedUntil() {
             return null;
         }
 
+        @Override
         public Object modifiedBy() {
             return "changed_by";
         }
 
+        @Override
         public Object sequenceNumber() {
             return null;
         }
 
+        @Override
         public Object title() {
             return null;
         }
 
+        @Override
         public Object url() {
             return null;
         }
 
+        @Override
         public Object version() {
             return "version";
         }
 
+        @Override
         public Object versionComment() {
             return null;
         }
 
+        @Override
         public Object filestoreLocation() {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public Object lastModifiedUTC() {
             return lastModified();
         }
 
+        @Override
         public Object numberOfVersions() {
             return null;
         }
@@ -493,99 +521,123 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     static final class InfostoreDocumentColumnsSwitch implements MetadataSwitcher{
 
+        @Override
         public Object categories() {
             return "categories";
         }
 
+        @Override
         public Object colorLabel() {
             return null;
         }
 
+        @Override
         public Object content() {
             return null;
         }
 
+        @Override
         public Object createdBy() {
             return "created_by";
         }
 
+        @Override
         public Object creationDate() {
             return "creating_date";
         }
 
+        @Override
         public Object currentVersion() {
             return null;
         }
 
+        @Override
         public Object description() {
             return "description";
         }
 
+        @Override
         public Object fileMD5Sum() {
             return "file_md5sum";
         }
 
+        @Override
         public Object fileMIMEType() {
             return "file_mimetype";
         }
 
+        @Override
         public Object fileName() {
             return "filename";
         }
 
+        @Override
         public Object fileSize() {
             return "file_size";
         }
 
+        @Override
         public Object folderId() {
             return null;
         }
 
+        @Override
         public Object id() {
             return "infostore_id";
         }
 
+        @Override
         public Object lastModified() {
             return "last_modified";
         }
 
+        @Override
         public Object lockedUntil() {
             return null;
         }
 
+        @Override
         public Object modifiedBy() {
             return "changed_by";
         }
 
+        @Override
         public Object sequenceNumber() {
             return null;
         }
 
+        @Override
         public Object title() {
             return "title";
         }
 
+        @Override
         public Object url() {
             return "url";
         }
 
+        @Override
         public Object version() {
             return "version_number";
         }
 
+        @Override
         public Object versionComment() {
             return "file_version_comment";
         }
 
+        @Override
         public Object filestoreLocation() {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public Object lastModifiedUTC() {
             return lastModified();
         }
 
+        @Override
         public Object numberOfVersions() {
             return null;
         }
@@ -597,6 +649,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 
     private static class VersionWins implements FieldChooser {
 
+        @Override
         public Table choose(final Metadata m) {
             if(Table.INFOSTORE_DOCUMENT.getFieldSet().contains(m)) {
                 return Table.INFOSTORE_DOCUMENT;
@@ -607,6 +660,7 @@ public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
     }
 
     static class DocumentWins implements FieldChooser {
+        @Override
         public Table choose(final Metadata m) {
             if(Table.INFOSTORE.getFieldSet().contains(m)) {
                 return Table.INFOSTORE;

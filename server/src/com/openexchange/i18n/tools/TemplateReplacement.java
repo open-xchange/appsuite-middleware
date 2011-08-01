@@ -55,7 +55,7 @@ import java.util.TimeZone;
 /**
  * {@link TemplateReplacement} - Defines how a {@link TemplateToken token} is
  * supposed to be replaced by a replacement string.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TemplateReplacement extends Cloneable {
@@ -64,7 +64,7 @@ public interface TemplateReplacement extends Cloneable {
 
     /**
      * Gets the token occurring in a template which is supposed to be replaced
-     * 
+     *
      * @return The token occurring in a template which is supposed to be
      *         replaced
      */
@@ -72,7 +72,7 @@ public interface TemplateReplacement extends Cloneable {
 
     /**
      * Gets the replacement string for the token occurring in a template
-     * 
+     *
      * @return The replacement string for the token occurring in a template
      */
     public String getReplacement();
@@ -80,7 +80,7 @@ public interface TemplateReplacement extends Cloneable {
     /**
      * Indicates if this replacement reflects a changed value; default is
      * <code>false</code>
-     * 
+     *
      * @return <code>true</code> if this replacement reflects a changed value;
      *         otherwise <code>false</code>
      */
@@ -88,10 +88,10 @@ public interface TemplateReplacement extends Cloneable {
 
     /**
      * Sets whether this replacement is marked as being changed or not.
-     * 
+     *
      * <code>true</code> to mark this replacement as being changed; otherwise
      * <code>false</code>
-     * 
+     *
      * @return This replacement with new changed status applied
      */
     public TemplateReplacement setChanged(boolean changed);
@@ -102,7 +102,7 @@ public interface TemplateReplacement extends Cloneable {
      * If not applicable, given locale is <code>null</code> or equal to already
      * applied locale, this method is a no-op and this replacement is returned
      * unchanged.
-     * 
+     *
      * @param locale The locale to set
      * @return This replacement with specified locale applied
      */
@@ -114,7 +114,7 @@ public interface TemplateReplacement extends Cloneable {
      * If not applicable, given time zone is <code>null</code> or equal to
      * already applied time zone, this method is a no-op and this replacement is
      * returned unchanged.
-     * 
+     *
      * @param timeZone The time zone to set
      * @return This replacement with specified time zone applied
      */
@@ -122,7 +122,7 @@ public interface TemplateReplacement extends Cloneable {
 
     /**
      * Should delegate to {@link java.lang.Object#clone()}
-     * 
+     *
      * @return The clone
      * @throws CloneNotSupportedException If {@link Cloneable} interface is not
      *             implemented
@@ -140,7 +140,7 @@ public interface TemplateReplacement extends Cloneable {
      * <b>Note</b>:<br>
      * If specified replacement is <code>null</code> this method is treated as a
      * no-op.
-     * 
+     *
      * @param other The other replacement to merge with
      * @return <code>true</code> if this replacement is merged with specified
      *         replacement; otherwise <code>false</code> is this replacement is

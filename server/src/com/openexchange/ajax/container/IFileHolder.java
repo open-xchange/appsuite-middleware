@@ -53,42 +53,42 @@ import java.io.InputStream;
 
 /**
  * {@link IFileHolder}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface IFileHolder {
 
     /**
      * Gets the content's input stream.
-     * 
+     *
      * @return The input stream
      */
     InputStream getStream();
 
     /**
      * Gets the content's length.
-     * 
+     *
      * @return The content length
      */
     long getLength();
 
     /**
      * Gets the content type.
-     * 
+     *
      * @return The content type
      */
     String getContentType();
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     String getName();
 
     /**
      * Gets the (optional) disposition.
-     * 
+     *
      * @return The disposition or <code>null</code>
      */
     String getDisposition();

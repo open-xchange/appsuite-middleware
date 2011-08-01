@@ -71,7 +71,7 @@ public class UpdatesAction extends AbstractMessagingAction {
     public UpdatesAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
-    
+
     public UpdatesAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }

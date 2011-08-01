@@ -78,10 +78,12 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         avgUseTimeArr = new long[USE_TIME_COUNT];
     }
 
+    @Override
     public int getPoolSize() {
         return 0;
     }
 
+    @Override
     public int getNumActive() {
         return numActive.get();
     }
@@ -90,6 +92,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         this.numActive.set(numActive);
     }
 
+    @Override
     public int getNumIdle() {
         return numIdle.get();
     }
@@ -98,6 +101,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         this.numIdle.set(numIdle);
     }
 
+    @Override
     public double getAvgUseTime() {
         long duration = 0;
         for (final long element : avgUseTimeArr) {
@@ -122,6 +126,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         }
     }
 
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
@@ -130,6 +135,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
     }
 
+    @Override
     public void resetMaxUseTime() {
         useTimeLock.lock();
         try {
@@ -139,6 +145,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         }
     }
 
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
@@ -147,6 +154,7 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         this.minUseTime = (minUseTime <= this.minUseTime) ? minUseTime : this.minUseTime;
     }
 
+    @Override
     public void resetMinUseTime() {
         useTimeLock.lock();
         try {
@@ -156,10 +164,12 @@ public class AJPv13ServerThreadsMonitor implements AJPv13ServerThreadsMonitorMBe
         }
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return 0;
     }
 
+    @Override
     public void stopAndRestartAJPServer() throws AJPv13Exception {
         AJPv13Server.stopAJPServer();
         AJPv13Server.startAJPServer();

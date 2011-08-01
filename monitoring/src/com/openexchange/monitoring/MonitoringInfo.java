@@ -56,7 +56,7 @@ import com.openexchange.counter.Counter;
 
 /**
  * {@link MonitoringInfo} - Container for various monitoring information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MonitoringInfo {
@@ -126,7 +126,7 @@ public class MonitoringInfo {
     private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8);
 
     private static final Counter EMPTY_COUNTER = new Counter() {
-        
+
         public int getCount() {
             return 0;
         }

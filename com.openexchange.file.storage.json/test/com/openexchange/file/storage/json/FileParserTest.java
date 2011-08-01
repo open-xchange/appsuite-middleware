@@ -75,7 +75,7 @@ import com.openexchange.file.storage.File;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileParserTest extends TestCase {
-    
+
     public void testParse() throws JSONException, OXException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
@@ -97,9 +97,9 @@ public class FileParserTest extends TestCase {
         object.put("url", "http://some.url");
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
-        
+
         final File file = FileMetadataParser.getInstance().parse(object);
-        
+
         assertNotNull(file);
         assertEquals("cat1, cat2, cat3", file.getCategories());
         assertEquals(12, file.getColorLabel());
@@ -121,7 +121,7 @@ public class FileParserTest extends TestCase {
         assertEquals(33, file.getVersion());
         assertEquals("This is the best version", file.getVersionComment());
     }
-    
+
     public void testFindFields() throws JSONException {
         final JSONObject object = new JSONObject();
         object.put("categories", new JSONArray("['cat1', 'cat2', 'cat3']"));
@@ -133,9 +133,9 @@ public class FileParserTest extends TestCase {
         object.put("number_of_versions", 3000);
         object.put("version", 33);
         object.put("version_comment", "This is the best version");
-        
+
         final List<File.Field> fields = FileMetadataParser.getInstance().getFields(object);
-        
+
         for(final File.Field field : EnumSet.of(CATEGORIES, COLOR_LABEL, DESCRIPTION, FILENAME, FOLDER_ID, MODIFIED_BY, NUMBER_OF_VERSIONS, VERSION, VERSION_COMMENT)) {
             assertTrue("Missing field "+field, fields.contains(field));
         }

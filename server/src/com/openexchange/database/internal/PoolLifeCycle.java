@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * Interface for creating database connection pools.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface PoolLifeCycle {
 
     /**
      * Creates a connection pool for the given pool identifier.
-     * 
+     *
      * @param poolId The pool identifier.
      * @return The connection pool or <code>null</code> if the current {@link PoolLifeCycle} is not responsive for the given pool
      *         identifier.

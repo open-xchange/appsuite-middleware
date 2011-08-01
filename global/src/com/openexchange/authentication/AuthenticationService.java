@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
  * This interface defines the methods for handling the login information. E.g. the login information <code>user@domain.tld</code> is split
  * into <code>user</code> and <code>domain.tld</code> and the context part will be used to resolve the context while the user part will be
  * used to authenticate the user.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface AuthenticationService {
@@ -63,7 +63,7 @@ public interface AuthenticationService {
     /**
      * This method maps the login information from the login screen to the both parts needed to resolve the context and the user of that
      * context.
-     * 
+     *
      * @param loginInfo the complete login information from the login screen.
      * @return a string array with two elements in which the first contains the login info for the context and the second contains the login
      *         info for the user.

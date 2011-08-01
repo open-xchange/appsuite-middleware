@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link CheckPermissionOnInsert} - Checks for system permissions which shall be inserted.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
@@ -80,7 +80,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
 
     /**
      * Initializes a new {@link CheckPermissionOnInsert}
-     * 
+     *
      * @param session The session
      * @param writeCon A connection with write capability
      * @param ctx The context
@@ -92,7 +92,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
     /**
      * Checks for parental visibility permissions and adds a folder-read-only-permission for non-tree-visible parent folder if user has
      * admin permission (optional).
-     * 
+     *
      * @param parent The parent folder ID
      * @param perms The current permissions that shall be applied to affected folder
      * @param lastModified The last-modified time stamp to use when adding permissions
@@ -207,7 +207,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
 
     /**
      * Adds system-read-folder permission to specified folder for given entity
-     * 
+     *
      * @param folderId The folder ID
      * @param entity The entity
      * @param isGroup whether entity denotes a group

@@ -72,19 +72,19 @@ public class MessagingAccountWriterTest extends TestCase {
         final SimMessagingAccount account = new SimMessagingAccount();
         account.setId(12);
         account.setDisplayName("My Twitter Account");
-        
+
         final Map<String, Object> configuration = new HashMap<String, Object>();
         configuration.put("inputField", "My Input Value");
         account.setConfiguration(configuration);
-        
+
         final SimMessagingService messagingService = new SimMessagingService();
-        
+
         final DynamicFormDescription description = new DynamicFormDescription().add(FormElement.input("inputField", "My cool config option"));
         messagingService.setFormDescription(description);
-        
+
         messagingService.setId("com.openexchange.twitter");
         account.setMessagingService(messagingService);
-        
+
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("id").withValue(12)
@@ -95,13 +95,13 @@ public class MessagingAccountWriterTest extends TestCase {
                 .objectEnds()
             .objectEnds()
         ;
-        
+
         final MessagingAccountWriter writer = new MessagingAccountWriter();
-        
+
         final JSONObject object = writer.write(account);
-        
+
         assertValidates(assertion, object);
-        
+
     }
- 
+
 }

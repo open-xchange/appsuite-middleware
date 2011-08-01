@@ -61,7 +61,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link SimpleTableCreationTask}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
@@ -77,6 +77,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
     protected abstract String getTableName();
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         final Connection con = dbService.getForUpdateTask(contextId);

@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link PasswordChangeServletServiceRegistry} - A registry for services needed by password change servlet bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PasswordChangeServletServiceRegistry {
@@ -62,7 +62,7 @@ public final class PasswordChangeServletServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingAddressHeader} - Represents a messaging address header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -61,28 +61,28 @@ public interface MessagingAddressHeader extends MessagingHeader {
 
     /**
      * Gets the personal.
-     * 
+     *
      * @return The personal or <code>null</code> if not available
      */
     public String getPersonal();
 
     /**
      * Sets the personal.
-     * 
+     *
      * @param personal The personal to set
      */
     public void setPersonal(String personal);
 
     /**
      * Gets the address.
-     * 
+     *
      * @return The address
      */
     public String getAddress();
 
     /**
      * Sets the address.
-     * 
+     *
      * @param address The address to set
      * @throws OXException If setting address fails
      */

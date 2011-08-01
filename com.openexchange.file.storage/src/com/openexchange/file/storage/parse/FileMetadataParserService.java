@@ -9,7 +9,7 @@ import com.openexchange.file.storage.File.Field;
 
 /**
  * {@link FileMetadataParserService} - The JSON parsing service for file storage.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -17,7 +17,7 @@ public interface FileMetadataParserService {
 
     /**
      * Parses given JSON object to a file.
-     * 
+     *
      * @param object The JSON object
      * @return The parsed file
      * @throws OXException If parsing fails
@@ -26,7 +26,7 @@ public interface FileMetadataParserService {
 
     /**
      * Gets all present fields from given JSON object.
-     * 
+     *
      * @param object The JSON object
      * @return The present fields
      */

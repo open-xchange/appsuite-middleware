@@ -58,11 +58,13 @@ public class SUBSTRING extends TernaryFunction {
 		super(leftExpression, middleExpression, rightExpression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildSUBSTRING(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "SUBSTRING";
 	}
 }

@@ -51,13 +51,13 @@ package com.openexchange.control.console.internal;
 
 /**
  * ConsoleException
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ConsoleException extends Exception {
 
     /**
-	 * 
+	 *
 	 */
     private static final long serialVersionUID = 2896219569585713526L;
 

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.SortableId;
 
 /**
  * {@link FileStorageId} - A file storage ID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageId implements SortableId {
@@ -66,7 +66,7 @@ public final class FileStorageId implements SortableId {
 
     /**
      * Initializes a new {@link FileStorageId}.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      * @param name The name
@@ -78,14 +78,17 @@ public final class FileStorageId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         /*
          * Mail folders at second position
@@ -93,6 +96,7 @@ public final class FileStorageId implements SortableId {
         return Priority.NORMAL;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof FileStorageId) {
             final int thisVal = ordinal;

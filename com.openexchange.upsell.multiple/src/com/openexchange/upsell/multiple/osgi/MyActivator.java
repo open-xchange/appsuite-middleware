@@ -108,7 +108,7 @@ public class MyActivator extends DeferredActivator {
 
     @Override
 	protected void startBundle() throws Exception {
-		
+
 		// try to load all the needed services like config service and hostnameservice
 		try {
 			{
@@ -122,24 +122,24 @@ public class MyActivator extends DeferredActivator {
 					}
 				}
 			}
-			
-			
+
+
 			// register the http info/sso servlet
 			servletRegistration = new SessionServletRegistration(context, new MyServlet(), getFromConfig("com.openexchange.upsell.multiple.servlet"));
 			servletRegistration.open();
             serviceTrackerList.add(new ServiceTracker(context, UpsellURLService.class.getName(), new UrlServiceInstallationServiceListener(context)));
-			
+
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackerList) {
                 tracker.open();
             }
 
-            
+
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-		
+
 	}
 
     private String getFromConfig(final String key) throws OXException {

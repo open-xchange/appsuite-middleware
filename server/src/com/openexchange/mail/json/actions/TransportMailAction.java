@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TransportMailAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportMailAction extends AbstractMailAction {
@@ -85,7 +85,7 @@ public final class TransportMailAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link TransportMailAction}.
-     * 
+     *
      * @param services
      */
     public TransportMailAction(final ServiceLookup services) {

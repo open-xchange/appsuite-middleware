@@ -58,7 +58,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * The write lock can only be acquired exclusively, but the read lock can be held by multiple threads simultaneously, as long as no write
  * lock is acquired.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingRWLock {
@@ -76,7 +76,7 @@ public final class NonBlockingRWLock {
 
     /**
      * Initializes a new {@link NonBlockingRWLock}
-     * 
+     *
      * @param infiniteConcurrentWrites <code>true</code> to enable infinite concurrent write accesses; otherwise <code>false</code> to use
      *            default value of <code>10000</code> for max. number of concurrent write accesses
      */
@@ -95,7 +95,7 @@ public final class NonBlockingRWLock {
 
     /**
      * Initializes a new {@link NonBlockingRWLock}
-     * 
+     *
      * @param maxConcurrentWrites The max. number of concurrent write accesses; a value equal to or less than zero means infinite concurrent
      *            write accesses
      */
@@ -114,7 +114,7 @@ public final class NonBlockingRWLock {
      * Acquires the read lock and returns current state.
      * <p>
      * The general contract of acquiring and finally releasing a read lock is:
-     * 
+     *
      * <pre>
      * int state;
      * do {
@@ -122,7 +122,7 @@ public final class NonBlockingRWLock {
      *     // your code here
      * } while (!myRWLock.releaseRead(state));
      * </pre>
-     * 
+     *
      * @return The current state
      */
     public int acquireRead() {
@@ -140,7 +140,7 @@ public final class NonBlockingRWLock {
      * Acquires the write lock exclusively.
      * <p>
      * The general contract of acquiring and finally releasing a write lock is:
-     * 
+     *
      * <pre>
      * myRWLock.acquireWrite();
      * try {
@@ -162,7 +162,7 @@ public final class NonBlockingRWLock {
     /**
      * Releases the previously acquired read lock and indicates if previous state still equals current state. See {@link #acquireRead()} how
      * to deal with the return value.
-     * 
+     *
      * @param prevState The previous state when read lock was acquired
      * @return <code>true</code> if previous state still equals current state and thus read lock has been released successfully; otherwise
      *         <code>false</code>
@@ -173,7 +173,7 @@ public final class NonBlockingRWLock {
 
     /**
      * Releases the previously acquired exclusive write lock.
-     * 
+     *
      * @see #acquireWrite()
      */
     public void releaseWrite() {

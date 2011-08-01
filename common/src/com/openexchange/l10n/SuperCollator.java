@@ -56,16 +56,16 @@ import java.util.Locale;
  * one consistent package. This way, you always know which collation to use for
  * a Java locale or the other way around. Note that the only unique attribute is
  * the mysql collation: Both locales and charsets might occur more than once.
- * 
+ *
  * @author tobiasp
- * 
+ *
  */
 public enum SuperCollator {
-	PRC_1		("PRC", Locale.PRC, "gb2312", "gb2312_chinese_ci"), 
-	PRC_2		("PRC", Locale.PRC, "gbk","gbk_chinese_ci"), 
-	CHINA_TAIWAN("TAIWAN",Locale.TAIWAN, "big5","big5_chinese_ci"), 
-	CHINA_2		("CHINESE", Locale.CHINESE, "gb2312","gb2312_chinese_ci"), 
-	CHINA_3		("CHINA", Locale.CHINA, "gb2312",	"gb2312_chinese_ci"), 
+	PRC_1		("PRC", Locale.PRC, "gb2312", "gb2312_chinese_ci"),
+	PRC_2		("PRC", Locale.PRC, "gbk","gbk_chinese_ci"),
+	CHINA_TAIWAN("TAIWAN",Locale.TAIWAN, "big5","big5_chinese_ci"),
+	CHINA_2		("CHINESE", Locale.CHINESE, "gb2312","gb2312_chinese_ci"),
+	CHINA_3		("CHINA", Locale.CHINA, "gb2312",	"gb2312_chinese_ci"),
 	DEFAULT		("DEFAULT", Locale.getDefault(), "utf8","utf8_general_ci");
 
 	private String collation;
@@ -99,82 +99,99 @@ public enum SuperCollator {
 		SuperCollator result = null;
 
 		result = getBySqlCollation(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getBySqlCharset(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getByJavaLocale(something);
-		if (result != null)
-			return result;
+		if (result != null) {
+            return result;
+        }
 
 		result = getByName(something);
-		if (result != null)
-			return result;
-		
+		if (result != null) {
+            return result;
+        }
+
 		return result;
 	}
 
 	public static SuperCollator getByJavaLocale(String something) {
-		if(something == null)
-			return null;
-		
+		if(something == null) {
+            return null;
+        }
+
 		String[] parts = something.split("_");
 
 		String lang = null, country = null, variant = null;
 		Locale javaLocale;
 
-		if (parts.length > 0)
-			lang = parts[0];
-		if (parts.length > 1)
-			country = parts[1];
-		if (parts.length > 2)
-			variant = parts[2];
+		if (parts.length > 0) {
+            lang = parts[0];
+        }
+		if (parts.length > 1) {
+            country = parts[1];
+        }
+		if (parts.length > 2) {
+            variant = parts[2];
+        }
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
 			if (javaLocale.getVariant().equalsIgnoreCase(variant)
 				&& javaLocale.getCountry().equalsIgnoreCase(country)
-				&& javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+				&& javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
 			if (javaLocale.getCountry().equalsIgnoreCase(country)
-				&& javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+				&& javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		for (SuperCollator loc : values()) {
 			javaLocale = loc.getJavaLocale();
-			if (javaLocale.getLanguage().equalsIgnoreCase(lang))
-				return loc;
+			if (javaLocale.getLanguage().equalsIgnoreCase(lang)) {
+                return loc;
+            }
 		}
 
 		return null;
 	}
 
 	public static SuperCollator getBySqlCollation(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getSqlCollation().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getSqlCollation().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
 
 	public static SuperCollator getBySqlCharset(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getSqlCharset().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getSqlCharset().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
-	
+
 	public static SuperCollator getByName(String something) {
-		for (SuperCollator loc : values())
-			if (loc.getName().equalsIgnoreCase(something))
-				return loc;
+		for (SuperCollator loc : values()) {
+            if (loc.getName().equalsIgnoreCase(something)) {
+                return loc;
+            }
+        }
 		return null;
 	}
 

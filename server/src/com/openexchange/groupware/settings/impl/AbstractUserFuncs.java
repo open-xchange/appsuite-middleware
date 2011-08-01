@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  * This class contains the shared functions for all user settings.
  */
 public abstract class AbstractUserFuncs implements IValueHandler {
-    
+
     /**
      * Initializes a new {@link AbstractUserFuncs}.
      */
@@ -73,6 +73,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void writeValue(final Session session, final Context ctx, final User user,
         final Setting setting) throws OXException {
         try {
@@ -87,13 +88,14 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return -1;
     }
 
     /**
      * Sets the value in passed <tt>newUser</tt>.
-     * 
+     *
      * @param newUser In this user object the value should be set.
      * @param value The value to set.
      * @param originalUser The original user fetched from storage

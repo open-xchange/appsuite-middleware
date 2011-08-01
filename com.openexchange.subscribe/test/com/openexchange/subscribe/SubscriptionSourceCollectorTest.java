@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link SubscriptionSourceCollectorTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionSourceCollectorTest extends TestCase {
@@ -70,6 +70,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
 
     private SubscribeService testService1;
 
+    @Override
     public void setUp() {
         collector = new SubscriptionSourceCollector();
         collector.addSubscribeService(testService1 = service("com.openexchange.subscription.test1"));
@@ -89,11 +90,11 @@ public class SubscriptionSourceCollectorTest extends TestCase {
             "com.openexchange.subscription.test1",
             "com.openexchange.subscription.test2",
             "com.openexchange.subscription.test3");
-        
+
         assertPriority(sources, "com.openexchange.subscription.test3", 2);
-        
+
     }
-    
+
     public void testKnows() {
         assertKnows(collector, "com.openexchange.subscription.test1");
         assertKnows(collector, "com.openexchange.subscription.test2");
@@ -101,7 +102,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertKnows(collector, "com.openexchange.subscription.testHandlesNoFolder");
         assertDoesNotKnow(collector, "unknown");
     }
-    
+
     public void testGet() {
         assertNotNull("Missing com.openexchange.susbscription.test1", collector.getSource("com.openexchange.subscription.test1"));
         assertNotNull("Missing com.openexchange.susbscription.test2", collector.getSource("com.openexchange.subscription.test2"));
@@ -109,10 +110,10 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertNotNull("Missing com.openexchange.susbscription.testHandlesNoFolder", collector.getSource("com.openexchange.subscription.testHandlesNoFolder"));
         assertEquals("Didn't remember subscribe service", testService1, collector.getSource("com.openexchange.subscription.test1").getSubscribeService());
         assertNull("Got unknown?!?", collector.getSource("unknown"));
-        
+
         assertPriority(collector.getSource("com.openexchange.subscription.test3"), 2);
     }
-    
+
     public void testRemove() {
         collector.removeSubscribeService("com.openexchange.subscription.test1");
         sources = collector.getSources(2);
@@ -124,7 +125,7 @@ public class SubscriptionSourceCollectorTest extends TestCase {
         assertDoesNotKnow(collector, "com.openexchange.subscription.test1");
         assertNull("Didn't expect a source", collector.getSource("com.openexchange.subscription.test1"));
     }
-    
+
     private SubscribeService serviceWithPriority(String string, int i) {
         SubscribeService service = service(string);
         service.getSubscriptionSource().setPriority(i);

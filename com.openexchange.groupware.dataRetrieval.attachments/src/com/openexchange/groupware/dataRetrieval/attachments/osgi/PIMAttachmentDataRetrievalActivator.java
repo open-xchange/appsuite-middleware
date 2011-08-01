@@ -73,11 +73,12 @@ public class PIMAttachmentDataRetrievalActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
- 
+
     }
 
+    @Override
     protected void handleUnavailability(Class<?> clazz) {
- 
+
     }
 
     @Override

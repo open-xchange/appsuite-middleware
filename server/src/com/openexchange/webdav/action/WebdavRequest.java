@@ -88,13 +88,13 @@ public interface WebdavRequest {
 	WebdavPath getDestinationUrl();
 
 	int getDepth(int def);
-	
+
 	WebdavFactory getFactory() throws OXException;
 
 	String getCharset();
 
     boolean hasBody();
-    
+
     Map<String, Object> getUserInfo();
-	
+
 }

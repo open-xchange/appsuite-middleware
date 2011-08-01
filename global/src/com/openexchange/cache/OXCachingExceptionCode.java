@@ -43,7 +43,7 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
@@ -53,7 +53,7 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
         this.category = category;
         this.detailNumber = detailNumber;
     }
-    
+
     public String getPrefix() {
         return "CAC";
     }
@@ -69,14 +69,14 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
     public int getNumber() {
         return detailNumber;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -85,7 +85,7 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -95,7 +95,7 @@ public enum OXCachingExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

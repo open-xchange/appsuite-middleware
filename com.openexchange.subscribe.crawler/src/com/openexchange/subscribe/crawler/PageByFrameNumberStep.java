@@ -67,9 +67,9 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
     private Exception exception;
 
     protected boolean executedSuccessfully;
-    
+
     private int frameNumber;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFrameNumberStep.class));
 
     public PageByFrameNumberStep() {
@@ -86,10 +86,10 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
     @Override
     public void execute(final WebClient webClient) throws OXException {
         int index = 1;
-        
+
         for (FrameWindow frame : input.getFrames()){
             if (index == frameNumber){
-                output = (HtmlPage) frame.getEnclosedPage();                
+                output = (HtmlPage) frame.getEnclosedPage();
                 LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
             }
             index ++;
@@ -119,15 +119,15 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
         this.exception = exception;
     }
 
-    
+
     public int getFrameNumber() {
         return frameNumber;
     }
 
-    
+
     public void setFrameNumber(int frameNumber) {
         this.frameNumber = frameNumber;
     }
-    
-    
+
+
 }

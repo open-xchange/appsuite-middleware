@@ -59,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link CallerRunsCompletionService} - A {@link CompletionService} that uses submitting thread to perform the task.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CallerRunsCompletionService<V> implements CompletionService<V> {
@@ -97,6 +97,7 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
         this.completionQueue = new LinkedBlockingQueue<Future<V>>();
     }
 
+    @Override
     public Future<V> submit(final Callable<V> task) {
         if (task == null) {
             throw new NullPointerException();
@@ -106,6 +107,7 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
         return f;
     }
 
+    @Override
     public Future<V> submit(final Runnable task, final V result) {
         if (task == null) {
             throw new NullPointerException();
@@ -115,14 +117,17 @@ public final class CallerRunsCompletionService<V> implements CompletionService<V
         return f;
     }
 
+    @Override
     public Future<V> take() throws InterruptedException {
         return completionQueue.take();
     }
 
+    @Override
     public Future<V> poll() {
         return completionQueue.poll();
     }
 
+    @Override
     public Future<V> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         return completionQueue.poll(timeout, unit);
     }

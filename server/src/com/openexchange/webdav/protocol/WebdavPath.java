@@ -85,6 +85,7 @@ public class WebdavPath implements Iterable<String>{
         append(components);
     }
 
+    @Override
     public Iterator<String> iterator() {
         return components.iterator();
     }

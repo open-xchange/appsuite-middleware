@@ -66,7 +66,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link ScriptPasswordChange}
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  */
 public final class ScriptPasswordChange extends PasswordChangeService {
@@ -112,21 +112,21 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		final String newpw = event.getNewPassword();
 		final String cid = event.getContext().getContextId()+"";
 		final String userid = user.getId()+"";
-		
+
 		/*
 		 * Update passwd via executing a shell script
-		 * 
+		 *
 		 * Following values must be passed to the script in given order:
-		 * 
-		 *  0. cid -  Context ID 
-		 *  1. user - Username of the logged in user 
-		 *  2. userid - User ID of the logged in user 
-		 *  3. oldpwd - Old user password 
+		 *
+		 *  0. cid -  Context ID
+		 *  1. user - Username of the logged in user
+		 *  2. userid - User ID of the logged in user
+		 *  3. oldpwd - Old user password
 		 *  4. newpwd - New user password
 		 */
-		
+
 		final String[] cmd = new String[11];
-		cmd[0] = shellscript_to_execute; // the script, after that, the parameter 
+		cmd[0] = shellscript_to_execute; // the script, after that, the parameter
 		cmd[1] = "--cid";
 		cmd[2] = cid;
 		cmd[3] = "--username";
@@ -134,12 +134,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		cmd[5] = "--userid";
 		cmd[6] = userid;
 		cmd[7] = "--oldpassword";
-		cmd[8] = oldpw; 
+		cmd[8] = oldpw;
 		cmd[9] = "--newpassword";
-		cmd[10] = newpw; // 
-		
+		cmd[10] = newpw; //
+
 		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
-		
+
 		try {
 		    final int ret = executePasswordUpdateShell(cmd);
 		    if(ret!=0) {
@@ -161,29 +161,29 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		    }
 		} catch (final IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
+			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
 		} catch (final InterruptedException e) {
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));			
+			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
 		}
-		
+
 	}
 
 	private int executePasswordUpdateShell(final String[] cmd) throws IOException, InterruptedException {
-		
+
 		final Runtime rt = Runtime.getRuntime();
 		final Process proc = rt.exec(cmd);
 		final InputStream stderr = proc.getInputStream();
 		final InputStreamReader isr = new InputStreamReader(stderr);
 		final BufferedReader br = new BufferedReader(isr);
 		String line = null;
-		
+
 		while ((line = br.readLine()) != null){
 			LOG.debug("PWD CHANGE: "+line);
 		}
-		
+
 		return proc.waitFor();
-		
+
 
 	}
 

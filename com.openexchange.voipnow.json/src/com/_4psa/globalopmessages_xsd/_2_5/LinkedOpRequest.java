@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -62,8 +62,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -76,25 +76,25 @@ public class LinkedOpRequest {
 
     /**
      * Gets the value of the operation property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the operation property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getOperation().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link LinkedOpRequest.Operation }
-     * 
-     * 
+     *
+     *
      */
     public List<LinkedOpRequest.Operation> getOperation() {
         if (operation == null) {
@@ -106,9 +106,9 @@ public class LinkedOpRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -146,8 +146,8 @@ public class LinkedOpRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -167,11 +167,11 @@ public class LinkedOpRequest {
 
         /**
          * Gets the value of the identifier property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getIdentifier() {
             return identifier;
@@ -179,11 +179,11 @@ public class LinkedOpRequest {
 
         /**
          * Sets the value of the identifier property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setIdentifier(String value) {
             this.identifier = value;
@@ -191,7 +191,7 @@ public class LinkedOpRequest {
 
         /**
          * Gets the value of the package property.
-         * 
+         *
          * @return
          *     possible object is
          *     byte[]
@@ -202,22 +202,22 @@ public class LinkedOpRequest {
 
         /**
          * Sets the value of the package property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     byte[]
          */
         public void setPackage(byte[] value) {
-            this._package = ((byte[]) value);
+            this._package = value;
         }
 
         /**
          * Gets the value of the finalOnFailure property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Boolean }
-         *     
+         *
          */
         public Boolean isFinalOnFailure() {
             return finalOnFailure;
@@ -225,11 +225,11 @@ public class LinkedOpRequest {
 
         /**
          * Sets the value of the finalOnFailure property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Boolean }
-         *     
+         *
          */
         public void setFinalOnFailure(Boolean value) {
             this.finalOnFailure = value;
@@ -237,25 +237,25 @@ public class LinkedOpRequest {
 
         /**
          * Gets the value of the appendOpResponse property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the appendOpResponse property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAppendOpResponse().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link LinkedOpRequest.Operation.AppendOpResponse }
-         * 
-         * 
+         *
+         *
          */
         public List<LinkedOpRequest.Operation.AppendOpResponse> getAppendOpResponse() {
             if (appendOpResponse == null) {
@@ -267,9 +267,9 @@ public class LinkedOpRequest {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -294,8 +294,8 @@ public class LinkedOpRequest {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -311,11 +311,11 @@ public class LinkedOpRequest {
 
             /**
              * Gets the value of the identifier property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getIdentifier() {
                 return identifier;
@@ -323,11 +323,11 @@ public class LinkedOpRequest {
 
             /**
              * Sets the value of the identifier property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setIdentifier(String value) {
                 this.identifier = value;
@@ -335,25 +335,25 @@ public class LinkedOpRequest {
 
             /**
              * Gets the value of the responseMapping property.
-             * 
+             *
              * <p>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the responseMapping property.
-             * 
+             *
              * <p>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getResponseMapping().add(newItem);
              * </pre>
-             * 
-             * 
+             *
+             *
              * <p>
              * Objects of the following type(s) are allowed in the list
              * {@link LinkedOpRequest.Operation.AppendOpResponse.ResponseMapping }
-             * 
-             * 
+             *
+             *
              */
             public List<LinkedOpRequest.Operation.AppendOpResponse.ResponseMapping> getResponseMapping() {
                 if (responseMapping == null) {
@@ -365,9 +365,9 @@ public class LinkedOpRequest {
 
             /**
              * <p>Java class for anonymous complex type.
-             * 
+             *
              * <p>The following schema fragment specifies the expected content contained within this class.
-             * 
+             *
              * <pre>
              * &lt;complexType>
              *   &lt;complexContent>
@@ -381,8 +381,8 @@ public class LinkedOpRequest {
              *   &lt;/complexContent>
              * &lt;/complexType>
              * </pre>
-             * 
-             * 
+             *
+             *
              */
             @XmlAccessorType(XmlAccessType.FIELD)
             @XmlType(name = "", propOrder = {
@@ -399,11 +399,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Gets the value of the responseParam property.
-                 * 
+                 *
                  * @return
                  *     possible object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public String getResponseParam() {
                     return responseParam;
@@ -411,11 +411,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Sets the value of the responseParam property.
-                 * 
+                 *
                  * @param value
                  *     allowed object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public void setResponseParam(String value) {
                     this.responseParam = value;
@@ -423,11 +423,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Gets the value of the requestParam property.
-                 * 
+                 *
                  * @return
                  *     possible object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public String getRequestParam() {
                     return requestParam;
@@ -435,11 +435,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Sets the value of the requestParam property.
-                 * 
+                 *
                  * @param value
                  *     allowed object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public void setRequestParam(String value) {
                     this.requestParam = value;
@@ -447,11 +447,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Gets the value of the node property.
-                 * 
+                 *
                  * @return
                  *     possible object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public String getNode() {
                     return node;
@@ -459,11 +459,11 @@ public class LinkedOpRequest {
 
                 /**
                  * Sets the value of the node property.
-                 * 
+                 *
                  * @param value
                  *     allowed object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public void setNode(String value) {
                     this.node = value;

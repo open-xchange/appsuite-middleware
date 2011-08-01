@@ -11,11 +11,11 @@ import com._4psa.common_xsd._2_5.Notice;
 
 /**
  * Upgrade 4PSA VoipNow to latest release: response type
- * 
+ *
  * <p>Java class for UpgradeVoipNowResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="UpgradeVoipNowResponseType">
  *   &lt;complexContent>
@@ -35,8 +35,8 @@ import com._4psa.common_xsd._2_5.Notice;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UpgradeVoipNowResponseType", propOrder = {
@@ -50,11 +50,11 @@ public class UpgradeVoipNowResponseType {
 
     /**
      * Gets the value of the result property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getResult() {
         return result;
@@ -62,11 +62,11 @@ public class UpgradeVoipNowResponseType {
 
     /**
      * Sets the value of the result property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setResult(String value) {
         this.result = value;
@@ -74,25 +74,25 @@ public class UpgradeVoipNowResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

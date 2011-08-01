@@ -86,7 +86,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link MALPollActivator} - The MAL Poll activator.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollActivator extends DeferredActivator {

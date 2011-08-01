@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link BodyTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BodyTerm extends SearchTerm<String> {
@@ -166,7 +166,7 @@ public final class BodyTerm extends SearchTerm<String> {
 
     /**
      * Extracts textual content out of given message's body
-     * 
+     *
      * @param part The message whose textual content shall be extracted
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails
@@ -193,7 +193,7 @@ public final class BodyTerm extends SearchTerm<String> {
 
     /**
      * Extracts textual content out of given mail part's body
-     * 
+     *
      * @param mailPart The mail message whose textual content shall be extracted
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails
@@ -238,7 +238,7 @@ public final class BodyTerm extends SearchTerm<String> {
 
     /**
      * Extracts textual content out of given part's body
-     * 
+     *
      * @param part The part
      * @return The textual content or <code>null</code> if none found
      * @throws OXException If text extraction fails

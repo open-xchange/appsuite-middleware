@@ -56,7 +56,7 @@ import com.openexchange.messaging.MultipartContent;
 
 /**
  * {@link MimeMessagingBodyPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -76,7 +76,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
 
     /**
      * Initializes a new {@link MimeMessagingBodyPart}.
-     * 
+     *
      * @param parent The multipart parent
      */
     public MimeMessagingBodyPart(final MimeMultipartContent parent) {
@@ -86,7 +86,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
 
     /**
      * Initializes a new {@link MimeMessagingBodyPart}.
-     * 
+     *
      * @param part The MIME body part
      * @param parent The multipart parent
      */
@@ -97,7 +97,7 @@ public class MimeMessagingBodyPart extends MimeMessagingPart implements Messagin
 
     /**
      * Sets the multipart parent.
-     * 
+     *
      * @param parent The multipart parent to set
      */
     public void setParent(final MimeMultipartContent parent) {

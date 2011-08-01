@@ -51,7 +51,7 @@ package com.openexchange.tools.encoding;
 
 /**
  * Conversion methods for strings with hexadezimal coded bytes.
- * 
+ *
  * @author <a href="mailto:m.klein@comfire.de">Marcus Klein</a>
  */
 public class Hex {
@@ -64,7 +64,7 @@ public class Hex {
      * Converts the given byte array to a string with hexadezimal coded bytes. Each byte is represented with its two digit hexadezimal
      * presentation. E.g. dezimal 10 will be represented with hexadezimal 0a. The sign of a byte is used as 8th bit therefore all negative
      * values get hexadezimal values from 80 to ff.
-     * 
+     *
      * @param b The byte array to convert.
      * @return A string with hexadezimal coded bytes.
      */
@@ -90,7 +90,7 @@ public class Hex {
 
     /**
      * Converts the hexadezimal coded bytes in the given string to a byte array.
-     * 
+     *
      * @param hex
      * @return
      */

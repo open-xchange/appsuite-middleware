@@ -51,7 +51,7 @@ package com.openexchange.push.udp;
 
 /**
  * {@link AbstractPushObject} - Abstract push object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractPushObject {
@@ -69,7 +69,7 @@ public abstract class AbstractPushObject {
 
     /**
      * Gets the context ID.
-     * 
+     *
      * @return The context ID
      */
     public int getContextId() {
@@ -80,7 +80,7 @@ public abstract class AbstractPushObject {
      * Checks if this push object was remotely received.
      * <p>
      * If remotely received this push object must not be further distributed among linked hosts.
-     * 
+     *
      * @return <code>true</code> if this push object was remotely received; otherwise <code>false</code>
      */
     public boolean isRemote() {

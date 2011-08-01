@@ -65,15 +65,15 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
     private ComposedConfigProperty<String> delegate;
     private StringParser stringParser;
     private final Class<T> coerceTo;
-    
+
     public CoercingComposedConfigProperty(final Class<T> coerceTo, final ComposedConfigProperty<String> delegate, final StringParser stringParser) {
         this.stringParser = stringParser;
         this.coerceTo = coerceTo;
         this.stringParser = stringParser;
         initDelegate(delegate);
-        
+
     }
- 
+
     private void initDelegate(final ComposedConfigProperty<String> d) {
         this.delegate = d;
     }
@@ -82,7 +82,7 @@ public class CoercingComposedConfigProperty<T> implements ComposedConfigProperty
         initDelegate(delegate.precedence(scopes));
         return this;
     }
-    
+
     public T get() throws OXException {
         final String value = delegate.get();
         return parse(value, coerceTo);

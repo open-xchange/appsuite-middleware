@@ -57,7 +57,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link BooleanTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BooleanTerm extends SearchTerm<Boolean> {

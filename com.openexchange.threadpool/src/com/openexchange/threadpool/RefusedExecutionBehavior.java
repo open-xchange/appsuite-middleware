@@ -53,7 +53,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * {@link RefusedExecutionBehavior} - The behavior for tasks that cannot be executed by a {@link ThreadPoolService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RefusedExecutionBehavior<V> {
@@ -71,7 +71,7 @@ public interface RefusedExecutionBehavior<V> {
      * slots are available because their bounds would be exceeded, or upon shutdown of the thread pool. In the absence of other
      * alternatives, the method may throw an unchecked {@link RejectedExecutionException}, which will be propagated to the caller of
      * <tt>submit()</tt>.
-     * 
+     *
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
      * @return Task's result or {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant if task has been discarded

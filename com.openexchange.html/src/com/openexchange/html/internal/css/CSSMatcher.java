@@ -62,7 +62,7 @@ import com.openexchange.html.internal.RegexUtility.GroupType;
 
 /**
  * {@link CSSMatcher} - Provides several utility methods to check CSS content.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSSMatcher {
@@ -129,10 +129,10 @@ public final class CSSMatcher {
             "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
             GroupType.NON_CAPTURING);
 
-        final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" + 
-                "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" + 
-                "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" + 
-                "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" + 
+        final String strCOLOR_SYSTEM = "ActiveBorder|ActiveCaption|AppWorkspace|Background|" +
+                "ButtonFace|ButtonHighlight|ButtonShadow|ButtonText|CaptionTextGrayText|" +
+                "Highlight|HighlightText|InactiveBorder|InactiveCaption|InactiveCaptionText|" +
+                "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|" +
                 "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
 
         final String strCOLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
@@ -189,7 +189,7 @@ public final class CSSMatcher {
      * <li><b>*</b>:&nbsp;any value</li>
      * <li><b>t</b>:&nbsp;time</li>
      * </ul>
-     * 
+     *
      * @param value The value
      * @param allowedValuesSet The allowed values
      * @return <code>true</code> if value is matched by given allowed values; otherwise <code>false</code>
@@ -262,7 +262,7 @@ public final class CSSMatcher {
 
     /**
      * Iterates over CSS blocks contained in specified string argument and checks each block against given style map
-     * 
+     *
      * @param cssBuilder A {@link StringBuilder} containing CSS content
      * @param styleMap The style map
      * @param findBlocks <code>true</code> to iterate over CSS blocks; otherwise <code>false</code> to iterate over CSS elements
@@ -302,7 +302,7 @@ public final class CSSMatcher {
     /**
      * Corrects rgb functions; e.g.<br>
      * "<i>rgb(238,&nbsp;239,&nbsp;240)</i>"&nbsp;-&gt;&nbsp; "<i>rgb(238,239,240)</i>"
-     * 
+     *
      * @param cssBuilder A {@link StringBuilder} containing CSS content
      */
     private static void correctRGBFunc(final StringBuilder cssBuilder) {
@@ -322,7 +322,7 @@ public final class CSSMatcher {
 
     /**
      * Iterates over CSS elements contained in specified string argument and checks each element and its value against given style map
-     * 
+     *
      * @param cssBuilder A {@link StringBuilder} containing the CSS content
      * @param styleMap The style map
      * @param removeIfAbsent <code>true</code> to completely remove CSS element if not contained in specified style map; otherwise
@@ -396,7 +396,7 @@ public final class CSSMatcher {
 
     /**
      * Checks if specified string argument contains at least one CSS element
-     * 
+     *
      * @param css The CSS string
      * @return <code>true</code> if specified string argument contains at least one CSS element; otherwise <code>false</code>
      */

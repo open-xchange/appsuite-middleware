@@ -63,7 +63,7 @@ import java.util.Set;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TimeSpanParser  implements StringParser {
-    
+
     private static final Map<String, Long> UNITS = new HashMap<String, Long>() {
         private static final long serialVersionUID = 4341197305332412108L;
     {
@@ -83,8 +83,8 @@ public class TimeSpanParser  implements StringParser {
      * h for hours
      * D for days
      * W for weeks
-     * 
-     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds  
+     *
+     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
      * @param span
      * @return
      */
@@ -96,7 +96,7 @@ public class TimeSpanParser  implements StringParser {
         final StringBuilder unitBuilder = new StringBuilder();
         int mode = 0;
         long tally = 0;
-        
+
         for(final char c : span.toCharArray()) {
             if(Character.isDigit(c)) {
                 if(mode == 0) {
@@ -105,7 +105,7 @@ public class TimeSpanParser  implements StringParser {
                     final String unit = unitBuilder.toString().toUpperCase();
                     final Long factor = UNITS.get(unit);
                     if(factor == null) {
-                        
+
                         throw new IllegalArgumentException("I don't know unit "+unit);
                     }
                     tally += Long.parseLong(numberBuilder.toString()) * factor;
@@ -131,13 +131,13 @@ public class TimeSpanParser  implements StringParser {
         }
         return tally;
     }
-    
+
     private static final Set<Class> SUPPORTED = new HashSet<Class>() {{
         add(Long.class);
         add(long.class);
         add(Date.class);
     }};
-    
+
     public <T> T parse(String s, Class<T> t) {
         if(!SUPPORTED.contains(t)) {
             return null;

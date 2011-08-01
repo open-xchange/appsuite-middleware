@@ -54,28 +54,28 @@ import java.util.List;
 /**
  * {@link SpellCheckError} - Generated if a misspelt word is detected.<br/>
  * It provides both the incorrect word and a list of words phonetically close to the misspelt word
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SpellCheckError {
 
     /**
      * Gets the list of suggested words
-     * 
+     *
      * @return A list of words phonetically close to the misspelt word
      */
     public List<String> getSuggestions();
 
     /**
      * Gets the currently misspelt word
-     * 
+     *
      * @return The text misspelt
      */
     public String getInvalidWord();
 
     /**
      * Gets the start position of the misspelt word in the context
-     * 
+     *
      * @return The position of the word
      */
     public int getWordStartingPosition();

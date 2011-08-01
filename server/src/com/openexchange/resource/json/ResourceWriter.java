@@ -55,7 +55,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceWriter} - Writes a {@link Resource resource} to a JSON object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceWriter {
@@ -69,7 +69,7 @@ public final class ResourceWriter {
 
     /**
      * Writes specified {@link Resource resource} to a JSON object
-     * 
+     *
      * @param resource The resource to write
      * @return The written JSON object
      * @throws JSONException If writing to JSON object fails

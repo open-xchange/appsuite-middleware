@@ -65,14 +65,17 @@ import com.openexchange.ajax.requesthandler.ResponseOutputter;
  */
 public class StringResponseOutputter implements ResponseOutputter {
 
+    @Override
     public int getPriority() {
         return Integer.MIN_VALUE;
     }
 
+    @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return true;
     }
 
+    @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         Object resultObject = result.getResultObject();
         if (resultObject == null) {
@@ -81,7 +84,7 @@ public class StringResponseOutputter implements ResponseOutputter {
         if (! (resultObject instanceof String)) {
             resultObject = resultObject.toString();
         }
-        
+
         Map<String, String> headers = result.getHeaders();
         for(Map.Entry<String, String> entry : headers.entrySet()) {
             resp.setHeader(entry.getKey(), entry.getValue());

@@ -88,6 +88,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         if (getDocuments().size()==0) {
             return;

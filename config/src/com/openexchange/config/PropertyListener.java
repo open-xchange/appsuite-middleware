@@ -53,14 +53,14 @@ import com.openexchange.config.PropertyEvent.Type;
 
 /**
  * {@link PropertyListener} - Listener for a certain property.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PropertyListener {
 
     /**
      * Invoked if corresponding property has changed.
-     * 
+     *
      * @param event The property event containing property information and event type: either {@link Type#CHANGED} or {@link Type#DELETED}
      */
     public void onPropertyChange(PropertyEvent event);

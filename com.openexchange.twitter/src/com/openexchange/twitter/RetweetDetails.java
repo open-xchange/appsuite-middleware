@@ -53,28 +53,28 @@ import java.util.Date;
 
 /**
  * {@link RetweetDetails} - One single retweet details.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RetweetDetails {
 
     /**
      * Gets the retweet id.
-     * 
+     *
      * @return The retweet id
      */
     long getRetweetId();
 
     /**
      * Gets the retweet date.
-     * 
+     *
      * @return The retweet date.
      */
     Date getRetweetedAt();
 
     /**
      * Gets the retweet user.
-     * 
+     *
      * @return The retweet user
      */
     User getRetweetingUser();

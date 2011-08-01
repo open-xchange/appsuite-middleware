@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link Enabled}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Enabled implements PreferencesItemService {

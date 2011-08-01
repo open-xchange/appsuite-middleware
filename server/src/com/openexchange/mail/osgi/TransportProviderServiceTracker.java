@@ -58,7 +58,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 
 /**
  * Service tracker for transport providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer {
@@ -75,6 +75,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (null == addedService) {
@@ -109,10 +110,12 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
         return addedService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

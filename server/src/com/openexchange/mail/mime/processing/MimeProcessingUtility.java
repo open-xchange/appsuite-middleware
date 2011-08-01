@@ -74,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MimeProcessingUtility} - Provides some utility methods for {@link MimeForward} and {@link MimeReply}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeProcessingUtility {
@@ -90,7 +90,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Formats specified date in given style with given locale and time zone.
-     * 
+     *
      * @param date The date to format
      * @param style The style to use
      * @param locale The locale
@@ -105,7 +105,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Formats specified time in given style with given locale and time zone.
-     * 
+     *
      * @param date The time to format
      * @param style The style to use
      * @param locale The locale
@@ -120,7 +120,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Checks if given part's disposition is inline; meaning more likely a regular message body than an attachment.
-     * 
+     *
      * @param part The message's part
      * @param contentType The part's Content-Type header
      * @return <code>true</code> if given part is considered to be an inline part; otherwise <code>false</code>
@@ -144,7 +144,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Checks if specified part's filename ends with given suffix.
-     * 
+     *
      * @param suffix The suffix to check against
      * @param part The part whose filename shall be checked
      * @param contentType The part's Content-Type header
@@ -158,7 +158,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Gets specified part's filename.
-     * 
+     *
      * @param part The part whose filename shall be returned
      * @param contentType The part's Content-Type header
      * @return The filename or <code>null</code>
@@ -183,7 +183,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Determines the proper text version according to user's mail settings. Given content type is altered accordingly
-     * 
+     *
      * @param textPart The text part
      * @param contentType The text part's content type
      * @return The proper text version
@@ -216,7 +216,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Reads specified mail part's content catching possible <code>java.io.CharConversionException</code>.
-     * 
+     *
      * @param mailPart The mail part
      * @param charset The charset to use
      * @return The mail part's content as a string
@@ -267,7 +267,7 @@ public final class MimeProcessingUtility {
     /**
      * Creates a {@link String} from given array of {@link InternetAddress} instances through invoking
      * {@link InternetAddress#toUnicodeString()}
-     * 
+     *
      * @param addrs The rray of {@link InternetAddress} instances
      * @return A comma-separated list of addresses as a {@link String}
      */
@@ -284,7 +284,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Appends the appropriate text version dependent on root's content type and current text's content type
-     * 
+     *
      * @param rootType The root's content type
      * @param contentType Current text's content type
      * @param text The text content

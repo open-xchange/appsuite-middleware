@@ -62,8 +62,8 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; replyallcc</code>
- * 
- * 
+ *
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReplyAllCc implements PreferencesItemService {
@@ -78,6 +78,7 @@ public class ReplyAllCc implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "replyallcc" };
     }
@@ -85,8 +86,10 @@ public class ReplyAllCc implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractMailFuncs() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }

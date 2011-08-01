@@ -51,7 +51,7 @@ package com.openexchange.config.cascade.context.matching;
 
 /**
  * {@link ContextSetTermParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextSetTermParser {
@@ -141,7 +141,7 @@ public class ContextSetTermParser {
 
     private static class Lexer {
 
-        private String string;
+        private final String string;
 
         private int index;
 

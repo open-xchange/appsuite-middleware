@@ -71,7 +71,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     public InfostoreFolderAccess(final ServerSession session) {
         super();
         // TODO Auto-generated constructor stub
-        
+
     }
 
     public void clearFolder(final String folderId) throws OXException {

@@ -58,7 +58,7 @@ import com.openexchange.push.internal.PushClientWhitelist;
 
 /**
  * {@link WhitelistServiceTracker} - The service tracker for push managers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
@@ -67,7 +67,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link WhitelistServiceTracker}.
-     * 
+     *
      * @param context The bundle context
      */
     public WhitelistServiceTracker(final BundleContext context) {
@@ -137,7 +137,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

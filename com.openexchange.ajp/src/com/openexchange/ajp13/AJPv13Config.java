@@ -65,7 +65,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link AJPv13Config} - The AJPv13 configuration
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Config implements Initialization {
@@ -124,6 +124,7 @@ public final class AJPv13Config implements Initialization {
 
     private boolean logForwardRequest;
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
@@ -132,6 +133,7 @@ public final class AJPv13Config implements Initialization {
         init();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
@@ -384,7 +386,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the capacity for listener pool
-     * 
+     *
      * @return The capacity for listener pool
      */
     public static int getAJPListenerPoolSize() {
@@ -456,7 +458,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified server property.
-     * 
+     *
      * @param property The server property
      * @return The property value
      */
@@ -467,7 +469,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the specified system property.
-     * 
+     *
      * @param property The system property
      * @return The property value
      */

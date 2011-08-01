@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link UnboundContentType} - The folder storage content type for unbound.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnboundContentType implements ContentType {
@@ -62,7 +62,7 @@ public final class UnboundContentType implements ContentType {
 
     /**
      * Gets the {@link UnboundContentType} instance.
-     * 
+     *
      * @return The {@link UnboundContentType} instance
      */
     public static UnboundContentType getInstance() {
@@ -81,11 +81,13 @@ public final class UnboundContentType implements ContentType {
         return "unbound";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.UNBOUND
         return 4;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

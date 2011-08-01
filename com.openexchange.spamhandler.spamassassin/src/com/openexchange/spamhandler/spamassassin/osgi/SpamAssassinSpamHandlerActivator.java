@@ -68,7 +68,7 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
 
 /**
  * {@link SpamAssassinSpamHandlerActivator} - {@link BundleActivator Activator} for spam-assassin spam handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
@@ -76,12 +76,12 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = { MailService.class, ConfigurationService.class };
-    
+
     private static Bundle thisBundle = null;
 
     private final Dictionary<String, String> dictionary;
-    
-    private List<ServiceTracker> serviceTrackerList;
+
+    private final List<ServiceTracker> serviceTrackerList;
 
     private ServiceRegistration serviceRegistration;
 
@@ -152,9 +152,9 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
 //            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             serviceRegistration = context.registerService(SpamHandler.class.getName(), SpamAssassinSpamHandler.getInstance(), dictionary);
-            
+
             serviceTrackerList.add(new ServiceTracker(context, SpamdService.class.getName(), new SpamdInstallationServiceListener(context)));
-            
+
             // Open service trackers
             for (final ServiceTracker tracker : serviceTrackerList) {
                 tracker.open();
@@ -181,7 +181,7 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
                 tracker.close();
             }
             serviceTrackerList.clear();
-            
+
             /*
              * Clear service registry
              */

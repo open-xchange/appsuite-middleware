@@ -73,14 +73,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SearchAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link SearchAction}.
-     * 
+     *
      * @param services
      */
     public SearchAction(final ServiceLookup services) {

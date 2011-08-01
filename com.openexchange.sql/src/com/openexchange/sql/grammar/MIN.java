@@ -57,11 +57,13 @@ public class MIN extends UnaryFunction {
 		super(expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildMIN(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "MIN";
 	}
 }

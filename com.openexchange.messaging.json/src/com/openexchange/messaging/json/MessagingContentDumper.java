@@ -71,8 +71,8 @@ public interface MessagingContentDumper {
     /**
      * @param content
      * @param outputStream
-     * @throws OXException 
-     * @throws IOException 
+     * @throws OXException
+     * @throws IOException
      */
     void dump(MessagingContent content, OutputStream outputStream) throws OXException, IOException;
 

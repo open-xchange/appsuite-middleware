@@ -59,7 +59,7 @@ import com.openexchange.groupware.upload.UploadFile;
 
 /**
  * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadEvent {
@@ -123,7 +123,7 @@ public class UploadEvent {
 
     /**
      * Gets the affiliation ID.
-     * 
+     *
      * @return The affiliation ID.
      */
     public final int getAffiliationId() {
@@ -132,7 +132,7 @@ public class UploadEvent {
 
     /**
      * Sets the affiliation ID.
-     * 
+     *
      * @param affiliationId The affiliation ID.
      */
     public final void setAffiliationId(final int affiliationId) {
@@ -141,7 +141,7 @@ public class UploadEvent {
 
     /**
      * Adds given upload file.
-     * 
+     *
      * @param uploadFile The upload file to add.
      */
     public final void addUploadFile(final UploadFile uploadFile) {
@@ -164,7 +164,7 @@ public class UploadEvent {
 
     /**
      * Removes the upload file associated with specified file name.
-     * 
+     *
      * @param fileName The file name.
      */
     public final void removeUploadFile(final String fileName) {
@@ -191,7 +191,7 @@ public class UploadEvent {
 
     /**
      * Gets the upload file associated with specified file name.
-     * 
+     *
      * @param fileName The file name.
      * @return The upload file associated with specified file name.
      */
@@ -201,7 +201,7 @@ public class UploadEvent {
 
     /**
      * Gets the upload file associated with specified field name.
-     * 
+     *
      * @param fieldName The field name.
      * @return The upload file associated with specified field name.
      */
@@ -229,7 +229,7 @@ public class UploadEvent {
 
     /**
      * Gets the number of upload files.
-     * 
+     *
      * @return The number of upload files.
      */
     public final int getNumberOfUploadFiles() {
@@ -238,7 +238,7 @@ public class UploadEvent {
 
     /**
      * Gets an iterator for upload files.
-     * 
+     *
      * @return An iterator for upload files.
      */
     public final Iterator<UploadFile> getUploadFilesIterator() {
@@ -247,7 +247,7 @@ public class UploadEvent {
 
     /**
      * Gets a list containing the upload files.
-     * 
+     *
      * @return A list containing the upload files.
      */
     public final List<UploadFile> getUploadFiles() {
@@ -279,7 +279,7 @@ public class UploadEvent {
 
     /**
      * Adds a name-value-pair of a form field.
-     * 
+     *
      * @param fieldName The field's name.
      * @param fieldValue The field's value.
      */
@@ -289,7 +289,7 @@ public class UploadEvent {
 
     /**
      * Removes the form field whose name equals specified field name.
-     * 
+     *
      * @param fieldName The field name.
      * @return The removed form field's value or <code>null</code>.
      */
@@ -299,7 +299,7 @@ public class UploadEvent {
 
     /**
      * Gets the form field whose name equals specified field name.
-     * 
+     *
      * @param fieldName The field name.
      * @return The value of associated form field or <code>null</code>.
      */
@@ -316,7 +316,7 @@ public class UploadEvent {
 
     /**
      * Gets an iterator for form fields.
-     * 
+     *
      * @return An iterator for form fields.
      */
     public final Iterator<String> getFormFieldNames() {
@@ -325,7 +325,7 @@ public class UploadEvent {
 
     /**
      * Gets this upload event's action string.
-     * 
+     *
      * @return The action string.
      */
     public final String getAction() {
@@ -334,7 +334,7 @@ public class UploadEvent {
 
     /**
      * Sets this upload event's action string.
-     * 
+     *
      * @param action The action string.
      */
     public final void setAction(final String action) {
@@ -343,7 +343,7 @@ public class UploadEvent {
 
     /**
      * Gets the parameter associated with specified name.
-     * 
+     *
      * @param name The parameter's name.
      * @return The parameter associated with specified name or <code>null</code> .
      */
@@ -353,7 +353,7 @@ public class UploadEvent {
 
     /**
      * Associates specified parameter name with given parameter value.
-     * 
+     *
      * @param name The parameter name.
      * @param value The parameter value.
      */
@@ -365,7 +365,7 @@ public class UploadEvent {
 
     /**
      * Removes the parameter associated with specified name.
-     * 
+     *
      * @param name The parameter's name.
      */
     public final void removeParameter(final String name) {
@@ -405,7 +405,7 @@ public class UploadEvent {
     /**
      * Strips off heading path information from specified file path by looking for last occurrence of a common file separator character like
      * <code>'/'</code> or <code>'\'</code> to only return sole file name.
-     * 
+     *
      * @param filePath The file path
      * @return The sole file name.
      */

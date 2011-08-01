@@ -59,7 +59,7 @@ import com.openexchange.mail.headercache.HeaderCacheMailProviderRegistry;
 
 /**
  * Header cache's service tracker for mail providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheMailProviderServiceTracker implements ServiceTrackerCustomizer {

@@ -93,6 +93,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 6;
     }
@@ -100,6 +101,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.LOW.priority;
     }
@@ -111,7 +113,8 @@ public class TaskReminderFolderZero implements UpdateTask {
         private int userid;
         private int folder;
     }
-    
+
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         LOG.info("Performing update task TaskReminderFolderZero.");
         final List<ReminderData> reminders = getReminder(contextId);
@@ -255,6 +258,6 @@ public class TaskReminderFolderZero implements UpdateTask {
                 + " have been removed.");
         }
         return retval;
-        
+
     }
 }

@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link TwitterService} - The <a href="http://twitter.com/">twitter</a> service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TwitterService {
 
     /**
      * Gets the access token for specified user credentials.
-     * 
+     *
      * @param twitterId The twitter id
      * @param password The twitter password
      * @return The access token for specified user credentials
@@ -70,7 +70,7 @@ public interface TwitterService {
 
     /**
      * Gets the OAuth twitter access instance for the authenticating user.
-     * 
+     *
      * @param token The twitter token
      * @param tokenSecret The twitter token secret
      * @return The authenticated twitter access
@@ -81,7 +81,7 @@ public interface TwitterService {
 
     /**
      * Gets the twitter access instance for the authenticating user.
-     * 
+     *
      * @param twitterId The twitter id
      * @param password The twitter password
      * @return The authenticated twitter access
@@ -92,14 +92,14 @@ public interface TwitterService {
 
     /**
      * Gets an unauthenticated twitter access instance.
-     * 
+     *
      * @return An unauthenticated twitter access
      */
     public TwitterAccess getUnauthenticatedTwitterAccess();
 
     /**
      * Creates a new instance of {@link Paging}.
-     * 
+     *
      * @return A new instance of {@link Paging}
      */
     public Paging newPaging();

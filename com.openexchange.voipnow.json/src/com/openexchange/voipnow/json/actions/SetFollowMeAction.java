@@ -83,16 +83,16 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * {@link SetFollowMeAction} - The action to set followers.
  * <p>
  * Using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-/* 
+/*
  * Advice from 4PSA to implement "follow-me" in 2.5.1
  * You can add a rule that implements follow me by adding a 'transfer' rule in incoming call rules for an extension.
  * To satisfy the follow me conditions you must set these parameters:
  *  - toNumbers - this is an array containing the settings for the transfer
  *  - transferNumber - number that will receive the transferred call
- *  - call = true - when this is set to true the extension that owns the rule will also be called. 
+ *  - call = true - when this is set to true the extension that owns the rule will also be called.
  */
 public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterface> {
 
@@ -129,7 +129,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
             BigInteger userId = getMainExtensionIDOfSessionUser(session.getUser(), session.getContextId());
 
             ExtensionInterface port = configureStub(setting);
-           
+
             ((BindingProvider)port).getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://voip-prototyp.netline.de/" + getSOAPPath());
 
             UserCredentials userCredentials = getUserCredentials(setting);
@@ -138,14 +138,14 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 
             List<BigInteger> followMeRulesIDs = detectExistingFollowMeRules(userId, port, userCredentials);
             String successStr = deleteExistingFollowMeRules(userId, port, followMeRulesIDs, userCredentials);
-            
+
             /*
              * Add new follow-me rule
              */
             if (transferTo.length == 0) {
                 return new AJAXRequestResult(-1);
             }
-            
+
             AddCallRulesInRequest addRequest = new AddCallRulesInRequest();
             addRequest.setUserID(userId);
 
@@ -157,11 +157,11 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 
             // number this rule is responsible for:
             //TODO
-            
+
             // numbers to call on incoming call:
             List<String> transferNumber = info.getTransferNumber();
             transferNumber.addAll(Arrays.asList(transferTo));
-            
+
             //call main number, too
             //TODO
 
@@ -170,7 +170,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
              */
             UpdateObject addResponse = port.addCallRulesIn(addRequest, getUserCredentials(setting), new Holder<ServerInfo>());
             String result = addResponse.getResult();
-            
+
             if (!successStr.equalsIgnoreCase(result)) {
             	throw VoipNowExceptionCodes.SOAP_FAULT.create("AddCallRulesInRequest failed with: " + result);
             }
@@ -200,12 +200,15 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 
     private boolean isFollowRule(Rules rule) {
 		Transfer transfer = rule.getTransfer();
-		if(transfer == null)
-			return false;
-		if(transfer.getNumber() == null)
-			return false;
-		if(transfer.getToNumbers() == null)
-			return false;
+		if(transfer == null) {
+            return false;
+        }
+		if(transfer.getNumber() == null) {
+            return false;
+        }
+		if(transfer.getToNumbers() == null) {
+            return false;
+        }
 		return true;
 	}
 
@@ -214,7 +217,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 	    GetCallRulesInRequest request = new GetCallRulesInRequest();
 	    request.setUserID(userId);
 	    GetCallRulesInResponseType response = port.getCallRulesIn(request, userCredentials, new Holder<ServerInfo>());
-	
+
 	    List<Rules> rules = response.getRules();
 	    if (null != rules) {
 	    	followMeRulesIDs = new ArrayList<BigInteger>(rules.size());
@@ -226,7 +229,7 @@ public class SetFollowMeAction extends AbstractVoipNowSOAPAction<ExtensionInterf
 	    }
 	    return followMeRulesIDs;
     }
-    
+
 	@Override
     protected String getSOAPPath() {
         return SOAP_PATH;

@@ -61,10 +61,10 @@ import com.openexchange.data.conversion.ical.ICalParser;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ICalParserRegisterer implements ServiceTrackerCustomizer {
-    
-    private BundleContext context;
-    private Activator activator;
-    
+
+    private final BundleContext context;
+    private final Activator activator;
+
     public ICalParserRegisterer(BundleContext context, Activator activator) {
         super();
         this.context = context;
@@ -73,7 +73,7 @@ public class ICalParserRegisterer implements ServiceTrackerCustomizer {
 
     public Object addingService(ServiceReference reference) {
         ICalParser iCalParser = (ICalParser) context.getService(reference);
-        activator.setICalParser(iCalParser);        
+        activator.setICalParser(iCalParser);
         return iCalParser;
     }
 

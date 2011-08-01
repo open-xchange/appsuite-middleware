@@ -61,7 +61,7 @@ public interface WebdavResponse {
 	void setStatus(int status);
 
 	int getStatus();
-	
+
 	void setContentType(String s);
 
     void sendString(String notFound) throws IOException;

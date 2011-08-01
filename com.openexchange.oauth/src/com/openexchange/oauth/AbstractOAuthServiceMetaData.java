@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
@@ -92,7 +92,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the identifier
-     * 
+     *
      * @param id The identifier to set
      */
     public void setId(final String id) {
@@ -101,7 +101,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the display name
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -110,7 +110,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the API Key
-     * 
+     *
      * @param apiKey The API Key to set
      */
     public void setApiKey(final String apiKey) {
@@ -119,7 +119,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the API Secret
-     * 
+     *
      * @param apiSecret The API Secret to set
      */
     public void setApiSecret(final String apiSecret) {
@@ -137,7 +137,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
         return null;
     }
-    
+
     public boolean needsRequestToken() {
         return true;
     }
@@ -149,7 +149,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }
-    
+
     public String modifyCallbackURL(String callbackUrl) {
         return callbackUrl;
     }

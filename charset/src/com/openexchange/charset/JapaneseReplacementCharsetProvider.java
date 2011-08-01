@@ -56,7 +56,7 @@ import java.util.Iterator;
 
 /**
  * {@link JapaneseReplacementCharsetProvider} - A charset provider which returns the "CP50220" charset when "ISO-2022-JP" is requested.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
@@ -67,7 +67,7 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
 
     /**
      * Initializes a new {@link JapaneseReplacementCharsetProvider}.
-     * 
+     *
      * @throws UnsupportedCharsetException If "CP50220" charset cannot be found
      */
     public JapaneseReplacementCharsetProvider(final CharsetProvider standardProvider) {
@@ -76,7 +76,7 @@ public final class JapaneseReplacementCharsetProvider extends CharsetProvider {
         cp50220 = Charset.forName("CP50220");
         /*-
          * Retry with: "x-windows-50220", "MS50220"
-         * 
+         *
          * http://www.docjar.com/html/api/sun/nio/cs/ext/MS50220.java.html
          */
     }

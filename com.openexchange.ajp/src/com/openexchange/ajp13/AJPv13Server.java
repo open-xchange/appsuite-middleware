@@ -54,7 +54,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 
 /**
  * {@link AJPv13Server}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AJPv13Server {
@@ -73,7 +73,7 @@ public abstract class AJPv13Server {
 
     /**
      * Sets the singleton instance of AJP server to specified instance.
-     * 
+     *
      * @param instance The instance to use as singleton
      * @throws IllegalStateException If instance has already been set before
      */
@@ -110,7 +110,7 @@ public abstract class AJPv13Server {
 
     /**
      * Starts the AJP server
-     * 
+     *
      * @throws AJPv13Exception If starting the AJP server fails
      * @throws NullPointerException If AJP server instance has not been set before
      */
@@ -120,7 +120,7 @@ public abstract class AJPv13Server {
 
     /**
      * Re-Starts the AJP server
-     * 
+     *
      * @throws AJPv13Exception If re-starting the AJP server fails
      * @throws NullPointerException If AJP server instance has not been set before
      */
@@ -131,7 +131,7 @@ public abstract class AJPv13Server {
 
     /**
      * Stops the AJP server
-     * 
+     *
      * @throws NullPointerException If AJP server instance has not been set before
      */
     public static void stopAJPServer() {
@@ -140,7 +140,7 @@ public abstract class AJPv13Server {
 
     /**
      * Gets the number of open AJP connections.
-     * 
+     *
      * @return The number of open AJP connections
      */
     public static int getNumberOfOpenAJPSockets() {
@@ -174,7 +174,7 @@ public abstract class AJPv13Server {
 
     /**
      * Starts this AJP server instance.
-     * 
+     *
      * @throws AJPv13Exception If starting this instance fails
      */
     protected abstract void startServer() throws AJPv13Exception;
@@ -186,7 +186,7 @@ public abstract class AJPv13Server {
 
     /**
      * Checks if this AJP server instance is running.
-     * 
+     *
      * @return <code>true</code> if this AJP server instance is running; otherwise <code>false</code>
      */
     public abstract boolean isRunning();

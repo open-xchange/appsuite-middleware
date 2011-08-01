@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FolderQueryCacheManager}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderQueryCacheManager {
@@ -90,7 +90,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Initializes the singleton instance of folder query cache {@link FolderQueryCacheManager manager}
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public static void initInstance() throws OXException {
@@ -114,7 +114,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Initializes cache reference.
-     * 
+     *
      * @throws OXException If initializing the cache reference fails
      */
     public void initCache() throws OXException {
@@ -126,7 +126,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Releases cache reference.
-     * 
+     *
      * @throws OXException If clearing cache fails
      */
     public void releaseCache() throws OXException {
@@ -139,7 +139,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Releases the singleton instance of {@link FolderQueryCacheManager} and frees its cache resources
-     * 
+     *
      * @throws OXException If cache cannot be freed
      */
     public static void releaseInstance() throws OXException {
@@ -158,7 +158,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Gets a query result from cache if present, otherwise <code>null</code> is returned
-     * 
+     *
      * @return query result if present, otherwise <code>null</code>
      */
     public LinkedList<Integer> getFolderQuery(final int queryNum, final Session session) {
@@ -167,7 +167,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Gets a query result from cache if present, otherwise <code>null</code> is returned
-     * 
+     *
      * @return query result if present, otherwise <code>null</code>
      */
     public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
@@ -197,7 +197,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Puts a query result into cache
-     * 
+     *
      * @throws OXException If a caching error occurs
      */
     public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session) throws OXException {
@@ -206,7 +206,7 @@ public final class FolderQueryCacheManager {
 
     /**
      * Puts a query result into cache
-     * 
+     *
      * @throws OXException If a caching error occurs
      */
     public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid) throws OXException {
@@ -216,7 +216,7 @@ public final class FolderQueryCacheManager {
     /**
      * Puts a query result into cache. If <code>append</code> is set and cache already contains a query result belonging to given
      * <code>queryNum</code>, given result is going to appended to existing one. Otherwise existing entries are replaced.
-     * 
+     *
      * @throws OXException If a caching error occurs
      */
     public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session, final boolean append) throws OXException {
@@ -226,7 +226,7 @@ public final class FolderQueryCacheManager {
     /**
      * Puts a query result into cache. If <code>append</code> is set and cache already contains a query result belonging to given
      * <code>queryNum</code>, given result is going to appended to existing one. Otherwise existing entries are replaced.
-     * 
+     *
      * @throws OXException If a caching error occurs
      */
     public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid, final boolean append) throws OXException {

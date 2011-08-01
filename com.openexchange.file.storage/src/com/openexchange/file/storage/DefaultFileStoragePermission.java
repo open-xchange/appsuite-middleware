@@ -51,7 +51,7 @@ package com.openexchange.file.storage;
 
 /**
  * {@link DefaultFileStoragePermission} - The default file storage permission granting full access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -59,7 +59,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
 
     /**
      * Creates a new instance of {@link DefaultFileStoragePermission} with {@link #setMaxPermissions()} invoked.
-     * 
+     *
      * @return A new instance of {@link DefaultFileStoragePermission} with {@link #setMaxPermissions()} invoked
      */
     public static DefaultFileStoragePermission newInstance() {

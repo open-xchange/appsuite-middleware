@@ -61,16 +61,16 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
 
 /**
  * {@link OSGiPropertyMixin}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OSGiPropertyMixin implements PropertyMixin {
 
     private ServiceTracker mixinTracker = null;
 
-    private ServiceTracker factoryTracker;
+    private final ServiceTracker factoryTracker;
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
     public OSGiPropertyMixin(BundleContext context, SessionHolder sessionHolder) {
         this.sessionHolder = sessionHolder;
@@ -87,6 +87,7 @@ public class OSGiPropertyMixin implements PropertyMixin {
         factoryTracker.close();
     }
 
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         Object[] mixins = mixinTracker.getServices();
         List<WebdavProperty> allProperties = new ArrayList<WebdavProperty>();
@@ -109,6 +110,7 @@ public class OSGiPropertyMixin implements PropertyMixin {
         return allProperties;
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         Object[] mixins = mixinTracker.getServices();
         if (mixins != null) {

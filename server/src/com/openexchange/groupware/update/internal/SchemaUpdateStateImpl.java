@@ -76,18 +76,22 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         backgroundUpdatesRunning = schema.backgroundUpdatesRunning();
     }
 
+    @Override
     public void addExecutedTask(String taskName) {
         executedTasks.add(taskName);
     }
 
+    @Override
     public boolean isExecuted(String taskName) {
         return executedTasks.contains(taskName);
     }
 
+    @Override
     public String[] getExecutedList() {
         return executedTasks.toArray(new String[executedTasks.size()]);
     }
 
+    @Override
     public boolean backgroundUpdatesRunning() {
         return backgroundUpdatesRunning;
     }

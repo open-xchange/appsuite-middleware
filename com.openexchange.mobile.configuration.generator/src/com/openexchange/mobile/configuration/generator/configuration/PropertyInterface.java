@@ -50,10 +50,10 @@
 package com.openexchange.mobile.configuration.generator.configuration;
 
 public interface PropertyInterface {
-    
+
     public Class<? extends Object> getClazz();
-    
+
     public Required getRequired();
-    
+
     public String getName();
 }

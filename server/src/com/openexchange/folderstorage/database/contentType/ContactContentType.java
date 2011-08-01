@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link ContactContentType} - The folder storage content type for contacts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactContentType implements ContentType {
@@ -62,7 +62,7 @@ public final class ContactContentType implements ContentType {
 
     /**
      * Gets the {@link ContactContentType} instance.
-     * 
+     *
      * @return The {@link ContactContentType} instance
      */
     public static ContactContentType getInstance() {
@@ -81,11 +81,13 @@ public final class ContactContentType implements ContentType {
         return "contacts";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.CONTACT
         return 3;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

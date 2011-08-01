@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link IMAPProvider} - The provider for IMAP protocol.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPProvider extends MailProvider {
@@ -73,7 +73,7 @@ public final class IMAPProvider extends MailProvider {
 
     /**
      * Gets the singleton instance of IMAP provider.
-     * 
+     *
      * @return The singleton instance of IMAP provider
      */
     public static IMAPProvider getInstance() {

@@ -12,17 +12,17 @@ import com.openexchange.polling.Question;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 public class Snippets {
-	
+
 	public void feature12345() {
 		//...
 	}
-	
+
 	public void a1() {
 		int a = 12;
 	}
-	
-	
-	
+
+
+
 	// The meat of this class. Here be dragons ;)
     private JSONObject convert(final Poll poll) throws OXException {
         try {
@@ -63,9 +63,9 @@ public class Snippets {
             throw AjaxExceptionCodes.JSONError.create(x.getMessage());
         }
     }
-    
+
 	public void a2() {
-		
+
 	}
 
 }

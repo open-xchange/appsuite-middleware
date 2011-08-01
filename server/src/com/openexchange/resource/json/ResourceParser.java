@@ -55,7 +55,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceParser} - Parses a {@link Resource resource} out of a JSON object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceParser {
@@ -69,7 +69,7 @@ public final class ResourceParser {
 
     /**
      * Parses a {@link Resource resource} out of given JSON object
-     * 
+     *
      * @param jsonResource The JSON object containing the resource's data
      * @return The parsed {@link Resource resource}
      * @throws JSONException If reading from JSON object fails

@@ -65,55 +65,55 @@ public abstract class ParserTest extends TestCase {
     public void testCollect() throws OXException {
         final String text = "<html><head /><body><div class='ox_contact someOtherClass'><span class='ox_bla someOtherClass'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
         final List<Map<String, String>> parsed = parse(text);
-        
+
         assertNotNull("Parsed was null", parsed);
         assertEquals("Expected two elements", 2, parsed.size());
-        
+
         final Map blaMap = parsed.get(0);
         final Map blaMap2 = parsed.get(1);
-        
+
         assertEquals("Bla", blaMap.get("ox_bla"));
         assertEquals("Blupp", blaMap.get("ox_blupp"));
-        
+
         assertEquals("Bla2", blaMap2.get("ox_bla"));
         assertEquals("Blupp2", blaMap2.get("ox_blupp"));
     }
-    
+
     public void testCollectImageSources() throws OXException {
         final String text = "<html><head /><body><div class='ox_contact someOtherClass'><img src=\"http://www.open-xchange.com/bla.png\" class=\"ox_image\" /> <span class='ox_bla someOtherClass'>Bla</span><span class='ox_blupp'>Blupp</span></div><div class='ox_contact'><span class='ox_bla'>Bla2</span><span class='ox_blupp'>Blupp2</span></div></body></html>";
         final List<Map<String, String>> parsed = parse(text);
         final Map blaMap = parsed.get(0);
-        
-        
+
+
         assertEquals("Bla", blaMap.get("ox_bla"));
         assertEquals("Blupp", blaMap.get("ox_blupp"));
         assertEquals("http://www.open-xchange.com/bla.png", blaMap.get("ox_image"));
-        
+
     }
-    
+
     public void testCollectAnchorHREFs() throws OXException {
         final String text = "<html><head /><body><div class='ox_contact someOtherClass'><a href=\"http://www.open-xchange.com/bla.png\" class=\"ox_file\">Download</a> </div></body></html>";
         final List<Map<String, String>> parsed = parse(text);
         final Map blaMap = parsed.get(0);
-        
-        
+
+
         assertEquals("http://www.open-xchange.com/bla.png", blaMap.get("ox_file"));
-        
+
     }
-    
+
     public void testCollectDeeplyNested() throws OXException {
         final String text = "<html><head /><body><div class='ox_contact'><div><span class='ox_bla'>Bla</span><span class='ox_blupp bla'>Blupp</span></div><!-- comment --> </div><div class='ox_contact'><div><div><span class='ox_bla'>Bla2</span></div><span class='ox_blupp'>Blupp2</span></div></div></body></html>";
         final List<Map<String, String>> parsed = parse(text);
-        
+
         assertNotNull("Parsed was null", parsed);
         assertEquals("Expected two elements", 2, parsed.size());
-        
+
         final Map blaMap = parsed.get(0);
         final Map blaMap2 = parsed.get(1);
-        
+
         assertEquals("Bla", blaMap.get("ox_bla"));
         assertEquals("Blupp", blaMap.get("ox_blupp"));
-        
+
         assertEquals("Bla2", blaMap2.get("ox_bla"));
         assertEquals("Blupp2", blaMap2.get("ox_blupp"));
     }
@@ -126,23 +126,23 @@ public abstract class ParserTest extends TestCase {
         final List<Map<String, String>> parsed = parse(text);
         assertNotNull(parsed);
     }
-    
+
     public void testRemovalOfTrailingWhitespaces() throws OXException{
-        final String text = 
+        final String text =
             "<html><head /><body>" +
         		"<div class='ox_contact'>" +
         		    "<span class='ox_bla'> Bla </span>" +
         		 "</div>" +
         	"</body></html>";
         final List<Map<String, String>> parsed = parse(text);
-        
+
         assertNotNull("Parsed was null", parsed);
         assertEquals("Expected one element", 1, parsed.size());
-        
+
         final Map blaMap = parsed.get(0);
-        
+
         assertEquals("Should remove trailing whitespaces", "Bla", blaMap.get("ox_bla"));
     }
-    
+
     protected abstract List<Map<String, String>> parse(String text) throws OXException;
 }

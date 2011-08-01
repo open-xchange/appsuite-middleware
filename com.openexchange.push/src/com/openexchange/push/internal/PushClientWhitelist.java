@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link PushClientWhitelist}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushClientWhitelist {
@@ -66,7 +66,7 @@ public final class PushClientWhitelist {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static PushClientWhitelist getInstance() {
@@ -85,7 +85,7 @@ public final class PushClientWhitelist {
 
     /**
      * Adds specified pattern if no such pattern is already contained.
-     * 
+     *
      * @param pattern The pattern to add
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
      */
@@ -95,7 +95,7 @@ public final class PushClientWhitelist {
 
     /**
      * Gets this white-list's size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -104,7 +104,7 @@ public final class PushClientWhitelist {
 
     /**
      * Checks if this white-list contains specified pattern.
-     * 
+     *
      * @param pattern The pattern
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
@@ -114,7 +114,7 @@ public final class PushClientWhitelist {
 
     /**
      * Removes specified pattern.
-     * 
+     *
      * @param pattern The pattern
      * @return <code>true</code> if specified pattern was removed; otherwise <code>false</code>
      */
@@ -131,7 +131,7 @@ public final class PushClientWhitelist {
 
     /**
      * Checks if this white-list is empty.
-     * 
+     *
      * @return <code>true</code> if this white-list is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -140,7 +140,7 @@ public final class PushClientWhitelist {
 
     /**
      * Gets currently contained patterns.
-     * 
+     *
      * @return Currently contained patterns.
      */
     public Set<Pattern> getPatterns() {
@@ -149,7 +149,7 @@ public final class PushClientWhitelist {
 
     /**
      * Checks if specified client identifier is matched by one of contained patterns.
-     * 
+     *
      * @param clientId The client identifier
      * @return <code>true</code> if specified client identifier is matched by one of contained patterns; otherwise <code>false</code>
      */

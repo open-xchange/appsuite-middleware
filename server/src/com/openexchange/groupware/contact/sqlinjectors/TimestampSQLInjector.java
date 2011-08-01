@@ -63,6 +63,7 @@ public class TimestampSQLInjector implements SQLInjector {
         this.value = new java.sql.Timestamp(value.getTime());
     }
 
+    @Override
     public void inject(final PreparedStatement ps, final int parameterIndex) throws SQLException {
         if (null == value) {
             ps.setNull(parameterIndex, Types.TIMESTAMP);

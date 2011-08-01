@@ -65,7 +65,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HttpServletRequestWrapper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {
@@ -108,7 +108,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     /**
      * Initializes a new {@link HttpServletRequestWrapper}
-     * 
+     *
      * @param ajpSession The AJP session
      * @throws AJPv13Exception If instantiation fails
      */
@@ -121,6 +121,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getAuthType()
      */
+    @Override
     public String getAuthType() {
         return authType;
     }
@@ -134,6 +135,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getCookies()
      */
+    @Override
     public Cookie[] getCookies() {
         if (cookies == null) {
             return null;
@@ -147,6 +149,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getDateHeader(java.lang.String)
      */
+    @Override
     public long getDateHeader(final String name) {
         return containsHeader(name) ? getDateValueFromHeaderField(getHeader(name)) : -1;
     }
@@ -155,6 +158,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getIntHeader(java.lang.String)
      */
+    @Override
     public int getIntHeader(final String name) {
         return containsHeader(name) ? Integer.parseInt(getHeader(name)) : -1;
     }
@@ -167,6 +171,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getMethod()
      */
+    @Override
     public String getMethod() {
         return method;
     }
@@ -179,6 +184,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getPathInfo()
      */
+    @Override
     public String getPathInfo() {
         return pathInfo;
     }
@@ -191,6 +197,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getPathTranslated()
      */
+    @Override
     public String getPathTranslated() {
         return pathTranslated;
     }
@@ -203,6 +210,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getContextPath()
      */
+    @Override
     public String getContextPath() {
         return contextPath;
     }
@@ -215,6 +223,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getQueryString()
      */
+    @Override
     public String getQueryString() {
         return queryString;
     }
@@ -227,6 +236,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
      */
+    @Override
     public String getRemoteUser() {
         return remoteUser;
     }
@@ -235,6 +245,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#isUserInRole(java.lang.String)
      */
+    @Override
     public boolean isUserInRole(final String role) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
@@ -246,6 +257,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
      */
+    @Override
     public java.security.Principal getUserPrincipal() {
         return userPrincipal;
     }
@@ -258,6 +270,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getRequestedSessionId()
      */
+    @Override
     public String getRequestedSessionId() {
         return session.getId();
     }
@@ -270,6 +283,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getRequestURI()
      */
+    @Override
     public String getRequestURI() {
         return requestURI;
     }
@@ -278,6 +292,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getRequestURL()
      */
+    @Override
     public StringBuffer getRequestURL() {
         if (null == requestURL) {
             final StringBuilder tmp = new StringBuilder(256);
@@ -299,6 +314,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getServletPath()
      */
+    @Override
     public String getServletPath() {
         return servletPath;
     }
@@ -311,6 +327,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
      */
+    @Override
     public HttpSession getSession(final boolean create) {
         if (session != null) {
             return session;
@@ -351,6 +368,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#getSession()
      */
+    @Override
     public HttpSession getSession() {
         return getSession(true);
     }
@@ -363,6 +381,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdValid()
      */
+    @Override
     public boolean isRequestedSessionIdValid() {
         return !HttpSessionManagement.isHttpSessionExpired(session);
     }
@@ -371,6 +390,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
      */
+    @Override
     public boolean isRequestedSessionIdFromCookie() {
         return requestedSessionIdFromCookie;
     }
@@ -383,6 +403,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromURL()
      */
+    @Override
     public boolean isRequestedSessionIdFromURL() {
         return requestedSessionIdFromURL;
     }
@@ -391,6 +412,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
      * (non-Javadoc)
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromUrl()
      */
+    @Override
     public boolean isRequestedSessionIdFromUrl() {
         return requestedSessionIdFromURL;
     }

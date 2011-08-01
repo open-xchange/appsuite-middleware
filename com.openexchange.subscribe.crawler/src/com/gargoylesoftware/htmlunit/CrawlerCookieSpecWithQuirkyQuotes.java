@@ -62,11 +62,12 @@ import org.apache.commons.logging.LogFactory;
 public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpecWithQuirkyQuotes.class));
-    
+
     public CrawlerCookieSpecWithQuirkyQuotes(){
     }
-    
+
     // overwriting this to be able to use the quotes needed for linkedin
+    @Override
     public String formatCookie(Cookie cookie) {
         LOG.trace("enter CrawlerCookieSpecWithQuirkyQuotes.formatCookie(Cookie)");
         if (cookie == null) {
@@ -75,8 +76,8 @@ public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
         StringBuffer buf = new StringBuffer();
         buf.append(cookie.getName());
         buf.append("=");
-        String s = "\"" + cookie.getValue()+"\"";                        
-        //System.out.println("quirkyCookieQuotes ensabled! ");        
+        String s = "\"" + cookie.getValue()+"\"";
+        //System.out.println("quirkyCookieQuotes ensabled! ");
         if (s != null) {
             buf.append(s);
         }

@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * With this abstract class multiple activators in a bundle can be joined.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
@@ -103,7 +103,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
 
     /**
      * Gets the joined {@link BundleActivator activators} which shall be started sequentially.
-     * 
+     *
      * @return The joined {@link BundleActivator activators}
      */
     protected abstract BundleActivator[] getActivators();

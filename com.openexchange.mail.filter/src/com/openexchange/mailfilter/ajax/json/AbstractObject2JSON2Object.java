@@ -56,7 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
 /**
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
 public abstract class AbstractObject2JSON2Object<T> {
@@ -106,12 +106,12 @@ public abstract class AbstractObject2JSON2Object<T> {
         }
         return obj;
     }
-    
+
     /**
      * Convenience method that just invokes {@link #write(Object[], String[])}
      * with a <code>String</code> array as second argument that only contains
      * given field.
-     * 
+     *
      * @param objs -
      *                the data objects
      * @param field -
@@ -126,7 +126,7 @@ public abstract class AbstractObject2JSON2Object<T> {
     /**
      * Writes given fields of data objects into separate JSONArrays which in
      * turn are put into a surrounding JSONArray
-     * 
+     *
      * @param objs -
      *                the data objects
      * @param fields -
@@ -152,7 +152,7 @@ public abstract class AbstractObject2JSON2Object<T> {
     /**
      * Convenience method that just invokes {@link #write(Object[], String[])}
      * with {@link #getListFields()} as second argument
-     * 
+     *
      * @param objs -
      *                the data objects
      * @return resulting <code>JSONArray</code>

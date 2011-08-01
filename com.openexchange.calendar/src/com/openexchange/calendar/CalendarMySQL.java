@@ -1097,26 +1097,26 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         return CalendarMySQL.select;
     }
-    
+
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
         final StringBuilder sb = new StringBuilder(128);
         sb.append("SELECT ");
         sb.append(columns);
         sb.append(", pdm.pfid");
         sb.append(" FROM prg_dates pd JOIN prg_dates_members pdm ON pd.intfield01 = pdm.object_id AND pd.cid = ? AND pdm.cid = ? WHERE ");
-        
+
         if (searchObj.hasFolders()) {
             final int folderId = searchObj.getFolders()[0];
             final int folderType = folderAccess.getFolderType(folderId, uid);
-            
+
             if (folderType == FolderObject.PRIVATE) {
                 sb.append("(pd.fid = 0 AND pdm.pfid = " + folderId + " AND pdm.member_uid = " + uid + ")");
             } else {
                 // Folder is shared or public
-                
+
                 final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, uid);
                 final EffectivePermission folderPermission = folderAccess.getFolderPermission(folderId, uid, userConfig);
-                
+
                 final boolean canReadAll = folderPermission.canReadAllObjects();
                 if (folderType == FolderObject.SHARED) {
                     final int owner = folderAccess.getFolderOwner(folderId);
@@ -1134,10 +1134,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
             }
         } else {
-            // Perform search over all folders in which the user has the right to see elements.      
-            
+            // Perform search over all folders in which the user has the right to see elements.
+
             sb.append("(");
-            
+
             // Look into the users private folders
             boolean first = true;
             for (final int folder : cfo.getPrivateFolders()) {
@@ -1146,21 +1146,21 @@ public class CalendarMySQL implements CalendarSqlImp {
                     first = false;
                 } else {
                     sb.append(" OR (pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + uid + ")");
-                }                
+                }
             }
-            
+
             // Look into folders that are shared to the user
             // where he can read all objects
             for (final int folder : cfo.getSharedReadableAll()) {
                 final int owner = folderAccess.getFolderOwner(folder);
-                if (first) {                    
+                if (first) {
                     sb.append("(NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
                     first = false;
                 } else {
                     sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + ")");
-                }                
+                }
             }
-            
+
             // where he can read own objects
             for (final int folder : cfo.getSharedReadableOwn()) {
                 final int owner = folderAccess.getFolderOwner(folder);
@@ -1169,9 +1169,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                     first = false;
                 } else {
                     sb.append(" OR (NOT pd.pflag = 1 AND pd.fid = 0 AND pdm.pfid = " + folder + " AND pdm.member_uid = " + owner + " AND pd.created_from = " + uid + ")");
-                }                
+                }
             }
-            
+
             // Look into public folders
             // where the user can read all objects
             for (final int folder : cfo.getPublicReadableAll()) {
@@ -1180,9 +1180,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                     first = false;
                 } else {
                     sb.append(" OR (pd.fid = " + folder + ")");
-                }                
+                }
             }
-            
+
             // where the user can read own objects
             for (final int folder : cfo.getPublicReadableOwn()) {
                 if (first) {
@@ -1190,19 +1190,19 @@ public class CalendarMySQL implements CalendarSqlImp {
                     first = false;
                 } else {
                     sb.append(" OR (pd.fid = " + folder + " AND pd.created_from = " + uid + ")");
-                }                
+                }
             }
-            
+
             sb.append(")");
         }
-        
-        // Look for pattern            
+
+        // Look for pattern
         String pattern = searchObj.getPattern();
         if (pattern != null) {
             sb.append(" AND (pd.field01 LIKE ? OR pd.field09 LIKE ?)");
             pattern = StringCollection.prepareForSearch(pattern);
         }
-        
+
         sb.append(" ORDER BY ");
         String orderby = collection.getFieldName(orderBy);
         if (orderby == null) {
@@ -1210,16 +1210,16 @@ public class CalendarMySQL implements CalendarSqlImp {
         }
         sb.append("pd." + orderby);
         sb.append(DBUtils.forSQLCommand(orderDir));
-        
+
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setInt(1, ctx.getContextId());
         pst.setInt(2, ctx.getContextId());
-        
+
         if (pattern != null) {
             pst.setString(3, pattern);
             pst.setString(4, pattern);
-        }        
-        
+        }
+
         return pst;
     }
 
@@ -1703,7 +1703,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             throw OXCalendarExceptionCodes.FOLDER_TYPE_UNRESOLVEABLE.create();
                         }
                         stmt.setInt(4, user.getConfirm());
-                        
+
                         if (folderType == FolderObject.SHARED) {
                             if (cdao.containsAlarm() && user.getIdentifier() == cdao.getSharedFolderOwner()) {
                                 user.setAlarmMinutes(cdao.getAlarm());
@@ -1719,7 +1719,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 }
                             }
                         }
-                        
+
                         if (user.containsConfirmMessage() && user.getConfirmMessage() != null) {
                             stmt.setString(5, user.getConfirmMessage());
                         } else {
@@ -2083,18 +2083,18 @@ public class CalendarMySQL implements CalendarSqlImp {
                 if (!rs.wasNull()) {
                     up.setConfirmMessage(temp);
                 }
-                
+
                 final int alarm = rs.getInt(5);
                 if (!rs.wasNull()) {
                     up.setAlarmMinutes(alarm);
                 }
-                
+
                 final int pfid = rs.getInt(4);
                 if (!rs.wasNull()) {
                     if (pfid < 1) {
                         LOG.error(StringCollection.convertArraytoString(new Object[] { "ERROR: getUserParticipants oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(cdao.getObjectID()) }));
                     }
-                    
+
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if (uid == tuid) {
                             cdao.setGlobalFolderID(pfid);
@@ -2124,7 +2124,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             }
                         }
                         up.setPersonalFolderId(pfid);
-                        
+
                         if (tuid == cdao.getSharedFolderOwner() && up.containsAlarm()) {
                             cdao.setAlarm(up.getAlarmMinutes());
                         }
@@ -2158,7 +2158,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 readcon = con;
             }
-            
+
             int action_folder = inFolder;
             if (cdao.containsParentFolderID()) {
                 action_folder = cdao.getParentFolderID();
@@ -2445,8 +2445,8 @@ public class CalendarMySQL implements CalendarSqlImp {
 
             ucols[uc++] = Appointment.LAST_MODIFIED;
             ucols[uc++] = Appointment.MODIFIED_BY;
-            
-            // If a normal appointment is changed into a recurring appointment, 
+
+            // If a normal appointment is changed into a recurring appointment,
             // recurring position (intfield05) has to be set to 0 instead of staying NULL.
             // Otherwise it will disappear in outlook because of missing series information.
             if (edao.getRecurrence() == null && cdao.getRecurrence() != null && !com.openexchange.tools.arrays.Arrays.contains(ucols, Appointment.RECURRENCE_POSITION)) {
@@ -3663,7 +3663,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
                 throw OXException.notFound("");
             }
-       
+
 
             oldAmount += numberOfAttachments;
             if (oldAmount < 0) {
@@ -3798,7 +3798,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private final boolean checkForDeletedParticipants(final int uid, final int cid, final int oid, final Context context, final Connection con) throws OXException, SQLException {
         Connection readcon = null;
         boolean pushCon = false;
-        
+
         boolean ret = false;
         try {
             if (con != null) {
@@ -3807,7 +3807,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 readcon = DBPool.pickup(context);
                 pushCon = true;
             }
-            
+
             final PreparedStatement pst = readcon.prepareStatement(SQL_CHECK_DEL_PART);
             ResultSet rs = null;
             try {

@@ -69,14 +69,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link DeleteAction}.
-     * 
+     *
      * @param services
      */
     public DeleteAction(final ServiceLookup services) {

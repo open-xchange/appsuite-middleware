@@ -55,7 +55,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 
 /**
  * {@link DefaultDeferringURLService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class DefaultDeferringURLService implements DeferringURLService {

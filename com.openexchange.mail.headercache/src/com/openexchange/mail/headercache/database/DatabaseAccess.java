@@ -99,14 +99,14 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link DatabaseAccess} - Database access for header cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseAccess {
 
     /**
      * Creates a new instance of {@link DatabaseAccess}.
-     * 
+     *
      * @param fullname The folder fullname
      * @param accountId The account identifier
      * @param user The user identifier
@@ -133,7 +133,7 @@ public final class DatabaseAccess {
 
     /**
      * Initializes a new {@link DatabaseAccess}.
-     * 
+     *
      * @param fullname The folder fullname
      * @param accountId The account identifier
      * @param user The user identifier
@@ -154,14 +154,14 @@ public final class DatabaseAccess {
 
         /**
          * Gets appropriate field name.
-         * 
+         *
          * @return Appropriate field name
          */
         String getField();
 
         /**
          * Applies read value to given {@link MailMessage} instance.
-         * 
+         *
          * @param mail The mail which shall be filled
          * @param rs The result set to read from
          * @param pos The current position to read
@@ -183,7 +183,7 @@ public final class DatabaseAccess {
 
         /**
          * Initializes a new {@link FolderSetterApplier}.
-         * 
+         *
          * @param fullname The folder fullname
          */
         public FolderSetterApplier(final String fullname) {
@@ -321,7 +321,7 @@ public final class DatabaseAccess {
 
     /**
      * Gets the {@link SetterApplier} list for specified mail fields.
-     * 
+     *
      * @param fields The mail fields
      * @return The {@link SetterApplier} list for specified mail fields
      */
@@ -355,7 +355,7 @@ public final class DatabaseAccess {
      * Fills specified instances of {@link MailMessage} with available data.
      * <p>
      * Note that {@link MailMessage#getMailId()} is expected to return a non-<code>null</code> value for each {@link MailMessage} instance.
-     * 
+     *
      * @param mails The instances of {@link MailMessage} to fill
      * @param fields The fields to fill in instances of {@link MailMessage}
      * @throws OXException If filling the mails fails
@@ -387,7 +387,7 @@ public final class DatabaseAccess {
      * Fills specified instances of {@link MailMessage} with available data.
      * <p>
      * Note that {@link MailMessage#getMailId()} is expected to return a non-<code>null</code> value for each {@link MailMessage} instance.
-     * 
+     *
      * @param chunkedMails The instances of {@link MailMessage} to fill
      * @param fields The fields to fill in instances of {@link MailMessage}
      * @throws OXException If filling the mails fails
@@ -483,7 +483,7 @@ public final class DatabaseAccess {
      * Fills specified instance of {@link MailMessage} with available data.
      * <p>
      * Note that {@link MailMessage#getMailId()} is expected to return a non-<code>null</code> value.
-     * 
+     *
      * @param mail The instance of {@link MailMessage} to fill
      * @param fields The fields to fill in instance of {@link MailMessage}
      * @throws OXException If filling the mail fails
@@ -569,7 +569,7 @@ public final class DatabaseAccess {
 
     /**
      * Fill specified pipe with given input stream's data.
-     * 
+     *
      * @param pipedOut The pipe to write to
      * @param in The input stream whose data shall be written
      * @throws IOException If an I/O error occurs
@@ -593,7 +593,7 @@ public final class DatabaseAccess {
 
     /**
      * Loads sync data from database from specified folder in user's account.
-     * 
+     *
      * @return The sync data from database
      * @throws OXException If loading sync data fails
      */
@@ -645,7 +645,7 @@ public final class DatabaseAccess {
 
     /**
      * Deletes sync data from database associated with specified mail identifiers in folder denoted by given account's fullname.
-     * 
+     *
      * @param ids The mail identifiers to delete
      * @throws OXException If deletion fails
      */
@@ -698,7 +698,7 @@ public final class DatabaseAccess {
 
     /**
      * Inserts specified mail collection to sync data.
-     * 
+     *
      * @param mails The mail collection to insert
      * @throws OXException If insertion fails
      */
@@ -745,7 +745,7 @@ public final class DatabaseAccess {
 
     /**
      * Inserts specified mail collection to sync data.
-     * 
+     *
      * @param mails The mail list to insert
      * @param wc A writable connection
      * @throws OXException If insertion fails
@@ -933,7 +933,7 @@ public final class DatabaseAccess {
 
     /**
      * Fills specified {@link PipedOutputStream} instance.
-     * 
+     *
      * @param pipedOutputStream The piped output stream
      * @param headers The headers' bytes
      * @throws IOException If an I/O error occurs
@@ -951,7 +951,7 @@ public final class DatabaseAccess {
 
     /**
      * Closes specified {@link Closeable} instance quietly.
-     * 
+     *
      * @param closeable The {@link Closeable} instance to close
      */
     static void closeQuietly(final Closeable closeable) {
@@ -975,7 +975,7 @@ public final class DatabaseAccess {
 
     /**
      * Updates specified sync data.
-     * 
+     *
      * @param col The sync data to update
      * @param fullname The folder fullname
      * @param accountId The account identifier

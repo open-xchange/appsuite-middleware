@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link IDGeneratorService} - A service to generate unique numeric identifiers for a specified type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IDGeneratorService {
 
     /**
      * Generates a unique numeric identifier for specified type.
-     * 
+     *
      * @param type The type identifier
      * @param contextId The context identifier
      * @return A unique numeric identifier

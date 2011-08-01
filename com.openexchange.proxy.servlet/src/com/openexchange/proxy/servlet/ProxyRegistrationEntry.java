@@ -54,7 +54,7 @@ import com.openexchange.proxy.ProxyRegistration;
 /**
  * {@link ProxyRegistrationEntry} - A registration entry which wraps a {@link ProxyRegistration registration} and provides registration time
  * stamp and time-to-live.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyRegistrationEntry {
@@ -67,7 +67,7 @@ public final class ProxyRegistrationEntry {
 
     /**
      * Initializes a new {@link ProxyRegistrationEntry} bound to session.
-     * 
+     *
      * @param proxyRegistration The proxy registration
      */
     public ProxyRegistrationEntry(final ProxyRegistration proxyRegistration) {
@@ -76,7 +76,7 @@ public final class ProxyRegistrationEntry {
 
     /**
      * Initializes a new {@link ProxyRegistrationEntry} with given time-to-live.
-     * 
+     *
      * @param proxyRegistration The proxy registration
      * @param ttl The time-to-live value; a negative value means bound to session life time.
      */
@@ -89,7 +89,7 @@ public final class ProxyRegistrationEntry {
 
     /**
      * Gets the time-to-live for this entry. A negative value means this entry is bound to associated session's life time.
-     * 
+     *
      * @return The time-to-live or a negative value
      */
     public long getTTL() {
@@ -98,7 +98,7 @@ public final class ProxyRegistrationEntry {
 
     /**
      * Gets the proxy registration
-     * 
+     *
      * @return The proxy registration
      */
     public ProxyRegistration getProxyRegistration() {
@@ -107,7 +107,7 @@ public final class ProxyRegistrationEntry {
 
     /**
      * Gets the time stamp when this entry was registered.
-     * 
+     *
      * @return The register time stamp
      */
     public long getTimestamp() {

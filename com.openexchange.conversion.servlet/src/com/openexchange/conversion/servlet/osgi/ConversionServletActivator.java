@@ -60,7 +60,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link ConversionServletActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversionServletActivator extends DeferredActivator {

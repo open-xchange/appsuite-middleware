@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link ContactInterfaceProviderRegistry} - A registry for {@link ContactInterfaceProvider} instances.
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +68,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Gets the {@link ContactInterfaceProviderRegistry} instance.
-     * 
+     *
      * @return The {@link ContactInterfaceProviderRegistry} instance
      */
     public static ContactInterfaceProviderRegistry getInstance() {
@@ -88,7 +88,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Adds specified {@link ContactInterfaceProvider} instance and binds it to given folder ID/context ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @param contactInterface The {@link ContactInterfaceProvider} instance to add
@@ -100,7 +100,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Checks if this registry contains a {@link ContactInterfaceProvider} instance bound to given folder ID/context ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return <code>true</code> if this registry contains a {@link ContactInterfaceProvider} instance bound to given folder ID/context ID
@@ -112,7 +112,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Removes possibly existing binding of given folder ID/context ID pair to specified {@link ContactInterfaceProvider} instance.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @param contactInterface he {@link ContactInterfaceProvider} instance to remove
@@ -125,7 +125,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Gets the number of registered {@link ContactInterfaceProvider} instances.
-     * 
+     *
      * @return The number of registered {@link ContactInterfaceProvider} instances
      */
     public int getNumberOfServices() {
@@ -139,7 +139,7 @@ public class ContactInterfaceProviderRegistry {
 
     /**
      * Gets the {@link ContactInterfaceProvider} instance bound to given folder ID in given context.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return The {@link ContactInterfaceProvider} instance bound to given folder ID in given context
@@ -147,7 +147,7 @@ public class ContactInterfaceProviderRegistry {
     public ContactInterfaceProvider getService(final int folderId, final int contextId) {
         return services.get(new Key(folderId, contextId));
     }
-    
+
     public List<ContactInterfaceProviderRegistration> getRegistrations(final int contextId) {
         final Set<Entry<Key,ContactInterfaceProvider>> entrySet = services.entrySet();
         final List<ContactInterfaceProviderRegistration> registrations = new LinkedList<ContactInterfaceProviderRegistration>();
@@ -156,7 +156,7 @@ public class ContactInterfaceProviderRegistry {
                 registrations.add(new ContactInterfaceProviderRegistration(entry.getKey().folderId, entry.getValue()));
             }
         }
-        
+
         return registrations;
     }
 

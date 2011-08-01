@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link HeaderCacheMailAccountDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HeaderCacheMailAccountDeleteListener implements MailAccountDeleteListener {

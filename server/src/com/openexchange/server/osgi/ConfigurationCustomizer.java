@@ -77,6 +77,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object addingService(ServiceReference reference) {
         ConfigurationService confService = (ConfigurationService) context.getService(reference);
         ServerConfig.getInstance().initialize(confService);
@@ -88,6 +89,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
@@ -95,6 +97,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(ServiceReference reference, final Object service) {
         // ConfigurationService is not referenced in ContactConfig.
         // ConfigurationService is not referenced in ParticipantConfig.

@@ -77,23 +77,23 @@ public class SELECT extends Command {
             this.columns.add(column.getName());
         }
 	}
-	
+
 	public SELECT(List<Column> columns) {
 	    this();
 	    for (Column column : columns) {
             this.columns.add(column.getName());
         }
 	}
-	
+
 	public SELECT(COUNT count) {
 	    this();
 	    this.expression = count;
 	}
-	
+
 	public SELECT(Constant constant) {
 	    this(constant.toString());
 	}
-	
+
 	public void addColumn(String column) {
 		this.columns.add(column);
 	}
@@ -114,7 +114,7 @@ public class SELECT extends Command {
 		from.addTable(table);
 		return this;
 	}
-	
+
 	public SELECT FROM(Table table) {
 	    from.addTable(table);
 	    return this;
@@ -124,12 +124,12 @@ public class SELECT extends Command {
 		from.addTables(tables);
 		return this;
 	}
-	
+
 	public SELECT FROM(Table... tables) {
 	    from.addTables(tables);
 	    return this;
 	}
-	
+
 	public SELECT JOIN(String rightTable, Predicate predicate) {
 		from.JOIN(rightTable, predicate);
 		return this;
@@ -139,7 +139,7 @@ public class SELECT extends Command {
 		from.JOIN(rightTable, predicate);
 		return this;
 	}
-	
+
 	public SELECT WHERE(Predicate predicate) {
 		where = new WHERE(predicate);
 		return this;
@@ -148,7 +148,7 @@ public class SELECT extends Command {
 	public Expression getExpression() {
 	    return this.expression;
 	}
-	
+
 	public FROM getFrom() {
 		return from;
 	}
@@ -157,7 +157,8 @@ public class SELECT extends Command {
 		return where;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildSELECT(this);
 	}
 }

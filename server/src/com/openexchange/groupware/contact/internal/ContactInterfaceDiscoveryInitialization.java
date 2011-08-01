@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link ContactInterfaceDiscoveryInitialization} - {@link Initialization} for contact interface discovery.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactInterfaceDiscoveryInitialization implements Initialization {
@@ -70,6 +70,7 @@ public final class ContactInterfaceDiscoveryInitialization implements Initializa
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -77,6 +78,7 @@ public final class ContactInterfaceDiscoveryInitialization implements Initializa
         ContactInterfaceDiscoveryServiceImpl.initInstance();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

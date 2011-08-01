@@ -57,21 +57,21 @@ import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
  * {@link IAttachmentHandler} - Tracks mail parts when parsing a mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IAttachmentHandler {
 
     /**
      * Sets the text part which may be modified.
-     * 
+     *
      * @param textBodyPart The text part to set
      */
     public void setTextPart(TextBodyMailPart textBodyPart);
 
     /**
      * Adds specified attachment.
-     * 
+     *
      * @param attachment The attachment to add
      * @throws OXException Depending on implementation it may indicate an exceeded quota, but other errors as well
      */
@@ -79,7 +79,7 @@ public interface IAttachmentHandler {
 
     /**
      * Generates composed mails.
-     * 
+     *
      * @param source The source composed mail
      * @return The resulting composed mails
      * @throws OXException If an error occurs while filling mail

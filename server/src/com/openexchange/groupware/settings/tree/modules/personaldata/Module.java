@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Module implements PreferencesItemService {
@@ -76,6 +76,7 @@ public final class Module implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.personaldata", "module" };
     }
@@ -83,12 +84,15 @@ public final class Module implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.valueOf(OXFolderProperties.isEnableInternalUsersEdit()));
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

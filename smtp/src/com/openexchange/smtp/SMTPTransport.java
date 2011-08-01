@@ -110,7 +110,7 @@ import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link SMTPTransport} - The SMTP mail transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPTransport extends MailTransport {
@@ -145,7 +145,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Constructor
-     * 
+     *
      * @param session The session
      * @throws OXException If initialization fails
      */
@@ -155,7 +155,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Constructor
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @throws OXException If initialization fails
@@ -204,7 +204,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Executes the given task. This method returns as soon as the task is scheduled, without waiting for it to be executed.
-     * 
+     *
      * @param task The task to be executed.
      */
     private void invokeLater(final Runnable task) {
@@ -653,7 +653,7 @@ public final class SMTPTransport extends MailTransport {
             } catch (final javax.mail.internet.ParseException e) {
                 /*-
                  * Probably parsing of a Content-Type header failed.
-                 * 
+                 *
                  * Try to sanitize parameter list headers
                  */
                 sanitizeContentTypeHeaders(smtpMessage, new ContentType());

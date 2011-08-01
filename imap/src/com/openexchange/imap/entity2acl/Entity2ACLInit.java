@@ -57,7 +57,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link Entity2ACLInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Entity2ACLInit implements Initialization {

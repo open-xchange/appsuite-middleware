@@ -14,11 +14,11 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetVoicemailSettingsResponseType
 
 /**
  * Phone terminal voicemail function data
- * 
+ *
  * <p>Java class for Voicemail complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Voicemail">
  *   &lt;complexContent>
@@ -48,8 +48,8 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetVoicemailSettingsResponseType
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Voicemail", propOrder = {
@@ -87,11 +87,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -99,11 +99,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -111,11 +111,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the storage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getStorage() {
         return storage;
@@ -123,11 +123,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the storage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setStorage(UnlimitedUInt value) {
         this.storage = value;
@@ -135,11 +135,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the autoDelDays property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAutoDelDays() {
         return autoDelDays;
@@ -147,11 +147,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the autoDelDays property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAutoDelDays(BigInteger value) {
         this.autoDelDays = value;
@@ -159,11 +159,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the notify property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotify() {
         return notify;
@@ -171,11 +171,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the notify property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotify(String value) {
         this.notify = value;
@@ -183,11 +183,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the password property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -195,11 +195,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the password property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -207,11 +207,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the autoAnswer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAutoAnswer() {
         return autoAnswer;
@@ -219,11 +219,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the autoAnswer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAutoAnswer(Boolean value) {
         this.autoAnswer = value;
@@ -231,11 +231,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the autoAnswerTime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAutoAnswerTime() {
         return autoAnswerTime;
@@ -243,11 +243,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the autoAnswerTime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAutoAnswerTime(BigInteger value) {
         this.autoAnswerTime = value;
@@ -255,11 +255,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the directory property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDirectory() {
         return directory;
@@ -267,11 +267,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the directory property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDirectory(Boolean value) {
         this.directory = value;
@@ -279,11 +279,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -291,11 +291,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -303,11 +303,11 @@ public class Voicemail {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -315,11 +315,11 @@ public class Voicemail {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

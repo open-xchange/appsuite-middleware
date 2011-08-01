@@ -62,9 +62,9 @@ import com.openexchange.session.Session;
 /**
  * {@link SMTPMailMessage} - Extends the {@link ComposedMailMessage} class to
  * compose SMTP messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPMailMessage extends ComposedMailMessage {
 
@@ -83,7 +83,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	 * is defined through {@link #setContentType(String)} or
 	 * {@link #setContentType(com.openexchange.mail.mime.ContentType)}. The HTML
 	 * is then converted appropriately.
-	 * 
+	 *
 	 * @param htmlMailBody
 	 *            The mail body as HTML content
 	 * @param session
@@ -99,7 +99,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	/**
 	 * Initializes a new {@link SMTPMailMessage}
-	 * 
+	 *
 	 * @param session
 	 *            The session providing needed user data
 	 * @param ctx
@@ -159,7 +159,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	 * Removes the enclosed part at the specified position. Shifts any
 	 * subsequent parts to the left (subtracts one from their indices). Returns
 	 * the part that was removed.
-	 * 
+	 *
 	 * @param index
 	 *            The index position
 	 * @return The removed part
@@ -171,7 +171,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	/**
 	 * Adds an instance of {@link MailPart} to enclosed parts
-	 * 
+	 *
 	 * @param part
 	 *            The instance of {@link MailPart} to add
 	 */

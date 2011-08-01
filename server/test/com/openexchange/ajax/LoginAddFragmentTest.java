@@ -62,28 +62,28 @@ public class LoginAddFragmentTest extends TestCase {
     public LoginAddFragmentTest(String name) {
         super(name);
     }
-    
+
     public void assertFragment(String original, String expected) {
         assertEquals(expected, new TestLogin().addFragmentParam(original, "session", "abcd"));
     }
-    
+
     public void testSimple() {
         assertFragment("http://www.open-xchange.com/index.html", "http://www.open-xchange.com/index.html#session=abcd");
     }
-    
+
     public void testEnhanceExistingFragment() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd");
     }
-    
+
     public void testDelimitedByQuestionMark() {
         assertFragment("http://www.open-xchange.com/index.html#f=12&i=23?someParam=someValue", "http://www.open-xchange.com/index.html#f=12&i=23&session=abcd?someParam=someValue");
     }
-    
+
     private static final class TestLogin extends Login {
         public String addFragmentParam(String url, String param, String value) {
             return addFragmentParameter(url, param, value);
         }
     }
-    
-    
+
+
 }

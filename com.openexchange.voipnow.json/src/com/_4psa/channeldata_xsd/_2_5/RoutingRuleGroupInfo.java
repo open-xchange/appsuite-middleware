@@ -12,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Outgoing routing rule group definition
- * 
+ *
  * <p>Java class for RoutingRuleGroupInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="RoutingRuleGroupInfo">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RoutingRuleGroupInfo", propOrder = {
@@ -52,11 +52,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -64,11 +64,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -76,11 +76,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -88,11 +88,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -100,11 +100,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Gets the value of the default property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDefault() {
         return _default;
@@ -112,11 +112,11 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Sets the value of the default property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDefault(Boolean value) {
         this._default = value;
@@ -124,25 +124,25 @@ public class RoutingRuleGroupInfo {
 
     /**
      * Gets the value of the rules property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rules property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRules().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link RoutingRuleInfo }
-     * 
-     * 
+     *
+     *
      */
     public List<RoutingRuleInfo> getRules() {
         if (rules == null) {

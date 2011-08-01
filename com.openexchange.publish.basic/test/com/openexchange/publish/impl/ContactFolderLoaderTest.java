@@ -83,37 +83,37 @@ public class ContactFolderLoaderTest extends TestCase {
     @Override
     public void setUp() {
         final SimContactSQLInterface contacts = new SimContactSQLInterface();
-        
+
         cid = 1;
         folderId = 12;
         id1 = 1337;
         id2 = 1338;
         id3 = 1339;
-        
+
         publication = new Publication();
         publication.setEntityId(String.valueOf(folderId));
         publication.setContext(new SimContext(cid));
-        
+
         contacts.simulateContact(cid, folderId, id1, "Hans");
         contacts.simulateContact(cid, folderId, id2, "Peter");
         contacts.simulateDistributionList(cid, folderId, id3, "DistriList");
-            
+
         contactSQLFactory = new ContactInterfaceFactory() {
 
             public ContactSQLInterface create(final int folderId, final Session session) throws OXException {
                 return contacts;
             }
-            
+
         };
-        
+
         contactLoader = new ContactFolderLoader(contactSQLFactory);
     }
-    
+
     public void testLoadFolder() throws OXException {
         final Collection<? extends Object> collection = contactLoader.load(publication);
-        
+
         assertNotNull("Collection was null", collection);
-        
+
         assertEquals("Folder should contain two contacts", 2, collection.size());
         final Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
         for (final Object object : collection) {
@@ -121,5 +121,5 @@ public class ContactFolderLoaderTest extends TestCase {
             assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
         }
     }
-    
+
 }

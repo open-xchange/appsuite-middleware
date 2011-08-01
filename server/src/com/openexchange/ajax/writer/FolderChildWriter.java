@@ -95,9 +95,11 @@ public class FolderChildWriter extends DataWriter {
     }
 
     private static final FieldWriter<FolderChildObject> FOLDER_ID_WRITER = new FieldWriter<FolderChildObject>() {
+        @Override
         public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getParentFolderID(), json, obj.containsParentFolderID());
         }
+        @Override
         public void write(final FolderChildObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(FolderChildFields.FOLDER_ID, obj.getParentFolderID(), json, obj.containsParentFolderID());
         }

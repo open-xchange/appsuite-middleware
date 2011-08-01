@@ -59,7 +59,7 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
 
 /**
  * {@link GetTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetTest extends AbstractMessagingActionTest {
@@ -162,7 +162,7 @@ public class GetTest extends AbstractMessagingActionTest {
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
         req.putParameter("peek", "aboo");
-        
+
         assertFails(req);
     }
 

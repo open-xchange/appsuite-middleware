@@ -55,7 +55,7 @@ import org.osgi.service.event.EventConstants;
 /**
  * {@link SessiondEventConstants} - Provides constants for {@link EventConstants#EVENT_TOPIC event topic} and property names accessible by
  * an {@link Event event}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondEventConstants {
@@ -103,7 +103,7 @@ public final class SessiondEventConstants {
      * Gets an array of {@link String string} including all known topics.
      * <p>
      * Needed on event handler registration to a bundle context.
-     * 
+     *
      * @return An array of {@link String string} including all known topics.
      */
     public static String[] getAllTopics() {

@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ComposedMailWrapper}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ComposedMailWrapper extends ComposedMailMessage {
@@ -81,7 +81,7 @@ final class ComposedMailWrapper extends ComposedMailMessage {
 
     /**
      * Initializes a new {@link ComposedMailWrapper}.
-     * 
+     *
      * @param session The session
      * @param ctx The context
      */

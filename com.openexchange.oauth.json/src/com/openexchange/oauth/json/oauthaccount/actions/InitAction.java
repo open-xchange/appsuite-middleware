@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link InitAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InitAction extends AbstractOAuthAJAXActionService {
@@ -103,7 +103,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
-    
+
     //FIXME: Refactor this. These methods are pretty similar. DRY
 
     private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {

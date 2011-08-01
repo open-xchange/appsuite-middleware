@@ -65,45 +65,57 @@ public interface URIDefaults {
     int getSSLPort();
 
     static URIDefaults IMAP = new URIDefaults() {
+        @Override
         public String getProtocol() {
             return "imap";
         }
+        @Override
         public String getSSLProtocol() {
             return "imaps";
         }
+        @Override
         public int getPort() {
             return 143;
         }
+        @Override
         public int getSSLPort() {
             return 993;
         }
     };
 
     static URIDefaults NULL = new URIDefaults() {
+        @Override
         public String getProtocol() {
             return null;
         }
+        @Override
         public String getSSLProtocol() {
             return null;
         }
+        @Override
         public int getPort() {
             return -1;
         }
+        @Override
         public int getSSLPort() {
             return -1;
         }
     };
 
     static URIDefaults SMTP = new URIDefaults() {
+        @Override
         public String getProtocol() {
             return "smtp";
         }
+        @Override
         public String getSSLProtocol() {
             return "smtps";
         }
+        @Override
         public int getPort() {
             return 25;
         }
+        @Override
         public int getSSLPort() {
             return 465;
         }

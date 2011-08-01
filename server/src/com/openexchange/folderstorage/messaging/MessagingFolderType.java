@@ -57,7 +57,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link MessagingFolderType} - The folder type for messaging.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingFolderType implements FolderType {
@@ -66,7 +66,7 @@ public final class MessagingFolderType implements FolderType {
 
     /**
      * Gets the {@link MessagingFolderType} instance.
-     * 
+     *
      * @return The {@link MessagingFolderType} instance
      */
     public static MessagingFolderType getInstance() {
@@ -80,6 +80,7 @@ public final class MessagingFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
@@ -89,6 +90,7 @@ public final class MessagingFolderType implements FolderType {
      */
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         if (null == folderId) {
             return false;
@@ -117,6 +119,7 @@ public final class MessagingFolderType implements FolderType {
         return true;
     }
 
+    @Override
     public boolean servesParentId(final String folderId) {
         if (null == folderId) {
             return false;

@@ -68,17 +68,17 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> {
-    
+
     private String formName, formAction, selectName, selectValue, buttonName;
-    
+
     private int formNumber;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextPageByMultiselectStep.class));
-    
+
     public TextPageByMultiselectStep(){
-        
+
     }
-    
+
     public TextPageByMultiselectStep(final String description, final String formName, final String formAction, final int formNumber, final String selectName, final String selectValue, final String buttonName){
         this.description = description;
         this.formName = formName;
@@ -88,7 +88,7 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
         this.selectValue = selectValue;
         this.buttonName = buttonName;
     }
-    
+
     @Override
     public void execute(final WebClient webClient) throws OXException {
         HtmlForm form = null;
@@ -106,10 +106,10 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
             final HtmlOption option = select.getOptionByValue(selectValue);
             select.setSelectedAttribute(option, true);
             final HtmlSubmitInput button = form.getInputByName(buttonName);
-            
+
             try {
                 output = (TextPage) button.click();
-            } 
+            }
             catch (final ClassCastException e){
                 LOG.info("Instead of the expected TextPage something else was returned. Maybe the users addressbook is empty.");
                 executedSuccessfully = true;
@@ -119,68 +119,68 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
             }
             if (output != null) {
                 executedSuccessfully = true;
-            }            
+            }
         }
     }
-    
+
     public String getFormName() {
         return formName;
     }
 
-    
+
     public void setFormName(final String formName) {
         this.formName = formName;
     }
 
-    
+
     public String getFormAction() {
         return formAction;
     }
 
-    
+
     public void setFormAction(final String formAction) {
         this.formAction = formAction;
     }
 
-    
+
     public String getSelectName() {
         return selectName;
     }
 
-    
+
     public void setSelectName(final String selectName) {
         this.selectName = selectName;
     }
 
-    
+
     public String getSelectValue() {
         return selectValue;
     }
 
-    
+
     public void setSelectValue(final String selectValue) {
         this.selectValue = selectValue;
     }
 
-    
+
     public int getFormNumber() {
         return formNumber;
     }
 
-    
+
     public void setFormNumber(final int formNumber) {
         this.formNumber = formNumber;
     }
 
-    
+
     public String getButtonName() {
         return buttonName;
     }
 
-    
+
     public void setButtonName(final String buttonName) {
         this.buttonName = buttonName;
     }
-    
+
 
 }

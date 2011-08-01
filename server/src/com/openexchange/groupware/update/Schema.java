@@ -88,7 +88,7 @@ public interface Schema {
      * <code>null</code>.
      */
     String getServer();
-    
+
     /**
      * @return schema name
      */

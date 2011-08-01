@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -42,11 +42,11 @@ public class GetRegionsRequest {
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCode() {
         return code;
@@ -54,11 +54,11 @@ public class GetRegionsRequest {
 
     /**
      * Sets the value of the code property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCode(String value) {
         this.code = value;
@@ -66,11 +66,11 @@ public class GetRegionsRequest {
 
     /**
      * Gets the value of the region property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRegion() {
         return region;
@@ -78,11 +78,11 @@ public class GetRegionsRequest {
 
     /**
      * Sets the value of the region property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRegion(String value) {
         this.region = value;

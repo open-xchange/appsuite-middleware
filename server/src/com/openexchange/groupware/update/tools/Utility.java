@@ -53,7 +53,7 @@ import java.util.List;
 
 /**
  * {@link Utility} - Utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utility {
@@ -72,7 +72,7 @@ public final class Utility {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
@@ -126,7 +126,7 @@ public final class Utility {
 
     /**
      * Generates a DB-style output for given map.
-     * 
+     *
      * <pre>
      * +---------------+---------+
      * | schema        | version |
@@ -136,7 +136,7 @@ public final class Utility {
      * | dfgdg56       | 12      |
      * +---------------+---------+
      * </pre>
-     * 
+     *
      * @param rows The rows
      * @param columnNames The map's column names
      * @param withBorders <code>true</code> to output with table borders; otherwise <code>false</code>

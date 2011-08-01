@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link MessagingPermission} - Represents a messaging permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -119,7 +119,7 @@ public interface MessagingPermission extends Cloneable {
 
     /**
      * Creates and returns a copy of this object.
-     * 
+     *
      * @return A clone of this instance.
      */
     public Object clone();
@@ -131,56 +131,56 @@ public interface MessagingPermission extends Cloneable {
 
     /**
      * Gets this folder permission's system bit mask.
-     * 
+     *
      * @return This folder permission's system bit mask
      */
     public int getSystem();
 
     /**
      * Sets this folder permission's system bit mask.
-     * 
+     *
      * @param system This folder permission's system bit mask
      */
     public void setSystem(int system);
 
     /**
      * Checks if this folder permission's entity is a group.
-     * 
+     *
      * @return <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>
      */
     public boolean isGroup();
 
     /**
      * Sets if this folder permission's entity is a group.
-     * 
+     *
      * @param group <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>
      */
     public void setGroup(boolean group);
 
     /**
      * Gets this folder permission's entity identifier.
-     * 
+     *
      * @return This folder permission's entity identifier
      */
     public int getEntity();
 
     /**
      * Sets this folder permission's entity identifier.
-     * 
+     *
      * @param entity The entity identifier
      */
     public void setEntity(int entity);
 
     /**
      * Checks if this folder permission denotes its entity as a folder administrator.
-     * 
+     *
      * @return <code>true</code> if this folder permission's entity is a folder administrator; otherwise <code>false</code>
      */
     public boolean isAdmin();
 
     /**
      * Sets if this folder permission denotes its entity as a folder administrator.
-     * 
+     *
      * @param admin <code>true</code> if this folder permission's entity is a folder administrator; otherwise <code>false</code>
      */
     public void setAdmin(boolean admin);
@@ -196,7 +196,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #CREATE_SUB_FOLDERS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @return The folder permission
      */
     public int getFolderPermission();
@@ -212,7 +212,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #CREATE_SUB_FOLDERS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @param permission The folder permission
      */
     public void setFolderPermission(int permission);
@@ -227,7 +227,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #READ_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @return The read permission
      */
     public int getReadPermission();
@@ -242,7 +242,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #READ_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @param permission The read permission
      */
     public void setReadPermission(int permission);
@@ -257,7 +257,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #WRITE_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @return The write permission
      */
     public int getWritePermission();
@@ -272,7 +272,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #WRITE_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @param permission The write permission
      */
     public void setWritePermission(int permission);
@@ -287,7 +287,7 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #DELETE_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @return The delete permission
      */
     public int getDeletePermission();
@@ -302,14 +302,14 @@ public interface MessagingPermission extends Cloneable {
      * <li>{@link #DELETE_ALL_OBJECTS}</li>
      * <li>{@link #MAX_PERMISSION}</li>
      * </ul>
-     * 
+     *
      * @param permission The delete permission
      */
     public void setDeletePermission(int permission);
 
     /**
      * Convenience method to set all permissions at once.
-     * 
+     *
      * @param folderPermission The folder permission
      * @param readPermission The read permission
      * @param writePermission The write permission

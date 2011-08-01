@@ -52,9 +52,9 @@ import java.util.HashSet;
 
 /**
  * A class representing the else command in a sieve script
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class ElseCommand extends IfStructureCommand {
     public ElseCommand() {

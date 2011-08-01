@@ -56,7 +56,7 @@ import com.openexchange.tools.OXCloneable;
 
 /**
  * {@link OCLPermission}
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -64,37 +64,37 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /*
      * Permisson Matrix # 2 4 8 16 32 64 128 #WERT
-     * 
+     *
      * Folder z 0 Folder +r 2 2 Folder +co 2 4 6 Folder +csf 2 4 8 14 Folder
      * admina 128
-     * 
+     *
      * Object z 0 Object +ro 2 2 Object +ra 2 4 6 Object adminr 128
-     * 
+     *
      * Object z 0 Object +wo 2 2 Object +wa 2 4 6 Object adminw 128
-     * 
+     *
      * Object +do 2 2 Object +da 2 4 4 Object admind 128
-     * 
+     *
      * (a) to delete a folder the user needs permissons to delete every object
      * in the folder!
-     * 
+     *
      * We must be able to: - set the owner - set role (only if principal ==
      * owner or another admin can add a new entity) - protect existing
      * permissons
-     * 
-     * 
+     *
+     *
      * CREATE TABLE folder ( "fuid" integer, "parent" integer, "fname" text,
      * "module" text, "type" text, "owner" text, "creator" text, "pid" integer,
      * "creating_date" timestamp, "created_from" text, "changing_date"
      * timestamp, "changed_from" text );
-     * 
+     *
      * fuid = unique folder id parent = parent folder (fuid) fname = folder name
      * module = system, task, calendar, contact, unbound type = system, private,
      * public, share owner = uid creator = uid pid = pointer to permission
-     * 
+     *
      * CREATE TABLE permission ( "puid" integer, "pid" integer, "role" integer,
      * "entity" text, "sealed" integer, "fp" integer, "orp" integer, "owp"
      * integer, "odp" integer );
-     * 
+     *
      * puid = unique permission id pid = permission id (folder.pid) role = role
      * entity = entity (uid, group, ...) sealed = sealed (0 / n) fp = folder
      * permission orp = object read permission owp = object write permission odp
@@ -187,7 +187,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Initializes a new {@link OCLPermission}
-     * 
+     *
      * @param entity The entity ID
      * @param fuid The folder ID
      */
@@ -219,7 +219,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the system bit mask
-     * 
+     *
      * @param system The system bit mask
      */
     public void setSystem(final int system) {
@@ -228,7 +228,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name
      */
     public void setName(final String name) {
@@ -237,7 +237,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the entity ID
-     * 
+     *
      * @param entity The entity ID
      */
     public void setEntity(final int entity) {
@@ -249,7 +249,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Set folder admin
-     * 
+     *
      * @param folderAdmin <code>true</code> to allow folder admin; otherwise
      *            <code>false</code>
      */
@@ -262,7 +262,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Set group permission
-     * 
+     *
      * @param folderAdmin <code>true</code> to mark as group; otherwise
      *            <code>false</code>
      */
@@ -275,7 +275,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the folder permission
-     * 
+     *
      * @param p The folder permission
      * @return <code>true</code> if given permission value could be successfully
      *         applied; otherwise <code>false</code>
@@ -290,7 +290,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the read permission
-     * 
+     *
      * @param p The read permission
      * @return <code>true</code> if given permission value could be successfully
      *         applied; otherwise <code>false</code>
@@ -305,7 +305,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the write permission
-     * 
+     *
      * @param p The write permission
      * @return <code>true</code> if given permission value could be successfully
      *         applied; otherwise <code>false</code>
@@ -320,7 +320,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the delete permission
-     * 
+     *
      * @param p The delete permission
      * @return <code>true</code> if given permission value could be successfully
      *         applied; otherwise <code>false</code>
@@ -335,7 +335,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets all object-related permission
-     * 
+     *
      * @param pr The read permission
      * @param pw The write permission
      * @param pd The delete permission
@@ -354,7 +354,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets all permission
-     * 
+     *
      * @param fp The folder permission
      * @param opr The read permission
      * @param opw The write permission
@@ -375,7 +375,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Validates given permission value
-     * 
+     *
      * @param p The permission value to validate
      * @return <code>true</code> if value is valid; otherwise <code>false</code>
      */
@@ -385,7 +385,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Sets the folder ID
-     * 
+     *
      * @param fuid The folder ID
      */
     public void setFuid(final int fuid) {
@@ -394,7 +394,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants folder admin
-     * 
+     *
      * @return <code>true</code> if this permission grants folder admin;
      *         otherwise <code>false</code>
      */
@@ -404,7 +404,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission is marked as group permission
-     * 
+     *
      * @return <code>true</code> if this permission is marked as group
      *         permission; otherwise <code>false</code>
      */
@@ -414,7 +414,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the folder permission
-     * 
+     *
      * @return The folder permission
      */
     public int getFolderPermission() {
@@ -423,7 +423,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the read permission
-     * 
+     *
      * @return The read permission
      */
     public int getReadPermission() {
@@ -432,7 +432,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the write permission
-     * 
+     *
      * @return The write permission
      */
     public int getWritePermission() {
@@ -441,7 +441,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the delete permission
-     * 
+     *
      * @return The delete permission
      */
     public int getDeletePermission() {
@@ -450,7 +450,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least folder's visibility
-     * 
+     *
      * @return <code>true</code> if folder's visibility is granted; otherwise
      *         <code>false</code>
      */
@@ -463,7 +463,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least object creation
-     * 
+     *
      * @return <code>true</code> if object creation is granted; otherwise
      *         <code>false</code>
      */
@@ -473,7 +473,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least subfolder creation
-     * 
+     *
      * @return <code>true</code> if subfolder creation is granted; otherwise
      *         <code>false</code>
      */
@@ -483,7 +483,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least own object read access
-     * 
+     *
      * @return <code>true</code> if own object read access is granted; otherwise
      *         <code>false</code>
      */
@@ -493,7 +493,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least all object read access
-     * 
+     *
      * @return <code>true</code> if all object read access is granted; otherwise
      *         <code>false</code>
      */
@@ -503,7 +503,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least own object write access
-     * 
+     *
      * @return <code>true</code> if own object write access is granted;
      *         otherwise <code>false</code>
      */
@@ -513,7 +513,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least all object write access
-     * 
+     *
      * @return <code>true</code> if all object write access is granted;
      *         otherwise <code>false</code>
      */
@@ -523,7 +523,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least own object deletion
-     * 
+     *
      * @return <code>true</code> if own object deletion is granted; otherwise
      *         <code>false</code>
      */
@@ -533,7 +533,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission grants at least all object deletion
-     * 
+     *
      * @return <code>true</code> if all object deletion is granted; otherwise
      *         <code>false</code>
      */
@@ -543,7 +543,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -552,7 +552,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the entity ID
-     * 
+     *
      * @return The entity ID
      */
     public int getEntity() {
@@ -561,7 +561,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the folder ID
-     * 
+     *
      * @return The folder ID
      */
     public int getFuid() {
@@ -570,7 +570,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Gets the system bit mask
-     * 
+     *
      * @return The system bit mask
      */
     public int getSystem() {
@@ -579,7 +579,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     /**
      * Checks if this permission's system bit mask indicates the system flag
-     * 
+     *
      * @return <code>true</code> if system flag is set; otherwise
      *         <code>false</code>
      */
@@ -590,7 +590,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     /**
      * Compares this permission's sole permission values to the ones in
      * <code>op</code>.
-     * 
+     *
      * @param op The other permission
      * @return <code>true</code> if sole permission settings are equal;
      *         otherwise <code>false</code>.
@@ -648,6 +648,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         return clone;
     }
 
+    @Override
     public OCLPermission deepClone() {
         try {
             return ((OCLPermission) super.clone());

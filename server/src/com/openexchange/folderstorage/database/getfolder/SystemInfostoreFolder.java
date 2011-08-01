@@ -72,7 +72,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link SystemInfostoreFolder} - Gets the system infostore folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemInfostoreFolder {
@@ -86,7 +86,7 @@ public final class SystemInfostoreFolder {
 
     /**
      * Gets the database folder representing system infostore folder.
-     * 
+     *
      * @param fo The folder object fetched from database
      * @return The database folder representing system infostore folder
      */
@@ -105,7 +105,7 @@ public final class SystemInfostoreFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system infostore folder. <code>false</code>.
-     * 
+     *
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
@@ -171,7 +171,7 @@ public final class SystemInfostoreFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system infostore folder. <code>false</code>.
-     * 
+     *
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context

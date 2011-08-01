@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link VoipNowEnabled} - The setting whether VoipNow is enabled for a certain user.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VoipNowEnabled implements PreferencesItemService {

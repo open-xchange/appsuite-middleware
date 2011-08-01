@@ -63,7 +63,7 @@ public interface MessagingBodyPart extends MessagingPart {
 
     /**
      * Gets the multipart parent.
-     * 
+     *
      * @return The multipart parent
      * @throws OXException If multipart parent cannot be returned
      */

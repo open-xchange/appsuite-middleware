@@ -54,16 +54,16 @@ import java.rmi.RemoteException;
 
 /**
  * GenericCacheInvalidationInterface
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface GenericCacheInvalidationInterface extends Remote {
 
 	/**
 	 * Indicates the <b>unique</b> name of implementing class which is then
 	 * used to bind it to registry
-	 * 
+	 *
 	 * @return unique name of implementing class
 	 */
 	String getRemoteName();
@@ -73,7 +73,7 @@ public interface GenericCacheInvalidationInterface extends Remote {
 	 * cache is strucutred by groups and if a group represents a context.
 	 * Following JCS API method
 	 * <code>org.apache.jcs.JCS.invalidateGroup(String groupName)</code>
-	 * 
+	 *
 	 * @param contextId -
 	 *            the context ID
 	 * @throws RemoteException
@@ -83,7 +83,7 @@ public interface GenericCacheInvalidationInterface extends Remote {
 	/**
 	 * Invalidates a single element in cache whose key is concatenated by given
 	 * context ID and object ID.
-	 * 
+	 *
 	 * @param contextId -
 	 *            the context ID
 	 * @param objectId -

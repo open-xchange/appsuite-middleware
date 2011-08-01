@@ -54,7 +54,7 @@ import com.openexchange.file.storage.FileStorageConstants;
 
 /**
  * {@link WebDAVConstants} - Provides useful constants for WebDAV file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVConstants implements FileStorageConstants {

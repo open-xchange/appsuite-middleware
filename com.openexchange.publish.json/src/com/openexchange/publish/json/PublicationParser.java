@@ -65,29 +65,29 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.types.EntityMap;
 
 /**
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationParser {
 
-    private PublicationTargetDiscoveryService discovery;
+    private final PublicationTargetDiscoveryService discovery;
 
     private static final FormContentParser formParser = new FormContentParser();
 
-    private Map<String, EntityType> entityTypes = new EntityMap();
+    private final Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationParser(PublicationTargetDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
-    
- 
+
+
     /**
      * @param object
      * @return
      * @throws JSONException
      * @throws OXException
-     * @throws OXException 
+     * @throws OXException
      */
     public Publication parse(JSONObject object) throws JSONException, OXException, OXException {
         Publication publication = new Publication();
@@ -114,7 +114,7 @@ public class PublicationParser {
                 publication.setConfiguration(formParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
             }
         }
-        
+
         if(object.has(ENABLED)) {
             publication.setEnabled(object.getBoolean(ENABLED));
         }

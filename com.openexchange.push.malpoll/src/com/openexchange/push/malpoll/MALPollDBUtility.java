@@ -67,7 +67,7 @@ import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
 
 /**
  * {@link MALPollDBUtility} - DB utilities for MAL poll bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollDBUtility {
@@ -85,7 +85,7 @@ public final class MALPollDBUtility {
 
     /**
      * Inserts the mail IDs associated with specified hash.
-     * 
+     *
      * @param hash The hash
      * @param mailIds The new mail IDs
      * @param cid The context ID
@@ -188,7 +188,7 @@ public final class MALPollDBUtility {
 
     /**
      * Replaces the mail IDs associated with specified hash.
-     * 
+     *
      * @param hash The hash
      * @param newIds The new mail IDs
      * @param delIds The deleted mail IDs
@@ -215,7 +215,7 @@ public final class MALPollDBUtility {
 
     /**
      * Drops the mail IDs associated with specified hash and the hash itself, too.
-     * 
+     *
      * @param cid The context ID
      * @param user The user ID
      * @throws OXException If a database resource could not be acquired
@@ -293,7 +293,7 @@ public final class MALPollDBUtility {
 
     /**
      * Gets all mail IDs associated with specified hash.
-     * 
+     *
      * @param hash The hash
      * @param cid The context ID
      * @return The mail IDs associated with specified hash
@@ -329,7 +329,7 @@ public final class MALPollDBUtility {
 
     /**
      * Gets the hash for specified keys.
-     * 
+     *
      * @param cid The context ID
      * @param user The user ID
      * @param accountId The account ID
@@ -370,7 +370,7 @@ public final class MALPollDBUtility {
 
     /**
      * Generates and inserts a new hash for specified keys.
-     * 
+     *
      * @param cid The context ID
      * @param user The user ID
      * @param accountId The account ID
@@ -409,7 +409,7 @@ public final class MALPollDBUtility {
 
     /**
      * Generates a new {@link UUID} instance from specified byte array.
-     * 
+     *
      * @param bytes The byte array
      * @return A new {@link UUID} instance
      * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16
@@ -434,7 +434,7 @@ public final class MALPollDBUtility {
 
     /**
      * Gets the {@link DatabaseService database service} from service registry.
-     * 
+     *
      * @return The database service
      * @throws OXException If database service is not available
      */
@@ -471,7 +471,7 @@ public final class MALPollDBUtility {
 
     /**
      * Rolls-back specified connection.
-     * 
+     *
      * @param con The connection to roll back.
      */
     private static void rollback(final Connection con) {
@@ -487,7 +487,7 @@ public final class MALPollDBUtility {
 
     /**
      * Convenience method to set the auto-commit of a connection to <code>true</code>.
-     * 
+     *
      * @param con The connection that should go into auto-commit mode.
      */
     private static void autocommit(final Connection con) {
@@ -503,7 +503,7 @@ public final class MALPollDBUtility {
 
     /**
      * Closes the {@link ResultSet}.
-     * 
+     *
      * @param result <code>null</code> or a {@link ResultSet} to close.
      */
     private static void closeSQLStuff(final ResultSet result) {
@@ -518,7 +518,7 @@ public final class MALPollDBUtility {
 
     /**
      * Closes the {@link Statement}.
-     * 
+     *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
     private static void closeSQLStuff(final Statement stmt) {

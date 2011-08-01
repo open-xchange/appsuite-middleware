@@ -51,7 +51,7 @@ package com.openexchange.mail;
 
 /**
  * {@link MailSessionParameterNames} - Constants used as keys for session parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSessionParameterNames {
@@ -70,7 +70,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for publishing infostore folder ID.
-     * 
+     *
      * @return The parameter name for publishing infostore folder ID
      */
     public static String getParamPublishingInfostoreFolderID() {
@@ -88,7 +88,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for default folder flag.
-     * 
+     *
      * @return The parameter name for default folder flag
      */
     public static String getParamDefaultFolderChecked() {
@@ -102,7 +102,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for default trash folder.
-     * 
+     *
      * @return The parameter name for default trash folder
      */
     public static String getParamDefaultTrashFolder() {
@@ -120,7 +120,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for mail folder separator.
-     * 
+     *
      * @return The parameter name for mail folder separator
      */
     public static String getParamSeparator() {
@@ -134,7 +134,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for default folder array.
-     * 
+     *
      * @return The parameter name for default folder array
      */
     public static String getParamDefaultFolderArray() {
@@ -148,7 +148,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for session mail cache.
-     * 
+     *
      * @return The parameter name for session mail cache
      */
     public static String getParamMailCache() {
@@ -162,7 +162,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for session main cache.
-     * 
+     *
      * @return The parameter name for session main cache
      */
     public static String getParamMainCache() {
@@ -176,7 +176,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for mail provider.
-     * 
+     *
      * @return The parameter name for mail provider
      */
     public static String getParamMailProvider() {
@@ -190,7 +190,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for mail transport.
-     * 
+     *
      * @param accountId The account ID
      * @return The parameter name for mail transport
      */
@@ -210,7 +210,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for session's context.
-     * 
+     *
      * @return The parameter name for session's context
      */
     public static String getParamSessionContext() {
@@ -224,7 +224,7 @@ public final class MailSessionParameterNames {
 
     /**
      * Gets the parameter name for spam handler.
-     * 
+     *
      * @return The parameter name for spam handler
      */
     public static String getParamSpamHandler() {

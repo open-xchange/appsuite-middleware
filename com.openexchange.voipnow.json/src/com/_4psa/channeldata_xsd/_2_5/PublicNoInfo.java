@@ -12,11 +12,11 @@ import com._4psa.channelmessages_xsd._2_5.EditPublicNoRequest;
 
 /**
  * Public phone number data
- * 
+ *
  * <p>Java class for PublicNoInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PublicNoInfo">
  *   &lt;complexContent>
@@ -51,8 +51,8 @@ import com._4psa.channelmessages_xsd._2_5.EditPublicNoRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PublicNoInfo", propOrder = {
@@ -81,11 +81,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the phoneNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneNo() {
         return phoneNo;
@@ -93,11 +93,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the phoneNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneNo(String value) {
         this.phoneNo = value;
@@ -105,11 +105,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the did property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDid() {
         return did;
@@ -117,11 +117,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the did property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDid(String value) {
         this.did = value;
@@ -129,11 +129,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the location property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLocation() {
         return location;
@@ -141,11 +141,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the location property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLocation(String value) {
         this.location = value;
@@ -153,11 +153,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the cost property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getCost() {
         return cost;
@@ -165,11 +165,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the cost property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setCost(Float value) {
         this.cost = value;
@@ -177,11 +177,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the incomingCost property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link PublicNoInfo.IncomingCost }
-     *     
+     *
      */
     public PublicNoInfo.IncomingCost getIncomingCost() {
         return incomingCost;
@@ -189,11 +189,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the incomingCost property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link PublicNoInfo.IncomingCost }
-     *     
+     *
      */
     public void setIncomingCost(PublicNoInfo.IncomingCost value) {
         this.incomingCost = value;
@@ -201,11 +201,11 @@ public class PublicNoInfo {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -213,11 +213,11 @@ public class PublicNoInfo {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -226,9 +226,9 @@ public class PublicNoInfo {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -241,8 +241,8 @@ public class PublicNoInfo {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -256,11 +256,11 @@ public class PublicNoInfo {
 
         /**
          * Gets the value of the cost property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getCost() {
             return cost;
@@ -268,11 +268,11 @@ public class PublicNoInfo {
 
         /**
          * Sets the value of the cost property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setCost(Float value) {
             this.cost = value;
@@ -280,11 +280,11 @@ public class PublicNoInfo {
 
         /**
          * Gets the value of the interval property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getInterval() {
             return interval;
@@ -292,11 +292,11 @@ public class PublicNoInfo {
 
         /**
          * Sets the value of the interval property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setInterval(BigInteger value) {
             this.interval = value;

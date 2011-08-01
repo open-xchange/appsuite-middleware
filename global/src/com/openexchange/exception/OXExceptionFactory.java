@@ -51,7 +51,7 @@ package com.openexchange.exception;
 
 /**
  * {@link OXExceptionFactory} - A factory for {@link OXException} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXExceptionFactory {
@@ -60,7 +60,7 @@ public class OXExceptionFactory {
 
     /**
      * Gets the factory instance.
-     * 
+     *
      * @return The factory instance.
      */
     public static OXExceptionFactory getInstance() {
@@ -76,7 +76,7 @@ public class OXExceptionFactory {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
-     * 
+     *
      * @param code The exception code
      * @return The newly created {@link OXException} instance
      */
@@ -86,7 +86,7 @@ public class OXExceptionFactory {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
-     * 
+     *
      * @param code The exception code
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
@@ -97,7 +97,7 @@ public class OXExceptionFactory {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with specified code's attributes.
-     * 
+     *
      * @param code The exception code
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message

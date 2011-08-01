@@ -73,15 +73,15 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
     private final BundleContext context;
 
     private ScheduledTimerTask scheduledTimerTask;
-    
-    private Activator activator;
-    
+
+    private final Activator activator;
+
     private final Lock lock = new ReentrantLock();
-    
+
     private TimerService timerService;
-    
+
     private ConfigurationService configurationService;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerAutoUpdater.class));
 
     public CrawlerAutoUpdater(BundleContext context, Activator activator) {
@@ -105,7 +105,7 @@ public class CrawlerAutoUpdater implements ServiceTrackerCustomizer {
         } finally {
             lock.unlock();
         }
-        // only activate the auto-update if both services are available and it is enabled via config-file 
+        // only activate the auto-update if both services are available and it is enabled via config-file
         if (taskSchedulingPossible && Boolean.parseBoolean(configurationService.getProperty(activator.ENABLE_AUTO_UPDATE))) {
             CrawlerUpdateTask crawlerUpdateTask = new CrawlerUpdateTask(configurationService, activator);
             // Start the job 30 seconds after this and repeat it as often as configured (default:daily)

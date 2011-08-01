@@ -67,7 +67,7 @@ import com.openexchange.subscribe.facebook.groupware.FacebookSubscriptionsOAuthA
 
 /**
  * {@link FacebookRegisterer}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookRegisterer implements ServiceTrackerCustomizer {
@@ -141,7 +141,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer {
             if (registration != null && (facebookMetaData == null || facebookService == null)) {
                 unregister = registration;
                 registration = null;
-                
+
             }
         } finally {
             lock.unlock();

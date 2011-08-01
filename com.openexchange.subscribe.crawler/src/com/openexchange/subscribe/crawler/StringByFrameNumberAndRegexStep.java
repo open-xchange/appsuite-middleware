@@ -61,7 +61,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * {@link StringByFrameNumberAndRegexStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPage> {
@@ -93,7 +93,7 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
                 HtmlPage page = (HtmlPage) frame.getEnclosedPage();
                 LOG.info("Frame content : " + page.getWebResponse().getContentAsString());
             }
-            
+
             if (index == frameNumber) {
                 HtmlPage page = (HtmlPage) frame.getEnclosedPage();
                 String pageString = page.getWebResponse().getContentAsString();
@@ -106,7 +106,7 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
                 Matcher matcher = pattern.matcher(pageString);
                 if (matcher.find()) {
                     output = matcher.group(1);
-                    LOG.debug("String found is  : " + output);                    
+                    LOG.debug("String found is  : " + output);
                     executedSuccessfully = true;
                 } else {
                     LOG.info("This pattern was not found on the page : " + regex + "\n Page: " + pageString);

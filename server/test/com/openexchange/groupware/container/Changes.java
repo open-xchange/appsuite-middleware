@@ -52,16 +52,18 @@ package com.openexchange.groupware.container;
 
 /**
  * A change for an update request.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Changes extends KeyValueHolder {
 
     public void update(CommonObject obj) {
-        for (int key : getKeys())
-            if(getMap().get(Integer.valueOf(key)) == null)
+        for (int key : getKeys()) {
+            if(getMap().get(Integer.valueOf(key)) == null) {
                 obj.remove(key);
-            else
+            } else {
                 obj.set(key, getMap().get(Integer.valueOf(key)));
+            }
+        }
     }
 }

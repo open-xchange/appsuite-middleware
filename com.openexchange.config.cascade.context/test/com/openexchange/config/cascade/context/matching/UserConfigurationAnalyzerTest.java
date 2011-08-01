@@ -67,17 +67,17 @@ public class UserConfigurationAnalyzerTest extends TestCase {
         config.setEditPassword(true);
         config.setInfostore(true);
         config.setWebDAVXML(true);
-        
+
         UserConfigurationAnalyzer analyzer = new UserConfigurationAnalyzer();
-        
+
         Set<String> tags = analyzer.getTags(config);
-        
+
         for(String tag : Arrays.asList("ucActiveSync", "ucEditPassword", "ucInfostore", "ucWebDAVXML")) {
             assertTrue(tags.toString()+ " did not contain "+tag, tags.remove(tag));
         }
-        
+
         assertTrue(tags.toString()+" were not expected", tags.isEmpty());
-        
-        
+
+
     }
 }

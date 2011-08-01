@@ -62,8 +62,8 @@ public interface WebdavFactory{
     public WebdavCollection resolveCollection(String url) throws OXException;
 
 	public Protocol getProtocol();
-	
+
 	public void beginRequest();
-	
+
 	public void endRequest(int status);
 }

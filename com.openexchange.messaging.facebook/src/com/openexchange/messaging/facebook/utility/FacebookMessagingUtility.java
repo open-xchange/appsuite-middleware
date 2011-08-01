@@ -83,7 +83,7 @@ import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
 
 /**
  * {@link FacebookMessagingUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacebookMessagingUtility {
@@ -141,7 +141,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * {@link FolderFiller} - The folder filler
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      * @since Open-Xchange v6.16
      */
@@ -443,7 +443,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets the stream query-able fields.
-     * 
+     *
      * @return The stream query-able fields
      */
     public static EnumSet<MessagingField> getStreamQueryableFields() {
@@ -452,7 +452,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets the user/group query-able fields.
-     * 
+     *
      * @return The user/group query-able fields
      */
     public static EnumSet<MessagingField> getEntityQueryableFields() {
@@ -463,7 +463,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets the static fillers for given fields.
-     * 
+     *
      * @param fields The fields
      * @param access The messaging access
      * @return The fillers
@@ -474,7 +474,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets the static fillers for given fields.
-     * 
+     *
      * @param fields The fields
      * @param access The messaging access
      * @return The fillers
@@ -492,7 +492,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Checks specified message's content to be of given type.
-     * 
+     *
      * @param message The message
      * @return The typed content
      * @throws OXException If message's content is of given type
@@ -511,7 +511,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Parses as an unsigned <code>long</code>.
-     * 
+     *
      * @param s The string to parse
      * @return An unsigned <code>long</code> or <code>-1</code>.
      */
@@ -563,7 +563,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * URL-encodes specified string.
-     * 
+     *
      * @param string The string
      * @return The URL-encoded string
      */
@@ -604,7 +604,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Performs specified FQL query and returns its result as a JSON object.
-     * 
+     *
      * @param fqlQuery The FQL query
      * @return The queried JSON object
      * @throws OXException If FQL query fails
@@ -660,7 +660,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Fires given FQL query using specified facebook REST client.
-     * 
+     *
      * @param fqlQuery The FQL query to fire
      * @param facebookOAuthInfo The facebook OAuth information
      * @return The FQL query's results
@@ -687,7 +687,7 @@ public final class FacebookMessagingUtility {
 
         /**
          * Initializes a new {@link FQLQuery}.
-         * 
+         *
          * @param query The query character sequence
          * @param orderBy <code>true</code> if query contains <code>ORDER BY</code> clause; otherwise <code>false</code>
          */
@@ -699,7 +699,7 @@ public final class FacebookMessagingUtility {
 
         /**
          * Gets the query character sequence
-         * 
+         *
          * @return The query character sequence
          */
         public CharSequence getCharSequence() {
@@ -708,7 +708,7 @@ public final class FacebookMessagingUtility {
 
         /**
          * Checks if query contains <code>ORDER BY</code> clause
-         * 
+         *
          * @return <code>true</code> if query contains <code>ORDER BY</code> clause; otherwise <code>false</code>
          */
         public boolean containsOrderBy() {
@@ -756,7 +756,7 @@ public final class FacebookMessagingUtility {
 
         /**
          * Gets the Facebook query type for specified folder identifier.
-         * 
+         *
          * @param folderId The folder identifier
          * @return The query type or <code>null</code> if no query is associated with specified folder identifier
          */
@@ -773,7 +773,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL stream query for given post identifier.
-     * 
+     *
      * @param fields The fields
      * @param postId The post identifier
      * @param facebookUserId The facebook user identifier
@@ -786,7 +786,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL stream query for given post identifiers.
-     * 
+     *
      * @param fields The fields
      * @param postIds The post identifiers
      * @param facebookUserId The facebook user identifier
@@ -799,7 +799,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL stream query for given fields.
-     * 
+     *
      * @param queryType The query type constant
      * @param fields The fields
      * @param facebookUserId The facebook user identifier
@@ -812,7 +812,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL stream query for given fields.
-     * 
+     *
      * @param queryType The query type constant
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
@@ -843,7 +843,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL stream query for given fields considering posts created <b>before</b> given time stamp.
-     * 
+     *
      * @param timeStamp The time stamp
      * @param queryType The query type constant
      * @param fields The fields
@@ -968,7 +968,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL user query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param userId The user identifier
      * @return The FQL user query or <code>null</code> if fields require no query
@@ -979,7 +979,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL user query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param userIds The user identifiers
      * @return The FQL user query or <code>null</code> if fields require no query
@@ -990,7 +990,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL user query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
@@ -1062,7 +1062,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL group query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param groupId The group identifier
      * @return The FQL group query or <code>null</code> if fields require no query
@@ -1073,7 +1073,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL group query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param groupIds The group identifiers
      * @return The FQL group query or <code>null</code> if fields require no query
@@ -1084,7 +1084,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL group query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
@@ -1156,7 +1156,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL page query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param groupId The page identifier
      * @return The FQL page query or <code>null</code> if fields require no query
@@ -1167,7 +1167,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL page query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param groupIds The page identifiers
      * @return The FQL page query or <code>null</code> if fields require no query
@@ -1178,7 +1178,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Composes the FQL page query for given fields.
-     * 
+     *
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
@@ -1250,7 +1250,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Abbreviates a text using ellipses. This will turn "Now is the time for all good men" into "Now is the time for..."
-     * 
+     *
      * @param text The text to check, may be null
      * @param maxWidth The maximum length of result String, must be at least 4
      * @return The abbreviated text or <code>null</code>
@@ -1262,7 +1262,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Abbreviates a text using ellipses. This will turn "Now is the time for all good men" into "...is the time for..."
-     * 
+     *
      * @param text The text to check, may be null
      * @param offset The left edge of source String
      * @param maxWidth The maximum length of result String, must be at least 4
@@ -1300,7 +1300,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Checks specified message's content to be of given type.
-     * 
+     *
      * @param part The part
      * @return The typed content
      * @throws OXException If message's content is of given type
@@ -1315,7 +1315,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link java.util.regex.Pattern pattern}
      */
@@ -1343,7 +1343,7 @@ public final class FacebookMessagingUtility {
     /**
      * Gets the IN expression for specified <code>long</code>s ready for being used in a FQL query.<br>
      * E.g.: <code>&quot;(12,13,14,15)&quot;</code> would be returned for providing array <code>[12,13,14,15]</code>.
-     * 
+     *
      * @param arr The <code>long</code>s
      * @return The IN expression or <code>null</code> in case of a <code>null</code> dereference or an empty array
      */

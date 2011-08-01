@@ -61,7 +61,7 @@ import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 
 /**
  * {@link MessagingConfig} - The configuration for messaging service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingConfig {
@@ -72,7 +72,7 @@ public final class MessagingConfig {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MessagingConfig getInstance() {
@@ -81,7 +81,7 @@ public final class MessagingConfig {
 
     /**
      * Initializes the instance with given bundle configuration.
-     * 
+     *
      * @param configurationService The configuration service
      * @throws OXException If re-initialization fails
      */
@@ -209,7 +209,7 @@ public final class MessagingConfig {
      * Gets the listener port.
      * <p>
      * If not set {@link Constants#DEFAULT_PORT} is returned.
-     * 
+     *
      * @return The listener port
      */
     public int getListenerPort() {
@@ -220,7 +220,7 @@ public final class MessagingConfig {
      * Sets the listener port.
      * <p>
      * The port must be between 0 and 65535 inclusive.
-     * 
+     *
      * @param multicastPort The listener port to set
      * @throws IllegalArgumentException If port is invalid
      */
@@ -234,7 +234,7 @@ public final class MessagingConfig {
 
     /**
      * Sets whether mDNS is enabled.
-     * 
+     *
      * @param multicastEnabled <code>true</code> if mDNS is enabled; otherwise <code>false</code>
      */
     public void setMdnsEnabled(final boolean mdnsEnabled) {
@@ -243,7 +243,7 @@ public final class MessagingConfig {
 
     /**
      * Checks if mDNS is enabled.
-     * 
+     *
      * @return <code>true</code> if mDNS is enabled; otherwise <code>false</code>
      */
     public boolean isMdnsEnabled() {
@@ -252,7 +252,7 @@ public final class MessagingConfig {
 
     /**
      * Gets the bind address.
-     * 
+     *
      * @return The bind address or <code>null</code> for all available interfaces.
      */
     public InetAddress getBindAddress() {
@@ -261,7 +261,7 @@ public final class MessagingConfig {
 
     /**
      * Sets the bind address.
-     * 
+     *
      * @param bindAddress The bind address to set or <code>null</code> for all available interfaces.
      */
     public void setBindAddress(final InetAddress bindAddress) {
@@ -270,7 +270,7 @@ public final class MessagingConfig {
 
     /**
      * Gets the number of server threads.
-     * 
+     *
      * @return The number of server threads
      */
     public int getNumberOfServerThreads() {
@@ -279,7 +279,7 @@ public final class MessagingConfig {
 
     /**
      * Sets the number of server threads.
-     * 
+     *
      * @param numberOfServerThreads The number of server threads to set
      */
     public void setNumberOfServerThreads(final int numberOfServerThreads) {
@@ -288,7 +288,7 @@ public final class MessagingConfig {
 
     /**
      * Gets the statically configured remote messaging servers.
-     * 
+     *
      * @return The remote messaging servers.
      */
     public List<InetSocketAddress> getRemoteMessagingServers() {
@@ -297,7 +297,7 @@ public final class MessagingConfig {
 
     /**
      * Sets the statically configured remote messaging servers.
-     * 
+     *
      * @param remoteMessagingServers The remote messaging servers to set.
      */
     public void setRemoteMessagingServers(final List<InetSocketAddress> remoteMessagingServers) {

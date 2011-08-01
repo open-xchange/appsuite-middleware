@@ -64,14 +64,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CopyAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CopyAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link CopyAction}.
-     * 
+     *
      * @param services
      */
     public CopyAction(final ServiceLookup services) {

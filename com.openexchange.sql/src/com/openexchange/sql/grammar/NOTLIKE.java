@@ -65,15 +65,18 @@ public class NOTLIKE extends TernaryPredicate {
 		super(column, new Constant(value), new Constant(escape));
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildNOTLIKE(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "NOT LIKE";
 	}
 
-	public String getSecondSqlKeyword() {
+	@Override
+    public String getSecondSqlKeyword() {
 		return "ESCAPE";
 	}
 }

@@ -75,7 +75,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterStatusConverter} - Converts twitter status to a mail message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterStatusConverter {
@@ -93,7 +93,7 @@ public final class TwitterStatusConverter {
 
     /**
      * Converts given twitter status to a mail message.
-     * 
+     *
      * @param status The twitter status
      * @param accountId The account ID
      * @param accountName The account name

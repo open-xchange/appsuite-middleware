@@ -122,6 +122,7 @@ public final class Pools implements Runnable {
     }
 
     private final Runnable cleaner = new Runnable() {
+        @Override
         public void run() {
             try {
                 final Thread thread = Thread.currentThread();
@@ -135,6 +136,7 @@ public final class Pools implements Runnable {
         }
     };
 
+    @Override
     public void run() {
         LOG.trace("Starting cleaner run.");
         poolsLock.lock();

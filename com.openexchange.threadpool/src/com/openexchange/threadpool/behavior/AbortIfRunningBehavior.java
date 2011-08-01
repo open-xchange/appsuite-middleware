@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AbortIfRunningBehavior} - Implements "Abort-If-Running" behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Object> {
@@ -65,7 +65,7 @@ public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Ob
 
     /**
      * Gets the "Abort-If-Running" behavior.
-     * 
+     *
      * @return The "Abort-If-Running" behavior
      */
     @SuppressWarnings("unchecked")
@@ -82,7 +82,7 @@ public final class AbortIfRunningBehavior implements RefusedExecutionBehavior<Ob
 
     /**
      * Throws {@link RejectedExecutionException} if provided thread pool is not shut down; otherwise the task is discarded.
-     * 
+     *
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
      * @return Nothing since a {@link RejectedExecutionException} is immediately thrown if pool is <b>not</b> shut down; otherwise the

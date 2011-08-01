@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link POP3StorageProperties} - Properties for a {@link POP3Storage}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface POP3StorageProperties {
 
     /**
      * Gets the property value associated with specified property name.
-     * 
+     *
      * @param propertyName The property name
      * @return The property value associated with specified property name or <code>null</code>
      * @throws OXException If property retrieval fails
@@ -69,7 +69,7 @@ public interface POP3StorageProperties {
 
     /**
      * Maps given property name to given property value.
-     * 
+     *
      * @param propertyName The property name
      * @param propertyValue The property value
      * @throws OXException If property mapping cannot be added
@@ -78,7 +78,7 @@ public interface POP3StorageProperties {
 
     /**
      * Removes the property value associated with specified property name.
-     * 
+     *
      * @param propertyName The property name
      * @throws OXException If property removal fails
      */

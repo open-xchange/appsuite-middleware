@@ -56,7 +56,7 @@ import com.openexchange.mailaccount.AttributeSwitch;
 
 /**
  * {@link UpdateMailAccountBuilder}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UpdateMailAccountBuilder implements AttributeSwitch {
@@ -100,170 +100,213 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return getUpdateQuery();
     }
 
+    @Override
     public Object confirmedHam() {
         bob.append("confirmed_ham = ?,");
         return null;
     }
 
+    @Override
     public Object confirmedSpam() {
         bob.append("confirmed_spam = ?,");
         return null;
     }
 
+    @Override
     public Object drafts() {
         bob.append("drafts = ?,");
         return null;
     }
 
+    @Override
     public Object id() {
         return null;
     }
 
+    @Override
     public Object login() {
         bob.append("login = ?,");
         return null;
     }
 
+    @Override
     public Object mailURL() {
         bob.append("url = ?,");
         return null;
     }
 
+    @Override
     public Object name() {
         bob.append("name = ?,");
         return null;
     }
 
+    @Override
     public Object password() {
         bob.append("password = ?,");
         return null;
     }
 
+    @Override
     public Object primaryAddress() {
         bob.append("primary_addr = ?,");
         return null;
     }
 
+    @Override
     public Object personal() {
         bob.append("personal = ?,");
         return null;
     }
 
+    @Override
+    public Object replyTo() {
+        bob.append("replyTo = ?,");
+        return null;
+    }
+
+    @Override
     public Object sent() {
         bob.append("sent = ?,");
         return null;
     }
 
+    @Override
     public Object spam() {
         bob.append("spam = ?,");
         return null;
     }
 
+    @Override
     public Object spamHandler() {
         bob.append("spam_handler = ?,");
         return null;
     }
 
+    @Override
     public Object transportURL() {
         return null;
     }
 
+    @Override
     public Object trash() {
         bob.append("trash = ?,");
         return null;
     }
 
+    @Override
     public Object mailPort() {
         return null;
     }
 
+    @Override
     public Object mailProtocol() {
         return null;
     }
 
+    @Override
     public Object mailSecure() {
         return null;
     }
 
+    @Override
     public Object mailServer() {
         return null;
     }
 
+    @Override
     public Object transportPort() {
         return null;
     }
 
+    @Override
     public Object transportProtocol() {
         return null;
     }
 
+    @Override
     public Object transportSecure() {
         return null;
     }
 
+    @Override
     public Object transportServer() {
         return null;
     }
 
+    @Override
     public Object transportLogin() {
         return null;
     }
 
+    @Override
     public Object transportPassword() {
         return null;
     }
 
+    @Override
     public Object unifiedINBOXEnabled() {
         bob.append("unified_inbox = ?,");
         return null;
     }
 
+    @Override
     public Object confirmedHamFullname() {
         bob.append("confirmed_ham_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object confirmedSpamFullname() {
         bob.append("confirmed_spam_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object draftsFullname() {
         bob.append("drafts_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object sentFullname() {
         bob.append("sent_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object spamFullname() {
         bob.append("spam_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object trashFullname() {
         bob.append("trash_fullname = ?,");
         return null;
     }
 
+    @Override
     public Object pop3DeleteWriteThrough() {
         return null;
     }
 
+    @Override
     public Object pop3ExpungeOnQuit() {
         return null;
     }
 
+    @Override
     public Object pop3RefreshRate() {
         return null;
     }
 
+    @Override
     public Object pop3Path() {
         return null;
     }
 
+    @Override
     public Object pop3Storage() {
         return null;
     }

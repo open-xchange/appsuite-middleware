@@ -65,10 +65,12 @@ public final class GUI implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "folder", NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new SharedNode(NAME, 5);
     }

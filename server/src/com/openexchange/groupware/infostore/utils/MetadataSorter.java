@@ -62,24 +62,25 @@ public class MetadataSorter {
 
 	private String field = Metadata.TITLE_LITERAL.getName();
 	private int direction = InfostoreSearchEngine.ASC;
-	
+
 	private DocumentMetadata[] metadata;
 	private List<DocumentMetadata> metadataList;
-	
+
 	private static final class MetadataComparator implements Comparator<DocumentMetadata>{
 
 		private final String field;
 		private final int direction;
 		private final Metadata metadataField;
-		
+
 		public MetadataComparator(final String field, final int direction){
 			this.field = field;
 			metadataField = Metadata.get(field);
 			this.direction = direction;
-			
+
 		}
-		
-		public int compare(final DocumentMetadata arg0, final DocumentMetadata arg1) {
+
+		@Override
+        public int compare(final DocumentMetadata arg0, final DocumentMetadata arg1) {
 			final Comparable<Object> v1 = getValue(arg0);
 			final Comparable<Object> v2 = getValue(arg1);
 			if(v2 == null && v1 == null) {
@@ -92,7 +93,7 @@ public class MetadataSorter {
 				return -1;
 			}
 			switch(direction){
-			case InfostoreSearchEngine.DESC : return v2.compareTo(v1); 
+			case InfostoreSearchEngine.DESC : return v2.compareTo(v1);
 			default : return v1.compareTo(v2);
 			}
 		}
@@ -105,37 +106,37 @@ public class MetadataSorter {
 			}
 			return metadata.getProperty(field);
 		}
-		
+
 	}
-	
+
 	public MetadataSorter(final DocumentMetadata[] metadata){
 		this.metadata = metadata;
 	}
-	
+
 	public MetadataSorter(final DocumentMetadata[] metadata, final String field){
 		this(metadata);
 		this.field = field;
 	}
-	
+
 	public MetadataSorter(final DocumentMetadata[] metadata,final String field, final int direction){
 		this(metadata, field);
 		this.direction = direction;
 	}
-	
+
 	public MetadataSorter(final List<DocumentMetadata> metadata){
 		this.metadataList = metadata;
 	}
-	
+
 	public MetadataSorter(final List<DocumentMetadata> metadata, final String field){
 		this(metadata);
 		this.field = field;
 	}
-	
+
 	public MetadataSorter(final List<DocumentMetadata> metadata,final String field, final int direction){
 		this(metadata, field);
 		this.direction = direction;
 	}
-	
+
 	public int getDirection() {
 		return direction;
 	}
@@ -151,7 +152,7 @@ public class MetadataSorter {
 	public void setField(final String field) {
 		this.field = field;
 	}
-	
+
 	public DocumentMetadata[] getSorted(){
 		if(null == metadata && metadataList != null){
 			final List<DocumentMetadata> sortedMetadata = getSortedAsList();
@@ -162,7 +163,7 @@ public class MetadataSorter {
 		}
 		return metadata;
 	}
-	
+
 	public List<DocumentMetadata> getSortedAsList(){
 		if(null == metadataList && null != metadata){
 			return Arrays.asList(getSorted());

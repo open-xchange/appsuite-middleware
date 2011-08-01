@@ -50,10 +50,10 @@
 package com.openexchange.hostname.ldap.configuration;
 
 public interface PropertyInterface {
-    
+
     public Class<? extends Object> getClazz();
-    
+
     public Required getRequired();
-    
+
     public String getName();
 }

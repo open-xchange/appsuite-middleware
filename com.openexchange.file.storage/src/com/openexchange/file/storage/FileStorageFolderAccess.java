@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FileStorageFolderAccess} - Provides access to folder storage.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -62,7 +62,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>
-     * 
+     *
      * @param folderId The identifier
      * @return <code>true</code> if folder exists in account; otherwise <code>false</code>
      * @throws OXException If existence cannot be checked
@@ -71,7 +71,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
 
     /**
      * Gets the folder identified through given identifier
-     * 
+     *
      * @param folderId The identifier
      * @return The corresponding instance of {@link FileStorageFolder}
      * @throws OXException If either folder does not exist or could not be fetched
@@ -82,7 +82,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Gets the first level subfolders located below the folder whose identifier matches given parameter <code>parentIdentifier</code>.
      * <p>
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.
-     * 
+     *
      * @param parentIdentifier The parent identifier
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying file storage system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
@@ -95,7 +95,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Gets the account's root folder.
      * <p>
      * A convenience method for {@link #getFolder(String)} invoked with {@link FileStorageFolder#ROOT_FULLNAME}.
-     * 
+     *
      * @return The account's root folder
      * @throws OXException If account's default folder cannot be delivered
      */
@@ -107,14 +107,14 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
      * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
-     * 
+     *
      * @throws OXException If user's default folder could not be checked
      */
     // public void checkDefaultFolders() throws OXException;
 
     /**
      * Creates a new file storage folder with attributes taken from given file storage folder description
-     * 
+     *
      * @param toCreate The file storage folder to create
      * @return The identifier of the created file storage folder
      * @throws OXException If creation fails
@@ -133,7 +133,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Of course more folder attributes may be checked by implementation to enhance update operations.
      * <p>
      * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
-     * 
+     *
      * @param identifier The identifier of the file storage folder to update
      * @param toUpdate The file storage folder to update containing only the modified fields
      * @return The identifier of the updated file storage folder
@@ -145,11 +145,11 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Moves the folder identified through given identifier to the parent specified through argument <code>newParentId</code>.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.newpath.to.folder
      * </pre>
-     * 
+     *
      * @param folderId The folder identifier
      * @param newParentId The identifier of the new parent to move to
      * @return The new identifier where the folder has been moved
@@ -161,11 +161,11 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Renames the folder identified through given identifier to the specified new name.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.path.to.newfolder
      * </pre>
-     * 
+     *
      * @param folderId The folder identifier
      * @param newName The new name
      * @return The new identifier
@@ -178,7 +178,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * <p>
      * This is a convenience method that invokes {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set to
      * <code>false</code>.
-     * 
+     *
      * @param folderId The identifier of the file storage folder to delete
      * @return The identifier of the deleted file storage folder
      * @throws OXException If either folder does not exist or cannot be deleted
@@ -197,7 +197,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * the next name would be "DeleteMe3", and so no.
      * <p>
      * If default trash folder cannot hold subfolders, the folder is either deleted permanently or an appropriate exception may be thrown.
-     * 
+     *
      * @param folderId The identifier of the file storage folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @return The identifier of the deleted file storage folder
@@ -207,7 +207,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
 
     /**
      * Deletes the content of the folder identified through given identifier.
-     * 
+     *
      * @param folderId The identifier of the file storage folder whose content should be cleared
      * @throws OXException If either folder does not exist or its content cannot be cleared
      */
@@ -215,7 +215,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
 
     /**
      * Deletes the content of the folder identified through given identifier.
-     * 
+     *
      * @param folderId The identifier of the file storage folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @throws OXException If either folder does not exist or its content cannot be cleared
@@ -225,7 +225,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     /**
      * Gets the reverse path from the folder identified through given identifier to parental default folder. All occurring folders on that
      * path are contained in reverse order in returned array of {@link FileStorageFolder} instances.
-     * 
+     *
      * @param folderId The folder identifier
      * @return All occurring folders in reverse order as an array of {@link FileStorageFolder} instances.
      * @throws OXException If either folder does not exist or path cannot be determined
@@ -238,7 +238,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * available (limit) and allocated (usage) storage size.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in 1024 octets.
-     * 
+     *
      * @param folderId The folder identifier (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -249,7 +249,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * Detects both quota limit and quota usage of FILE resource on given file storage folder's quota-root. If the folder denoted by passed
      * file storage folder's quota-root is the root folder itself, the whole account's FILE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) file amount.
-     * 
+     *
      * @param folderId The folder identifier (if <code>null</code> <i>""</i> is used)
      * @return The quota of FILE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -265,7 +265,7 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
      * to indicate no limitations on that resource type.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} returned for {@link Quota.Type#STORAGE} quota is in 1024 octets.
-     * 
+     *
      * @param folder The folder identifier (if <code>null</code> <i>""</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types

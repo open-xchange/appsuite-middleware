@@ -14,11 +14,11 @@ import com._4psa.resellerdata_xsd._2_5.ResellerInfo;
 
 /**
  * Client account data
- * 
+ *
  * <p>Java class for ClientInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ClientInfo">
  *   &lt;complexContent>
@@ -58,8 +58,8 @@ import com._4psa.resellerdata_xsd._2_5.ResellerInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ClientInfo", propOrder = {
@@ -116,11 +116,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -128,11 +128,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -140,11 +140,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the company property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCompany() {
         return company;
@@ -152,11 +152,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the company property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCompany(String value) {
         this.company = value;
@@ -164,11 +164,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the login property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -176,11 +176,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the login property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -188,11 +188,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the passwordAuto property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPasswordAuto() {
         return passwordAuto;
@@ -200,11 +200,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the passwordAuto property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPasswordAuto(Boolean value) {
         this.passwordAuto = value;
@@ -212,11 +212,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the password property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -224,11 +224,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the password property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -236,11 +236,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the passwordStrength property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPasswordStrength() {
         return passwordStrength;
@@ -248,11 +248,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the passwordStrength property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPasswordStrength(String value) {
         this.passwordStrength = value;
@@ -260,11 +260,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the forceUpdate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isForceUpdate() {
         return forceUpdate;
@@ -272,11 +272,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the forceUpdate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setForceUpdate(Boolean value) {
         this.forceUpdate = value;
@@ -284,11 +284,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the phone property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhone() {
         return phone;
@@ -296,11 +296,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the phone property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhone(String value) {
         this.phone = value;
@@ -308,11 +308,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the fax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFax() {
         return fax;
@@ -320,11 +320,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the fax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFax(String value) {
         this.fax = value;
@@ -332,11 +332,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the email property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail() {
         return email;
@@ -344,11 +344,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the email property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail(String value) {
         this.email = value;
@@ -356,11 +356,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the address property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAddress() {
         return address;
@@ -368,11 +368,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the address property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAddress(String value) {
         this.address = value;
@@ -380,11 +380,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the city property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCity() {
         return city;
@@ -392,11 +392,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the city property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCity(String value) {
         this.city = value;
@@ -404,11 +404,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the pcode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPcode() {
         return pcode;
@@ -416,11 +416,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the pcode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPcode(String value) {
         this.pcode = value;
@@ -428,11 +428,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the country property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCountry() {
         return country;
@@ -440,11 +440,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the country property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCountry(String value) {
         this.country = value;
@@ -452,11 +452,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the region property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRegion() {
         return region;
@@ -464,11 +464,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the region property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRegion(BigInteger value) {
         this.region = value;
@@ -476,11 +476,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the timezone property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimezone() {
         return timezone;
@@ -488,11 +488,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the timezone property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimezone(BigInteger value) {
         this.timezone = value;
@@ -500,11 +500,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the interfaceLang property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInterfaceLang() {
         return interfaceLang;
@@ -512,11 +512,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the interfaceLang property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInterfaceLang(String value) {
         this.interfaceLang = value;
@@ -524,11 +524,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the notes property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotes() {
         return notes;
@@ -536,11 +536,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the notes property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotes(String value) {
         this.notes = value;
@@ -548,11 +548,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the serverID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getServerID() {
         return serverID;
@@ -560,11 +560,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the serverID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setServerID(String value) {
         this.serverID = value;
@@ -572,11 +572,11 @@ public class ClientInfo {
 
     /**
      * Gets the value of the chargingIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingIdentifier() {
         return chargingIdentifier;
@@ -584,11 +584,11 @@ public class ClientInfo {
 
     /**
      * Sets the value of the chargingIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingIdentifier(String value) {
         this.chargingIdentifier = value;

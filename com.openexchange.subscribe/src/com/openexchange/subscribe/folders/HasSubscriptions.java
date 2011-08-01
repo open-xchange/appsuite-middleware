@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link HasSubscriptions}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HasSubscriptions implements AdditionalFolderField {
@@ -92,7 +92,7 @@ public class HasSubscriptions implements AdditionalFolderField {
         try {
             final List<SubscriptionSource> sources = discovery.filter(session.getUserId(), session.getContextId()).getSources(folder.getModule());
             final SecretService secretService = SubscriptionServiceRegistry.getInstance().getService(SecretService.class);
-            
+
             for (final SubscriptionSource subscriptionSource : sources) {
                 String fn = folder.getFullName();
                 if(fn == null) {

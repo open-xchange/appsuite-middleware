@@ -22,19 +22,19 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 
 public class MobileConfigSigner extends Writer {
-    
+
     // Public to test this
     public  static final String OPENSSL_DIDN_T_RETURN_IN_A_TIMELY_MANNER_KILLED_PROCESS = "openssl didn't return in a timely manner, killed process";
 
     // Public to test this
     public static final String OPENSSL_EXITED_UNEXPECTEDLY_WITH = "openssl exited unexpectedly with ";
-    
+
     private final OutputStream writer;
     private final ProcessBuilder pb;
     private Process process;
     private Writer output;
     private InputStream input;
-    
+
     public MobileConfigSigner(final OutputStream writer) throws ConfigurationException {
         this.writer = writer;
         final String[] command = getCommand();
@@ -54,12 +54,12 @@ public class MobileConfigSigner extends Writer {
             keyFile, "-outform", "der", "-nodetach"};
         return command;
     }
-    
+
     private void init() throws IOException {
         this.process = pb.start();
         this.input = new BufferedInputStream(this.process.getInputStream());
         this.output = new OutputStreamWriter(new BufferedOutputStream(this.process.getOutputStream()));
-        
+
     }
 
     @Override
@@ -80,7 +80,7 @@ public class MobileConfigSigner extends Writer {
                 }
                 return waitFor;
             }
-            
+
         });
         try {
             final Integer property = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.OpensslTimeout);

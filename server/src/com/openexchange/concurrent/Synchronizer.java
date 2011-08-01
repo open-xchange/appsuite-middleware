@@ -53,7 +53,7 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * {@link Synchronizer} - Methods to synchronize/unsynchronize access to implementing object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Synchronizer extends Synchronizable {
@@ -69,7 +69,7 @@ public interface Synchronizer extends Synchronizable {
      * &nbsp;&nbsp;release(lock);<br>
      * &nbsp;}<br>
      * </code>
-     * 
+     *
      * @return A lock if synchronized access was enabled via {@link #synchronize()}; otherwise <code>null</code>
      */
     public Lock acquire();
@@ -89,7 +89,7 @@ public interface Synchronizer extends Synchronizable {
      * &nbsp;&nbsp;<b>release(lock);</b><br>
      * &nbsp;}<br>
      * </code>
-     * 
+     *
      * @param lock The lock previously obtained by {@link #acquire()}.
      */
     public void release(Lock lock);

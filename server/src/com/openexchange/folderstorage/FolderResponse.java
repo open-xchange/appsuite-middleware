@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FolderResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -62,14 +62,14 @@ public interface FolderResponse<R> {
 
     /**
      * Gets the response object.
-     * 
+     *
      * @return The response object
      */
     R getResponse();
 
     /**
      * Gets the warnings.
-     * 
+     *
      * @return The warnings
      */
     Collection<OXException> getWarnings();

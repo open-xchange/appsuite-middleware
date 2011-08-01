@@ -97,7 +97,7 @@ import org.apache.commons.logging.impl.SimpleLog;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerWebConnection extends HttpWebConnection {
-        
+
     private final WebClient webClient_;
     private HttpClient httpClient_;
     private String virtualHost_;
@@ -120,8 +120,9 @@ public class CrawlerWebConnection extends HttpWebConnection {
     /**
      * {@inheritDoc}
      */
+    @Override
     public WebResponse getResponse(final WebRequestSettings settings) throws IOException {
-        
+
         final URL url = settings.getUrl();
 
         final HttpClient httpClient = getHttpClient();
@@ -159,10 +160,10 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 newRequest.setAdditionalHeaders(settings.getAdditionalHeaders());
                 return getResponse(newRequest);
             }
-            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);        
+            throw new RuntimeException("HTTP Error: " + e.getMessage(), e);
         }
         // this is done so the logfile is not cluttered with irrelevant data as per bug 16591
-        catch (SSLProtocolException e){            
+        catch (SSLProtocolException e){
             LOG.error(e);
             return null;
         }
@@ -176,6 +177,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * the HttpMethod's connection. Subclasses may override.
      * @param httpMethod the httpMethod used
      */
+    @Override
     protected void onResponseGenerated(final HttpMethodBase httpMethod) {
         httpMethod.releaseConnection();
     }
@@ -297,8 +299,8 @@ public class CrawlerWebConnection extends HttpWebConnection {
                 httpMethod.setRequestHeader("User-Agent", mobileUserAgent);
             }
         } else {
-            httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());            
-        }    
+            httpMethod.setRequestHeader("User-Agent", webClient_.getBrowserVersion().getUserAgent());
+        }
 
         writeRequestHeadersToHttpMethod(httpMethod, webRequestSettings.getAdditionalHeaders());
         httpMethod.setFollowRedirects(false);
@@ -326,6 +328,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
         return httpMethod;
     }
 
+    @Override
     FilePart buildFilePart(final KeyDataPair pairWithFile, final String charset) throws FileNotFoundException {
         final FilePartPageCharSet part;
         if (pairWithFile.getData() != null) {
@@ -393,6 +396,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Lazily initializes the internal HTTP client.
      * @return the initialized HTTP client
      */
+    @Override
     public synchronized HttpClient getHttpClient() {
         if (httpClient_ == null) {
             httpClient_ = createHttpClient();
@@ -424,6 +428,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * must have long running connections explicitly terminated.
      * @return the WebClient's timeout
      */
+    @Override
     protected int getTimeout() {
         return webClient_.getTimeout();
     }
@@ -435,9 +440,10 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * see feature request 1438216).
      * @return the <tt>HttpClient</tt> that will be used by this WebConnection
      */
+    @Override
     protected HttpClient createHttpClient() {
         //final MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
-        return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here. 
+        return new HttpClient(/*connectionManager*/); // Seems we're leaking connections somewhere. Use the default connection manager here.
     }
 
 
@@ -445,6 +451,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Sets the virtual host.
      * @param virtualHost the virtualHost to set
      */
+    @Override
     public void setVirtualHost(final String virtualHost) {
         virtualHost_ = virtualHost;
     }
@@ -453,6 +460,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * Gets the virtual host.
      * @return virtualHost The current virtualHost
      */
+    @Override
     public String getVirtualHost() {
         return virtualHost_;
     }
@@ -488,6 +496,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * @return the WebResponseData to use for this response
      * @throws IOException if there is a problem reading the response body
      */
+    @Override
     protected WebResponseData newWebResponseDataInstance(
             final String statusMessage,
             final List<NameValuePair> headers,
@@ -506,6 +515,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
      * @param loadTime How long the response took to be sent
      * @return the new WebResponse
      */
+    @Override
     protected WebResponse newWebResponseInstance(
             final String charset,
             final WebResponseData responseData,
@@ -531,7 +541,7 @@ public class CrawlerWebConnection extends HttpWebConnection {
     private static final class FilePartPageCharSet extends FilePart {
         private KeyDataPair pairWithFile_;
         private WebClient webClient_;
-        private String pageCharset_;
+        private final String pageCharset_;
 
         private FilePartPageCharSet(final String name, final ByteArrayPartSource byteArrayPartSource,
             final String contentType, final String charset) {
@@ -573,12 +583,12 @@ public class CrawlerWebConnection extends HttpWebConnection {
         }
     }
 
-    
+
     public boolean isQuirkyCookieQuotes() {
         return quirkyCookieQuotes;
     }
 
-    
+
     public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
@@ -587,5 +597,5 @@ public class CrawlerWebConnection extends HttpWebConnection {
         if (this.switchUserAgent) {this.switchUserAgent = false;}
         else {this.switchUserAgent = true;}
     }
-    
+
 }

@@ -105,14 +105,14 @@ public class TasksDowngrade extends DowngradeListener {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
             } catch (final OXException e) {
                 throw e;
-            } 
+            }
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
                 removeDelegations(session, ctx, userConfig.getUserId(), userConfig, con);
             } catch (final OXException e) {
                 throw e;
-            } 
+            }
         }
     }
 
@@ -129,7 +129,7 @@ public class TasksDowngrade extends DowngradeListener {
         try {
             while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
-                removeTaskInPrivateFolder(session, ctx, con, userId, folder);        
+                removeTaskInPrivateFolder(session, ctx, con, userId, folder);
             }
         } finally {
             iter.close();
@@ -278,7 +278,7 @@ public class TasksDowngrade extends DowngradeListener {
                 TaskLogic.removeTask(session, ctx, con, folder.getObjectID(),
                     taskId, type);
             }
-        }        
+        }
     }
 
     private void removeDelegationsInFolder(final Session session,

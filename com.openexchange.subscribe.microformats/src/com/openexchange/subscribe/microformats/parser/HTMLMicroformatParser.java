@@ -71,16 +71,16 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
  * {@link HTMLMicroformatParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HTMLMicroformatParser implements OXMFParser {
 
     private static final String IMG = "img";
     private static final String ANCHOR = "a";
-    
-    private Set<String> containerClasses = new HashSet<String>();
-    private Set<String> prefixes = new HashSet<String>();
+
+    private final Set<String> containerClasses = new HashSet<String>();
+    private final Set<String> prefixes = new HashSet<String>();
 
     public void addAttributePrefix(String prefix) {
         prefixes.add(prefix);
@@ -98,12 +98,12 @@ public class HTMLMicroformatParser implements OXMFParser {
         DOMParser parser = new DOMParser();
         ArrayList<Map<String, String>> container = new ArrayList<Map<String, String>>();
         try {
-            
+
             parser.parse(new InputSource(html));
             Document document = parser.getDocument();
-            
+
             recurse(document, container);
-            
+
         } catch (SAXException e) {
             OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         } catch (IOException e) {
@@ -164,7 +164,7 @@ public class HTMLMicroformatParser implements OXMFParser {
         }
         return false;
     }
-    
+
     private boolean isAnchorElement(Node node) {
         if(node.getNodeType() == Node.ELEMENT_NODE) {
             return ANCHOR.equalsIgnoreCase(((Element)node).getTagName());

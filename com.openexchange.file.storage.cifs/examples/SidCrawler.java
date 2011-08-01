@@ -8,8 +8,9 @@ public class SidCrawler {
     static final byte[] SP = "                                              ".getBytes();
 
     static void printSpace(int count) {
-        if (count > SP.length)
+        if (count > SP.length) {
             count = SP.length;
+        }
         System.out.write(SP, 0, count);
     }
 

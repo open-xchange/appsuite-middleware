@@ -116,7 +116,7 @@ public class DummyStorage implements PublicationStorage {
 
     public void updatePublication(Publication publication) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -124,7 +124,7 @@ public class DummyStorage implements PublicationStorage {
      */
     public void deletePublicationsOfUser(int userID, Context context) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -132,7 +132,7 @@ public class DummyStorage implements PublicationStorage {
      */
     public void deletePublicationsInContext(int contextId, Context ctx) {
         // TODO Auto-generated method stub
-        
+
     }
 
 	public List<Publication> getPublicationsOfUser(Context ctx, int userId) throws OXException {

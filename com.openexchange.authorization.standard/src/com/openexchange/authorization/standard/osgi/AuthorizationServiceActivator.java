@@ -58,7 +58,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link AuthorizationServiceActivator}
- * 
+ *
  */
 public class AuthorizationServiceActivator extends DeferredActivator {
 

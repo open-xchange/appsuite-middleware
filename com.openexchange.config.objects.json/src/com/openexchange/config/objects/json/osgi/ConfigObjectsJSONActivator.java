@@ -78,13 +78,13 @@ public class ConfigObjectsJSONActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         ConfigObjectActionFactory factory = new ConfigObjectActionFactory(getService(ConfigObjectRegistryFactory.class));
         ConfigObjectServlet.ACTIONS = factory;
-        
+
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(factory, "cobjects"));
-    
+
         servletRegistration = new SessionServletRegistration(context, new ConfigObjectServlet(), "/ajax/cobjects");
-        
+
     }
-    
+
    @Override
     protected void stopBundle() throws Exception {
         if (servletRegistration != null) {

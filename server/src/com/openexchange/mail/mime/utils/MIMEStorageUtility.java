@@ -69,7 +69,7 @@ import com.sun.mail.imap.protocol.UIDSet;
 
 /**
  * {@link MIMEStorageUtility} - Provides MIME-specific storage utility methods
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEStorageUtility {
@@ -107,7 +107,7 @@ public final class MIMEStorageUtility {
 
     /**
      * Clones specified fetch profile:
-     * 
+     *
      * @param toClone The fetch profile to clone
      * @return The clone fetch profile
      */
@@ -127,7 +127,7 @@ public final class MIMEStorageUtility {
 
     /**
      * The corresponding fields to fetch profile obtained by {@link #getCacheFetchProfile()}
-     * 
+     *
      * @return The corresponding fields to the fetch profile obtained by {@link #getCacheFetchProfile()}
      */
     public static Collection<MailField> getCacheFields() {
@@ -136,7 +136,7 @@ public final class MIMEStorageUtility {
 
     /**
      * The corresponding fields to fetch profile obtained by {@link #getCacheFetchProfile()}
-     * 
+     *
      * @return The corresponding fields to the fetch profile obtained by {@link #getCacheFetchProfile()}
      */
     public static MailField[] getCacheFieldsArray() {
@@ -146,7 +146,7 @@ public final class MIMEStorageUtility {
     /**
      * Messages which are pre-filled with the fetch profile returned by this method are completely pre-filles with all data that can occur
      * in a listing. Thus these messages can be put into cache for future list requests
-     * 
+     *
      * @return An appropriate instance of {@link FetchProfile} to pre-fill messages ready for being put into cache
      */
     public static FetchProfile getCacheFetchProfile() {
@@ -173,7 +173,7 @@ public final class MIMEStorageUtility {
 
     /**
      * Creates an appropriate collection of {@link MailField} enumeration constants from given fetch profile
-     * 
+     *
      * @param fetchProfile The fetch profile
      * @return An appropriate collection of {@link MailField} enumeration constants
      */
@@ -249,7 +249,7 @@ public final class MIMEStorageUtility {
     /**
      * Turns given array of <code>long</code> into an array of <code>com.sun.mail.imap.protocol.UIDSet</code> which in turn can be used for
      * a varieties of <code>IMAPProtocol</code> methods.
-     * 
+     *
      * @param uids - the UIDs
      * @return an array of <code>com.sun.mail.imap.protocol.UIDSet</code>
      */
@@ -289,7 +289,7 @@ public final class MIMEStorageUtility {
      * <p>
      * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are discarded since no corresponding fetch profile item exists and
      * therefore should be handled separately.
-     * 
+     *
      * @param fields The fields
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
@@ -303,7 +303,7 @@ public final class MIMEStorageUtility {
      * <p>
      * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are discarded since no corresponding fetch profile item exists and
      * therefore should be handled separately.
-     * 
+     *
      * @param fields The fields
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
@@ -344,7 +344,7 @@ public final class MIMEStorageUtility {
      * <p>
      * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are discarded since no corresponding fetch profile item exists and
      * therefore should be handled separately.
-     * 
+     *
      * @param fields The fields
      * @param searchFields The search fields
      * @param sortField The sort field
@@ -360,7 +360,7 @@ public final class MIMEStorageUtility {
      * <p>
      * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are discarded since no corresponding fetch profile item exists and
      * therefore should be handled separately.
-     * 
+     *
      * @param fields The fields
      * @param headerNames The header names
      * @param searchFields The search fields

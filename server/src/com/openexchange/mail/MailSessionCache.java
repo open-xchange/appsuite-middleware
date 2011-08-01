@@ -57,14 +57,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailSessionCache} - The main session-bound cache for mail module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSessionCache {
 
     /**
      * Gets the session-bound mail cache.
-     * 
+     *
      * @param session The session whose mail cache shall be returned
      * @return The session-bound mail cache.
      */
@@ -108,7 +108,7 @@ public final class MailSessionCache {
 
     /**
      * Drops the session-bound mail cache.
-     * 
+     *
      * @param session The session whose mail cache shall be dropped
      */
     public static void dropInstance(final Session session) {
@@ -165,7 +165,7 @@ public final class MailSessionCache {
 
     /*-
      * Gets the parameter associated with given account ID and parameter name.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @return The parameter or <code>null</code>
@@ -180,7 +180,7 @@ public final class MailSessionCache {
 
     /**
      * Gets the parameter associated with given account ID and parameter name.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @param clazz The parameter value's class
@@ -201,7 +201,7 @@ public final class MailSessionCache {
 
     /**
      * Checks if a parameter is associated with given account ID and parameter name.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @return <code>true</code> if a parameter is associated with given account ID and parameter name; otherwise <code>false</code>
@@ -216,7 +216,7 @@ public final class MailSessionCache {
 
     /**
      * Puts parameter into this cache. A <code>null</code> value removes the parameter.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @param parameterValue The parameter value
@@ -240,7 +240,7 @@ public final class MailSessionCache {
     /**
      * (Atomically) Puts parameter into this cache only if no other parameter is associated with given account ID and parameter name. A
      * <code>null</code> value removes the parameter.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @param parameterValue The parameter value
@@ -263,7 +263,7 @@ public final class MailSessionCache {
 
     /**
      * Removes the parameter associated with given account ID and parameter name.
-     * 
+     *
      * @param accountId The account ID
      * @param parameterName The parameter name
      * @return The parameter previously associated with given account ID and parameter name or <code>null</code>
@@ -278,7 +278,7 @@ public final class MailSessionCache {
 
     /**
      * Removes the parameters associated with given account ID
-     * 
+     *
      * @param accountId The account ID
      */
     public void removeAccountParameters(final int accountId) {

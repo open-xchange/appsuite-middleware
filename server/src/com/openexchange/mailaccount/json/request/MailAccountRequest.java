@@ -93,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailAccountRequest} - Handles request to mail account servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountRequest {
@@ -108,7 +108,7 @@ public final class MailAccountRequest {
 
     /**
      * Gets the time stamp.
-     * 
+     *
      * @return The time stamp.
      */
     public Date getTimestamp() {
@@ -117,7 +117,7 @@ public final class MailAccountRequest {
 
     /**
      * Initializes a new {@link MailAccountRequest}.
-     * 
+     *
      * @param session The session
      */
     public MailAccountRequest(final ServerSession session) {
@@ -127,7 +127,7 @@ public final class MailAccountRequest {
 
     /**
      * Handles the request dependent on specified action string.
-     * 
+     *
      * @param action The action string
      * @param jsonObject The JSON object containing request's data & parameters
      * @return A JSON result object dependent on triggered action method
@@ -599,7 +599,7 @@ public final class MailAccountRequest {
                  */
                 MailSessionCache.getInstance(session).removeAccountParameters(id);
                 /*-
-                 * 
+                 *
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
                  */

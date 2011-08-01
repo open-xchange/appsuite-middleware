@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReminderFactoryService} - Factory service for reminder module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReminderFactoryService implements MultipleHandlerFactoryService {
@@ -75,10 +75,12 @@ public final class ReminderFactoryService implements MultipleHandlerFactoryServi
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new ReminderHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "reminder";
     }
@@ -91,14 +93,17 @@ public final class ReminderFactoryService implements MultipleHandlerFactoryServi
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final ReminderRequest request = new ReminderRequest(session);
             final JSONValue retval = request.action(action, jsonObject);
@@ -106,6 +111,7 @@ public final class ReminderFactoryService implements MultipleHandlerFactoryServi
             return retval;
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

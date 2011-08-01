@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CalendarPrintingEnabled} - Preference item service to mark calendar printing as enabled.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CalendarPrintingEnabled implements PreferencesItemService {
@@ -77,11 +77,11 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
 
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            
+
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
-            
+
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.TRUE);
             }

@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Writes a content-disposition in the long form.
- * 
+ *
  * @see ContentDispositionParser
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

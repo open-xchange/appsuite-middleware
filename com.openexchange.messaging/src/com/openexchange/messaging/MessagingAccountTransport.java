@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingAccountTransport} - Provides access to transport.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -63,7 +63,7 @@ public interface MessagingAccountTransport extends MessagingResource {
 
     /**
      * Transports specified message to given recipients.
-     * 
+     *
      * @param message The message to transport
      * @param recipients The recipients' addresses
      * @throws OXException If transport fails

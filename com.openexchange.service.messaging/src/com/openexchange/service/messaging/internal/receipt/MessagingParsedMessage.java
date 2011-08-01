@@ -53,7 +53,7 @@ import java.util.UUID;
 
 /**
  * {@link MessagingParsedMessage} - A contiguous message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingParsedMessage {
@@ -72,7 +72,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Initializes a new {@link MessagingParsedMessage}.
-     * 
+     *
      * @param uuid The message UUID
      * @param prefixCode The prefix code
      * @param chunkNumber The chunk number
@@ -89,7 +89,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Initializes a new {@link MessagingParsedMessage}.
-     * 
+     *
      * @param uuid The message UUID
      * @param prefixCode The prefix code
      * @param topic The message topic
@@ -106,7 +106,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Gets the message's UUID.
-     * 
+     *
      * @return The message's UUID.
      */
     public UUID getUuid() {
@@ -115,7 +115,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Gets the topic
-     * 
+     *
      * @return The topic
      */
     public String getTopic() {
@@ -124,7 +124,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Gets the chunk
-     * 
+     *
      * @return The chunk
      */
     public byte[] getChunk() {
@@ -133,7 +133,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Gets the chunk number
-     * 
+     *
      * @return The chunk number
      */
     public int getChunkNumber() {
@@ -142,7 +142,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Checks the contiguous flag.
-     * 
+     *
      * @return The contiguous flag.
      */
     public boolean isContiguous() {
@@ -151,7 +151,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Sets the contiguous flag.
-     * 
+     *
      * @param contiguous The contiguous flag.
      */
     public void setContiguous(final boolean contiguous) {
@@ -160,7 +160,7 @@ public final class MessagingParsedMessage {
 
     /**
      * Gets the prefix code.
-     * 
+     *
      * @return The prefix code
      */
     public int getPrefixCode() {

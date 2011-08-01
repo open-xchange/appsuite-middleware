@@ -54,13 +54,14 @@ import org.xml.sax.SAXException;
 import com.openexchange.groupware.container.Contact;
 
 
-public class MicroformatContactSAXHandler extends 
+public class MicroformatContactSAXHandler extends
 AbstractMicroformatSAXHandler<Contact> {
-    
+
     public MicroformatContactSAXHandler(){
         super();
     }
 
+    @Override
     public void startElement(String uri, String name, String qName, Attributes atts) {
         String className = atts.getValue("class");
         if(null == className ){
@@ -68,13 +69,13 @@ AbstractMicroformatSAXHandler<Contact> {
         }
         if( className.equals("ox-contact")){
             newObjectEncountered();
-        } 
+        }
         else if( className.equals("surname")){
             currentlyReading = "surname";
-        } 
+        }
         else if( className.equals("givenName")){
             currentlyReading = "givenName";
-        } 
+        }
         else if( className.equals("email1")){
             currentlyReading = "email1";
         }
@@ -82,7 +83,7 @@ AbstractMicroformatSAXHandler<Contact> {
             currentlyReading = null;
         }
     }
-    
+
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         super.characters(ch, start, length);
@@ -91,13 +92,13 @@ AbstractMicroformatSAXHandler<Contact> {
         }
         if( currentlyReading.equals("ox-contact")){
             newObjectEncountered();
-        } 
+        }
         else if( currentlyReading.equals("surname")){
             currentObject.setSurName( stringArray(ch, start, start+length) );
-        } 
+        }
         else if( currentlyReading.equals("givenName")){
             currentObject.setGivenName( stringArray(ch, start, start+length) );
-        } 
+        }
         else if( currentlyReading.equals("email1")){
             currentObject.setEmail1( stringArray(ch, start, start+length) );
         }

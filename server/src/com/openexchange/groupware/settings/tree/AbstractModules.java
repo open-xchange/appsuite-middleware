@@ -59,7 +59,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * Abstract class for easily adding preferences item returning features enabled for a user. 
+ * Abstract class for easily adding preferences item returning features enabled for a user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractModules implements PreferencesItemService {
@@ -68,14 +68,17 @@ public abstract class AbstractModules implements PreferencesItemService {
         super();
     }
 
+    @Override
     public IValueHandler getSharedValue() {
 
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

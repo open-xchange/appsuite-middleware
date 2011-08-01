@@ -58,7 +58,7 @@ public class CPFormattingInformation {
     private int position;
 
     private int type;
-    
+
     private Object additionalInformation;
 
     public int getPosition() {
@@ -76,16 +76,16 @@ public class CPFormattingInformation {
     public void setType(int type) {
         this.type = type;
     }
-    
+
     public void setAdditionalInformation(Object additionalInformation) {
         this.additionalInformation = additionalInformation;
     }
-    
+
     public Object getAdditionalInformation() {
         return additionalInformation;
     }
 
-    
+
     public CPFormattingInformation() {
         super();
     }
@@ -102,7 +102,7 @@ public class CPFormattingInformation {
 
     @Override
     public String toString() {
-        return "Pos:"+getPosition() + "/Type:" + getType(); 
+        return "Pos:"+getPosition() + "/Type:" + getType();
     }
 
     @Override
@@ -135,6 +135,6 @@ public class CPFormattingInformation {
         return true;
     }
 
- 
+
 
 }

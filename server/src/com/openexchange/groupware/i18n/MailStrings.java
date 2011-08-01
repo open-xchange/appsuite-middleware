@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MailStrings} - Provides locale-specific string constants for mail module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailStrings implements LocalizableStrings {
@@ -110,13 +110,13 @@ public class MailStrings implements LocalizableStrings {
 
     // The name for trash folder
     public static final String DEFAULT_TRASH = "Trash";
-    
+
     // The name for trash folder
     public static final String DEFAULT_DRAFTS = "Drafts";
-    
+
     // The name for trash folder
     public static final String DEFAULT_SENT = "Sent objects";
-    
+
     // The name for trash folder
     public static final String DEFAULT_SPAM = "Spam";
 

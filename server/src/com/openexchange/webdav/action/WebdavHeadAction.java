@@ -54,11 +54,12 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavHeadAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		head(res,req.getResource(),-1);
 	}
-	
+
 	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws OXException {
 		if(resource == null) {
 			return;

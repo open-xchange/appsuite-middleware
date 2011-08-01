@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link ANDTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
@@ -86,7 +86,7 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 
     /**
      * Gets the search terms that should be linked with an AND as an array of {@link SearchTerm} with length <code>2</code>.
-     * 
+     *
      * @return The terms that should be linked with an AND
      */
     @Override
@@ -96,7 +96,7 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 
     /**
      * Sets the first search term
-     * 
+     *
      * @param firstTerm The first search term
      */
     public void setFirstTerm(final SearchTerm<?> firstTerm) {
@@ -105,7 +105,7 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 
     /**
      * Sets the second search term
-     * 
+     *
      * @param secondTerm The second search term
      */
     public void setSecondTerm(final SearchTerm<?> secondTerm) {

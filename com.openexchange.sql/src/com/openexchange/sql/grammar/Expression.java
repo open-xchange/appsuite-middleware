@@ -104,7 +104,8 @@ public abstract class Expression extends Element {
 		return new BETWEEN(this, middleExpression, rightExpression);
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return getSqlKeyword();
 	}
 

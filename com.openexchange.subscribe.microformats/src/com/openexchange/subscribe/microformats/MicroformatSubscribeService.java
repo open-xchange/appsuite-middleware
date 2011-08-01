@@ -68,7 +68,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
 
 /**
  * {@link MicroformatSubscribeService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MicroformatSubscribeService extends AbstractSubscribeService {
@@ -79,13 +79,13 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private OXMFDataSource mfSource;
 
-    private List<String> containers = new LinkedList<String>();
+    private final List<String> containers = new LinkedList<String>();
 
-    private List<String> prefixes = new LinkedList<String>();
+    private final List<String> prefixes = new LinkedList<String>();
 
     private SubscriptionSource source;
 
-    private List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
+    private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
 
     public Collection getContent(Subscription subscription) throws OXException {
         Reader htmlData = mfSource.getData(subscription);
@@ -98,7 +98,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         if (!objectParsers.isEmpty()) {
             data = read(htmlData);
             htmlData = new StringReader(data);
-        } 
+        }
 
         OXMFParser parser = parserFactory.getParser();
         configureParser(parser);

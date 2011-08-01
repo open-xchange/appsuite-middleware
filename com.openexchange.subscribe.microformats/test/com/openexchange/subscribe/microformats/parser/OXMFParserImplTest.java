@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  *
  */
 public class OXMFParserImplTest extends ParserTest {
-    
+
     private OXMFParserImpl parser;
 
     @Override

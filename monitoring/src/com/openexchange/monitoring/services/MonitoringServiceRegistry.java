@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MonitoringServiceRegistry} - A registry for services needed by IMAP bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MonitoringServiceRegistry {
@@ -62,7 +62,7 @@ public final class MonitoringServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

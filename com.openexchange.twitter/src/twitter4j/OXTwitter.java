@@ -51,7 +51,7 @@ package twitter4j;
 
 /**
  * {@link OXTwitter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface OXTwitter extends twitter4j.Twitter {
@@ -59,7 +59,7 @@ public interface OXTwitter extends twitter4j.Twitter {
     /**
      * Returns a single status, specified by the id parameter below. The status's author will be returned inline. <br>
      * This method calls http://api.twitter.com/1/statuses/show
-     * 
+     *
      * @param id the numerical ID of the status you're trying to retrieve
      * @return a single status
      * @throws twitter4j.TwitterException when Twitter service or network is unavailable

@@ -70,7 +70,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageUtility {
@@ -88,7 +88,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     * 
+     *
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -113,7 +113,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     * 
+     *
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -137,7 +137,7 @@ public final class MessageUtility {
 
     /**
      * Gets the input stream of specified part.
-     * 
+     *
      * @param p The part whose input stream shall be returned
      * @return The part's input stream.
      */
@@ -190,7 +190,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     * 
+     *
      * @param p The <code>javax.mail.Part</code> object
      * @param ct The part's content type
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -211,7 +211,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     * 
+     *
      * @param p The <code>javax.mail.Part</code> object
      * @param charset The charset
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -246,7 +246,7 @@ public final class MessageUtility {
 
     /**
      * Reads the stream content from given mail part.
-     * 
+     *
      * @param mailPart The mail part
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
@@ -268,7 +268,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     * 
+     *
      * @param inStream The input stream
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -373,7 +373,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as BIG5.
-     * 
+     *
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
      */
@@ -393,7 +393,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as GB2312.
-     * 
+     *
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as GB2312; otherwise <code>false</code>
      */
@@ -406,7 +406,7 @@ public final class MessageUtility {
 
     /**
      * Gets the byte content from specified input stream.
-     * 
+     *
      * @param in The input stream to get the byte content from
      * @return The byte content
      * @throws IOException If an I/O error occurs
@@ -446,7 +446,7 @@ public final class MessageUtility {
 
     /**
      * Check if specified bytes contain ascii-only content.
-     * 
+     *
      * @param bytes The bytes to check
      * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
      */

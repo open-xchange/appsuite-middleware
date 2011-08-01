@@ -73,18 +73,22 @@ public class TargetDuration implements Mapper<Long> {
         super();
     }
 
+    @Override
     public int getId() {
         return Task.TARGET_DURATION;
     }
 
+    @Override
     public boolean isSet(Task task) {
         return task.containsTargetDuration();
     }
 
+    @Override
     public String getDBColumnName() {
         return "target_duration";
     }
 
+    @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getTargetDuration()) {
             stmt.setNull(pos, Types.BIGINT);
@@ -93,6 +97,7 @@ public class TargetDuration implements Mapper<Long> {
         }
     }
 
+    @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         long targetDuration = result.getLong(pos);
         if (!result.wasNull()) {
@@ -100,14 +105,17 @@ public class TargetDuration implements Mapper<Long> {
         }
     }
 
+    @Override
     public boolean equals(Task task1, Task task2) {
         return task1.getTargetDuration().equals(task2.getTargetDuration());
     }
 
+    @Override
     public Long get(Task task) {
         return task.getTargetDuration();
     }
 
+    @Override
     public void set(Task task, Long value) {
         task.setTargetDuration(value);
     }

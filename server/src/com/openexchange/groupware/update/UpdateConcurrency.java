@@ -60,7 +60,7 @@ public enum UpdateConcurrency {
      * Productive work must be blocked if the task is executed.
      */
     BLOCKING,
-    
+
     /**
      * Productive work can continue if the task is executed.
      */

@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Public phone number list data
- * 
+ *
  * <p>Java class for PublicNoList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PublicNoList">
  *   &lt;complexContent>
@@ -54,8 +54,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PublicNoList", propOrder = {
@@ -91,11 +91,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the channelID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelID() {
         return channelID;
@@ -103,11 +103,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the channelID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelID(BigInteger value) {
         this.channelID = value;
@@ -115,11 +115,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the channel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChannel() {
         return channel;
@@ -127,11 +127,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the channel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChannel(String value) {
         this.channel = value;
@@ -139,11 +139,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the didID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDidID() {
         return didID;
@@ -151,11 +151,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the didID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDidID(BigInteger value) {
         this.didID = value;
@@ -163,11 +163,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the did property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDid() {
         return did;
@@ -175,11 +175,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the did property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDid(String value) {
         this.did = value;
@@ -187,11 +187,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the location property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLocation() {
         return location;
@@ -199,11 +199,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the location property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLocation(String value) {
         this.location = value;
@@ -211,11 +211,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -223,11 +223,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -235,11 +235,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the cost property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getCost() {
         return cost;
@@ -247,11 +247,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the cost property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setCost(Float value) {
         this.cost = value;
@@ -259,11 +259,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the flow property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFlow() {
         return flow;
@@ -271,11 +271,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the flow property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFlow(String value) {
         this.flow = value;
@@ -283,11 +283,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the phoneNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneNo() {
         return phoneNo;
@@ -295,11 +295,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the phoneNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneNo(String value) {
         this.phoneNo = value;
@@ -307,11 +307,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the callbackExt property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallbackExt() {
         return callbackExt;
@@ -319,11 +319,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the callbackExt property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallbackExt(String value) {
         this.callbackExt = value;
@@ -331,11 +331,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the callbackExtID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCallbackExtID() {
         return callbackExtID;
@@ -343,11 +343,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the callbackExtID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCallbackExtID(BigInteger value) {
         this.callbackExtID = value;
@@ -355,11 +355,11 @@ public class PublicNoList {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -367,11 +367,11 @@ public class PublicNoList {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

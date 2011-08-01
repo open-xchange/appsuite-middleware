@@ -66,7 +66,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UserConfigProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UserConfigProvider implements ConfigProviderService {
@@ -76,7 +76,7 @@ public class UserConfigProvider implements ConfigProviderService {
     private final UserService users;
 
     private final ContextService contexts;
-    
+
     public UserConfigProvider(final UserService users, final ContextService contexts) {
         super();
         this.users = users;
@@ -96,7 +96,7 @@ public class UserConfigProvider implements ConfigProviderService {
 
                 public String get() {
                     final Map<String, Set<String>> attributes = user.getAttributes();
-                    
+
                     final Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
                     if (set == null || set.isEmpty()) {
                         return null;
@@ -126,7 +126,7 @@ public class UserConfigProvider implements ConfigProviderService {
                 public List<String> getMetadataNames() throws OXException {
                     return Collections.emptyList();
                 }
-                
+
             };
         }
 
@@ -147,7 +147,7 @@ public class UserConfigProvider implements ConfigProviderService {
                 }
             }
             return allNames;
-        } 
+        }
     }
 
 }

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.SortableId;
 
 /**
  * {@link MailId} - A mail ID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailId implements SortableId {
@@ -66,7 +66,7 @@ public final class MailId implements SortableId {
 
     /**
      * Initializes a new {@link MailId}.
-     * 
+     *
      * @param fullname The fullname
      * @param ordinal The ordinal
      */
@@ -78,7 +78,7 @@ public final class MailId implements SortableId {
 
     /**
      * Applies specified name.
-     * 
+     *
      * @param name The name
      * @return This {@link MailId} instance with new name applied
      */
@@ -87,14 +87,17 @@ public final class MailId implements SortableId {
         return this;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return fullname;
     }
 
+    @Override
     public Priority getPriority() {
         /*
          * Mail folders come first
@@ -102,6 +105,7 @@ public final class MailId implements SortableId {
         return Priority.HIGH;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof MailId) {
             final int thisVal = ordinal;

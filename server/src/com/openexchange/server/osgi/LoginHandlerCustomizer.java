@@ -57,7 +57,7 @@ import com.openexchange.login.internal.LoginHandlerRegistry;
 
 /**
  * {@link LoginHandlerCustomizer} - Registers/unregisters a login handler in/from {@link LoginHandlerRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
@@ -66,13 +66,14 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link LoginHandlerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public LoginHandlerCustomizer(final BundleContext context) {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         if ((service instanceof LoginHandlerService) && LoginHandlerRegistry.getInstance().addLoginHandler((LoginHandlerService) service)) {
@@ -83,10 +84,12 @@ public class LoginHandlerCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference serviceReference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference serviceReference, final Object service) {
         if (null != service) {
             if (service instanceof LoginHandlerService) {

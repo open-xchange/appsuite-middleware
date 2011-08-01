@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link LoginStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public interface LoginStep{
@@ -64,6 +64,6 @@ public interface LoginStep{
     public void setUsername(String username);
 
     public void setPassword(String password);
-    
+
     public String getBaseUrl();
 }

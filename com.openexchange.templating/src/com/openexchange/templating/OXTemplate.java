@@ -60,11 +60,11 @@ import com.openexchange.exception.OXException;
  *
  */
 public interface OXTemplate {
-    
+
     public enum TemplateLevel {
         SERVER, USER;
     }
-    
+
     public void process(Object rootObject, Writer writer) throws OXException;
     public TemplateLevel getLevel();
 }

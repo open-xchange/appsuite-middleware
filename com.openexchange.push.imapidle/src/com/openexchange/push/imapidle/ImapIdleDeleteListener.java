@@ -56,7 +56,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 
 /**
  * {@link ImapIdleDeleteListener} - Delete listener for IMAP IDLE bundle.
- * 
+ *
  */
 public final class ImapIdleDeleteListener implements DeleteListener {
 

@@ -71,47 +71,50 @@ public class ContactCollectOnIncomingAndOutgoingMailUpdateTask implements Update
     private static final String COLUMN_TRANSPORT = "contactCollectOnMailTransport";
 
     private static final String COLUMN_ACCESS = "contactCollectOnMailAccess";
-    
+
     private static final String COLUMN_DEFINITION_TRANSPORT = COLUMN_TRANSPORT + " BOOL DEFAULT TRUE";
-    
+
     private static final String COLUMN_DEFINITION_ACCESS = COLUMN_ACCESS + " BOOL DEFAULT TRUE";
 
     private static final String ALTER_TABLE = "ALTER TABLE " + TABLE + " ADD (";
 
+    @Override
     public int addedWithVersion() {
         return 92;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            
+
             StringBuilder sb = new StringBuilder(ALTER_TABLE);
-            
+
             if (!columnExists(con, TABLE, COLUMN_TRANSPORT)) {
                 sb.append(COLUMN_DEFINITION_TRANSPORT);
                 sb.append(", ");
             }
-            
+
             if (!columnExists(con, TABLE, COLUMN_ACCESS)) {
                 sb.append(COLUMN_DEFINITION_ACCESS);
                 sb.append(", ");
             }
-            
+
             String stmt = sb.toString();
-            
+
             if (stmt.equals(ALTER_TABLE)) {
                 return;
             }
-            
+
             stmt = stmt.substring(0, stmt.length() - 2);
             stmt = stmt + ")";
-            
+
             PreparedStatement pstmt = con.prepareStatement(stmt);
             pstmt.execute();
             pstmt.close();

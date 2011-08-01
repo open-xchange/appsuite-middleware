@@ -64,12 +64,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CopyLinksForChangeExceptions implements CalendarListener {
 
-    private LinkSQLInterface links;
+    private final LinkSQLInterface links;
 
     public CopyLinksForChangeExceptions(LinkSQLInterface links) {
         this.links = links;
     }
 
+    @Override
     public void createdChangeExceptionInRecurringAppointment(Appointment master, Appointment changeException,int inFolder, ServerSession session) throws OXException {
         int userId = session.getUserId();
         UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(userId,session.getContext());
@@ -82,7 +83,7 @@ public class CopyLinksForChangeExceptions implements CalendarListener {
         if(folderId == 0) {
             folderId = inFolder;
         }
-        
+
         for (LinkObject loadedLink : loadedLinks) {
             LinkObject copy = new LinkObject();
             copy.setFirstFolder(folderId);

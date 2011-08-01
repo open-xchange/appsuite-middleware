@@ -53,14 +53,14 @@ import java.util.Set;
 
 /**
  * {@link And}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class And extends ContextSetTerm {
 
-    private ContextSetTerm firstOperand;
+    private final ContextSetTerm firstOperand;
 
-    private ContextSetTerm otherOperand;
+    private final ContextSetTerm otherOperand;
 
     public And(ContextSetTerm firstOperand, ContextSetTerm otherOperand) {
         this.firstOperand = firstOperand;

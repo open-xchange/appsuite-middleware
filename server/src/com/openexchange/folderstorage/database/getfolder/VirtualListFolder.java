@@ -67,7 +67,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * {@link VirtualListFolder} - Gets a virtual list folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualListFolder {
@@ -83,7 +83,7 @@ public final class VirtualListFolder {
 
     /**
      * Checks if specified virtual folder identifier exists; meaning corresponding non-tree-visible folders exist.
-     * 
+     *
      * @param folderId The folder identifier
      * @param user The user
      * @param userConfiguration The user configuration
@@ -117,7 +117,7 @@ public final class VirtualListFolder {
 
     /**
      * Gets the database folder representing given virtual folder.
-     * 
+     *
      * @param folderId The virtual folder identifier
      * @return The database folder representing given virtual folder
      */
@@ -176,7 +176,7 @@ public final class VirtualListFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing given virtual folder.
-     * 
+     *
      * @param folderId The virtual folder identifier
      * @param user The user
      * @param userConfiguration The user configuration
@@ -228,7 +228,7 @@ public final class VirtualListFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing given virtual folder.
-     * 
+     *
      * @param folderId The virtual folder identifier
      * @param user The user
      * @param userConfiguration The user configuration

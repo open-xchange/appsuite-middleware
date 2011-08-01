@@ -70,7 +70,7 @@ import com.openexchange.messaging.generic.internal.TimeZoneUtils;
 
 /**
  * {@link Utility} - Utility class for <i>com.openexchange.messaging.generic</i> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -85,7 +85,7 @@ public final class Utility {
 
     /**
      * Gets the {@link TimeZone} instance for the given ID.
-     * 
+     *
      * @param id The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
      * @return The specified {@link TimeZone} instance, or the GMT zone if the given ID cannot be understood.
@@ -96,7 +96,7 @@ public final class Utility {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone identifier
      * @return The date millis with time zone offset added
@@ -107,7 +107,7 @@ public final class Utility {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone
      * @return The date millis with time zone offset added
@@ -130,7 +130,7 @@ public final class Utility {
      * <p>
      * Note that returned instance of {@link SimpleDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = Utility.getDefaultMailDateFormat();
@@ -139,7 +139,7 @@ public final class Utility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @return The default {@link SimpleDateFormat} instance configured with GMT time zone
      */
     public static SimpleDateFormat getDefaultMailDateFormat() {
@@ -151,7 +151,7 @@ public final class Utility {
      * <p>
      * Note that returned instance of {@link SimpleDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = Utility.getMailDateFormat(timeZoneId);
@@ -160,7 +160,7 @@ public final class Utility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @param timeZoneId The time zone identifier
      * @return The {@link SimpleDateFormat} for specified time zone identifier
      */
@@ -196,7 +196,7 @@ public final class Utility {
 
     /**
      * Decodes a "Subject" header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param subject The subject obtained from ENVELOPE fetch item
      * @return The decoded subject value
      */
@@ -206,7 +206,7 @@ public final class Utility {
 
     /**
      * Decodes a string header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param headerValue The header value
      * @return The decoded header value
      */
@@ -220,7 +220,7 @@ public final class Utility {
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
      * If the String is not a RFC 2047 style encoded header, it is returned as-is
-     * 
+     *
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
@@ -234,7 +234,7 @@ public final class Utility {
      * <tt>used</tt> indicates how many characters have been used in the current line; it is usually the length of the header name.
      * <p>
      * Note that line breaks in the string aren't escaped; they probably should be.
-     * 
+     *
      * @param used The characters used in line so far
      * @param foldMe The string to fold
      * @return The folded string
@@ -245,7 +245,7 @@ public final class Utility {
 
     /**
      * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
-     * 
+     *
      * @param headerLine The header line to unfold
      * @return The unfolded string
      */
@@ -259,7 +259,7 @@ public final class Utility {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -271,7 +271,7 @@ public final class Utility {
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     * 
+     *
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
@@ -282,7 +282,7 @@ public final class Utility {
 
     /**
      * Formats HTML to plain text.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The converted plain text
      */
@@ -298,7 +298,7 @@ public final class Utility {
      * <p>
      * Example: <code>http://www.somewhere.com</code> is converted to
      * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
-     * 
+     *
      * @param content The content to search in
      * @return The given content with all non-HTML links converted to valid HTML links
      */
@@ -308,7 +308,7 @@ public final class Utility {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
@@ -319,7 +319,7 @@ public final class Utility {
 
     /**
      * Creates a {@link Document DOM document} from specified XML/HTML string.
-     * 
+     *
      * @param string The XML/HTML string
      * @return A newly created DOM document or <code>null</code> if given string cannot be transformed to a DOM document
      */
@@ -329,7 +329,7 @@ public final class Utility {
 
     /**
      * Pretty-prints specified XML/HTML string.
-     * 
+     *
      * @param string The XML/HTML string to pretty-print
      * @return The pretty-printed XML/HTML string
      */
@@ -339,7 +339,7 @@ public final class Utility {
 
     /**
      * Pretty-prints specified XML/HTML node.
-     * 
+     *
      * @param node The XML/HTML node pretty-print
      * @return The pretty-printed XML/HTML node
      */
@@ -349,7 +349,7 @@ public final class Utility {
 
     /**
      * Gets the MIME type associated with given file.
-     * 
+     *
      * @param file The file
      * @return The MIME type associated with given file or <code>application/octet-stream</code> if none found
      */
@@ -359,7 +359,7 @@ public final class Utility {
 
     /**
      * Gets the MIME type associated with given file name.
-     * 
+     *
      * @param fileName The file name; e.g. <code>"file.html"</code>
      * @return The MIME type associated with given file name or <code>application/octet-stream</code> if none found
      */
@@ -369,7 +369,7 @@ public final class Utility {
 
     /**
      * Gets the MIME type associated with given file extension.
-     * 
+     *
      * @param extension The file extension; e.g. <code>"txt"</code>
      * @return The MIME type associated with given file extension or <code>application/octet-stream</code> if none found
      */
@@ -379,7 +379,7 @@ public final class Utility {
 
     /**
      * Gets the file extension for given MIME type.
-     * 
+     *
      * @param mimeType The MIME type
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */

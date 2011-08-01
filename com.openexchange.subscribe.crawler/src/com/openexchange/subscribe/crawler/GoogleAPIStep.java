@@ -83,7 +83,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link GoogleAPIStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
@@ -263,7 +263,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
                         }
                     }
-                    
+
                     if (entry.getContactPhotoLink() != null && entry.getContactPhotoLink().getEtag() != null) {
                         final Link photoLink = entry.getContactPhotoLink();
                         final Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);

@@ -13,15 +13,16 @@ import com.openexchange.tools.file.external.FileStorageFactory;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory {
 
+    @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
         LocalFileStorage standardFS = new LocalFileStorage(uri);
         HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
         CompositingFileStorage cStorage = new CompositingFileStorage();
-        
+
         cStorage.addStore(standardFS);
         cStorage.addStore("hashed", hashedFS);
         cStorage.setSavePrefix("hashed");
-        
+
         return cStorage;
     }
 }

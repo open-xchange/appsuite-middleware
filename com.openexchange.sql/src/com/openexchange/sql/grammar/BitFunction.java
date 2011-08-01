@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 
 /**
  * {@link BitFunction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class BitFunction extends Expression {

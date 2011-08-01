@@ -57,13 +57,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public abstract class TimedWriter<T> {
-	
+
 	protected JSONWriter jsonWriter;
 
 	public TimedWriter(final JSONWriter w){
 		jsonWriter = w;
 	}
-	
+
 	public void timedResult(final long timestamp) throws JSONException {
 		jsonWriter.object();
 		jsonWriter.key(ResponseFields.TIMESTAMP);
@@ -74,7 +74,7 @@ public abstract class TimedWriter<T> {
 	public void endTimedResult() throws JSONException {
 		jsonWriter.endObject();
 	}
-	
+
 	public void writeDelta(final SearchIterator<T> iterator, final SearchIterator<T> deleted, final Object[] cols, final boolean ignoreDeleted, final TimeZone tz) throws JSONException, OXException {
 		jsonWriter.array();
 		fillArray(iterator,cols, tz);

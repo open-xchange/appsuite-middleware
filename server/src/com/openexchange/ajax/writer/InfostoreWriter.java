@@ -64,28 +64,28 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.tools.iterator.SearchIterator;
 
 public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
-	
+
 	public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreWriter.class));
-	
+
 	public InfostoreWriter(final JSONWriter w) {
 		super(w);
 	}
-	
+
 	public void writeMetadata(final SearchIterator<DocumentMetadata> iter, final Metadata[] cols, final TimeZone tz) throws JSONException, OXException {
 		jsonWriter.array();
-		
+
 		fillArray(iter,cols,tz);
 		jsonWriter.endArray();
-		
+
 	}
-	
-	
+
+
 	@Override
 	protected void fillArray(final SearchIterator<DocumentMetadata> iter, final Object[] cols, final TimeZone tz) throws JSONException, OXException {
 		final WriterSwitch sw = new WriterSwitch(jsonWriter, tz);
-		
+
 		//The array contains one array for every DocumentMetadata, and filled according to the requested columns
-		
+
 		while (iter.hasNext()) {
 			sw.setDocumentMetadata(iter.next());
 			jsonWriter.array();
@@ -98,7 +98,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 
 	public void write(final DocumentMetadata dm, final TimeZone tz) throws JSONException {
 		jsonWriter.object();
-		
+
 		final WriterSwitch w = new WriterSwitch(jsonWriter, tz);
 		w.setDocumentMetadata(dm);
 		for(final Metadata metadata : Metadata.HTTPAPI_VALUES) {
@@ -107,22 +107,22 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 		}
 		jsonWriter.endObject();
 	}
-	
+
 	private static final class WriterSwitch implements MetadataSwitcher{
-		
+
 		private DocumentMetadata dm;
 		private final JSONWriter writer;
 		private final TimeZone tz;
-		
+
 		public WriterSwitch(final JSONWriter writer, final TimeZone tz) {
 			this.writer = writer;
 			this.tz = tz;
 		}
-	
+
 		public void setDocumentMetadata(final DocumentMetadata dm) {
 			this.dm = dm;
 		}
-		
+
 		public void setMetadata(final Metadata current) {
 			try {
 				writer.key(current.getName());
@@ -130,83 +130,99 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				LOG.error("",e);
 			}
 		}
-	
-		public Object lastModified() {
+
+		@Override
+        public Object lastModified() {
 			writeDate(dm.getLastModified());
 			return null;
 		}
-	
-		public Object creationDate() {
+
+		@Override
+        public Object creationDate() {
 			writeDate(dm.getCreationDate());
 			return null;
 		}
-	
-		public Object modifiedBy() {
+
+		@Override
+        public Object modifiedBy() {
 			writeId(dm.getModifiedBy());
 			return null;
 		}
-	
-		public Object folderId() {
+
+		@Override
+        public Object folderId() {
 			writeId(dm.getFolderId());
 			return null;
 		}
-	
-		public Object title() {
+
+		@Override
+        public Object title() {
 			writeString(dm.getTitle());
 			return null;
 		}
-		
-		public Object version() {
+
+		@Override
+        public Object version() {
 			writeInteger(dm.getVersion());
 			return null;
 		}
-	
-		public Object content() {
+
+		@Override
+        public Object content() {
 			writeString(dm.getContent());
 			return null;
 		}
-	
-		public Object id() {
+
+		@Override
+        public Object id() {
 			writeId(dm.getId());
 			return null;
 		}
-	
-		public Object fileSize() {
+
+		@Override
+        public Object fileSize() {
 			writeInteger(dm.getFileSize());
 			return null;
 		}
-	
-		public Object description() {
+
+		@Override
+        public Object description() {
 			writeString(dm.getDescription());
 			return null;
 		}
-	
-		public Object url() {
+
+		@Override
+        public Object url() {
 			writeString(dm.getURL());
 			return null;
 		}
-	
-		public Object createdBy() {
+
+		@Override
+        public Object createdBy() {
 			writeId(dm.getCreatedBy());
 			return null;
 		}
-	
-		public Object fileName() {
+
+		@Override
+        public Object fileName() {
 			writeString(dm.getFileName());
 			return null;
 		}
-	
-		public Object fileMIMEType() {
+
+		@Override
+        public Object fileMIMEType() {
 			writeString(dm.getFileMIMEType());
 			return null;
 		}
-	
-		public Object sequenceNumber() {
+
+		@Override
+        public Object sequenceNumber() {
 			return null;
-			
+
 		}
-	
-		public Object categories() {
+
+		@Override
+        public Object categories() {
 			final String categoriesString = dm.getCategories();
 			if(categoriesString==null || categoriesString.equals("")) {
 				try {
@@ -218,7 +234,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				return null;
 			}
 			final String[] categoriesArray = categoriesString.split("\\s*,\\s*");
-			
+
 			try {
 				writer.array();
 				for(final String cat : categoriesArray) {
@@ -231,22 +247,26 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			return null;
 		}
 
-		public Object versionComment() {
+		@Override
+        public Object versionComment() {
 			writeString(dm.getVersionComment());
 			return null;
 		}
 
-		public Object currentVersion() {
+		@Override
+        public Object currentVersion() {
 			writeBoolean(dm.isCurrentVersion());
 			return null;
 		}
 
-		public Object colorLabel() {
+		@Override
+        public Object colorLabel() {
 			writeInteger(dm.getColorLabel());
 			return null;
 		}
 
-		public Object lockedUntil() {
+		@Override
+        public Object lockedUntil() {
 			if(dm.getLockedUntil() != null && dm.getLockedUntil().getTime()>System.currentTimeMillis()) {
 				writeDate(dm.getLockedUntil());
 			} else {
@@ -254,12 +274,13 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			}
 			return null;
 		}
-	
-		public Object fileMD5Sum() {
+
+		@Override
+        public Object fileMD5Sum() {
 			writeString(dm.getFileMD5Sum());
 			return null;
 		}
-		
+
 		private void writeDate(final Date date) {
 			if (date == null) {
                 writeNull();
@@ -273,11 +294,11 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				writeInteger(time);
 			}
 		}
-		
+
 		private void writeId(final long id) {
 			writeString(String.valueOf(id));
 		}
-	
+
 		private void writeString(final String string) {
             if(string == null) {
                 writeNull();
@@ -289,7 +310,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 				LOG.error("",e);
 			}
 		}
-	
+
 		private void writeInteger(final long l) {
 			try {
 				writer.value(l);
@@ -314,11 +335,13 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 			}
 		}
 
-		public Object filestoreLocation() {
+		@Override
+        public Object filestoreLocation() {
 			writeString(dm.getFilestoreLocation());
 			return null;
 		}
 
+        @Override
         public Object lastModifiedUTC() {
             if(dm.getLastModified() == null) {
                 writeNull();
@@ -328,6 +351,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             return null;
         }
 
+        @Override
         public Object numberOfVersions() {
             writeInteger(dm.getNumberOfVersions());
             return null;
@@ -338,5 +362,5 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 	protected int getId(final Object object) {
 		return ((DocumentMetadata)object).getId();
 	}
-	
+
 }

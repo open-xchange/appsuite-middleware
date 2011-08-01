@@ -71,7 +71,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link ExtendedIMAPFolder} - Extends {@link IMAPFolder} by possibility to trigger listeners.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ExtendedIMAPFolder extends IMAPFolder {
@@ -80,7 +80,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
 
     /**
      * Initializes a new {@link ExtendedIMAPFolder}.
-     * 
+     *
      * @param imapFolder The backing IMAP folder
      * @param sep The separator character
      */
@@ -91,7 +91,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
 
     /**
      * Delegates to {@link #notifyFolderListeners(int)}.
-     * 
+     *
      * @param type The type of FolderEvent
      */
     public void triggerNotifyFolderListeners(final int type) {

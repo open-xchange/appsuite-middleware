@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * An interface to handle upload events by the <code>action()</code> method
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UploadListener {
 
     /**
      * Performs all actions needed to handle given upload event.
-     * 
+     *
      * @param uploadEvent
      * @return <code>true</code> if upload event can be properly handled by this listener and upload event's affiliation id is accepted by
      *         this listener; <code>false</code> otherwise
@@ -70,7 +70,7 @@ public interface UploadListener {
 
     /**
      * Gets the associated registry for this listener.
-     * 
+     *
      * @return The associated registry for this listener
      */
     public UploadRegistry getRegistry();

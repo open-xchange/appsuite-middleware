@@ -67,45 +67,47 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link HeaderCacheCreateTableTask} - Inserts necessary tables to support MAL Poll bundle features.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
     private static String getCreateMailUUIDTable() {
-        return "CREATE TABLE mailUUID (" + 
-        " cid INT4 unsigned NOT NULL," + 
-        " user INT4 unsigned NOT NULL," + 
-        " account INT4 unsigned NOT NULL," + 
-        " fullname VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " id VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        " uuid BINARY(16) NOT NULL," + 
-        " PRIMARY KEY (cid, user, account, fullname, id)," + 
-        " INDEX (cid, user, uuid)," + 
-        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        return "CREATE TABLE mailUUID (" +
+        " cid INT4 unsigned NOT NULL," +
+        " user INT4 unsigned NOT NULL," +
+        " account INT4 unsigned NOT NULL," +
+        " fullname VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " id VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " uuid BINARY(16) NOT NULL," +
+        " PRIMARY KEY (cid, user, account, fullname, id)," +
+        " INDEX (cid, user, uuid)," +
+        " FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
     private static final String getCreateHeaderBlobTable() {
-        return "CREATE TABLE headersAsBlob (" + 
-        " cid INT4 unsigned NOT NULL," + 
-        " user INT4 unsigned NOT NULL," + 
-        " uuid BINARY(16) NOT NULL," + 
-        " flags INT4 unsigned NOT NULL default '0'," + 
-        " receivedDate bigint(64) default NULL," + 
-        " rfc822Size bigint(64) UNSIGNED NOT NULL," + 
-        " userFlags VARCHAR(1024) collate utf8_unicode_ci default NULL," + 
-        " headers BLOB," + 
-        " PRIMARY KEY (cid, user, uuid)," + 
-        " FOREIGN KEY (cid, user, uuid) REFERENCES mailUUID (cid, user, uuid)" + 
+        return "CREATE TABLE headersAsBlob (" +
+        " cid INT4 unsigned NOT NULL," +
+        " user INT4 unsigned NOT NULL," +
+        " uuid BINARY(16) NOT NULL," +
+        " flags INT4 unsigned NOT NULL default '0'," +
+        " receivedDate bigint(64) default NULL," +
+        " rfc822Size bigint(64) UNSIGNED NOT NULL," +
+        " userFlags VARCHAR(1024) collate utf8_unicode_ci default NULL," +
+        " headers BLOB," +
+        " PRIMARY KEY (cid, user, uuid)," +
+        " FOREIGN KEY (cid, user, uuid) REFERENCES mailUUID (cid, user, uuid)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -114,26 +116,32 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         return new String[] { getCreateMailUUIDTable(), getCreateHeaderBlobTable() };
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { "user" };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { "mailUUID", "headersAsBlob" };
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable("mailUUID", getCreateMailUUIDTable(), contextId);

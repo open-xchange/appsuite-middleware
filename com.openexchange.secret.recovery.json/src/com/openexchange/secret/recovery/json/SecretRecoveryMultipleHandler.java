@@ -72,14 +72,14 @@ import com.openexchange.tools.session.ServerSession;
 public class SecretRecoveryMultipleHandler implements MultipleHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryMultipleHandler.class));
-    
+
     private static final String CHECK = "check";
     private static final String MIGRATE = "migrate";
 
     private final SecretInconsistencyDetector detector;
     private final SecretMigrator migrator;
     private final SecretService secretService;
-    
+
     public SecretRecoveryMultipleHandler(final SecretInconsistencyDetector detector, final SecretMigrator migrator, final SecretService secretService) {
         this.detector = detector;
         this.migrator = migrator;
@@ -122,9 +122,9 @@ public class SecretRecoveryMultipleHandler implements MultipleHandler {
     private Object migrate(final JSONObject request, final ServerSession session) throws JSONException, OXException {
         final String password = request.getString("password");
         final String secret = secretService.getSecret(session);
-        
+
         migrator.migrate(password, secret, session);
-        
+
         return Integer.valueOf(1);
     }
 

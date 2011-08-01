@@ -71,7 +71,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheActivator extends DeferredActivator {
@@ -201,7 +201,7 @@ public final class CacheActivator extends DeferredActivator {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

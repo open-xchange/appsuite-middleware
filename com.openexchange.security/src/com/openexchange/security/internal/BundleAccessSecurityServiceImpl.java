@@ -59,9 +59,9 @@ import com.openexchange.security.permission.BundleAccessPermissionCollection;
 /**
  * {@link BundleAccessSecurityServiceImpl} - The
  * {@link BundleAccessSecurityService} implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class BundleAccessSecurityServiceImpl implements BundleAccessSecurityService {
 

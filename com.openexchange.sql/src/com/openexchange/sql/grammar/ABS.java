@@ -57,11 +57,13 @@ public class ABS extends UnaryFunction {
 		super(expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildABS(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "ABS";
 	}
 }

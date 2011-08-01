@@ -57,14 +57,14 @@ import com.openexchange.voipnow.json.actions.StaticVoipNowServerSetting;
 
 /**
  * {@link InitializingRegistryServiceTrackerCustomizer} - Enhances {@link RegistryServiceTrackerCustomizer}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InitializingRegistryServiceTrackerCustomizer extends RegistryServiceTrackerCustomizer<ConfigurationService> {
 
     /**
      * Initializes a new {@link InitializingRegistryServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param registry The registry
      */

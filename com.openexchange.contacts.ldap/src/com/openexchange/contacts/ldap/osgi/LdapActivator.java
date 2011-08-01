@@ -69,9 +69,9 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link LdapActivator}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public final class LdapActivator extends DeferredActivator {
 
@@ -167,8 +167,8 @@ public final class LdapActivator extends DeferredActivator {
                     LOG.info(new StringBuilder("Registered global LDAP contact provider for folder \"").append(folderprop.getFoldername()).append(
                         "\" with id \"").append(stringfolderid).append("\" for context: ").append(ctx).toString());
                     /*-
-                     * 
-                     * 
+                     *
+                     *
                     final LdapContactInterface ldapContactInterface = new LdapContactInterface(ctx.intValue(), createGlobalFolder.getAdminid(), folderprop, folderid);
                     context.registerService(ContactInterface.class.getName(), ldapContactInterface, getHashtableWithFolderID(stringfolderid, ctx.toString()));
                     LOG.info("Registered global LDAP folder \"" + folderprop.getFoldername() + "\" with id \"" + stringfolderid + "\" for context: " + ctx);

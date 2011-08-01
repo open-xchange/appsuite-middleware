@@ -153,7 +153,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Folder} - The folder servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Folder extends SessionServlet implements OXExceptionConstants {
@@ -228,7 +228,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Writes given error message into JSON response
-     * 
+     *
      * @param error
      * @param jsonWriter
      */
@@ -244,7 +244,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Assigns incoming GET request to corresponding method
-     * 
+     *
      * @param req
      * @param resp
      * @throws Exception
@@ -374,7 +374,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Performs the GET request to back certain folder's subfolders
-     * 
+     *
      * @param session
      * @param w
      * @param requestObj
@@ -1053,7 +1053,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Performs the GET request to send back the path from a certain folder to root folder
-     * 
+     *
      * @throws JSONException
      */
     public void actionGetPath(final ServerSession session, final JSONWriter w, final JSONObject requestObj) throws JSONException {
@@ -1311,7 +1311,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Performs the GET request to send back all modified folders since a certain timestamp
-     * 
+     *
      * @param session
      * @param w
      * @param requestObj
@@ -1601,6 +1601,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 final int index = i;
                                 tasks.add(new AbstractTask<Object>() {
 
+                                    @Override
                                     public Object call() throws Exception {
                                         arrays[index] = null;
                                         return null;
@@ -1881,7 +1882,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 } else {
                     /*-
                      * A messaging folder identifier
-                     * 
+                     *
                      * Check for move to another account
                      */
                     final int accountId = mfi.getAccountId();
@@ -2361,7 +2362,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
@@ -2439,6 +2440,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             this.index = index;
         }
 
+        @Override
         public Object call() throws OXException {
             final MailAccess<?, ?> mailAccess;
             final int accountId = mailAccount.getId();
@@ -2511,6 +2513,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             this.index = index;
         }
 
+        @Override
         public Object call() throws OXException {
             final MessagingFolder rootFolder;
             final MessagingAccountAccess access;
@@ -2554,7 +2557,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     /**
      * {@link DisplayNameComparator} - Sorts display names with respect to a certain locale
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class DisplayNameComparator implements Comparator<String> {
@@ -2567,6 +2570,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String displayName1, final String displayName2) {
             return collator.compare(displayName1, displayName2);
         }
@@ -2583,6 +2587,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {

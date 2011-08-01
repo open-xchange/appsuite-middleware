@@ -57,7 +57,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
  * Service tracker for mail providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer {
@@ -78,6 +78,7 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
      * (non-Javadoc)
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (null == addedService) {
@@ -106,6 +107,7 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
      * (non-Javadoc)
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
     }
 
@@ -113,6 +115,7 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
      * (non-Javadoc)
      * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         try {
             if (service instanceof SpamHandler) {

@@ -65,185 +65,185 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
  */
 public class InfostoreFile extends AbstractFile implements File {
 
-    private DocumentMetadata document;
+    private final DocumentMetadata document;
 
     public InfostoreFile(DocumentMetadata documentMetadata) {
         this.document = documentMetadata;
     }
 
-   
+
     public String getCategories() {
         return document.getCategories();
     }
 
-   
+
     public int getColorLabel() {
         return document.getColorLabel();
     }
 
-   
+
     public String getContent() {
         return document.getContent();
     }
 
-   
+
     public Date getCreated() {
         return document.getCreationDate();
     }
 
-   
+
     public int getCreatedBy() {
         return document.getCreatedBy();
     }
 
-   
+
     public String getDescription() {
         return document.getDescription();
     }
 
-   
+
     public String getFileMD5Sum() {
         return document.getFileMD5Sum();
     }
 
-   
+
     public String getFileMIMEType() {
         return document.getFileMIMEType();
     }
 
-   
+
     public String getFileName() {
         return document.getFileName();
     }
 
-   
+
     public long getFileSize() {
         return document.getFileSize();
     }
 
-   
+
     public String getFolderId() {
         return String.valueOf(document.getFolderId());
     }
 
-   
+
     public String getId() {
         return String.valueOf(document.getId());
     }
 
-   
+
     public Date getLastModified() {
         return document.getLastModified();
     }
 
-   
+
     public Date getLockedUntil() {
         return document.getLockedUntil();
     }
 
-   
+
     public int getModifiedBy() {
         return document.getModifiedBy();
     }
 
-   
+
     public int getNumberOfVersions() {
         return document.getNumberOfVersions();
     }
 
-   
+
     public String getProperty(String key) {
         return document.getProperty(key);
     }
 
-   
+
     public Set<String> getPropertyNames() {
         return document.getPropertyNames();
     }
 
-   
+
     public long getSequenceNumber() {
         return document.getSequenceNumber();
     }
 
-   
+
     public String getTitle() {
         return document.getTitle();
     }
 
-   
+
     public String getURL() {
         return document.getURL();
     }
 
-   
+
     public int getVersion() {
         return document.getVersion();
     }
 
-   
+
     public String getVersionComment() {
         return document.getVersionComment();
     }
 
-   
+
     public boolean isCurrentVersion() {
         return document.isCurrentVersion();
     }
 
-   
+
     public void setCategories(String categories) {
         document.setCategories(categories);
     }
 
-   
+
     public void setColorLabel(int color) {
         document.setColorLabel(color);
     }
 
-   
+
     public void setCreatedBy(int cretor) {
         document.setCreatedBy(cretor);
     }
 
-   
+
     public void setCreated(Date creationDate) {
         document.setCreationDate(creationDate);
     }
 
-   
+
     public void setDescription(String description) {
         document.setDescription(description);
     }
 
-   
+
     public void setFileMD5Sum(String sum) {
         document.setFileMD5Sum(sum);
     }
 
-   
+
     public void setFileMIMEType(String type) {
         document.setFileMIMEType(type);
     }
 
-   
+
     public void setFileName(String fileName) {
         document.setFileName(fileName);
     }
 
-   
+
     public void setFileSize(long length) {
         document.setFileSize(length);
     }
 
-   
+
     public void setFolderId(String folderId) {
         if(folderId != null) {
             document.setFolderId(Long.parseLong(folderId));
         }
     }
 
-   
+
     public void setId(String id) {
         if(id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
@@ -252,50 +252,50 @@ public class InfostoreFile extends AbstractFile implements File {
         }
     }
 
-   
+
     public void setIsCurrentVersion(boolean bool) {
         document.setIsCurrentVersion(bool);
     }
 
-   
+
     public void setLastModified(Date now) {
         document.setLastModified(now);
     }
 
-   
+
     public void setLockedUntil(Date lockedUntil) {
         document.setLockedUntil(lockedUntil);
     }
 
-   
+
     public void setModifiedBy(int lastEditor) {
         document.setModifiedBy(lastEditor);
     }
 
-   
+
     public void setNumberOfVersions(int numberOfVersions) {
         document.setNumberOfVersions(numberOfVersions);
     }
 
-   
+
     public void setTitle(String title) {
         document.setTitle(title);
     }
 
-   
+
     public void setURL(String url) {
         document.setURL(url);
     }
 
-   
+
     public void setVersion(int version) {
         document.setVersion(version);
     }
 
-   
+
     public void setVersionComment(String string) {
         document.setVersionComment(string);
     }
 
-    
+
 }

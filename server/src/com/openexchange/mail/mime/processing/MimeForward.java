@@ -104,7 +104,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeForward} - MIME message forward.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeForward {
@@ -124,7 +124,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -139,7 +139,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -165,7 +165,7 @@ public final class MimeForward {
      * <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountIDs The account IDs of the referenced original mails
@@ -190,7 +190,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMsgs The referenced original messages
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
@@ -361,6 +361,7 @@ public final class MimeForward {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return originalMsg.getInputStream();
@@ -371,6 +372,7 @@ public final class MimeForward {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }
@@ -437,7 +439,7 @@ public final class MimeForward {
 
     /**
      * Determines the first seen text in given multipart content with recursive iteration over enclosed multipart contents.
-     * 
+     *
      * @param mp The multipart object
      * @param retvalContentType The return value's content type (gets filled during processing and should therefore be empty)
      * @return The first seen text content
@@ -509,7 +511,7 @@ public final class MimeForward {
 
     /**
      * Generates the forward text on an inline-forward operation.
-     * 
+     *
      * @param firstSeenText The first seen text from original message
      * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
@@ -587,7 +589,7 @@ public final class MimeForward {
     }
 
     /*-
-     * 
+     *
     private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws OXException {
         final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
         final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();

@@ -55,7 +55,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link IMailMessageStorageExt} - Extends {@link IMailMessageStorage} for mail systems which support to request single header names.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IMailMessageStorageExt extends IMailMessageStorage {
@@ -67,7 +67,7 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * The returned instances of {@link MailMessage} are pre-filled with specified fields through argument <code>fields</code>.
      * <p>
      * If any mail ID is invalid, <code>null</code> is returned for that entry.
-     * 
+     *
      * @param folder The folder fullname
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
@@ -85,7 +85,7 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * <p>
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
-     * 
+     *
      * @param folder The folder fullname
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the

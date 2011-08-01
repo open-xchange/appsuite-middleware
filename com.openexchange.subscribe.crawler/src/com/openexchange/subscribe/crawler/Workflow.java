@@ -77,7 +77,7 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
 
 /**
  * A crawling workflow. This holds the individual Steps and the session information (WebClient instance).
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Workflow {
@@ -99,7 +99,7 @@ public class Workflow {
     private boolean debuggingEnabled = false;
 
     private boolean mobileUserAgent = false;
-    
+
     private boolean quirkyCookieQuotes;
 
     public Workflow() {
@@ -137,8 +137,8 @@ public class Workflow {
             browser = new BrowserVersion("Netscape", "5.0 (Windows; en-US)",
                 "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16",
                 (float)1.2, new BrowserVersionFeatures[0]);
-        }    
-             
+        }
+
         final WebClient webClient = new WebClient(browser);
 
         // use a custom CookiePolicy to be more lenient and thereby work with more websites
@@ -175,7 +175,7 @@ public class Workflow {
                     currentStep.setInput(previousStep.getOutput());
                 }
                 currentStep.setWorkflow(this);
-                LOG.info("Current Step : " + currentStep.getClass());                
+                LOG.info("Current Step : " + currentStep.getClass());
                 if (currentStep.isSwitchUserAgent()){
                     crawlerConnection.switchUserAgent();
                 }
@@ -199,16 +199,16 @@ public class Workflow {
                             logBadInput(currentStep);
                             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
                         }
-                    }                    
+                    }
                 }
                 if (!(currentStep instanceof LogoutStep)) {
                     result = currentStep.getOutput();
                 }
-            }        
+            }
 
             webClient.closeAllWindows();
             return (Object[]) result;
-        } 
+        }
         catch (NullPointerException e) {
             LOG.error(e);
             String stacktrace = "";
@@ -294,16 +294,16 @@ public class Workflow {
         this.mobileUserAgent = mobileUserAgent;
     }
 
-    
+
     public boolean isQuirkyCookieQuotes() {
         return quirkyCookieQuotes;
     }
 
-    
+
     public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
-    
+
     // This should help to better understand why a step failed. May need to be expanded for other complex inputs without helpful toString()-Method ...
     private void logBadInput(Step currentStep){
         if (currentStep.getInput() != null){

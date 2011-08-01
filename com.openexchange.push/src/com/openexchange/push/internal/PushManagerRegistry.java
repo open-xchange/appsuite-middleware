@@ -56,7 +56,7 @@ import com.openexchange.push.PushManagerService;
 
 /**
  * {@link PushManagerRegistry} - The push manager registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushManagerRegistry {
@@ -91,7 +91,7 @@ public final class PushManagerRegistry {
 
     /**
      * Gets the push manager registry.
-     * 
+     *
      * @return The push manager registry
      */
     public static PushManagerRegistry getInstance() {
@@ -114,7 +114,7 @@ public final class PushManagerRegistry {
 
     /**
      * Adds specified push manager service.
-     * 
+     *
      * @param pushManager The push manager service to add
      * @return <code>true</code> if push manager service could be successfully added; otherwise <code>false</code>
      */
@@ -129,7 +129,7 @@ public final class PushManagerRegistry {
 
     /**
      * Removes specified push manager service.
-     * 
+     *
      * @param pushManager The push manager service to remove
      */
     public void removePushManager(final PushManagerService pushManager) {
@@ -140,7 +140,7 @@ public final class PushManagerRegistry {
      * Gets a read-only {@link Iterator iterator} over the push managers in this registry.
      * <p>
      * Invoking {@link Iterator#remove() remove} will throw an {@link UnsupportedOperationException}.
-     * 
+     *
      * @return A read-only {@link Iterator iterator} over the push managers in this registry.
      */
     public Iterator<PushManagerService> getPushManagers() {
@@ -152,7 +152,7 @@ public final class PushManagerRegistry {
      * <p>
      * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
      * method is called.
-     * 
+     *
      * @param iterator The iterator to turn into an unmodifiable iterator.
      * @return An iterator with no remove functionality.
      */

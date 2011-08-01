@@ -136,7 +136,7 @@ public class I18nActivator implements BundleActivator {
     /**
      * Reads in all I18n services configured through property <code>"i18n.language.path"</code>, registers them, and returns corresponding
      * service registrations for future unregistration.
-     * 
+     *
      * @param context The current valid bundle context
      * @return The corresponding service registrations of registered I18n services
      * @throws FileNotFoundException If directory referenced by <code>"i18n.language.path"</code> does not exist

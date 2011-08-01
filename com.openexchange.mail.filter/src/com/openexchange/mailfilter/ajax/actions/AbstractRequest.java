@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractRequest {
@@ -128,15 +128,15 @@ public abstract class AbstractRequest {
         final String password = session.getPassword();
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
-        
+
         try {
             final String username = getUsername();
             return new Credentials(loginName, password, userId, contextId, username);
         } catch (final OXException e) {
             return new Credentials(loginName, password, userId, contextId);
-        }        
+        }
     }
-    
+
     /**
      * @return the action
      * @throws OXException
@@ -156,14 +156,14 @@ public abstract class AbstractRequest {
         }
         return retval;
     }
-    
+
     private String getUsername() throws OXException {
-        final Parameter pUsername = Parameter.USERNAME;        
+        final Parameter pUsername = Parameter.USERNAME;
         final String username = parameters.getParameter(pUsername);
         if (username == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( pUsername);
         }
-        
+
         return username;
     }
 

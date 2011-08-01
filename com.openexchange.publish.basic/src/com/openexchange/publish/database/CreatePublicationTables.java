@@ -53,12 +53,12 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * Creates tables necessary to run the publish part of PubSub.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CreatePublicationTables extends AbstractCreateTableImpl {
 
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT = 
+    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT =
         "CREATE TABLE publication_users (" +
             "cid INT4 UNSIGNED NOT NULL," +
             "id INT4 UNSIGNED NOT NULL," +
@@ -88,12 +88,12 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
 
-            "CREATE TABLE sequence_publications (" 
-            + "cid INT4 UNSIGNED NOT NULL," 
-            + "id INT4 UNSIGNED NOT NULL," 
-            + "PRIMARY KEY (cid)" 
+            "CREATE TABLE sequence_publications ("
+            + "cid INT4 UNSIGNED NOT NULL,"
+            + "id INT4 UNSIGNED NOT NULL,"
+            + "PRIMARY KEY (cid)"
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-            
+
             CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
         };
     }

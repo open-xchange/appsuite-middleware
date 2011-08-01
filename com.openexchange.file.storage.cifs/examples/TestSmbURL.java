@@ -6,7 +6,9 @@ public class TestSmbURL {
     static void test( String url, String name ) throws Exception {
         SmbFile f;
 
-        if( name == null ) name = "";
+        if( name == null ) {
+            name = "";
+        }
 
         System.out.println( "INPUT[" + url + ", " + name + "]");
         try {

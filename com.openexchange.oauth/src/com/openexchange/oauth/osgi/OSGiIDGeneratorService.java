@@ -54,7 +54,7 @@ import com.openexchange.id.IDGeneratorService;
 
 /**
  * {@link OSGiIDGeneratorService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiIDGeneratorService extends AbstractOSGiDelegateService<IDGeneratorService> implements IDGeneratorService {

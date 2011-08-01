@@ -59,7 +59,7 @@ public class OAuthEventConstants {
      * The topic of oauth storage events.
      */
     public static final String TOPIC = "com/openexchange/oauth";
-    
+
     /**
      * The topic of oauth storage delete events.
      */
@@ -76,7 +76,7 @@ public class OAuthEventConstants {
      * Gets an array of {@link String string} including all known topics.
      * <p>
      * Needed on event handler registration to a bundle context.
-     * 
+     *
      * @return An array of {@link String string} including all known topics.
      */
     public static String[] getAllTopics() {

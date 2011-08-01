@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountSMTPProperties} - SMTP properties read from mail account with fallback to properties read from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountSMTPProperties extends MailAccountTransportProperties implements ISMTPProperties {
@@ -68,7 +68,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
     /**
      * Initializes a new {@link MailAccountSMTPProperties}.
-     * 
+     *
      * @param mailAccount The mail account providing the properties
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
@@ -105,7 +105,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             return SMTPProperties.getInstance().getSmtpConnectionTimeout();
         }
     }
-    
+
     public String getSmtpLocalhost() {
         final String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
         if (null == smtpLocalhostStr) {

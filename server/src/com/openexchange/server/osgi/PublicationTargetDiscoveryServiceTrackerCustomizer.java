@@ -58,7 +58,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * {@link PublicationTargetDiscoveryServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for
  * {@link PublicationTargetDiscoveryService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -71,7 +71,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
 
     /**
      * Initializes a new {@link PublicationTargetDiscoveryServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public PublicationTargetDiscoveryServiceTrackerCustomizer(final BundleContext context) {
@@ -80,6 +80,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         ranking = -1;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final int refRanking = getServiceReferenceRanking(reference);
         if (refRanking <= ranking) {
@@ -91,10 +92,12 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         return addedService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

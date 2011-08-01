@@ -10,9 +10,9 @@ import com._4psa.clientmessagesinfo_xsd._2_5.GetClientDetailsResponseType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -21,8 +21,8 @@ import com._4psa.clientmessagesinfo_xsd._2_5.GetClientDetailsResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")

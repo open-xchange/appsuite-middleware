@@ -72,7 +72,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MailPart} - Abstract super class for all {@link MailPart} subclasses.
  * <p>
  * It's main purpose is to provide access to common part headers and part's content.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailPart implements Serializable, Cloneable {
@@ -93,6 +93,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * @return <tt>true</tt> if the iterator has more elements.
          */
+        @Override
         public boolean hasNext() {
             return false;
         }
@@ -100,6 +101,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * @return The next element in the iteration.
          */
+        @Override
         public Entry<String, String> next() {
             return null;
         }
@@ -107,6 +109,7 @@ public abstract class MailPart implements Serializable, Cloneable {
         /**
          * Removes from the underlying collection the last element returned by the iterator (optional operation).
          */
+        @Override
         public void remove() {
             // Nothing to remove
         }
@@ -185,7 +188,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the content type
-     * 
+     *
      * @return the content type
      */
     public ContentType getContentType() {
@@ -229,7 +232,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the content type
-     * 
+     *
      * @param contentType the contentType to set
      */
     public void setContentType(final ContentType contentType) {
@@ -239,7 +242,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Parses and sets the content type
-     * 
+     *
      * @param contentType the content type to parse
      * @throws OXException If content type is invalid or could not be parsed
      */
@@ -250,7 +253,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the disposition
-     * 
+     *
      * @return the disposition
      */
     public ContentDisposition getContentDisposition() {
@@ -285,7 +288,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the disposition
-     * 
+     *
      * @param disposition the disposition to set
      * @throws OXException If content disposition is invalid or could not be parsed
      */
@@ -296,7 +299,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the disposition
-     * 
+     *
      * @param disposition the disposition to set
      */
     public void setContentDisposition(final ContentDisposition disposition) {
@@ -306,7 +309,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the fileName
-     * 
+     *
      * @return the fileName
      */
     public String getFileName() {
@@ -337,7 +340,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the fileName
-     * 
+     *
      * @param fileName the fileName to set
      */
     public void setFileName(final String fileName) {
@@ -351,7 +354,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Adds a header
-     * 
+     *
      * @param name The header name
      * @param value The header value
      */
@@ -368,7 +371,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets a header
-     * 
+     *
      * @param name The header name
      * @param value The header value
      */
@@ -385,7 +388,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Adds a header collection
-     * 
+     *
      * @param headers The header collection
      */
     public void addHeaders(final HeaderCollection headers) {
@@ -415,7 +418,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the number of headers
-     * 
+     *
      * @return The number of headers
      */
     public int getHeadersSize() {
@@ -427,7 +430,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets an instance of {@link Iterator} to iterate all headers
-     * 
+     *
      * @return An instance of {@link Iterator} to iterate all headers
      * @see #getHeadersSize()
      */
@@ -440,7 +443,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Checks for a header entry for specified header
-     * 
+     *
      * @param name The header name
      * @return <code>true</code> if a header entry exists for specified header; otherwise <code>false</code>
      */
@@ -453,7 +456,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets all the values for the specified header. Returns null if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @return The header values or <code>null</code>
      */
@@ -468,7 +471,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * Gets the first header for specified header name.
      * <p>
      * This is a convenience method that invokes {@link #getHeader(String, String)} with the latter parameter set to <code>null</code>.
-     * 
+     *
      * @param name The header name
      * @return The header's first value or <code>null</code>
      */
@@ -479,7 +482,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Gets all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
      * <code>null</code>, only the first header is returned. Returns null if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @param delimiter The delimiter
      * @return The header values as a single String or <code>null</code>
@@ -494,7 +497,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Gets all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
      * <code>'\0'</code>, only the first header is returned. Returns null if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @param delimiter The delimiter character
      * @return The header values as a single String or <code>null</code>
@@ -508,7 +511,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets a read-only version of this part's headers
-     * 
+     *
      * @return A read-only version of this part's headers
      */
     public HeaderCollection getHeaders() {
@@ -520,7 +523,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets an iterator for non-matching headers
-     * 
+     *
      * @param nonMatchingHeaders The non-matching headers
      * @return An iterator for non-matching headers
      */
@@ -533,7 +536,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets an iterator for matching headers
-     * 
+     *
      * @param matchingHeaders The matching headers
      * @return An iterator for matching headers or <code>null</code> if not exists
      */
@@ -546,7 +549,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Removes the header if present
-     * 
+     *
      * @param name The header name
      */
     public void removeHeader(final String name) {
@@ -557,7 +560,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Checks if this part contains all of specified headers.
-     * 
+     *
      * @param names The names of the headers to check
      * @return <code>true</code> if this part contains all of specified headers; otherwise <code>false</code>
      */
@@ -571,7 +574,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the size
-     * 
+     *
      * @return the size
      */
     public long getSize() {
@@ -595,7 +598,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the size
-     * 
+     *
      * @param size the size to set
      */
     public void setSize(final long size) {
@@ -605,7 +608,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the contentId
-     * 
+     *
      * @return the contentId
      */
     public String getContentId() {
@@ -636,7 +639,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the contentId
-     * 
+     *
      * @param contentId the contentId to set
      */
     public void setContentId(final String contentId) {
@@ -646,7 +649,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the sequenceId
-     * 
+     *
      * @return the sequenceId
      */
     public String getSequenceId() {
@@ -670,7 +673,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the sequenceId
-     * 
+     *
      * @param sequenceId the sequenceId to set
      */
     public void setSequenceId(final String sequenceId) {
@@ -680,7 +683,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the message reference
-     * 
+     *
      * @return the message reference
      */
     public MailPath getMsgref() {
@@ -722,7 +725,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Sets the message reference
-     * 
+     *
      * @param msgref the message reference to set
      */
     public void setMsgref(final MailPath msgref) {
@@ -752,7 +755,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Checks if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @return <code>true</code> if part holds enclosed parts; otherwise <code>false</code>
      * @throws OXException If check fails
      */
@@ -763,7 +766,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Returns the part's content as a Java object dependent on underlying implementation. <br>
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @return The content as a Java object or <code>null</code> if not applicable
      * @throws OXException If content cannot be returned as a Java object
      */
@@ -772,7 +775,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Returns an appropriate {@link DataHandler} for this mail part. <br>
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @return an appropriate {@link DataHandler} or <code>null</code> if not applicable
      * @throws OXException If an appropriate {@link DataHandler} cannot be returned
      */
@@ -781,7 +784,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Returns an input stream for this part. <br>
      * This method is not applicable if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @return An input stream for this part or <code>null</code> if not applicable
      * @throws OXException If no input stream could be returned
      */
@@ -790,7 +793,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Gets the number of enclosed mail parts. <br>
      * This method is only applicable if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @see #NO_ENCLOSED_PARTS
      * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS} if not applicable
      */
@@ -799,7 +802,7 @@ public abstract class MailPart implements Serializable, Cloneable {
     /**
      * Gets the mail part located at given index. <br>
      * This method is only applicable if part's MIME type is <code>multipart/*</code>
-     * 
+     *
      * @param index The index of desired mail part or <code>null</code> if not applicable
      * @return The mail part
      */
@@ -812,14 +815,14 @@ public abstract class MailPart implements Serializable, Cloneable {
      * underlying connection closed, the part's content is no more accessible. Otherwise this method may be implemented with an empty body.
      * <p>
      * Moreover the loaded content is no more discarded when {@link #prepareForCaching()} is invoked.
-     * 
+     *
      * @throws OXException If loading part's content fails
      */
     public abstract void loadContent() throws OXException;
 
     /**
      * Writes complete part's data into given output stream
-     * 
+     *
      * @param out The output stream to write to
      * @throws OXException If writing to output stream fails
      */
@@ -849,7 +852,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets the mail part's source
-     * 
+     *
      * @return The mail part's source
      * @throws OXException If mail part's source cannot be returned
      */
@@ -866,7 +869,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
     /**
      * Gets a newly allocated byte array containing the mail part's source bytes
-     * 
+     *
      * @return The mail part's source bytes
      * @throws OXException If mail part's source cannot be returned
      */

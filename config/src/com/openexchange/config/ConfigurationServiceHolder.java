@@ -53,14 +53,14 @@ import com.openexchange.server.ServiceHolder;
 
 /**
  * {@link ConfigurationServiceHolder} - The service holder for configuration service
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigurationServiceHolder extends ServiceHolder<ConfigurationService> {
 
     /**
      * Gets the configuration service instance.
-     * 
+     *
      * @return The singleton instance of {@link ConfigurationServiceHolder}
      */
     public static ConfigurationServiceHolder newInstance() {

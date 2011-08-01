@@ -76,7 +76,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * {@link LoginWithHttpClientStep} This step opens a single URL in HttpClient and passes this session on to the standard WebClient. This
  * allows a login for some exotic scenarios when all parameters of the relevant login-form are passed via URL. An example for this is
  * LinkedIn in its current (2010/03/25) incarnation.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -94,6 +94,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         this.regex = regex;
     }
 
+    @Override
     public void execute(WebClient webClient) throws OXException {
         MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
         final HttpClient httpClient = new HttpClient(manager);
@@ -112,6 +113,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
 
             webClient.setWebConnection(new CrawlerWebConnection(webClient) {
 
+                @Override
                 public WebResponse getResponse(WebRequestSettings settings) throws IOException {
                     URL url = settings.getUrl();
                     GetMethod getMethod2 = new GetMethod(url.toString());
@@ -136,6 +138,7 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
                     return new WebResponseImpl(responseData, url, method, loadTime);
                 }
 
+                @Override
                 public HttpClient getHttpClient() {
                     return httpClient;
                 }
@@ -169,12 +172,12 @@ public class LoginWithHttpClientStep extends AbstractStep<Object, Object> implem
         this.url = url;
     }
 
-    
+
     public String getRegex() {
         return regex;
     }
 
-    
+
     public void setRegex(String regex) {
         this.regex = regex;
     }

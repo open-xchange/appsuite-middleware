@@ -53,7 +53,7 @@ import javax.management.MBeanException;
 
 /**
  * {@link GABRestorerMBean} - The MBean restore default permissions on global address book folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface GABRestorerMBean {
@@ -62,7 +62,7 @@ public interface GABRestorerMBean {
 
     /**
      * Restores default permissions on global address book folder.
-     * 
+     *
      * @param cid The context ID
      * @param enable Whether to enable or disable global address book access for each user
      * @throws MBeanException If invocation fails

@@ -70,7 +70,7 @@ import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 
 /**
  * {@link HTTPToolkit}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HTTPToolkit {
@@ -80,7 +80,7 @@ public class HTTPToolkit {
     public static InputStream grabStream(final String site) throws IOException {
         return grabStream(site, true);
     }
-    
+
     public static InputStream grabStream(final String site, boolean check) throws IOException {
         final HttpClient client = new HttpClient();
         final int timeout = 3000;
@@ -90,7 +90,7 @@ public class HTTPToolkit {
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
 
         final java.net.URL javaURL = new java.net.URL(site);
-        
+
         if(check) {
             checkContentAndLength(javaURL, timeout);
         }

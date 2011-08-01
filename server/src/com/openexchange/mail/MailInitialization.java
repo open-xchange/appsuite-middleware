@@ -72,7 +72,7 @@ import com.openexchange.server.Initialization;
 /**
  * {@link MailInitialization} - Initializes whole mail implementation and therefore provides a central point for starting/stopping mail
  * implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
@@ -98,6 +98,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("Duplicate initialization of mail module aborted.");
@@ -112,21 +113,25 @@ public final class MailInitialization implements Initialization, CacheAvailabili
             startUp(MailCacheConfiguration.getInstance(), startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     MailAccessWatcher.init();
                 }
 
+                @Override
                 public void stop() {
                     MailAccessWatcher.stop();
                 }
             }, startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     JSONMessageCacheConfiguration.initInstance();
                     JSONMessageCacheConfiguration.getInstance().loadProperties();
                 }
 
+                @Override
                 public void stop() throws OXException {
                     JSONMessageCacheConfiguration.releaseInstance();
                 }
@@ -144,24 +149,28 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 //            }, startedStack);
             startUp(new Initialization() {
 
+                @Override
                 public void start() throws OXException {
                     EventPool.initInstance();
                 }
 
+                @Override
                 public void stop() {
                     EventPool.releaseInstance();
                 }
             }, startedStack);
             startUp(new Initialization() {
-                
+
+                @Override
                 public void stop() {
                     // Nothing to do
                 }
-                
+
+                @Override
                 public void start() {
                     /*-
                      * Add handlers for main MIME types
-                     * 
+                     *
                         #
                         #
                         # Default mailcap file for the JavaMail System.
@@ -215,6 +224,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         startedStack.push(initialization);
     }
 
+    @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.warn("Duplicate shut-down of mail module aborted.");
@@ -251,7 +261,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the (possibly temporary) unavailability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches shut-down fails
      */
     public void shutDownCaches() throws OXException {
@@ -261,7 +271,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 
     /**
      * Handles the re-availability of caching service
-     * 
+     *
      * @throws AbstractOXException If mail caches start-up fails
      */
     public void startUpCaches() throws OXException {
@@ -269,10 +279,12 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         MailMessageCache.getInstance().initCache();
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         shutDownCaches();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         startUpCaches();
     }

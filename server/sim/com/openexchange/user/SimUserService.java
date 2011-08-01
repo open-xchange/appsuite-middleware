@@ -62,19 +62,22 @@ import com.openexchange.groupware.ldap.User;
  */
 public class SimUserService implements UserService {
 
+    @Override
     public String getUserAttribute(String name, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#authenticate(com.openexchange.groupware.ldap.User, java.lang.String)
      */
+    @Override
     public boolean authenticate(User user, String password) throws OXException {
         // TODO Auto-generated method stub
         return false;
@@ -83,11 +86,13 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUser(int, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public User getUser(int uid, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public User[] getUser(Context context, int[] userIds) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -96,6 +101,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUser(com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public User[] getUser(Context ctx) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -104,6 +110,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#getUserId(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public int getUserId(String loginInfo, Context context) throws OXException {
         // TODO Auto-generated method stub
         return 0;
@@ -112,6 +119,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#invalidateUser(com.openexchange.groupware.contexts.Context, int)
      */
+    @Override
     public void invalidateUser(Context ctx, int userId) throws OXException {
         // TODO Auto-generated method stub
 
@@ -120,6 +128,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listAllUser(com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public int[] listAllUser(Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -128,6 +137,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#listModifiedUser(java.util.Date, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public int[] listModifiedUser(Date modifiedSince, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -136,6 +146,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#resolveIMAPLogin(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public int[] resolveIMAPLogin(String imapLogin, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -144,6 +155,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#searchUser(java.lang.String, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public User searchUser(String email, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -152,6 +164,7 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#updateUser(com.openexchange.groupware.ldap.User, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public void updateUser(User user, Context context) throws OXException {
         // TODO Auto-generated method stub
 
@@ -160,9 +173,10 @@ public class SimUserService implements UserService {
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#setAttribute(java.lang.String, java.lang.String, int, com.openexchange.groupware.contexts.Context)
      */
+    @Override
     public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

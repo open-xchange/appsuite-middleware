@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link SimSession}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class SimSession implements Session {
@@ -62,7 +62,7 @@ public class SimSession implements Session {
     private String loginName;
     private String randomToken;
     private String sessionId;
-    private Map<String, Object> parameters = new HashMap<String, Object>();
+    private final Map<String, Object> parameters = new HashMap<String, Object>();
     private int contextId;
     private int userId;
     private String password;
@@ -172,7 +172,7 @@ public class SimSession implements Session {
 
     /**
      * Sets the contextId
-     * 
+     *
      * @param contextId The contextId to set
      */
     public void setContextId(int contextId) {
@@ -181,7 +181,7 @@ public class SimSession implements Session {
 
     /**
      * Sets the userId
-     * 
+     *
      * @param userId The userId to set
      */
     public void setUserId(int userId) {

@@ -54,15 +54,15 @@ package com.openexchange.webdav.xml.fields;
 public interface DataFields {
 
 	public static final String ID = "id";
-	
+
 	public static final String OBJECT_ID = "object_id";
-	
+
 	public static final String CREATED_BY = "created_by";
-	
+
 	public static final String MODIFIED_BY = "modified_by";
-	
+
 	public static final String CREATION_TIME = "creation_time";
-	
+
 	public static final String LAST_MODIFIED = "last_modified";
-	
+
 }

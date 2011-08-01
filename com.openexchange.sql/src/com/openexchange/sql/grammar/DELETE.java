@@ -52,22 +52,23 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class DELETE extends ModifyCommand {
-	private FROM from;
+	private final FROM from;
 	private WHERE where;
 
 	public DELETE() {
 		from = new FROM();
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildDELETE(this);
 	}
-	
+
 	public DELETE FROM(String table) {
 		from.addTable(table);
 		return this;
 	}
-    
+
     public DELETE FROM(Table table) {
         from.addTable(table);
         return this;
@@ -77,12 +78,12 @@ public class DELETE extends ModifyCommand {
         from.addTables(tables);
         return this;
     }
-    
+
     public DELETE FROM(Table... tables) {
         from.addTables(tables);
         return this;
     }
-	
+
 	public DELETE WHERE(Predicate predicate) {
 		where = new WHERE(predicate);
 		return this;

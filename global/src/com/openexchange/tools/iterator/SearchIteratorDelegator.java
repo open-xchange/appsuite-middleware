@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link SearchIteratorDelegator} - An implementation of {@link SearchIterator} backed by a common instance of {@link Iterator} to which
  * calls are delegated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchIteratorDelegator<T> implements SearchIterator<T> {
@@ -71,7 +71,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link SearchIteratorDelegator}
-     * 
+     *
      * @param iter The delegate iterator
      */
     public SearchIteratorDelegator(final Iterator<T> iter) {
@@ -83,7 +83,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link SearchIteratorDelegator}
-     * 
+     *
      * @param iter The delegate iterator
      * @param size The delegate iterator's size
      * @throws IllegalArgumentException If specified size is equal to or less than zero
@@ -100,7 +100,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link SearchIteratorDelegator}.
-     * 
+     *
      * @param collection The collection to iterate
      */
     public SearchIteratorDelegator(final Collection<T> collection) {

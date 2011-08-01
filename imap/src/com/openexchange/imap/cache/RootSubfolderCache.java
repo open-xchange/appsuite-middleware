@@ -62,7 +62,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link RootSubfolderCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RootSubfolderCache {
@@ -76,7 +76,7 @@ public final class RootSubfolderCache {
 
     /**
      * Gets cached <code>boolean</code> value if root folder allows subfolder creation
-     * 
+     *
      * @param f The IMAP root folder
      * @param load Whether subfolder creation shall be checked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -97,7 +97,7 @@ public final class RootSubfolderCache {
 
     /**
      * Removes cached <code>boolean</code> value if root folder allows subfolder creation
-     * 
+     *
      * @param f The IMAP root folder
      * @param session The session providing the session-bound cache
      * @param accontId The account ID

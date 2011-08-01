@@ -67,14 +67,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link WebDAVFileStorageService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageService implements FileStorageService {
 
     /**
      * Creates a new WebDAV file storage service.
-     * 
+     *
      * @return A new WebDAV file storage service
      * @throws OXException If creation fails
      */

@@ -69,11 +69,11 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Link} - The servlet serving requests to link module
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic
  *         Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class Link extends DataServlet {
 

@@ -69,15 +69,19 @@ public class Module implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "olox20", "module" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(Boolean.FALSE);
             }
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }

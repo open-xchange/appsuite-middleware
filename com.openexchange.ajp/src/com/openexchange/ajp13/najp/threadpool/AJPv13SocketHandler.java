@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AJPv13SocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP task.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13SocketHandler {
@@ -186,7 +186,7 @@ public final class AJPv13SocketHandler {
 
     /**
      * Checks if this socket handler has been shut down or has not been started.
-     * 
+     *
      * @return <code>true</code> if this socket handler has been shut down or has not been started; otherwise <code>false</code>
      */
     public boolean isShutdown() {
@@ -198,7 +198,7 @@ public final class AJPv13SocketHandler {
 
     /**
      * Handles given client socket.
-     * 
+     *
      * @param client The client socket to handle
      */
     public void handleSocket(final Socket client) {

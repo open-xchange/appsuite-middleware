@@ -70,13 +70,13 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
     private static final String OBJECT = "attached";
     private static final String MODULE = "module";
     private static final String ID = "id";
-    
+
     private AttachmentBase attachments = null;
-    
+
     public PIMAttachmentDataProvider(final AttachmentBase attachments) {
         this.attachments = attachments;
     }
-    
+
     public String getId() {
         return "attachments";
     }
@@ -91,14 +91,14 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
     }
 
     public FileMetadata retrieveMetadata(final PIMAttachmentState state, final Map<String, Object> specification, final ServerSession session) throws OXException {
-        
+
         final int folderId = tolerantInt(specification.get(FOLDER));
         final int objectId = tolerantInt(specification.get(OBJECT));
         final int moduleId = tolerantInt(specification.get(MODULE));
         final int id = tolerantInt(specification.get(ID));
-        
+
         final AttachmentMetadata attachment = attachments.getAttachment(folderId, objectId, moduleId, id, session.getContext(), session.getUser(), session.getUserConfiguration());
-        
+
         return new AttachmentFileMetadata(attachment);
     }
 
@@ -111,17 +111,17 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
     }
 
     public void close(final PIMAttachmentState state) {
-        
+
     }
-    
+
     private static class AttachmentFileMetadata implements FileMetadata {
 
         private AttachmentMetadata attachment = null;
-        
+
         public AttachmentFileMetadata(final AttachmentMetadata attachment) {
             this.attachment = attachment;
         }
-        
+
         public String getFilename() {
             return attachment.getFilename();
         }
@@ -133,7 +133,7 @@ public class PIMAttachmentDataProvider implements DataProvider<PIMAttachmentStat
         public String getType() {
             return attachment.getFileMIMEType();
         }
-        
+
     }
 
 }

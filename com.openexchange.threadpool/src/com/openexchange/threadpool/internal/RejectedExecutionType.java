@@ -53,7 +53,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 
 /**
  * {@link RejectedExecutionType} - The rejected execution type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum RejectedExecutionType {
@@ -86,7 +86,7 @@ public enum RejectedExecutionType {
 
     /**
      * Gets the rejected execution type for given identifier.
-     * 
+     *
      * @param identifier The identifier
      * @return The rejected execution type for given identifier or <code>null</code>
      */

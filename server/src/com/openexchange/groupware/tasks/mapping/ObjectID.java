@@ -66,35 +66,43 @@ public class ObjectID implements Mapper<Integer> {
         super();
     }
 
+    @Override
     public int getId() {
         return Task.OBJECT_ID;
     }
 
+    @Override
     public String getDBColumnName() {
         return "id";
     }
 
+    @Override
     public boolean isSet(final Task task) {
         return task.containsObjectID();
     }
 
+    @Override
     public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
         stmt.setInt(pos, task.getObjectID());
     }
 
+    @Override
     public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
         // NOT NULL constraint
         task.setObjectID(result.getInt(pos));
     }
 
+    @Override
     public boolean equals(final Task task1, final Task task2) {
         return task1.getObjectID() == task2.getObjectID();
     }
 
+    @Override
     public Integer get(final Task task) {
         return I(task.getObjectID());
     }
 
+    @Override
     public void set(final Task task, final Integer value) {
         task.setObjectID(value.intValue());
     }

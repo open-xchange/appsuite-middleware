@@ -76,14 +76,17 @@ public class ExecutedTaskImpl implements ExecutedTask {
         this.lastModified = lastModified;
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified;
     }
 
+    @Override
     public String getTaskName() {
         return taskName;
     }
 
+    @Override
     public boolean isSuccessful() {
         return successful;
     }

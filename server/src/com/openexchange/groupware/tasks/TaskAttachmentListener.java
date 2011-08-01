@@ -72,6 +72,7 @@ public class TaskAttachmentListener implements AttachmentListener {
         super();
     }
 
+    @Override
     public long attached(final AttachmentEvent event) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = event.getContext();
@@ -99,6 +100,7 @@ public class TaskAttachmentListener implements AttachmentListener {
         return lastModified.getTime();
     }
 
+    @Override
     public long detached(final AttachmentEvent event) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final Context ctx = event.getContext();

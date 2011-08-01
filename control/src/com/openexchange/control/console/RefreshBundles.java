@@ -55,7 +55,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link RefreshBundles} - The console handler for <code>&quot;refreshbundles&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class RefreshBundles extends AbstractConsoleHandler {
@@ -64,7 +64,7 @@ public final class RefreshBundles extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link RefreshBundles} with specified arguments and performs {@link #refresh() refresh}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public RefreshBundles(final String args[]) {

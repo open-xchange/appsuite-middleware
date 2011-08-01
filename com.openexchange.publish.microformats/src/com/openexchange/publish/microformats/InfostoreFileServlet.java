@@ -93,33 +93,33 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String INFOSTORE_VERSION = "infoVersion";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
-    
+
     private static OXMFPublicationService infostorePublisher = null;
-    
-    
+
+
     public static void setInfostorePublisher(final OXMFPublicationService service) {
         infostorePublisher = service;
     }
-    
+
     private static InfostoreFacade infostore;
-    
+
     public static void setInfostore(final InfostoreFacade service) {
         infostore = service;
     }
-    
+
     private static UserService users  = null;
-    
+
     public static void setUsers(final UserService service) {
         users = service;
     }
-    
+
     private static UserConfigurationService userConfigs = null;
-    
+
     public static void setUserConfigs(final UserConfigurationService service) {
         userConfigs = service;
     }
-   
-    
+
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Map<String, String> args = getPublicationArguments(req);
@@ -135,23 +135,23 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
-            
+
             if (!checkPublicationPermission(publication, resp)) {
                 return;
             }
 
             final int infoId = Integer.parseInt(args.get(INFOSTORE_ID));
-     
+
             final User user = getUser(publication);
             final UserConfiguration userConfig = getUserConfiguration(publication);
-            
+
             final DocumentMetadata metadata = loadMetadata(publication, infoId, user, userConfig);
 
             final InputStream fileData = loadFile(publication, infoId, user, userConfig);
-            
+
             startedWriting = true;
             writeFile(metadata, fileData, req, resp);
-            
+
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             if(!startedWriting) {
@@ -170,7 +170,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 
-    
+
     private DocumentMetadata loadMetadata(final Publication publication, final int infoId, final User user, final UserConfiguration userConfig) throws OXException {
         return infostore.getDocumentMetadata(infoId, InfostoreFacade.CURRENT_VERSION, publication.getContext(), user, userConfig);
     }
@@ -179,7 +179,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         configureHeaders(metadata, req, resp);
         write(fileData, resp);
     }
-    
+
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
         BufferedInputStream bis = null;
         OutputStream output = null;
@@ -197,7 +197,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             }
         }
     }
-    
+
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
         resp.setHeader("Content-Disposition", "attachment; filename=\""
              + Helper.encodeFilename(document.getFileName(), "UTF-8", isIE(req)) + "\"");
@@ -217,7 +217,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/files/[cid]/[siteName]/[infostoreID]/[version]?secret=[secret]
-        
+
         final String[] path = SPLIT.split(req.getPathInfo(), 0);
         final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
@@ -234,5 +234,5 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         args.put(INFOSTORE_ID, normalized.get(normalized.size()-2));
         return args;
     }
-    
+
 }

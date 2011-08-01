@@ -51,7 +51,7 @@ package com.openexchange.ajax.fields;
 
 /**
  * {@link SearchTermFields}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTermFields {

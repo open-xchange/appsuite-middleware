@@ -57,7 +57,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 
 /**
  * {@link CacheFolderStorageServiceTracker} - A {@link ServiceTrackerCustomizer customizer} for cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderStorageServiceTracker implements ServiceTrackerCustomizer {
@@ -72,6 +72,7 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         // Get tree identifier
@@ -96,10 +97,12 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

@@ -57,7 +57,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * EffectivePermission
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class EffectivePermission extends OCLPermission {

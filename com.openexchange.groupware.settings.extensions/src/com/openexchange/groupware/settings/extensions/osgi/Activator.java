@@ -70,7 +70,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
@@ -114,24 +113,24 @@ public class Activator implements BundleActivator {
         } catch (Throwable x) {
             LOG.error(x.getMessage(), x);
         }
-        
-        
+
+
     }
-    
+
     // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
-    
+
     private void export(final ConfigViewFactory viewFactory, ComposedConfigProperty<String> property, final String propertyName) throws OXException {
-        
+
         final String[] path = property.get(PREFERENCE_PATH).split("/");
         String finalScope = property.get("final");
         String isProtected = property.get("protected");
         final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
-        
-        
+
+
         PreferencesItemService prefItem = new PreferencesItemService() {
 
             private static final String UNDEFINED_STRING = "undefined";
-            
+
             public String[] getPath() {
                 return path;
             }
@@ -157,7 +156,7 @@ public class Activator implements BundleActivator {
                             } catch (JSONException x) {
                                 // Ah well, let's pretend it's a string.
                             }
-                            
+
                             setting.setSingleValue(value);
                         } catch (OXException e) {
                             throw new OXException(e);
@@ -177,7 +176,7 @@ public class Activator implements BundleActivator {
                         if(value == null) {
                             Object[] multiValue = setting.getMultiValue();
                             if(multiValue != null) {
-                                
+
                                 JSONArray arr = new JSONArray();
                                 for (Object o : multiValue) {
                                     arr.put(o);
@@ -194,22 +193,22 @@ public class Activator implements BundleActivator {
                                 if(!value.equals(oldValue)) {
                                     viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
-                            
+
                         } else {
-                            
+
                         }} catch (OXException e) {
                             throw new OXException(e);
                         }
-                        
+
                     }
-                    
+
                 };
             }
-            
+
         };
-        
+
         services.publishService(PreferencesItemService.class, prefItem);
-        
+
         // And let's publish the metadata as well
         List<String> metadataNames = property.getMetadataNames();
         for (final String metadataName : metadataNames) {
@@ -217,7 +216,7 @@ public class Activator implements BundleActivator {
             System.arraycopy(path, 0, metadataPath, 1, path.length);
             metadataPath[metadataPath.length-1] = metadataName;
             metadataPath[0] = METADATA_PREFIX;
-            
+
             PreferencesItemService metadataItem = new PreferencesItemService() {
 
                 public String[] getPath() {
@@ -242,7 +241,7 @@ public class Activator implements BundleActivator {
                                 } catch (JSONException x) {
                                     // Ah well, let's pretend it's a string.
                                 }
-                                
+
                                 setting.setSingleValue(value);
                             } catch (OXException e) {
                                 throw new OXException(e);
@@ -260,22 +259,22 @@ public class Activator implements BundleActivator {
                         public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                             // IGNORE
                         }
-                        
+
                     };
                 }
-                
+
             };
-            
+
             services.publishService(PreferencesItemService.class, metadataItem);
         }
-        
+
         // Lastly, let's publish configurability.
         final String[] configurablePath = new String[path.length+2];
         System.arraycopy(path, 0, configurablePath, 1, path.length);
         configurablePath[configurablePath.length-1] = "configurable";
         configurablePath[0] = METADATA_PREFIX;
-        
-        
+
+
         PreferencesItemService configurableItem = new PreferencesItemService(){
 
             public String[] getPath() {
@@ -304,12 +303,12 @@ public class Activator implements BundleActivator {
                     public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
                         // IGNORE
                     }
-                    
+
                 };
             }
-            
+
         };
-        
+
         services.publishService(PreferencesItemService.class, configurableItem);
     }
 

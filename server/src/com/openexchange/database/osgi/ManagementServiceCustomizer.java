@@ -76,6 +76,7 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
         this.context = context;
     }
 
+    @Override
     public ManagementService addingService(final ServiceReference<ManagementService> reference) {
         final ManagementService service = context.getService(reference);
         LOG.info("Injecting ManagementService into database bundle.");
@@ -83,10 +84,12 @@ public final class ManagementServiceCustomizer implements ServiceTrackerCustomiz
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         LOG.info("Removing ManagementService from database bundle.");
         Initialization.getInstance().getManagement().removeManagementService();

@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link DatabaseServiceRegistry} - The service registry for database folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseServiceRegistry {
@@ -62,7 +62,7 @@ public final class DatabaseServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

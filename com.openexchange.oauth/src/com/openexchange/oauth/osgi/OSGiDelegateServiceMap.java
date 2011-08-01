@@ -55,7 +55,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * {@link OSGiDelegateServiceMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiDelegateServiceMap {

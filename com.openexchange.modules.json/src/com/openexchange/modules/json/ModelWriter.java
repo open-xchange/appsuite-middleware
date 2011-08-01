@@ -59,19 +59,19 @@ import com.openexchange.modules.model.Model;
 
 /**
  * {@link ModelWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ModelWriter<T extends Model<T>> {
 
     private AttributeHandler<T> overrides = AttributeHandler.DO_NOTHING;
-    private Metadata<T> metadata;
+    private final Metadata<T> metadata;
 
     public ModelWriter(Metadata<T> metadata) {
         this.metadata = metadata;
 
     }
-    
+
     public void setOverrides(AttributeHandler<T> overrides) {
         this.overrides = overrides;
     }

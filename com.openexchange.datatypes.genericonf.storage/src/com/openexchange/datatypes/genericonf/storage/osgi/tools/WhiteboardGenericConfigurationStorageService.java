@@ -67,21 +67,21 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class WhiteboardGenericConfigurationStorageService implements GenericConfigurationStorageService {
 
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
     public WhiteboardGenericConfigurationStorageService(BundleContext context) {
         this.tracker = new ServiceTracker(context, GenericConfigurationStorageService.class.getName(), null);
         tracker.open();
     }
-    
+
     public void close() {
         this.tracker.close();
     }
-    
+
     public GenericConfigurationStorageService getDelegate() {
         return (GenericConfigurationStorageService) tracker.getService();
     }
-    
+
     public void delete(Context ctx, int id) throws OXException {
         getDelegate().delete(ctx, id);
     }
@@ -126,5 +126,5 @@ public class WhiteboardGenericConfigurationStorageService implements GenericConf
         return getDelegate().search(con, ctx, query);
     }
 
-    
+
 }

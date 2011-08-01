@@ -58,23 +58,23 @@ import com.openexchange.messaging.MessagingHeader;
 
 /**
  * A pair of {@link MessagingHeaderParser} and {@link MessagingHeaderWriter} are used for customizing header reading and writing. Instances
- * of those classes can be registered in a given {@link MessagingMessageWriter}. 
+ * of those classes can be registered in a given {@link MessagingMessageWriter}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessagingHeaderParser {
-    
+
     /**
      * Returns true if this parser feels responsible for the given header. Usually this will orient itself along the given key.
      */
     public boolean handles(String key, Object value);
 
     /**
-     * Parses the header and adds it to the given map. 
+     * Parses the header and adds it to the given map.
      */
     public void parseAndAdd(Map<String, Collection<MessagingHeader>> headers, String key, Object value) throws JSONException, OXException;
-    
+
     /**
      * If more than one parser feels responsible for a given header, the one with the highest ranking wins.
      */

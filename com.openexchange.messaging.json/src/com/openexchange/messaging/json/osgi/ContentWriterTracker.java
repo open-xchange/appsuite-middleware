@@ -68,14 +68,14 @@ public class ContentWriterTracker extends ServiceTracker {
         super(context, MessagingContentWriter.class.getName(), null);
         this.writer = writer;
     }
-    
+
     @Override
     public Object addingService(final ServiceReference reference) {
         final MessagingContentWriter writer = (MessagingContentWriter) super.addingService(reference);
         this.writer.addContentWriter(writer);
         return writer;
     }
-    
+
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         writer.removeContentWriter((MessagingContentWriter) service);

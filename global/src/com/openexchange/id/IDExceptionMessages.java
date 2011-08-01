@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link IDExceptionMessages} - Exception messages for {@link IDException} that needs to be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDExceptionMessages implements LocalizableStrings {

@@ -56,7 +56,7 @@ import com.openexchange.messaging.MessagingMessage;
 
 /**
  * {@link TwitterMessagingUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingUtility {
@@ -70,7 +70,7 @@ public final class TwitterMessagingUtility {
 
     /**
      * Checks specified message's content to be of given type.
-     * 
+     *
      * @param message The message
      * @return The typed content
      * @throws OXException If message's content is of given type
@@ -89,7 +89,7 @@ public final class TwitterMessagingUtility {
 
     /**
      * Parses as an unsigned <code>long</code>.
-     * 
+     *
      * @param s The string to parse
      * @return An unsigned <code>long</code> or <code>-1</code>.
      */

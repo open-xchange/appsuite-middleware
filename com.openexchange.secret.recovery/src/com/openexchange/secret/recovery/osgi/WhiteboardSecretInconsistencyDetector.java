@@ -68,37 +68,37 @@ public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsis
 
     private final ServiceTracker tracker;
     private final WhiteboardSecretService secretService;
-    
+
     public WhiteboardSecretInconsistencyDetector(final BundleContext context) {
         tracker = new ServiceTracker(context, SecretConsistencyCheck.class.getName(), null);
         secretService = new WhiteboardSecretService(context);
     }
-    
+
     public void open() {
         tracker.open();
         secretService.open();
     }
-    
+
     public void close() {
         tracker.close();
         secretService.close();
     }
-    
+
     @Override
     public List<SecretConsistencyCheck> getChecks() {
         final Object[] services = tracker.getServices();
         final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>(services.length);
-        
+
         for (final Object object : services) {
             checks.add((SecretConsistencyCheck) object);
         }
-        
+
         return checks;
     }
-    
+
     @Override
     public SecretService getSecretService() {
         return secretService;
     }
-    
+
 }

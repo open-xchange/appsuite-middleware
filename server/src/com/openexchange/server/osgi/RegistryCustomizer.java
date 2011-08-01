@@ -56,7 +56,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link RegistryCustomizer} - Registers/unregisters a certain service in/from {@link ServerServiceRegistry}.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
@@ -67,7 +67,7 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link RegistryCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param clazz The class of the service to register
      */
@@ -76,6 +76,7 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
         this.clazz = clazz;
     }
 
+    @Override
     public Object addingService(final ServiceReference serviceReference) {
         final Object service = context.getService(serviceReference);
         ServerServiceRegistry.getInstance().addService(clazz, customize((T)service));
@@ -86,10 +87,12 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference serviceReference, final Object o) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference serviceReference, final Object o) {
         ServerServiceRegistry.getInstance().removeService(clazz);
         context.ungetService(serviceReference);

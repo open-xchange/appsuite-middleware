@@ -63,56 +63,56 @@ public class PublicationTarget {
     private String displayName;
     private String icon;
     private String module;
-    
+
     private DynamicFormDescription description;
     private PublicationService publicationService;
 
-    
+
     public String getId() {
         return id;
     }
 
-    
+
     public void setId(String id) {
         this.id = id;
     }
 
-    
+
     public String getDisplayName() {
         return displayName;
     }
 
-    
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    
+
     public String getIcon() {
         return icon;
     }
 
-    
+
     public void setIcon(String icon) {
         this.icon = icon;
     }
 
-    
+
     public String getModule() {
         return module;
     }
 
-    
+
     public void setModule(String module) {
         this.module = module;
     }
 
-    
+
     public DynamicFormDescription getFormDescription() {
         return description;
     }
 
-    
+
     public void setFormDescription(DynamicFormDescription description) {
         this.description = description;
     }
@@ -121,7 +121,7 @@ public class PublicationTarget {
     public PublicationService getPublicationService() {
         return this.publicationService;
     }
-    
+
     public void setPublicationService(PublicationService publicationService) {
         this.publicationService = publicationService;
     }
@@ -130,5 +130,5 @@ public class PublicationTarget {
     public boolean isResponsibleFor(String module) {
         return this.module.equals(module);
     }
-    
+
 }

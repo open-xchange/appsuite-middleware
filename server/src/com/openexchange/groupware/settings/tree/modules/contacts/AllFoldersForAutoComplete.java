@@ -71,17 +71,21 @@ public class AllFoldersForAutoComplete implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "contacts", "allFoldersForAutoComplete" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
             }

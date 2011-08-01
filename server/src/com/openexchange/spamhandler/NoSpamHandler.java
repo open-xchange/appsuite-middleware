@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 /**
  * {@link NoSpamHandler} - The special spam handler ignoring invocations to both {@link #handleSpam(String, long[], boolean, MailAccess)}
  * and {@link #handleHam(String, long[], boolean, MailAccess)}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NoSpamHandler extends SpamHandler {
@@ -65,7 +65,7 @@ public final class NoSpamHandler extends SpamHandler {
 
     /**
      * Gets the {@link NoSpamHandler} instance
-     * 
+     *
      * @return The {@link NoSpamHandler} instance
      */
     public static NoSpamHandler getInstance() {

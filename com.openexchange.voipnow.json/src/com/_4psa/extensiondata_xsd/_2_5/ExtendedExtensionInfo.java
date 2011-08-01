@@ -16,11 +16,11 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetExtensionDetailsResponseType;
 
 /**
  * Extension account details data
- * 
+ *
  * <p>Java class for ExtendedExtensionInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtendedExtensionInfo">
  *   &lt;complexContent>
@@ -50,8 +50,8 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetExtensionDetailsResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtendedExtensionInfo", propOrder = {
@@ -95,11 +95,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -107,11 +107,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -119,11 +119,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -131,11 +131,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -143,11 +143,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the extensionID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtensionID() {
         return extensionID;
@@ -155,11 +155,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the extensionID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtensionID(BigInteger value) {
         this.extensionID = value;
@@ -167,11 +167,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -179,11 +179,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -191,11 +191,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -203,11 +203,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;
@@ -215,11 +215,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -227,11 +227,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -239,11 +239,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the cpAccess property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCpAccess() {
         return cpAccess;
@@ -251,11 +251,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the cpAccess property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCpAccess(Boolean value) {
         this.cpAccess = value;
@@ -263,11 +263,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the parentName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentName() {
         return parentName;
@@ -275,11 +275,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the parentName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentName(String value) {
         this.parentName = value;
@@ -287,11 +287,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the chargingPlan property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlan() {
         return chargingPlan;
@@ -299,11 +299,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the chargingPlan property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlan(String value) {
         this.chargingPlan = value;
@@ -311,11 +311,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -323,11 +323,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -335,11 +335,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -347,11 +347,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;
@@ -359,11 +359,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -371,11 +371,11 @@ public class ExtendedExtensionInfo
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -383,25 +383,25 @@ public class ExtendedExtensionInfo
 
     /**
      * Gets the value of the accountFlag property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accountFlag property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccountFlag().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAccountFlag() {
         if (accountFlag == null) {

@@ -58,7 +58,7 @@ import com.openexchange.caching.ElementEventHandler;
 
 /**
  * {@link ElementAttributesImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElementAttributesImpl implements ElementAttributes, Cloneable {
@@ -144,7 +144,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
      * fields. The method does not need to concern itself with the state belonging to its super classes or subclasses. State is saved by
      * writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for primitive data types
      * supported by {@link DataOutput}.
-     * 
+     *
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
@@ -159,7 +159,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
 
     /**
      * Constructor for the element attributes object
-     * 
+     *
      * @param attr The element attributes object
      */
     protected ElementAttributesImpl(final ElementAttributesImpl attr) {

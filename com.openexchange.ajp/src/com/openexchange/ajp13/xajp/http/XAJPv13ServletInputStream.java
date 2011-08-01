@@ -62,7 +62,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
  * {@link XAJPv13ServletInputStream} - The AJP's servlet input stream which may be accessed by only one dedicated {@link Thread thread}. The
  * one which actually created this servlet input stream. Otherwise an {@link IOException I/O exception} will be thrown complaining about
  * illegal access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13ServletInputStream extends ServletInputStream {
@@ -85,7 +85,7 @@ public final class XAJPv13ServletInputStream extends ServletInputStream {
 
     /**
      * Initializes a new {@link XAJPv13ServletInputStream}
-     * 
+     *
      * @param ajpCon The associated AJP connection
      */
     public XAJPv13ServletInputStream(final INonBlockingConnection ajpCon) {
@@ -109,7 +109,7 @@ public final class XAJPv13ServletInputStream extends ServletInputStream {
     /**
      * This method is called to set or append new data. If new data is <code>null</code> then value <code>-1</code> will be returned on
      * invocations of any read method
-     * 
+     *
      * @param newData The new data
      * @throws IOException If an I/O error occurs
      */
@@ -282,7 +282,7 @@ public final class XAJPv13ServletInputStream extends ServletInputStream {
 
     /**
      * Peeks (and thus does not consume) available data from this input stream
-     * 
+     *
      * @return Peeked available data
      * @throws IOException If an I/O error occurs
      */
@@ -299,7 +299,7 @@ public final class XAJPv13ServletInputStream extends ServletInputStream {
     /**
      * Requests more data from web server. Note: If web server transmits an empty data package the setData() method sets data to
      * <code>null</code>. This should be checked after calling this method.
-     * 
+     *
      * @return <code>true</code> if new data could be read successfully, <code>false</code> if no more data is expected or an empty data
      *         package has been sent from web server
      */

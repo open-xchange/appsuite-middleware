@@ -72,22 +72,22 @@ public class UpdateTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testNoUpload() throws JSONException, OXException {
         request().param("timestamp", "1337").body(new JSONObject("{id: '23', folder_id: '12', title: 'nice title'}"));
-        
+
         DefaultFile file = new DefaultFile();
         file.setId("23");
         file.setFolderId("12");
         file.setTitle("nice title");
-        
+
         fileAccess().expectCall("saveFileMetadata", file, 1337l, Arrays.asList(File.Field.FOLDER_ID, File.Field.TITLE, File.Field.ID));
-    
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
     public void testMissingId() throws JSONException {
         request().param("timestamp", "1337").body(new JSONObject("{folder_id: '12', title: 'nice title'}"));
         try {
@@ -96,13 +96,13 @@ public class UpdateTest extends FileActionTest {
         } catch (OXException x) {
             assertTrue(true);
         }
-        
+
     }
-    
+
     public void testUpload() {
         // TODO
     }
-    
+
     @Override
     public AbstractFileAction createAction() {
         return new UpdateAction();

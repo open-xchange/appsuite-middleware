@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractProtocolProperties} - Super class of protocol-specific global properties
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractProtocolProperties {
@@ -111,7 +111,7 @@ public abstract class AbstractProtocolProperties {
 
     /**
      * Waits for loading this properties.
-     * 
+     *
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
      *             loading the properties.
      */

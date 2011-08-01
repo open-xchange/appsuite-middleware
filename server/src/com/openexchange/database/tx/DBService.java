@@ -88,6 +88,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         return this.provider;
     }
 
+    @Override
     public void setProvider(final DBProvider provider) {
         this.provider = new RequestDBProvider(provider);
         this.provider.setTransactional(true);
@@ -102,6 +103,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         setProvider(provider);
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         if(txState.get() != null && txState.get().preferWriteCon) {
             return getWriteConnection(ctx);
@@ -109,6 +111,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         return provider.getReadConnection(ctx);
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         final Connection writeCon = provider.getWriteConnection(ctx);
         if(txState.get() != null && txState.get().preferWriteCon) {
@@ -121,6 +124,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         return writeCon;
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if(txState.get() != null && txState.get().preferWriteCon && txState.get().writeCons.contains(con)){
             releaseWriteConnection(ctx,con);
@@ -129,6 +133,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.releaseReadConnection(ctx, con);
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         if(txState.get() != null && txState.get().preferWriteCon) {
             txState.get().writeCons.remove(con);
@@ -157,15 +162,18 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.finish();
     }
 
+    @Override
     public void startTransaction() throws OXException {
         txState.set(new ThreadState());
     }
 
+    @Override
     public void finish() throws OXException {
         provider.finish();
         txState.set(null);
     }
 
+    @Override
     public void rollback() throws OXException {
         final List<Undoable> failed = new ArrayList<Undoable>();
         final List<Undoable> undos = new ArrayList<Undoable>(txState.get().undoables);
@@ -192,15 +200,18 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         }
     }
 
+    @Override
     public void commit() throws OXException {
         // Nothing to do.
     }
 
+    @Override
     public void setRequestTransactional(final boolean transactional) {
         provider.setRequestTransactional(transactional);
     }
 
 
+    @Override
     public void setCommitsTransaction(final boolean mustCommit) {
         provider.setCommitsTransaction(false);
     }
@@ -247,6 +258,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         }
     }
 
+    @Override
     @Deprecated
     public void setTransactional(final boolean tx) {
         // Nothing to do.

@@ -66,7 +66,7 @@ import com.openexchange.server.impl.Version;
 
 /**
  * {@link ServletContextWrapper} - A wrapper class for {@link ServletContext} interface.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -84,7 +84,7 @@ public class ServletContextWrapper implements ServletContext {
      * Return a context-relative path, beginning with a "/", that represents the canonical version of the specified path after ".." and "."
      * elements are resolved out. If the specified path attempts to go outside the boundaries of the current context (i.e. too many ".."
      * path elements are present), return <code>null</code> instead.
-     * 
+     *
      * @param path Path to be normalized
      */
     private static String normalize(final String path) {
@@ -135,29 +135,35 @@ public class ServletContextWrapper implements ServletContext {
         this.servletConfigWrapper = servletConfigWrapper;
     }
 
+    @Override
     public Object getAttribute(final String name) {
         return attributes.get(name);
     }
 
+    @Override
     public Enumeration<?> getAttributeNames() {
         return new Enumeration<String>() {
 
             private final Iterator<String> iterator = attributes.keySet().iterator();
 
+            @Override
             public boolean hasMoreElements() {
                 return iterator.hasNext();
             }
 
+            @Override
             public String nextElement() {
                 return iterator.next();
             }
         };
     }
 
+    @Override
     public String getContextPath() {
         return null;
     }
 
+    @Override
     public ServletContext getContext(final String uri) {
         if ((uri == null) || (uri.charAt(0) != '/')) {
             return null;
@@ -165,14 +171,17 @@ public class ServletContextWrapper implements ServletContext {
         return null;
     }
 
+    @Override
     public String getInitParameter(final String name) {
         return servletConfigWrapper.getInitParameter(name);
     }
 
+    @Override
     public Enumeration<String> getInitParameterNames() {
         return servletConfigWrapper.getInitParameterNames();
     }
 
+    @Override
     public int getMajorVersion() {
         // E.g. 6.13.0-Rev5
         final String version = Version.getVersionString();
@@ -187,10 +196,12 @@ public class ServletContextWrapper implements ServletContext {
         return OX_SERVLET_MAJOR;
     }
 
+    @Override
     public String getMimeType(final String fileName) {
         return FileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
     }
 
+    @Override
     public int getMinorVersion() {
         // E.g. 6.13.0-Rev5
         final String[] tokens = Version.getVersionString().split("\\.");
@@ -204,72 +215,88 @@ public class ServletContextWrapper implements ServletContext {
         }
     }
 
+    @Override
     public RequestDispatcher getNamedDispatcher(final String string) {
         return null;
     }
 
+    @Override
     public String getRealPath(final String string) {
         return string;
     }
 
+    @Override
     public RequestDispatcher getRequestDispatcher(final String string) {
         return null;
     }
 
+    @Override
     public URL getResource(final String string) throws MalformedURLException {
         return null;
     }
 
+    @Override
     public InputStream getResourceAsStream(final String path) {
         return null;
     }
 
+    @Override
     public Set<?> getResourcePaths(final String string) {
         return null;
     }
 
+    @Override
     public String getServerInfo() {
         return "THE SERVER INFO";
     }
 
+    @Override
     public Servlet getServlet(final String string) throws ServletException {
         return null;
     }
 
+    @Override
     public String getServletContextName() {
         return servletConfigWrapper.getServletName();
     }
 
+    @Override
     public Enumeration<?> getServletNames() {
         return null;
     }
 
+    @Override
     public Enumeration<?> getServlets() {
         return null;
     }
 
+    @Override
     public void log(final Exception exception, final String string) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string, exception);
         }
     }
 
+    @Override
     public void log(final String string) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string);
         }
     }
 
+    @Override
     public void log(final String string, final Throwable throwable) {
         if (LOG.isInfoEnabled()) {
             LOG.info(string, throwable);
         }
     }
 
+    @Override
     public void removeAttribute(final String name) {
         attributes.remove(name);
     }
 
+    @Override
     public void setAttribute(final String name, final Object value) {
         attributes.put(name, value);
     }

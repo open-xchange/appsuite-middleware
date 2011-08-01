@@ -59,55 +59,55 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class DBPool  {
-    
+
     public static final Connection pickup() throws OXException {
         return Database.get(false);
     }
-    
+
     public static final Connection pickup(final Context context) throws OXException {
         return Database.get(context, false);
     }
-    
+
     public static final Connection pickupWriteable() throws OXException {
         return Database.get(true);
     }
-    
+
     public static final Connection pickupWriteable(final Context context) throws OXException {
         return Database.get(context, true);
     }
-    
+
     public static final boolean push(final Connection con) {
         Database.back(false, con);
         return true;
     }
-    
+
     public static final boolean push(final Context context, final Connection con) {
         Database.back(context, false, con);
         return true;
     }
-    
+
     public static final boolean pushWrite(final Connection con) {
         Database.back(true, con);
         return true;
     }
-    
+
     public static final boolean pushWrite(final Context context, final Connection con) {
         Database.back(context, true, con);
         return true;
     }
-    
+
     public static final void closeReaderSilent(final Connection con) {
         Database.back(false, con);
     }
-    
+
     public static final void closeReaderSilent(final Context context, final Connection con) {
         Database.back(context, false, con);
     }
-    
+
     public static final void closeWriterSilent(final Connection con) {
         Database.back(true, con);
     }
-    
+
     public static final void closeWriterSilent(final Context context, final Connection con) {
         Database.back(context, true, con);
     }

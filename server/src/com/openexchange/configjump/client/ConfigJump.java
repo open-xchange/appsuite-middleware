@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Provides a static method for the servlet to generate the ConfigJump URL based on the service.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConfigJump {

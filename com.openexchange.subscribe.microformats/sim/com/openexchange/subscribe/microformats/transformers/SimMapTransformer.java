@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
  */
 public class SimMapTransformer implements MapToObjectTransformer {
 
-    private List<? extends Object> data;
+    private final List<? extends Object> data;
     private List<Map<String, String>> input;
 
     public SimMapTransformer(List<? extends Object> data) {
@@ -73,11 +73,11 @@ public class SimMapTransformer implements MapToObjectTransformer {
         this.input = list;
         return data;
     }
-    
+
     public List<Map<String, String>> getInput() {
         return input;
     }
-    
-    
+
+
 
 }

@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.Contact;
 public interface YahooService {
 
     public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
-    
+
     public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
 
 }

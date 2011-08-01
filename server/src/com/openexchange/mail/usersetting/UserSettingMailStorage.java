@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
  * {@link UserSettingMailStorage} - Access to {@link UserSettingMail}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
@@ -75,7 +75,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Gets the singleton instance of {@link UserSettingMailStorage}
-     * 
+     *
      * @return The singleton instance of {@link UserSettingMailStorage}
      */
     public static final UserSettingMailStorage getInstance() {
@@ -108,7 +108,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     /**
      * A convenience method that returns {@link #getUserSettingMail(int, Context, Connection)} with the connection parameter set to
      * <code>null</code>.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The instance of {@link UserSettingMail} which matches given user ID and context or <code>null</code> on exception
@@ -125,7 +125,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     /**
      * A convenience method that returns {@link #getUserSettingMail(int, Context, Connection)} with the connection parameter set to
      * <code>null</code>.
-     * 
+     *
      * @param user The user ID
      * @param ctx The context
      * @return The instance of {@link UserSettingMail} which matches given user ID and context or <code>null</code> on exception
@@ -137,7 +137,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
     /**
      * A convenience method that returns {@link #loadUserSettingMail(int, Context, Connection)}. If an exception is thrown in delegated
      * method <code>null</code> is returned.
-     * 
+     *
      * @param user The user ID
      * @param ctx The context
      * @param readCon The readable connection (may be <code>null</code>)
@@ -154,7 +154,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Saves given user's mail settings bits to database
-     * 
+     *
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
@@ -166,7 +166,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Saves given user's mail settings bits to database
-     * 
+     *
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
@@ -177,7 +177,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Saves given user's mail settings to database
-     * 
+     *
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
@@ -189,7 +189,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Saves given user's mail settings to database
-     * 
+     *
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
@@ -200,7 +200,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Deletes the user's mail settings from database
-     * 
+     *
      * @param user the user ID
      * @param ctx the context
      * @throws OXException if deletion fails
@@ -211,7 +211,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Deletes the user's mail settings from database
-     * 
+     *
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg the writable connection; may be <code>null</code>
@@ -221,7 +221,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Loads user's mail settings from database
-     * 
+     *
      * @param user the user
      * @param ctx the context
      * @return The instance of {@link UserSettingMail} which matches given user ID and context
@@ -233,7 +233,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Loads user's mail settings from database
-     * 
+     *
      * @param user the user
      * @param ctx the context
      * @param readConArg the readable connection
@@ -244,7 +244,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Removes the user's mail settings from cache if any used
-     * 
+     *
      * @param user the user
      * @param ctx the context
      * @throws OXException if cache removal fails
@@ -253,7 +253,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
 
     /**
      * Clears this storage's cache if any used
-     * 
+     *
      * @throws OXException if cache clearing fails
      */
     public abstract void clearStorage() throws OXException;

@@ -54,7 +54,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountGetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAccountGetSwitch implements AttributeSwitch {
@@ -65,150 +65,192 @@ public class MailAccountGetSwitch implements AttributeSwitch {
         account = desc;
     }
 
+    @Override
+    public Object replyTo() {
+        return account.getReplyTo();
+    }
+
+    @Override
     public Object confirmedHam() {
         return account.getConfirmedHam();
     }
 
+    @Override
     public Object confirmedSpam() {
         return account.getConfirmedSpam();
     }
 
+    @Override
     public Object drafts() {
         return account.getDrafts();
     }
 
+    @Override
     public Object id() {
         return Integer.valueOf(account.getId());
     }
 
+    @Override
     public Object login() {
         return account.getLogin();
     }
 
+    @Override
     public Object mailURL() {
         return account.generateMailServerURL();
     }
 
+    @Override
     public Object name() {
         return account.getName();
     }
 
+    @Override
     public Object password() {
         return account.getPassword();
     }
 
+    @Override
     public Object primaryAddress() {
         return account.getPrimaryAddress();
     }
-    
+
+    @Override
     public Object personal() {
         return account.getPersonal();
     }
 
+    @Override
     public Object sent() {
         return account.getSent();
     }
 
+    @Override
     public Object spam() {
         return account.getSpam();
     }
 
+    @Override
     public Object spamHandler() {
         return account.getSpamHandler();
     }
 
+    @Override
     public Object transportURL() {
         return account.generateTransportServerURL();
     }
 
+    @Override
     public Object trash() {
         return account.getTrash();
     }
 
+    @Override
     public Object mailPort() {
         return Integer.valueOf(account.getMailPort());
     }
 
+    @Override
     public Object mailProtocol() {
         return account.getMailProtocol();
     }
 
+    @Override
     public Object mailSecure() {
         return Boolean.valueOf(account.isMailSecure());
     }
 
+    @Override
     public Object mailServer() {
         return account.getMailServer();
     }
 
+    @Override
     public Object transportPort() {
         return Integer.valueOf(account.getTransportPort());
     }
 
+    @Override
     public Object transportProtocol() {
         return account.getTransportProtocol();
     }
 
+    @Override
     public Object transportSecure() {
         return Boolean.valueOf(account.isTransportSecure());
     }
 
+    @Override
     public Object transportServer() {
         return account.getTransportServer();
     }
 
+    @Override
     public Object transportLogin() {
         return account.getTransportLogin();
     }
 
+    @Override
     public Object transportPassword() {
         return account.getTransportPassword();
     }
 
+    @Override
     public Object unifiedINBOXEnabled() {
         return Boolean.valueOf(account.isUnifiedINBOXEnabled());
     }
 
+    @Override
     public Object confirmedHamFullname() {
         return account.getConfirmedHamFullname();
     }
 
+    @Override
     public Object confirmedSpamFullname() {
         return account.getConfirmedSpamFullname();
     }
 
+    @Override
     public Object draftsFullname() {
         return account.getDraftsFullname();
     }
 
+    @Override
     public Object sentFullname() {
         return account.getSentFullname();
     }
 
+    @Override
     public Object spamFullname() {
         return account.getSpamFullname();
     }
 
+    @Override
     public Object trashFullname() {
         return account.getTrashFullname();
     }
 
+    @Override
     public Object pop3DeleteWriteThrough() {
         return account.getProperties().get("pop3.deletewt");
     }
 
+    @Override
     public Object pop3ExpungeOnQuit() {
         return account.getProperties().get("pop3.expunge");
     }
 
+    @Override
     public Object pop3RefreshRate() {
         return account.getProperties().get("pop3.refreshrate");
     }
 
+    @Override
     public Object pop3Path() {
         return account.getProperties().get("pop3.path");
     }
 
+    @Override
     public Object pop3Storage() {
         return account.getProperties().get("pop3.storage");
     }

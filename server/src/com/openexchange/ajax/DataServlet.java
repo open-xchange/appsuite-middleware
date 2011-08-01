@@ -163,7 +163,7 @@ public abstract class DataServlet extends PermissionServlet {
 
     /**
      * Generates an appropriate JSON object from given request's parameters.
-     * 
+     *
      * @param httpServletRequest The HTTP servlet request
      * @return An appropriate JSON object
      * @throws JSONException If a JSON error occurs
@@ -178,7 +178,7 @@ public abstract class DataServlet extends PermissionServlet {
                 jsonObj.put(name, SPLIT.matcher(value).replaceAll(","));
                 /*-
                  * Previous code:
-                 * 
+                 *
                 final String[] sa = SPLIT.split(value, 0);
                 final int len = sa.length;
                 if (len > 0) {

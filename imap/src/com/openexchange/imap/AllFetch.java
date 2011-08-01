@@ -87,7 +87,7 @@ import com.sun.mail.imap.protocol.UID;
 
 /**
  * {@link AllFetch} - Utility class to fetch all messages from a certain IMAP folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllFetch {
@@ -113,7 +113,7 @@ public final class AllFetch {
 
         /**
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance and applies it to given message.
-         * 
+         *
          * @param item The item to handle
          * @param msg The message to apply to
          * @param logger The logger
@@ -239,7 +239,7 @@ public final class AllFetch {
 
         /**
          * Gets the Fetch item string.
-         * 
+         *
          * @return The Fetch item string
          */
         public String getItemString() {
@@ -248,7 +248,7 @@ public final class AllFetch {
 
         /**
          * Gets the item class.
-         * 
+         *
          * @return The item class
          */
         public Class<? extends Item> getItemClass() {
@@ -257,7 +257,7 @@ public final class AllFetch {
 
         /**
          * Gets the item handler.
-         * 
+         *
          * @return The item handler
          */
         public FetchItemHandler getItemHandler() {
@@ -274,7 +274,7 @@ public final class AllFetch {
 
     /**
      * Fetches all messages from given IMAP folder and pre-fills instances with UID, folder fullname and received date.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
      * @param config The IMAP configuration
@@ -290,7 +290,7 @@ public final class AllFetch {
      * Fetches all messages from given IMAP folder and pre-fills instances with fullname and given low-cost fetch item list.
      * <p>
      * Since returned instances are sorted, the low-cost fetch item list must contain <code>"INTERNALDATE"</code>.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param items The low-cost fetch items
      * @param ascending <code>true</code> to order messages by received date in ascending order; otherwise descending
@@ -312,9 +312,9 @@ public final class AllFetch {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
-                 * 
+                 *
                  * Responses:  untagged responses: FETCH
-                 * 
+                 *
                  * Result:     OK - fetch completed
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
@@ -408,7 +408,7 @@ public final class AllFetch {
 
     /**
      * Restores trace state for specified IMAP protocol.
-     * 
+     *
      * @param protocol The protocol whose trace state shall be restored
      * @param sbout The output stream written to in the meantime
      * @param tracerState The trace state
@@ -450,7 +450,7 @@ public final class AllFetch {
 
     /**
      * Gets the trace state for specified IMAP protocol.
-     * 
+     *
      * @param protocol The protocol whose trace state shall be returned
      * @param sbout The output stream to write to
      * @return The trace state
@@ -500,7 +500,7 @@ public final class AllFetch {
 
     /**
      * Compares given object references being <code>null</code>.
-     * 
+     *
      * @param o1 The first object reference
      * @param o2 The second object reference
      * @return An {@link Integer} of <code>-1</code> if first reference is <code>null</code> but the second is not, an {@link Integer} of
@@ -552,7 +552,7 @@ public final class AllFetch {
 
         /**
          * Gets the trace.
-         * 
+         *
          * @return The trace
          */
         public StringBuilder getTrace() {
@@ -564,7 +564,7 @@ public final class AllFetch {
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response; throws an appropriate protocol exception if not present
      * in given <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
@@ -583,7 +583,7 @@ public final class AllFetch {
 
     /**
      * Gets the item associated with given class in specified <i>FETCH</i> response.
-     * 
+     *
      * @param <I> The returned item's class
      * @param clazz The item class to look for
      * @param fetchResponse The <i>FETCH</i> response
@@ -604,7 +604,7 @@ public final class AllFetch {
     /**
      * Generates a new protocol exception according to following template:<br>
      * <code>&quot;Missing &lt;itemName&gt; item in FETCH response.&quot;</code>
-     * 
+     *
      * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
      * @param config The IMAP configuration
      * @param session The session
@@ -619,7 +619,7 @@ public final class AllFetch {
 
     /**
      * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
-     * 
+     *
      * @param items The items
      * @return The string representation
      */

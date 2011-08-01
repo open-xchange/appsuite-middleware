@@ -65,14 +65,14 @@ import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link WebDAVFileStorageFile}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageFile extends DefaultFile {
 
     /**
      * Initializes a new {@link WebDAVFileStorageFile}.
-     * 
+     *
      * @param folderId The folder identifier; e.g. "http://webdav-server.com/Telephone%20Lines/"
      * @param id The file identifier; e.g. "lines.pdf"
      * @param userId The user identifier
@@ -95,7 +95,7 @@ public final class WebDAVFileStorageFile extends DefaultFile {
 
     /**
      * Parses specified DAV property set of associated MultiStatus response.
-     * 
+     *
      * @param propertySet The DAV property set of associated MultiStatus response
      * @throws OXException If parsing DAV property set fails
      * @return This WebDAV file with property set applied
@@ -106,7 +106,7 @@ public final class WebDAVFileStorageFile extends DefaultFile {
 
     /**
      * Parses specified DAV property set of associated MultiStatus response.
-     * 
+     *
      * @param propertySet The DAV property set of associated MultiStatus response
      * @param fields The fields to consider
      * @throws OXException If parsing DAV property set fails

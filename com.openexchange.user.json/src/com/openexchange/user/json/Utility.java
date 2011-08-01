@@ -59,7 +59,7 @@ import java.util.concurrent.FutureTask;
 
 /**
  * {@link Utility} - Utility class for user JSON interface bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utility {
@@ -75,7 +75,7 @@ public final class Utility {
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.
-     * 
+     *
      * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
@@ -109,7 +109,7 @@ public final class Utility {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone identifier
      * @return The date millis with time zone offset added
@@ -120,7 +120,7 @@ public final class Utility {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone
      * @return The date millis with time zone offset added
@@ -131,7 +131,7 @@ public final class Utility {
 
     /**
      * Checks if specified required field is contained in given fields and appends it if necessary.
-     * 
+     *
      * @param fields The fields to check
      * @param requiredField The required field
      * @return The fields with required field (possibly appended)

@@ -59,7 +59,7 @@ import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
 
 /**
  * {@link URLMailAttachmentActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class URLMailAttachmentActivator implements BundleActivator {

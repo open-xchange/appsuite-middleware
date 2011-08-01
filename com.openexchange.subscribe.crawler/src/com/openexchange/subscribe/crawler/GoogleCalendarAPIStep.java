@@ -75,7 +75,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link GoogleCalendarAPIStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Object> implements LoginStep {

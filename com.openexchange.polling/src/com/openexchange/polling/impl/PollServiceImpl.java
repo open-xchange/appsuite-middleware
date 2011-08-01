@@ -50,7 +50,6 @@
 package com.openexchange.polling.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,14 +68,14 @@ import com.openexchange.polling.Question;
 public class PollServiceImpl implements PollService {
 
     private static final AtomicInteger ID_COUNTER = new AtomicInteger(1);
-    
-    private Map<Integer, Poll> polls = new ConcurrentHashMap<Integer, Poll>();
-    
+
+    private final Map<Integer, Poll> polls = new ConcurrentHashMap<Integer, Poll>();
+
     public void createPoll(Poll poll, int cid) {
         int newID = ID_COUNTER.incrementAndGet();
-        
+
         poll.setId(newID);
-        
+
         polls.put(newID, poll);
     }
 
@@ -97,7 +96,7 @@ public class PollServiceImpl implements PollService {
         if (poll == null) {
             return;
         }
-        
+
         List<Question> questions = poll.getQuestions();
         List<Integer> answers = answer.getAnswers();
         for (int i = 0; i < answers.size(); i++) {

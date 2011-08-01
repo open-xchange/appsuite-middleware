@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link OAuthCreateTableTask} - Inserts necessary tables.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthCreateTableTask extends UpdateTaskAdapter {

@@ -91,7 +91,7 @@ import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
  * than delete the permission in question</li>
  * </ul>
  * </li>
- * 
+ *
  * <li><b>Infostore</b><br>
  * If user lost access to infostore module the following actions have to be
  * performed.
@@ -106,13 +106,13 @@ import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
  * <li>Delete all WebDAV properties and locks held by remote infostore folders</li>
  * </ul>
  * </li>
- * 
+ *
  * <li><b>Full public folder access</b><br>
  * If user lost full public folder access he is no more able to see affected
  * public data, thus nothing has to be deleted here.</li>
  * <ul>
  * </ul>
- * 
+ *
  * <li><b>Full shared folder access</b><br>
  * If user lost full shared folder access neither sharing nor viewing shared
  * folders is possible
@@ -122,7 +122,7 @@ import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
  * folders</li>
  * </ul>
  * </li>
- * 
+ *
  * <li><b>Delegating tasks</b><br>
  * If user lost capability to delegate tasks all delegations of user's tasks
  * have to be removed.
@@ -130,21 +130,22 @@ import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
  * <li>Delete additional participants from task items created by user</li>
  * </ul>
  * </li>
- * 
+ *
  * </ul>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class DowngradeRegistry {
 
 	private static final Comparator<DowngradeListener> COMPARATOR = new Comparator<DowngradeListener>() {
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 		 */
-		public int compare(final DowngradeListener o1, final DowngradeListener o2) {
+		@Override
+        public int compare(final DowngradeListener o1, final DowngradeListener o2) {
 			if (o1.getOrder() > o2.getOrder()) {
 				return 1;
 			} else if (o1.getOrder() < o2.getOrder()) {
@@ -227,7 +228,7 @@ public final class DowngradeRegistry {
 
 	/**
 	 * Fires the downgrade event
-	 * 
+	 *
 	 * @param downgradeEvent
 	 *            the downgrade event
 	 * @throws OXException
@@ -251,7 +252,7 @@ public final class DowngradeRegistry {
 	 * <b>Note</b>: Only one instance of a certain {@link DowngradeListener}
 	 * implementation is added, meaning if you try to register a certain
 	 * implementation twice, the latter one is going to be discarded
-	 * 
+	 *
 	 * @param listener
 	 *            the listener to register
 	 * @return <code>true</code> if specified downgrade listener has been
@@ -275,7 +276,7 @@ public final class DowngradeRegistry {
 	/**
 	 * Removes given instance of {@link DowngradeListener} from this registry's
 	 * known listeners.
-	 * 
+	 *
 	 * @param listener -
 	 *            the listener to remove
 	 */

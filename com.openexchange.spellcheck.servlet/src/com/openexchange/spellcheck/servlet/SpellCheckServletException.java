@@ -53,12 +53,12 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SpellCheckServletException}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpellCheckServletException extends OXException {
 
     private static final long serialVersionUID = -4936647856374250642L;
 
-    
+
 }

@@ -72,7 +72,7 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
 
     private final ModelParser<T> parser;
     private final ModelWriter<T> writer;
-   
+
     public AbstractActionPrototype(final ModelParser<T> parser, final ModelWriter<T> writer) {
         super();
         this.parser = parser;
@@ -96,19 +96,19 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
     protected RequestPrototype<T> createRequest(final AJAXRequestData request, final ModelParser<T> modelParser, final ServerSession session) {
         return new RequestPrototype<T>(request, modelParser, session);
     }
-    
+
     protected AJAXRequestResult result(final T thing) throws JSONException {
         return new AJAXRequestResult(writer.write(thing));
     }
-    
+
     protected AJAXRequestResult result(final List<T> things) throws JSONException {
         final JSONArray array = new JSONArray();
 
         for (final T thing : things) {
             array.put(writer.write(thing));
         }
-        
+
         return new AJAXRequestResult(array);
     }
-    
+
 }

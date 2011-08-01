@@ -74,7 +74,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterRetweetMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterRetweetMessage implements MessagingMessage {
@@ -104,7 +104,7 @@ public final class TwitterRetweetMessage implements MessagingMessage {
 
     /**
      * Initializes a new {@link TwitterRetweetMessage}.
-     * 
+     *
      * @param status The status to retweet
      * @param user The authenticated user
      */

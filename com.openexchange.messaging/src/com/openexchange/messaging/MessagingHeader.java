@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link MessagingHeader} - A message header.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -145,7 +145,7 @@ public interface MessagingHeader {
          * X-Mailer
          */
         MAILER("X-Mailer");
-        
+
         private final String name;
 
         private KnownHeader(final String name) {
@@ -175,7 +175,7 @@ public interface MessagingHeader {
 
         /**
          * Maps a {@link MessagingHeader} to a {@link MessagingField}
-         * 
+         *
          * @return The {@link MessagingField} this field is associated with
          */
         public MessagingField getEquivalentField() {
@@ -203,27 +203,27 @@ public interface MessagingHeader {
          * The header contains parameter.
          */
         PARAMETERIZED,
-        
+
         ;
     }
 
     /**
      * Gets the header type.
-     * 
+     *
      * @return The header type
      */
     public HeaderType getHeaderType();
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName();
 
     /**
      * Gets the value.
-     * 
+     *
      * @return The value
      */
     public String getValue();

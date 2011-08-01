@@ -55,15 +55,15 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * FolderSyncInterface
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface FolderSyncInterface {
 
 	/**
 	 * Deletes all items located in given folder
-	 * 
+	 *
 	 * @param delFolderObj -
 	 *            the unique ID of the folder whose content should be deleted
 	 * @param clientLastModified -

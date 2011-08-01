@@ -73,7 +73,7 @@ public class GenericSubscribeServiceForGoogleAPITest extends GenericSubscribeSer
         List<Step> steps = new LinkedList<Step>();
 
         steps.add(new GoogleAPIStep());
-        
+
 
         Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));

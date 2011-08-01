@@ -9,11 +9,11 @@ import com._4psa.common_xsd._2_5.UpdateObject;
 
 /**
  * Edit public phone number: response type
- * 
+ *
  * <p>Java class for EditPublicNoResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="EditPublicNoResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.common_xsd._2_5.UpdateObject;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "EditPublicNoResponseType")

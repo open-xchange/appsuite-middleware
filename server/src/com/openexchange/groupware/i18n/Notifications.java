@@ -57,201 +57,201 @@ public class Notifications implements LocalizableStrings {
      * CREATE
      */
 
-    public static final String APPOINTMENT_CREATE_MAIL = 
+    public static final String APPOINTMENT_CREATE_MAIL =
             "A new appointment was created by [created_by].\n" +
             "You can check this appointment in your calendar:\n" +
-            "[link]\n" + 
-            "\n" + 
-            "Appointment\n" + 
-            "===========\n" + 
-            "Created by: [created_by]\n" + 
-            "Created at: [creation_datetime]\n" + 
-            "[title]\n" + 
-            "[location]" + 
-            "[folder_name]\n" + 
-            "\n" + 
-            "[start]\n" + 
-            "[end]\n" + 
-            "[series]" + 
-            "[delete_exceptions]" + 
-            "[change_exceptions]" + 
-            "\n" + 
-            "[description]" + 
-            "\n" + 
-            "Participants\n" + 
-            "============\n" + 
-            "[participants]" + 
-            "\n" + 
-            "\n" + 
+            "[link]\n" +
+            "\n" +
+            "Appointment\n" +
+            "===========\n" +
+            "Created by: [created_by]\n" +
+            "Created at: [creation_datetime]\n" +
+            "[title]\n" +
+            "[location]" +
+            "[folder_name]\n" +
+            "\n" +
+            "[start]\n" +
+            "[end]\n" +
+            "[series]" +
+            "[delete_exceptions]" +
+            "[change_exceptions]" +
+            "\n" +
+            "[description]" +
+            "\n" +
+            "Participants\n" +
+            "============\n" +
+            "[participants]" +
+            "\n" +
+            "\n" +
             "Resources\n" +
             "=========\n" +
             "[resources]" +
-            "\n" + 
-            "\n" + 
+            "\n" +
+            "\n" +
             "========================================== ";
 
-    public static final String APPOINTMENT_CREATE_MAIL_EXT = 
+    public static final String APPOINTMENT_CREATE_MAIL_EXT =
         "A new appointment was created by [created_by].\n" +
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" + 
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
         "Resources\n" +
         "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
-        "========================================== ";
-    
-    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF = 
-        "A new appointment was created by [created_by] on behalf of [behalf_of].\n" +
-        "You can check this appointment in your calendar:\n" +
-        "[link]\n" + 
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" + 
-        "\n" + 
-        "\n" + 
-        "Resources\n" +
-        "=========\n" +
-        "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "========================================== ";
 
-    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT = 
+    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF =
         "A new appointment was created by [created_by] on behalf of [behalf_of].\n" +
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" + 
-        "\n" + 
-        "\n" + 
+        "You can check this appointment in your calendar:\n" +
+        "[link]\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
         "Resources\n" +
         "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
+        "========================================== ";
+
+    public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT =
+        "A new appointment was created by [created_by] on behalf of [behalf_of].\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
+        "[resources]" +
+        "\n" +
+        "\n" +
         "========================================== ";
     /**
      * Notification Template for user which has no access to this appointment.
      * We use the same as for external participants, because this has no link to the appointment.
      */
     public static final String APPOINTMENT_CREATE_MAIL_NO_ACCESS = APPOINTMENT_CREATE_MAIL_EXT;
-    
+
     public static final String APPOINTMENT_CREATE_MAIL_ON_BEHALF_NO_ACCESS = APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT;
-    
-    public static final String TASK_CREATE_MAIL = 
+
+    public static final String TASK_CREATE_MAIL =
         "A new task was created by [created_by].\n" +
         "You can check this task in your tasks:\n" +
-        "[link]\n" + 
-        "\n" + 
-        "Task\n" + 
-        "====\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[folder_name]\n" + 
-        "[priority]\n" + 
-        "[task_status]\n" + 
-        "\n" + 
+        "[link]\n" +
+        "\n" +
+        "Task\n" +
+        "====\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[folder_name]\n" +
+        "[priority]\n" +
+        "[task_status]\n" +
+        "\n" +
         "[start]\n" +
         "[end]\n" +
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" + 
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
         "\n" +
-        "\n" + 
+        "\n" +
         "========================================== ";
 
-    public static final String TASK_CREATE_MAIL_EXT = 
+    public static final String TASK_CREATE_MAIL_EXT =
         "A new task was created by [created_by].\n" +
-        "\n" + 
-        "Task\n" + 
-        "====\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[folder_name]\n" + 
-        "[priority]\n" + 
-        "[task_status]\n" + 
-        "\n" + 
+        "\n" +
+        "Task\n" +
+        "====\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[folder_name]\n" +
+        "[priority]\n" +
+        "[task_status]\n" +
+        "\n" +
         "[start]\n" +
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" + 
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
         "\n" +
-        "\n" + 
+        "\n" +
         "========================================== ";
-    
+
     /**
      * Notification Template for user which has no access to this task.
      * We use the same as for external participants, because this has no link to the task.
@@ -262,68 +262,68 @@ public class Notifications implements LocalizableStrings {
      * DELETE
      */
 
-    public static final String APPOINTMENT_DELETE_MAIL = 
-        "This appointment does not take place.\n" + 
+    public static final String APPOINTMENT_DELETE_MAIL =
+        "This appointment does not take place.\n" +
         "It was either deleted by [changed_by] or\n" +
-        "you have been removed from the list of participants.\n" + 
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by:  [created_by]\n" + 
-        "Created at:  [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "you have been removed from the list of participants.\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by:  [created_by]\n" +
+        "Created at:  [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
-    
-    public static final String TASK_DELETE_MAIL = 
-        "This task was either deleted by [changed_by] or\n" + 
-        "you have been removed from the list of participants.\n" + 
-        "\n" + 
-        "Task\n" + 
-        "====\n" + 
-        "Created by:  [created_by]\n" + 
-        "Created at:  [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[folder_name]\n" + 
-        "[priority]\n" + 
-        "[task_status]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+
+    public static final String TASK_DELETE_MAIL =
+        "This task was either deleted by [changed_by] or\n" +
+        "you have been removed from the list of participants.\n" +
+        "\n" +
+        "Task\n" +
+        "====\n" +
+        "Created by:  [created_by]\n" +
+        "Created at:  [creation_datetime]\n" +
+        "[title]\n" +
+        "[folder_name]\n" +
+        "[priority]\n" +
+        "[task_status]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "========================================== ";
 
     /*-
@@ -333,74 +333,74 @@ public class Notifications implements LocalizableStrings {
     public static final String APPOINTMENT_UPDATE_MAIL =
         "This appointment was changed by [changed_by].\n" +
         "You can check this appointment in your calendar:\n" +
-        "[link]\n" + 
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "[link]\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
 
     public static final String APPOINTMENT_UPDATE_MAIL_EXT =
         "This appointment was changed by [changed_by].\n" +
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
-    
+
     /**
      * Notification Template for user which has no access to this appointment.
      * We use the same as for external participants, because this has no link to the appointment.
      */
     public static final String APPOINTMENT_UPDATE_MAIL_NO_ACCESS = APPOINTMENT_UPDATE_MAIL_EXT;
 
-    public static final String TASK_UPDATE_MAIL = 
+    public static final String TASK_UPDATE_MAIL =
         "This task was changed by [changed_by].\n" +
         "You can check this task in your tasks:\n" +
         "[link]\n" +
@@ -410,29 +410,29 @@ public class Notifications implements LocalizableStrings {
         "Created by: [created_by]\n" +
         "Created at: [creation_datetime]\n" +
         "[title]\n" +
-        "[folder_name]\n" + 
+        "[folder_name]\n" +
         "[priority]\n" +
         "[task_status]\n" +
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
 
-    public static final String TASK_UPDATE_MAIL_EXT = 
+    public static final String TASK_UPDATE_MAIL_EXT =
         "This task was changed by [changed_by].\n" +
         "\n" +
         "Task\n" +
@@ -440,162 +440,162 @@ public class Notifications implements LocalizableStrings {
         "Created by: [created_by]\n" +
         "Created at: [creation_datetime]\n" +
         "[title]\n" +
-        "[folder_name]\n" + 
+        "[folder_name]\n" +
         "[priority]\n" +
         "[task_status]\n" +
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
-    
+
     /**
      * Notification Template for user which has no access to this task.
      * We use the same as for external participants, because this has no link to the task.
      */
     public static final String TASK_UPDATE_MAIL_NO_ACCESS = TASK_UPDATE_MAIL_EXT;
-    
+
     /*-
      * CONFIRMATION
      */
 
-    public static final String APPOINTMENT_CONFIRMATION_MAIL = 
+    public static final String APPOINTMENT_CONFIRMATION_MAIL =
         "[changed_by] has [confirmation_action] this appointment.\n" +
         "You can check this appointment in your calendar:\n" +
-        "[link]\n" + 
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "[link]\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
-        "==========================================";
-    
-    public static final String APPOINTMENT_CONFIRMATION_MAIL_EXT = 
-        "[changed_by] has [confirmation_action] this appointment.\n" +
-        "\n" + 
-        "Appointment\n" + 
-        "===========\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[location]" + 
-        "[folder_name]\n" + 
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "[delete_exceptions]" + 
-        "[change_exceptions]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
-        "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
-        "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
 
-    public static final String TASK_CONFIRMATION_MAIL = 
+    public static final String APPOINTMENT_CONFIRMATION_MAIL_EXT =
+        "[changed_by] has [confirmation_action] this appointment.\n" +
+        "\n" +
+        "Appointment\n" +
+        "===========\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[location]" +
+        "[folder_name]\n" +
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "[delete_exceptions]" +
+        "[change_exceptions]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
+        "[participants]" +
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
+        "[resources]" +
+        "\n" +
+        "\n" +
+        "==========================================";
+
+    public static final String TASK_CONFIRMATION_MAIL =
         "[changed_by] has [confirmation_action] this task.\n" +
         "You can check this task in your tasks:\n" +
-        "[link]\n" + 
-        "\n" + 
-        "Task\n" + 
-        "====\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[folder_name]\n" + 
+        "[link]\n" +
+        "\n" +
+        "Task\n" +
+        "====\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[folder_name]\n" +
         "[priority]\n" +
         "[task_status]\n" +
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
-    
-    public static final String TASK_CONFIRMATION_MAIL_EXT = 
+
+    public static final String TASK_CONFIRMATION_MAIL_EXT =
         "[changed_by] has [confirmation_action] this task.\n" +
-        "\n" + 
-        "Task\n" + 
-        "====\n" + 
-        "Created by: [created_by]\n" + 
-        "Created at: [creation_datetime]\n" + 
-        "[title]\n" + 
-        "[folder_name]\n" + 
+        "\n" +
+        "Task\n" +
+        "====\n" +
+        "Created by: [created_by]\n" +
+        "Created at: [creation_datetime]\n" +
+        "[title]\n" +
+        "[folder_name]\n" +
         "[priority]\n" +
         "[task_status]\n" +
-        "\n" + 
-        "[start]\n" + 
-        "[end]\n" + 
-        "[series]" + 
-        "\n" + 
-        "[description]" + 
-        "\n" + 
-        "Participants\n" + 
-        "============\n" + 
+        "\n" +
+        "[start]\n" +
+        "[end]\n" +
+        "[series]" +
+        "\n" +
+        "[description]" +
+        "\n" +
+        "Participants\n" +
+        "============\n" +
         "[participants]" +
-        "\n" + 
-        "\n" + 
-        "Resources\n" + 
-        "=========\n" + 
+        "\n" +
+        "\n" +
+        "Resources\n" +
+        "=========\n" +
         "[resources]" +
-        "\n" + 
-        "\n" + 
+        "\n" +
+        "\n" +
         "==========================================";
 
     /*-
@@ -629,7 +629,7 @@ public class Notifications implements LocalizableStrings {
     /*-
      * MISC
      */
- 
+
     // Reminder
     public static final String REMINDER = "Reminder";
 

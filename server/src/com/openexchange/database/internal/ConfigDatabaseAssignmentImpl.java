@@ -62,6 +62,7 @@ final class ConfigDatabaseAssignmentImpl implements ConfigDatabaseAssignmentServ
         super();
     }
 
+    @Override
     public Assignment getConfigDBAssignment() {
         return configDB;
     }

@@ -72,6 +72,7 @@ public final class GUI implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
@@ -79,6 +80,7 @@ public final class GUI implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new SharedNode(NAME, 1);
     }

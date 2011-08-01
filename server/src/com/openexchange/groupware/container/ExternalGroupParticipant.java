@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link ExternalGroupParticipant} - Represent an external group participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ExternalGroupParticipant implements Participant, Comparable<Participant> {
@@ -66,7 +66,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
-     * 
+     *
      * @param emailAddress unique email address of the external group participant.
      */
     public ExternalGroupParticipant(final String emailAddress) {
@@ -85,6 +85,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setIdentifier(final int id) {
         this.id = id;
     }
@@ -92,6 +93,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getIdentifier() {
         return id;
     }
@@ -99,6 +101,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
@@ -106,6 +109,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -113,6 +117,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmailAddress() {
         return emailaddress;
     }
@@ -127,6 +132,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getType() {
         return EXTERNAL_GROUP;
     }
@@ -161,6 +167,7 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int compareTo(final Participant part) {
         final int retval;
         if (EXTERNAL_GROUP == part.getType()) {
@@ -180,14 +187,17 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
         return super.clone();
     }
 
+    @Override
     public Participant getClone() throws CloneNotSupportedException {
         return (Participant) clone();
     }
 
+    @Override
     public boolean isIgnoreNotification() {
         return ignoreNotification;
     }
 
+    @Override
     public void setIgnoreNotification(final boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
     }

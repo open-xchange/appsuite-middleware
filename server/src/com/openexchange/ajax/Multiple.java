@@ -110,12 +110,12 @@ public class Multiple extends SessionServlet {
     public static void setDispatcher(final Dispatcher dispatcher) {
         Multiple.dispatcher = dispatcher;
     }
-    
+
     private static Dispatcher getDispatcher() {
         return dispatcher;
     }
 
-    
+
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         JSONArray dataArray = null;
@@ -183,7 +183,7 @@ public class Multiple extends SessionServlet {
         }
 
         action = jsonObj.optString(PARAMETER_ACTION);
-        
+
         final OXJSONWriter jWriter = new OXJSONWriter(respArr);
 
         return doAction(module, action, jsonObj, session, req, jWriter, state);
@@ -233,11 +233,11 @@ public class Multiple extends SessionServlet {
                         state = dispatcher.begin();
                     }
                     result = dispatcher.perform(request, state, session);
-                    
+
                     jsonWriter.key(ResponseFields.DATA);
                     jsonWriter.value(result.getResultObject());
 
-                    
+
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                     ResponseWriter.writeException(e, jsonWriter);

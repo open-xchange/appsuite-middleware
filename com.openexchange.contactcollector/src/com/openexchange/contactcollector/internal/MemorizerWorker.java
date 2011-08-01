@@ -94,7 +94,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link MemorizerWorker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemorizerWorker {
@@ -117,7 +117,7 @@ public final class MemorizerWorker {
 
     /**
      * Initializes a new {@link MemorizerWorker}.
-     * 
+     *
      * @throws OXException If thread pool service is missing
      */
     public MemorizerWorker() throws OXException {
@@ -150,7 +150,7 @@ public final class MemorizerWorker {
 
     /**
      * Submits specified task.
-     * 
+     *
      * @param memorizerTask The task
      * @throws OXException If thread pool service is missing
      */
@@ -168,7 +168,7 @@ public final class MemorizerWorker {
             if (isDone(f)) {
                 /*-
                  * Upgrade lock manually
-                 * 
+                 *
                  * Must unlock first to obtain write lock
                  */
                 readLock.unlock();
@@ -306,7 +306,7 @@ public final class MemorizerWorker {
 
     /**
      * Handles specified task
-     * 
+     *
      * @param memorizerTask The task
      */
     static void handleTask(final MemorizerTask memorizerTask) {
@@ -492,7 +492,7 @@ public final class MemorizerWorker {
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
      * If the String is not a RFC 2047 style encoded value, it is returned as-is
-     * 
+     *
      * @param value The possibly encoded value
      * @return The possibly decoded value
      * @throws UnsupportedEncodingException If an unsupported charset encoding occurs

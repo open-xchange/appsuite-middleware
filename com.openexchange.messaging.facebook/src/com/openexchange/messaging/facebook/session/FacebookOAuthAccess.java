@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookOAuthAccess} - Initializes and provides Facebook OAuth access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -80,7 +80,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets the facebook OAuth access for given facebook messaging account.
-     * 
+     *
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The facebook OAuth access; either newly created or fetched from underlying registry
@@ -133,7 +133,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Initializes a new {@link FacebookMessagingResource}.
-     * 
+     *
      * @param messagingAccount The facebook messaging account providing credentials and settings
      * @throws OXException
      */
@@ -183,12 +183,12 @@ public final class FacebookOAuthAccess {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
         }
-        
+
     }
 
     /**
      * Gets the last-accessed time stamp.
-     * 
+     *
      * @return The last-accessed time stamp
      */
     public long getLastAccessed() {
@@ -203,7 +203,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets associated OAuth account.
-     * 
+     *
      * @return The OAuth account
      */
     public OAuthAccount getOauthAccount() {
@@ -212,7 +212,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets the facebook user identifier.
-     * 
+     *
      * @return The facebook user identifier
      */
     public String getFacebookUserId() {
@@ -221,7 +221,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets the facebook user's full name.
-     * 
+     *
      * @return The facebook user's full name.
      */
     public String getFacebookUserName() {
@@ -230,7 +230,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets the Facebook OAuth service needed to sign requests.
-     * 
+     *
      * @return The Facebook OAuth service
      * @see org.scribe.oauth.OAuthService#signRequest(Token, OAuthRequest)
      */
@@ -240,7 +240,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Gets the Facebook access token needed to sign requests.
-     * 
+     *
      * @return The Facebook access token
      * @see org.scribe.oauth.OAuthService#signRequest(Token, OAuthRequest)
      */
@@ -250,7 +250,7 @@ public final class FacebookOAuthAccess {
 
     /**
      * Executes GET request for specified URL.
-     * 
+     *
      * @param url The URL
      * @return The response
      * @throws OXException If request fails

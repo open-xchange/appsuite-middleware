@@ -54,21 +54,21 @@ import com.openexchange.exception.OXException;
 /**
  * Components of the server have to implement this interface if this component needs some code to be executed during startup. If the
  * {@link #start()} method of a component executed successfully the {@link #stop()} method is guaranteed to be executed on shutdown.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface Initialization {
 
     /**
      * Called to start a component.
-     * 
+     *
      * @throws OXException If the initialization of the component is not successfully and further start of the server should be interrupted.
      */
     void start() throws OXException;
 
     /**
      * Called to stop a component. This method is only called if the {@link #start()} method was executed successfully.
-     * 
+     *
      * @throws OXException If some problem occurs. The component then remains as stopped.
      */
     void stop() throws OXException;

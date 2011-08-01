@@ -79,14 +79,17 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
         super(provider, "oxfolder_lock");
     }
 
+    @Override
     public List<Lock> findLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return new ArrayList<Lock>(loadOwnLocks(Arrays.asList(Integer.valueOf(entity)), ctx, user, userConfig).get(Integer.valueOf(entity)));
     }
 
+    @Override
     public List<FolderLock> findAllLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return findFolderLocks(entity, ctx, user, userConfig);
     }
 
+    @Override
     public List<FolderLock> findFolderLocks(final int entity, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final FolderTreeUtil treeUtil = new FolderTreeUtilImpl(getProvider());
         List<Integer> path = treeUtil.getPath(entity, ctx, user, userConfig);
@@ -123,18 +126,22 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
         }
     }
 
+    @Override
     public Map<Integer, List<FolderLock>> loadOwnLocks(final List<Integer> entities, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return findLocksByEntity(entities, ctx);
     }
 
+    @Override
     public void insertLock(final int entity, final Lock lock, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException{
         createLockForceId(entity, lock.getId(), lock.getTimeout(), lock.getScope(), lock.getType(), lock.getOwnerDescription(),ctx,user,Integer.valueOf(((FolderLock) lock).getDepth()));
     }
 
+    @Override
     public int lock(final int entity, final long timeout, final Scope scope, final Type type, final int depth, final String ownerDesc, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return createLock(entity, timeout, scope, type, ownerDesc, ctx, user, Integer.valueOf(depth));
     }
 
+    @Override
     public void unlock(final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         removeLock(id, ctx);
     }
@@ -166,6 +173,7 @@ public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implement
         return Types.INFOSTORE;
     }
 
+    @Override
     public void removeAll(final int entity, final Context context, final User userObject, final UserConfiguration userConfiguration) throws OXException {
         removeAllFromEntity(entity, context);
     }

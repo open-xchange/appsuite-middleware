@@ -14,7 +14,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * <p>
  * The detail number range in subclasses generated in transport bundles is supposed to start with <code>3000</code> and may go up to
  * <code>3999</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MailExceptionCode implements OXExceptionCode {
@@ -353,7 +353,7 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Mail attachment expired or absent.
      */
     ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
-    
+
     ;
 
     private final String message;
@@ -378,29 +378,34 @@ public enum MailExceptionCode implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public String getPrefix() {
         return "MSG";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
-    
+
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -409,7 +414,7 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -419,7 +424,7 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

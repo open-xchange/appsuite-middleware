@@ -59,7 +59,7 @@ import com.openexchange.ajp13.monitoring.AJPv13TaskMonitorMBean;
 
 /**
  * {@link AJPv13TaskMonitor} - The task monitor MBean implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonitorMBean {
@@ -100,7 +100,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
 
     /**
      * Initializes a new {@link AJPv13TaskMonitor}.
-     * 
+     *
      * @throws NotCompliantMBeanException If MBean is not compliant
      */
     public AJPv13TaskMonitor() throws NotCompliantMBeanException {
@@ -109,6 +109,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         avgProcessingTimeArr = new long[USE_TIME_COUNT];
     }
 
+    @Override
     public int getPoolSize() {
         return poolSize.get();
     }
@@ -125,6 +126,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         this.poolSize.set(poolSize);
     }
 
+    @Override
     public int getNumActive() {
         return numActive.get();
     }
@@ -137,6 +139,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         numActive.decrementAndGet();
     }
 
+    @Override
     public int getNumIdle() {
         return numIdle.get();
     }
@@ -153,6 +156,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         this.numIdle.set(numIdle);
     }
 
+    @Override
     public int getNumWaiting() {
         return numWaiting.get();
     }
@@ -165,6 +169,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         numWaiting.decrementAndGet();
     }
 
+    @Override
     public int getNumProcessing() {
         return numProcessing.get();
     }
@@ -177,6 +182,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         numProcessing.decrementAndGet();
     }
 
+    @Override
     public long getNumRequests() {
         return numRequests.get();
     }
@@ -185,6 +191,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         numRequests.incrementAndGet();
     }
 
+    @Override
     public double getAvgUseTime() {
         long duration = 0;
         for (int i = 0; i < avgUseTimeArr.length; i++) {
@@ -209,6 +216,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         }
     }
 
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
@@ -220,6 +228,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         this.maxUseTime = Math.max(maxUseTime, this.maxUseTime);
     }
 
+    @Override
     public void resetMaxUseTime() {
         useTimeLock.lock();
         try {
@@ -229,6 +238,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         }
     }
 
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
@@ -237,6 +247,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         this.minUseTime = Math.min(minUseTime, this.minUseTime);
     }
 
+    @Override
     public void resetMinUseTime() {
         useTimeLock.lock();
         try {
@@ -246,6 +257,7 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         }
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return 0;
     }
@@ -274,14 +286,17 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         this.minProcessingTime = Math.min(this.minProcessingTime, minProcessingTime);
     }
 
+    @Override
     public long getMaxProcessingTime() {
         return maxProcessingTime;
     }
 
+    @Override
     public long getMinProcessingTime() {
         return minProcessingTime;
     }
 
+    @Override
     public double getAvgProcessingTime() {
         long duration = 0;
         for (int i = 0; i < avgProcessingTimeArr.length; i++) {
@@ -290,10 +305,12 @@ public class AJPv13TaskMonitor extends StandardMBean implements AJPv13TaskMonito
         return (duration / avgProcessingTimeArr.length);
     }
 
+    @Override
     public void resetMaxProcessingTime() {
         maxProcessingTime = 0;
     }
 
+    @Override
     public void resetMinProcessingTime() {
         minProcessingTime = Long.MAX_VALUE;
     }

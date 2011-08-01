@@ -49,15 +49,17 @@
 
 package com.openexchange.ajax.requesthandler.osgiservice;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.Module;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-
 
 /**
  * {@link AJAXModuleActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
@@ -65,16 +67,29 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
     public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
     }
-    
+
     public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, false);
     }
 
     private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        
         properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
+        properties.put("multiple", multiple ? "true" : "false");
+        final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
+        if (null != moduleAnnotation) {
+            final String[] actions = moduleAnnotation.actions();
+            if (null != actions && actions.length > 0) {
+                final List<String> list = new ArrayList<String>(actions.length);
+                for (int i = 0; i < actions.length; i++) {
+                    final String action = actions[i];
+                    if (action.length() > 0) {
+                        list.add(action);
+                    }
+                }
+                properties.put("actions", list);
+            }
+        }
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }
 }

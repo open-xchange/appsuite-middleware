@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CacheingMessageAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CacheingMessageAccess implements MessagingMessageAccess {

@@ -51,7 +51,7 @@ package com.openexchange.mail.utils;
 
 /**
  * {@link DisplayMode} - The display mode
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum DisplayMode {
@@ -71,7 +71,7 @@ public enum DisplayMode {
 
     /**
      * Gets the mode's integer value
-     * 
+     *
      * @return The mode's integer value
      */
     public int getMode() {
@@ -80,7 +80,7 @@ public enum DisplayMode {
 
     /**
      * Indicates if this mode is included in given mode
-     * 
+     *
      * @param other The other mode
      * @return <code>true</code> if this mode is included in given mode; otherwise <code>false</code>
      */

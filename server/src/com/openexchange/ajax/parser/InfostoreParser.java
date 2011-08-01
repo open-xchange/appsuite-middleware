@@ -69,7 +69,7 @@ public class InfostoreParser {
         public UnknownMetadataException(final String id) {
             this.columnId = id;
         }
-        
+
         public String getColumnId() {
             return columnId;
         }
@@ -77,7 +77,7 @@ public class InfostoreParser {
     }
 
     public DocumentMetadata getDocumentMetadata(final String json) throws JSONException, OXException {
-        
+
         final DocumentMetadata m = new JSONDocumentMetadata(json);
         return m;
     }
@@ -103,7 +103,7 @@ public class InfostoreParser {
 
     public Metadata[] findPresentFields(final String updateBody) throws UnknownMetadataException, JSONException{
         final JSONObject obj = new JSONObject(updateBody);
-        
+
         final Metadata[] metadata = new Metadata[obj.length()];
         int i = 0;
         boolean shrink = false;

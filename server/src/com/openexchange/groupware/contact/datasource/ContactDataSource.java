@@ -80,7 +80,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link ContactDataSource} - A data source for contacts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactDataSource implements DataSource {
@@ -98,6 +98,7 @@ public final class ContactDataSource implements DataSource {
         super();
     }
 
+    @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type) && !byte[].class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
@@ -200,10 +201,12 @@ public final class ContactDataSource implements DataSource {
         }
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }

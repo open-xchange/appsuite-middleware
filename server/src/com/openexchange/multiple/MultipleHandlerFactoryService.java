@@ -52,14 +52,14 @@ package com.openexchange.multiple;
 /**
  * {@link MultipleHandlerFactoryService} - Provides {@link MultipleHandler} instances for a certain module indicated by
  * {@link #getSupportedModule()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MultipleHandlerFactoryService {
 
     /**
      * Gets the string value of the module supported by this handler.
-     * 
+     *
      * @return The string value of the module supported by this handler
      */
     public String getSupportedModule();
@@ -68,7 +68,7 @@ public interface MultipleHandlerFactoryService {
      * Returns a newly created multiple handler.
      * <p>
      * The general contract in using a {@link MultipleHandler} is as follows:
-     * 
+     *
      * <pre>
      * MultipleHandlerFactoryService factoryService = ...;
      * MultipleHandler myHandler = factoryService.createMultipleHandler();
@@ -80,7 +80,7 @@ public interface MultipleHandlerFactoryService {
      *  myHandler.close();
      * }
      * </pre>
-     * 
+     *
      * @return A newly created multiple handler to perform a single multiple request.
      */
     public MultipleHandler createMultipleHandler();

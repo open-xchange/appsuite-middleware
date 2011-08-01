@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ThreadPoolInformation} - The thread pool information implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolInformation extends StandardMBean implements ThreadPoolInformationMBean {
@@ -65,7 +65,7 @@ public final class ThreadPoolInformation extends StandardMBean implements Thread
 
     /**
      * Initializes a new {@link ThreadPoolInformation}.
-     * 
+     *
      * @param threadPoolService The thread pool service
      * @throws NotCompliantMBeanException If the MBean interface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.

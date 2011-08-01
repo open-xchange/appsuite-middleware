@@ -54,17 +54,17 @@ import java.util.Date;
 public class ContactSearchObject extends SearchObject {
 
     private String surname = null;
-    
+
     private String yomiSurname = null;
 
     private String displayName = null;
 
     private String givenname = null;
-    
+
     private String yomiGivenname = null;
 
     private String company = null;
-    
+
     private String yomiCompany = null;
 
 	private String email1 = null;
@@ -72,13 +72,13 @@ public class ContactSearchObject extends SearchObject {
     private String email2 = null;
 
     private String email3 = null;
-    
+
     private String city_business = null;
-    
+
     private String street_business = null;
-    
+
     private String department = null;
-    
+
     private String from = null, to = null;
 
     private int ignoreOwn = 0;
@@ -172,7 +172,7 @@ public class ContactSearchObject extends SearchObject {
     public void setEmail3(final String email3) {
         this.email3 = email3;
     }
-    
+
     public String getDepartment() {
         return department;
     }
@@ -188,7 +188,7 @@ public class ContactSearchObject extends SearchObject {
     public void setCityBusiness(final String city_business) {
         this.city_business = city_business;
     }
-    
+
     public String getStreetBusiness() {
         return street_business;
     }
@@ -196,7 +196,7 @@ public class ContactSearchObject extends SearchObject {
     public void setStreetBusiness(final String street_business) {
         this.street_business = street_business;
     }
-    
+
     public Date[] getCreationDateRange() {
         return creationDateRange;
     }
@@ -324,7 +324,7 @@ public class ContactSearchObject extends SearchObject {
     public final void setStartLetter(final boolean startLetter) {
         this.startLetter = startLetter;
     }
-    
+
     public String getYomiLastName() {
 		return yomiSurname;
 	}

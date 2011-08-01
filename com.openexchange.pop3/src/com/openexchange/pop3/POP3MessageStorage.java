@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link POP3MessageStorage} - The POP3 message storage implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3MessageStorage extends MailMessageStorage {
@@ -96,7 +96,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     /**
      * Initializes a new {@link POP3MessageStorage}.
-     * 
+     *
      * @param pop3Storage The POP3 storage
      * @param accountId The account ID
      * @param session The session
@@ -254,7 +254,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instances
      * @throws OXException If mail account cannot be obtained
      */
@@ -271,7 +271,7 @@ public final class POP3MessageStorage extends MailMessageStorage {
 
     /**
      * Sets account ID and name in given instance of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instance
      * @throws OXException If mail account cannot be obtained
      */

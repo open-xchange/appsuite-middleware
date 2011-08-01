@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -35,8 +35,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -50,11 +50,11 @@ public class GetSystemAPISettingsResponse {
 
     /**
      * Gets the value of the access property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetSystemAPISettingsResponse.Access }
-     *     
+     *
      */
     public GetSystemAPISettingsResponse.Access getAccess() {
         return access;
@@ -62,11 +62,11 @@ public class GetSystemAPISettingsResponse {
 
     /**
      * Sets the value of the access property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetSystemAPISettingsResponse.Access }
-     *     
+     *
      */
     public void setAccess(GetSystemAPISettingsResponse.Access value) {
         this.access = value;
@@ -75,9 +75,9 @@ public class GetSystemAPISettingsResponse {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -90,8 +90,8 @@ public class GetSystemAPISettingsResponse {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -105,7 +105,7 @@ public class GetSystemAPISettingsResponse {
 
         /**
          * Gets the value of the legacyAuth property.
-         * 
+         *
          */
         public boolean isLegacyAuth() {
             return legacyAuth;
@@ -113,7 +113,7 @@ public class GetSystemAPISettingsResponse {
 
         /**
          * Sets the value of the legacyAuth property.
-         * 
+         *
          */
         public void setLegacyAuth(boolean value) {
             this.legacyAuth = value;
@@ -121,7 +121,7 @@ public class GetSystemAPISettingsResponse {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          */
         public boolean isStatus() {
             return status;
@@ -129,7 +129,7 @@ public class GetSystemAPISettingsResponse {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          */
         public void setStatus(boolean value) {
             this.status = value;

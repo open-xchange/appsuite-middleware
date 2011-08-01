@@ -71,8 +71,8 @@ public final class ContextTabularData implements TabularData {
 
     /**
      * Initializes a new {@link ContextTabularData}.
-     * @param userService 
-     * @param contextService 
+     * @param userService
+     * @param contextService
      */
     public ContextTabularData(ContextService contextService, UserService userService) {
         super();
@@ -80,50 +80,62 @@ public final class ContextTabularData implements TabularData {
         this.userService = userService;
     }
 
+    @Override
     public Object[] calculateIndex(CompositeData value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean containsKey(Object[] key) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean containsValue(CompositeData value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public CompositeData get(Object[] key) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public TabularType getTabularType() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public boolean isEmpty() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Set keySet() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void put(CompositeData value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void putAll(CompositeData[] values) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public CompositeData remove(Object[] key) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int size() {
         throw new UnsupportedOperationException();
     }
@@ -131,6 +143,7 @@ public final class ContextTabularData implements TabularData {
     /* (non-Javadoc)
      * @see javax.management.openmbean.TabularData#values()
      */
+    @Override
     public Collection values() {
         // TODO Auto-generated method stub
         return null;

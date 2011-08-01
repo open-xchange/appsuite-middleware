@@ -61,7 +61,7 @@ import com.openexchange.groupware.dataRetrieval.DataRetrievalExceptionCodes;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class DataProviderRegistry {
-    
+
     public DataProvider getProvider(final String id) throws OXException {
         final List<DataProvider> providers = getProviders();
         for (final DataProvider dataProvider : providers) {

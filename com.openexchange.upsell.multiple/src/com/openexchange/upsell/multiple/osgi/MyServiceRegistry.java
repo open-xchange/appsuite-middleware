@@ -52,8 +52,8 @@ package com.openexchange.upsell.multiple.osgi;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
-* {@link MyServiceRegistry} - A registry for services 
-* 
+* {@link MyServiceRegistry} - A registry for services
+*
 */
 public final class MyServiceRegistry {
 
@@ -61,7 +61,7 @@ public final class MyServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

@@ -59,7 +59,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
 
 /**
  * {@link XAJPv13CPingRequest} - Responds quickly with a CPong reply.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13CPingRequest extends XAJPv13Request {
@@ -70,7 +70,7 @@ public final class XAJPv13CPingRequest extends XAJPv13Request {
 
     /**
      * Initializes a new {@link XAJPv13CPingRequest}
-     * 
+     *
      * @param payloadData The payload data with prefix code already consumed
      */
     public XAJPv13CPingRequest(final ByteBuffer payloadData) {

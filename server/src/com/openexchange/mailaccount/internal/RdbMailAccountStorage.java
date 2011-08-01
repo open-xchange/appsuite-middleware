@@ -101,7 +101,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbMailAccountStorage} - The relational database implementation of mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbMailAccountStorage implements MailAccountStorageService {
@@ -114,10 +114,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final int TYPE_VARCHAR = Types.VARCHAR;
 
     private static final String SELECT_MAIL_ACCOUNT =
-        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
+        "SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_TRANSPORT_ACCOUNT =
-        "SELECT name, url, login, password, send_addr, default_flag, personal FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
+        "SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String SELECT_MAIL_ACCOUNTS = "SELECT id FROM user_mail_account WHERE cid = ? AND user = ? ORDER BY id";
 
@@ -133,16 +133,16 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private static final String DELETE_TRANSPORT_ACCOUNT = "DELETE FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String UPDATE_MAIL_ACCOUNT =
-        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
+        "UPDATE user_mail_account SET name = ?, url = ?, login = ?, password = ?, primary_addr = ?, spam_handler = ?, trash = ?, sent = ?, drafts = ?, spam = ?, confirmed_spam = ?, confirmed_ham = ?, unified_inbox = ?, trash_fullname = ?, sent_fullname = ?, drafts_fullname = ?, spam_fullname = ?, confirmed_spam_fullname = ?, confirmed_ham_fullname = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String INSERT_MAIL_ACCOUNT =
-        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_TRANSPORT_ACCOUNT =
-        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ? WHERE cid = ? AND id = ? AND user = ?";
+        "UPDATE user_transport_account SET name = ?, url = ?, login = ?, password = ?, send_addr = ?, personal = ?, replyTo = ? WHERE cid = ? AND id = ? AND user = ?";
 
     private static final String INSERT_TRANSPORT_ACCOUNT =
-        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal) VALUES (?,?,?,?,?,?,?,?,?,?)";
+        "INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String UPDATE_UNIFIED_INBOX_FLAG =
         "UPDATE user_mail_account SET unified_inbox = ? WHERE cid = ? AND id = ? AND user = ?";
@@ -177,13 +177,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public void invalidateMailAccount(final int id, final int user, final int cid) throws OXException {
         // Nothing to do
     }
 
     /**
      * Gets the POP3 storage folders for specified session.
-     * 
+     *
      * @param session The session
      * @return The POP3 storage folder full names
      * @throws OXException If an error occurs
@@ -291,6 +292,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             } else {
                 mailAccount.setPersonal(pers);
             }
+            final String replyTo = result.getString(22);
+            if (result.wasNull()) {
+                mailAccount.setReplyTo(null);
+            } else {
+                mailAccount.setReplyTo(replyTo);
+            }
             mailAccount.setUserId(user);
             /*
              * Fill properties
@@ -343,6 +350,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!result.wasNull()) {
                     mailAccount.setPersonal(pers);
                 }
+                final String replyTo = result.getString(8);
+                if (!result.wasNull()) {
+                    mailAccount.setReplyTo(replyTo);
+                }
             } else {
                 // throw MailAccountExceptionMessages.NOT_FOUND, I(id), I(user), I(cid));
                 mailAccount.setTransportServer((String) null);
@@ -387,10 +398,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         super();
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         deleteMailAccount(id, properties, user, cid, false);
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary) throws OXException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
@@ -415,6 +428,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
@@ -558,6 +572,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return getMailAccount(MailAccount.DEFAULT_ID, user, cid, con);
     }
 
+    @Override
     public MailAccount getDefaultMailAccount(final int user, final int cid) throws OXException {
         return getMailAccount(MailAccount.DEFAULT_ID, user, cid);
     }
@@ -569,6 +584,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return retval;
     }
 
+    @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             final Connection rcon = Database.get(cid, false);
@@ -593,6 +609,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid) throws OXException {
         final Connection con = Database.get(cid, false);
         try {
@@ -602,6 +619,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount[] getUserMailAccounts(final int user, final int cid, final Connection con) throws OXException {
         final int[] ids = getUserMailAccountIDs(user, cid, con);
         final MailAccount[] retval = new MailAccount[ids.length];
@@ -647,6 +665,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return ids;
     }
 
+    @Override
     public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
         final MailAccount[] retval = new MailAccount[idsAndUsers.length];
@@ -694,6 +713,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return retval;
     }
 
+    @Override
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveLogin2IDs(login, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
@@ -706,6 +726,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return l.toArray(new MailAccount[l.size()]);
     }
 
+    @Override
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws OXException {
         final int[][] idsAndUsers = resolvePrimaryAddr2IDs(primaryAddress, cid);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
@@ -753,6 +774,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return idsAndUsers;
     }
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
         final Connection con = Database.get(cid, true);
         try {
@@ -807,8 +829,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     private static final EnumSet<Attribute> PRIMARY_EDITABLE = EnumSet.of(
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
-        Attribute.PERSONAL_LITERAL);
+        Attribute.PERSONAL_LITERAL,
+        Attribute.REPLY_TO_LITERAL);
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
         final boolean rename;
         if (attributes.contains(Attribute.NAME_LITERAL)) {
@@ -825,7 +849,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
             final boolean containsPersonal = attributes.contains(Attribute.PERSONAL_LITERAL);
-            if (!containsUnifiedInbox && !containsPersonal) {
+            final boolean containsReplyTo = attributes.contains(Attribute.REPLY_TO_LITERAL);
+            if (!containsUnifiedInbox && !containsPersonal && !containsReplyTo) {
                 /*
                  * Another attribute must not be changed
                  */
@@ -879,6 +904,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                  * OK, update PERSONAL string.
                  */
                 updatePersonal(mailAccount.getPersonal(), MailAccount.DEFAULT_ID, user, cid, con);
+            }
+            if (containsReplyTo) {
+                /*
+                 * OK, update reply-to string.
+                 */
+                updateReplyTo(mailAccount.getReplyTo(), MailAccount.DEFAULT_ID, user, cid, con);
             }
         } else {
             /*
@@ -959,6 +990,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             } else {
                                 stmt.setString(pos++, personal);
                             }
+                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                            final String replyTo = mailAccount.getReplyTo();
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
+                            }
                         } else if (DEFAULT.contains(attribute)) {
                             if (DEFAULT_FULL_NAMES.contains(attribute)) {
                                 final String fullName =
@@ -1029,6 +1067,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
+                            }
+                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                            final String replyTo = mailAccount.getReplyTo();
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
                             }
                         } else {
                             stmt.setObject(pos++, value);
@@ -1133,6 +1178,40 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    private void updateReplyTo(final String replyTo, final int id, final int user, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
+            int pos = 1;
+            if (null == replyTo) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            // Transport table, too
+            stmt = con.prepareStatement("UPDATE user_transport_account SET replyTo = ? WHERE cid = ? AND id = ? AND user = ?");
+            pos = 1;
+            if (null == replyTo) {
+                stmt.setNull(pos++, TYPE_VARCHAR);
+            } else {
+                stmt.setString(pos++, replyTo);
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, id);
+            stmt.setInt(pos++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     private void updateProperty(final int cid, final int user, final int accountId, final String name, final String newValue, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -1204,6 +1283,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return false;
     }
 
+    @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE.create(I(user), I(cid));
@@ -1261,6 +1341,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, personal);
                 }
+                final String replyTo = mailAccount.getReplyTo();
+                if (isEmpty(replyTo)) {
+                    stmt.setNull(pos++, TYPE_VARCHAR);
+                } else {
+                    stmt.setString(pos++, replyTo);
+                }
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
                 stmt.setLong(pos++, user);
@@ -1287,6 +1373,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
+                }
+                final String replyTo = mailAccount.getReplyTo();
+                if (isEmpty(replyTo)) {
+                    stmt.setNull(pos++, TYPE_VARCHAR);
+                } else {
+                    stmt.setString(pos++, replyTo);
                 }
                 stmt.setLong(pos++, cid);
                 stmt.setLong(pos++, mailAccount.getId());
@@ -1337,6 +1429,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
         final int cid = ctx.getContextId();
         // Check for duplicate
@@ -1450,6 +1543,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, personal);
                 }
+                final String replyTo = mailAccount.getReplyTo();
+                if (isEmpty(replyTo)) {
+                    stmt.setNull(pos++, TYPE_VARCHAR);
+                } else {
+                    stmt.setString(pos++, replyTo);
+                }
                 stmt.executeUpdate();
             }
             final String transportURL = mailAccount.generateTransportServerURL();
@@ -1490,6 +1589,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     stmt.setNull(pos++, TYPE_VARCHAR);
                 } else {
                     stmt.setString(pos++, personal);
+                }
+                final String replyTo = mailAccount.getReplyTo();
+                if (isEmpty(replyTo)) {
+                    stmt.setNull(pos++, TYPE_VARCHAR);
+                } else {
+                    stmt.setString(pos++, replyTo);
                 }
                 stmt.executeUpdate();
             }
@@ -1532,6 +1637,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return id;
     }
 
+    @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
         final int cid = ctx.getContextId();
         final Connection con = Database.get(cid, true);
@@ -1556,6 +1662,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return retval;
     }
 
+    @Override
     public int[] getByHostNames(final Collection<String> hostNames, final int user, final int cid) throws OXException {
         final Connection con = Database.get(cid, false);
         try {
@@ -1604,6 +1711,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public int getByPrimaryAddress(final String primaryAddress, final int user, final int cid) throws OXException {
         final Connection con = Database.get(cid, false);
         try {
@@ -1768,6 +1876,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
     public MailAccount getTransportAccountForID(final int id, final int user, final int cid) throws OXException {
         final MailAccount account = getMailAccount(id, user, cid);
         if (null == account.getTransportServer()) {
@@ -1776,6 +1885,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return account;
     }
 
+    @Override
     public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
@@ -1832,6 +1942,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return null;
     }
 
+    @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         Connection con = null;
         PreparedStatement select = null;
@@ -1946,7 +2057,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     /**
      * Checks if specified name contains an invalid character.
-     * 
+     *
      * @param name The name to check
      * @return <code>true</code> if name contains an invalid character; otherwsie <code>false</code>
      */

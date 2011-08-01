@@ -66,11 +66,11 @@ public class SearchAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.COLUMNS);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final SearchIterator<File> results = fileAccess.search(request.getSearchQuery(), request.getColumns(), request.getSearchFolderId(), request.getSortingField(), request.getSortingOrder(), request.getStart(), request.getEnd());
-        
+
         return results(results, 0l, request);
     }
 

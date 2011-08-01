@@ -108,7 +108,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeReply} - MIME message reply.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeReply {
@@ -126,7 +126,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     * 
+     *
      * @param originalMail The referenced original mail
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
      * @param session The session containing needed user data
@@ -140,7 +140,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     * 
+     *
      * @param originalMail The referenced original mail
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
      * @param session The session containing needed user data
@@ -188,7 +188,7 @@ public final class MimeReply {
 
     /**
      * Composes a reply message from specified original message based on MIME objects from <code>JavaMail</code> API.
-     * 
+     *
      * @param originalMsg The referenced original message
      * @param msgref The message reference
      * @param replyAll <code>true</code> to reply to all; otherwise <code>false</code>
@@ -402,7 +402,7 @@ public final class MimeReply {
             final MailMessage replyMail;
             /*-
              * Withhold inline images. Those images are inserted through image service framework on message transport
-             * 
+             *
             if (retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL) && MIMEMessageUtility.hasEmbeddedImages(replyText)) {
                 // Prepare to append inline content
                 final Multipart multiRelated = new MimeMultipart("related");
@@ -464,7 +464,7 @@ public final class MimeReply {
     /**
      * Filters given address array against given filter set. All addresses currently contained in filter set are removed from specified
      * <code>addrs</code> and all addresses not contained in filter set are added to filter set for future invocations.
-     * 
+     *
      * @param filter The current address filter
      * @param addrs The address list to filter
      * @return The filtered set of addresses
@@ -499,7 +499,7 @@ public final class MimeReply {
 
     /**
      * Gathers all text bodies and appends them to given text builder.
-     * 
+     *
      * @param msg The root message
      * @param retvalContentType The return value's content type
      * @param strHelper The i18n string helper
@@ -590,7 +590,7 @@ public final class MimeReply {
 
     /**
      * Gathers all text bodies and appends them to given text builder.
-     * 
+     *
      * @return <code>true</code> if any text was found; otherwise <code>false</code>
      * @throws OXException If a mail error occurs
      * @throws MessagingException If a messaging error occurs

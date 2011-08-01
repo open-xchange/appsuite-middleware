@@ -54,7 +54,7 @@ import com.openexchange.systemname.SystemNameService;
 
 /**
  * {@link JVMRouteSystemNameImpl} - The {@link SystemNameService system name} implementation that uses the JVM route.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JVMRouteSystemNameImpl implements SystemNameService {
@@ -63,13 +63,14 @@ public final class JVMRouteSystemNameImpl implements SystemNameService {
 
     /**
      * Initializes a new {@link JVMRouteSystemNameImpl}
-     * @param configurationService 
+     * @param configurationService
      */
     public JVMRouteSystemNameImpl(ConfigurationService configurationService) {
         super();
         this.configurationService = configurationService;
     }
 
+    @Override
     public String getSystemName() {
         return configurationService.getProperty("AJP_JVM_ROUTE", "OX1");
     }

@@ -53,7 +53,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link FullnameArgument} - Represents a full name argument; e.g. &quot;default347/INBOX/folder3&quot;.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FullnameArgument {
@@ -64,7 +64,7 @@ public final class FullnameArgument {
 
     /**
      * Initializes a new {@link FullnameArgument} with default account ID.
-     * 
+     *
      * @param fullname The full name
      */
     public FullnameArgument(final String fullname) {
@@ -73,7 +73,7 @@ public final class FullnameArgument {
 
     /**
      * Initializes a new {@link FullnameArgument}.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The full name
      */
@@ -85,7 +85,7 @@ public final class FullnameArgument {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -94,7 +94,7 @@ public final class FullnameArgument {
 
     /**
      * Gets the full name.
-     * 
+     *
      * @return The full name
      */
     public String getFullname() {

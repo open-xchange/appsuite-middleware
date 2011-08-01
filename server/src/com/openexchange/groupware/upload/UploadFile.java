@@ -60,28 +60,28 @@ public interface UploadFile {
 
     /**
      * Gets the file's field name in multipart upload.
-     * 
+     *
      * @return The file's field name in multipart upload.
      */
     String getFieldName();
 
     /**
      * Sets the file's field name in multipart upload.
-     * 
+     *
      * @param fieldName The file's field name in multipart upload.
      */
     void setFieldName(final String fieldName);
 
     /**
      * Gets the file's content type.
-     * 
+     *
      * @return The file's content type.
      */
     String getContentType();
 
     /**
      * Sets the file's content type.
-     * 
+     *
      * @param contentType The file's content type.
      */
     void setContentType(final String contentType);
@@ -93,7 +93,7 @@ public interface UploadFile {
      * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or <code>C:\MyFolderOnDisk\myfile.dat</code>
      * <p>
      * To ensure to deal with the expected file name call {@link #getPreparedFileName()}.
-     * 
+     *
      * @see #getPreparedFileName()
      * @return The file name.
      */
@@ -101,56 +101,56 @@ public interface UploadFile {
 
     /**
      * Gets the prepared file name; meaning prepending path and encoding information omitted.
-     * 
+     *
      * @return The prepared file name
      */
     String getPreparedFileName();
 
     /**
      * Sets the file name as provided through upload form.
-     * 
+     *
      * @param fileName The file name
      */
     void setFileName(final String fileName);
 
     /**
      * Gets the file size in bytes.
-     * 
+     *
      * @return The file size in bytes.
      */
     long getSize();
 
     /**
      * Sets the file size in bytes.
-     * 
+     *
      * @param size The file size in bytes.
      */
     void setSize(final long size);
 
     /**
      * Gets the associated unique temporary file on disk.
-     * 
+     *
      * @return The associated unique temporary file on disk.
      */
     File getTmpFile();
 
     /**
      * Sets the associated unique temporary file on disk.
-     * 
+     *
      * @param tmpFile The associated unique temporary file on disk.
      */
     void setTmpFile(final File tmpFile);
 
     /**
      * Gets the next homonymous file.
-     * 
+     *
      * @return The next homonymous file.
      */
     UploadFile getHomonymous();
 
     /**
      * Sets the next homonymous file.
-     * 
+     *
      * @param homonymous The next homonymous file.
      */
     void setHomonymous(final UploadFile homonymous);

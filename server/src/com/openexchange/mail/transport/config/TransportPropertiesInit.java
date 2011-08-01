@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link TransportPropertiesInit} - Initializes global configuration implementation for transport system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportPropertiesInit implements Initialization {
@@ -80,6 +80,7 @@ public final class TransportPropertiesInit implements Initialization {
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         if (started.get()) {
             LOG.error(this.getClass().getName() + " already started");
@@ -89,6 +90,7 @@ public final class TransportPropertiesInit implements Initialization {
         started.set(true);
     }
 
+    @Override
     public void stop() {
         if (!started.get()) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");

@@ -15,11 +15,11 @@ import com._4psa.common_xsd._2_5.UnlimitedUInt;
 
 /**
  * Queue extension data
- * 
+ *
  * <p>Java class for Queue complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Queue">
  *   &lt;complexContent>
@@ -111,8 +111,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUInt;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Queue", propOrder = {
@@ -216,11 +216,11 @@ public class Queue
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -228,11 +228,11 @@ public class Queue
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -240,11 +240,11 @@ public class Queue
 
     /**
      * Gets the value of the size property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getSize() {
         return size;
@@ -252,11 +252,11 @@ public class Queue
 
     /**
      * Sets the value of the size property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setSize(UnlimitedUInt value) {
         this.size = value;
@@ -264,11 +264,11 @@ public class Queue
 
     /**
      * Gets the value of the distribution property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDistribution() {
         return distribution;
@@ -276,11 +276,11 @@ public class Queue
 
     /**
      * Sets the value of the distribution property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDistribution(String value) {
         this.distribution = value;
@@ -288,11 +288,11 @@ public class Queue
 
     /**
      * Gets the value of the waitFor property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigInteger> getWaitFor() {
         return waitFor;
@@ -300,23 +300,23 @@ public class Queue
 
     /**
      * Sets the value of the waitFor property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public void setWaitFor(JAXBElement<BigInteger> value) {
-        this.waitFor = ((JAXBElement<BigInteger> ) value);
+        this.waitFor = value;
     }
 
     /**
      * Gets the value of the service property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigDecimal> getService() {
         return service;
@@ -324,23 +324,23 @@ public class Queue
 
     /**
      * Sets the value of the service property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}
-     *     
+     *
      */
     public void setService(JAXBElement<BigDecimal> value) {
-        this.service = ((JAXBElement<BigDecimal> ) value);
+        this.service = value;
     }
 
     /**
      * Gets the value of the record property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRecord() {
         return record;
@@ -348,11 +348,11 @@ public class Queue
 
     /**
      * Sets the value of the record property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRecord(Boolean value) {
         this.record = value;
@@ -360,11 +360,11 @@ public class Queue
 
     /**
      * Gets the value of the recordStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getRecordStorage() {
         return recordStorage;
@@ -372,11 +372,11 @@ public class Queue
 
     /**
      * Sets the value of the recordStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setRecordStorage(UnlimitedUInt value) {
         this.recordStorage = value;
@@ -384,11 +384,11 @@ public class Queue
 
     /**
      * Gets the value of the agentMaxRings property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAgentMaxRings() {
         return agentMaxRings;
@@ -396,11 +396,11 @@ public class Queue
 
     /**
      * Sets the value of the agentMaxRings property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAgentMaxRings(BigInteger value) {
         this.agentMaxRings = value;
@@ -408,11 +408,11 @@ public class Queue
 
     /**
      * Gets the value of the callBetween property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigInteger> getCallBetween() {
         return callBetween;
@@ -420,23 +420,23 @@ public class Queue
 
     /**
      * Sets the value of the callBetween property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public void setCallBetween(JAXBElement<BigInteger> value) {
-        this.callBetween = ((JAXBElement<BigInteger> ) value);
+        this.callBetween = value;
     }
 
     /**
      * Gets the value of the delayFor property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDelayFor() {
         return delayFor;
@@ -444,11 +444,11 @@ public class Queue
 
     /**
      * Sets the value of the delayFor property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDelayFor(BigInteger value) {
         this.delayFor = value;
@@ -456,11 +456,11 @@ public class Queue
 
     /**
      * Gets the value of the pickupAnnounceSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPickupAnnounceSnd() {
         return pickupAnnounceSnd;
@@ -468,11 +468,11 @@ public class Queue
 
     /**
      * Sets the value of the pickupAnnounceSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPickupAnnounceSnd(String value) {
         this.pickupAnnounceSnd = value;
@@ -480,11 +480,11 @@ public class Queue
 
     /**
      * Gets the value of the reportWaitTime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isReportWaitTime() {
         return reportWaitTime;
@@ -492,11 +492,11 @@ public class Queue
 
     /**
      * Sets the value of the reportWaitTime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setReportWaitTime(Boolean value) {
         this.reportWaitTime = value;
@@ -504,11 +504,11 @@ public class Queue
 
     /**
      * Gets the value of the restartTimer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRestartTimer() {
         return restartTimer;
@@ -516,11 +516,11 @@ public class Queue
 
     /**
      * Sets the value of the restartTimer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRestartTimer(Boolean value) {
         this.restartTimer = value;
@@ -528,11 +528,11 @@ public class Queue
 
     /**
      * Gets the value of the welcomeSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isWelcomeSndActive() {
         return welcomeSndActive;
@@ -540,11 +540,11 @@ public class Queue
 
     /**
      * Sets the value of the welcomeSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setWelcomeSndActive(Boolean value) {
         this.welcomeSndActive = value;
@@ -552,11 +552,11 @@ public class Queue
 
     /**
      * Gets the value of the welcomeSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getWelcomeSnd() {
         return welcomeSnd;
@@ -564,11 +564,11 @@ public class Queue
 
     /**
      * Sets the value of the welcomeSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setWelcomeSnd(String value) {
         this.welcomeSnd = value;
@@ -576,11 +576,11 @@ public class Queue
 
     /**
      * Gets the value of the announcePosition property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnouncePosition() {
         return announcePosition;
@@ -588,11 +588,11 @@ public class Queue
 
     /**
      * Sets the value of the announcePosition property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnouncePosition(Boolean value) {
         this.announcePosition = value;
@@ -600,11 +600,11 @@ public class Queue
 
     /**
      * Gets the value of the announcePosFreq property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAnnouncePosFreq() {
         return announcePosFreq;
@@ -612,11 +612,11 @@ public class Queue
 
     /**
      * Sets the value of the announcePosFreq property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAnnouncePosFreq(BigInteger value) {
         this.announcePosFreq = value;
@@ -624,11 +624,11 @@ public class Queue
 
     /**
      * Gets the value of the announceHoldTime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnounceHoldTime() {
         return announceHoldTime;
@@ -636,11 +636,11 @@ public class Queue
 
     /**
      * Sets the value of the announceHoldTime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnounceHoldTime(Boolean value) {
         this.announceHoldTime = value;
@@ -648,11 +648,11 @@ public class Queue
 
     /**
      * Gets the value of the periodicAnnounceFreq property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPeriodicAnnounceFreq() {
         return periodicAnnounceFreq;
@@ -660,11 +660,11 @@ public class Queue
 
     /**
      * Sets the value of the periodicAnnounceFreq property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPeriodicAnnounceFreq(BigInteger value) {
         this.periodicAnnounceFreq = value;
@@ -672,11 +672,11 @@ public class Queue
 
     /**
      * Gets the value of the exitToExtension property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExitToExtension() {
         return exitToExtension;
@@ -684,11 +684,11 @@ public class Queue
 
     /**
      * Sets the value of the exitToExtension property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExitToExtension(BigInteger value) {
         this.exitToExtension = value;
@@ -696,11 +696,11 @@ public class Queue
 
     /**
      * Gets the value of the musicOnHoldFolder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMusicOnHoldFolder() {
         return musicOnHoldFolder;
@@ -708,11 +708,11 @@ public class Queue
 
     /**
      * Sets the value of the musicOnHoldFolder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMusicOnHoldFolder(String value) {
         this.musicOnHoldFolder = value;
@@ -720,11 +720,11 @@ public class Queue
 
     /**
      * Gets the value of the thereAreSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getThereAreSnd() {
         return thereAreSnd;
@@ -732,11 +732,11 @@ public class Queue
 
     /**
      * Sets the value of the thereAreSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setThereAreSnd(String value) {
         this.thereAreSnd = value;
@@ -744,11 +744,11 @@ public class Queue
 
     /**
      * Gets the value of the holdTimeSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getHoldTimeSnd() {
         return holdTimeSnd;
@@ -756,11 +756,11 @@ public class Queue
 
     /**
      * Sets the value of the holdTimeSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setHoldTimeSnd(String value) {
         this.holdTimeSnd = value;
@@ -768,11 +768,11 @@ public class Queue
 
     /**
      * Gets the value of the youAreNextSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getYouAreNextSnd() {
         return youAreNextSnd;
@@ -780,11 +780,11 @@ public class Queue
 
     /**
      * Sets the value of the youAreNextSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setYouAreNextSnd(String value) {
         this.youAreNextSnd = value;
@@ -792,11 +792,11 @@ public class Queue
 
     /**
      * Gets the value of the thankYouSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getThankYouSnd() {
         return thankYouSnd;
@@ -804,11 +804,11 @@ public class Queue
 
     /**
      * Sets the value of the thankYouSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setThankYouSnd(String value) {
         this.thankYouSnd = value;
@@ -816,11 +816,11 @@ public class Queue
 
     /**
      * Gets the value of the callsWaitingSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallsWaitingSnd() {
         return callsWaitingSnd;
@@ -828,11 +828,11 @@ public class Queue
 
     /**
      * Sets the value of the callsWaitingSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallsWaitingSnd(String value) {
         this.callsWaitingSnd = value;
@@ -840,11 +840,11 @@ public class Queue
 
     /**
      * Gets the value of the reportHoldSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getReportHoldSnd() {
         return reportHoldSnd;
@@ -852,11 +852,11 @@ public class Queue
 
     /**
      * Sets the value of the reportHoldSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setReportHoldSnd(String value) {
         this.reportHoldSnd = value;
@@ -864,11 +864,11 @@ public class Queue
 
     /**
      * Gets the value of the periodicAnnounceSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPeriodicAnnounceSnd() {
         return periodicAnnounceSnd;
@@ -876,11 +876,11 @@ public class Queue
 
     /**
      * Sets the value of the periodicAnnounceSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPeriodicAnnounceSnd(String value) {
         this.periodicAnnounceSnd = value;
@@ -888,11 +888,11 @@ public class Queue
 
     /**
      * Gets the value of the secondSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSecondSnd() {
         return secondSnd;
@@ -900,11 +900,11 @@ public class Queue
 
     /**
      * Sets the value of the secondSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSecondSnd(String value) {
         this.secondSnd = value;
@@ -912,11 +912,11 @@ public class Queue
 
     /**
      * Gets the value of the minuteSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMinuteSnd() {
         return minuteSnd;
@@ -924,11 +924,11 @@ public class Queue
 
     /**
      * Sets the value of the minuteSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMinuteSnd(String value) {
         this.minuteSnd = value;
@@ -936,11 +936,11 @@ public class Queue
 
     /**
      * Gets the value of the timeoutStatus property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTimeoutStatus() {
         return timeoutStatus;
@@ -948,11 +948,11 @@ public class Queue
 
     /**
      * Sets the value of the timeoutStatus property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTimeoutStatus(Boolean value) {
         this.timeoutStatus = value;
@@ -960,11 +960,11 @@ public class Queue
 
     /**
      * Gets the value of the timeout property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimeout() {
         return timeout;
@@ -972,11 +972,11 @@ public class Queue
 
     /**
      * Sets the value of the timeout property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimeout(BigInteger value) {
         this.timeout = value;
@@ -984,11 +984,11 @@ public class Queue
 
     /**
      * Gets the value of the timeoutParam property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimeoutParam() {
         return timeoutParam;
@@ -996,11 +996,11 @@ public class Queue
 
     /**
      * Sets the value of the timeoutParam property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimeoutParam(BigInteger value) {
         this.timeoutParam = value;
@@ -1008,11 +1008,11 @@ public class Queue
 
     /**
      * Gets the value of the allowCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAllowCalls() {
         return allowCalls;
@@ -1020,11 +1020,11 @@ public class Queue
 
     /**
      * Sets the value of the allowCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAllowCalls(String value) {
         this.allowCalls = value;
@@ -1032,11 +1032,11 @@ public class Queue
 
     /**
      * Gets the value of the emptyStatus property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isEmptyStatus() {
         return emptyStatus;
@@ -1044,11 +1044,11 @@ public class Queue
 
     /**
      * Sets the value of the emptyStatus property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setEmptyStatus(Boolean value) {
         this.emptyStatus = value;
@@ -1056,11 +1056,11 @@ public class Queue
 
     /**
      * Gets the value of the emptyTransfer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getEmptyTransfer() {
         return emptyTransfer;
@@ -1068,11 +1068,11 @@ public class Queue
 
     /**
      * Sets the value of the emptyTransfer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setEmptyTransfer(BigInteger value) {
         this.emptyTransfer = value;
@@ -1080,11 +1080,11 @@ public class Queue
 
     /**
      * Gets the value of the dropCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDropCalls() {
         return dropCalls;
@@ -1092,11 +1092,11 @@ public class Queue
 
     /**
      * Sets the value of the dropCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDropCalls(String value) {
         this.dropCalls = value;
@@ -1104,11 +1104,11 @@ public class Queue
 
     /**
      * Gets the value of the unavailableStatus property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isUnavailableStatus() {
         return unavailableStatus;
@@ -1116,11 +1116,11 @@ public class Queue
 
     /**
      * Sets the value of the unavailableStatus property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUnavailableStatus(Boolean value) {
         this.unavailableStatus = value;
@@ -1128,11 +1128,11 @@ public class Queue
 
     /**
      * Gets the value of the unavailableTransfer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUnavailableTransfer() {
         return unavailableTransfer;
@@ -1140,11 +1140,11 @@ public class Queue
 
     /**
      * Sets the value of the unavailableTransfer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUnavailableTransfer(BigInteger value) {
         this.unavailableTransfer = value;
@@ -1152,11 +1152,11 @@ public class Queue
 
     /**
      * Gets the value of the disconnectSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDisconnectSndActive() {
         return disconnectSndActive;
@@ -1164,11 +1164,11 @@ public class Queue
 
     /**
      * Sets the value of the disconnectSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDisconnectSndActive(Boolean value) {
         this.disconnectSndActive = value;
@@ -1176,11 +1176,11 @@ public class Queue
 
     /**
      * Gets the value of the disconnectSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDisconnectSnd() {
         return disconnectSnd;
@@ -1188,11 +1188,11 @@ public class Queue
 
     /**
      * Sets the value of the disconnectSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDisconnectSnd(String value) {
         this.disconnectSnd = value;

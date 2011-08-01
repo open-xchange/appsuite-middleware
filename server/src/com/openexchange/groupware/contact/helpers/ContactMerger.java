@@ -71,7 +71,7 @@ public class ContactMerger {
     /**
      * Merges the first object with the second one and returns a merged one. In case of conflicts: If <i>overwrite</i> is set, values from
      * the second object take precedence, otherwise the values from the first do.
-     * 
+     *
      * @param c1 first object to be merged. This one will be changed afterwards.
      * @param c2 second object to be merged. This one will not be changed at all.
      */
@@ -80,21 +80,25 @@ public class ContactMerger {
 
         for (ContactField field : ContactField.values()) {
             int number = field.getNumber();
-            if (c2.contains(number))
-                if (overwrite || !c1.contains(number))
+            if (c2.contains(number)) {
+                if (overwrite || !c1.contains(number)) {
                     clone.set(number, c2.get(number));
+                }
+            }
         }
 
         return clone;
     }
 
     public List<Contact> merge(List<Contact> list1, List<Contact> list2) {
-        if (list1.size() != list2.size())
+        if (list1.size() != list2.size()) {
             throw new IllegalArgumentException("Both lists to be merged must be same length, but are: " + list1.size() + "/" + list2.size());
+        }
 
         LinkedList<Contact> merged = new LinkedList<Contact>();
-        for (int i = 0, length = list1.size(); i < length; i++)
+        for (int i = 0, length = list1.size(); i < length; i++) {
             merged.add(merge(list1.get(i), list2.get(i)));
+        }
 
         return merged;
     }

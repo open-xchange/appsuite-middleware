@@ -68,19 +68,23 @@ import com.openexchange.session.Session;
  */
 public class ShowStrength implements PreferencesItemService {
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.passwordchange", "showStrength" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 Boolean property = service.getBoolProperty("com.openexchange.passwordchange.showStrength", false);
                 setting.setSingleValue(property);
             }
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }

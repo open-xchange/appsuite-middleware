@@ -63,7 +63,7 @@ public class Whitelist implements Authentication {
 
     private static final String PROPERTY = "crawler.whitelist";
 
-    private ConfigurationService configService;
+    private final ConfigurationService configService;
 
     private List<String> addresses;
 

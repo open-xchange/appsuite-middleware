@@ -63,14 +63,17 @@ public abstract class ReadOnlyValue implements IValueHandler {
         super();
     }
 
+    @Override
     public final boolean isWritable() {
         return false;
     }
 
+    @Override
     public final void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
         throw SettingExceptionCodes.NO_WRITE.create(setting.getName());
     }
 
+    @Override
     public int getId() {
         return -1;
     }

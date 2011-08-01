@@ -110,7 +110,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageHandler implements MailMessageHandler {
@@ -168,13 +168,17 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     private PlainTextContent plainText;
 
+    private String tokenFolder;
+
+    private String tokenMailId;
+
     private final boolean token;
 
     private final int ttlMillis;
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param displayMode The display mode
@@ -199,7 +203,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link JSONMessageHandler}
-     * 
+     *
      * @param accountId The account ID
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
@@ -246,9 +250,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 /*
                  * Add missing fields
                  */
-                if (mail.containsFolder() && mail.getMailId() != null) {
-                    jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
-                    jsonObject.put(DataFields.ID, mail.getMailId());
+                final String mailId = mail.getMailId();
+                if (mail.containsFolder() && mailId != null) {
+                    tokenFolder = prepareFullname(accountId, mail.getFolder());
+                    jsonObject.put(FolderChildFields.FOLDER_ID, tokenFolder);
+                    tokenMailId = mailId;
+                    jsonObject.put(DataFields.ID, mailId);
                 }
                 jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
                 jsonObject.put(
@@ -288,13 +295,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     private void addToken(final JSONObject jsonObject, final String attachmentId) {
-        if (token) {
+        if (token && null != tokenFolder && null != tokenMailId) {
             /*
              * Token
              */
             try {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentToken.DEFAULT_TIMEOUT : ttlMillis);
-                token.setAccessInfo(accountId, session.getUserId(), session.getContextId());
+                token.setAccessInfo(accountId, session);
                 token.setAttachmentInfo(
                     this.jsonObject.getString(FolderChildFields.FOLDER_ID),
                     this.jsonObject.getString(DataFields.ID),
@@ -307,6 +314,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -385,6 +393,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_BCC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -394,6 +403,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_CC.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -403,6 +413,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         try {
             jsonObject.put(MailJSONField.COLOR_LABEL.getKey(), colorLabel);
@@ -412,6 +423,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleContentId(final String contentId) throws OXException {
         try {
             jsonObject.put(MailJSONField.CID.getKey(), contentId);
@@ -421,6 +433,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.FROM.getKey(), MessageWriter.getAddressesAsArray(fromAddrs));
@@ -439,6 +452,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
             MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO, MessageHeaders.FROM, MessageHeaders.X_PRIORITY,
             MessageHeaders.SUBJECT, MessageHeaders.TO }));
 
+    @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         if (size == 0) {
             return true;
@@ -505,10 +519,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         return handleAttachment(part, isInline, baseContentType, fileName, id);
     }
 
+    @Override
     public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (textAppended) {
             /*
@@ -575,6 +591,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     // private static final RTF2HtmlConverter RTFCONV = new RTF2HtmlConverter();
 
+    @Override
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.startsWith(MIMETypes.MIME_TEXT_PLAIN)) {
             /*
@@ -699,6 +716,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
     }
 
+    @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject();
@@ -739,10 +757,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return handleInlinePlainText(decodedTextContent, contentType, size, fileName, id);
     }
 
+    @Override
     public void handleMessageEnd(final MailMessage mail) throws OXException {
         /*
          * Since we obviously touched message's content, mark its corresponding message object as seen
@@ -789,6 +809,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
          */
     }
 
+    @Override
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         /*
          * Determine if message is of MIME type multipart/alternative
@@ -805,6 +826,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         try {
             final Object content = mailPart.getContent();
@@ -827,6 +849,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
                 return true;
             }
             final JSONMessageHandler msgHandler = new JSONMessageHandler(accountId, null, null, displayMode, session, usm, ctx, token, ttlMillis);
+            msgHandler.tokenFolder = tokenFolder;
+            msgHandler.tokenMailId = tokenMailId;
             new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
             final JSONObject nestedObject = msgHandler.getJSONObject();
             /*
@@ -849,6 +873,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handlePriority(final int priority) throws OXException {
         try {
             jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
@@ -858,6 +883,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleMsgRef(final String msgRef) throws OXException {
         try {
             jsonObject.put(MailJSONField.MSGREF.getKey(), msgRef);
@@ -867,6 +893,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         try {
             if (!seen) {
@@ -878,6 +905,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
             jsonObject.put(
@@ -889,6 +917,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
             jsonObject.put(
@@ -900,9 +929,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         /*-
-         * 
+         *
         if (false && !textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
             String charset = part.getContentType().getCharsetParameter();
             if (null == charset) {
@@ -953,6 +983,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         return "text/calendar".equalsIgnoreCase(baseContentType) || "text/x-vcalendar".equalsIgnoreCase(baseContentType);
     }
 
+    @Override
     public boolean handleSubject(final String subject) throws OXException {
         try {
             jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
@@ -962,6 +993,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         try {
             if (jsonObject.hasAndNotNull(MailJSONField.FLAGS.getKey())) {
@@ -976,6 +1008,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         try {
             jsonObject.put(MailJSONField.RECIPIENT_TO.getKey(), MessageWriter.getAddressesAsArray(recipientAddrs));
@@ -985,6 +1018,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
         }
     }
 
+    @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         if (userFlags == null) {
             return true;
@@ -1021,7 +1055,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Gets the filled instance of {@link JSONObject}
-     * 
+     *
      * @return The filled instance of {@link JSONObject}
      */
     public JSONObject getJSONObject() {

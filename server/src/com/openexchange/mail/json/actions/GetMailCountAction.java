@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetMailCountAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetMailCountAction extends AbstractMailAction {
@@ -71,7 +71,7 @@ public final class GetMailCountAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetMailCountAction}.
-     * 
+     *
      * @param services
      */
     public GetMailCountAction(final ServiceLookup services) {

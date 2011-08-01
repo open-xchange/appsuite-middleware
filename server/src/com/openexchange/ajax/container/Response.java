@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Response data object.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -112,7 +112,7 @@ public final class Response {
 
     /**
      * This constructor parses a server response into an object.
-     * 
+     *
      * @param response the response JSON object.
      */
     public Response(final JSONObject response) {
@@ -124,7 +124,7 @@ public final class Response {
 
     /**
      * Constructor for generating responses.
-     * 
+     *
      * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      * @throws OXException If user's locale cannot be detected
      */
@@ -134,7 +134,7 @@ public final class Response {
 
     /**
      * Constructor for generating responses.
-     * 
+     *
      * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      */
     public Response(final ServerSession session) {
@@ -153,7 +153,7 @@ public final class Response {
 
     /**
      * Constructor for generating responses.
-     * 
+     *
      * @param locale The locale for possibly internationalizing the error message
      */
     public Response(final Locale locale) {
@@ -165,7 +165,7 @@ public final class Response {
 
     /**
      * Sets the specified locale needed for internationalization of display message.
-     * 
+     *
      * @param session The server session; if <code>null</code> default locale {@link Locale#US} is used
      * @return This {@link Response} with locale applied.
      */
@@ -176,7 +176,7 @@ public final class Response {
 
     /**
      * Sets the specified locale needed for internationalization of display message.
-     * 
+     *
      * @param session The session; if <code>null</code> default locale {@link Locale#US} is used
      * @return This {@link Response} with locale applied.
      * @throws OXException If locale cannot be detected
@@ -188,7 +188,7 @@ public final class Response {
 
     /**
      * Sets the specified locale needed for internationalization of display message.
-     * 
+     *
      * @param locale The locale
      * @return This {@link Response} with locale applied.
      */
@@ -199,7 +199,7 @@ public final class Response {
 
     /**
      * Gets the locale used for internationalization of display message.
-     * 
+     *
      * @return locale The locale
      */
     public Locale getLocale() {
@@ -208,7 +208,7 @@ public final class Response {
 
     /**
      * Gets the JSON object resulting from this response.
-     * 
+     *
      * @return The JSON object
      * @throws JSONException If composing the JSON object fails.
      * @deprecated use {@link ResponseWriter#getJSON(Response)}.
@@ -236,7 +236,7 @@ public final class Response {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data.
      */
     public Object getData() {
@@ -247,7 +247,7 @@ public final class Response {
      * Gets the error message.
      * <p>
      * For testing only
-     * 
+     *
      * @return The errorMessage.
      */
     public String getErrorMessage() {
@@ -261,7 +261,7 @@ public final class Response {
      * Gets the formatted message.
      * <p>
      * For testing only
-     * 
+     *
      * @return The formatted message or <code>null</code> if no error present
      */
     public String getFormattedErrorMessage() {
@@ -296,7 +296,7 @@ public final class Response {
      * Checks if if the response contains an error message or a warning.
      * <p>
      * For testing only.
-     * 
+     *
      * @return <code>true</code> if the response contains an error message or a warning.
      */
     public boolean hasError() {
@@ -305,7 +305,7 @@ public final class Response {
 
     /**
      * Checks if this response contains warnings.
-     * 
+     *
      * @return <code>true</code> if the response contains warnings; otherwise <code>false</code>
      */
     public boolean hasWarnings() {
@@ -314,7 +314,7 @@ public final class Response {
 
     /**
      * Deserializes a response into the Response object.
-     * 
+     *
      * @param body JSON response string.
      * @return the parsed object.
      * @throws JSONException if parsing fails.
@@ -327,7 +327,7 @@ public final class Response {
 
     /**
      * Serializes a Response object to the writer.
-     * 
+     *
      * @param response Response object to serialize.
      * @param writer the serialized object will be written to this writer.
      * @throws JSONException if writing fails.
@@ -342,7 +342,7 @@ public final class Response {
     /**
      * Serializes a Response object to given instance of <code>
      * {@link JSONWriter}</code>.
-     * 
+     *
      * @param response - the <code>{@link Response}</code> object to serialize.
      * @param writer - the <code>{@link JSONWriter}</code> to write to
      * @throws JSONException - if writing fails
@@ -373,7 +373,7 @@ public final class Response {
      * Sets this response object's exception and implicitly overwrites any existing exception.
      * <p>
      * <b>Note</b>: If exception's category is set to {@link Category#CATEGORY_WARNING} it is treated as a warning only.
-     * 
+     *
      * @param exception The exception to set
      * @return This response with exception applied
      */
@@ -390,7 +390,7 @@ public final class Response {
      * Sets this response object's warning.
      * <p>
      * <b>Note</b>: {@link OXException}'s category is implicitly set to {@link Category#CATEGORY_WARNING}.
-     * 
+     *
      * @param warning The warning to add
      * @return This response with warning added
      */
@@ -406,7 +406,7 @@ public final class Response {
      * Sets this response object's warnings and implicitly overwrites any existing warning/error.
      * <p>
      * <b>Note</b>: {@link OXException}'s category is implicitly set to {@link Category#CATEGORY_WARNING}.
-     * 
+     *
      * @param warnings The warnings to add
      * @return This response with warnings added
      */
@@ -422,7 +422,7 @@ public final class Response {
 
     /**
      * Gets this response object's exception/warning.
-     * 
+     *
      * @return the exception or <code>null</code>
      */
     public OXException getException() {
@@ -431,7 +431,7 @@ public final class Response {
 
     /**
      * Gets this response object's warnings
-     * 
+     *
      * @return The warnings as an unmodifiable list
      */
     public List<OXException> getWarnings() {

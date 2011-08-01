@@ -75,13 +75,14 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
 
     /**
      * Gets the {@link MailAccountActionFactory} instance.
-     * 
+     *
      * @return The {@link MailAccountActionFactory} instance
      */
     public static final MailAccountActionFactory getInstance() {
         return SINGLETON;
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         final AJAXActionService retval = actions.get(action);
         if (null == retval) {

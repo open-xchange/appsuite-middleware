@@ -68,14 +68,17 @@ public class RepairRecurrencePatternNullValue implements UpdateTask {
 
     private static final String[] STATEMENTS = { "UPDATE prg_dates SET field06 = ? WHERE field06 = ?", "UPDATE del_dates SET field06 = ? WHERE field06 = ?" };
 
+    @Override
     public int addedWithVersion() {
         return 58;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
@@ -92,7 +95,7 @@ public class RepairRecurrencePatternNullValue implements UpdateTask {
             Database.backNoTimeout(contextId, true, con);
         }
     }
-    
+
     private void executeStatement(Connection con, String statement) throws SQLException {
         PreparedStatement stmt = null;
         try {

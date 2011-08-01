@@ -72,7 +72,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 
 /**
  * {@link WebDAVFileStorageFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
@@ -109,7 +109,7 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
 
     /**
      * Parses specified value of header <code>"Allow"</code>.
-     * 
+     *
      * @param allow The value of header <code>"Allow"</code>
      */
     public void parseAllowHeader(final String allow) {
@@ -132,7 +132,7 @@ public final class WebDAVFileStorageFolder extends DefaultFileStorageFolder {
 
     /**
      * Parses specified DAV property set of associated MultiStatus response.
-     * 
+     *
      * @param propertySet The DAV property set of associated MultiStatus response
      * @throws OXException If parsing DAV property set fails
      */

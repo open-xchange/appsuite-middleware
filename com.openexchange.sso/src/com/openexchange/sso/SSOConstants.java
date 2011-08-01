@@ -52,7 +52,7 @@ package com.openexchange.sso;
 
 /**
  * {@link SSOConstants} for the HTTP JSON interface of the single sign-on component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SSOConstants {

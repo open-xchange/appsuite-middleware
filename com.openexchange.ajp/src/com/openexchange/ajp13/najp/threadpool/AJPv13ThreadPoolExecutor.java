@@ -58,7 +58,7 @@ import com.openexchange.monitoring.MonitoringInfo;
 
 /**
  * {@link AJPv13ThreadPoolExecutor} - Custom {@link ThreadPoolExecutor} for AJP module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
@@ -69,7 +69,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Initializes a new {@link AJPv13ThreadPoolExecutor}.
-     * 
+     *
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit The time unit for the <code>keepAliveTime</code> argument.
@@ -113,7 +113,7 @@ final class AJPv13ThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Increments/decrements the number of running AJP tasks.
-     * 
+     *
      * @param increment whether to increment or to decrement
      */
     private void changeNumberOfRunningAJPTasks(final boolean increment) {

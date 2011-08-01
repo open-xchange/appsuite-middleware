@@ -68,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  *
  */
 public class ContactHandler {
- 
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactHandler.class));
 
     /**
@@ -78,10 +78,10 @@ public class ContactHandler {
      * @throws OXException
      */
     protected void storeContacts(final Session session, final int folderId, final Collection<Contact> updatedContacts) throws OXException{
-       
-        
+
+
         final RdbContactSQLImpl storage = new RdbContactSQLImpl(session);
-        
+
         for(final Contact updatedContact: updatedContacts){
             final SearchIterator<Contact> existingContacts = storage.getContactsInFolder(folderId, 0, 0, 0, null, null, Contact.ALL_COLUMNS);
             boolean foundMatch = false;
@@ -112,7 +112,7 @@ public class ContactHandler {
             }
         }
     }
-    
+
 
     protected boolean isSame(final Contact first, final Contact second){
         if(first.containsGivenName()) {
@@ -120,13 +120,13 @@ public class ContactHandler {
                 return false;
             }
         }
-        
+
         if(first.containsSurName()) {
             if(!first.getSurName().equals(second.getSurName())) {
                 return false;
             }
         }
-        
+
         if(first.containsDisplayName()) {
             if(!first.getDisplayName().equals(second.getDisplayName())) {
                 return false;
@@ -134,5 +134,5 @@ public class ContactHandler {
         }
         return true;
     }
-    
+
 }

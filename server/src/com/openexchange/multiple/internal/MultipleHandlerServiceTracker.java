@@ -57,7 +57,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MultipleHandlerServiceTracker} - Service tracker for multiple handler factory services.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleHandlerServiceTracker implements ServiceTrackerCustomizer {
@@ -68,7 +68,7 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
 
     /**
      * Initializes a new {@link MultipleHandlerServiceTracker}.
-     * 
+     *
      * @param context The bundle context
      */
     public MultipleHandlerServiceTracker(final BundleContext context) {
@@ -76,6 +76,7 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (null == addedService) {
@@ -92,10 +93,12 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null == service) {
             return;

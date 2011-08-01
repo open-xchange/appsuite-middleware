@@ -59,10 +59,10 @@ import com.openexchange.calendar.printing.CPType;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public interface CPPartitioningStrategy {
-    
+
     public boolean isPackaging(CPType type);
-    
+
     public CPPartition partition(List<CPAppointment> appointments);
-    
+
     public void setCalendar(CPCalendar calendar);
 }

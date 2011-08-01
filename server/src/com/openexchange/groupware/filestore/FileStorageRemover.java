@@ -76,6 +76,7 @@ public final class FileStorageRemover extends ContextDelete {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (isContextDelete(event)) {
             removeFileStorage(event.getContext(), new SimpleDBProvider(readCon, writeCon));
@@ -92,6 +93,6 @@ public final class FileStorageRemover extends ContextDelete {
     }
 
     private FileStorage getFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx); 
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 }

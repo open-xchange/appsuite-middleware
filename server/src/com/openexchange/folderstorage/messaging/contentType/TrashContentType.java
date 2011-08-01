@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.messaging.contentType;
 
 /**
  * {@link TrashContentType} - The folder storage content type for trash messaging folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TrashContentType extends MessagingContentType {
@@ -60,7 +60,7 @@ public final class TrashContentType extends MessagingContentType {
 
     /**
      * Gets the {@link TrashContentType} instance.
-     * 
+     *
      * @return The {@link TrashContentType} instance
      */
     public static TrashContentType getInstance() {
@@ -78,5 +78,5 @@ public final class TrashContentType extends MessagingContentType {
     public int getPriority() {
         return 1;
     }
-   
+
 }

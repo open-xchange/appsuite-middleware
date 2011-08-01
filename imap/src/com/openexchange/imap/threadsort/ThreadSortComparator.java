@@ -63,7 +63,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link ThreadSortComparator} - Sorts according to <small><b><a href="http://tools.ietf.org/html/rfc5256">RFC5256</a></b></small>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadSortComparator {
@@ -105,8 +105,8 @@ public final class ThreadSortComparator {
             }
 
         }
-        
-        
+
+
         return null;
     }
 

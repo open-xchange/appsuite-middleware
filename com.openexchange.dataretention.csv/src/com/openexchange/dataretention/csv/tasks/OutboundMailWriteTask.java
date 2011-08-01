@@ -57,7 +57,7 @@ import com.openexchange.dataretention.csv.CSVWriter.TransactionType;
 
 /**
  * {@link OutboundMailWriteTask} - The write task for outbound mail event.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutboundMailWriteTask extends AbstractWriteTask {
@@ -66,7 +66,7 @@ public final class OutboundMailWriteTask extends AbstractWriteTask {
 
     /**
      * Initializes a new {@link OutboundMailWriteTask}.
-     * 
+     *
      * @param retentionData The retention data to write as a CSV line
      * @param versionNumber The version number
      * @param sequenceNumber The sequence number

@@ -68,7 +68,7 @@ import com.openexchange.server.osgiservice.Whiteboard;
 
 /**
  * {@link CleanUpActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CleanUpActivator implements BundleActivator {
@@ -82,19 +82,19 @@ public class CleanUpActivator implements BundleActivator {
         final ContextService contexts = whiteboard.getService(ContextService.class);
 
         final EntityCleanUp entityCleanUp = new EntityCleanUp(AbstractPublicationService.getDefaultStorage());
-        
+
         registrations = new LinkedList<ServiceRegistration>();
 
         registerHandler(
             context,
             new FolderCleanUpEventHandler(entityCleanUp, "contacts", FolderObject.CONTACT, contexts),
             "com/openexchange/groupware/folder/delete");
-        
+
         registerHandler(
             context,
             new FolderCleanUpEventHandler(entityCleanUp, "infostore", FolderObject.INFOSTORE, contexts),
             "com/openexchange/groupware/folder/delete");
-        
+
         registerHandler(context, new InfostoreCleanUpEventHandler(entityCleanUp, contexts), "com/openexchange/groupware/infostore/delete");
 
     }

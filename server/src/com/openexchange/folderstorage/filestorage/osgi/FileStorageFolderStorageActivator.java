@@ -65,7 +65,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link FileStorageFolderStorageActivator} - {@link BundleActivator Activator} for file storage folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderStorageActivator extends DeferredActivator {

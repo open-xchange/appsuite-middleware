@@ -68,12 +68,12 @@ import com.openexchange.modules.model.Tools;
 public class MemoryStorage<T extends Model<T>> {
 
     private Map<Object, T> db;
-    
-    
+
+
     public MemoryStorage(Map<String, Map<String, Object>> database, Metadata<T> metadata) {
         this(database, metadata, AttributeHandler.DO_NOTHING);
     }
-    
+
     public MemoryStorage(Map<String, Map<String, Object>> database, Metadata<T> metadata, AttributeHandler<T> overrides) {
         super();
         db  = new HashMap<Object, T>();
@@ -91,16 +91,16 @@ public class MemoryStorage<T extends Model<T>> {
             thing.set(metadata.getIdField(), pair.getKey());
             db.put(thing.get(metadata.getIdField()), thing);
         }
-     
+
     }
-    
+
     public List<T> list() {
         ArrayList<T> list = new ArrayList<T>(db.values());
         return Tools.copy(list);
     }
-    
+
     public T get(Object id) {
         return Tools.copy(db.get(id));
     }
-    
+
 }

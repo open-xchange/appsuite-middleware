@@ -73,7 +73,7 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskRunUpdateCLT} - Command-Line access to run update process for a certain schema via update task toolkit.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskRunUpdateCLT {

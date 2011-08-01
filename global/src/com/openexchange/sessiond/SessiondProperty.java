@@ -55,8 +55,8 @@ package com.openexchange.sessiond;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum SessiondProperty {
-    
-    /** 
+
+    /**
      * Whether autologin is allowed or not.
      */
     SESSIOND_AUTOLOGIN("com.openexchange.sessiond.autologin", Boolean.FALSE.toString());

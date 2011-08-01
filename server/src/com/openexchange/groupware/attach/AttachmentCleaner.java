@@ -73,45 +73,54 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
 
     private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
 
+    @Override
     public final void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
         deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj);
     }
 
+    @Override
     public final void taskDeleted(final Task taskObj, final Session sessionObj) {
 
         deleteAttachments(taskObj.getParentFolderID(), taskObj.getObjectID(), Types.TASK, sessionObj);
     }
 
+    @Override
     public final void contactDeleted(final Contact contactObj, final Session sessionObj) {
         deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
 
     }
 
+    @Override
     public final void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public final void appointmentModified(final Appointment appointment, final Session session) {
         // Nothing to do.
 
     }
 
+    @Override
     public final void taskCreated(final Task taskObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public final void taskModified(final Task taskObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public final void contactCreated(final Contact contactObj, final Session sessionObj) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public final void contactModified(final Contact contact, final Session session) {
         // Nothing to do.
     }
@@ -179,26 +188,32 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
         x.log(LOG);
     }
 
+    @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
         // Nothing to do
     }
 
+    @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
         // Nothing to do
     }
 
+    @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
         // Nothing to do
     }
 
+    @Override
     public void taskAccepted(final Task taskObj, final Session sessionObj) {
         // Nothing to do
     }
 
+    @Override
     public void taskDeclined(final Task taskObj, final Session sessionObj) {
         // Nothing to do
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task taskObj, final Session sessionObj) {
         // Nothing to do
     }

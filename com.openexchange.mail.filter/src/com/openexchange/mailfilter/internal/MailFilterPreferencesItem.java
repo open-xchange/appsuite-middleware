@@ -60,7 +60,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
  */
 public class MailFilterPreferencesItem implements PreferencesItemService {

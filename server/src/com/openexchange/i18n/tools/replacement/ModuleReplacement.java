@@ -56,9 +56,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link ModuleReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ModuleReplacement implements TemplateReplacement {
 
@@ -76,7 +76,7 @@ public final class ModuleReplacement implements TemplateReplacement {
 
     /**
      * Initializes a new {@link ModuleReplacement}
-     * 
+     *
      * @param module The module; supposed to be either {@link #MODULE_CALENDAR}
      *            or {@link #MODULE_TASK}
      */
@@ -85,27 +85,33 @@ public final class ModuleReplacement implements TemplateReplacement {
         repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
     }
 
+    @Override
     public String getReplacement() {
         return repl;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.MODULE;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
@@ -115,10 +121,12 @@ public final class ModuleReplacement implements TemplateReplacement {
         return super.clone();
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!ModuleReplacement.class.isInstance(other)) {
             /*

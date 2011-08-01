@@ -57,7 +57,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link ICalEmitter}
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface ICalEmitter {
@@ -72,7 +72,7 @@ public interface ICalEmitter {
     public ICalSession createSession();
 
     public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-    
+
     /**
      * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */

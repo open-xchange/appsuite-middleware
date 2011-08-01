@@ -17,7 +17,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE. */
- 
+
 
 package org.kxml2.kdom;
 
@@ -40,15 +40,15 @@ public class Document extends Node {
     public String getEncoding () {
         return encoding;
     }
-    
+
     public void setEncoding(final String enc) {
         this.encoding = enc;
     }
-    
+
     public void setStandalone (final Boolean standalone) {
         this.standalone = standalone;
     }
-    
+
     public Boolean getStandalone() {
         return standalone;
     }
@@ -61,6 +61,7 @@ public class Document extends Node {
     /** Adds a child at the given index position. Throws
     an exception when a second root element is added */
 
+    @Override
     public void addChild(final int index, final int type, final Object child) {
         if (type == ELEMENT) {
          //   if (rootIndex != -1)
@@ -80,15 +81,16 @@ public class Document extends Node {
     The end event is consumed. For parsing partial
         XML structures, consider using Node.parse (). */
 
+    @Override
     public void parse(final XmlPullParser parser)
         throws IOException, XmlPullParserException {
 
 		parser.require(XmlPullParser.START_DOCUMENT, null, null);
-		parser.nextToken ();        	
+		parser.nextToken ();
 
         encoding = parser.getInputEncoding();
         standalone = (Boolean)parser.getProperty ("http://xmlpull.org/v1/doc/properties.html#xmldecl-standalone");
-        
+
         super.parse(parser);
 
         if (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
@@ -97,6 +99,7 @@ public class Document extends Node {
 
     }
 
+    @Override
     public void removeChild(final int index) {
         if (index == rootIndex) {
 			rootIndex = -1;
@@ -116,19 +119,20 @@ public class Document extends Node {
 
         return (Element) getChild(rootIndex);
     }
-    
-    
+
+
     /** Writes this node to the given XmlWriter. For node and document,
         this method is identical to writeChildren, except that the
         stream is flushed automatically. */
 
+    @Override
     public void write(final XmlSerializer writer)
         throws IOException {
-        
+
         writer.startDocument(encoding, standalone);
         writeChildren(writer);
         writer.endDocument();
     }
-    
-    
+
+
 }

@@ -67,34 +67,42 @@ public class Alarm implements Mapper<Date>{
         super();
     }
 
+    @Override
     public boolean equals(final Task task1, final Task task2) {
         return Mapping.equals(task1.getAlarm(), task2.getAlarm());
     }
 
+    @Override
     public void fromDB(final ResultSet result, final int pos, final Task task) throws SQLException {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Date get(final Task task) {
         return task.getAlarm();
     }
 
+    @Override
     public String getDBColumnName() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int getId() {
         return Task.ALARM;
     }
 
+    @Override
     public boolean isSet(final Task task) {
         return task.containsAlarm();
     }
 
+    @Override
     public void set(final Task task, final Date value) {
         task.setAlarm(value);
     }
 
+    @Override
     public void toDB(final PreparedStatement stmt, final int pos, final Task task) throws SQLException {
         throw new UnsupportedOperationException();
     }

@@ -65,7 +65,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link FacebookURLConnectionContent} - A {@link BinaryContent} read from an URL.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -88,7 +88,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
 
     /**
      * Initializes a new {@link FacebookURLConnectionContent}.
-     * 
+     *
      * @param url The URL
      * @param stream <code>true</code> to stream the URL's data; otherwise <code>false</code> to hold in memory
      * @throws OXException If initialization fails
@@ -99,7 +99,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
 
     /**
      * Initializes a new {@link FacebookURLConnectionContent}.
-     * 
+     *
      * @param url The URL
      * @param stream <code>true</code> to stream the URL's data; otherwise <code>false</code> to hold in memory
      * @throws OXException If initialization fails
@@ -114,7 +114,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
 
     /**
      * Gets the MIME type as indicated by opened {@link URLConnection URL connection}.
-     * 
+     *
      * @return The MIME type
      * @throws OXException If initialization fails
      */
@@ -144,7 +144,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
 
     /**
      * Gets (a copy of) the bytes.
-     * 
+     *
      * @return The (copied) bytes
      * @throws OXException If initialization fails
      */

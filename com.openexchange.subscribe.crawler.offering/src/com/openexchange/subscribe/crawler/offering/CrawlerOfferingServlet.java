@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link CrawlerOfferingServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
@@ -252,7 +252,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         values.put("ACTION", getProtocol(req) + req.getServerName() + "/publications/crawler?action=crawl&crawler=" + source.getId());
         values.put("SOURCE", source);
         values.put("MODULE", Module.getModuleString(source.getFolderModule(), -1));
-        
+
         template.process(values, resp.getWriter());
     }
 
@@ -271,7 +271,7 @@ public class CrawlerOfferingServlet extends HttpServlet {
         final Authentication authentication = new Whitelist(configService);
         return authentication.auth(req);
     }
-    
+
     private void sourceNotFound(final HttpServletResponse res, final String sourceName) throws IOException {
         res.setStatus(HttpServletResponse.SC_NOT_FOUND);
         res.getWriter().println("Source "+sourceName+" was not found on this server.");

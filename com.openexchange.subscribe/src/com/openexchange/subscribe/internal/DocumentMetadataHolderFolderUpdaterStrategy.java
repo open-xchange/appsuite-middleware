@@ -82,13 +82,13 @@ import com.openexchange.userconf.UserConfigurationService;
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
-    
+
     private final UserService users;
     private final UserConfigurationService userConfigs;
     private final InfostoreFacade infostore;
-    
-    
-    
+
+
+
     public DocumentMetadataHolderFolderUpdaterStrategy(final UserService users, final UserConfigurationService userConfigs, final InfostoreFacade infostore) {
         super();
         this.users = users;
@@ -123,7 +123,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     public Collection<DocumentMetadataHolder> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         final List<DocumentMetadataHolder> list = new ArrayList<DocumentMetadataHolder>();
         final InfostoreSession sess = (InfostoreSession) session;
-        
+
         final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.userConfig).results();
         try {
             while(documents.hasNext()) {
@@ -132,7 +132,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         } finally {
             documents.close();
         }
-        
+
         return list;
     }
 
@@ -192,7 +192,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         update.documentMetadata.setId(original.documentMetadata.getId());
         update.documentMetadata.setFolderId(sess.folderId);
         update.documentMetadata.setVersion(InfostoreFacade.NEW);
-        
+
         if(file == null) {
             infostore.saveDocumentMetadata(update.documentMetadata, original.documentMetadata.getSequenceNumber(), sess.serverSession);
         } else {
@@ -206,22 +206,22 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
                 }
             }
         }
-        
+
     }
-    
+
     private class InfostoreSession {
         public int folderId;
         public User user;
-        public UserConfiguration userConfig;    
+        public UserConfiguration userConfig;
         public ServerSession serverSession;
-        
+
         public InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
             user = users.getUser(target.getUserId(), target.getContext());
             userConfig = userConfigs.getUserConfiguration(target.getUserId(), target.getContext());
-       
+
             serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
             folderId = target.getFolderIdAsInt();
-            
+
         }
     }
 

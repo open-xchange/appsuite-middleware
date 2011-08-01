@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -52,11 +52,11 @@ public class GetFoldersRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -64,11 +64,11 @@ public class GetFoldersRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -76,11 +76,11 @@ public class GetFoldersRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -88,11 +88,11 @@ public class GetFoldersRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -100,11 +100,11 @@ public class GetFoldersRequest {
 
     /**
      * Gets the value of the musicOnHold property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMusicOnHold() {
         return musicOnHold;
@@ -112,11 +112,11 @@ public class GetFoldersRequest {
 
     /**
      * Sets the value of the musicOnHold property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMusicOnHold(BigInteger value) {
         this.musicOnHold = value;
@@ -124,11 +124,11 @@ public class GetFoldersRequest {
 
     /**
      * Gets the value of the emptyFolder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getEmptyFolder() {
         return emptyFolder;
@@ -136,11 +136,11 @@ public class GetFoldersRequest {
 
     /**
      * Sets the value of the emptyFolder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setEmptyFolder(BigInteger value) {
         this.emptyFolder = value;

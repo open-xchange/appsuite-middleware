@@ -58,19 +58,19 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class CryptoServiceTest extends TestCase {
-    
+
     protected String payload = "Hello World!";
-    
+
     protected String payloadSpecial = "H\u00d4\u00f8\u03a9ll\u00d4\u00f8\u03a9 &/() w\u00d4\u00f8\u03a9RLD!";
-    
+
     protected String password = "passwordpasswordpasswordpassword";
-    
+
     protected String passwordSpecial = "p\u00c0\u00dfw\u00d4\u00f8\u03a9rd;";
-    
+
     protected String badPassword  = "passwordpasswordpasswordpassword1";
-    
+
     protected CryptoService cryptoService;
-    
+
     protected final byte[] salt = new byte[] { 0x34, 0x11, 0x45, 0x03, 0x04, 0x05, 0x06, 0x43, 0x23, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0e };
 
     @Override
@@ -84,25 +84,25 @@ public class CryptoServiceTest extends TestCase {
         cryptoService = null;
         super.tearDown();
     }
-    
+
     public void testEncrypt() throws Exception {
         String encrypted = cryptoService.encrypt(payload, password);
         assertFalse("Payload was not encrypted.", encrypted.equals(payload));
-        
+
         encrypted = cryptoService.encrypt(payloadSpecial, passwordSpecial);
         assertFalse("Payload was not encrypted.", encrypted.equals(payloadSpecial));
     }
-    
+
     public void testDecrypt() throws Exception {
         String encrypted = cryptoService.encrypt(payload, password);
         String decrypted = cryptoService.decrypt(encrypted, password);
         assertEquals("Payload not decrypted.", payload, decrypted);
-        
+
         encrypted = cryptoService.encrypt(payloadSpecial, passwordSpecial);
         decrypted = cryptoService.decrypt(encrypted, passwordSpecial);
         assertEquals("payload not decrypted.", payloadSpecial, decrypted);
     }
-    
+
     public void testBadPassword() throws Exception {
         final String encrypted = cryptoService.encrypt(payload, password);
         try {
@@ -112,7 +112,7 @@ public class CryptoServiceTest extends TestCase {
             assertTrue("Wrong exception thrown.", BadPassword.equals(e));
         }
     }
-    
+
     public void testSaltUsage() throws Exception {
         EncryptedData encryptedData = cryptoService.encrypt(payload, password, true);
         String decryptedData = cryptoService.decrypt(encryptedData, password, true);
@@ -121,7 +121,7 @@ public class CryptoServiceTest extends TestCase {
         encryptedData = cryptoService.encrypt(payload, password, false);
         decryptedData = cryptoService.decrypt(encryptedData, password, false);
         assertEquals("Payload not decrypted", payload, decryptedData);
-        
+
         encryptedData = cryptoService.encrypt(payload, password, true);
         encryptedData = new EncryptedData(encryptedData.getData(), salt);
         try {

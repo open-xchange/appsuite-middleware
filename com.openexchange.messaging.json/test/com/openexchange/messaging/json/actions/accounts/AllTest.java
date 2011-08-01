@@ -68,21 +68,21 @@ import com.openexchange.tools.session.SimServerSession;
  */
 public class AllTest extends TestCase {
     private SimMessagingServiceRegistry registry;
-    
+
     @Override
     protected void setUp() throws Exception {
         registry = new SimMessagingServiceRegistry();
-        
+
         final SimMessagingService service1 = new SimMessagingService();
         service1.setId("com.openexchange.test1");
-        
+
         final SimAccountManager accManager1 = new SimAccountManager();
-        
+
         final SimMessagingAccount account11 = new SimMessagingAccount();
         account11.setDisplayName("acc1.1");
         account11.setId(11);
         account11.setMessagingService(service1);
-        
+
         final SimMessagingAccount account12 = new SimMessagingAccount();
         account12.setDisplayName("acc1.2");
         account12.setId(12);
@@ -90,99 +90,99 @@ public class AllTest extends TestCase {
 
         accManager1.setAllAccounts(account11, account12);
         service1.setAccountManager(accManager1);
-        
+
         final SimMessagingService service2 = new SimMessagingService();
         service2.setId("com.openexchange.test2");
- 
+
         final SimAccountManager accManager2 = new SimAccountManager();
 
         final SimMessagingAccount account21 = new SimMessagingAccount();
         account21.setDisplayName("acc2.1");
         account21.setId(11);
         account21.setMessagingService(service2);
-        
+
         final SimMessagingAccount account22 = new SimMessagingAccount();
         account22.setDisplayName("acc2.2");
         account22.setId(22);
         account22.setMessagingService(service2);
-        
+
         accManager2.setAllAccounts(account21, account22);
         service2.setAccountManager(accManager2);
-        
+
         registry.add(service1);
         registry.add(service2);
     }
-    
+
     // Success Cases
     public void testListAllForACertainMessagingService() throws OXException {
-        
+
         final AllAction action = new AllAction(registry);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.test1");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final AJAXRequestResult result = action.perform(requestData, session);
-        
+
         assertNotNull(result);
         final Object resultObject = result.getResultObject();
-        
+
         assertNotNull(resultObject);
         assertTrue(JSONArray.class.isInstance(resultObject));
-        
+
         final JSONArray arr = (JSONArray) resultObject;
         assertEquals(2, arr.length());
-        
+
     }
-    
+
     public void testListAll() throws OXException {
         final AllAction action = new AllAction(registry);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final AJAXRequestResult result = action.perform(requestData, session);
-        
+
         assertNotNull(result);
         final Object resultObject = result.getResultObject();
-        
+
         assertNotNull(resultObject);
         assertTrue(JSONArray.class.isInstance(resultObject));
-        
+
         final JSONArray arr = (JSONArray) resultObject;
         assertEquals(4, arr.length());
-        
+
     }
-    
+
     // Error Cases
     public void testExceptionInMessagingRegistry() throws OXException {
         registry.setException(new OXException());
         final AllAction action = new AllAction(registry);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             //SUCCESS
         }
-        
-        
+
+
     }
-    
+
     public void testExceptionInMessagingAccountManager() throws OXException {
         ((SimAccountManager) registry.getAllServices(-1, -1).get(0).getAccountManager()).setException(new OXException());
         final AllAction action = new AllAction(registry);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         try {
             final AJAXRequestResult result = action.perform(requestData, session);
             fail("Should not swallow exceptions");
@@ -190,5 +190,5 @@ public class AllTest extends TestCase {
             //SUCCESS
         }
     }
-    
+
 }

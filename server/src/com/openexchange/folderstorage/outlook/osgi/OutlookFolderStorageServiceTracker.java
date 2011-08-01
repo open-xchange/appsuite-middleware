@@ -58,7 +58,7 @@ import com.openexchange.folderstorage.FolderStorage;
 /**
  * {@link OutlookFolderStorageServiceTracker} - A {@link ServiceTrackerCustomizer customizer} for MS Outlook folder storage which tracks
  * real folder storages; meaning those storages which indicate to handle the {@link FolderStorage#REAL_TREE_ID} tree identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorageServiceTracker implements ServiceTrackerCustomizer {
@@ -73,6 +73,7 @@ public final class OutlookFolderStorageServiceTracker implements ServiceTrackerC
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         // Get tree identifier
@@ -97,10 +98,12 @@ public final class OutlookFolderStorageServiceTracker implements ServiceTrackerC
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

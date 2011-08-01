@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AbstractOSGiDelegateService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOSGiDelegateService<S> {
@@ -79,7 +79,7 @@ public abstract class AbstractOSGiDelegateService<S> {
 
     /**
      * Starts tracking the delegate service.
-     * 
+     *
      * @param bundleContext The bundle context
      * @return This instance for method chaining
      */
@@ -109,7 +109,7 @@ public abstract class AbstractOSGiDelegateService<S> {
 
     /**
      * Gets the service from service reference.
-     * 
+     *
      * @return The service
      * @throws OXException If service reference returned <code>null</code>
      */
@@ -123,7 +123,7 @@ public abstract class AbstractOSGiDelegateService<S> {
 
     /**
      * Gets the service from service reference.
-     * 
+     *
      * @return The service or <code>null</code> if absent
      */
     protected S optService() {

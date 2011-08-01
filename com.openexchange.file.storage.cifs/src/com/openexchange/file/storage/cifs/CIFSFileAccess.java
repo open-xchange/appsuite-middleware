@@ -82,13 +82,13 @@ import com.openexchange.tx.TransactionException;
 
 /**
  * {@link CIFSFileAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageFileAccess {
 
     private final FileStorageAccountAccess accountAccess;
-   
+
     /**
      * Initializes a new {@link CIFSFileAccess}.
      */

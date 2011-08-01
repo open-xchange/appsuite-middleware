@@ -58,7 +58,7 @@ import com.openexchange.server.services.I18nServices;
 
 /**
  * {@link StringHelper} - Helper class to translate strings.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,7 +72,7 @@ public class StringHelper {
 
     /**
      * Initializes a string replacer using the given locale.
-     * 
+     *
      * @param locale The locale to translate string to. If <code>null</code> is
      *            given, no replacement takes place.
      */

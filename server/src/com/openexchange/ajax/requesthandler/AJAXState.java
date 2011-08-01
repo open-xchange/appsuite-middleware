@@ -60,7 +60,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AJAXState}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 /**
@@ -90,7 +90,7 @@ public final class AJAXState {
 
     /**
      * Check for presence of named property.
-     * 
+     *
      * @param name The property name
      * @return <code>true</code> if property is present; otherwise <code>false</code>
      */
@@ -100,7 +100,7 @@ public final class AJAXState {
 
     /**
      * Gets (optionally) the named property.
-     * 
+     *
      * @param name The property name
      * @return The property or <code>null</code> if absent
      */
@@ -110,7 +110,7 @@ public final class AJAXState {
 
     /**
      * Gets the named property.
-     * 
+     *
      * @param name The property name
      * @return The property
      * @throws OXException If property is absent
@@ -125,7 +125,7 @@ public final class AJAXState {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      * @return The value previously associated with given name or <code>null</code> if no such property existed before
@@ -136,7 +136,7 @@ public final class AJAXState {
 
     /**
      * Removes the property associated with specified name.
-     * 
+     *
      * @param name The property name
      * @return The removed property value or <code>null</code> if absent
      */
@@ -153,7 +153,7 @@ public final class AJAXState {
 
     /**
      * Gets the property names.
-     * 
+     *
      * @return The property names.
      */
     public Set<String> propertyNames() {
@@ -162,7 +162,7 @@ public final class AJAXState {
 
     /**
      * Adds specified initializer identifier.
-     * 
+     *
      * @param identifier The initializer identifier
      * @param handler The associated handler
      * @return <code>true</code> if no such initializer identifier was present before (successful insertion); otherwise <code>false</code>

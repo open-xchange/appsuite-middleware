@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link PushExceptionMessages} - Exception messages for {@link OXException} that must be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushExceptionMessages implements LocalizableStrings {

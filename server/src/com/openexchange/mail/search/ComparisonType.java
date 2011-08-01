@@ -51,7 +51,7 @@ package com.openexchange.mail.search;
 
 /**
  * {@link ComparisonType}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ComparisonType {
@@ -68,7 +68,7 @@ public enum ComparisonType {
 
     /**
      * Gets the <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> constant for this comparison type.
-     * 
+     *
      * @return The <i>JavaMail</i> constant for this comparison type
      */
     public int getType() {

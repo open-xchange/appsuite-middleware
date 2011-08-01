@@ -85,41 +85,41 @@ public class ContactObjectsByStringAndPagePartSequenceStep extends AbstractStep<
         this.description = description;
         this.pageParts = pageParts;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
     public void execute(WebClient webClient) throws OXException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
-            try {                
+            try {
                 LOG.debug("Page evaluated is : "+input);
-                pageParts.setPage(input);                
+                pageParts.setPage(input);
                 final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformationConstrainedByLimit();
 
                 for (HashMap<String, String> map : maps){
                     final Contact contact = Mappings.translateMapToContact(map);
                     SANITIZER.sanitize(contact);
                     contactObjects.add(contact);
-                }               
-                                
-            } catch (final ConverterException e) {                
-                LOG.error(e.getMessage() 
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId() 
+                }
+
+            } catch (final ConverterException e) {
+                LOG.error(e.getMessage()
+                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
                     + ", User : " + workflow.getSubscription().getUserId()
                     + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
-                
+
                 exception = e;
             }
             executedSuccessfully = true;
-        
+
 
         if (!executedSuccessfully && input != null){
-            
+
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
     }
-    
+
     public PagePartSequence getPageParts() {
         return pageParts;
     }

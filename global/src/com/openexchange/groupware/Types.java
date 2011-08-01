@@ -79,9 +79,9 @@ public interface Types {
     public static final int USER = 120;
 
     public static final int GROUP = 125;
-    
+
     public static final int SUBSCRIPTION = 126;
-    
+
     public static final int PUBLICATION = 127;
 
     /**
@@ -112,7 +112,7 @@ public interface Types {
      * TODO: EXTRACT to admin Used for generating ids for mail service
      */
     public static final int MAIL_SERVICE = 1132;
-    
+
     public static final int GENERIC_CONFIGURATION = 1200;
 
     public static final int EAV_NODE = 666;

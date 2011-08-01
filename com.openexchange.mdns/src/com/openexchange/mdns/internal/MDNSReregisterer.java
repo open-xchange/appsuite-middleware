@@ -53,7 +53,7 @@ import java.util.UUID;
 
 /**
  * {@link MDNSReregisterer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MDNSReregisterer {

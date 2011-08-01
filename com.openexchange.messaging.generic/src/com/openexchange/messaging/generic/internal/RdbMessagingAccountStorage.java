@@ -79,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbMessagingAccountStorage} - The messaging account storage backed by database.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -99,7 +99,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     /**
      * Gets the database-backed instance of account storage manager.
-     * 
+     *
      * @return The database-backed instance of account storage manager
      */
     public static RdbMessagingAccountStorage getInstance() {
@@ -245,7 +245,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
 
     /**
      * Gets the identifiers of user-associated accounts of a certain service.
-     * 
+     *
      * @param serviceId The service identifier
      * @param session The session
      * @return The identifiers of user-associated accounts of a certain service

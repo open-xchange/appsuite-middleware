@@ -72,7 +72,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
     private final FilestoreStorage delegate;
 
     private static final Lock CACHE_LOCK = new ReentrantLock();
-    
+
     public CachingFilestoreStorage(final FilestoreStorage fs) {
         this.delegate = fs;
     }
@@ -104,15 +104,18 @@ public class CachingFilestoreStorage extends FilestoreStorage {
             this.id = I(id);
             this.delegate = delegate;
         }
-        
+
+        @Override
         public Serializable getKey() {
             return id;
         }
 
+        @Override
         public Filestore load() throws OXException {
             return delegate.getFilestore(id.intValue());
         }
 
+        @Override
         public Lock getCacheLock() {
             return CACHE_LOCK;
         }

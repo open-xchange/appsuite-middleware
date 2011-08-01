@@ -51,7 +51,7 @@ package com.openexchange.ajax.helper;
 
 /**
  * {@link BrowserDetector} - Parses useful information out of <i>"user-agent"</i> header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BrowserDetector {
@@ -134,7 +134,7 @@ public final class BrowserDetector {
 
     /**
      * Initializes a new {@link BrowserDetector}.
-     * 
+     *
      * @param userAgent The user-agent
      */
     public BrowserDetector(final String userAgent) {
@@ -147,7 +147,7 @@ public final class BrowserDetector {
 
     /**
      * Whether or not CSS works in this browser.
-     * 
+     *
      * @return True if CSS works in this browser.
      */
     public boolean isCssOK() {
@@ -156,7 +156,7 @@ public final class BrowserDetector {
 
     /**
      * Whether or not file upload works in this browser.
-     * 
+     *
      * @return True if file upload works in this browser.
      */
     public boolean isFileUploadOK() {
@@ -165,7 +165,7 @@ public final class BrowserDetector {
 
     /**
      * Whether or not Javascript works in this browser.
-     * 
+     *
      * @return True if Javascript works in this browser.
      */
     public boolean isJavascriptOK() {
@@ -174,7 +174,7 @@ public final class BrowserDetector {
 
     /**
      * The browser name specified in the user agent string.
-     * 
+     *
      * @return A String with the browser name.
      */
     public String getBrowserName() {
@@ -183,7 +183,7 @@ public final class BrowserDetector {
 
     /**
      * The browser platform specified in the user agent string.
-     * 
+     *
      * @return A String with the browser platform.
      */
     public String getBrowserPlatform() {
@@ -192,7 +192,7 @@ public final class BrowserDetector {
 
     /**
      * The browser version specified in the user agent string.
-     * 
+     *
      * @return A String with the browser version.
      */
     public float getBrowserVersion() {
@@ -201,7 +201,7 @@ public final class BrowserDetector {
 
     /**
      * The user agent string for this class.
-     * 
+     *
      * @return A String with the user agent.
      */
     public String getUserAgentString() {
@@ -210,7 +210,7 @@ public final class BrowserDetector {
 
     /**
      * Checks if user-agent indicates Internet Explorer browser.
-     * 
+     *
      * @return <code>true</code> if user-agent indicates Internet Explorer browser; otherwise <code>false</code>
      */
     public boolean isMSIE() {
@@ -227,7 +227,7 @@ public final class BrowserDetector {
 
     /**
      * Checks if user-agent indicates Windows platform.
-     * 
+     *
      * @return <code>true</code> if user-agent indicates Windows platform; otherwise <code>false</code>
      */
     public boolean isWindows() {

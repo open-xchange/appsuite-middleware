@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link InfostoreContentType} - The folder storage content type for infostore.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InfostoreContentType implements ContentType {
@@ -62,7 +62,7 @@ public final class InfostoreContentType implements ContentType {
 
     /**
      * Gets the {@link InfostoreContentType} instance.
-     * 
+     *
      * @return The {@link InfostoreContentType} instance
      */
     public static InfostoreContentType getInstance() {
@@ -81,11 +81,13 @@ public final class InfostoreContentType implements ContentType {
         return "infostore";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.INFOSTORE
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

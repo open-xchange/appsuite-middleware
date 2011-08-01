@@ -12,11 +12,11 @@ import com._4psa.pbxdata_xsd._2_5.TimeIntervalBlock;
 
 /**
  * Get time interval blocks: response type
- * 
+ *
  * <p>Java class for GetTimeIntervalBlocksResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetTimeIntervalBlocksResponseType">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.pbxdata_xsd._2_5.TimeIntervalBlock;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetTimeIntervalBlocksResponseType", propOrder = {
@@ -44,25 +44,25 @@ public class GetTimeIntervalBlocksResponseType {
 
     /**
      * Gets the value of the timeIntervalBlock property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the timeIntervalBlock property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getTimeIntervalBlock().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link TimeIntervalBlock }
-     * 
-     * 
+     *
+     *
      */
     public List<TimeIntervalBlock> getTimeIntervalBlock() {
         if (timeIntervalBlock == null) {
@@ -73,25 +73,25 @@ public class GetTimeIntervalBlocksResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

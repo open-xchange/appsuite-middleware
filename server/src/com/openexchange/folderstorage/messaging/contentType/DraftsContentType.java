@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.messaging.contentType;
 
 /**
  * {@link DraftsContentType} - The folder storage content type for drafts messaging folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DraftsContentType extends MessagingContentType {
@@ -60,7 +60,7 @@ public final class DraftsContentType extends MessagingContentType {
 
     /**
      * Gets the {@link DraftsContentType} instance.
-     * 
+     *
      * @return The {@link DraftsContentType} instance
      */
     public static DraftsContentType getInstance() {

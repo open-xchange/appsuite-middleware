@@ -94,7 +94,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link CalendarOperation} - Provides various operations on calendar
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarOperation implements SearchIterator<CalendarDataObject> {
@@ -391,7 +391,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     /**
      * Performs some preparations on specified calendar data object
-     * 
+     *
      * @param cdao The calendar data object to check
      * @param edao The storage's version of calendar data object to check; may be <code>null</code> on an insert
      * @param uid The user ID
@@ -622,7 +622,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     /**
      * Checks if full-time flag is set in specified parameter <code>cdao</code>. If so its start date and end date is changed to last the
      * whole day.
-     * 
+     *
      * @param cdao The current calendar object
      * @param edao The storage calendar object used to set start/end date if not available in specified parameter <code>cdao</code>
      * @throws OXException
@@ -945,7 +945,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     /**
      * This method does the complex filling of the calendar object if some series appointment or some series exception appointment is
      * loaded.
-     * 
+     *
      * @param cdao loaded object.
      * @throws OXException if extracting the recurrence pattern string fails.
      */
@@ -1070,7 +1070,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     /**
      * Gets the new and modified user participants
-     * 
+     *
      * @param np The current user participants
      * @param op The old user participants
      * @param uid Current working session user
@@ -1458,7 +1458,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     /**
      * Checks if specified recurring appointment's pattern shall be changed
-     * 
+     *
      * @param cdao The current calendar object (containing the changes for ongoing update operation)
      * @param edao The storage calendar object
      * @param recurringAction The previously detected recurring action constant

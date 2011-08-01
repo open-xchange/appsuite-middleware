@@ -71,42 +71,52 @@ public abstract class JDBC3ArrayWrapper implements Array {
         this.result = result;
     }
 
+    @Override
     public Object getArray() throws SQLException {
         return delegate.getArray();
     }
 
+    @Override
     public Object getArray(final Map<String, Class<?>> map) throws SQLException {
         return delegate.getArray(map);
     }
 
+    @Override
     public Object getArray(final long index, final int count) throws SQLException {
         return delegate.getArray(index, count);
     }
 
+    @Override
     public Object getArray(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
         return delegate.getArray(index, count, map);
     }
 
+    @Override
     public int getBaseType() throws SQLException {
         return delegate.getBaseType();
     }
 
+    @Override
     public String getBaseTypeName() throws SQLException {
         return delegate.getBaseTypeName();
     }
 
+    @Override
     public ResultSet getResultSet() throws SQLException {
         return new JDBC4ResultSetWrapper(delegate.getResultSet(), result.getStatement());
     }
 
+    @Override
     public ResultSet getResultSet(final Map<String, Class<?>> map) throws SQLException {
         return new JDBC4ResultSetWrapper(delegate.getResultSet(map), result.getStatement());
     }
 
+    @Override
     public ResultSet getResultSet(final long index, final int count) throws SQLException {
         return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count), result.getStatement());
     }
 
+    @Override
     public ResultSet getResultSet(final long index, final int count, final Map<String, Class<?>> map) throws SQLException {
         return new JDBC4ResultSetWrapper(delegate.getResultSet(index, count, map), result.getStatement());
     }

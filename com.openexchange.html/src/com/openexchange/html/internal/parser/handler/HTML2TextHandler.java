@@ -67,7 +67,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
 /**
  * {@link HTML2TextHandler} - A handler to generate plain text version from parsed HTML content which is then accessible via
  * {@link #getText()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTML2TextHandler implements HTMLHandler {
@@ -162,7 +162,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTML2TextHandler}.
-     * 
+     *
      * @param capacity The initial capacity
      */
     public HTML2TextHandler(final HTMLService htmlService, final int capacity) {
@@ -171,7 +171,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTML2TextHandler}.
-     * 
+     *
      * @param capacity The initial capacity
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
@@ -187,7 +187,7 @@ public final class HTML2TextHandler implements HTMLHandler {
     /**
      * Sets whether to append URLs contained in <i>href</i>s and <i>src</i>.<br>
      * Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be <code>Link&nbsp;[www.somewhere.com]</code>
-     * 
+     *
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
      * @return This handler with behavior applied
      */
@@ -198,7 +198,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Gets the extracted text.
-     * 
+     *
      * @return The extracted text
      */
     public String getText() {
@@ -207,7 +207,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Sets the mail ID for debugging purpose on {@link #handleError(String)}.
-     * 
+     *
      * @param mailId The mail ID to set
      */
     public void setMailId(final long mailId) {
@@ -216,7 +216,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Sets the user ID for debugging purpose on {@link #handleError(String)}.
-     * 
+     *
      * @param userId The user ID to set
      */
     public void setUserId(final int userId) {
@@ -225,7 +225,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Sets the context ID for debugging purpose on {@link #handleError(String)}.
-     * 
+     *
      * @param contextId The context ID to set
      */
     public void setContextId(final int contextId) {
@@ -523,7 +523,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
     /**
      * Resets this handler for re-usage
-     * 
+     *
      * @return This html2text handler
      */
     public HTML2TextHandler reset() {

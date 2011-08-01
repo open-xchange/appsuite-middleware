@@ -36,7 +36,7 @@ public class MailfilterActionTest extends MailfilterAction {
             Assert.assertTrue(OXMailfilterExceptionCode.NO_VALID_PASSWORDSOURCE.equals(e));
         }
     }
-    
+
     @Test
     public void testGetRightPasswordSession() throws OXException {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.SESSION.name);
@@ -46,7 +46,7 @@ public class MailfilterActionTest extends MailfilterAction {
         final String rightPassword = getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + credsPW + "\"", credsPW, rightPassword);
     }
-    
+
     @Test
     public void testGetRightPasswordGlobalNoMasterPW() throws OXException {
         Common.simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property, MailFilterProperties.PasswordSource.GLOBAL.name);
@@ -60,7 +60,7 @@ public class MailfilterActionTest extends MailfilterAction {
             Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.equals(e));
         }
     }
-    
+
     @Test
     public void testGetRightPasswordGlobal() throws OXException {
         final String masterPW = "masterPW";
@@ -72,5 +72,5 @@ public class MailfilterActionTest extends MailfilterAction {
         final String rightPassword = getRightPassword(config, creds);
         Assert.assertEquals("Password should be equal to \"" + masterPW + "\"", masterPW, rightPassword);
     }
-    
+
 }

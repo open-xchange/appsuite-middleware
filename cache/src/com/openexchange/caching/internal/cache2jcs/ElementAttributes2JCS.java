@@ -58,7 +58,7 @@ import com.openexchange.caching.internal.jcs2cache.JCSElementEventHandlerDelegat
 
 /**
  * {@link ElementAttributes2JCS} - Delegates its method invocations to an instance of {@link IElementAttributes}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElementAttributes2JCS implements ElementAttributes {

@@ -80,7 +80,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
-import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -92,7 +91,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * AJAXFile
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJAXFile extends PermissionServlet {
@@ -407,7 +406,7 @@ public final class AJAXFile extends PermissionServlet {
 
     /**
      * Checks if specified {@link FileItem file item} denotes a valid file.
-     * 
+     *
      * @param fileItem The file item to check
      * @return <code>true</code> if file item denotes a valid file; otherwise <code>false</code>
      */

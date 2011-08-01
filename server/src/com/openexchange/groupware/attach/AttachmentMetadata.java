@@ -80,17 +80,17 @@ public interface AttachmentMetadata {
 	public abstract boolean getRtfFlag();
 
 	public abstract void setRtfFlag(boolean rtfFlag);
-	
+
 	public abstract int getModuleId();
 
 	public abstract void setModuleId(int moduleId);
 
 	public abstract int getId();
-	
+
 	public abstract void setId(int id);
-	
+
 	public abstract void setFolderId(int folderId);
-	
+
 	public abstract int getFolderId();
 
 	public abstract void setComment(String string);

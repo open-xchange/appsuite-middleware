@@ -55,14 +55,14 @@ import com.openexchange.server.impl.EffectivePermission;
 
 /**
  * {@link FolderService} - The folder service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderService {
 
     /**
      * Gets specified folder from given context.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return The folder object
@@ -72,7 +72,7 @@ public interface FolderService {
 
     /**
      * Determines specified user's effective permission on the folder matching given folder ID.
-     * 
+     *
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID

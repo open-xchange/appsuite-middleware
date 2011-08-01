@@ -61,11 +61,13 @@ public class SQRT extends UnaryFunction {
 		super(new Constant(value));
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildSQRT(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "SQRT";
 	}
 }

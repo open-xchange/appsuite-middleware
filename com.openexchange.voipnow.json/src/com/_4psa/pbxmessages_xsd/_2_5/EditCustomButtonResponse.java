@@ -10,9 +10,9 @@ import com._4psa.common_xsd._2_5.UpdateObject;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import com._4psa.common_xsd._2_5.UpdateObject;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -40,11 +40,11 @@ public class EditCustomButtonResponse
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCode() {
         return code;
@@ -52,11 +52,11 @@ public class EditCustomButtonResponse
 
     /**
      * Sets the value of the code property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCode(String value) {
         this.code = value;

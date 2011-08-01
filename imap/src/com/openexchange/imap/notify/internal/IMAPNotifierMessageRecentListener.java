@@ -68,7 +68,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 /**
  * {@link IMAPNotifierMessageRecentListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
@@ -85,7 +85,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
         /**
          * Checks validity of specified IMAP folder's full name
-         * 
+         *
          * @param fullName The full name
          * @return <code>true</code> if valid; otherwise <code>false</code>
          */
@@ -96,7 +96,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Gets the full name checker.
-     * 
+     *
      * @return The full name checker
      */
     private static FullNameChecker getFullNameChecker() {
@@ -162,7 +162,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param str The string to check
      * @return <code>true</code> if string is considered empty; otherwise <code>false</code>
      */
@@ -180,7 +180,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Adds the recent-notifier for specified IMAP folder if allowed to.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param accountId The account identifier
      * @param session The session
@@ -191,7 +191,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Adds the recent-notifier for specified IMAP folder if allowed to.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param optFullName The optional full name
      * @param accountId The account identifier
@@ -203,7 +203,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Adds the recent-notifier for specified IMAP folder if allowed to.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param optFullName The optional full name (if <code>null</code> gets from {@link IMAPFolder#getFullName()})
      * @param accountId The account identifier
@@ -227,7 +227,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
     /**
      * Initializes a new {@link IMAPNotifierMessageRecentListener}.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account identifier
      * @param session The session

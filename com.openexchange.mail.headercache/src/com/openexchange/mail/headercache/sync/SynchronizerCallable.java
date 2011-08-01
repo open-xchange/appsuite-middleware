@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SynchronizerCallable} - The synchronizer callable.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SynchronizerCallable implements Callable<Object> {

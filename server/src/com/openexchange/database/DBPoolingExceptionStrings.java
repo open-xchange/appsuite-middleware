@@ -105,7 +105,7 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
 
     public static final String MISSING_CONFIGURATION_MSG = "Configuration file for database configuration is missing.";
 
-    // %1$s is replaced with the name of the required property that is not found. 
+    // %1$s is replaced with the name of the required property that is not found.
     public static final String PROPERTY_MISSING_MSG = "Property \"%1$s\" is not defined.";
 
     // %1$s is replaced with the name of the java class that should be initialized a second time.

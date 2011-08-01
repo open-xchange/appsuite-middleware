@@ -61,15 +61,15 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 
 public abstract class CommonRequest {
-	
+
 	protected JSONWriter w;
-	
+
 	private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CommonRequest.class));
-	
+
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;
 	}
-	
+
 	protected void sendErrorAsJS(final String error, final String...errorParams) {
 		//final JSONObject response = new JSONObject();
 		try {
@@ -85,7 +85,7 @@ public abstract class CommonRequest {
 			LOG.debug(e.getMessage(),e);
 		}
 	}
-	
+
 	protected void handle(final Throwable t) {
 		final Response res = new Response();
 		if(t instanceof OXException) {
@@ -102,7 +102,7 @@ public abstract class CommonRequest {
 			LOG.error("",t);
 		}
 	}
-	
+
 	protected void invalidParameter(final String parameter, final String value) {
 		sendErrorAsJS("Invalid parameter value '%s' for parameter %s",value,parameter);
 	}
@@ -120,10 +120,10 @@ public abstract class CommonRequest {
 		}
 		return true;
 	}
-	
+
 	protected void missingParameter(final String parameter, final String action) {
 		sendErrorAsJS("Missing Parameter: %s for action: %s",parameter,action);
-		
+
 	}
-	
+
 }

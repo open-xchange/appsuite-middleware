@@ -53,7 +53,7 @@ import java.util.concurrent.CompletionService;
 
 /**
  * {@link TrackingCompletionService} - Extends {@link CompletionService} by {@link #getDuration()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TrackingCompletionService<V> extends CompletionService<V> {
@@ -61,7 +61,7 @@ public interface TrackingCompletionService<V> extends CompletionService<V> {
     /**
      * Gets the duration. That is the tracked amount of time in milliseconds until the last element was removed from this completion queue
      * since the first task was submitted.
-     * 
+     *
      * @return The duration in milliseconds
      */
     public long getDuration();

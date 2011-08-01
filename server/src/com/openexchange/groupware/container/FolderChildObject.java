@@ -54,7 +54,7 @@ import java.util.Set;
 
 /**
  * DataObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -95,6 +95,7 @@ public abstract class FolderChildObject extends DataObject {
         b_parent_folder_id = false;
     }
 
+    @Override
     public Set<Integer> findDifferingFields(DataObject otherDataObject) {
         Set<Integer> differingFields = super.findDifferingFields(otherDataObject);
 

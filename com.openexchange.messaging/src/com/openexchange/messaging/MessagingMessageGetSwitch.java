@@ -54,7 +54,7 @@ import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
 /**
  * {@link MessagingMessageGetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16

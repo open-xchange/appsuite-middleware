@@ -71,21 +71,21 @@ public class LockActionTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request().param("id", "12").param("diff", "1337");
-        
+
         final File document = new DefaultFile();
         document.setLastModified(new Date());
-        
+
         fileAccess().expectCall("lock", "12", 1337l);
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(document);
-        
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
     @Override
     public AbstractFileAction createAction() {
         return new LockAction();

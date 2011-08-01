@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MemoryTable} - The in-memory representation of the virtual folder table.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTable {
@@ -79,7 +79,7 @@ public final class MemoryTable {
 
     /**
      * Gets the memory table for specified session, creates it if absent for given session.
-     * 
+     *
      * @param session The session
      * @return The memory table for specified session
      * @throws OXException If creation of memory table fails
@@ -90,7 +90,7 @@ public final class MemoryTable {
 
     /**
      * Gets the memory table for specified session.
-     * 
+     *
      * @param session The session
      * @return The memory table for specified session or <code>null</code> if absent
      */
@@ -105,7 +105,7 @@ public final class MemoryTable {
 
     /**
      * Gets the memory table for specified session.
-     * 
+     *
      * @param session The session
      * @param createIfAbsent <code>true</code> to create if absent; otherwise <code>false</code> to possibly return <code>null</code> if
      *            there is no memory table
@@ -147,7 +147,7 @@ public final class MemoryTable {
 
     /**
      * Drops the memory table from specified session
-     * 
+     *
      * @param session The session
      */
     public static void dropMemoryTableFrom(final Session session) {
@@ -189,7 +189,7 @@ public final class MemoryTable {
 
     /**
      * Checks if this memory table contains specified memory tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @return <code>true</code> if this memory table contains specified memory tree; otherwise <code>false</code>
      */
@@ -199,7 +199,7 @@ public final class MemoryTable {
 
     /**
      * Gets the specified memory tree; atomically creates it if absent.
-     * 
+     *
      * @param treeId The memory tree identifier
      * @param session The session providing user data
      * @return The memory tree
@@ -211,7 +211,7 @@ public final class MemoryTable {
 
     /**
      * Gets the specified memory tree; atomically creates it if absent.
-     * 
+     *
      * @param treeId The memory tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -233,7 +233,7 @@ public final class MemoryTable {
 
     /**
      * Gets the specified memory tree.
-     * 
+     *
      * @param treeId The memory tree identifier
      * @return The memory tree or <code>null</code> if absent
      */
@@ -243,7 +243,7 @@ public final class MemoryTable {
 
     /**
      * Checks if this memory table is empty.
-     * 
+     *
      * @return <code>true</code> if this memory table is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -252,7 +252,7 @@ public final class MemoryTable {
 
     /**
      * Removes the specified memory tree from this memory table.
-     * 
+     *
      * @param treeId The memory tree identifier
      * @return The removed memory tree or <code>null</code> if there was no such memory tree
      */
@@ -262,7 +262,7 @@ public final class MemoryTable {
 
     /**
      * Gets the number of memory trees held by this memory table
-     * 
+     *
      * @return The number of memory trees
      */
     public int size() {
@@ -357,7 +357,7 @@ public final class MemoryTable {
 
     /**
      * (Re-)Initializes specified tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -377,7 +377,7 @@ public final class MemoryTable {
 
     /**
      * (Re-)Initializes specified tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -451,7 +451,7 @@ public final class MemoryTable {
 
     /**
      * (Re-)Initializes specified folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @param treeId The tree identifier
      * @param userId The user identifier
@@ -472,7 +472,7 @@ public final class MemoryTable {
 
     /**
      * (Re-)Initializes specified folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @param treeId The tree identifier
      * @param userId The user identifier

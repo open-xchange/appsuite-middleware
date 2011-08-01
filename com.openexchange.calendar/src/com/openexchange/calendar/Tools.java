@@ -76,14 +76,14 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Tools} - Utility methods for calendaring.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Tools {
 
     private static final Map<String, TimeZone> zoneCache = new ConcurrentHashMap<String, TimeZone>();
-    
+
     private static CalendarCollectionService calColl = new CalendarCollection();
 
     /**
@@ -96,7 +96,7 @@ public final class Tools {
     /**
      * Formats specified date's time millis into a date string.<br>
      * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
-     * 
+     *
      * @param timeMillis The date's time millis to format
      * @return The date string.
      */
@@ -107,7 +107,7 @@ public final class Tools {
     /**
      * Formats specified date into a date string.<br>
      * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
-     * 
+     *
      * @param date The date to format
      * @return The date string.
      */
@@ -137,7 +137,7 @@ public final class Tools {
 
     /**
      * Gets the <code>TimeZone</code> for the given ID.
-     * 
+     *
      * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
@@ -155,7 +155,7 @@ public final class Tools {
 
     /**
      * Gets the appointment's title associated with given object ID in given context.
-     * 
+     *
      * @param objectId The object ID
      * @param ctx The context
      * @return The appointment's title or <code>null</code>
@@ -188,7 +188,7 @@ public final class Tools {
 
     /**
      * Gets the appointment's folder associated with given object ID in given context.
-     * 
+     *
      * @param objectId The object ID
      * @param userId The session user
      * @param ctx The context

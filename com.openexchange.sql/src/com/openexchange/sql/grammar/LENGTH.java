@@ -57,11 +57,13 @@ public class LENGTH extends UnaryFunction {
 		super(expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildLENGTH(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "LENGTH";
 	}
 }

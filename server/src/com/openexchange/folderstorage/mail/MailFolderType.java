@@ -56,7 +56,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link MailFolderType} - The folder type for mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderType implements FolderType {
@@ -69,7 +69,7 @@ public final class MailFolderType implements FolderType {
 
     /**
      * Gets the {@link MailFolderType} instance.
-     * 
+     *
      * @return The {@link MailFolderType} instance
      */
     public static MailFolderType getInstance() {
@@ -83,12 +83,14 @@ public final class MailFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         if (null == folderId) {
             return false;
@@ -116,6 +118,7 @@ public final class MailFolderType implements FolderType {
         return true;
     }
 
+    @Override
     public boolean servesParentId(final String folderId) {
         if (null == folderId) {
             return false;

@@ -168,7 +168,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             String address;
             //This sets the attendees email-addresses to their DefaultSenderAddress if configured via com.openexchange.notification.fromSource in notification.properties
             final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-            if ("defaultSenderAddress".equals(senderSource)) { 
+            if ("defaultSenderAddress".equals(senderSource)) {
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
                 } catch (final OXException e) {
@@ -224,7 +224,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         final PropertyList properties = component.getProperties(Property.ATTENDEE);
         final Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();
         final List<String> resourceNames = new LinkedList<String>();
-        
+
         final String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
 
         for(int i = 0, size = properties.size(); i < size; i++) {
@@ -277,7 +277,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if (icalP.status != -1) {
                 up.setConfirm(icalP.status);
             }
-            
+
             cObj.addParticipant(up);
         }
 
@@ -287,22 +287,22 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             external.setDisplayName(null);
 
             final ICalParticipant icalP = mails.get(mail);
-            
+
             if (icalP.message != null) {
                 external.setMessage(icalP.message);
             }
             if (icalP.status != -1) {
                 external.setConfirm(icalP.status);
             }
-            
+
             if (comment != null) {
                 external.setMessage(comment);
             }
-            
+
             cObj.addParticipant(external);
             confirmableParticipants.add(external);
         }
-        
+
         if (confirmableParticipants.size() > 0) {
             cObj.setConfirmations(confirmableParticipants.toArray(new ConfirmableParticipant[confirmableParticipants.size()]));
         }
@@ -332,7 +332,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             warnings.add(warning);
         }
     }
-    
+
     /**
      * @param attendee
      * @return
@@ -359,7 +359,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         public String mail;
         public int status;
         public String message;
-        
+
         public ICalParticipant(final String mail, final int status, final String message) {
             this.mail = mail;
             this.status = status;

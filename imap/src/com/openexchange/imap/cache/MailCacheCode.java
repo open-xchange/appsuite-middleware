@@ -51,9 +51,9 @@ package com.openexchange.imap.cache;
 
 /**
  * {@link MailCacheCode}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public enum MailCacheCode {
 

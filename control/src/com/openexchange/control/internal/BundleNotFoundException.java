@@ -51,7 +51,7 @@ package com.openexchange.control.internal;
 
 /**
  * {@link BundleNotFoundException} - Indicates that a bundle could not be found.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class BundleNotFoundException extends Exception {
@@ -67,7 +67,7 @@ public class BundleNotFoundException extends Exception {
 
     /**
      * Initializes a new {@link BundleNotFoundException}.
-     * 
+     *
      * @param message The exception message
      */
     public BundleNotFoundException(final String message) {
@@ -76,7 +76,7 @@ public class BundleNotFoundException extends Exception {
 
     /**
      * Initializes a new {@link BundleNotFoundException}.
-     * 
+     *
      * @param message The exception message
      * @param exc The cause
      */
@@ -86,7 +86,7 @@ public class BundleNotFoundException extends Exception {
 
     /**
      * Initializes a new {@link BundleNotFoundException}.
-     * 
+     *
      * @param exc The cause
      */
     public BundleNotFoundException(final Exception exc) {

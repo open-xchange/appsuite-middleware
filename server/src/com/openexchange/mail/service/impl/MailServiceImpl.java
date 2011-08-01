@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailServiceImpl} - The mail service implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailServiceImpl implements MailService {
@@ -69,10 +69,12 @@ public final class MailServiceImpl implements MailService {
         super();
     }
 
+    @Override
     public MailAccess<?, ?> getMailAccess(final Session session, final int accountId) throws OXException {
         return MailAccess.getInstance(session, accountId);
     }
 
+    @Override
     public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId);
     }

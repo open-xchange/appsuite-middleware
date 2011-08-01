@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link IDMailMessage} - Supports only {@link #getMailId()} and {@link #getFolder()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDMailMessage extends MailMessage {
@@ -114,7 +114,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Gets the UID
-     * 
+     *
      * @return The UID or <code>-1</code> if absent
      */
     public long getUid() {
@@ -123,7 +123,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Sets the UID
-     * 
+     *
      * @param uid The UID to set or <code>-1</code> to indicate absence
      */
     public void setUid(final long uid) {
@@ -132,7 +132,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Gets the separator.
-     * 
+     *
      * @return The separator
      */
     public char getSeparator() {
@@ -141,7 +141,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Sets the separator.
-     * 
+     *
      * @param separator The separator to set
      */
     public void setSeparator(final char separator) {
@@ -150,7 +150,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Gets the sequence number.
-     * 
+     *
      * @return The sequence number
      */
     public int getSeqnum() {
@@ -159,7 +159,7 @@ public final class IDMailMessage extends MailMessage {
 
     /**
      * Sets the sequence number.
-     * 
+     *
      * @param seqnum The sequence number to set
      */
     public void setSeqnum(final int seqnum) {

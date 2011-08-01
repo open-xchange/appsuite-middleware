@@ -55,7 +55,7 @@ import org.apache.commons.httpclient.HttpMethodBase;
 
 /**
  * {@link HttpMethodInputStream}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpMethodInputStream extends InputStream {
@@ -66,7 +66,7 @@ public final class HttpMethodInputStream extends InputStream {
 
     /**
      * Initializes a new {@link HttpMethodInputStream}.
-     * 
+     *
      * @param method The HTTP method from which to take the response as a stream
      * @throws IOException If initialization fails
      */

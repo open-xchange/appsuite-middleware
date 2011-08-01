@@ -71,18 +71,18 @@ public class UserWidgetSQLStorage extends WidgetSQLStorage {
     public UserWidgetSQLStorage(final Metadata<UWAWidget> metadata, final DatabaseService dbService, final int userId, final int ctxId) {
         super(metadata, dbService, userId, ctxId);
     }
-    
+
     public boolean isUserWidget(final String id) throws SQLException, OXException {
         final Predicate predicate = builder.matchOne().AND(new NOTNULL("user"));
-        
-        
+
+
         final SELECT select = new SELECT("id").FROM(metadata.getName()).WHERE(predicate);
         return executeQuery(select, primaryKey(id), new ResultSetHandler<Boolean>() {
 
             public Boolean handle(final ResultSet rs) throws SQLException, OXException {
                 return rs.next();
             }
-            
+
         });
     }
 

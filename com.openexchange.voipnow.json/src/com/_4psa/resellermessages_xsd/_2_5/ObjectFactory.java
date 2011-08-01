@@ -15,18 +15,18 @@ import com._4psa.resellermessagesinfo_xsd._2_5.GetResellersResponseType;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.resellermessages_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.resellermessages_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -45,14 +45,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.resellermessages_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link GetResellerPLRequest }
-     * 
+     *
      */
     public GetResellerPLRequest createGetResellerPLRequest() {
         return new GetResellerPLRequest();
@@ -60,7 +60,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditResellerResponse }
-     * 
+     *
      */
     public EditResellerResponse createEditResellerResponse() {
         return new EditResellerResponse();
@@ -68,7 +68,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditResellerRequest }
-     * 
+     *
      */
     public EditResellerRequest createEditResellerRequest() {
         return new EditResellerRequest();
@@ -76,7 +76,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SetResellerStatusRequest }
-     * 
+     *
      */
     public SetResellerStatusRequest createSetResellerStatusRequest() {
         return new SetResellerStatusRequest();
@@ -84,7 +84,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddResellerResponse }
-     * 
+     *
      */
     public AddResellerResponse createAddResellerResponse() {
         return new AddResellerResponse();
@@ -92,7 +92,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetResellersRequest }
-     * 
+     *
      */
     public GetResellersRequest createGetResellersRequest() {
         return new GetResellersRequest();
@@ -100,7 +100,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SetResellerCpAccessRequest }
-     * 
+     *
      */
     public SetResellerCpAccessRequest createSetResellerCpAccessRequest() {
         return new SetResellerCpAccessRequest();
@@ -108,7 +108,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetResellerDetailsRequest }
-     * 
+     *
      */
     public GetResellerDetailsRequest createGetResellerDetailsRequest() {
         return new GetResellerDetailsRequest();
@@ -116,7 +116,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelResellerRequest }
-     * 
+     *
      */
     public DelResellerRequest createDelResellerRequest() {
         return new DelResellerRequest();
@@ -124,7 +124,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddResellerRequest }
-     * 
+     *
      */
     public AddResellerRequest createAddResellerRequest() {
         return new AddResellerRequest();
@@ -132,7 +132,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "UpdateResellerPLResponse")
     public JAXBElement<UpdateObject> createUpdateResellerPLResponse(UpdateObject value) {
@@ -141,7 +141,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ResellerPLInfo }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "SetResellerPLRequest")
     public JAXBElement<ResellerPLInfo> createSetResellerPLRequest(ResellerPLInfo value) {
@@ -150,7 +150,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "DelResellerResponse")
     public JAXBElement<DelObject> createDelResellerResponse(DelObject value) {
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateResellerPLInfo }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "UpdateResellerPLRequest")
     public JAXBElement<UpdateResellerPLInfo> createUpdateResellerPLRequest(UpdateResellerPLInfo value) {
@@ -168,7 +168,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "SetResellerStatusResponse")
     public JAXBElement<UpdateObject> createSetResellerStatusResponse(UpdateObject value) {
@@ -177,7 +177,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "SetResellerPLResponse")
     public JAXBElement<UpdateObject> createSetResellerPLResponse(UpdateObject value) {
@@ -186,7 +186,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetResellersResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "GetResellersResponse")
     public JAXBElement<GetResellersResponseType> createGetResellersResponse(GetResellersResponseType value) {
@@ -195,7 +195,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetResellerDetailsRequest }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "GetResellerDetailsRequest")
     public JAXBElement<GetResellerDetailsRequest> createGetResellerDetailsRequest(GetResellerDetailsRequest value) {
@@ -204,7 +204,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetResellerDetailsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "GetResellerDetailsResponse")
     public JAXBElement<GetResellerDetailsResponseType> createGetResellerDetailsResponse(GetResellerDetailsResponseType value) {
@@ -213,7 +213,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateObject }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "SetResellerCpAccessResponse")
     public JAXBElement<UpdateObject> createSetResellerCpAccessResponse(UpdateObject value) {
@@ -222,7 +222,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetResellerPLResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ResellerMessages.xsd/2.5.1", name = "GetResellerPLResponse")
     public JAXBElement<GetResellerPLResponseType> createGetResellerPLResponse(GetResellerPLResponseType value) {

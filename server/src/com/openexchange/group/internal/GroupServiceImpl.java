@@ -73,6 +73,7 @@ public final class GroupServiceImpl implements GroupService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void create(final Context ctx, final User user, final Group group)
         throws OXException {
         final Create create = new Create(ctx, user, group);
@@ -82,18 +83,21 @@ public final class GroupServiceImpl implements GroupService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void update(final Context ctx, final User user, final Group group,
         final Date lastRead) throws OXException {
         final Update update = new Update(ctx, user, group, lastRead);
         update.perform();
     }
 
+    @Override
     public void delete(final Context ctx, final User user, final int groupId,
         final Date lastRead) throws OXException {
         final Delete delete = new Delete(ctx, user, groupId, lastRead);
         delete.perform();
     }
 
+    @Override
     public Group getGroup(Context ctx, int groupId) throws OXException {
         try {
             return GroupStorage.getInstance().getGroup(groupId, ctx);

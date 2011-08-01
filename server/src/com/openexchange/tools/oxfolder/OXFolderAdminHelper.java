@@ -82,7 +82,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXFolderAdminHelper} - Helper class for admin.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderAdminHelper {
@@ -129,7 +129,7 @@ public final class OXFolderAdminHelper {
      * Checks if context's admin has administer permission on public folder(s).
      * <p>
      * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
-     * 
+     *
      * @param cid The context ID
      * @param userId The ID of the user for whom the setting shall be checked
      * @param readCon A readable connection
@@ -163,7 +163,7 @@ public final class OXFolderAdminHelper {
      * Sets if context's admin has administer permission on public folder(s).
      * <p>
      * <b>Note</b>: Succeeds only of specified user ID denotes context's admin
-     * 
+     *
      * @param editable <code>true</code> if context's admin has administer permission on public folder(s); otherwise <code>false</code>
      * @param cid The context ID
      * @param userId The ID of the user for whom the option shall be set
@@ -277,7 +277,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Restores default permissions on global address book folder in given context.
-     * 
+     *
      * @param cid The context ID
      * @param enable Whether to enable or disable global address book access for each user
      * @throws OXException If an error occurs
@@ -348,7 +348,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Checks whether global address book is enabled for specified user.
-     * 
+     *
      * @param cid The context ID
      * @param userId The user ID
      * @param readCon A readable connection
@@ -391,7 +391,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Enables/Disables specified user's global address book permission.
-     * 
+     *
      * @param cid The context ID
      * @param userId The user ID
      * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
@@ -404,7 +404,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Enables/Disables specified user's global address book permission.
-     * 
+     *
      * @param cid The context ID
      * @param userId The user ID
      * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
@@ -454,7 +454,7 @@ public final class OXFolderAdminHelper {
             rs = stmt.executeQuery();
             final boolean update = rs.next();
             final int system = (update) ? rs.getInt(2) : -1;
-            
+
             DBUtils.closeSQLStuff(rs, stmt);
             rs = null;
             /*
@@ -546,7 +546,7 @@ public final class OXFolderAdminHelper {
     /**
      * Creates the standard system folders located in each context for given context in database and creates the default folders for
      * context's admin user by invoking <code>{@link #addUserToOXFolders(int, String, String, int, Connection)}</code>
-     * 
+     *
      * @param cid The context ID
      * @param mailAdminDisplayName The display name of context's admin user
      * @param language The language conforming to syntax rules of locales
@@ -773,7 +773,7 @@ public final class OXFolderAdminHelper {
          */
         /*-
          * Don't grant full access for admin on top level infostore folder
-         * 
+         *
         createSingleUserPermission(
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
             mailAdmin,
@@ -841,7 +841,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates a public system folder with default permission for all-groups-and-users entity.
-     * 
+     *
      * @param cid The context ID
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
@@ -862,7 +862,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates the public folder with default permission for all-groups-and-users entity.
-     * 
+     *
      * @param cid The context ID
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
@@ -895,7 +895,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates the infostore folder with default permission for all-groups-and-users entity.
-     * 
+     *
      * @param cid The context ID
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
@@ -928,7 +928,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates the public infostore folder with default permission for all-groups-and-users entity.
-     * 
+     *
      * @param cid The context ID
      * @param mailAdmin The context admin
      * @param writeCon A writable connection
@@ -961,7 +961,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Checks permission existence for all-groups-abd-users on GAB folder in given context.
-     * 
+     *
      * @param cid The context ID
      * @param con A connection
      * @return <code>true</code> if a permission exists; otherwise <code>false</code>
@@ -973,7 +973,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Checks permission existence in given folder in given context for given user.
-     * 
+     *
      * @param cid The context ID
      * @param folderId The folder ID
      * @param userId The user ID
@@ -997,7 +997,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Checks permission values for folder, object-read, object-write and object-delete permission.
-     * 
+     *
      * @param cid The context ID
      * @param folderId The folder ID
      * @param entityId The entity ID
@@ -1026,7 +1026,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Checks existence of given folder in given context.
-     * 
+     *
      * @param cid The context ID
      * @param folderId The folder ID
      * @param con A connection
@@ -1047,7 +1047,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates the global address book folder.
-     * 
+     *
      * @param cid The context ID
      * @param mailAdmin The ID of context's admin
      * @param writeCon A writable connection
@@ -1193,7 +1193,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Deletes all context associated folder in both working and backup tables from database
-     * 
+     *
      * @param cid The context ID
      * @param readCon A readable connection
      * @param writeCon A writeable connection
@@ -1292,7 +1292,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Propagates that a group has been modified throughout affected folders by touching folder's last-modified timestamp.
-     * 
+     *
      * @param group The affected group ID
      * @param readCon A readable connection to database
      * @param writeCon A writable connection to database
@@ -1350,7 +1350,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Propagates modifications <b>already</b> performed on an existing user throughout folder module.
-     * 
+     *
      * @param userId The ID of the user who has been modified
      * @param changedFields The changed fields of the user taken from constants defined in {@link Contact}; e.g.
      *            {@link Contact#DISPLAY_NAME}
@@ -1424,7 +1424,7 @@ public final class OXFolderAdminHelper {
     /**
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date
      * data and do not read old value.
-     * 
+     *
      * @param userId The user ID
      * @param cid The context ID
      * @param con The connection
@@ -1462,7 +1462,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Creates default folders for modules task, calendar, contact, and infostore for given user ID
-     * 
+     *
      * @param userId The user ID
      * @param displayName The display name which is taken as folder name for user's default infostore folder
      * @param language User's language which determines the translation of default folder names
@@ -1601,7 +1601,7 @@ public final class OXFolderAdminHelper {
 
     /**
      * Sets the global address book permission dependent on {@link OXFolderProperties#isEnableInternalUsersEdit()} option.
-     * 
+     *
      * @param p The permission instance whose permissions shall be set
      */
     private static void setGABPermissions(final OCLPermission p) {
@@ -1612,7 +1612,7 @@ public final class OXFolderAdminHelper {
             OCLPermission.NO_PERMISSIONS);
     }
 
-    // NOTE: This is an update without the full primary key in the where clause, so it may lock too many rows. 
+    // NOTE: This is an update without the full primary key in the where clause, so it may lock too many rows.
     // Since this is never called, I suppose we might as well remove the method
     private void updateGABWritePermission(final int contextId, final boolean enable, final Connection con) throws OXException {
         PreparedStatement ps = null;

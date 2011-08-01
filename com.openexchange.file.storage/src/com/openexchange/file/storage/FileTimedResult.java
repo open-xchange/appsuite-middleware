@@ -56,14 +56,14 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link FileTimedResult}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileTimedResult extends AbstractTimedResult<File> {
 
     /**
      * Initializes a new {@link FileTimedResult} from given collection.
-     * 
+     *
      * @param collection The collection
      */
     public FileTimedResult(final Collection<File> collection) {
@@ -72,7 +72,7 @@ public class FileTimedResult extends AbstractTimedResult<File> {
 
     /**
      * Initializes a new {@link FileTimedResult} from given search iterator.
-     * 
+     *
      * @param iter The search iterator
      */
     public FileTimedResult(final SearchIterator<File> iter) {

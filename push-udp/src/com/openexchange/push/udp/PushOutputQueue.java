@@ -71,7 +71,7 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * {@link PushOutputQueue} - Holds main queue containing objects to deliver.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushOutputQueue implements Runnable {
@@ -97,10 +97,10 @@ public class PushOutputQueue implements Runnable {
     private static int remoteHostTimeOut = 3600000;
 
     private static PushChannels channels;
-    
+
     /**
      * Adds specified push object to queue for delivery.
-     * 
+     *
      * @param pushObject The push object to deliver
      * @throws OXException If an event exception occurs
      */
@@ -131,7 +131,7 @@ public class PushOutputQueue implements Runnable {
 
     /**
      * Adds specified register object to queue for delivery.
-     * 
+     *
      * @param registerObject The register object
      * @throws OXException If an event exception occurs
      */
@@ -141,7 +141,7 @@ public class PushOutputQueue implements Runnable {
 
     /**
      * Adds specified register object to queue for delivery.
-     * 
+     *
      * @param registerObject The register object
      * @param noDelay <code>true</code> to immediately deliver the object; otherwise <code>false</code>
      * @throws OXException If an event exception occurs
@@ -170,7 +170,7 @@ public class PushOutputQueue implements Runnable {
 
     /**
      * Adds given remote host to set of known Open-Xchange servers to which objects ought to be distributed.
-     * 
+     *
      * @param remoteHostObject The remote host denoting a remote Open-Xchange server
      */
     public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
@@ -183,7 +183,7 @@ public class PushOutputQueue implements Runnable {
     /**
      * Creates an appropriate binary data package from given push object and delivers it to clients as well as distributes it among linked
      * Open-Xchange servers (if configured).
-     * 
+     *
      * @param pushObject The push object
      */
     private static void createAndDeliverPushPackage(final PushObject pushObject) {
@@ -287,7 +287,7 @@ public class PushOutputQueue implements Runnable {
     /**
      * Creates an appropriate binary data package from given register object and delivers it to clients as well as distributes it among
      * linked Open-Xchange server (if configured).
-     * 
+     *
      * @param registerObject The register object
      */
     private static void createAndDeliverRegisterPackage(final RegisterObject registerObject) {
@@ -349,7 +349,7 @@ public class PushOutputQueue implements Runnable {
 
     /**
      * Delivers specified push object to clients and distributes it among linked Open-Xchange servers (if configured).
-     * 
+     *
      * @param pushDelayedObject The push object to deliver
      */
     private static void deliver(final PushDelayedObject pushDelayedObject) {
@@ -373,7 +373,7 @@ public class PushOutputQueue implements Runnable {
         }
     }
 
-  
+
 
     private boolean isRunning = false;
 
@@ -396,7 +396,7 @@ public class PushOutputQueue implements Runnable {
             isEnabled = true;
 
             isRunning = true;
-            
+
             channels = channels2;
 
             final Thread th = new Thread(this);

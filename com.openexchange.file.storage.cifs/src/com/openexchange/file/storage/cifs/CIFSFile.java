@@ -62,7 +62,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link CIFSFile}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFile extends DefaultFile {
@@ -71,7 +71,7 @@ public final class CIFSFile extends DefaultFile {
 
     /**
      * Initializes a new {@link CIFSFile}.
-     * 
+     *
      * @param folderId The folder identifier; e.g. "smb://my.smb-server.net/d/files/"
      * @param id The file identifier; e.g. "document.pdf"
      * @param userId The user identifier
@@ -89,7 +89,7 @@ public final class CIFSFile extends DefaultFile {
 
     /**
      * Parses specified SMB file.
-     * 
+     *
      * @param smbFile The SMB file
      * @throws OXException If parsing SMB file fails
      * @return This CIFS file
@@ -100,7 +100,7 @@ public final class CIFSFile extends DefaultFile {
 
     /**
      * Parses specified SMB file.
-     * 
+     *
      * @param smbFile The SMB file
      * @param fields The fields to consider
      * @throws OXException If parsing SMB file fails

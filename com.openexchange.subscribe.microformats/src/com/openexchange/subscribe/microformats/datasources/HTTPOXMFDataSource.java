@@ -60,7 +60,7 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
  * {@link HTTPOXMFDataSource}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HTTPOXMFDataSource implements OXMFDataSource {

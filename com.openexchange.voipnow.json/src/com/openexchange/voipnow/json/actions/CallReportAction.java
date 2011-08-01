@@ -82,7 +82,7 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * {@link CallReportAction} - Maps the action to a <tt>callreport</tt> action.
  * <p>
  * A call report is initiated using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> -
  *         design for VoipNow 2.0.3
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> -
@@ -123,10 +123,10 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 			final TimeZone timeZone = TimeZoneUtils
 			.getTimeZone(null == timeZoneID ? session.getUser()
 					.getTimeZone() : timeZoneID);
-			
+
 			// TODO: What about disposion??? "ANSWERED", "BUSY", "FAILED", "NO ANSWER", "UNKNOWN", or "NOT ALLOWED"
 			final String disposion = "answered";
-			
+
 			/*
 			 * Get other parameters
 			 */
@@ -158,7 +158,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 
 	private JSONArray reportCallHistory(final CallReportResponseType callResponse) throws JSONException {
 		final List<Call> history = callResponse.getCall();
-		
+
 		final JSONArray historyObject = new JSONArray();
 		if (null != history && ! history.isEmpty()) {
 			for (final Call call : history) {
@@ -209,7 +209,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 			final BigInteger userId)
 	throws DatatypeConfigurationException, OXException {
         final ObjectFactory factory = new ObjectFactory();
-        
+
 		final CallReportRequest callReportRequest = factory.createCallReportRequest();
 
 		// Set choice 0: user ID, identifier OR login
@@ -217,7 +217,7 @@ public class CallReportAction extends AbstractVoipNowSOAPAction<ReportInterface>
 		callReportRequest.setUserID(userId);
 
 		//Set interval
-		
+
 		final Interval interval = factory.createCallReportRequestInterval();
 		final GregorianCalendar tempCal = new GregorianCalendar(timeZone);
 		tempCal.setTime(new java.util.Date(start));

@@ -12,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Rule definition: {action} number {number} if time interval {intervalId} and coming from {comingFrom} transfer through {channelId} and {prefixOperation} with /prefixOperation: prefix {prefix}/ prefixOperation: replace {prefix}/prefixOperation: delete  {digits} digits starting from {digitsAfter}/prefixOperation: add {digitsAfter} after {digitsAfterAdd}/ add in position {position}
- * 
+ *
  * <p>Java class for RoutingRuleInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="RoutingRuleInfo">
  *   &lt;complexContent>
@@ -93,8 +93,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RoutingRuleInfo", propOrder = {
@@ -154,11 +154,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the action property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAction() {
         return action;
@@ -166,11 +166,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the action property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAction(String value) {
         this.action = value;
@@ -178,11 +178,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the engine property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEngine() {
         return engine;
@@ -190,11 +190,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the engine property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEngine(String value) {
         this.engine = value;
@@ -202,11 +202,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the number property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNumber() {
         return number;
@@ -214,11 +214,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the number property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNumber(String value) {
         this.number = value;
@@ -226,11 +226,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the intervalID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getIntervalID() {
         return intervalID;
@@ -238,11 +238,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the intervalID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setIntervalID(BigInteger value) {
         this.intervalID = value;
@@ -250,11 +250,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the comingFrom property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getComingFrom() {
         return comingFrom;
@@ -262,11 +262,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the comingFrom property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setComingFrom(String value) {
         this.comingFrom = value;
@@ -274,11 +274,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the channelID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelID() {
         return channelID;
@@ -286,11 +286,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the channelID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelID(BigInteger value) {
         this.channelID = value;
@@ -298,11 +298,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDPrefixOperation property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerIDPrefixOperation() {
         return callerIDPrefixOperation;
@@ -310,11 +310,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDPrefixOperation property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerIDPrefixOperation(String value) {
         this.callerIDPrefixOperation = value;
@@ -322,11 +322,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDPrefix property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getCallerIDPrefix() {
         return callerIDPrefix;
@@ -334,11 +334,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDPrefix property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setCallerIDPrefix(BigDecimal value) {
         this.callerIDPrefix = value;
@@ -346,11 +346,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDDigits property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCallerIDDigits() {
         return callerIDDigits;
@@ -358,11 +358,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDDigits property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCallerIDDigits(BigInteger value) {
         this.callerIDDigits = value;
@@ -370,11 +370,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDDigitsAfter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCallerIDDigitsAfter() {
         return callerIDDigitsAfter;
@@ -382,11 +382,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDDigitsAfter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCallerIDDigitsAfter(BigInteger value) {
         this.callerIDDigitsAfter = value;
@@ -394,11 +394,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDNumberAdd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCallerIDNumberAdd() {
         return callerIDNumberAdd;
@@ -406,11 +406,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDNumberAdd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCallerIDNumberAdd(BigInteger value) {
         this.callerIDNumberAdd = value;
@@ -418,11 +418,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDDigitsAfterAdd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getCallerIDDigitsAfterAdd() {
         return callerIDDigitsAfterAdd;
@@ -430,11 +430,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDDigitsAfterAdd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setCallerIDDigitsAfterAdd(BigDecimal value) {
         this.callerIDDigitsAfterAdd = value;
@@ -442,11 +442,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the callerIDMatch property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerIDMatch() {
         return callerIDMatch;
@@ -454,11 +454,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the callerIDMatch property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerIDMatch(String value) {
         this.callerIDMatch = value;
@@ -466,11 +466,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the prefixOperation property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPrefixOperation() {
         return prefixOperation;
@@ -478,11 +478,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the prefixOperation property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPrefixOperation(String value) {
         this.prefixOperation = value;
@@ -490,11 +490,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the prefix property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getPrefix() {
         return prefix;
@@ -502,11 +502,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the prefix property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setPrefix(BigDecimal value) {
         this.prefix = value;
@@ -514,11 +514,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the digits property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDigits() {
         return digits;
@@ -526,11 +526,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the digits property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDigits(BigInteger value) {
         this.digits = value;
@@ -538,11 +538,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the numberAdd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getNumberAdd() {
         return numberAdd;
@@ -550,11 +550,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the numberAdd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setNumberAdd(BigInteger value) {
         this.numberAdd = value;
@@ -562,11 +562,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the digitsAfterAdd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getDigitsAfterAdd() {
         return digitsAfterAdd;
@@ -574,11 +574,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the digitsAfterAdd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setDigitsAfterAdd(BigDecimal value) {
         this.digitsAfterAdd = value;
@@ -586,11 +586,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the digitsAfter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDigitsAfter() {
         return digitsAfter;
@@ -598,11 +598,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the digitsAfter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDigitsAfter(BigInteger value) {
         this.digitsAfter = value;
@@ -610,11 +610,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the position property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getPosition() {
         return position;
@@ -622,11 +622,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the position property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setPosition(Long value) {
         this.position = value;
@@ -634,11 +634,11 @@ public class RoutingRuleInfo {
 
     /**
      * Gets the value of the final property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isFinal() {
         return _final;
@@ -646,11 +646,11 @@ public class RoutingRuleInfo {
 
     /**
      * Sets the value of the final property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setFinal(Boolean value) {
         this._final = value;

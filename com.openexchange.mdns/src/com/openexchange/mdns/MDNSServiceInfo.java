@@ -53,7 +53,7 @@ import java.util.UUID;
 
 /**
  * {@link MDNSServiceInfo} - The mDNS service information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
@@ -61,28 +61,28 @@ public interface MDNSServiceInfo {
 
     /**
      * Gets the port for the service.
-     * 
+     *
      * @return The port for the service
      */
     int getPort();
 
     /**
      * Gets the identifier uniquely identifying this service among services with same service identifier.
-     * 
+     *
      * @return The identifier uniquely identifying this service among services with same service identifier
      */
     UUID getId();
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     String getServiceId();
 
     /**
      * Gets the service information; arbitrary text such as <code>"path=index.html"</code>.
-     * 
+     *
      * @return The service information
      */
     String getInfo();

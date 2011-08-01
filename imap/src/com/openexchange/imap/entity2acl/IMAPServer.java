@@ -55,7 +55,7 @@ import java.util.Set;
 
 /**
  * {@link IMAPServer} - Represents an IMAP server with ACL support.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum IMAPServer {
@@ -140,7 +140,7 @@ public enum IMAPServer {
             return toLowerCase(greeting).indexOf(toLowerCase(MDAEMON.getName())) >= 0;
         }
     }),
-    
+
     ;
 
     private final Entity2ACL impl;
@@ -160,7 +160,7 @@ public enum IMAPServer {
 
     /**
      * Gets the {@link Entity2ACL} implementation.
-     * 
+     *
      * @return The {@link Entity2ACL} implementation
      */
     public Entity2ACL getImpl() {
@@ -169,7 +169,7 @@ public enum IMAPServer {
 
     /**
      * Gets the IMAP server's alias name.
-     * 
+     *
      * @return The IMAP server's alias name
      */
     public String getName() {
@@ -178,7 +178,7 @@ public enum IMAPServer {
 
     /**
      * Gets the needed arguments to reliably map an ACL entity to a system user and vice versa.
-     * 
+     *
      * @param accountId The account ID
      * @param imapServerAddress The IMAP server address
      * @param sessionUser The session user ID
@@ -192,7 +192,7 @@ public enum IMAPServer {
 
     /**
      * Checks if specified IMAP server greeting indicates the server to be this IMAP server.
-     * 
+     *
      * @param greeting The IMAP server greeting to check against
      * @return <code>true</code> if specified IMAP server greeting indicates the server to be this IMAP server; otherwise <code>false</code>
      */
@@ -204,7 +204,7 @@ public enum IMAPServer {
 
     /**
      * Gets the IMAP servers.
-     * 
+     *
      * @return The IMAP servers
      */
     public static Set<IMAPServer> getIMAPServers() {
@@ -213,7 +213,7 @@ public enum IMAPServer {
 
     /**
      * Gets the class name of {@link Entity2ACL} implementation that corresponds to specified name.
-     * 
+     *
      * @param name The IMAP server name
      * @return The class name of {@link Entity2ACL} implementation or <code>null</code> if none matches.
      */
@@ -234,7 +234,7 @@ public enum IMAPServer {
 
         /**
          * Gets the arguments needed for a certain IMAP server to map ACL entity to a system user and vice versa.
-         * 
+         *
          * @param accountId The account ID
          * @param imapServerAddress The IMAP server address
          * @param sessionUser The session user ID
@@ -253,7 +253,7 @@ public enum IMAPServer {
 
         /**
          * Turns specified {@link String} instance into lower-case.
-         * 
+         *
          * @param str The string
          * @return The lower-case string
          */
@@ -270,7 +270,7 @@ public enum IMAPServer {
 
         /**
          * Checks if given IMAP server greeting matches a certain IMAP server.
-         * 
+         *
          * @param greeting The IMAP server greeting
          * @return <code>true</code> if given IMAP server greeting matches a certain IMAP server; otherwise <code>false</code>
          */

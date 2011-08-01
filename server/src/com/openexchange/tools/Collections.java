@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Methods for easy handling of collections. TODO use Collections in com.openexchange.tools.arrays.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
@@ -87,7 +87,7 @@ public final class Collections {
      * <p>
      * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
      * method is called.
-     * 
+     *
      * @param iterator The iterator to turn into an unmodifiable iterator.
      * @return An iterator with no remove functionality.
      */
@@ -98,14 +98,17 @@ public final class Collections {
 
         return new Iterator<T>() {
 
+            @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
+            @Override
             public T next() {
                 return iterator.next();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -119,7 +122,7 @@ public final class Collections {
      * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(); </i><br>
      * with<br>
      * <i> Map&lt;String, String&gt; m = newHashMap(); </i>
-     * 
+     *
      * @param <K> The key instances' type
      * @param <V> The value instances' type
      * @return A new {@link HashMap} instance
@@ -135,7 +138,7 @@ public final class Collections {
      * <i> Map&lt;String, String&gt; m = new HashMap&lt;String, String&gt;(initialCapacity); </i><br>
      * with<br>
      * <i> Map&lt;String, String&gt; m = newHashMap(initialCapacity); </i>
-     * 
+     *
      * @param <K> The key instances' type
      * @param <V> The value instances' type
      * @param initialCapacity The initial capacity
@@ -147,7 +150,7 @@ public final class Collections {
 
     /**
      * Finds the first element in a collection that satisfies the filter
-     * 
+     *
      * @return
      */
     public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
@@ -169,7 +172,7 @@ public final class Collections {
             }
         }
     }
-    
+
     /**
      * Checks whether there is one element within the array that matches one of the given ones
      */
@@ -177,12 +180,14 @@ public final class Collections {
         for(T hay: haystack){
             for(T needle: needles){
                 if(needle == null){
-                    if(hay == null)
+                    if(hay == null) {
                         return true;
+                    }
                     continue;
                 }
-                if(needle.equals(hay))
+                if(needle.equals(hay)) {
                     return true;
+                }
             }
         }
         return false;
@@ -190,7 +195,7 @@ public final class Collections {
 
     /**
      * Converts a list of Integer into an int array.
-     * 
+     *
      * @param col list to convert.
      * @return the converted int array.
      */
@@ -205,7 +210,7 @@ public final class Collections {
 
     /**
      * SmartIntArray - A tiny helper class to increase arrays of <code>int</code> like dynamically lists
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static class SmartIntArray {
@@ -259,7 +264,7 @@ public final class Collections {
 
     /**
      * SmartLongArray - A tiny helper class to increase arrays of <code>long</code> as dynamically lists
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static class SmartLongArray {
@@ -504,6 +509,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#hasMoreElements()
          */
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
@@ -512,6 +518,7 @@ public final class Collections {
          * (non-Javadoc)
          * @see java.util.Enumeration#nextElement()
          */
+        @Override
         public T nextElement() {
             return iter.next();
         }
@@ -519,7 +526,7 @@ public final class Collections {
 
     /**
      * Interface to provide filtering opportunities for collections
-     * 
+     *
      * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
      * @param <T>
      */

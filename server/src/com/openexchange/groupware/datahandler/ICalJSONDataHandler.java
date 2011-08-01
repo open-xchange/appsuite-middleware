@@ -108,7 +108,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * <li>com.openexchange.groupware.calendar.recurrencePosition<br>
  * (optional; default is zero)</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ICalJSONDataHandler implements DataHandler {
@@ -126,14 +126,17 @@ public final class ICalJSONDataHandler implements DataHandler {
         super();
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         try {
@@ -322,8 +325,8 @@ public final class ICalJSONDataHandler implements DataHandler {
     }
 
     /*-
-     * 
-     * 
+     *
+     *
     private void insertTasks(final Session session, final int taskFolder, final List<Task> tasks, final JSONArray folderAndIdArray) throws OXException, JSONException {
         final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
         for (final Task task : tasks) {

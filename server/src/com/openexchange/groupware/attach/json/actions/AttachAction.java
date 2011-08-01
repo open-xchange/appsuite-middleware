@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AttachAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AttachAction extends AbstractAttachmentAction {
@@ -110,6 +110,7 @@ public final class AttachAction extends AbstractAttachmentAction {
 
     public static transient final AttachmentField[] REQUIRED = Attachment.REQUIRED;
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             if (request.hasUploads()) {

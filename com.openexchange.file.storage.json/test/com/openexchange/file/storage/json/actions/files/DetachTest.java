@@ -72,22 +72,22 @@ public class DetachTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException, JSONException {
         request()
             .param("timestamp", "1337")
             .param("id", "12")
             .body(new JSONArray("[1,2,5]"));
-        
-        fileAccess().expectCall("removeVersion", "12", new int[]{1,2,5}).andReturn(new int[0]); 
-        
+
+        fileAccess().expectCall("removeVersion", "12", new int[]{1,2,5}).andReturn(new int[0]);
+
         final DefaultFile updated = new DefaultFile();
         updated.setLastModified(new Date());
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(updated);
-        
-        
+
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

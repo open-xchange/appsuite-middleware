@@ -51,7 +51,7 @@ package com.openexchange.file.storage;
 
 /**
  * {@link Quota}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -59,7 +59,7 @@ public final class Quota {
 
     /**
      * {@link Type} - The quota resource type
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static enum Type {
@@ -85,7 +85,7 @@ public final class Quota {
 
         /**
          * Gets constant for unlimited quota for this resource type
-         * 
+         *
          * @return The constant for unlimited quota for this resource type
          */
         public Quota getUnlimited() {
@@ -97,7 +97,7 @@ public final class Quota {
      * Gets constant for unlimited quota for specified resource type
      * <p>
      * This is a convenience method that invokes {@link Type#getUnlimited()} for specified instance of {@link Type}.
-     * 
+     *
      * @param type The resource type
      * @return The constant for unlimited quota for specified resource type
      */
@@ -109,7 +109,7 @@ public final class Quota {
      * Gets constants for unlimited quota for specified resource types
      * <p>
      * This is a convenience method that invokes {@link Type#getUnlimited()} for each type in given array of {@link Type}.
-     * 
+     *
      * @param types The resource types
      * @return The constants for unlimited quota for specified resource types
      */
@@ -123,7 +123,7 @@ public final class Quota {
 
     /**
      * Constant which indicates unlimited quota
-     * 
+     *
      * @value <code>-1</code>
      */
     public static final int UNLIMITED = -1;
@@ -145,7 +145,7 @@ public final class Quota {
 
     /**
      * Initializes a new {@link Quota}
-     * 
+     *
      * @param limit The quota's limit
      * @param usage The quota's usage
      * @param type The quota's resource type to which this quota limitation applies
@@ -194,7 +194,7 @@ public final class Quota {
 
     /**
      * Gets the limit
-     * 
+     *
      * @return the limit
      */
     public long getLimit() {
@@ -203,7 +203,7 @@ public final class Quota {
 
     /**
      * Gets the usage
-     * 
+     *
      * @return the usage
      */
     public long getUsage() {
@@ -212,7 +212,7 @@ public final class Quota {
 
     /**
      * Gets the quota's resource type to which this quota limitation applies
-     * 
+     *
      * @return The quota's resource type to which this quota limitation applies
      */
     public Type getType() {
@@ -222,7 +222,7 @@ public final class Quota {
     /**
      * Returns a newly created array of <code>long</code> from this quota's limit and usage values. Quota's limit is at index <code>0</code>
      * and its usage is located at index <code>1</code>.
-     * 
+     *
      * @return An array of <code>long</code> from this quota's limit and usage.
      */
     public long[] toLongArray() {

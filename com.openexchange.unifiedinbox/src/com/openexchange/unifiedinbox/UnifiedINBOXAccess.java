@@ -66,7 +66,7 @@ import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 
 /**
  * {@link UnifiedINBOXAccess} - Access to Unified INBOX.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStorage, UnifiedINBOXMessageStorage> {
@@ -124,7 +124,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     /**
      * Initializes a new {@link UnifiedINBOXAccess}.
-     * 
+     *
      * @param session The session providing needed user data
      */
     protected UnifiedINBOXAccess(final Session session) {
@@ -134,7 +134,7 @@ public final class UnifiedINBOXAccess extends MailAccess<UnifiedINBOXFolderStora
 
     /**
      * Initializes a new {@link UnifiedINBOXAccess}.
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      */

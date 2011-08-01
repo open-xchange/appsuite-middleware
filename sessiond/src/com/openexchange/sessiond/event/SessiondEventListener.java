@@ -55,28 +55,28 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessiondEventListener} - The listener for sessiond events.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessiondEventListener {
 
     /**
      * Handles the removal of specified session
-     * 
+     *
      * @param session The removed session
      */
     void handleSessionRemoval(Session session);
 
     /**
      * Handles the removal of specified session container
-     * 
+     *
      * @param sessions The removed session container
      */
     void handleContainerRemoval(Map<String, Session> sessions);
 
     /**
      * Handles the specified error
-     * 
+     *
      * @param error The error
      */
     public void handleError(OXException error);

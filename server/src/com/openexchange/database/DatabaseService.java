@@ -173,7 +173,7 @@ public interface DatabaseService extends ConfigDatabaseService {
     String getSchemaName(int contextId) throws OXException;
 
     /**
-     * Finds all contexts their data is stored in the same schema and on the same database like the given one. 
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
      * @param contextId identifier of a context.
      * @return all contexts having their data in the same schema and on the same database.
      * @throws OXException if some problem occurs.

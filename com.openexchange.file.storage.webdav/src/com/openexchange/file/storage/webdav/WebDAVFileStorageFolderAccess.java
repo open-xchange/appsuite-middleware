@@ -81,7 +81,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link WebDAVFileStorageFolderAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess implements FileStorageFolderAccess {

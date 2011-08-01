@@ -62,14 +62,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailTransport} - Provides operations related to a mail transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailTransport {
 
     /**
      * Triggers all implementation-specific startup actions; especially its configuration initialization
-     * 
+     *
      * @param transport A {@link MailTransport transport}
      * @throws OXException If implementation start-up fails
      */
@@ -79,7 +79,7 @@ public abstract class MailTransport {
 
     /**
      * Triggers all implementation-specific shutdown actions; especially its configuration shut-down
-     * 
+     *
      * @param transport A {@link MailTransport transport}
      * @throws OXException If implementation shut-down fails
      */
@@ -91,7 +91,7 @@ public abstract class MailTransport {
      * Gets the proper instance of {@link MailTransport mail transport} parameterized with given session.
      * <p>
      * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
-     * 
+     *
      * <pre>
      * final MailTransport mailTransport = MailTransport.getInstance(session);
      * try {
@@ -100,7 +100,7 @@ public abstract class MailTransport {
      *     mailTransport.close();
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @return A proper instance of {@link MailTransport}
      * @throws OXException If instantiation fails
@@ -113,7 +113,7 @@ public abstract class MailTransport {
      * Gets the proper instance of {@link MailTransport mail transport} for session user's default transport account.
      * <p>
      * Note: Don't forget to call final {@link #close()} on obtained {@link MailTransport mail transport}:
-     * 
+     *
      * <pre>
      * final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
      * try {
@@ -122,7 +122,7 @@ public abstract class MailTransport {
      *     mailTransport.close();
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @return A proper instance of {@link MailTransport}
      * @throws OXException If instantiation fails
@@ -146,7 +146,7 @@ public abstract class MailTransport {
      * This is a convenience method that invokes {@link #sendMailMessage(ComposedMailMessage, ComposeType, Address[])} with the latter
      * parameter set to <code>null</code> if {@link ComposedMailMessage#hasRecipients()} is <code>false</code>; otherwise
      * {@link ComposedMailMessage#getRecipients()} is passed.
-     * 
+     *
      * @param transportMail The mail message to send (containing necessary header data and body)
      * @param sendType The send type
      * @return The sent mail message
@@ -158,7 +158,7 @@ public abstract class MailTransport {
 
     /**
      * Sends a mail message
-     * 
+     *
      * @param transportMail The mail message to send (containing necessary header data and body)
      * @param sendType The send type
      * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
@@ -174,7 +174,7 @@ public abstract class MailTransport {
      * <p>
      * This is a convenience method that invokes {@link #sendRawMessage(byte[], Address[])} with the latter parameter set to
      * <code>null</code>.
-     * 
+     *
      * @param asciiBytes The raw ascii bytes
      * @return The sent mail message
      * @throws OXException If sending fails
@@ -186,7 +186,7 @@ public abstract class MailTransport {
     /**
      * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
      * treated as an rfc822 MIME message.
-     * 
+     *
      * @param asciiBytes The raw ascii bytes
      * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
      *            from message headers TO, CC, BCC, and NEWSGROUPS.
@@ -197,7 +197,7 @@ public abstract class MailTransport {
 
     /**
      * Sends a receipt acknowledgment for the specified message.
-     * 
+     *
      * @param srcMail The source mail
      * @param fromAddr The from address (as unicode string). If set to <code>null</code>, user's default email address is used as value for
      *            header <code>From</code>
@@ -207,42 +207,42 @@ public abstract class MailTransport {
 
     /**
      * Pings the transport server to check if a connection can be established.
-     * 
+     *
      * @throws OXException If the ping fails
      */
     public abstract void ping() throws OXException;
 
     /**
      * Closes this mail transport
-     * 
+     *
      * @throws OXException If closing fails
      */
     public abstract void close() throws OXException;
 
     /**
      * Returns the transport configuration appropriate for current user. It provides needed connection and login information.
-     * 
+     *
      * @return The transport configuration
      */
     public abstract TransportConfig getTransportConfig() throws OXException;
 
     /**
      * Trigger all necessary startup actions; especially configuration start-up
-     * 
+     *
      * @throws OXException If startup actions fail
      */
     protected abstract void startup() throws OXException;
 
     /**
      * Trigger all necessary shutdown actions; especially configuration shut-down
-     * 
+     *
      * @throws OXException If shutdown actions fail
      */
     protected abstract void shutdown() throws OXException;
 
     /**
      * Gets an implementation-specific new instance of {@link ITransportProperties}.
-     * 
+     *
      * @return An implementation-specific new instance of {@link ITransportProperties}
      * @throws OXException If creating a new instance of {@link ITransportProperties} fails
      */

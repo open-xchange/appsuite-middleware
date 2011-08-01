@@ -71,9 +71,9 @@ import org.osgi.framework.ServiceRegistration;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class SimBundleContext implements BundleContext {
-    
+
     public SimBundleContext(){
-        
+
     }
 
     /* (non-Javadoc)

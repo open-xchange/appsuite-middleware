@@ -135,14 +135,14 @@ public class PagePartSequenceTest extends TestCase {
         String page = contents.toString();
         return page;
     }
-    
+
     public void testWebDeSubpage(){
         String page =">51379\u00a0Leverkusen<br>Germany</td>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(>)([0-9]*)()", "postal_code_home"));
         pageParts.add(new PagePart("()([a-zA-Z\u00e4\u00f6\u00fc]*)(<br)", "city_home"));
         pageParts.add(new PagePart("(>)([a-zA-Z\u00e4\u00f6\u00fc]*)(<\\/td>)", "country_home"));
-        
+
         PagePartSequence sequence = new PagePartSequence(pageParts, page);
         HashMap<String, String> map = sequence.retrieveInformation();
 
@@ -150,19 +150,19 @@ public class PagePartSequenceTest extends TestCase {
         assertEquals("Leverkusen", map.get("city_home"));
         assertEquals("Germany", map.get("country_home"));
     }
-    
+
     public void testRetrieveMultipleInformation(){
         String page ="<FIRST_NAME>Peter</FIRST_NAME><LAST_NAME>Mueller</LAST_NAME>\n"
             +"<FIRST_NAME>Hans-Georg</FIRST_NAME><LAST_NAME>Walter</LAST_NAME>";
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<FIRST_NAME>)([a-zA-Z\u00e4\u00f6\u00fc\\-]*)(<\\/FIRST_NAME>)", "first_name"));
         pageParts.add(new PagePart("(<LAST_NAME>)([a-zA-Z\u00e4\u00f6\u00fc\\-]*)(<\\/LAST_NAME>)", "last_name"));
-        
+
         PagePartSequence sequence = new PagePartSequence(pageParts, page);
         ArrayList<HashMap<String, String>> results = (ArrayList<HashMap<String, String>>) sequence.retrieveMultipleInformation();
         boolean peterFound = false;
         boolean hansGeorgFound = false;
-        
+
         for (HashMap<String, String> result : results){
             if (result.containsKey("first_name") && result.containsKey("last_name")){
                 if (result.get("first_name").equals("Peter") && result.get("last_name").equals("Mueller")){
@@ -172,23 +172,23 @@ public class PagePartSequenceTest extends TestCase {
                 }
             }
         }
-        
+
         assertTrue("contact Peter Mueller was not retrieved", peterFound);
         assertTrue("contact Hans-Georg Walter was not retrieved", hansGeorgFound);
     }
-    
+
     public void testYahooCom(){
         String page = getStringFromFile("test-resources/YahooCom.html");
         String VALID_NAME = GenericSubscribeServiceTestHelpers.VALID_NAME;
         String VALID_EMAIL_REGEX = GenericSubscribeServiceTestHelpers.VALID_EMAIL_REGEX;
         String VALID_PHONE_REGEX = GenericSubscribeServiceTestHelpers.VALID_PHONE_REGEX;
         String VALID_ADDRESS_PART = GenericSubscribeServiceTestHelpers.VALID_ADDRESS_PART;
-        
+
         String crapBefore = "[^0-9\\+\\(\\)]*";
-        
+
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<h1>\\s)"+VALID_NAME+"(</h1>)","display_name"));
-        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));        
+        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));
         // add a filler to be sure we are in the phone numbers part
         pageParts.add(new PagePart("(<h2>(Phone|Telefon)</h2>)"));
         pageParts.add(new PagePart("(Home|Privat):"+crapBefore+VALID_PHONE_REGEX+"()","telephone_home1"));
@@ -202,7 +202,7 @@ public class PagePartSequenceTest extends TestCase {
         pageParts.add(new PagePart("(<br \\/>)*([0-9]*)(\\s)", "postal_code_business"));
         pageParts.add(new PagePart("()("+VALID_ADDRESS_PART+")()", "city_business"));
         // add a filler to be sure we are in the instant messenger part
-        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)")); 
+        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)"));
         pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","instant_messenger1",1));
         // add a filler to be sure we are in the personal address
         pageParts.add(new PagePart("(<h2>(Personal|Pers.nliche Daten)</h2>)"));
@@ -215,7 +215,7 @@ public class PagePartSequenceTest extends TestCase {
         PagePartSequence sequence = new PagePartSequence(pageParts, "");
         sequence.setPage(page);
         Map<String, String> map = sequence.retrieveInformation();
-        
+
         assertTrue("display_name not good, should be 'Willi Winzig' but is '"+map.get("display_name")+"'",map.get("display_name").contains("Willi Winzig"));
         assertTrue("telephone_home1 should be in here", map.containsKey("telephone_home1"));
         assertTrue("telephone_home1 should be '06331 148973' but is '"+map.get("telephone_home1")+"'", map.get("telephone_home1").equals("06331 148973"));

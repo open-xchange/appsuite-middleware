@@ -13,11 +13,11 @@ import com._4psa.pbxdata_xsd._2_5.DeviceInfo;
 
 /**
  * Phone provisioning data
- * 
+ *
  * <p>Java class for ProvisioningInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ProvisioningInfo">
  *   &lt;complexContent>
@@ -62,8 +62,8 @@ import com._4psa.pbxdata_xsd._2_5.DeviceInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ProvisioningInfo", propOrder = {
@@ -112,11 +112,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the provision property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isProvision() {
         return provision;
@@ -124,11 +124,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the provision property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setProvision(Boolean value) {
         this.provision = value;
@@ -136,11 +136,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the regenerate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRegenerate() {
         return regenerate;
@@ -148,11 +148,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the regenerate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRegenerate(Boolean value) {
         this.regenerate = value;
@@ -160,11 +160,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -172,11 +172,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -184,11 +184,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -196,11 +196,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -208,11 +208,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the password property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -220,11 +220,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the password property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -232,11 +232,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the dtmf property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDtmf() {
         return dtmf;
@@ -244,11 +244,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the dtmf property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDtmf(String value) {
         this.dtmf = value;
@@ -256,11 +256,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the pbxConnected property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPBXConnected() {
         return pbxConnected;
@@ -268,11 +268,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the pbxConnected property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPBXConnected(Boolean value) {
         this.pbxConnected = value;
@@ -280,11 +280,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the qualify property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isQualify() {
         return qualify;
@@ -292,11 +292,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the qualify property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setQualify(Boolean value) {
         this.qualify = value;
@@ -304,25 +304,25 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the codecs property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the codecs property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCodecs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getCodecs() {
         if (codecs == null) {
@@ -333,25 +333,25 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the lockIP property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the lockIP property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLockIP().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getLockIP() {
         if (lockIP == null) {
@@ -362,11 +362,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the host property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getHost() {
         return host;
@@ -374,11 +374,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the host property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setHost(String value) {
         this.host = value;
@@ -386,11 +386,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the port property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPort() {
         return port;
@@ -398,11 +398,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the port property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPort(BigInteger value) {
         this.port = value;
@@ -410,11 +410,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the register property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRegister() {
         return register;
@@ -422,11 +422,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the register property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRegister(Boolean value) {
         this.register = value;
@@ -434,11 +434,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -446,11 +446,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -458,11 +458,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the publishStatus property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPublishStatus() {
         return publishStatus;
@@ -470,11 +470,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the publishStatus property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPublishStatus(Boolean value) {
         this.publishStatus = value;
@@ -482,11 +482,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the allowReInvite property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAllowReInvite() {
         return allowReInvite;
@@ -494,11 +494,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the allowReInvite property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAllowReInvite(Boolean value) {
         this.allowReInvite = value;
@@ -506,11 +506,11 @@ public class ProvisioningInfo
 
     /**
      * Gets the value of the forceMWI property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isForceMWI() {
         return forceMWI;
@@ -518,11 +518,11 @@ public class ProvisioningInfo
 
     /**
      * Sets the value of the forceMWI property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setForceMWI(Boolean value) {
         this.forceMWI = value;

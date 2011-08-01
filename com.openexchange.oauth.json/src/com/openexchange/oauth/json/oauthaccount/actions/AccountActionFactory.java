@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AccountActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AccountActionFactory implements AJAXActionServiceFactory {

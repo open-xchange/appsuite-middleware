@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link FileStorageResource} - A file storage resource which is {@link #connect() connectable}, {@link #close() closeable} and {@link #ping()
  * pingable}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -62,14 +62,14 @@ public interface FileStorageResource extends FileStorageConstants {
 
     /**
      * Opens this resource. May be invoked on an already opened resource.
-     * 
+     *
      * @throws OXException If the resource could not be opened for various reasons
      */
     void connect() throws OXException;
 
     /**
      * Checks if this connection is currently connected.
-     * 
+     *
      * @return <code>true</code> if connected; otherwise <code>false</code>
      */
     public boolean isConnected();
@@ -81,7 +81,7 @@ public interface FileStorageResource extends FileStorageConstants {
 
     /**
      * Pings this resource to check if it can be opened and and immediately closes connection.
-     * 
+     *
      * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
      * @throws OXException If the ping fails
      */
@@ -89,7 +89,7 @@ public interface FileStorageResource extends FileStorageConstants {
 
     /**
      * Indicates if this resource may be cached (for a little amount of time) once opened.
-     * 
+     *
      * @return <code>true</code> if this resource may be cached; otherwise <code>false</code>
      */
     boolean cacheable();

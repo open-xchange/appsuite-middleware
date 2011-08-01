@@ -68,7 +68,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * {@link OSGIFileStorageAccountManagerLookupService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -97,7 +97,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
 
     /**
      * Starts the tracker.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
@@ -147,7 +147,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                     if (!providers.contains(addMe)) {
                         providers.add(addMe);
                         /*
-                         * Post event 
+                         * Post event
                          */
                         final EventAdmin eventAdmin = eventAdminLookup.getEventAdmin();
                         if (null != eventAdmin) {

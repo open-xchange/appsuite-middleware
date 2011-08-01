@@ -72,17 +72,17 @@ import com.openexchange.sessiond.SessiondEventConstants;
  * listeners.
  * <p>
  * The corresponding code inside {@link BundleActivator#start(BundleContext) activator.start()} should be like:
- * 
+ *
  * <pre>
- * 
+ *
  * final SessiondEventHandler eventHandler = new SessiondEventHandler();
  * // register some listeners ...
  * eventHandler.addListener(new MyListener());
  * // Remember returned ServiceRegistration for proper unregistration on stop
  * serviceRegistration = eventHandler.registerSessiondEventHandler(context);
- * 
+ *
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondEventHandler implements EventHandler {
@@ -102,7 +102,7 @@ public final class SessiondEventHandler implements EventHandler {
 
     /**
      * Registers this sessiond event handler to specified {@link BundleContext bundle context}.
-     * 
+     *
      * @param context The {@link BundleContext bundle context} to register to
      * @return The appropriate {@link ServiceRegistration service registration}.
      */
@@ -115,7 +115,7 @@ public final class SessiondEventHandler implements EventHandler {
 
     /**
      * Adds a listener to this sessiond event handler
-     * 
+     *
      * @param listener The listener to add
      * @return <code>true</code> if listener has been successfully added; otherwise <code>false</code>
      */
@@ -131,7 +131,7 @@ public final class SessiondEventHandler implements EventHandler {
 
     /**
      * Removes specified listener from this sessiond event handler
-     * 
+     *
      * @param listener The listener to remove
      * @return <code>true</code> if listener has been successfully removed; otherwise <code>false</code>
      */

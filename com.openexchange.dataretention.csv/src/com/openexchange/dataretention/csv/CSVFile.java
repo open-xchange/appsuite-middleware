@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link CSVFile} - Represents a CSV file with an exchangeable file reference.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVFile {
@@ -82,7 +82,7 @@ public final class CSVFile {
 
     /**
      * Atomically tests for file existence and if file limit is reached (if any).
-     * 
+     *
      * @return <code>true</code> if file exists and has not reached limit, yet; <code>false</code> otherwise
      */
     public boolean exists() {
@@ -110,7 +110,7 @@ public final class CSVFile {
 
     /**
      * Gets the file.
-     * 
+     *
      * @return The file
      */
     public File getFile() {
@@ -119,7 +119,7 @@ public final class CSVFile {
 
     /**
      * Sets the file.
-     * 
+     *
      * @param file The file to set
      */
     public void setFile(final File file) {

@@ -66,14 +66,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CIFSService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSService implements FileStorageService {
 
     /**
      * Creates a new CIFS/SMB file storage service.
-     * 
+     *
      * @return A new CIFS/SMB file storage service
      * @throws OXException If creation fails
      */

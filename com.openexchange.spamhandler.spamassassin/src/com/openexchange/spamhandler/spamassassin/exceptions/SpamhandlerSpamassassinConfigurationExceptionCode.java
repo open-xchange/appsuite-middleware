@@ -14,7 +14,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      * The given value for mode "%s" is not a possible one
      */
     MODE_TYPE_WRONG("The given value for mode \"%s\" is not a possible one", CATEGORY_CONFIGURATION, 1),
-    
+
     /**
      * The parameter "%s" is not set in the property file
      */
@@ -24,7 +24,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      * The parameter "%s" must be set in the property file if spamd is true
      */
     PARAMETER_NOT_SET_SPAMD("The parameter \"%s\" must be set in the property file if spamd is true", CATEGORY_CONFIGURATION, 3),
-    
+
     /**
      * The parameter "%s" must be an integer value but is "%s"
      */
@@ -45,7 +45,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
      */
     PARAMETER_NO_LONG("The parameter \"%s\" must be an long value but is \"%s\"", CATEGORY_CONFIGURATION, 7);
 
-    
+
     /**
      * Message of the exception.
      */
@@ -73,7 +73,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
         this.category = category;
         this.number = detailNumber;
     }
-    
+
     public String getPrefix() {
         return "MSG";
     }
@@ -89,14 +89,14 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
     public int getNumber() {
         return number;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -105,7 +105,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -115,7 +115,7 @@ public enum SpamhandlerSpamassassinConfigurationExceptionCode implements OXExcep
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

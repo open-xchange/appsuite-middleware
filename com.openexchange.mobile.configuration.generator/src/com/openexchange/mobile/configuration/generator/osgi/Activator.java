@@ -27,7 +27,7 @@ public class Activator extends DeferredActivator {
 
     public Activator() {
     }
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -66,11 +66,11 @@ public class Activator extends DeferredActivator {
                 }
             }
         }
-        
+
         checkConfiguration();
-        
+
         register();
-        
+
         // Test encoding:
         try {
             URLEncoder.encode("test", "UTF-8");

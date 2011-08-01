@@ -52,33 +52,34 @@ package com.openexchange.groupware.tasks.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.groupware.tasks.json.TaskActionFactory;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration reminderService;
+public class Activator extends AJAXModuleActivator {
 
     public Activator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+    @Override
+    protected void startBundle() throws Exception {
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        reminderService = context.registerService(TargetService.class.getName(), new ModifyThroughDependant(), props);
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
+
+        registerModule(new TaskActionFactory(this), "tasks");
     }
 
-    public void stop(BundleContext context) throws Exception {
-        reminderService.unregister();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 }

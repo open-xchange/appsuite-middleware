@@ -72,13 +72,13 @@ import com.openexchange.session.Session;
 
 /**
  * {@link InfostoreDocumentMailPart} - A {@link MailPart} implementation that provides the input stream to an infostore document
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class InfostoreDocumentMailPart extends MailPart implements ComposedMailPart {
 
     /**
-	 * 
+	 *
 	 */
     private static final long serialVersionUID = -3158021272821196715L;
 
@@ -92,7 +92,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 
     /**
      * Constructor
-     * 
+     *
      * @param documentId The document's unique ID
      * @param session The session providing needed user data
      * @throws OXException If infostore document cannot be read
@@ -202,6 +202,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     }
 
 
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.DOCUMENT;
     }
@@ -220,6 +221,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             this.documentId = documentId;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             try {
                 return fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION);
@@ -234,6 +236,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             this.name = name;
         }
 
+        @Override
         public String getName() {
             return name;
         }

@@ -70,7 +70,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link IMAPProperties}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPProperties extends AbstractProtocolProperties implements IIMAPProperties {
@@ -81,7 +81,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the singleton instance of {@link IMAPProperties}
-     * 
+     *
      * @return The singleton instance of {@link IMAPProperties}
      */
     public static IMAPProperties getInstance() {
@@ -436,7 +436,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the {@link Entity2ACL}.
-     * 
+     *
      * @return The {@link Entity2ACL}
      */
     public String getEntity2AclImpl() {
@@ -453,7 +453,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the spam handler name.
-     * 
+     *
      * @return The spam handler name
      */
     public String getSpamHandlerName() {

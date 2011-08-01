@@ -232,7 +232,7 @@ public abstract class FolderStorage {
         throws OXException {
         deleteFolder(ctx, con, taskId, new int[] { folderId }, type, sanityCheck);
     }
-    
+
     /**
      * Deletes task folder mappings.
      * @param ctx Context.
@@ -247,7 +247,7 @@ public abstract class FolderStorage {
         throws OXException {
         deleteFolder(ctx, con, taskId, folders, type, true);
     }
-    
+
     /**
      * Deletes task folder mappings.
      * @param ctx Context.

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link MessagingType} - The messaging type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingType implements Type {
@@ -62,7 +62,7 @@ public final class MessagingType implements Type {
 
     /**
      * Gets the {@link MessagingType} instance.
-     * 
+     *
      * @return The {@link MessagingType} instance
      */
     public static MessagingType getInstance() {
@@ -76,6 +76,7 @@ public final class MessagingType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.MESSAGING
         return 13;

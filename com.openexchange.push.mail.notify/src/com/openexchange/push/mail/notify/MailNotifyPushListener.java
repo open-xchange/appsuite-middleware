@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailNotifyPushListener} - The {@link PushListener}.
- * 
+ *
  */
 public final class MailNotifyPushListener implements PushListener {
 
@@ -68,7 +68,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     /**
      * Gets the account ID constant.
-     * 
+     *
      * @return The account ID constant
      */
     public static int getAccountId() {
@@ -77,7 +77,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     /**
      * Initializes a new {@link MailNotifyPushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      * @return A new {@link MailNotifyPushListener}.
      */
@@ -99,7 +99,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     /**
      * Initializes a new {@link MailNotifyPushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      */
     private MailNotifyPushListener(final Session session) {
@@ -118,7 +118,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     /**
      * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
-     * 
+     *
      * @throws OXException If listener cannot be opened
      */
     public void open() throws OXException {
@@ -136,7 +136,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     /**
      * Checks if this listener has been started.
-     * 
+     *
      * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
      */
     public boolean isStarted() {

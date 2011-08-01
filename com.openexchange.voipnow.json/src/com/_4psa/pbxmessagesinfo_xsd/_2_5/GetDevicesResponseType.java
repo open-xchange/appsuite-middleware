@@ -13,11 +13,11 @@ import com._4psa.pbxdata_xsd._2_5.DeviceExtension;
 
 /**
  * Get time intervals: response type
- * 
+ *
  * <p>Java class for GetDevicesResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetDevicesResponseType">
  *   &lt;complexContent>
@@ -62,8 +62,8 @@ import com._4psa.pbxdata_xsd._2_5.DeviceExtension;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetDevicesResponseType", propOrder = {
@@ -77,25 +77,25 @@ public class GetDevicesResponseType {
 
     /**
      * Gets the value of the devices property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the devices property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getDevices().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetDevicesResponseType.Devices }
-     * 
-     * 
+     *
+     *
      */
     public List<GetDevicesResponseType.Devices> getDevices() {
         if (devices == null) {
@@ -106,25 +106,25 @@ public class GetDevicesResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -136,9 +136,9 @@ public class GetDevicesResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -172,8 +172,8 @@ public class GetDevicesResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -209,11 +209,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the deviceID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getDeviceID() {
             return deviceID;
@@ -221,11 +221,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the deviceID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setDeviceID(BigInteger value) {
             this.deviceID = value;
@@ -233,11 +233,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getStatus() {
             return status;
@@ -245,11 +245,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setStatus(BigInteger value) {
             this.status = value;
@@ -257,11 +257,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the name property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getName() {
             return name;
@@ -269,11 +269,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the name property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setName(String value) {
             this.name = value;
@@ -281,11 +281,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the serial property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getSerial() {
             return serial;
@@ -293,11 +293,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the serial property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setSerial(String value) {
             this.serial = value;
@@ -305,11 +305,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the manufacturer property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getManufacturer() {
             return manufacturer;
@@ -317,11 +317,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the manufacturer property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setManufacturer(String value) {
             this.manufacturer = value;
@@ -329,11 +329,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the model property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getModel() {
             return model;
@@ -341,11 +341,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the model property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setModel(String value) {
             this.model = value;
@@ -353,11 +353,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the firmware property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getFirmware() {
             return firmware;
@@ -365,11 +365,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the firmware property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setFirmware(String value) {
             this.firmware = value;
@@ -377,11 +377,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the firmwareVersion property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getFirmwareVersion() {
             return firmwareVersion;
@@ -389,11 +389,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the firmwareVersion property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setFirmwareVersion(String value) {
             this.firmwareVersion = value;
@@ -401,11 +401,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the mac property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getMac() {
             return mac;
@@ -413,11 +413,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the mac property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setMac(String value) {
             this.mac = value;
@@ -425,11 +425,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the ownerID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getOwnerID() {
             return ownerID;
@@ -437,11 +437,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the ownerID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setOwnerID(BigInteger value) {
             this.ownerID = value;
@@ -449,11 +449,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the assignedClientID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getAssignedClientID() {
             return assignedClientID;
@@ -461,11 +461,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the assignedClientID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setAssignedClientID(BigInteger value) {
             this.assignedClientID = value;
@@ -473,25 +473,25 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the assignedExtensions property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the assignedExtensions property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAssignedExtensions().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link GetDevicesResponseType.Devices.AssignedExtensions }
-         * 
-         * 
+         *
+         *
          */
         public List<GetDevicesResponseType.Devices.AssignedExtensions> getAssignedExtensions() {
             if (assignedExtensions == null) {
@@ -502,11 +502,11 @@ public class GetDevicesResponseType {
 
         /**
          * Gets the value of the tplID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Object }
-         *     
+         *
          */
         public Object getTplID() {
             return tplID;
@@ -514,11 +514,11 @@ public class GetDevicesResponseType {
 
         /**
          * Sets the value of the tplID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Object }
-         *     
+         *
          */
         public void setTplID(Object value) {
             this.tplID = value;
@@ -527,9 +527,9 @@ public class GetDevicesResponseType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -541,8 +541,8 @@ public class GetDevicesResponseType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -556,11 +556,11 @@ public class GetDevicesResponseType {
 
             /**
              * Gets the value of the number property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Object }
-             *     
+             *
              */
             public Object getNumber() {
                 return number;
@@ -568,11 +568,11 @@ public class GetDevicesResponseType {
 
             /**
              * Sets the value of the number property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Object }
-             *     
+             *
              */
             public void setNumber(Object value) {
                 this.number = value;

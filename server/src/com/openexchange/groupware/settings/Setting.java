@@ -143,7 +143,7 @@ public class Setting {
         }
         return retval;
     }
-    
+
     public boolean isEmptyMultivalue() {
         return multiValue != null && multiValue.isEmpty();
     }

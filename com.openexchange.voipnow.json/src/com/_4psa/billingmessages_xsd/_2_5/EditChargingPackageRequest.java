@@ -12,9 +12,9 @@ import com._4psa.billingdata_xsd._2_5.ChargingPackage;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com._4psa.billingdata_xsd._2_5.ChargingPackage;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -47,11 +47,11 @@ public class EditChargingPackageRequest
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -59,11 +59,11 @@ public class EditChargingPackageRequest
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -71,11 +71,11 @@ public class EditChargingPackageRequest
 
     /**
      * Gets the value of the chargingPackageID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPackageID() {
         return chargingPackageID;
@@ -83,11 +83,11 @@ public class EditChargingPackageRequest
 
     /**
      * Sets the value of the chargingPackageID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPackageID(BigInteger value) {
         this.chargingPackageID = value;

@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.CommonObject;
 
 /**
  * {@link CommonWriter} - Writer for common fields
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
@@ -69,7 +69,7 @@ public class CommonWriter extends FolderChildWriter {
 
     /**
      * Initializes a new {@link CommonWriter}
-     * 
+     *
      * @param tz
      *            The user time zone
      * @param jsonwriter
@@ -81,7 +81,7 @@ public class CommonWriter extends FolderChildWriter {
 
     /**
      * Writes common field from given {@link CommonObject} instance to specified {@link JSONObject}
-     * 
+     *
      * @param commonObj The common object
      * @param jsonObj The JSON object
      * @throws JSONException If a JSON error occurs
@@ -111,45 +111,55 @@ public class CommonWriter extends FolderChildWriter {
     }
 
     private static final FieldWriter<CommonObject> CATEGORIES_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getCategories(), json, obj.containsCategories());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.CATEGORIES, obj.getCategories(), json, obj.containsCategories());
         }
     };
 
     private static final FieldWriter<CommonObject> PRIVATE_FLAG_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.PRIVATE_FLAG, obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
     };
 
     private static final FieldWriter<CommonObject> COLORLABEL_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLabel(), json, obj.containsLabel());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.COLORLABEL, obj.getLabel(), json, obj.containsLabel());
         }
     };
 
     private static final FieldWriter<CommonObject> NUMBER_OF_ATTACHMENTS_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
     };
 
     private static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLastModifiedOfNewestAttachment(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(
                 CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC,
@@ -161,9 +171,11 @@ public class CommonWriter extends FolderChildWriter {
     };
 
     private static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
         }
+        @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) {
             // This value is nowhere written to a JSON object.
         }

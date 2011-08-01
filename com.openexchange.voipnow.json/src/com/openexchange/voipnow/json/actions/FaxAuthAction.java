@@ -65,7 +65,7 @@ import com.openexchange.voipnow.json.Utility;
  * {@link FaxAuthAction} - Maps the action to a <tt>faxauth</tt> action.
  * <p>
  * A new call is initiated using VoipNow's HTTP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FaxAuthAction extends AbstractVoipNowAction {

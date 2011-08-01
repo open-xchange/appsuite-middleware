@@ -80,17 +80,17 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 
 /**
- * A {@link CaldavCollection} bridges OX calendar folders to caldav collections. 
+ * A {@link CaldavCollection} bridges OX calendar folders to caldav collections.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavCollection extends AbstractCollection {
-    
+
     private final UserizedFolder folder;
     private final GroupwareCaldavFactory factory;
     private final WebdavPath url;
     private int id = -1;
-    
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavCollection.class));
 
     public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory) {
@@ -105,14 +105,14 @@ public class CaldavCollection extends AbstractCollection {
             new SupportedCalendarComponentSet(),
             new CTag(factory.getState().getFolder(getId()), getId())
         );
-        
+
 
     }
     private String getFolderName(final UserizedFolder f) {
         final Type type = f.getType();
         if (type.equals(SharedType.getInstance())) {
             return f.getName()+" ("+getOwnerName(f)+")";
-        } 
+        }
         return f.getName();
     }
 
@@ -129,7 +129,7 @@ public class CaldavCollection extends AbstractCollection {
                 }
             }
         }
-        
+
         return null;
     }
     @Override
@@ -184,22 +184,22 @@ public class CaldavCollection extends AbstractCollection {
             final CaldavResource resource = new CaldavResource(this, appointment, factory);
             children.add(resource);
         }
-        
+
         return children;
-        
+
     }
 
 
     private static final Pattern NAME_PATTERN = Pattern.compile("(.+?)\\.ics");
-    
+
     public CaldavResource getChild(final String name) throws OXException {
         final Matcher matcher = NAME_PATTERN.matcher(name);
         if (!matcher.find()) {
             throw WebdavProtocolException.generalError(getUrl().dup().append(name), 404);
         }
-        
+
         final String uid = matcher.group(1);
-        
+
         final Appointment appointment = factory.getState().get(uid, getId());
         if (appointment == null) {
             // Not Found
@@ -267,14 +267,14 @@ public class CaldavCollection extends AbstractCollection {
     public void unlock(final String token) throws OXException {
         // IGNORE
     }
-    
+
     public int getId() {
         if (id == -1) {
             return id = Integer.parseInt(folder.getID());
         }
         return id;
     }
-    
+
     @Override
     public String getResourceType() throws OXException {
         return super.getResourceType()+CaldavProtocol.CALENDAR;

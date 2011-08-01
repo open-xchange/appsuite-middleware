@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link InfostoreFileStorageService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFileStorageService implements FileStorageService {

@@ -72,7 +72,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link CheckPermissionOnRemove} - Checks for system permissions which shall be removed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CheckPermissionOnRemove extends CheckPermission {
@@ -81,7 +81,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
 
     /**
      * Initializes a new {@link CheckPermissionOnRemove}
-     * 
+     *
      * @param session The session
      * @param writeCon A connection with write capability
      * @param ctx The context
@@ -92,7 +92,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
 
     /**
      * Checks for system permissions which shall be removed due to an update operation
-     * 
+     *
      * @param folderId The current folder ID
      * @param removedPerms The removed permissions (by an update operation)
      * @param lastModified The last-modified time stamp
@@ -129,7 +129,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
 
     /**
      * Checks for system permissions which shall be removed due to a delete operation
-     * 
+     *
      * @param parent The parent's folder ID
      * @param deletedId The ID of the deleted folder
      * @param formerPerms The former child's permissions
@@ -196,7 +196,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
 
     /**
      * Delete system-read-folder permission to specified folder for given entity
-     * 
+     *
      * @param folderId The folder ID
      * @param entity The entity
      * @throws OXException If a pooling error occurs
@@ -211,7 +211,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
 
     /**
      * Iterates specified map and deletes denoted permissions
-     * 
+     *
      * @param lastModified The last-modified time stamp
      * @param toRemove The map containing the permissions to delete
      * @throws OXException If a pooling error occurs

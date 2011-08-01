@@ -62,7 +62,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * SpamAssassin - Offers methods for spam detection and learning.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SpamAssassin {
@@ -127,7 +127,7 @@ public class SpamAssassin {
 
     /**
      * Check if message is spam or non-spam
-     * 
+     *
      * @return <code>true</code> if message is treated as spam, <code>false</code> otherwise
      */
     public static final boolean scoreMessage(final Message msg) {
@@ -170,7 +170,7 @@ public class SpamAssassin {
 
     /**
      * Adds given message to SpamAssassin's learn rules as <b>spam</b> in a separate thread
-     * 
+     *
      * @param msg - the message
      */
     public static final void trainMessageAsSpam(final Message msg) {
@@ -179,7 +179,7 @@ public class SpamAssassin {
 
     /**
      * Adds given message to SpamAssassin's learn rules as <b>ham</b> in a separate thread
-     * 
+     *
      * @param msg - the message
      */
     public static final void trainMessageAsHam(final Message msg) {

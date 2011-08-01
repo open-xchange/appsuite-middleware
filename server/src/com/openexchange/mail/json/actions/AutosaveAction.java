@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AutosaveAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AutosaveAction extends AbstractMailAction {
@@ -75,7 +75,7 @@ public final class AutosaveAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link AutosaveAction}.
-     * 
+     *
      * @param services
      */
     public AutosaveAction(final ServiceLookup services) {

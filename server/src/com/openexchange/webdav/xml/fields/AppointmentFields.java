@@ -52,14 +52,14 @@
 package com.openexchange.webdav.xml.fields;
 
 public interface AppointmentFields extends CalendarFields {
-	
+
 	public static final String LOCATION = "location";
-	
+
 	public static final String FULL_TIME = "full_time";
-	
+
 	public static final String SHOW_AS = "shown_as";
-	
+
 	public static final String IGNORE_CONFLICTS = "ignore_conflicts";
-	
+
 	public static final String UID = "uid";
 }

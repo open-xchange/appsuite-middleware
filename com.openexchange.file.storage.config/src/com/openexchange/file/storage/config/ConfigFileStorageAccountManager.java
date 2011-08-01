@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ConfigFileStorageAccountManager}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */

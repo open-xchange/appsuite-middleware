@@ -73,7 +73,7 @@ public interface FileStorage {
     void remove() throws OXException;
 
     void recreateStateFile() throws OXException;
-    
+
     boolean stateFileIsCorrect() throws OXException;
 
 }

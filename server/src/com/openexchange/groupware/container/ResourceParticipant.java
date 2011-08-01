@@ -53,7 +53,7 @@ import com.openexchange.resource.Resource;
 
 /**
  * {@link ResourceParticipant} - Represents a resource participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ResourceParticipant implements Participant, Comparable<Participant> {
@@ -68,17 +68,17 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the resource.
      */
     public ResourceParticipant(final int id) {
         super();
         this.id = id;
     }
-    
+
     /**
      * Constructor that takes values of from a given resource
-     * 
+     *
      * @param res - a resource to be used as base
      */
     public ResourceParticipant(Resource res){
@@ -98,6 +98,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setIdentifier(final int id) {
         this.id = id;
     }
@@ -105,6 +106,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getIdentifier() {
         return id;
     }
@@ -112,6 +114,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
@@ -119,6 +122,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -126,6 +130,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmailAddress() {
         return emailaddress;
     }
@@ -140,6 +145,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getType() {
         return RESOURCE;
     }
@@ -171,6 +177,7 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
     /**
      * {@inheritDoc}
      */
+    @Override
     public int compareTo(final Participant part) {
         final int retval;
         if (RESOURCE == part.getType()) {
@@ -186,14 +193,17 @@ public class ResourceParticipant implements Participant, Comparable<Participant>
         return super.clone();
     }
 
+    @Override
     public Participant getClone() throws CloneNotSupportedException {
         return (Participant) clone();
     }
 
+    @Override
     public boolean isIgnoreNotification() {
         return ignoreNotification;
     }
 
+    @Override
     public void setIgnoreNotification(final boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
     }

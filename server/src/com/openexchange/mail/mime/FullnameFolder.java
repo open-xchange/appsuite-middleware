@@ -59,7 +59,7 @@ import javax.mail.MessagingException;
  * {@link FullnameFolder} - A {@link Folder} implementation whose only purpose is to provide fullname, separator character and UIDs.
  * <p>
  * All other methods will throw an {@link UnsupportedOperationException}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FullnameFolder extends Folder {
@@ -74,7 +74,7 @@ public final class FullnameFolder extends Folder {
 
     /**
      * Initializes a new {@link FullnameFolder}
-     * 
+     *
      * @param fullname The folder's fullname
      * @param separator The folder's separator character
      * @param uids The UIDs corresponding to appropriate message numbers such that uids[0] is the UID of message numbered with 1 and so on.
@@ -92,7 +92,7 @@ public final class FullnameFolder extends Folder {
 
     /**
      * Initializes a new {@link FullnameFolder}
-     * 
+     *
      * @param fullname The folder's fullname
      * @param separator The folder's separator character
      * @param uid The UID corresponding to appropriate message.

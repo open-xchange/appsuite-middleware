@@ -82,7 +82,7 @@ import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link AllAction} - Maps the action to an <tt>all</tt> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllAction extends AbstractUserAction {

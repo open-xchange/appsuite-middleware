@@ -67,7 +67,7 @@ public class FileIDTest {
         assertEquals(null, fileID.getFolderId());
         assertEquals("12", fileID.getFileId());
     }
-    
+
     @Test
     public void shouldReturnSimpleUniqueIDForInfostore() {
         FileID fileID = new FileID("12");

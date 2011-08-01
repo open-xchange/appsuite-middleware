@@ -58,7 +58,7 @@ import java.util.regex.Pattern;
  * <p>
  * This class is considered to be the unsynchronized replacement for {@link Matcher#appendReplacement(StringBuffer, String)} and
  * {@link Matcher#appendTail(StringBuffer)} which only accept a synchronized string buffer.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MatcherReplacer {
@@ -78,7 +78,7 @@ public final class MatcherReplacer {
 
     /**
      * Initializes a new {@link MatcherReplacer}.
-     * 
+     *
      * @param matcher The matcher
      * @param input The input string from which the matcher was created
      */
@@ -97,7 +97,7 @@ public final class MatcherReplacer {
 
     /**
      * Resets this replacer to specified matcher and input string.
-     * 
+     *
      * @param matcher The matcher
      * @param input The input string from which the matcher was created
      */
@@ -144,7 +144,7 @@ public final class MatcherReplacer {
      * yard</tt> to the standard-output stream:
      * </p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * Pattern p = Pattern.compile(&quot;cat&quot;);
      * Matcher m = p.matcher(&quot;one cat two cats in the yard&quot;);
@@ -157,9 +157,9 @@ public final class MatcherReplacer {
      * mr.appendTail(sb);
      * System.out.println(sb.toString());
      * </pre>
-     * 
+     *
      * </blockquote>
-     * 
+     *
      * @param sb The target string builder
      * @param replacement The literal replacement string
      * @see #appendReplacement(StringBuilder, String)
@@ -215,7 +215,7 @@ public final class MatcherReplacer {
      * yard</tt> to the standard-output stream:
      * </p>
      * <blockquote>
-     * 
+     *
      * <pre>
      * Pattern p = Pattern.compile(&quot;cat&quot;);
      * Matcher m = p.matcher(&quot;one cat two cats in the yard&quot;);
@@ -227,9 +227,9 @@ public final class MatcherReplacer {
      * mr.appendTail(sb);
      * System.out.println(sb.toString());
      * </pre>
-     * 
+     *
      * </blockquote>
-     * 
+     *
      * @param sb The target string builder
      * @param replacement The replacement string possibly containing group references
      * @throws IllegalArgumentException If the replacement string refers to a capturing group that does not exist in the pattern
@@ -295,7 +295,7 @@ public final class MatcherReplacer {
      * It is intended to be invoked after one or more invocations of the {@link #appendReplacement appendReplacement} method in order to
      * copy the remainder of the input sequence.
      * </p>
-     * 
+     *
      * @param sb The target string builder
      */
     public void appendTail(final StringBuilder sb) {

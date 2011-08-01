@@ -87,15 +87,19 @@ public class UpdaterImpl extends Updater {
     private UpdateStatus getStatus(final SchemaUpdateState schema) {
         final SeparatedTasks tasks = UpdateTaskCollection.getInstance().getFilteredAndSeparatedTasks(schema);
         return new UpdateStatus() {
+            @Override
             public boolean needsBlockingUpdates() {
                 return tasks.getBlocking().size() > 0;
             }
+            @Override
             public boolean needsBackgroundUpdates() {
                 return tasks.getBackground().size() > 0;
             }
+            @Override
             public boolean blockingUpdatesRunning() {
                 return schema.isLocked();
             }
+            @Override
             public boolean backgroundUpdatesRunning() {
                 return schema.backgroundUpdatesRunning();
             }

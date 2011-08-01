@@ -67,7 +67,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class CompositePublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private List<PublicationTargetDiscoveryService> services = new LinkedList<PublicationTargetDiscoveryService>();
+    private final List<PublicationTargetDiscoveryService> services = new LinkedList<PublicationTargetDiscoveryService>();
 
     public void addDiscoveryService(PublicationTargetDiscoveryService discovery) {
         services.add(discovery);
@@ -92,7 +92,7 @@ public class CompositePublicationTargetDiscoveryService implements PublicationTa
         }
         return false;
     }
-    
+
     public PublicationTarget getTarget(String id) throws OXException {
         for (PublicationTargetDiscoveryService service : services) {
             if(service.knows(id)) {

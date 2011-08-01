@@ -98,6 +98,7 @@ public class ReminderHandler implements ReminderService {
         this.context = context;
     }
 
+    @Override
     public int insertReminder( final ReminderObject reminderObj) throws OXException {
         Connection writeCon = null;
 
@@ -123,6 +124,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public int insertReminder( final ReminderObject reminderObj, final Connection writeCon) throws OXException {
         if (reminderObj.getUser() == 0) {
             throw ReminderExceptionCode.MANDATORY_FIELD_USER.create("missing user id");
@@ -174,6 +176,7 @@ public class ReminderHandler implements ReminderService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void updateReminder(final ReminderObject reminder) throws OXException {
         final Connection con = DBPool.pickupWriteable(context);
         try {
@@ -193,6 +196,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void updateReminder(final ReminderObject reminder, final Connection con) throws OXException {
         isValid(reminder);
         final boolean containsId = (0 != reminder.getObjectId());
@@ -252,6 +256,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void deleteReminder(final ReminderObject reminder) throws OXException {
         final int contextId = context.getContextId();
         Connection writeCon = null;
@@ -292,6 +297,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void deleteReminder(final int targetId, final int userId, final int module) throws OXException {
         final Connection writeCon = DBPool.pickupWriteable(context);
         try {
@@ -307,6 +313,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void deleteReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException {
         final int contextId = context.getContextId();
         if (userId == 0) {
@@ -333,6 +340,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void deleteReminder(final int targetId, final int module) throws OXException {
         final Connection con = DBPool.pickupWriteable(context);
         try {
@@ -348,6 +356,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void deleteReminder(final int targetId, final int module, final Connection con) throws OXException {
         final int contextId = context.getContextId();
         PreparedStatement stmt = null;
@@ -369,7 +378,8 @@ public class ReminderHandler implements ReminderService {
             closeSQLStuff(stmt);
         }
     }
-    
+
+    @Override
     public boolean existsReminder(final int targetId, final int userId, final int module, final Connection con) throws OXException {
         try {
             if (con == null) {
@@ -377,7 +387,7 @@ public class ReminderHandler implements ReminderService {
             } else {
                 loadReminder(targetId, userId, module, con);
             }
-            
+
             return true;
         } catch (final OXException exc) {
             if (ReminderExceptionCode.NOT_FOUND.equals(exc)) {
@@ -387,10 +397,12 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public boolean existsReminder(final int targetId, final int userId, final int module) throws OXException {
         return existsReminder(targetId, userId, module, null);
     }
 
+    @Override
     public ReminderObject loadReminder( final int targetId, final int userId, final int module) throws OXException {
         return loadReminder(String.valueOf(targetId), userId, module);
     }
@@ -403,11 +415,12 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public ReminderObject loadReminder( final int targetId, final int userId, final int module, final Connection readCon) throws OXException {
         if (readCon == null) {
             return loadReminder(String.valueOf(targetId), userId, module);
         }
-        return loadReminder(String.valueOf(targetId), userId, module, readCon);        
+        return loadReminder(String.valueOf(targetId), userId, module, readCon);
     }
 
     public ReminderObject loadReminder(final String targetId, final int userId, final int module, final Connection con) throws OXException {
@@ -432,6 +445,7 @@ public class ReminderHandler implements ReminderService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ReminderObject[] loadReminder(final int[] targetIds,
             final int userId, final int module) throws OXException {
         final Connection con = DBPool.pickup(context);
@@ -503,6 +517,7 @@ public class ReminderHandler implements ReminderService {
         return retval.toArray(new ReminderObject[retval.size()]);
     }
 
+    @Override
     public ReminderObject loadReminder( final int objectId) throws OXException {
         final Connection readCon = DBPool.pickup(context);
         try {
@@ -560,6 +575,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public SearchIterator<ReminderObject> listReminder(final int module, final int targetId) throws OXException {
         final Connection con = DBPool.pickup(context);
         PreparedStatement ps = null;
@@ -583,11 +599,13 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public SearchIterator<ReminderObject> getArisingReminder(final Session session, final Context ctx, final User user, final Date end) throws OXException {
         final GetArisingReminder arising = new GetArisingReminder(session, ctx, user, end);
         return arising.loadWithIterator();
     }
 
+    @Override
     public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx) throws OXException {
         Connection readCon = null;
         try {
@@ -598,6 +616,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public void remindAgain(final ReminderObject reminder, final Session session, final Context ctx, final Connection writeCon) throws OXException {
         final RemindAgain remindAgain = new RemindAgain(reminder, session, ctx, this);
         remindAgain.remindAgain();
@@ -611,6 +630,7 @@ public class ReminderHandler implements ReminderService {
         }
     }
 
+    @Override
     public SearchIterator<ReminderObject> listModifiedReminder(final int userId, final Date lastModified) throws OXException {
         final Connection readCon = DBPool.pickup(context);
 

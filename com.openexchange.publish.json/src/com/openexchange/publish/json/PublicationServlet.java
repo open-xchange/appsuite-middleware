@@ -59,14 +59,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PublicationServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationServlet extends MultipleAdapterServlet {
 
     private static PublicationMultipleHandlerFactory multipleFactory;
 
-	
+
     public static void setFactory(PublicationMultipleHandlerFactory factory) {
         multipleFactory = factory;
     }
@@ -93,7 +93,7 @@ public class PublicationServlet extends MultipleAdapterServlet {
         request.put("__serverURL", getServerURL(req));
         return request;
     }
-    
+
     protected String getServerURL(HttpServletRequest req) {
         String protocol = Tools.getProtocol(req);
         return protocol + req.getServerName();

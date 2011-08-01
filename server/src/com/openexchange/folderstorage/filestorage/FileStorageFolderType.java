@@ -58,7 +58,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link FileStorageFolderType} - The folder type for file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderType implements FolderType {
@@ -72,7 +72,7 @@ public final class FileStorageFolderType implements FolderType {
 
     /**
      * Gets the {@link FileStorageFolderType} instance.
-     * 
+     *
      * @return The {@link FileStorageFolderType} instance
      */
     public static FileStorageFolderType getInstance() {
@@ -93,10 +93,12 @@ public final class FileStorageFolderType implements FolderType {
         serviceRegistry = FileStorageFolderStorageServiceRegistry.getServiceRegistry();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         if (null == folderId) {
             return false;
@@ -121,6 +123,7 @@ public final class FileStorageFolderType implements FolderType {
         return true;
     }
 
+    @Override
     public boolean servesParentId(final String folderId) {
         if (null == folderId) {
             return false;

@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link StopBundle} - The console handler for <code>&quot;stopbundle&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class StopBundle extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class StopBundle extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link StopBundle} with specified arguments and performs {@link #stop(String) stop}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public StopBundle(final String args[]) {

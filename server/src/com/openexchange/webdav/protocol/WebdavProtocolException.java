@@ -60,7 +60,7 @@ import com.openexchange.groupware.EnumComponent;
  * {@link WebdavProtocolException} - Indicates a WebDAV/XML protocol error.
  * <p>
  * This is a subclass of {@link WebdavException}, therefore its error codes start at <code>1000</code>.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -135,7 +135,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
 
         /**
          * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link WebdavProtocolException} instance
          */
         public WebdavProtocolException create(final WebdavPath url, final int status) {
@@ -145,7 +145,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         /**
          * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
          * @param args The message arguments in case of printf-style message
-         * 
+         *
          * @return The newly created {@link WebdavProtocolException} instance
          */
         public WebdavProtocolException create(final WebdavPath url, final int status, final Object... args) {
@@ -156,7 +156,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
          * Creates a new {@link WebdavProtocolException} instance pre-filled with this code's attributes.
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
-         * 
+         *
          * @return The newly created {@link WebdavProtocolException} instance
          */
         public WebdavProtocolException create(final WebdavPath url, final int status, final Throwable cause, final Object... args) {
@@ -210,14 +210,17 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         this.url = url;
     }
 
+    @Override
     public int getStatus() {
         return status;
     }
 
+    @Override
     public WebdavPath getUrl() {
         return url;
     }
 
+    @Override
     public Object getAdditional() {
         return null;
     }

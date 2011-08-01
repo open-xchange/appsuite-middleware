@@ -61,5 +61,5 @@ public class FolderLock extends Lock {
 	public void setDepth(final int depth) {
 		this.depth = depth;
 	}
-	
+
 }

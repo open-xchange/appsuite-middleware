@@ -57,7 +57,7 @@ import com.openexchange.mail.api.MailAccess;
 /**
  * {@link MailAccessTimeoutListener2} - The mail access event handler which preludes mail access closure if an instance of {@link MailAccess}
  * is removed from mail access cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAccess<?, ?>> {
@@ -65,7 +65,7 @@ public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAcc
     private final ConcurrentMap<?, TimeoutConcurrentSet<MailAccess<?, ?>>> map;
 
     private final TimeoutConcurrentSet<MailAccess<?, ?>> set;
-    
+
     private final Object key;
 
     /**
@@ -78,6 +78,7 @@ public final class MailAccessTimeoutListener2 implements TimeoutListener<MailAcc
         this.set = set;
     }
 
+    @Override
     public void onTimeout(final MailAccess<?, ?> mailAccess) {
         mailAccess.close(false);
         if (set.isEmpty()) {

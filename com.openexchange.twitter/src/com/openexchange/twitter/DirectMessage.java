@@ -53,70 +53,70 @@ import java.util.Date;
 
 /**
  * {@link DirectMessage} - A sent/received direct message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DirectMessage {
 
     /**
      * Gets the id.
-     * 
+     *
      * @return The id
      */
     long getId();
 
     /**
      * Gets the text.
-     * 
+     *
      * @return The text
      */
     String getText();
 
     /**
      * Gets the sender id.
-     * 
+     *
      * @return The sender id
      */
     long getSenderId();
 
     /**
      * Gets the recipient id.
-     * 
+     *
      * @return The recipient id
      */
     long getRecipientId();
 
     /**
      * Gets the creation date.
-     * 
+     *
      * @return The creation date
      */
     Date getCreatedAt();
 
     /**
      * Gets the sender's screen name.
-     * 
+     *
      * @return The sender's screen name.
      */
     String getSenderScreenName();
 
     /**
      * Gets the recipient's screen name.
-     * 
+     *
      * @return The recipient's screen name.
      */
     String getRecipientScreenName();
 
     /**
      * Gets the sender's user.
-     * 
+     *
      * @return The sender's user
      */
     User getSender();
 
     /**
      * Gets the recipient's user.
-     * 
+     *
      * @return The recipient's user
      */
     User getRecipient();

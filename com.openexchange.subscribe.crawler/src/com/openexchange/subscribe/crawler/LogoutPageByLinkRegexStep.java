@@ -59,9 +59,9 @@ import com.openexchange.subscribe.crawler.internal.LogoutStep;
  */
 public class LogoutPageByLinkRegexStep extends PageByLinkRegexStep implements LogoutStep{
     public LogoutPageByLinkRegexStep(){
-        
+
     }
-    
+
 public LogoutPageByLinkRegexStep(final String description, final String linkRegex){
         super(description, linkRegex);
     }

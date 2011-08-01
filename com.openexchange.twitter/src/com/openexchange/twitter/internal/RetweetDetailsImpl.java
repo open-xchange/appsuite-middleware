@@ -56,7 +56,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link RetweetDetailsImpl} - The retweet details implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RetweetDetailsImpl implements RetweetDetails {
@@ -69,7 +69,7 @@ public final class RetweetDetailsImpl implements RetweetDetails {
 
     /**
      * Initializes a new {@link RetweetDetailsImpl}.
-     * 
+     *
      * @param retweetStatus
      * @param retweetCount
      */

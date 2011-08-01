@@ -61,7 +61,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessagingMessageParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingMessageParser {
@@ -81,7 +81,7 @@ public final class MessagingMessageParser {
 
     /**
      * Gets the parsed contiguous message.
-     * 
+     *
      * @return The parsed contiguous message
      * @throws OXException If parsing fails
      */
@@ -130,7 +130,7 @@ public final class MessagingMessageParser {
 
     /**
      * Gets the next <i>unsigned</i> byte.
-     * 
+     *
      * @return The next <i>unsigned</i> byte
      */
     private int nextByte() {
@@ -191,7 +191,7 @@ public final class MessagingMessageParser {
      * <p>
      * This function implements a subset of quoted-printable encoding specification (rule #1 and rule #2) as defined in RFC 1521.
      * </p>
-     * 
+     *
      * @param bytes The array of quoted-printable characters
      * @return The array of original bytes
      * @throws OXException If quoted-printable decoding fails
@@ -223,7 +223,7 @@ public final class MessagingMessageParser {
 
     /**
      * Parses the next <code>int</code> value (which consumes next two bytes).
-     * 
+     *
      * @return The next <code>int</code> value
      */
     private int parseInt() {
@@ -232,7 +232,7 @@ public final class MessagingMessageParser {
 
     /**
      * Parses a boolean value.
-     * 
+     *
      * @return The boolean value
      */
     private boolean parseBoolean() {
@@ -241,7 +241,7 @@ public final class MessagingMessageParser {
 
     /**
      * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes).
-     * 
+     *
      * @param numOfBytes The number of bytes to return
      * @return The next bytes
      */
@@ -255,7 +255,7 @@ public final class MessagingMessageParser {
 
     /**
      * Gets the remaining bytes.
-     * 
+     *
      * @return The next bytes
      */
     private byte[] getRemainingBytes() {

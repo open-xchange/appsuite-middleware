@@ -57,11 +57,13 @@ public class ANY extends Operator {
 		super(expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildANY(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "ANY";
 	}
 }

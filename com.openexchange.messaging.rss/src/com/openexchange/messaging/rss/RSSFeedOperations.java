@@ -79,7 +79,7 @@ public class RSSFeedOperations implements MessagingAccountAccess, MessagingAccou
     public RSSFeedOperations(final int accountId, final Session session, final FeedFetcher fetcher, final MessagingAccountManager accounts) {
         super();
         this.accountId = accountId;
-        
+
         folderAccess = new RSSFolderAccess(accountId, session);
         messageAccess = new RSSMessageAccess(accountId, session, fetcher, accounts);
     }

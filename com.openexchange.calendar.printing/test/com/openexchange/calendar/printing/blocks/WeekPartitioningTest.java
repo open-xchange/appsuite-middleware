@@ -92,10 +92,12 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should contain two elements", 2, partitions.getAppointments().size());
         boolean daybreakFound = false, weekbreakFound = false;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
                 daybreakFound = true;
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            }
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 weekbreakFound = true;
+            }
         }
         assertTrue("Should contain a day break after the first element", daybreakFound);
         assertTrue("Should contain a week break after the first element", weekbreakFound);
@@ -208,13 +210,15 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         int encounters = 0;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
             if (info.getType() == 0) {
-                if (foundDaybreak)
+                if (foundDaybreak) {
                     fail("Encountered daybreak info twice without dayname info inbetween");
+                }
                 foundDaybreak = true;
             }
             if (info.getType() == 10) {
-                if (foundDayname)
+                if (foundDayname) {
                     fail("Encountered dayname info twice without daybreak info inbetween");
+                }
                 foundDayname = true;
                 dayname = (Integer) info.getAdditionalInformation();
             }
@@ -228,7 +232,7 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     }
 
     public void testShouldAlwaysContainSevenDaybreaksBetweenWeekBreaks() {
-        calendar.set(Calendar.YEAR, 2007); //1.1.2007 is a Monday, so we don't have to treat the first week differently: Other years might have only 4 days on the first week. 
+        calendar.set(Calendar.YEAR, 2007); //1.1.2007 is a Monday, so we don't have to treat the first week differently: Other years might have only 4 days on the first week.
         calendar.set(Calendar.DAY_OF_YEAR, 1);
         CPAppointment app1 = new CPAppointment();
         app1.setStartDate(calendar.getTime());
@@ -245,8 +249,9 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         int days = 7;
         int weekCounter = 0;
         for (CPFormattingInformation info : infos) {
-            if (info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
+            if (info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
                 days++;
+            }
             if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 assertEquals("Should contain 7 days within each week, but not in week #" + weekCounter, 7, days);
                 weekCounter++;
@@ -307,13 +312,17 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
         int daysBeforeWednesday = 0, daysAfterWednesday = 0;
         boolean startCounting = false;
         for (CPFormattingInformation info : infos) {
-            if (info.getPosition() == 2 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            if (info.getPosition() == 2 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 startCounting = true;
-            if (startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
-                if (info.getPosition() == 2)
+            }
+            if (startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
+                if (info.getPosition() == 2) {
                     daysBeforeWednesday++;
-            if (info.getPosition() == 3)
+                }
+            }
+            if (info.getPosition() == 3) {
                 daysAfterWednesday++;
+            }
         }
         assertEquals("Should find 3 daybreaks in week before Wednesday", 3, daysBeforeWednesday);
         assertEquals("Should find 2 daybreaks in week after Wednesday", 2, daysAfterWednesday);
@@ -338,26 +347,27 @@ public class WeekPartitioningTest extends AbstractPartitioningTest {
     public void testShouldWorkEvenWithDifferentWeekStart(){
         CPCalendar cal = CPCalendar.getCalendar();
         cal.setFirstDayOfWeek(Calendar.THURSDAY);
-        
+
         CPAppointment app1 = new CPAppointment();
         CPAppointment app2 = new CPAppointment();
         app1.setStartDate(WEDNESDAY());
         app1.setEndDate(plusOneHour(WEDNESDAY()));
         app2.setStartDate(THURSDAY());
         app2.setEndDate(plusOneHour(THURSDAY()));
-        
+
         strategy.setCalendar(cal);
         CPPartition partition = strategy.partition(Arrays.asList(app1,app2));
-        
+
         List<CPFormattingInformation> infos = partition.getFormattingInformation();
         boolean found = false;
         for(CPFormattingInformation info: infos){
-            if(info.getPosition() == 1 && info.getType() == WeekPartitioningStrategy.WEEKBREAK)
+            if(info.getPosition() == 1 && info.getType() == WeekPartitioningStrategy.WEEKBREAK) {
                 found = true;
+            }
         }
         assertTrue("Should place weekbreak between Wednesday and Thursday if first day of the week is set to the latter", found);
     }
-    
+
     public void testShouldInsertYearBreak() {
         // TODO
     }

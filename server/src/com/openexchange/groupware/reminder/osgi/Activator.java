@@ -49,30 +49,31 @@
 
 package com.openexchange.groupware.reminder.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
-
-    private ServiceTracker targetTracker;
+public class Activator extends AJAXModuleActivator {
 
     public Activator() {
         super();
     }
 
-    public void start(BundleContext context) throws Exception {
-        targetTracker = new ServiceTracker(context, TargetService.class.getName(), new TargetRegistryCustomizer(context));
-        targetTracker.open();
+    @Override
+    protected void startBundle() throws Exception {
+        rememberTracker(new ServiceTracker<TargetService, TargetService>(context, TargetService.class.getName(), new TargetRegistryCustomizer(context)));
+        openTrackers();
+        registerModule(new ReminderActionFactory(this), "reminder");
     }
 
-    public void stop(BundleContext context) throws Exception {
-        targetTracker.close();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[0];
     }
 }

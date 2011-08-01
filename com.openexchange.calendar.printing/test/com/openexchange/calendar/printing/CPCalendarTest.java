@@ -59,8 +59,8 @@ import junit.framework.TestCase;
  */
 public class CPCalendarTest extends TestCase {
     private CPCalendar calendar;
-    
-    
+
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -74,50 +74,50 @@ public class CPCalendarTest extends TestCase {
 
     public void testShouldWrapAroundProperlyForLastDayOfTheWeek(){
         int[] days = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY};
-        
+
         for(int i = 1; i < days.length; i++){
             calendar.setFirstDayOfWeek(days[i]);
             assertEquals("Should find the day before", days[i-1], calendar.getLastDayOfWeek());
         }
     }
-    
+
     public void testShouldListAllWorkDays(){
         int[] workDays = new int[]{Calendar.SATURDAY, Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY};
         calendar.setWorkWeekStartingDay(Calendar.SATURDAY);
         calendar.setWorkWeekDurationInDays(workDays.length);
-        
+
         for(int workDay: workDays){
             assertTrue("Should be a work day: "+workDay, calendar.getWorkWeekDays().contains(Integer.valueOf(workDay)));
         }
         assertEquals("Should contain only the given days, not more: "+workDays, workDays.length , calendar.getWorkWeekDurationInDays());
     }
-    
+
     public void testShouldKnowFirstAndLastDayOfTheWeek(){
         calendar.setFirstDayOfWeek(Calendar.WEDNESDAY);
         assertEquals("First week day", Calendar.WEDNESDAY, calendar.getFirstDayOfWeek());
         assertEquals("Last week day", Calendar.TUESDAY, calendar.getLastDayOfWeek());
-        
+
         Calendar date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
         assertTrue("Check for first day of week", calendar.isOnFirstDayOfWeek(date.getTime()));
         assertFalse(calendar.isOnLastDayOfWeek(date.getTime()));
-        
+
         date.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
         assertTrue("Check for last day of week", calendar.isOnLastDayOfWeek(date.getTime()));
         assertFalse(calendar.isOnFirstDayOfWeek(date.getTime()));
     }
-    
+
     public void testShouldKnowFirstAndLastWorkingDayOfTheWeek(){
         calendar.setWorkWeekStartingDay(Calendar.WEDNESDAY);
         calendar.setWorkWeekDurationInDays(5);
         assertEquals("First work week day", Calendar.WEDNESDAY, calendar.getFirstDayOfWorkWeek());
         assertEquals("Last work week day", Calendar.SUNDAY, calendar.getLastDayOfWorkWeek());
-        
+
         Calendar date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
         assertTrue("Check for first day of work week", calendar.isOnFirstDayOfWorkWeek(date.getTime()));
         assertFalse(calendar.isOnLastDayOfWorkWeek(date.getTime()));
-        
+
         date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         assertTrue("Check for last day of work week", calendar.isOnLastDayOfWorkWeek(date.getTime()));
         assertFalse(calendar.isOnFirstDayOfWorkWeek(date.getTime()));

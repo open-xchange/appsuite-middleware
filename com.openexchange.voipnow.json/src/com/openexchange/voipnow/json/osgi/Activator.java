@@ -75,7 +75,7 @@ import com.openexchange.voipnow.json.servlet.VoipNowServlet;
 
 /**
  * {@link Activator} - Activator for VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator implements BundleActivator {

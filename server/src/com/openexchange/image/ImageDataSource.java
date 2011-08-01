@@ -61,7 +61,7 @@ public interface ImageDataSource extends DataSource {
 
     /**
      * Gets this data source's registration name.
-     * 
+     *
      * @return The registration name
      */
     String getRegistrationName();

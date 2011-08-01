@@ -61,22 +61,22 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TestFriendlyInfostoreRequest extends AJAXInfostoreRequest {
-    
+
     public TestFriendlyInfostoreRequest() {
         super(new AJAXRequestData(), new SimServerSession(new SimContext(1), new SimUser(), null));
         ((SimUser) getSimSession().getUser()).setTimeZone("UTC");
     }
-    
+
     public TestFriendlyInfostoreRequest param(String key, String value) {
         data.putParameter(key, value);
         return this;
     }
-    
+
     public TestFriendlyInfostoreRequest body(Object body) {
         data.setData(body);
         return this;
     }
-    
+
     public SimServerSession getSimSession() {
         return (SimServerSession) getSession();
     }

@@ -63,7 +63,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
  * {@link HTMLURLReplacerHandler} - Replaces any URL containing non-ASCII characters to ASCII using the procedure in RFC3490 section 4.1.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLURLReplacerHandler implements HTMLHandler {
@@ -88,7 +88,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTMLURLReplacerHandler}.
-     * 
+     *
      * @param capacity The initial capacity
      */
     public HTMLURLReplacerHandler(final HTMLService htmlService, final int capacity) {
@@ -151,7 +151,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     /**
      * Adds tag occurring in white list to HTML result.
-     * 
+     *
      * @param tag The tag to add
      * @param a The tag's attribute set
      * @param simple <code>true</code> to write a simple tag; otherwise <code>false</code>
@@ -223,7 +223,7 @@ public final class HTMLURLReplacerHandler implements HTMLHandler {
 
     /**
      * Gets the filtered HTML content.
-     * 
+     *
      * @return The filtered HTML content
      */
     public String getHTML() {

@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TransportProviderRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportProviderRegistry {
@@ -85,7 +85,7 @@ public final class TransportProviderRegistry {
 
     /**
      * Gets the transport provider appropriate for specified session
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return The appropriate transport provider
@@ -130,13 +130,13 @@ public final class TransportProviderRegistry {
      * Gets the transport provider appropriate for specified mail server URL.
      * <p>
      * The given URL should match pattern
-     * 
+     *
      * <pre>
      * &lt;protocol&gt;://&lt;host&gt;(:&lt;port&gt;)?
      * </pre>
-     * 
+     *
      * The protocol should be present. Otherwise the configured fallback is used as protocol.
-     * 
+     *
      * @param serverUrl The transport server URL
      * @return The appropriate transport provider
      */
@@ -149,7 +149,7 @@ public final class TransportProviderRegistry {
 
     /**
      * Gets the transport provider appropriate for specified protocol.
-     * 
+     *
      * @param protocol The mail protocol
      * @return The appropriate transport provider
      */
@@ -168,7 +168,7 @@ public final class TransportProviderRegistry {
 
     /**
      * Registers a transport provider and performs its start-up actions
-     * 
+     *
      * @param protocol The transport protocol's string representation; e.g. <code>"smtp_smtps"</code>
      * @param provider The transport provider to register
      * @return <code>true</code> if transport provider has been successfully registered and no other transport provider supports the same
@@ -225,7 +225,7 @@ public final class TransportProviderRegistry {
 
     /**
      * Unregisters the transport provider
-     * 
+     *
      * @param provider The transport provider to unregister
      * @return The unregistered transport provider, or <code>null</code>
      * @throws OXException If provider's shut-down fails
@@ -258,7 +258,7 @@ public final class TransportProviderRegistry {
 
     /**
      * Unregisters the transport provider supporting specified protocol
-     * 
+     *
      * @param protocol The protocol
      * @return The unregistered instance of {@link TransportProvider}, or <code>null</code> if there was no provider supporting specified
      *         protocol

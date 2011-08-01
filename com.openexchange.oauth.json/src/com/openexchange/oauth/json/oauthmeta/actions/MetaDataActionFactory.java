@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link MetaDataActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MetaDataActionFactory implements AJAXActionServiceFactory {

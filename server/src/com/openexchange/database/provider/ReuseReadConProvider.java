@@ -65,6 +65,7 @@ public class ReuseReadConProvider implements DBProvider {
         this.provider = provider;
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         if (readCon != null) {
             refCount++;
@@ -75,10 +76,12 @@ public class ReuseReadConProvider implements DBProvider {
         return readCon;
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if (con == null) {
             return;
@@ -93,6 +96,7 @@ public class ReuseReadConProvider implements DBProvider {
         }
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         throw new UnsupportedOperationException();
     }

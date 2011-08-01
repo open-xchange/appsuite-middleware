@@ -54,7 +54,7 @@ import com.openexchange.folderstorage.FolderType;
 
 /**
  * {@link DatabaseFolderType} - The database folder type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderType implements FolderType {
@@ -65,7 +65,7 @@ public final class DatabaseFolderType implements FolderType {
 
     /**
      * Gets the {@link DatabaseFolderType} instance.
-     * 
+     *
      * @return The {@link DatabaseFolderType} instance
      */
     public static DatabaseFolderType getInstance() {
@@ -79,14 +79,17 @@ public final class DatabaseFolderType implements FolderType {
         super();
     }
 
+    @Override
     public boolean servesTreeId(final String treeId) {
         return FolderStorage.REAL_TREE_ID.equals(treeId);
     }
 
+    @Override
     public boolean servesFolderId(final String folderId) {
         return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0 || DatabaseFolderStorageUtility.hasSharedPrefix(folderId);
     }
 
+    @Override
     public boolean servesParentId(final String parentId) {
         return servesFolderId(parentId);
     }

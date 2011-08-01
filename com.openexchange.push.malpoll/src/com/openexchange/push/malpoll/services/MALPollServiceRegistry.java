@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link MALPollServiceRegistry} - A registry for services needed by MAL poll bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollServiceRegistry extends AbstractServiceRegistry {

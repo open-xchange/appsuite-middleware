@@ -74,7 +74,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets the max. until date for given infinite recurring appointment for calculation purpose.
-     * 
+     *
      * @param cdao The infinite recurring appointment (neither until nor occurrence set)
      * @return The max. until date for given infinite recurring appointment
      */
@@ -82,7 +82,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets the name of specified field ID.
-     * 
+     *
      * @param fieldId The field ID.
      * @return The name of specified field ID or <code>null</code> if field ID is unknown.
      */
@@ -90,7 +90,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets the names of specified field IDs.
-     * 
+     *
      * @param fieldIds The field IDs.
      * @return The names of specified field IDs, unknown IDs are set to <code>null</code>.
      */
@@ -98,7 +98,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets the ID of specified field name.
-     * 
+     *
      * @param fieldName The field name.
      * @return The ID of specified field name or <code>-1</code> if field name
      *         is unknown.
@@ -153,7 +153,7 @@ public interface CalendarCommonCollectionInterface {
      * {@link Appointment#DELETE_EXCEPTIONS}, and
      * {@link Appointment#RECURRENCE_CALCULATOR} are added to specified
      * columns if not already present.
-     * 
+     *
      * @param cols The columns to check
      * @return The possibly enhanced columns
      */
@@ -162,7 +162,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Creates a newly allocated array containing first given array enhanced by
      * specified number of elements from second array.
-     * 
+     *
      * @param cols The first array
      * @param ara The second array
      * @param i The number of elements to copy from second array
@@ -185,7 +185,7 @@ public interface CalendarCommonCollectionInterface {
      * Checks if range specified by <code>check_start</code> and
      * <code>check_end</code> intersects/overlaps the range specified by
      * <code>range_start</code> and <code>range_end</code>.
-     * 
+     *
      * @param check_start
      *            The check start
      * @param check_end
@@ -204,7 +204,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Converts given string of comma-separated <i>long</i>s to an array of
      * {@link Date} objects
-     * 
+     *
      * @param s
      *            The string of comma-separated <i>long</i>s
      * @return An array of {@link Date} objects
@@ -214,7 +214,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Converts given array of {@link Date} objects to a string of
      * comma-separated <i>long</i>s
-     * 
+     *
      * @param d
      *            The array of {@link Date} objects
      * @return A string of comma-separated <i>long</i>s
@@ -223,7 +223,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Check if specified objects are different
-     * 
+     *
      * @param a The first object
      * @param b The second object
      * @return <code>true</code> if specified objects are different; otherwise <code>false</code>
@@ -234,7 +234,7 @@ public interface CalendarCommonCollectionInterface {
      * Checks if the two participant arrays are diffrent.
      * Two participant arrays are not different, if the contain the same Participants according their id,
      * indepent of the participant status.
-     * 
+     *
      * @param newParticipants
      * @param oldParticipants
      * @return true if the participant arrays are different, false otherwise.
@@ -249,7 +249,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
-     * 
+     *
      * @param dates The date array
      * @param d The date to check against
      * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
@@ -258,7 +258,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
-     * 
+     *
      * @param dates The date array
      * @param dateTime The date time to check against
      * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
@@ -268,7 +268,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Returns a {@link Date} array with <code>d</code> added to given date array
      * if not already contained.
-     * 
+     *
      * @param dates The date array
      * @param d The date to add
      * @return A {@link Date} array with <code>d</code> added to given date array
@@ -288,11 +288,11 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Checks if given time millis are less than today (normalized current time
      * millis):
-     * 
+     *
      * <pre>
      * return check &lt; (CalendarRecurringCollection.normalizeLong(System.currentTimeMillis()));
      * </pre>
-     * 
+     *
      * @param check
      *            The time millis to check against today's millis
      * @return <code>true</code> if given time millis are less than normalized
@@ -316,7 +316,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets an appointment by specified ID
-     * 
+     *
      * @param id The appointment ID
      * @param session The session providing needed user data
      * @return The appointment belonging to specified ID or <code>null</code>
@@ -326,7 +326,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets the change exception of specified recurrence in given folder with given exception date.
-     * 
+     *
      * @param folderId The folder ID
      * @param recurrenceId The ID of parental recurrence
      * @param exDate The exception date
@@ -339,7 +339,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets dates of change exceptions belonging to specified recurrence.
-     * 
+     *
      * @param recurrenceId The recurrence's ID
      * @param session The session providing needed user data
      * @return The dates of change exceptions belonging to specified recurrence.
@@ -349,7 +349,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Gets all change exceptions belonging to specified recurrence.
-     * 
+     *
      * @param recurrenceId The recurrence's ID
      * @param fields The fields to fill in returned calendar objects
      * @param session The session providing needed user data
@@ -360,7 +360,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Loads calendar objects corresponding to specified IDs.
-     * 
+     *
      * @param folderId The folder ID
      * @param ids The IDs
      * @param fields The fields to fill in returned calendar objects
@@ -372,7 +372,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Determines appointment's valid folder ID for specified user
-     * 
+     *
      * @param oid The appointment ID
      * @param uid The suer ID
      * @param c The context
@@ -386,7 +386,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Gets the calendar data object from specified list whose ID matches given
      * ID.
-     * 
+     *
      * @param list
      *            The list of calendar data objects
      * @param oid
@@ -403,7 +403,7 @@ public interface CalendarCommonCollectionInterface {
     /**
      * Adds the time zone offset to given date's time millis and determines
      * corresponding date based on resulting time millis
-     * 
+     *
      * @param date
      *            The date whose UTC-based date shall be calculated
      * @param timezone
@@ -416,7 +416,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Checks if specified (exception) date occurs in given recurring appointment.
-     * 
+     *
      * @param date The normalized (exception) date
      * @param recurringAppointment The recurring appointment
      * @return <code>true</code> if date occurs in recurring appointment; otherwise <code>false</code>
@@ -426,7 +426,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Checks if specified (exception) dates occur in given recurring appointment.
-     * 
+     *
      * @param dates The (exception) dates
      * @param recurringAppointment The recurring appointment
      * @return <code>true</code> if every date occurs in recurring appointment; otherwise <code>false</code>
@@ -438,7 +438,7 @@ public interface CalendarCommonCollectionInterface {
      * Gets the corresponding positions of specified (exception) dates in given recurring appointment.
      * <p>
      * If a date does not occur in given recurring appointment, its position is set to <code>-1</code>.
-     * 
+     *
      * @param dates The (exception) dates
      * @param recurringAppointment The recurring appointment
      * @return The corresponding positions of specified (exception) dates in given recurring appointment.
@@ -448,7 +448,7 @@ public interface CalendarCommonCollectionInterface {
 
     /**
      * Merges the specified (exception) dates
-     * 
+     *
      * @param ddates The first dates
      * @param cdates The second dates
      * @return The sorted and merged dates

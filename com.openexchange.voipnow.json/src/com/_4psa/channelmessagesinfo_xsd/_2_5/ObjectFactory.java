@@ -5,18 +5,18 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.channelmessagesinfo_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.channelmessagesinfo_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -24,14 +24,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.channelmessagesinfo_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link GetCodecsResponseType }
-     * 
+     *
      */
     public GetCodecsResponseType createGetCodecsResponseType() {
         return new GetCodecsResponseType();
@@ -39,7 +39,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutResponseType }
-     * 
+     *
      */
     public GetCallRulesOutResponseType createGetCallRulesOutResponseType() {
         return new GetCallRulesOutResponseType();
@@ -47,7 +47,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetChannelGroupsResponseType }
-     * 
+     *
      */
     public GetChannelGroupsResponseType createGetChannelGroupsResponseType() {
         return new GetChannelGroupsResponseType();
@@ -55,7 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UpdateChannelResponseType }
-     * 
+     *
      */
     public UpdateChannelResponseType createUpdateChannelResponseType() {
         return new UpdateChannelResponseType();
@@ -63,7 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelChannelResponseType }
-     * 
+     *
      */
     public DelChannelResponseType createDelChannelResponseType() {
         return new DelChannelResponseType();
@@ -71,7 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetChannelsResponseType }
-     * 
+     *
      */
     public GetChannelsResponseType createGetChannelsResponseType() {
         return new GetChannelsResponseType();
@@ -79,7 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AssignPublicNoResponseType }
-     * 
+     *
      */
     public AssignPublicNoResponseType createAssignPublicNoResponseType() {
         return new AssignPublicNoResponseType();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddPublicNoResponseType }
-     * 
+     *
      */
     public AddPublicNoResponseType createAddPublicNoResponseType() {
         return new AddPublicNoResponseType();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UpdateCallRulesOutGroupResponseType }
-     * 
+     *
      */
     public UpdateCallRulesOutGroupResponseType createUpdateCallRulesOutGroupResponseType() {
         return new UpdateCallRulesOutGroupResponseType();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UpdateChannelGroupResponseType }
-     * 
+     *
      */
     public UpdateChannelGroupResponseType createUpdateChannelGroupResponseType() {
         return new UpdateChannelGroupResponseType();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddCallRulesOutResponseType }
-     * 
+     *
      */
     public AddCallRulesOutResponseType createAddCallRulesOutResponseType() {
         return new AddCallRulesOutResponseType();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelPublicNoResponseType }
-     * 
+     *
      */
     public DelPublicNoResponseType createDelPublicNoResponseType() {
         return new DelPublicNoResponseType();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditPublicNoResponseType }
-     * 
+     *
      */
     public EditPublicNoResponseType createEditPublicNoResponseType() {
         return new EditPublicNoResponseType();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetNoSelectionResponseType }
-     * 
+     *
      */
     public GetNoSelectionResponseType createGetNoSelectionResponseType() {
         return new GetNoSelectionResponseType();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelCallRulesOutGroupResponseType }
-     * 
+     *
      */
     public DelCallRulesOutGroupResponseType createDelCallRulesOutGroupResponseType() {
         return new DelCallRulesOutGroupResponseType();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetPublicNoResponseType }
-     * 
+     *
      */
     public GetPublicNoResponseType createGetPublicNoResponseType() {
         return new GetPublicNoResponseType();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelChannelGroupResponseType }
-     * 
+     *
      */
     public DelChannelGroupResponseType createDelChannelGroupResponseType() {
         return new DelChannelGroupResponseType();
@@ -167,7 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutGroupResponseType }
-     * 
+     *
      */
     public GetCallRulesOutGroupResponseType createGetCallRulesOutGroupResponseType() {
         return new GetCallRulesOutGroupResponseType();
@@ -175,7 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetGroupSelectionResponseType }
-     * 
+     *
      */
     public GetGroupSelectionResponseType createGetGroupSelectionResponseType() {
         return new GetGroupSelectionResponseType();
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCodecsResponseType.Codecs }
-     * 
+     *
      */
     public GetCodecsResponseType.Codecs createGetCodecsResponseTypeCodecs() {
         return new GetCodecsResponseType.Codecs();
@@ -191,7 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutResponseType.Rules }
-     * 
+     *
      */
     public GetCallRulesOutResponseType.Rules createGetCallRulesOutResponseTypeRules() {
         return new GetCallRulesOutResponseType.Rules();
@@ -199,7 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutResponseType.Notice }
-     * 
+     *
      */
     public GetCallRulesOutResponseType.Notice createGetCallRulesOutResponseTypeNotice() {
         return new GetCallRulesOutResponseType.Notice();

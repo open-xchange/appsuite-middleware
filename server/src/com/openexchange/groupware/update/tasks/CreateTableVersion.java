@@ -60,9 +60,9 @@ import com.openexchange.groupware.update.UpdateTask;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class CreateTableVersion implements UpdateTask {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreateTableVersion.class));
-    
+
 //    private static final String CREATE = "CREATE TABLE foobar (" +
 //            "version INT4 UNSIGNED NOT NULL," +
 //            "boolfield01 BOOLEAN NOT NULL," +
@@ -70,7 +70,7 @@ public final class CreateTableVersion implements UpdateTask {
 //            "boolfield03 BOOLEAN NOT NULL," +
 //            "server VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)" +
 //            " ENGINE = InnoDB";
-//    
+//
 //    private static final String INSERT = "INSERT INTO foobar VALUES (?, ?, ?, ?, ?)";
 
     /**
@@ -83,10 +83,12 @@ public final class CreateTableVersion implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 1;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'CreateTableVersion' performed!");
@@ -116,10 +118,11 @@ public final class CreateTableVersion implements UpdateTask {
 //            }
 //        }
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGH.priority;
     }

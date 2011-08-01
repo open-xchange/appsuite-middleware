@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Voicemail extension data
- * 
+ *
  * <p>Java class for VoicemailInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="VoicemailInfo">
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "VoicemailInfo", propOrder = {
@@ -41,11 +41,11 @@ public class VoicemailInfo {
 
     /**
      * Gets the value of the connectionSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isConnectionSndActive() {
         return connectionSndActive;
@@ -53,11 +53,11 @@ public class VoicemailInfo {
 
     /**
      * Sets the value of the connectionSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setConnectionSndActive(Boolean value) {
         this.connectionSndActive = value;
@@ -65,11 +65,11 @@ public class VoicemailInfo {
 
     /**
      * Gets the value of the connectionSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getConnectionSnd() {
         return connectionSnd;
@@ -77,11 +77,11 @@ public class VoicemailInfo {
 
     /**
      * Sets the value of the connectionSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setConnectionSnd(BigInteger value) {
         this.connectionSnd = value;

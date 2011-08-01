@@ -76,6 +76,7 @@ public class CacheServiceCustomizer implements ServiceTrackerCustomizer<CacheSer
         this.context = context;
     }
 
+    @Override
     public CacheService addingService(final ServiceReference<CacheService> reference) {
         final CacheService service = context.getService(reference);
         LOG.info("Injecting CacheService into database bundle.");
@@ -83,10 +84,12 @@ public class CacheServiceCustomizer implements ServiceTrackerCustomizer<CacheSer
         return service;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
         LOG.info("Removing CacheService from database bundle.");
         Initialization.getInstance().removeCacheService();

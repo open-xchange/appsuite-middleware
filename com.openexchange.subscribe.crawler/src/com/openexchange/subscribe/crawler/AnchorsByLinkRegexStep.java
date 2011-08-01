@@ -66,7 +66,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 /**
  * This step takes a page and returns all pages linked from this page (as HTMLAnchors) via links, also from subpages, that fulfill a regular
  * expression
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlPage>{
@@ -80,9 +80,9 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private final ArrayList<String> outputHref, uniqueIds;
 
     private ArrayList<HtmlPage> subpages;
-    
+
     private String identifyingCriteria;
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkRegexStep.class));
 
     private boolean mayHaveEmptyOutput;
@@ -119,7 +119,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
     @Override
     public void execute(final WebClient webClient) {
-        try {         
+        try {
             // add the first page as there should always be results there
             subpages.add(input);
             LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
@@ -139,7 +139,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
             }
             // traverse the subpages
             for (final HtmlPage subpage : subpages) {
-                for (final HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {  
+                for (final HtmlAnchor possibleLinkToResultpage : subpage.getAnchors()) {
                     // get the result pages
                     if (possibleLinkToResultpage.getHrefAttribute().matches(linkRegex) && !outputHref.contains(possibleLinkToResultpage.getHrefAttribute())) {
                         if (identifyingCriteria.equals("")){
@@ -160,12 +160,12 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                                 }
                             }
                         }
-                        
+
                     }
                 }
             }
             if (output != null && (output.size() != 0 || mayHaveEmptyOutput)) {
-                executedSuccessfully = true;                
+                executedSuccessfully = true;
             } else {
                 LOG.error("No links matching the criteria were found.");
                 LOG.info(input.getWebResponse().getContentAsString());
@@ -225,12 +225,12 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         this.linkRegex = linkRegex;
     }
 
-    
+
     public String getIdentifyingCriteria() {
         return identifyingCriteria;
     }
 
-    
+
     public void setIdentifyingCriteria(final String identifyingCriteria) {
         this.identifyingCriteria = identifyingCriteria;
     }

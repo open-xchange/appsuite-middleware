@@ -60,25 +60,25 @@ import com.openexchange.publish.Publication;
  */
 public class Hostname {
     private static final Hostname INSTANCE = new Hostname();
-    
+
     private HostnameService hostnameService;
-    
+
     public String getHostname(Publication pub) {
         if(hostnameService == null) {
             return null;
         }
         return hostnameService.getHostname(pub.getUserId(), pub.getContext().getContextId());
     }
-    
-    
+
+
     public void setHostnameService(HostnameService hostnameService) {
         this.hostnameService = hostnameService;
     }
-    
+
     private Hostname() {
-        
+
     }
-    
+
     public static Hostname getInstance() {
         return INSTANCE;
     }

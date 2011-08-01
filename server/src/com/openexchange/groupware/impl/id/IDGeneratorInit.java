@@ -75,6 +75,7 @@ public final class IDGeneratorInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -84,6 +85,7 @@ public final class IDGeneratorInit implements Initialization {
         LOG.info("IDGeneratorService successfully injected to server service registry");
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

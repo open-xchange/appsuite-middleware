@@ -73,8 +73,9 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
     private SubscriptionSourceDiscoveryService discoveryService;
 
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if(event.getType() != DeleteEvent.TYPE_USER)
+        if(event.getType() != DeleteEvent.TYPE_USER) {
             return;
+        }
         try {
             getStorage(writeCon).deleteAllSubscriptionsForUser(event.getId(), event.getContext());
         } catch (OXException e) {
@@ -88,7 +89,7 @@ public class SubscriptionUserDeleteListener implements DeleteListener {
     public void setStorageService(GenericConfigurationStorageService storageService) {
         this.storageService = storageService;
     }
-    
+
     public void setDiscoveryService(SubscriptionSourceDiscoveryService discoveryService) {
         this.discoveryService = discoveryService;
     }

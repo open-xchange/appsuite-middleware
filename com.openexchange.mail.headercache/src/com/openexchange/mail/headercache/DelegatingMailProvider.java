@@ -61,7 +61,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link DelegatingMailProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegatingMailProvider extends MailProvider {
@@ -70,7 +70,7 @@ public final class DelegatingMailProvider extends MailProvider {
 
     /**
      * Initializes a new {@link DelegatingMailProvider}.
-     * 
+     *
      * @param mailProvider The mail provider to delegate to
      */
     public DelegatingMailProvider(final MailProvider mailProvider) {

@@ -59,7 +59,7 @@ import com.openexchange.mail.transport.config.TransportProperties;
 
 /**
  * {@link SMTPProperties}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPProperties extends AbstractProtocolProperties implements ISMTPProperties {
@@ -70,7 +70,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the singleton instance of {@link SMTPProperties}
-     * 
+     *
      * @return The singleton instance of {@link SMTPProperties}
      */
     public static SMTPProperties getInstance() {

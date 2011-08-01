@@ -76,6 +76,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return Task.STATUS;
     }
@@ -83,6 +84,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isSet(final Task task) {
         return task.containsStatus();
     }
@@ -90,6 +92,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDBColumnName() {
         return "state";
     }
@@ -97,6 +100,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void toDB(final PreparedStatement stmt, final int pos,
         final Task task) throws SQLException {
         stmt.setInt(pos, task.getStatus());
@@ -105,6 +109,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void fromDB(final ResultSet result, final int pos,
         final Task task) throws SQLException {
         final int status = result.getInt(pos);
@@ -116,6 +121,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(final Task task1, final Task task2) {
         return task1.getStatus() == task2.getStatus();
     }
@@ -123,6 +129,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Integer get(final Task task) {
         return Integer.valueOf(task.getStatus());
     }
@@ -130,6 +137,7 @@ public final class Status implements Mapper<Integer> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void set(final Task task, final Integer value) {
         task.setStatus(value.intValue());
     }

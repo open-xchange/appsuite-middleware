@@ -55,7 +55,7 @@ import com.openexchange.threadpool.Task;
 
 /**
  * {@link CustomFutureTask} - A custom {@link FutureTask}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CustomFutureTask<V> extends FutureTask<V> {
@@ -66,7 +66,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     /**
      * Initializes a new {@link CustomFutureTask}.
-     * 
+     *
      * @param task The task
      */
     public CustomFutureTask(final Task<V> task) {
@@ -75,7 +75,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     /**
      * Initializes a new {@link CustomFutureTask}.
-     * 
+     *
      * @param task The task
      * @param refusedExecutionBehavior The refused execution behavior
      */
@@ -87,7 +87,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     /**
      * Gets the task performed by this future task.
-     * 
+     *
      * @return The task
      */
     public Task<V> getTask() {
@@ -96,7 +96,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     /**
      * Gets the refused execution behavior.
-     * 
+     *
      * @return The refused execution behavior or <code>null</code> if task has no individual behavior
      */
     public RefusedExecutionBehavior<V> getRefusedExecutionBehavior() {
@@ -105,7 +105,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
 
     /**
      * Sets the result of this future to the given value unless this future has already been set or has been canceled.
-     * 
+     *
      * @param v The value
      */
     @Override
@@ -116,7 +116,7 @@ public class CustomFutureTask<V> extends FutureTask<V> {
     /**
      * Causes this future to report an <tt>ExecutionException</tt> with the given throwable as its cause, unless this Future has already
      * been set or has been canceled.
-     * 
+     *
      * @param t The cause of failure.
      */
     @Override

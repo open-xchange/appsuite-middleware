@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link MessagingPermissions} - Tools for {@link MessagingPermission} class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -67,7 +67,7 @@ public final class MessagingPermissions {
     /**
      * Gets an unmodifiable view of the specified permission. Attempts to modify the returned permission result in an
      * <tt>UnsupportedOperationException</tt>.
-     * 
+     *
      * @param messagingPermission The messaging permission
      * @return An unmodifiable view of the specified permission
      */

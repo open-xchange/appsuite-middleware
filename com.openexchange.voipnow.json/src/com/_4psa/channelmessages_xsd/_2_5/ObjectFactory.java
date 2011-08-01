@@ -28,18 +28,18 @@ import com._4psa.channelmessagesinfo_xsd._2_5.UpdateChannelResponseType;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.channelmessages_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.channelmessages_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -72,14 +72,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.channelmessages_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link EditCallRulesOutGroupRequest }
-     * 
+     *
      */
     public EditCallRulesOutGroupRequest createEditCallRulesOutGroupRequest() {
         return new EditCallRulesOutGroupRequest();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddPublicNoRequest }
-     * 
+     *
      */
     public AddPublicNoRequest createAddPublicNoRequest() {
         return new AddPublicNoRequest();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditCallRulesOutGroupRequest.RuleStatus }
-     * 
+     *
      */
     public EditCallRulesOutGroupRequest.RuleStatus createEditCallRulesOutGroupRequestRuleStatus() {
         return new EditCallRulesOutGroupRequest.RuleStatus();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AssignPublicNoRequest }
-     * 
+     *
      */
     public AssignPublicNoRequest createAssignPublicNoRequest() {
         return new AssignPublicNoRequest();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelChannelRequest }
-     * 
+     *
      */
     public DelChannelRequest createDelChannelRequest() {
         return new DelChannelRequest();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditChannelRequest }
-     * 
+     *
      */
     public EditChannelRequest createEditChannelRequest() {
         return new EditChannelRequest();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditChannelGroupRequest }
-     * 
+     *
      */
     public EditChannelGroupRequest createEditChannelGroupRequest() {
         return new EditChannelGroupRequest();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutGroupRequest }
-     * 
+     *
      */
     public GetCallRulesOutGroupRequest createGetCallRulesOutGroupRequest() {
         return new GetCallRulesOutGroupRequest();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EditPublicNoRequest }
-     * 
+     *
      */
     public EditPublicNoRequest createEditPublicNoRequest() {
         return new EditPublicNoRequest();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCodecsRequest }
-     * 
+     *
      */
     public GetCodecsRequest createGetCodecsRequest() {
         return new GetCodecsRequest();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelCallRulesOutRequest }
-     * 
+     *
      */
     public DelCallRulesOutRequest createDelCallRulesOutRequest() {
         return new DelCallRulesOutRequest();
@@ -167,7 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddPublicNoRequest.PublicNo }
-     * 
+     *
      */
     public AddPublicNoRequest.PublicNo createAddPublicNoRequestPublicNo() {
         return new AddPublicNoRequest.PublicNo();
@@ -175,7 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddChannelRequest }
-     * 
+     *
      */
     public AddChannelRequest createAddChannelRequest() {
         return new AddChannelRequest();
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UnassignPublicNoRequest }
-     * 
+     *
      */
     public UnassignPublicNoRequest createUnassignPublicNoRequest() {
         return new UnassignPublicNoRequest();
@@ -191,7 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetChannelsRequest }
-     * 
+     *
      */
     public GetChannelsRequest createGetChannelsRequest() {
         return new GetChannelsRequest();
@@ -199,7 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelPublicNoRequest }
-     * 
+     *
      */
     public DelPublicNoRequest createDelPublicNoRequest() {
         return new DelPublicNoRequest();
@@ -207,7 +207,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetPublicNoRequest }
-     * 
+     *
      */
     public GetPublicNoRequest createGetPublicNoRequest() {
         return new GetPublicNoRequest();
@@ -215,7 +215,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetChannelGroupPollRequest }
-     * 
+     *
      */
     public GetChannelGroupPollRequest createGetChannelGroupPollRequest() {
         return new GetChannelGroupPollRequest();
@@ -223,7 +223,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AddCallRulesOutRequest }
-     * 
+     *
      */
     public AddCallRulesOutRequest createAddCallRulesOutRequest() {
         return new AddCallRulesOutRequest();
@@ -231,7 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelCallRulesOutGroupRequest }
-     * 
+     *
      */
     public DelCallRulesOutGroupRequest createDelCallRulesOutGroupRequest() {
         return new DelCallRulesOutGroupRequest();
@@ -239,7 +239,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetPublicNoPollRequest }
-     * 
+     *
      */
     public GetPublicNoPollRequest createGetPublicNoPollRequest() {
         return new GetPublicNoPollRequest();
@@ -247,7 +247,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutRequest }
-     * 
+     *
      */
     public GetCallRulesOutRequest createGetCallRulesOutRequest() {
         return new GetCallRulesOutRequest();
@@ -255,7 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesOutGroupResponse }
-     * 
+     *
      */
     public GetCallRulesOutGroupResponse createGetCallRulesOutGroupResponse() {
         return new GetCallRulesOutGroupResponse();
@@ -263,7 +263,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetChannelGroupsRequest }
-     * 
+     *
      */
     public GetChannelGroupsRequest createGetChannelGroupsRequest() {
         return new GetChannelGroupsRequest();
@@ -271,7 +271,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DelChannelGroupRequest }
-     * 
+     *
      */
     public DelChannelGroupRequest createDelChannelGroupRequest() {
         return new DelChannelGroupRequest();
@@ -279,7 +279,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link AssignPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AssignPublicNoResponse")
     public JAXBElement<AssignPublicNoResponseType> createAssignPublicNoResponse(AssignPublicNoResponseType value) {
@@ -288,7 +288,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetChannelsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetChannelsResponse")
     public JAXBElement<GetChannelsResponseType> createGetChannelsResponse(GetChannelsResponseType value) {
@@ -297,7 +297,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ChannelGroupInfo }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddChannelGroupRequest")
     public JAXBElement<ChannelGroupInfo> createAddChannelGroupRequest(ChannelGroupInfo value) {
@@ -306,7 +306,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link AssignPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "UnassignPublicNoResponse")
     public JAXBElement<AssignPublicNoResponseType> createUnassignPublicNoResponse(AssignPublicNoResponseType value) {
@@ -315,7 +315,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "DelPublicNoResponse")
     public JAXBElement<DelPublicNoResponseType> createDelPublicNoResponse(DelPublicNoResponseType value) {
@@ -324,7 +324,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link AddCallRulesOutResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddCallRulesOutResponse")
     public JAXBElement<AddCallRulesOutResponseType> createAddCallRulesOutResponse(AddCallRulesOutResponseType value) {
@@ -333,7 +333,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateChannelGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddChannelGroupResponse")
     public JAXBElement<UpdateChannelGroupResponseType> createAddChannelGroupResponse(UpdateChannelGroupResponseType value) {
@@ -342,7 +342,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetCodecsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetCodecsResponse")
     public JAXBElement<GetCodecsResponseType> createGetCodecsResponse(GetCodecsResponseType value) {
@@ -351,7 +351,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateCallRulesOutGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "EditCallRulesOutGroupResponse")
     public JAXBElement<UpdateCallRulesOutGroupResponseType> createEditCallRulesOutGroupResponse(UpdateCallRulesOutGroupResponseType value) {
@@ -360,7 +360,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateChannelResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddChannelResponse")
     public JAXBElement<UpdateChannelResponseType> createAddChannelResponse(UpdateChannelResponseType value) {
@@ -369,7 +369,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelCallRulesOutGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "DelCallRulesOutResponse")
     public JAXBElement<DelCallRulesOutGroupResponseType> createDelCallRulesOutResponse(DelCallRulesOutGroupResponseType value) {
@@ -378,7 +378,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelChannelResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "DelChannelResponse")
     public JAXBElement<DelChannelResponseType> createDelChannelResponse(DelChannelResponseType value) {
@@ -387,7 +387,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link AddPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddPublicNoResponse")
     public JAXBElement<AddPublicNoResponseType> createAddPublicNoResponse(AddPublicNoResponseType value) {
@@ -396,7 +396,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link RoutingRuleGroupInfo }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddCallRulesOutGroupRequest")
     public JAXBElement<RoutingRuleGroupInfo> createAddCallRulesOutGroupRequest(RoutingRuleGroupInfo value) {
@@ -405,7 +405,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateChannelGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "EditChannelGroupResponse")
     public JAXBElement<UpdateChannelGroupResponseType> createEditChannelGroupResponse(UpdateChannelGroupResponseType value) {
@@ -414,7 +414,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link EditPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "EditPublicNoResponse")
     public JAXBElement<EditPublicNoResponseType> createEditPublicNoResponse(EditPublicNoResponseType value) {
@@ -423,7 +423,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateCallRulesOutGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "AddCallRulesOutGroupResponse")
     public JAXBElement<UpdateCallRulesOutGroupResponseType> createAddCallRulesOutGroupResponse(UpdateCallRulesOutGroupResponseType value) {
@@ -432,7 +432,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetNoSelectionResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetPublicNoPollResponse")
     public JAXBElement<GetNoSelectionResponseType> createGetPublicNoPollResponse(GetNoSelectionResponseType value) {
@@ -441,7 +441,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetPublicNoResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetPublicNoResponse")
     public JAXBElement<GetPublicNoResponseType> createGetPublicNoResponse(GetPublicNoResponseType value) {
@@ -450,7 +450,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetGroupSelectionResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetChannelGroupPollResponse")
     public JAXBElement<GetGroupSelectionResponseType> createGetChannelGroupPollResponse(GetGroupSelectionResponseType value) {
@@ -459,7 +459,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelCallRulesOutGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "DelCallRulesOutGroupResponse")
     public JAXBElement<DelCallRulesOutGroupResponseType> createDelCallRulesOutGroupResponse(DelCallRulesOutGroupResponseType value) {
@@ -468,7 +468,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link UpdateChannelResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "EditChannelResponse")
     public JAXBElement<UpdateChannelResponseType> createEditChannelResponse(UpdateChannelResponseType value) {
@@ -477,7 +477,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetCallRulesOutResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetCallRulesOutResponse")
     public JAXBElement<GetCallRulesOutResponseType> createGetCallRulesOutResponse(GetCallRulesOutResponseType value) {
@@ -486,7 +486,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetChannelGroupsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "GetChannelGroupsResponse")
     public JAXBElement<GetChannelGroupsResponseType> createGetChannelGroupsResponse(GetChannelGroupsResponseType value) {
@@ -495,7 +495,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DelChannelGroupResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelMessages.xsd/2.5.1", name = "DelChannelGroupResponse")
     public JAXBElement<DelChannelGroupResponseType> createDelChannelGroupResponse(DelChannelGroupResponseType value) {

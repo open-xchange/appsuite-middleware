@@ -58,7 +58,7 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**
  * {@link MimeContentType} - The MIME content type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -70,7 +70,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Gets the <i>Content-Type</i> name.
-     * 
+     *
      * @return The <i>Content-Type</i> name
      */
     public static String getContentTypeName() {
@@ -98,7 +98,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Initializes a new {@link MimeContentType}
-     * 
+     *
      * @param contentType The content type
      * @throws OXException If content type cannot be parsed
      */
@@ -201,7 +201,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Applies given content type to this content type
-     * 
+     *
      * @param contentType The content type to apply
      */
     public void setContentType(final MimeContentType contentType) {
@@ -280,7 +280,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Sets name parameter
-     * 
+     *
      * @param filename The name parameter
      */
     public void setNameParameter(final String filename) {
@@ -314,7 +314,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Checks if Content-Type's base type matches given wildcard pattern (e.g text/plain, text/* or text/htm*)
-     * 
+     *
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
     public boolean isMimeType(final String pattern) {
@@ -323,7 +323,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Checks if Content-Type's base type starts ignore-case with specified prefix.
-     * 
+     *
      * @param prefix The prefix
      * @return <code>true</code> if Content-Type's base type starts ignore-case with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
@@ -334,7 +334,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
-     * 
+     *
      * @param contentType The content-type string to process
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
      * @throws OXException If parsing content-type string fails
@@ -349,7 +349,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
-     * 
+     *
      * @param contentType The content-type string to process
      * @param name The optional name parameter to set if no <tt>"name"</tt> parameter is present in specified content-type string; pass
      *            <code>null</code> to ignore
@@ -366,7 +366,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Checks if given MIME type's base type matches given wildcard pattern (e.g text/plain, text/* or text/htm*)
-     * 
+     *
      * @param mimeType The MIME type
      * @param pattern The pattern
      * @return <code>true</code> if pattern matches; otherwise <code>false</code>
@@ -382,7 +382,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Detects the base type of given MIME type
-     * 
+     *
      * @param mimeType The MIME type
      * @return the base type
      * @throws OXException If an invalid MIME type is detected
@@ -402,7 +402,7 @@ public final class MimeContentType extends ParameterizedHeader implements Conten
 
     /**
      * Returns a RFC2045 style (ASCII-only) string representation of this content type.
-     * 
+     *
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */

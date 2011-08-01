@@ -81,7 +81,7 @@ public class RootPrincipal extends AbstractCollection {
         super();
         this.factory = factory;
         this.url = new WebdavPath();
-        
+
         includeProperties(new PrincipalURL(factory.getSessionHolder()));
     }
 
@@ -138,7 +138,7 @@ public class RootPrincipal extends AbstractCollection {
             throw WebdavProtocolException.generalError(getUrl(), 403);
         }
     }
-    
+
     public UserPrincipalResource resolveUser(WebdavPath url) throws OXException {
         String name = url.name();
         if (name.contains("@")) {

@@ -69,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetForwardAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetForwardAction extends AbstractMailAction {
@@ -79,7 +79,7 @@ public final class GetForwardAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetForwardAction}.
-     * 
+     *
      * @param services
      */
     public GetForwardAction(final ServiceLookup services) {

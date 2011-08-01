@@ -11,11 +11,11 @@ import com._4psa.resellermessagesinfo_xsd._2_5.GetResellerDetailsResponseType;
 
 /**
  * Reseller account details data
- * 
+ *
  * <p>Java class for ExtendedResellerInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtendedResellerInfo">
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import com._4psa.resellermessagesinfo_xsd._2_5.GetResellerDetailsResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtendedResellerInfo")

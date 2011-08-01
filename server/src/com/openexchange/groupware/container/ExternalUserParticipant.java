@@ -53,7 +53,7 @@ import com.openexchange.groupware.container.participants.AbstractConfirmablePart
 
 /**
  * {@link ExternalUserParticipant} - Represents an external user participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ExternalUserParticipant extends AbstractConfirmableParticipant implements Comparable<Participant> {
@@ -68,7 +68,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
 
     /**
      * Default constructor.
-     * 
+     *
      * @param emailAddress The unique email address of the external participant.
      */
     public ExternalUserParticipant(final String emailAddress) {
@@ -76,26 +76,32 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         emailaddress = emailAddress;
     }
 
+    @Override
     public void setIdentifier(final int id) {
         this.id = id;
     }
 
+    @Override
     public int getIdentifier() {
         return id;
     }
 
+    @Override
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
+    @Override
     public String getEmailAddress() {
         return emailaddress;
     }
 
+    @Override
     public int getType() {
         return EXTERNAL_USER;
     }
@@ -135,6 +141,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         return true;
     }
 
+    @Override
     public int compareTo(final Participant part) {
         final int retval;
         if (EXTERNAL_USER == part.getType()) {
@@ -170,14 +177,17 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
         return super.clone();
     }
 
+    @Override
     public Participant getClone() throws CloneNotSupportedException {
         return (Participant) clone();
     }
 
+    @Override
     public boolean isIgnoreNotification() {
         return ignoreNotification;
     }
 
+    @Override
     public void setIgnoreNotification(final boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
     }

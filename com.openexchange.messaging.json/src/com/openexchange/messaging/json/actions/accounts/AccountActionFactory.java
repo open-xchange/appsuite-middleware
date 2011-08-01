@@ -65,20 +65,20 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 public class AccountActionFactory implements AJAXActionServiceFactory {
 
     public static AccountActionFactory INSTANCE; // Initialize in Activator
-    
+
     private Map<String, AJAXActionService> actions = null;
-    
+
     public AccountActionFactory(final MessagingServiceRegistry registry) {
         actions = new HashMap<String, AJAXActionService>();
-    
+
         actions.put("all", new AllAction(registry));
         actions.put("delete", new DeleteAction(registry));
         actions.put("get", new GetAction(registry));
         actions.put("new", new NewAction(registry));
         actions.put("update", new UpdateAction(registry));
-        
+
     }
-    
+
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }

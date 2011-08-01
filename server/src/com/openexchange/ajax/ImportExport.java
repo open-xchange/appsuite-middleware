@@ -74,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * Abtract class for both importers and exporters that does the configuration via Spring. This means importers and exporters are loaded from
  * a configuration file and you do not need to hardcode them somewhere.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (spring configuration)
  */
@@ -101,15 +101,16 @@ public abstract class ImportExport extends SessionServlet {
 
     @Override
     public void init() {
-        if (importerExporter != null)
+        if (importerExporter != null) {
             return;
-        
+        }
+
         importerExporter = new ImporterExporter();
-        
+
         importerExporter.addExporter(new ICalExporter());
         importerExporter.addExporter(new VCardExporter());
         importerExporter.addExporter(new CSVContactExporter());
-        
+
         importerExporter.addImporter(new ICalImporter());
         importerExporter.addImporter(new VCardImporter());
         importerExporter.addImporter(new CSVContactImporter());
@@ -140,8 +141,9 @@ public abstract class ImportExport extends SessionServlet {
 
             int mapperAmount = 0;
             for (File file : files) {
-                if (!file.getName().endsWith(".properties"))
+                if (!file.getName().endsWith(".properties")) {
                     continue;
+                }
                 Properties props = new Properties();
                 props.load(new FileInputStream(file));
                 PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);

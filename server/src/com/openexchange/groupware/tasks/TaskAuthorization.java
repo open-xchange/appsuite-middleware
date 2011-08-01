@@ -72,6 +72,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void checkMayAttach(final int folderId, final int taskId,
         final User user, final UserConfiguration userConfig, final Context ctx)
         throws OXException {
@@ -94,6 +95,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void checkMayDetach(final int folderId, final int taskId,
         final User user, final UserConfiguration userConfig, final Context ctx)
         throws OXException {
@@ -103,6 +105,7 @@ public class TaskAuthorization implements AttachmentAuthorization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void checkMayReadAttachments(final int folderId, final int taskId,
         final User user, final UserConfiguration userConfig, final Context ctx)
         throws OXException {

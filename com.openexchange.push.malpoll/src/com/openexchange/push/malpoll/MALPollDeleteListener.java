@@ -56,7 +56,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 
 /**
  * {@link MALPollDeleteListener} - Delete listener for MAL Poll bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollDeleteListener implements DeleteListener {

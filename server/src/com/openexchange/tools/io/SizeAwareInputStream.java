@@ -58,7 +58,7 @@ import java.io.InputStream;
  * #size(long) is called whenever someone reads from the stream. This method is provided with the length of the stream up until the time the
  * method is called. The SizeAwareInputStream can be used to find out about the total length of a stream or to monitor certain upload quotas
  * (if a quota is exceeded the size method may simply throw an IOException).
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
  */
 public class SizeAwareInputStream extends FilterInputStream {

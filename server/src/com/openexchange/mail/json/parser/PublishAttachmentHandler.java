@@ -106,7 +106,7 @@ import com.openexchange.user.UserService;
 /**
  * {@link PublishAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that publishes attachments on exceeded quota (either
  * overall or per-file quota).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
@@ -131,7 +131,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
     /**
      * Initializes a new {@link PublishAttachmentHandler}.
-     * 
+     *
      * @param session The session providing needed user information
      * @param transportProvider The transport provider
      * @param protocol The server's protocol
@@ -151,10 +151,12 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         }
     }
 
+    @Override
     public void setTextPart(final TextBodyMailPart textPart) {
         this.textPart = textPart;
     }
 
+    @Override
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
@@ -195,6 +197,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         attachments.add(attachment);
     }
 
+    @Override
     public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         if (!exceeded) {
             /*

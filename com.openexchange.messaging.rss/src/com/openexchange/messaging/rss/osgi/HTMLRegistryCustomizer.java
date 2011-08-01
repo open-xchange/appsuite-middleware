@@ -57,7 +57,7 @@ import com.openexchange.messaging.rss.HTMLServiceProvider;
 
 /**
  * {@link HTMLRegistryCustomizer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLRegistryCustomizer implements ServiceTrackerCustomizer {

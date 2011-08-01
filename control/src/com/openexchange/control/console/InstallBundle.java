@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link InstallBundle} - The console handler for <code>&quot;installbundle&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class InstallBundle extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class InstallBundle extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link InstallBundle} with specified arguments and performs {@link #install(String) install}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public InstallBundle(final String args[]) {

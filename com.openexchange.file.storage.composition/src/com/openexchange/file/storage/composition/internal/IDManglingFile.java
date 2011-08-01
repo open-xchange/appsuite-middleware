@@ -55,16 +55,16 @@ import com.openexchange.file.storage.File;
 
 /**
  * {@link IDManglingFile}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IDManglingFile implements File {
 
-    private File file;
+    private final File file;
 
-    private String id;
+    private final String id;
 
-    private String folder;
+    private final String folder;
 
     public IDManglingFile(File file, String service, String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();

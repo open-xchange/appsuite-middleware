@@ -54,7 +54,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ByteArrayFileHolder} - A {@link IFileHolder} implementation backed by a <code>byte</code> array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ByteArrayFileHolder implements IFileHolder {
@@ -76,29 +76,34 @@ public final class ByteArrayFileHolder implements IFileHolder {
         contentType = "application/octet-stream";
     }
 
+    @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
     }
 
+    @Override
     public long getLength() {
         return bytes.length;
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDisposition() {
         return disposition;
     }
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {
@@ -107,7 +112,7 @@ public final class ByteArrayFileHolder implements IFileHolder {
 
     /**
      * Sets the content type; e.g. "application/octet-stream"
-     * 
+     *
      * @param contentType The content type
      */
     public void setContentType(final String contentType) {
@@ -116,7 +121,7 @@ public final class ByteArrayFileHolder implements IFileHolder {
 
     /**
      * Sets the (file) name.
-     * 
+     *
      * @param name The name
      */
     public void setName(final String name) {

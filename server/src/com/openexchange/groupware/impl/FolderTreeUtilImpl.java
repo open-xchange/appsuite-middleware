@@ -69,6 +69,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
         MODE = new CACHE_MODE(provider);
     }
 
+    @Override
     public List<Integer> getPath(final int folderid, final Context ctx, final User user,
             final UserConfiguration userConfig) throws OXException {
         final List<Integer> path = new ArrayList<Integer>();
@@ -107,6 +108,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
             this.provider = provider;
         }
 
+        @Override
         public FolderObject getFolder(final int folderid, final Context ctx)  throws Exception{
             try {
                 Connection readCon = null;
@@ -125,6 +127,7 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
 
     private static final class NORMAL_MODE implements Mode {
 
+        @Override
         public FolderObject getFolder(final int folderid, final Context ctx) throws Exception {
             return FolderObject.loadFolderObjectFromDB(folderid, ctx);
         }

@@ -60,13 +60,13 @@ import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
  *
  */
 public class SimOXMFParserFactory implements OXMFParserFactoryService {
-    private OXMFParser parser;
+    private final OXMFParser parser;
 
-    
+
     public SimOXMFParserFactory(OXMFParser parser) {
         this.parser = parser;
     }
-    
+
     public OXMFParser getParser() {
         return parser;
     }

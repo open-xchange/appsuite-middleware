@@ -76,8 +76,9 @@ public abstract class AbstractPartitioningTest extends AbstractDateTest {
         CPPartition partitions = strategy.partition(Arrays.asList(new CPAppointment[] { app1, app2 }));
         boolean foundWeekBreak = false;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1)
+            if (info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK & info.getPosition() == 1) {
                 foundWeekBreak = true;
+            }
         }
         assertTrue("Two consecutive days, Wednesday and Thursday, should not have any week break info between them", !foundWeekBreak);
         assertEquals("Partition should contain two appointments", 2, partitions.getAppointments().size());

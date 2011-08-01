@@ -75,14 +75,14 @@ import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link GetVersitAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetVersitAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetVersitAction}.
-     * 
+     *
      * @param services
      */
     public GetVersitAction(final ServiceLookup services) {

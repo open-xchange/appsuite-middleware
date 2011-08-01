@@ -62,7 +62,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link VersionsAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class VersionsAction extends AbstractFileAction {
@@ -70,20 +70,20 @@ public class VersionsAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final List<Field> columns = new ArrayList<File.Field>(request.getColumns());
         if(!columns.contains(File.Field.VERSION)) {
             columns.add(File.Field.VERSION);
         }
         final TimedResult<File> versions = fileAccess.getVersions(request.getId(), columns, request.getSortingField(), request.getSortingOrder());
-        
+
         return result( skipVersion0( versions ), request);
     }
 
     private TimedResult<File> skipVersion0(final TimedResult<File> versions) throws OXException {
-        
+
         return new TimedResult<File>() {
 
             public SearchIterator<File> results() throws OXException {
@@ -94,14 +94,14 @@ public class VersionsAction extends AbstractFileAction {
                         return thing.getVersion() != 0;
                     }
 
-                    
+
                 };
             }
 
             public long sequenceNumber() throws OXException {
                 return versions.sequenceNumber();
             }
-            
+
         };
     }
 

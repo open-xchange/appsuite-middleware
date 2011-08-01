@@ -62,7 +62,7 @@ public interface Response {
 
     /**
      * Returns the status code associated with the latest response.
-     * 
+     *
      * @return The status code from the most recent execution of this method.
      *         If the method has not yet been executed, the result is undefined.
      */
@@ -71,7 +71,7 @@ public interface Response {
     /**
      * Returns the status text (or "reason phrase") associated with the latest
      * response.
-     * 
+     *
      * @return The status text from the most recent execution of this method.
      *         If the method has not yet been executed, the result is undefined.
      */
@@ -79,8 +79,8 @@ public interface Response {
 
     /**
      * Returns the response headers from the most recent execution of this request.
-     * 
-     * @return A newly-created array containing all of the response headers, 
+     *
+     * @return A newly-created array containing all of the response headers,
      *         in the order in which they appeared in the response.
      */
     Header[] getResponseHeaders();
@@ -88,9 +88,9 @@ public interface Response {
     /**
      * Returns the specified response header. Note that header-name matching is
      * case insensitive.
-     * 
+     *
      * @param headerName The name of the header to be returned.
-     * 
+     *
      * @return The specified response header.  If the repsonse contained multiple
      *         instances of the header, its values will be combined using the ','
      *         separator as specified by RFC2616.
@@ -102,14 +102,14 @@ public interface Response {
      * case insensitive.
      * @param headerName the name of the headers to be returned.
      * @return an array of zero or more headers
-     * 
+     *
      * @since 3.0
      */
     Header[] getResponseHeaders(String headerName);
 
     /**
      * Returns the response footers from the most recent execution of this request.
-     * 
+     *
      * @return an array containing the response footers in the order that they
      *         appeared in the response.  If the response had no footers,
      *         an empty array will be returned.
@@ -119,7 +119,7 @@ public interface Response {
     /**
      * Return the specified response footer. Note that footer-name matching is
      * case insensitive.
-     * 
+     *
      * @param footerName The name of the footer.
      * @return The response footer.
      */
@@ -130,16 +130,16 @@ public interface Response {
      * If the method has not yet been executed or the response has no body, <code>null</code>
      * is returned.  Note that this method does not propagate I/O exceptions.
      * If an error occurs while reading the body, <code>null</code> will be returned.
-     * 
+     *
      * @return The response body, or <code>null</code> if the
      *         body is not available.
-     * 
+     *
      * @throws IOException if an I/O (transport) problem occurs
      */
     byte[] getResponseBody() throws IOException;
 
     /**
-     * Returns the response body of the HTTP method, if any, as a {@link String}. 
+     * Returns the response body of the HTTP method, if any, as a {@link String}.
      * If response body is not available or cannot be read, <tt>null</tt> is returned.
      * The raw bytes in the body are converted to a <code>String</code> using the
      * character encoding specified in the response's <tt>Content-Type</tt> header, or
@@ -150,7 +150,7 @@ public interface Response {
      *
      * @return The response body converted to a <code>String</code>, or <code>null</code>
      *         if the body is not available.
-     * 
+     *
      * @throws IOException if an I/O (transport) problem occurs
      */
     String getResponseBodyAsString() throws IOException;
@@ -160,10 +160,10 @@ public interface Response {
      * If the response had no body or the method has not yet been executed,
      * <code>null</code> is returned.  Additionally, <code>null</code> may be returned
      * if {@link #releaseConnection} has been called or
-     * if this method was called previously and the resulting stream was closed. 
-     * 
-     * @return The response body, or <code>null</code> if it is not available 
-     * 
+     * if this method was called previously and the resulting stream was closed.
+     *
+     * @return The response body, or <code>null</code> if it is not available
+     *
      * @throws IOException if an I/O (transport) problem occurs
      */
     InputStream getResponseBodyAsStream() throws IOException;

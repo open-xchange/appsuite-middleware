@@ -62,19 +62,21 @@ import com.openexchange.webdav.protocol.WebdavProperty;
  */
 public abstract class SinglePropertyMixin implements PropertyMixin {
 
-    private String namespace;
-    private String name;
-    
+    private final String namespace;
+    private final String name;
+
     public SinglePropertyMixin(String namespace, String name) {
         super();
         this.namespace = namespace;
         this.name = name;
     }
 
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         if (this.namespace.equals(namespace) && this.name.equals(name)) {
             WebdavProperty property = new WebdavProperty(namespace, name);

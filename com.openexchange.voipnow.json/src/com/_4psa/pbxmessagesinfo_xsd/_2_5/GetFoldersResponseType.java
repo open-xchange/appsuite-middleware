@@ -12,11 +12,11 @@ import com._4psa.pbxdata_xsd._2_5.Folders;
 
 /**
  * Get client list of folders: response type
- * 
+ *
  * <p>Java class for GetFoldersResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetFoldersResponseType">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.pbxdata_xsd._2_5.Folders;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetFoldersResponseType", propOrder = {
@@ -44,25 +44,25 @@ public class GetFoldersResponseType {
 
     /**
      * Gets the value of the folders property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the folders property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getFolders().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Folders }
-     * 
-     * 
+     *
+     *
      */
     public List<Folders> getFolders() {
         if (folders == null) {
@@ -73,25 +73,25 @@ public class GetFoldersResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

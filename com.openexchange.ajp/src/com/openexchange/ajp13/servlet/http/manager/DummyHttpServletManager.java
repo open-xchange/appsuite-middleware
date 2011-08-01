@@ -74,22 +74,27 @@ public final class DummyHttpServletManager implements IHttpServletManager {
         super();
     }
 
+    @Override
     public void destroyServlet(final String id, final HttpServlet servletObj) {
         // Nothing to do
     }
 
+    @Override
     public HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
         return null;
     }
 
+    @Override
     public void putServlet(final String path, final HttpServlet servletObj) {
         // Nothing to do
     }
 
+    @Override
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         throw new ServletException("Not initialized, yet.");
     }
 
+    @Override
     public void unregisterServlet(final String id) {
         // Nothing to do
     }

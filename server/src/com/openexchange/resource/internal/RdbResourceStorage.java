@@ -82,7 +82,7 @@ public class RdbResourceStorage extends ResourceStorage {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param context Context.
      */
     RdbResourceStorage() {
@@ -141,7 +141,7 @@ public class RdbResourceStorage extends ResourceStorage {
 
     /**
      * Reads multiple resource groups from the database.
-     * 
+     *
      * @param groupId array with unique identifier of the resource groups to read.
      * @return an array with the read resource groups.
      * @throws OXException if an error occurs.
@@ -192,7 +192,7 @@ public class RdbResourceStorage extends ResourceStorage {
 
     /**
      * Reads the member of a resource group.
-     * 
+     *
      * @param con readable database connection.
      * @param groupId unique identifier of the resource group.
      * @return an array with all unique identifier of resource that are member of the resource group.
@@ -239,7 +239,7 @@ public class RdbResourceStorage extends ResourceStorage {
 
     /**
      * Reads multiple resources from the database.
-     * 
+     *
      * @param resourceId array with unique identifier of the resources to read.
      * @return an array with the read resources.
      * @throws OXException if an error occurs.
@@ -384,7 +384,7 @@ public class RdbResourceStorage extends ResourceStorage {
     public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_RESOURCE);
     }
-    
+
     @Override
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeleted(modifiedSince, context, SQL_SELECT_DELETED_RESOURCE);
@@ -419,7 +419,7 @@ public class RdbResourceStorage extends ResourceStorage {
 
     /**
      * Creates a newly allocated {@link Resource resource} from current result set's entry.
-     * 
+     *
      * @param result The result set with its cursor properly set
      * @return A newly allocated {@link Resource resource} from current result set's entry
      * @throws SQLException If an SQL error occurs

@@ -54,7 +54,7 @@ import java.nio.charset.spi.CharsetProvider;
 
 /**
  * {@link ModifyCharsetExtendedProvider} - Modifies the <code>charsetExtendedProvider</code> field in {@link java.nio.charset.Charset}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ModifyCharsetExtendedProvider {
@@ -68,7 +68,7 @@ public final class ModifyCharsetExtendedProvider {
 
     /**
      * Modifies field <code>java.nio.charset.Charset.extendedProvider</code>
-     * 
+     *
      * @throws NoSuchFieldException If field "extendedProvider" does not exist
      * @throws IllegalAccessException If field "extendedProvider" is not accessible
      * @return An array of {@link CharsetProvider} of length <code>2</code>; the first index is occupied by replaced {@link CharsetProvider}
@@ -106,7 +106,7 @@ public final class ModifyCharsetExtendedProvider {
 
     /**
      * Restores field <code>java.nio.charset.Charset.extendedProvider</code>
-     * 
+     *
      * @param provider The {@link CharsetProvider} instance to restore to
      * @throws NoSuchFieldException If field "extendedProvider" does not exist
      * @throws IllegalAccessException If field "extendedProvider" is not accessible

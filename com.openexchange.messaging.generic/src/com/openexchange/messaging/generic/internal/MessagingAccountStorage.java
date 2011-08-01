@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MessagingAccountStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -64,7 +64,7 @@ public interface MessagingAccountStorage {
 
     /**
      * Gets the denoted account.
-     * 
+     *
      * @param serviceId The service identifier
      * @param id The account ID
      * @param session The session
@@ -75,7 +75,7 @@ public interface MessagingAccountStorage {
 
     /**
      * Gets all accounts associated with specified service and given user.
-     * 
+     *
      * @param serviceId The service ID
      * @param session The session
      * @return All accounts associated with specified service and given user
@@ -85,7 +85,7 @@ public interface MessagingAccountStorage {
 
     /**
      * Adds given account.
-     * 
+     *
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
@@ -96,7 +96,7 @@ public interface MessagingAccountStorage {
 
     /**
      * Deletes denoted account.
-     * 
+     *
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session
@@ -106,7 +106,7 @@ public interface MessagingAccountStorage {
 
     /**
      * Updates given account.
-     * 
+     *
      * @param serviceId The service identifier
      * @param account The account
      * @param session The session

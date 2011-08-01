@@ -56,15 +56,19 @@ import com.openexchange.groupware.contexts.Context;
 public interface DBProvider {
 
     static final DBProvider DUMMY = new DBProvider() {
+        @Override
         public Connection getReadConnection(final Context ctx) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public Connection getWriteConnection(final Context ctx) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public void releaseReadConnection(final Context ctx, final Connection con) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public void releaseWriteConnection(final Context ctx, final Connection con) {
             throw new UnsupportedOperationException();
         }

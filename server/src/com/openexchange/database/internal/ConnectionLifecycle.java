@@ -88,6 +88,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         this.info = info;
     }
 
+    @Override
     public boolean activate(final PooledData<Connection> data) {
         final Connection con = data.getPooled();
         boolean retval;
@@ -112,6 +113,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return retval;
     }
 
+    @Override
     public Connection create() throws SQLException {
         return DriverManager.getConnection(url, info);
     }
@@ -129,6 +131,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return DriverManager.getConnection(url, withoutTimeout);
     }
 
+    @Override
     public boolean deactivate(final PooledData<Connection> data) {
         boolean retval = true;
         try {
@@ -139,6 +142,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return retval;
     }
 
+    @Override
     public void destroy(final Connection obj) {
         try {
             obj.close();
@@ -153,6 +157,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
+    @Override
     public boolean validate(final PooledData<Connection> data) {
         final Connection con = data.getPooled();
         boolean retval = true;

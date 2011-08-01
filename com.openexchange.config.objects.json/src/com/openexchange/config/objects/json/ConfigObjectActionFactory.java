@@ -58,7 +58,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.objects.ConfigObjectRegistry;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,15 +70,15 @@ import com.openexchange.tools.session.ServerSession;
 public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
 
     private static final String GET = "get";
-    
+
     private static final String PATH = "path";
-    
+
     ConfigObjectRegistryFactory registryFactory = null;
-    
+
     public ConfigObjectActionFactory(ConfigObjectRegistryFactory registryFactory) {
         this.registryFactory = registryFactory;
     }
-    
+
     public AJAXActionService createActionService(String action) throws OXException {
         if(!GET.equals(action)) {
             throw AjaxExceptionCodes.UnknownAction.create( action);
@@ -87,19 +86,19 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
         return new AJAXActionService() {
 
             public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-                
+
                 String path = request.getParameter(PATH);
                 if(path == null) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create( PATH);
                 }
-                
+
                 ConfigObjectRegistry view = registryFactory.getView(session.getUserId(), session.getContextId());
                 Object object = view.get(path);
-                
+
                 if(object == null) {
                     return AJAXRequestResult.EMPTY_REQUEST_RESULT;
                 }
-                
+
                 try {
                     Object json = JSONCoercion.coerceToJSON(object);
                     return new AJAXRequestResult(json);
@@ -107,7 +106,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory{
                     throw AjaxExceptionCodes.JSONError.create( e);
                 }
             }
-            
+
         };
     }
 

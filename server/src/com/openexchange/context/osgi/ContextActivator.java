@@ -67,7 +67,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 public class ContextActivator extends HousekeepingActivator {
 
     /**
-     * 
+     *
      */
     private static final Class[] NEEDED = new Class[]{DatabaseService.class};
 
@@ -83,23 +83,24 @@ public class ContextActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final DatabaseService dbase = getService(DatabaseService.class);
-        
+
         final ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
         registerService(CreateTableService.class, createTable);
-        
+
         final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
-        
+
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
+            @Override
             public Collection<? extends UpdateTask> getUpdateTasks() {
                 return Arrays.asList(updateTask);
             }
-            
+
         });
-        
-        
+
+
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();

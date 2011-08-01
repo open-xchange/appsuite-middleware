@@ -56,27 +56,28 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfMatchAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		check(req, true);
 		check(req, false);
 		yield(req,res);
-		
+
 	}
 
 	private void check(final WebdavRequest req,final boolean mustMatch) throws OXException {
 		final String header = mustMatch ? "If-Match" : "If-None-Match";
-		
+
 		if(req.getHeader(header) != null) {
 			final WebdavResource res = req.getResource();
 			final String etag = res.getETag();
-			
+
 			if(res.exists() && res.isCollection()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
-			
+
 			boolean foundMatch = false;
-			
+
 			if(res.exists()) {
 				for(final String tag : req.getHeader(header).split("\\s*,\\s*")) {
 					if(etag.equals(tag) || tag.equals("*")) {
@@ -84,15 +85,15 @@ public class WebdavIfMatchAction extends AbstractAction {
 					}
 				}
 			}
-			
+
 			if(foundMatch == mustMatch) {
 				return;
 			}
-			
+
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 		}
 	}
-	
-	
+
+
 
 }

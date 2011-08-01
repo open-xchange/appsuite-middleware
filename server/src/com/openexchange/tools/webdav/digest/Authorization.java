@@ -51,7 +51,7 @@ package com.openexchange.tools.webdav.digest;
 
 /**
  * {@link Authorization}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Authorization {
@@ -85,7 +85,7 @@ public final class Authorization {
 
     /**
      * Gets the algorithm
-     * 
+     *
      * @return The algorithm
      */
     public String getAlgorithm() {
@@ -94,7 +94,7 @@ public final class Authorization {
 
     /**
      * Gets the cnonce
-     * 
+     *
      * @return The cnonce
      */
     public String getCnonce() {
@@ -103,7 +103,7 @@ public final class Authorization {
 
     /**
      * Gets the nOnce
-     * 
+     *
      * @return The nOnce
      */
     public String getnOnce() {
@@ -112,7 +112,7 @@ public final class Authorization {
 
     /**
      * Gets the nc
-     * 
+     *
      * @return The nc
      */
     public String getNc() {
@@ -121,7 +121,7 @@ public final class Authorization {
 
     /**
      * Gets the opaque
-     * 
+     *
      * @return The opaque
      */
     public String getOpaque() {
@@ -130,7 +130,7 @@ public final class Authorization {
 
     /**
      * Gets the qop
-     * 
+     *
      * @return The qop
      */
     public String getQop() {
@@ -139,7 +139,7 @@ public final class Authorization {
 
     /**
      * Gets the realm
-     * 
+     *
      * @return The realm
      */
     public String getRealm() {
@@ -148,7 +148,7 @@ public final class Authorization {
 
     /**
      * Gets the response
-     * 
+     *
      * @return The response
      */
     public String getResponse() {
@@ -157,7 +157,7 @@ public final class Authorization {
 
     /**
      * Gets the uri
-     * 
+     *
      * @return The uri
      */
     public String getUri() {
@@ -166,7 +166,7 @@ public final class Authorization {
 
     /**
      * Gets the user
-     * 
+     *
      * @return The user
      */
     public String getUser() {

@@ -62,7 +62,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * TaskParser
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class TaskParser extends CalendarParser {

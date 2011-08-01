@@ -62,7 +62,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link UserAttributeAccess} - Provides utility methods to access/update a user's attributes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserAttributeAccess {
@@ -71,7 +71,7 @@ public final class UserAttributeAccess {
 
     /**
      * Gets the default instance.
-     * 
+     *
      * @return The default instance
      */
     public static UserAttributeAccess getDefaultInstance() {
@@ -110,7 +110,7 @@ public final class UserAttributeAccess {
 
     /**
      * Gets the specified <code>boolean</code> property from configuration service read from appropriate properties files.
-     * 
+     *
      * @param name The property's name
      * @param defaultValue The default <code>boolean</code> value to return if property is missing
      * @return The <code>boolean</code> value
@@ -127,7 +127,7 @@ public final class UserAttributeAccess {
      * Gets the specified <code>boolean</code> attribute from given user.
      * <p>
      * This methods assumes that at most one value is associated with specified attribute name.
-     * 
+     *
      * @param name The name of the <code>boolean</code> attribute
      * @param userId The identifier of the user
      * @param contextId The identifier of user's context
@@ -142,7 +142,7 @@ public final class UserAttributeAccess {
      * Gets the specified <code>boolean</code> attribute from given user.
      * <p>
      * This methods assumes that at most one value is associated with specified attribute name.
-     * 
+     *
      * @param name The name of the <code>boolean</code> attribute
      * @param user The user
      * @param defaultValue The default value to return if user has no attribute of specified name
@@ -156,7 +156,7 @@ public final class UserAttributeAccess {
      * Gets the specified attribute from given user.
      * <p>
      * This methods assumes that at most one value is associated with specified attribute name.
-     * 
+     *
      * @param name The name of the attribute
      * @param user The user
      * @param defaultValue The default value to return if user has no attribute of specified name
@@ -176,7 +176,7 @@ public final class UserAttributeAccess {
 
     /**
      * Set specified <code>boolean</code> attribute for given user.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute <code>boolean</code> value
      * @param user The user
@@ -196,7 +196,7 @@ public final class UserAttributeAccess {
 
     /**
      * Set specified <code>boolean</code> attribute for given user.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute <code>boolean</code> value
      * @param user The user
@@ -209,7 +209,7 @@ public final class UserAttributeAccess {
 
     /**
      * Set specified attribute for given user.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param user The user

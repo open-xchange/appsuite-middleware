@@ -56,9 +56,9 @@ import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
 /**
  * {@link UserPermissionMerger}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserPermissionMerger {
 
@@ -75,7 +75,7 @@ public final class UserPermissionMerger {
 	/**
 	 * Handles corrupt user permissions by re-assigning (merged permission) them
 	 * to context's admin
-	 * 
+	 *
 	 * @param corruptPermissions
 	 *            The corrupt user permissions
 	 * @param con

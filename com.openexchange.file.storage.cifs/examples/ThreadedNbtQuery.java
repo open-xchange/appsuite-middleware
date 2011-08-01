@@ -3,12 +3,13 @@ import jcifs.netbios.NbtAddress;
 public class ThreadedNbtQuery {
 
     static class QThread extends Thread {
-        String name; 
+        String name;
 
         QThread( String name ) {
             this.name = name;
         }
 
+        @Override
         public void run() {
             try {
                 yield();

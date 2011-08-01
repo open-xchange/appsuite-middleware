@@ -75,22 +75,27 @@ public final class SharedNode implements IValueHandler {
         this.id = id;
     }
 
+    @Override
     public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
         throw SettingExceptionCodes.NOT_LEAF.create(name);
     }
 
+    @Override
     public boolean isAvailable(UserConfiguration userConfig) {
         return true;
     }
 
+    @Override
     public boolean isWritable() {
         return false;
     }
 
+    @Override
     public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
         throw SettingExceptionCodes.NO_WRITE.create(name);
     }
 
+    @Override
     public int getId() {
         return id;
     }

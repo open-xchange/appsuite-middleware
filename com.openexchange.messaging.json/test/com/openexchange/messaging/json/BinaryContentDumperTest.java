@@ -59,7 +59,7 @@ import com.openexchange.messaging.BinaryContent;
 
 /**
  * {@link BinaryContentDumperTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class BinaryContentDumperTest extends TestCase {
@@ -78,13 +78,13 @@ public class BinaryContentDumperTest extends TestCase {
     public void testDump() throws OXException, IOException {
         final InputStream is = new ByteArrayInputStream("Hello World".getBytes("UTF-8"));
         final BinaryContent content = getBinaryContent(is);
-        
+
         final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        
+
         new BinaryContentDumper().dump(content, bout);
-        
+
         assertEquals("Hello World", bout.toString("UTF-8"));
-        
+
     }
 
     private BinaryContent getBinaryContent(final InputStream is) {

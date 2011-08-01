@@ -61,7 +61,7 @@ import com.openexchange.ajp13.xajp.XAJPv13Session;
 
 /**
  * {@link XAJPv13Request} - Abstract super class for AJP requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class XAJPv13Request {
@@ -71,7 +71,7 @@ public abstract class XAJPv13Request {
     /**
      * Max size of an incoming request body:<br>
      * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer).
-     * 
+     *
      * @value 8188
      */
     protected final static int MAX_REQUEST_BODY_CHUNK_SIZE = 8188;
@@ -82,7 +82,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Initializes a new {@link XAJPv13Request}.
-     * 
+     *
      * @param payloadData The payload data
      */
     protected XAJPv13Request(final ByteBuffer payloadData) {
@@ -92,7 +92,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Process the AJP request.
-     * 
+     *
      * @param session The AJP session
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
@@ -101,7 +101,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Indicates whether to perform {@link #response(INonBlockingConnection)} on this AJP request or not.
-     * 
+     *
      * @param session The AJP session
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
@@ -111,7 +111,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Writes AJP response package.
-     * 
+     *
      * @param connection The AJP connection
      * @throws AJPv13Exception If an AJP error occurs
      * @throws ServletException If a servlet error occurs
@@ -188,7 +188,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Writes specified bytes into given output stream.
-     * 
+     *
      * @param responseBytes The bytes to write
      * @param connection The connection to write to
      * @param flushStream Whether to flush the output stream
@@ -203,7 +203,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Writes specified AJP response into given output stream.
-     * 
+     *
      * @param response The AJP response
      * @param connection The connection to write to
      * @param flushStream Whether to flush the output stream
@@ -216,7 +216,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Checks if payload data is <code>null</code>.
-     * 
+     *
      * @return <code>true</code> if payload data is <code>null</code>; otherwise <code>false</code>
      */
     protected final boolean isPayloadNull() {
@@ -225,7 +225,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Gets the payload data length.
-     * 
+     *
      * @return The payload data length
      */
     protected final int getPayloadLength() {
@@ -234,7 +234,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Parses the next <code>int</code> value (which consumes next two bytes).
-     * 
+     *
      * @return The next <code>int</code> value
      */
     protected final int parseInt() {
@@ -243,7 +243,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes).
-     * 
+     *
      * @param numOfBytes The number of bytes to return
      * @return The next bytes
      */
@@ -264,7 +264,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Gets the next <i>unsigned</i> byte.
-     * 
+     *
      * @return The next <i>unsigned</i> byte
      */
     protected final int nextByte() {
@@ -273,7 +273,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Compares next available unsigned byte with given value.
-     * 
+     *
      * @param compareTo The value to compare to
      * @return <code>true</code> if next available unsigned byte is equal to given value; otherwise <code>false</code>
      */
@@ -286,7 +286,7 @@ public abstract class XAJPv13Request {
 
     /**
      * Checks if there's another byte available.
-     * 
+     *
      * @return <code>true</code> if there's another byte available; otherwise <code>false</code>
      */
     protected final boolean hasNext() {

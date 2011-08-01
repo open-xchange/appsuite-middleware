@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MessagingExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -97,13 +97,13 @@ public final class MessagingExceptionMessages implements LocalizableStrings {
 
     // Unknown messaging content: %1$s.
     public static final String UNKNOWN_MESSAGING_CONTENT_MSG = "Unknown messaging content: %1$s.";
-    
+
     // Unknown messaging service: %1$s.
     public static final String UNKNOWN_MESSAGING_SERVICE_MSG = "Unknown messaging service: %1$s.";
-    
+
     //  Missing parameter: %1$s
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
-    
+
     // Invalid parameter: %1$s with value '%2$s'.
     public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with value '%2$s'.";
 

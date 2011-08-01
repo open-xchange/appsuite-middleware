@@ -68,7 +68,7 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
 public class PerformTest extends AbstractMessagingActionTest {
 
     // Success Cases
-    
+
     public void testPerformStorageCall() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
@@ -76,95 +76,95 @@ public class PerformTest extends AbstractMessagingActionTest {
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
         req.putParameter("messageAction", "theAction");
-        
+
         perform(req);
-        
+
         final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
-        
+
         assertEquals("perform", call.getName());
-        
+
         final Object[] args = call.getArgs();
 
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
         assertEquals("theAction", args[2]);
-        
+
     }
-    
+
     public void testPerformMessageCall() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("messageAction", "theAction");
-        
+
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
-        
+
         perform(req);
-        
+
         final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
-        
+
         assertEquals("perform", call.getName());
-        
+
         final Object[] args = call.getArgs();
 
         final MessagingMessage message = (MessagingMessage) args[0];
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
         assertEquals("theAction", args[1]);
-        
+
     }
-    
+
     public void testPerformNullCall() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("account", "12");
         req.putParameter("messageAction", "theAction");
-        
+
         perform(req);
-        
+
         final Call call = getMessagingAccessCall("com.openexchange.test1", 12);
-        
+
         assertEquals("perform", call.getName());
-        
+
         final Object[] args = call.getArgs();
 
         assertEquals("theAction", args[0]);
     }
-    
+
     // Error Cases
-    
+
     public void testMissingServiceID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
         req.putParameter("messageAction", "theAction");
-        
+
         assertFails(req);
     }
-    
+
     public void testMissingAccountID() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("id", "theID");
         req.putParameter("messageAction", "theAction");
-        
+
         assertFails(req);
-    
+
     }
-    
+
     public void testMissingAction() throws OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
         req.putParameter("folder", "theFolderID");
         req.putParameter("account", "12");
         req.putParameter("id", "theID");
-        
+
         assertFails(req);
-    
+
     }
-    
-    
+
+
     @Override
     protected AbstractMessagingAction getAction() {
         return new PerformAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());

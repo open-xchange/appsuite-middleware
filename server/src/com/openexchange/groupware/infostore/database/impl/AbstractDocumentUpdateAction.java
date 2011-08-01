@@ -62,26 +62,26 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
 	public void setOldDocuments(final List<DocumentMetadata> oldDocuments) {
 		this.oldDocuments = oldDocuments;
 	}
-	
+
 	public List<DocumentMetadata> getOldDocuments() {
 		return oldDocuments;
 	}
-	
+
 	public void setModified(final Metadata...modified) {
 		this.modified = modified;
 	}
-	
+
 	public Metadata[] getModified(){
 		return modified;
 	}
-	
+
 	public void setTimestamp(final long ts) {
 		this.timestamp = ts;
 	}
-	
+
 	public long getTimestamp(){
 		return this.timestamp;
 	}
-	
+
 
 }

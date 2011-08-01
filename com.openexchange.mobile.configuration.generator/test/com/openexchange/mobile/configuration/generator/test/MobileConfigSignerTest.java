@@ -17,7 +17,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 
 public class MobileConfigSignerTest {
-    
+
     private static final String SIGNEDJAVA_MOBILECONFIG = "testdata/signedjava.mobileconfig";
     private static final String EAS_MOBILECONFIG = "testdata/eas.mobileconfig";
 
@@ -51,6 +51,7 @@ public class MobileConfigSignerTest {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+            @Override
             protected String[] getCommand() throws ConfigurationException {
                 return new String[]{ "sleep", "10" };
             }
@@ -69,12 +70,13 @@ public class MobileConfigSignerTest {
 
         fileReader.close();
     }
-    
+
     @Test
     public void signerTestWrongResult() throws IOException, InterruptedException, ConfigurationException {
         final FileReader fileReader = new FileReader(EAS_MOBILECONFIG);
         final FileOutputStream fileWriter = new FileOutputStream(SIGNEDJAVA_MOBILECONFIG);
         final MobileConfigSigner mobileConfigSigner = new MobileConfigSigner(fileWriter) {
+            @Override
             protected String[] getCommand() throws ConfigurationException {
                 return new String[]{ "/bin/false" };
             }

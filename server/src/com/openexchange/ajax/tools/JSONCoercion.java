@@ -65,7 +65,7 @@ import org.json.JSONValue;
  * {@link JSONCoercion} - Turns JSON data to its Java representation and vice versa.
  * <p>
  * A {@link JSONObject} is coerced to a {@link Map}, a {@link JSONArray} is coerced to a {@link Collection}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -73,7 +73,7 @@ import org.json.JSONValue;
 public class JSONCoercion {
     /**
      * Coerces given JSON data to its Java representation.
-     * 
+     *
      * @param object The JSON data to coerce
      * @return The resulting Java representation.
      * @throws JSONException If coercion fails
@@ -104,7 +104,7 @@ public class JSONCoercion {
 
     /**
      * Checks if specified object needs to be coerced to JSON.
-     * 
+     *
      * @param value The object to check
      * @return <code>true</code> if specified object needs to be coerced to JSON; otherwise <code>false</code>
      */
@@ -114,17 +114,17 @@ public class JSONCoercion {
 
     /**
      * Checks if specified object needs to be coerced to a native Java object.
-     * 
+     *
      * @param value The object to check
      * @return <code>true</code> if specified object needs to be coerced to a native Java object; otherwise <code>false</code>
      */
     public static boolean needsNativeCoercion(final Object value) {
         return (value instanceof JSONValue);
     }
-    
+
     /**
      * Coerces given Java object to its JSON representation.
-     * 
+     *
      * @param value The Java object to coerce
      * @return The resulting JSON representation
      * @throws JSONException If coercion fails
@@ -170,7 +170,7 @@ public class JSONCoercion {
 
     /**
      * Checks if specified object is an array.
-     * 
+     *
      * @param object The object to check
      * @return <code>true</code> if specified object is an array; otherwise <code>false</code>
      */

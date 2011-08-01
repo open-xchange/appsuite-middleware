@@ -93,7 +93,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link Memorizer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -115,7 +115,7 @@ public class Memorizer implements Runnable {
 
     /**
      * Initializes a new {@link Memorizer}.
-     * 
+     *
      * @param addresses The addresses to insert if not already present
      * @param session The associated session
      * @param aliasesMap The aliases map holding already determined aliases per context
@@ -263,7 +263,7 @@ public class Memorizer implements Runnable {
 
     /**
      * Gets the aliases of a specified user.
-     * 
+     *
      * @param user The user whose aliases shall be returned
      * @return The aliases of a specified user
      */
@@ -333,7 +333,7 @@ public class Memorizer implements Runnable {
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
      * If the String is not a RFC 2047 style encoded value, it is returned as-is
-     * 
+     *
      * @param value The possibly encoded value
      * @return The possibly decoded value
      * @throws UnsupportedEncodingException If an unsupported charset encoding occurs
@@ -361,7 +361,7 @@ public class Memorizer implements Runnable {
 
     /**
      * Gets all aliases of all users of specified context.
-     * 
+     *
      * @param context The context
      * @param userService The user service
      * @return All aliases

@@ -50,8 +50,6 @@
 package com.openexchange.webdav.directory.servlets;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -164,7 +161,7 @@ public class WebdavDirectoryServlet extends OXServlet {
         		WebdavStatus status = (WebdavStatus) x;
         		resp.setStatus(status.getStatus());
         		resp.sendError(status.getStatus());
-        		
+
         	}
         	resp.setStatus(500);
         	resp.sendError(500);
@@ -208,9 +205,9 @@ public class WebdavDirectoryServlet extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

@@ -72,7 +72,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACLAutoDetector} - Auto-detects {@link Entity2ACL} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Entity2ACLAutoDetector {
@@ -110,7 +110,7 @@ public final class Entity2ACLAutoDetector {
      * <p>
      * The IMAP server name can either be a machine name, such as <code>&quot;java.sun.com&quot;</code>, or a textual representation of its
      * IP address.
-     * 
+     *
      * @param imapConfig The IMAP configuration
      * @return the IMAP server's depending {@link Entity2ACL} implementation
      * @throws IOException - if an I/O error occurs
@@ -174,7 +174,7 @@ public final class Entity2ACLAutoDetector {
 
     /**
      * Gets the appropriate {@link Entity2ACL} implementation.
-     * 
+     *
      * @param greeting The greeting
      * @param imapConfig The IMAP configuration
      * @return The appropriate {@link Entity2ACL} implementation

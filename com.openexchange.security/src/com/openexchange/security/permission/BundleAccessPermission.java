@@ -56,9 +56,9 @@ import java.util.regex.Pattern;
 
 /**
  * {@link BundleAccessPermission}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class BundleAccessPermission extends BasicPermission {
 
@@ -69,7 +69,7 @@ public final class BundleAccessPermission extends BasicPermission {
 
 	/**
 	 * Initializes a new {@link BundleAccessPermission}
-	 * 
+	 *
 	 * @param bundleSymbolicName
 	 *            The bundle symbolic name
 	 * @throws NullPointerException
@@ -113,7 +113,7 @@ public final class BundleAccessPermission extends BasicPermission {
 
 	/**
 	 * Converts specified wildcard string to a regular expression
-	 * 
+	 *
 	 * @param wildcard
 	 *            The wildcard string to convert
 	 * @return An appropriate regular expression ready for being used in a

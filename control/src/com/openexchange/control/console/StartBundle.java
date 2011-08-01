@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link StartBundle} - The console handler for <code>&quot;startbundle&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class StartBundle extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class StartBundle extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link StartBundle} with specified arguments and performs {@link #start(String) start}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public StartBundle(final String args[]) {

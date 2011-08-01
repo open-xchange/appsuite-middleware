@@ -77,14 +77,14 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public final class MobilityProvisioningServlet extends PermissionServlet {
 
 	private static final long serialVersionUID = 8555223354984992000L;
-	
+
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class));
 
 	/**
@@ -93,7 +93,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 	public MobilityProvisioningServlet() {
 		super();
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final ServerSession session) {
 		return true;
@@ -120,7 +120,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
 					services.put(ActionTypes.OTHER.code);
 				}
-				
+
 				obj.put("services", services);
 			}
 		} catch (final OXException e) {
@@ -130,7 +130,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			LOG.error(e.getLocalizedMessage(), e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
 		}
-		
+
 		response.setData(obj);
 
 		/*
@@ -142,13 +142,13 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
-	
+
 	@Override
     protected void doPut(final HttpServletRequest request,
 			final HttpServletResponse resp) throws ServletException,
 			IOException {
 		final Response response = new Response();
-		
+
 		final JSONObject obj = new JSONObject();
 
 		try {
@@ -167,11 +167,11 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 				if (MobilityProvisioningServiceRegistry.getInstance().containsService(ActionTypes.OTHER)) {
 					services.put(ActionTypes.OTHER.code);
 				}
-				
+
 				obj.put("services", services);
 			} else {
 				final ActionService service;
-				
+
 				if (action.equals(ActionTypes.EMAIL.code)) {
 				    service = MobilityProvisioningServiceRegistry.getInstance().getActionService(ActionTypes.EMAIL);
 				} else if (action.equals(ActionTypes.TELEPHONE.code)) {
@@ -194,7 +194,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 						url = url.replace("%c", URLEncoder.encode(String.valueOf(session.getContextId()), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%u", URLEncoder.encode(session.getUserlogin(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
 						url = url.replace("%p", URLEncoder.encode(user.getMail(), MobilityProvisioningServletConfiguration.getProvisioningURLEncoding()));
-			    								
+
 						final ProvisioningInformation provisioningInformation = new com.openexchange.mobile.configuration.json.container.ProvisioningInformation(
 								JSONUtility.checkStringParameter(request, "target"),
 								url,
@@ -205,7 +205,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 								session,
 								ctx,
 								user);
-												
+
 			    		provisioningResponse = service.handleAction(provisioningInformation);
 			    	} catch (final OXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
@@ -220,7 +220,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			    } else {
 			    	provisioningResponse = new ProvisioningResponse(false, "Service " + action + " provisioning is not available.");
 			    }
-			    
+
 				if (provisioningResponse == null) {
 					provisioningResponse = new ProvisioningResponse(false, "Unknown error");
 				}
@@ -235,9 +235,9 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			LOG.error(e.getLocalizedMessage(), e);
 			response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
 		}
-		
+
 		response.setData(obj);
-		
+
 		/*
 		 * Close response and flush print writer
 		 */
@@ -249,5 +249,5 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 		}
 
 	}
-	
+
 }

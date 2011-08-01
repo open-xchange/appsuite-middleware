@@ -54,19 +54,19 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TaskEventInterface}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public interface TaskEventInterface {
-    
+
     public void taskCreated(Task taskObj, Session sessionObj);
-    
+
     public void taskModified(Task taskObj, Session sessionObj);
 
     /**
      * Invoked if one of task's participants changed his confirmation status to
      * accepted.
-     * 
+     *
      * @param taskObj
      *            The task
      * @param sessionObj
@@ -77,7 +77,7 @@ public interface TaskEventInterface {
     /**
      * Invoked if one of task's participants changed his confirmation status to
      * declined.
-     * 
+     *
      * @param taskObj
      *            The task
      * @param sessionObj
@@ -88,14 +88,14 @@ public interface TaskEventInterface {
     /**
      * Invoked if one of task's participants changed his confirmation status to
      * tentatively accepted
-     * 
+     *
      * @param taskObj
      *            The task
      * @param sessionObj
      *            The user session
      */
     public void taskTentativelyAccepted(Task taskObj, Session sessionObj);
-        
+
     public void taskDeleted(Task taskObj, Session sessionObj);
-    
+
 }

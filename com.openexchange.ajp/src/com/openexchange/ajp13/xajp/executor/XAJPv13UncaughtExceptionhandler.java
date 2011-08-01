@@ -53,7 +53,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * {@link XAJPv13UncaughtExceptionhandler} - The {@link UncaughtExceptionHandler} for AJP threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class XAJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler {
@@ -67,6 +67,7 @@ final class XAJPv13UncaughtExceptionhandler implements UncaughtExceptionHandler 
         super();
     }
 
+    @Override
     public void uncaughtException(final Thread t, final Throwable e) {
         LOG.fatal("Thread terminated with exception: " + t.getName(), e);
     }

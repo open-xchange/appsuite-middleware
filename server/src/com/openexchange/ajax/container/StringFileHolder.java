@@ -55,7 +55,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link StringFileHolder} - A {@link IFileHolder} implementation backed by a {@link String}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StringFileHolder implements IFileHolder {
@@ -70,7 +70,7 @@ public final class StringFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link StringFileHolder} with default encoding (UTF-8).
-     * 
+     *
      * @param string The string
      */
     public StringFileHolder(final String string) {
@@ -79,7 +79,7 @@ public final class StringFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link StringFileHolder}.
-     * 
+     *
      * @param string The string
      * @param encoding The encoding; e.g. "UTF-8"
      * @throws IllegalStateException If encoding is not supported
@@ -94,25 +94,29 @@ public final class StringFileHolder implements IFileHolder {
         }
     }
 
+    @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
     }
 
+    @Override
     public long getLength() {
         return bytes.length;
     }
 
+    @Override
     public String getContentType() {
         return contentType;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
     /**
      * Sets the content type; e.g. "application/octet-stream"
-     * 
+     *
      * @param contentType The content type
      */
     public void setContentType(final String contentType) {
@@ -121,20 +125,21 @@ public final class StringFileHolder implements IFileHolder {
 
     /**
      * Sets the (file) name.
-     * 
+     *
      * @param name The name
      */
     public void setName(final String name) {
         this.name = name;
     }
 
+    @Override
     public String getDisposition() {
         return disposition;
     }
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {

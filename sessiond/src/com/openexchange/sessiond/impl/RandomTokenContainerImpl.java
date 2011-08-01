@@ -70,16 +70,16 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
     protected CleanUp<T> cleanUp;
     protected Lifecycle lifecycle;
     protected String name;
-    
+
     protected ConcurrentHashMap<String, T> delegate = new ConcurrentHashMap<String, T>();
     protected ConcurrentHashMap<String, Queue<String>> tokensPerSession = new ConcurrentHashMap<String, Queue<String>>();
-    
+
     public RandomTokenContainerImpl(final String name, final Lifecycle lifecycle, final CleanUp<T> cleanUp) {
         this.name = name;
         this.lifecycle = lifecycle;
         this.cleanUp = cleanUp;
     }
-    
+
     public T get(final String token) {
         return delegate.get(token);
     }
@@ -117,7 +117,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         }
         return removed;
     }
-    
+
     public void clear(final CleanUp<T> overridingCleanUp) {
         final CleanUp<T> cleanUp = overridingCleanUp == null ? this.cleanUp : overridingCleanUp;
         final Collection<T> values = delegate.values();
@@ -145,7 +145,7 @@ public class RandomTokenContainerImpl<T> implements RandomTokenContainer<T> {
         return lifecycle;
     }
 
-    
-    
+
+
 
 }

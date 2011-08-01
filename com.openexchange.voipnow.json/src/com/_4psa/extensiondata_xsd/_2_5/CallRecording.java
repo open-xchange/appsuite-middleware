@@ -14,11 +14,11 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRecordingSettingsResponse
 
 /**
  * Phone terminal call recording function data
- * 
+ *
  * <p>Java class for CallRecording complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallRecording">
  *   &lt;complexContent>
@@ -47,8 +47,8 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetCallRecordingSettingsResponse
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallRecording", propOrder = {
@@ -77,11 +77,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -89,11 +89,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -101,11 +101,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the storage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getStorage() {
         return storage;
@@ -113,11 +113,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the storage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setStorage(UnlimitedUInt value) {
         this.storage = value;
@@ -125,11 +125,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the trigger property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getTrigger() {
         return trigger;
@@ -137,11 +137,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the trigger property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setTrigger(Integer value) {
         this.trigger = value;
@@ -149,11 +149,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the recordSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isRecordSndActive() {
         return recordSndActive;
@@ -161,11 +161,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the recordSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setRecordSndActive(Boolean value) {
         this.recordSndActive = value;
@@ -173,11 +173,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the recordSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecordSnd() {
         return recordSnd;
@@ -185,11 +185,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the recordSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecordSnd(String value) {
         this.recordSnd = value;
@@ -197,11 +197,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -209,11 +209,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -221,11 +221,11 @@ public class CallRecording {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -233,11 +233,11 @@ public class CallRecording {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

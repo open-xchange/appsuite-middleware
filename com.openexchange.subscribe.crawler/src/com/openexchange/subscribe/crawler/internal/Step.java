@@ -56,7 +56,7 @@ import com.openexchange.subscribe.crawler.Workflow;
 
 /**
  * A Step in a crawling workflow
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @param <O> The Output accessible if the step executed successfully
  * @param <I> The Input needed for the step to execute
@@ -72,19 +72,19 @@ public interface Step<O, I>{
     Class inputType();
 
     Class outputType();
-    
+
     void setWorkflow(Workflow workflow);
-    
+
     public void setInput(I input);
-    
+
     public I getInput();
-    
+
     public O getOutput();
-    
+
     public boolean isDebuggingEnabled();
-    
+
     public void setDebuggingEnabled(boolean debuggingEnabled);
-    
+
     public TypeVariable<?>[] runEmpty();
 
     public boolean isSwitchUserAgent();

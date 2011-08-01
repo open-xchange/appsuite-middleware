@@ -65,19 +65,19 @@ import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 public class OSGIDataProviderRegistry extends DataProviderRegistry {
 
     private ServiceTracker tracker = null;
-    
+
     public OSGIDataProviderRegistry(BundleContext context) {
         tracker = new ServiceTracker(context, DataProvider.class.getName(), null);
     }
-    
+
     public void open() {
         tracker.open();
     }
-    
+
     public void close() {
         tracker.close();
     }
-    
+
     @Override
     public List<DataProvider> getProviders() {
         Object[] services = tracker.getServices();

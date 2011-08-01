@@ -74,16 +74,16 @@ import com.openexchange.server.osgiservice.DeferredRegistryRegistration;
 public class ServletRegistration extends DeferredRegistryRegistration<HttpService, HttpServlet> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletRegistration.class));
-    
+
     private static final Class<?>[] NO_SERVICES = new Class<?>[0];
     private static final Class<?>[] CONFIGURATION_SERVICE = new Class<?>[]{ConfigurationService.class};
-    
+
     private final String alias;
 
     private final List<String> configKeys;
 
     private boolean registered;
-    
+
     public ServletRegistration(final BundleContext context, final HttpServlet item, final String alias, final String...configKeys) {
         this(context, item, alias, ((configKeys == null || configKeys.length == 0) ? new ArrayList<String>() : Arrays.asList(configKeys)));
     }

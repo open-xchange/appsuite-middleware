@@ -65,14 +65,14 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetMultipleMessagesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetMultipleMessagesAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link GetMultipleMessagesAction}.
-     * 
+     *
      * @param services
      */
     public GetMultipleMessagesAction(final ServiceLookup services) {

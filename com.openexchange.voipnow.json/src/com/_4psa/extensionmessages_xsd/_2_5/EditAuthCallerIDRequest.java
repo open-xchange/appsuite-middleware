@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -52,11 +52,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -64,11 +64,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -76,11 +76,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Gets the value of the callerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallerID() {
         return callerID;
@@ -88,11 +88,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Sets the value of the callerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallerID(String value) {
         this.callerID = value;
@@ -100,11 +100,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getPIN() {
         return pin;
@@ -112,11 +112,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setPIN(BigDecimal value) {
         this.pin = value;
@@ -124,11 +124,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getStatus() {
         return status;
@@ -136,11 +136,11 @@ public class EditAuthCallerIDRequest {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setStatus(BigInteger value) {
         this.status = value;

@@ -21,8 +21,9 @@ public class GetGroupMemberSidsFromURL {
             SID sid = ace.getSID();
             if (sid.equals(SID.EVERYONE) ||
                         sid.equals(SID.CREATOR_OWNER) ||
-                        sid.equals(SID.SYSTEM))
+                        sid.equals(SID.SYSTEM)) {
                 continue;
+            }
 
             System.out.println(sid.toString() + " (" + sid.toDisplayString() + ") members:");
 

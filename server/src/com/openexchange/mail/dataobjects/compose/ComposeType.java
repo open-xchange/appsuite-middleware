@@ -51,7 +51,7 @@ package com.openexchange.mail.dataobjects.compose;
 
 /**
  * {@link ComposeType} - The compose type of a message
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ComposeType {
@@ -81,7 +81,7 @@ public enum ComposeType {
 
     /**
      * Gets the corresponding {@link ComposeType}
-     * 
+     *
      * @param type The send type as <code>int</code>
      * @return The corresponding {@link ComposeType} or <code>null</code>
      */

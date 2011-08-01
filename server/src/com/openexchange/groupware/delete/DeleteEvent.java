@@ -58,7 +58,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link DeleteEvent} - The event containing the entity to delete.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DeleteEvent extends EventObject {
@@ -100,7 +100,7 @@ public class DeleteEvent extends EventObject {
 
     /**
      * Initializes a new {@link DeleteEvent}.
-     * 
+     *
      * @param source the object on which the Event initially occurred
      * @param id the object's ID
      * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
@@ -117,7 +117,7 @@ public class DeleteEvent extends EventObject {
 
     /**
      * Initializes a new {@link DeleteEvent}.
-     * 
+     *
      * @param source the object on which the Event initially occurred
      * @param id the object's ID
      * @param type the object's type; either <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
@@ -133,7 +133,7 @@ public class DeleteEvent extends EventObject {
 
     /**
      * Getter for context.
-     * 
+     *
      * @return the context
      */
     public Context getContext() {
@@ -142,7 +142,7 @@ public class DeleteEvent extends EventObject {
 
     /**
      * Getter for the unique ID of entity that shall be deleted.
-     * 
+     *
      * @return the unique ID of entity that shall be deleted
      * @see <code>getType()</code> to determine entity type
      */
@@ -153,7 +153,7 @@ public class DeleteEvent extends EventObject {
     /**
      * Check return value against public constants <code>{@link #TYPE_USER}</code>, <code>{@link #TYPE_GROUP}</code>,
      * <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, and <code>{@value #TYPE_CONTEXT}</code>.
-     * 
+     *
      * @return the type
      */
     public int getType() {
@@ -162,7 +162,7 @@ public class DeleteEvent extends EventObject {
 
     /**
      * Getter for the instance of {@link Session} belonging to context's admin.
-     * 
+     *
      * @return an instance of {@link Session} belonging to context's admin
      */
     public Session getSession() {

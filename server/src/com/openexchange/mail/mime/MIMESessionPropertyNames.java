@@ -53,7 +53,7 @@ import javax.mail.Session;
 
 /**
  * {@link MIMESessionPropertyNames} - Provides string constants to set corresponding properties in an instance of {@link Session}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMESessionPropertyNames {

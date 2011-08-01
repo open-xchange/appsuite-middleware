@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link Participant} - Represents a participant of either a group appointment or group task.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface Participant extends Cloneable {
@@ -79,35 +79,35 @@ public interface Participant extends Cloneable {
 
     /**
      * Gets this participant's identifier.
-     * 
+     *
      * @return This participant's identifier
      */
     int getIdentifier();
 
     /**
      * Sets this participant's display name.
-     * 
+     *
      * @param displayName The display name to set
      */
     void setDisplayName(final String displayName);
 
     /**
      * Gets this participant's display name.
-     * 
+     *
      * @return This participant's display name
      */
     String getDisplayName();
 
     /**
      * Gets this participant's email address.
-     * 
+     *
      * @return This participant's email address.
      */
     String getEmailAddress();
 
     /**
      * Gets this participant's type.
-     * 
+     *
      * @return This participant's type; either {@link #USER}, {@link #GROUP}, {@link #RESOURCE}, {@link #RESOURCEGROUP},
      *         {@link #EXTERNAL_USER} , or {@link #EXTERNAL_GROUP}
      */
@@ -116,21 +116,21 @@ public interface Participant extends Cloneable {
     /**
      * Checks if notification for this participant shall be ignored.<br>
      * Default is <code>false</code>.
-     * 
+     *
      * @return <code>true</code> if notification for this participant shall be ignored; otherwise <code>false</code>
      */
     boolean isIgnoreNotification();
 
     /**
      * Sets whether notification for this participant are discarded.
-     * 
+     *
      * @param ignoreNotification <code>true</code> to ignore any notification for this participant; otherwise <code>false</code>
      */
     void setIgnoreNotification(boolean ignoreNotification);
 
     /**
      * Should delegate to {@link java.lang.Object#clone()}
-     * 
+     *
      * @return The clone
      * @throws CloneNotSupportedException If {@link Cloneable} interface is not implemented
      */

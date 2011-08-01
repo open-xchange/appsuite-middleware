@@ -65,7 +65,7 @@ import com.openexchange.tools.service.ServletRegistration;
 public class HTTPDeferrerActivator extends HousekeepingActivator {
 
     private static final Class[] CLASSES = new Class[]{ConfigurationService.class};
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return CLASSES;
@@ -80,9 +80,9 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
             public String getDeferrerURL() {
                 return getService(ConfigurationService.class).getProperty("com.openexchange.http.deferrer.url");
             }
-            
+
         });
-        
+
         openTrackers();
     }
 

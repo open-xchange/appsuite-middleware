@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link OAuthInteractionType}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum OAuthInteractionType {
@@ -64,7 +64,7 @@ public enum OAuthInteractionType {
      * <li>PIN</li>
      * <li>Request token</li>
      * </ul>
-     * 
+     *
      * @see OAuthConstants#ARGUMENT_PIN
      * @see OAuthConstants#ARGUMENT_REQUEST_TOKEN
      */
@@ -82,7 +82,7 @@ public enum OAuthInteractionType {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -91,7 +91,7 @@ public enum OAuthInteractionType {
 
     /**
      * Gets the interaction type for given name.
-     * 
+     *
      * @param name The name
      * @return The interaction type or <code>null</code> if none matches
      */

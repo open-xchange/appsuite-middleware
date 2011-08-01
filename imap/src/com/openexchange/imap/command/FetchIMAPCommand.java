@@ -93,7 +93,7 @@ import com.sun.mail.imap.protocol.UID;
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
  * RFC822.SIZE)) when later working on returned <code>javax.mail.Message</code> objects.
  * </p>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
@@ -178,7 +178,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Initializes a new {@link FetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
@@ -194,7 +194,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Initializes a new {@link FetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
@@ -218,7 +218,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Apply a new numeric argument to this IMAP <i>FETCH</i> command
-     * 
+     *
      * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
      * @param isSequential whether the source array values are sequential
      * @param keepOrder whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
@@ -239,7 +239,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Sets whether detection if message contains attachment is performed by "Content-Type" header only.
      * <p>
      * If <code>true</code> a message is considered to contain attachments if its "Content-Type" header equals "multipart/mixed".
-     * 
+     *
      * @param determineAttachmentByHeader <code>true</code> to detect if message contains attachment is performed by "Content-Type" header
      *            only; otherwise <code>false</code>
      * @return This FETCH IMAP command with value applied
@@ -323,7 +323,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Constructor to fetch all messages of given folder
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp - the fetch profile
@@ -338,7 +338,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Constructor to fetch all messages of given folder
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp - the fetch profile
@@ -631,7 +631,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
         /**
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance and applies it to given message.
-         * 
+         *
          * @param item The item to handle
          * @param msg The message to apply to
          * @param logger The logger
@@ -681,7 +681,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
                     msg.addHeader(name, hdr.getValue());
                 }
                 /*-
-                 * 
+                 *
                 final HeaderHandler hdrHandler = hdrHandlers.get(hdr.getName());
                 if (hdrHandler == null) {
                     msg.setHeader(hdr.getName(), hdr.getValue());
@@ -813,7 +813,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
-     * 
+     *
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
@@ -896,15 +896,15 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Possibly modifies a {@link FetchProfile}.
      */
     public static interface FetchProfileModifier {
-        
+
         /**
          * Modifies specified {@link FetchProfile} instance.
-         * 
+         *
          * @param fetchProfile The fetch profile
          * @return The modified fetch profile
          */
         FetchProfile modify(FetchProfile fetchProfile);
-        
+
         boolean byContentTypeHeader();
     }
 
@@ -912,7 +912,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Default modifier which returns the fetch profile unchanged.
      */
     public static final FetchProfileModifier DEFAULT_PROFILE_MODIFIER = new FetchProfileModifier() {
-        
+
         public FetchProfile modify(final FetchProfile fetchProfile) {
             /*
              * Return unchanged
@@ -929,7 +929,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Strips individual header names from fetch profile, but inserts {@link FetchProfileItem#HEADERS}.
      */
     public static final FetchProfileModifier HEADERLESS_PROFILE_MODIFIER = new FetchProfileModifier() {
-        
+
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getHeaderlessFetchProfile(fetchProfile);
         }
@@ -943,7 +943,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      * Strips BODYSTRUCTURE fetch item and inserts "Content-Type" header name.
      */
     public static final FetchProfileModifier NO_BODYSTRUCTURE_PROFILE_MODIFIER = new FetchProfileModifier() {
-        
+
         public FetchProfile modify(final FetchProfile fetchProfile) {
             return getSafeFetchProfile(fetchProfile);
         }
@@ -955,7 +955,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Strips BODYSTRUCTURE item from given fetch profile.
-     * 
+     *
      * @param fetchProfile The fetch profile
      * @return The fetch profile with BODYSTRUCTURE item stripped
      */
@@ -982,7 +982,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
     /**
      * Strips header names from given fetch profile.
-     * 
+     *
      * @param fetchProfile The fetch profile
      * @return The fetch profile with header names stripped
      */

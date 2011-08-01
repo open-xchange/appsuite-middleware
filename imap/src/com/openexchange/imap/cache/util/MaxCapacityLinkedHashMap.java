@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link MaxCapacityLinkedHashMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> implements ConcurrentMap<K, V> {
@@ -70,7 +70,7 @@ public final class MaxCapacityLinkedHashMap<K, V> extends LinkedHashMap<K, V> im
 
     /**
      * Initializes a new {@link MaxCapacityLinkedHashMap}.
-     * 
+     *
      * @param maximumCapacity The maximum capacity
      */
     public MaxCapacityLinkedHashMap(final int maximumCapacity) {

@@ -90,6 +90,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 2;
     }
@@ -97,6 +98,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
@@ -104,6 +106,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
         LOG.info("Performing update task TaskModifiedByNotNull.");

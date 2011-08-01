@@ -10,11 +10,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Charging plan list data
- * 
+ *
  * <p>Java class for ChargingPlanList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ChargingPlanList">
  *   &lt;complexContent>
@@ -34,8 +34,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ChargingPlanList", propOrder = {
@@ -66,11 +66,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -78,11 +78,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -90,11 +90,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -102,11 +102,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -114,11 +114,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -126,11 +126,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -138,11 +138,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -150,11 +150,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -162,11 +162,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the planType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPlanType() {
         return planType;
@@ -174,11 +174,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the planType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPlanType(String value) {
         this.planType = value;
@@ -186,11 +186,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the default property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDefault() {
         return _default;
@@ -198,11 +198,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the default property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDefault(Boolean value) {
         this._default = value;
@@ -210,11 +210,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -222,11 +222,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -234,11 +234,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the userName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserName() {
         return userName;
@@ -246,11 +246,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the userName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserName(String value) {
         this.userName = value;
@@ -258,11 +258,11 @@ public class ChargingPlanList {
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -270,11 +270,11 @@ public class ChargingPlanList {
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;

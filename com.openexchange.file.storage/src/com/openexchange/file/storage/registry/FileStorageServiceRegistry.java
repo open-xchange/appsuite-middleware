@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * {@link FileStorageServiceRegistry}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -64,7 +64,7 @@ public interface FileStorageServiceRegistry {
 
     /**
      * Gets the file storage service associated with specified identifier.
-     * 
+     *
      * @param id The file storage service identifier
      * @return The file storage service associated with specified identifier
      * @throws OXException If file storage service cannot be returned
@@ -73,7 +73,7 @@ public interface FileStorageServiceRegistry {
 
     /**
      * Checks if there is a file storage service associated with specified identifier.
-     * 
+     *
      * @param id The file storage service identifier
      * @return <code>true</code> if there is a file storage service associated with specified identifier; otherwise <code>false</code>
      */
@@ -81,7 +81,7 @@ public interface FileStorageServiceRegistry {
 
     /**
      * Gets all file storage services kept in this registry.
-     * 
+     *
      * @return All file storage services kept in this registry
      * @throws OXException If file storage services cannot be returned
      */

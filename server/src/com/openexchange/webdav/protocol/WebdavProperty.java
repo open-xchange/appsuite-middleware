@@ -56,11 +56,11 @@ public class WebdavProperty {
 	private String value = "";
 	private boolean xml;
 	private boolean date;
-	
+
 	public WebdavProperty(){
-		
+
 	}
-	
+
 	public WebdavProperty(final String namespace, final String name) {
 		setNamespace(namespace);
 		setName(name);
@@ -71,42 +71,42 @@ public class WebdavProperty {
 	public void setLanguage(final String lang) {
 		this.lang = lang;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
 	public void setName(final String name) {
 		this.name = name;
 	}
-	
+
 	public String getNamespace() {
 		return namespace;
 	}
 	public void setNamespace(final String namespace) {
 		this.namespace = namespace;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
 	public void setValue(final String value) {
 		this.value = value;
-	}	
-	
+	}
+
 	public boolean isXML() {
 		return xml;
 	}
-	
+
 	public void setXML(final boolean xml) {
 		this.xml = xml;
 	}
-	
-	
+
+
 	@Override
 	public int hashCode(){
 		return name.hashCode()+namespace.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(final Object o){
 		if (o instanceof WebdavProperty) {
@@ -119,7 +119,7 @@ public class WebdavProperty {
 	public boolean isDate() {
 		return date;
 	}
-	
+
 	public void setDate(final boolean b) {
 		this.date = b;
 	}

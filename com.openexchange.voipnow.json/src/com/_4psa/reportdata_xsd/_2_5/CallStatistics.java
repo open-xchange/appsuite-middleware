@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Call statistics data
- * 
+ *
  * <p>Java class for CallStatistics complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallStatistics">
  *   &lt;complexContent>
@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallStatistics", propOrder = {
@@ -47,11 +47,11 @@ public class CallStatistics {
 
     /**
      * Gets the value of the total property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTotal() {
         return total;
@@ -59,11 +59,11 @@ public class CallStatistics {
 
     /**
      * Sets the value of the total property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTotal(BigInteger value) {
         this.total = value;
@@ -71,11 +71,11 @@ public class CallStatistics {
 
     /**
      * Gets the value of the duration property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getDuration() {
         return duration;
@@ -83,11 +83,11 @@ public class CallStatistics {
 
     /**
      * Sets the value of the duration property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setDuration(Float value) {
         this.duration = value;
@@ -95,11 +95,11 @@ public class CallStatistics {
 
     /**
      * Gets the value of the cost property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getCost() {
         return cost;
@@ -107,11 +107,11 @@ public class CallStatistics {
 
     /**
      * Sets the value of the cost property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setCost(Float value) {
         this.cost = value;
@@ -119,11 +119,11 @@ public class CallStatistics {
 
     /**
      * Gets the value of the profit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getProfit() {
         return profit;
@@ -131,11 +131,11 @@ public class CallStatistics {
 
     /**
      * Sets the value of the profit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setProfit(Float value) {
         this.profit = value;

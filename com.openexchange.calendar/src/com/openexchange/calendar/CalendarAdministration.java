@@ -97,16 +97,16 @@ public class CalendarAdministration implements CalendarAdministrationService {
     private StringBuilder u1;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAdministration.class));
-    
+
     private final Set<Integer> handledObjects = new HashSet<Integer>();
-    
+
     /**
      * Initializes a new {@link CalendarAdministration}
      */
     public CalendarAdministration() {
         super();
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#deletePerformed(com.openexchange.groupware.delete.DeleteEvent, java.sql.Connection, java.sql.Connection)
      */
@@ -192,7 +192,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 final int folder_id = tuple[1];
                 addUpdateMasterObjectBatch(stmt, session.getUserId(), ctx.getContextId(), object_id);
                 eventHandling(object_id, folder_id, ctx, session, CalendarOperation.UPDATE, con);
-                                
+
             }
             stmt.executeBatch();
 
@@ -279,7 +279,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             collection.closeResultSet(rs);
         }
     }
-    
+
     private final void deleteUser(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         try {
             //  Delete all appointments where the user is the only participant (and where the app is private) !! NO MOVE TO del_* !!
@@ -291,31 +291,31 @@ public class CalendarAdministration implements CalendarAdministrationService {
             throw new OXException(ex);
         }
     }
-    
-    
+
+
     private final void deleteGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.GROUP);
     }
-    
+
     private final void deleteResource(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCE);
     }
-    
+
     private final void deleteResourceGroup(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws OXException, SQLException {
         deleteObjects(deleteEvent, readcon, writecon, CalendarSql.VIEW_TABLE_NAME, Participant.RESOURCEGROUP);
     }
-    
+
     private final Set<Integer> resolveMembersOfGroups(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon) throws SQLException, OXException {
         PreparedStatement rightsStatement = null;
         ResultSet rightsResultSet = null;
         final Set<Integer> usersInRightsTable = new HashSet<Integer>();
-        
+
         try {
             final StringBuilder sb = new StringBuilder();
             sb.append("SELECT id, type FROM ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ? AND type in (?, ?)");
-            
+
             rightsStatement = readcon.prepareStatement(sb.toString());
             rightsStatement.setInt(1, deleteEvent.getContext().getContextId());
             rightsStatement.setInt(2, objectId);
@@ -326,7 +326,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 rightsStatement.setInt(3, Participant.RESOURCEGROUP);
                 rightsStatement.setInt(4, Participant.RESOURCE);
             }
-            
+
             rightsResultSet = rightsStatement.executeQuery();
             while (rightsResultSet.next()) {
                 if (rightsResultSet.getInt(2) == Participant.USER) {
@@ -349,25 +349,25 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 rightsStatement.close();
             }
         }
-        
+
         return usersInRightsTable;
     }
-    
+
     private final Set<Integer> getUsers(final int objectId, final Context ctx, final Connection readcon) throws SQLException {
         PreparedStatement membersStatement = null;
         ResultSet membersResultSet = null;
         final Set<Integer> usersInMembersTable = new HashSet<Integer>();
-        
+
         try {
             final StringBuilder sb = new StringBuilder();
             sb.append("SELECT member_uid FROM ");
             sb.append(CalendarSql.PARTICIPANT_TABLE_NAME);
             sb.append(" WHERE cid = ? AND object_id = ?");
-            
+
             membersStatement = readcon.prepareStatement(sb.toString());
             membersStatement.setInt(1, ctx.getContextId());
             membersStatement.setInt(2, objectId);
-            
+
             membersResultSet = membersStatement.executeQuery();
             while (membersResultSet.next()) {
                 usersInMembersTable.add(I(membersResultSet.getInt(1)));
@@ -380,26 +380,26 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 membersStatement.close();
             }
         }
-        
+
         return usersInMembersTable;
     }
-    
+
     private final void resolveDeletedGroupAndAddMembers(final int objectId, final DeleteEvent deleteEvent, final int type, final Connection readcon, final Connection writecon) throws SQLException, OXException {
         if ( !(type == Participant.GROUP || type == Participant.RESOURCEGROUP)) {
             return;
         }
-        
+
         if (handledObjects.contains(I(objectId))) {
             return;
         }
-        
+
         PreparedStatement insertStatement = null;
         final Set<Integer> usersToAdd = new HashSet<Integer>();
-        
+
         try {
             usersToAdd.addAll(getUsers(objectId, deleteEvent.getContext(), readcon));
             usersToAdd.removeAll(resolveMembersOfGroups(objectId, deleteEvent, type, readcon));
-            
+
             final StringBuilder sb = new StringBuilder();
             sb.append("INSERT INTO ");
             sb.append(CalendarSql.VIEW_TABLE_NAME);
@@ -408,7 +408,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             sb.append("(?, ?, ?, ?)");
 
             insertStatement = writecon.prepareStatement(sb.toString());
-            
+
             for (final int id : usersToAdd) {
                 insertStatement.setInt(1, objectId);
                 insertStatement.setInt(2, deleteEvent.getContext().getContextId());
@@ -426,10 +426,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 insertStatement.close();
             }
         }
-        
+
         handledObjects.add(I(objectId));
     }
-    
+
     private final void deleteObjects(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon, final String table, final int type) throws OXException, SQLException {
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -546,7 +546,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
         }
     }
-   
+
     private static final String SQL_DEL_REMINDER = "DELETE FROM reminder WHERE cid = ? AND module = ? AND userid = ?";
 
     private void deleteUserFromAppointments(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws SQLException, OXException {
@@ -569,7 +569,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         	pst2.executeUpdate();
         	pst2.close();
         	pst2 = null;
-        	
+
             removeAppointmentsWithOnlyTheUserAsParticipant(deleteEvent.getSession(), deleteEvent.getContext(), deleteEvent.getId(), writecon);
 
             final StringBuilder sb2 = new StringBuilder(128);
@@ -594,7 +594,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
             update.executeBatch();
             update.close();
-            
+
             final StringBuilder replace = new StringBuilder(128);
             replace.append("UPDATE ");
             replace.append(CalendarSql.DATES_TABLE_NAME);
@@ -615,7 +615,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst3 = writecon.prepareStatement(replace.toString());
             pst3.addBatch();
             pst3.executeBatch();
-            
+
             final StringBuilder replace_modified_by = new StringBuilder(128);
             replace_modified_by.append("UPDATE ");
             replace_modified_by.append(CalendarSql.DATES_TABLE_NAME);
@@ -636,7 +636,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst4 = writecon.prepareStatement(replace_modified_by.toString());
             pst4.addBatch();
             pst4.executeBatch();
-            
+
             final StringBuilder delete_participant_members = new StringBuilder(128);
             delete_participant_members.append("DELETE FROM prg_dates_members WHERE cid = ");
             delete_participant_members.append(deleteEvent.getContext().getContextId());
@@ -645,7 +645,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst5 = writecon.prepareStatement(delete_participant_members.toString());
             pst5.addBatch();
             pst5.executeBatch();
-            
+
             final StringBuilder delete_participant_rights = new StringBuilder(128);
             delete_participant_rights.append("delete from prg_date_rights WHERE cid = ");
             delete_participant_rights.append(deleteEvent.getContext().getContextId());
@@ -656,7 +656,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             pst6 = writecon.prepareStatement(delete_participant_rights.toString());
             pst6.addBatch();
             pst6.executeBatch();
-            
+
         } finally {
             if (rs2 != null) {
                 collection.closeResultSet(rs2);
@@ -678,7 +678,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
         }
     }
-    
+
     private final void addUpdateMasterObjectBatch(final PreparedStatement update, final int mailadmin, final int cid, final int oid) throws SQLException {
         update.setInt(1, mailadmin);
         update.setLong(2, System.currentTimeMillis());
@@ -686,14 +686,14 @@ public class CalendarAdministration implements CalendarAdministrationService {
         update.setInt(4, oid);
         update.addBatch();
     }
-    
+
     private final PreparedStatement getUpdatePreparedStatement(final Connection writecon) throws SQLException {
         if (u1 == null) {
             initializeUpdateString();
         }
         return writecon.prepareStatement(u1.toString());
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.calendar.CalendarAdministrationService#initializeUpdateString()
      */
@@ -709,7 +709,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         u1.append(collection.getFieldName(Appointment.OBJECT_ID));
         u1.append(" = ?");
     }
-    
+
     private final void eventHandling(final int object_id, final int in_folder, final Context context, final Session so, final int type, final Connection readcon) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
         final CalendarSqlImp cimp = new CalendarMySQL();
@@ -760,5 +760,5 @@ public class CalendarAdministration implements CalendarAdministrationService {
             }
         };
     }
-    
+
 }

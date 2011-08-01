@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderMultipleHandler} - The multiple handler for folder module.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

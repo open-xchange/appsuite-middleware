@@ -122,7 +122,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorage implements FolderStorage {
@@ -136,7 +136,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         /**
          * Gets the (active) connection.
-         * 
+         *
          * @return The connection
          */
         Connection getConnection();
@@ -156,10 +156,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.connection = connection;
         }
 
+        @Override
         public Connection getConnection() {
             return connection;
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
@@ -183,10 +185,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.contextId = contextId;
         }
 
+        @Override
         public Connection getConnection() {
             return connection;
         }
 
+        @Override
         public void close() {
             if (writeable) {
                 databaseService.backWritable(contextId, connection);
@@ -203,6 +207,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         super();
     }
 
+    @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -250,16 +255,19 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] {
             TaskContentType.getInstance(), CalendarContentType.getInstance(), ContactContentType.getInstance(),
             InfostoreContentType.getInstance(), UnboundContentType.getInstance(), SystemContentType.getInstance() };
     }
 
+    @Override
     public ContentType getDefaultContentType() {
         return ContactContentType.getInstance();
     }
 
+    @Override
     public void commitTransaction(final StorageParameters params) throws OXException {
         final Connection con;
         final Boolean writable;
@@ -299,6 +307,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void restore(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -323,6 +332,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -428,6 +438,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return type;
     }
 
+    @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -444,6 +455,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void deleteFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -465,7 +477,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
             }
-             * 
+             *
              */
             folderManager.deleteFolder(fo, true, System.currentTimeMillis());
         } finally {
@@ -473,6 +485,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -502,6 +515,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         /*
          * Special treatment for system folders
@@ -527,6 +541,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return SystemType.getInstance();
     }
 
+    @Override
     public boolean containsForeignObjects(final User user, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -578,6 +593,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public boolean isEmpty(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -629,6 +645,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void updateLastModified(final long lastModified, final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -646,6 +663,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }
@@ -654,6 +672,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
         FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID };
 
+    @Override
     public Folder getFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -723,6 +742,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         /*
          * Owner
@@ -740,10 +760,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return folder;
     }
 
+    @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIdentifiers, StorageType.WORKING, storageParameters);
     }
 
+    @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -859,10 +881,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public FolderType getFolderType() {
         return DatabaseFolderType.getInstance();
     }
 
+    @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -970,6 +994,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public SortableId[] getSubfolders(final String treeId, final String parentIdentifier, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -1138,7 +1163,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
             /*-
              * IDs already sorted by default_flag DESC, fname
-             * 
+             *
              * TODO: Ensure locale-specific ordering is maintained
              */
             final boolean doDBSorting = true;
@@ -1191,6 +1216,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void rollback(final StorageParameters params) {
         final Connection con;
         final Boolean writable;
@@ -1221,6 +1247,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         final FolderType folderType = getFolderType();
         if (null != parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION)) {
@@ -1251,6 +1278,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
         try {
@@ -1348,14 +1376,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public StoragePriority getStoragePriority() {
         return StoragePriority.NORMAL;
     }
 
+    @Override
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderIdentifier, StorageType.WORKING, storageParameters);
     }
 
+    @Override
     public boolean containsFolder(final String treeId, final String folderIdentifier, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -1446,6 +1477,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     } // End of containsFolder()
 
+    @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -1470,6 +1502,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     } // End of getModifiedFolderIDs()
 
+    @Override
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(false, storageParameters);
         try {
@@ -1671,6 +1704,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.context = context;
         }
 
+        @Override
         public int compare(final FolderObject o1, final FolderObject o2) {
             if (o1.isDefaultFolder()) {
                 if (o2.isDefaultFolder()) {
@@ -1715,6 +1749,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             this.context = context;
         }
 
+        @Override
         public int compare(final FolderObject o1, final FolderObject o2) {
             /*
              * Compare by name

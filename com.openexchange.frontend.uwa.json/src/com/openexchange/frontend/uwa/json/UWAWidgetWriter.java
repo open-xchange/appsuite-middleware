@@ -69,7 +69,7 @@ public class UWAWidgetWriter extends ModelWriter<UWAWidget> {
         super(UWAWidget.METADATA);
         setOverrides(OVERRIDES);
     }
-    
+
     private static final AttributeHandler<UWAWidget> OVERRIDES = new AttributeHandler<UWAWidget>() {
 
         public Object handle(Attribute<UWAWidget> attr, Object... args) {

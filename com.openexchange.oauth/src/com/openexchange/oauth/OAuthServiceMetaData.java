@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -64,35 +64,35 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets this meta data's identifier.
-     * 
+     *
      * @return The identifier
      */
     String getId();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     String getDisplayName();
 
     /**
      * Gets the API key.
-     * 
+     *
      * @return The API key
      */
     String getAPIKey();
 
     /**
      * Gets the API secret.
-     * 
+     *
      * @return The API secret
      */
     String getAPISecret();
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
-     * 
+     *
      * @return <code>true</code> if this meta data needs a request token to obtain authorization URL; otherwise <code>false</code> to pass
      *         <code>null</code>
      */
@@ -100,21 +100,21 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the optional scope; a comma-separated list of scope items.
-     * 
+     *
      * @return The scope or <code>null</code>
      */
     String getScope();
 
     /**
      * Processes specified authorization URL.
-     * 
+     *
      * @return The processed authorization URL
      */
     String processAuthorizationURL(String authUrl);
 
     /**
      * Processes specified arguments.
-     * 
+     *
      * @param arguments The arguments. You can store additional information here
      * @param parameter The parameters. The request parameters sent to the callback url. You may want to extract items from these and store them in arguments for later processing
      * @param state The state
@@ -123,7 +123,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the optional OAuth token.
-     * 
+     *
      * @param arguments The OAuth arguments
      * @return The OAuth token or <code>null</code>
      * @throws OXException If an error occurs returning the token
@@ -144,5 +144,5 @@ public interface OAuthServiceMetaData {
      * @return the modified callback URL
      */
     String modifyCallbackURL(String callbackUrl);
-    
+
 }

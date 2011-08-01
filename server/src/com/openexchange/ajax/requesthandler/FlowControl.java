@@ -57,5 +57,5 @@ package com.openexchange.ajax.requesthandler;
  */
 public class FlowControl {
     public static class Later extends RuntimeException {};
-    
+
 }

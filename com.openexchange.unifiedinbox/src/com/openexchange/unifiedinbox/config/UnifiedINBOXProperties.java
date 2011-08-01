@@ -56,7 +56,7 @@ import com.openexchange.mail.config.MailProperties;
 
 /**
  * {@link UnifiedINBOXProperties}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXProperties extends AbstractProtocolProperties implements IUnifiedINBOXProperties {
@@ -67,7 +67,7 @@ public final class UnifiedINBOXProperties extends AbstractProtocolProperties imp
 
     /**
      * Gets the singleton instance of {@link UnifiedINBOXProperties}
-     * 
+     *
      * @return The singleton instance of {@link UnifiedINBOXProperties}
      */
     public static UnifiedINBOXProperties getInstance() {

@@ -4,13 +4,14 @@ import jcifs.UniAddress;
 public class ThreadedUniQuery {
 
     static class QThread extends Thread {
-        String name; 
+        String name;
 
         QThread( String name ) {
             super( name + "-thread" );
             this.name = name;
         }
 
+        @Override
         public void run() {
             try {
                 System.out.println( getName() + ": started" );

@@ -68,7 +68,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CachingMessagingAccountStorage} - The messaging account manager backed by {@link CacheService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -80,7 +80,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     /**
      * Gets the cache region name.
-     * 
+     *
      * @return The cache region name
      */
     public static String getRegionName() {
@@ -89,7 +89,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     /**
      * Gets the cache-backed instance.
-     * 
+     *
      * @return The cache-backed instance
      */
     public static CachingMessagingAccountStorage getInstance() {
@@ -98,7 +98,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     /**
      * Generates a new cache key.
-     * 
+     *
      * @return The new cache key
      */
     static CacheKey newCacheKey(final CacheService cacheService, final String serviceId, final int id, final int user, final int cid) {

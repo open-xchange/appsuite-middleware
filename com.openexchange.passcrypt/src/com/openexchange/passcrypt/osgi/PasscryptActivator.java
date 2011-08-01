@@ -65,7 +65,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link PasscryptActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PasscryptActivator extends DeferredActivator {

@@ -51,7 +51,7 @@ package com.openexchange.i18n;
 
 /**
  * Marker interface to tell the string extractor that this class contains strings that have to be translated on the backend.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface LocalizableStrings {

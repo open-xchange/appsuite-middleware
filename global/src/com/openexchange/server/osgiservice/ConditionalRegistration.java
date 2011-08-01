@@ -69,7 +69,7 @@ public class ConditionalRegistration {
     protected Dictionary dictionary;
     protected ServiceRegistration registration;
     private boolean running;
-    
+
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionalRegistration.class));
 
     public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
@@ -78,7 +78,7 @@ public class ConditionalRegistration {
         this.service = service;
         dictionary = dict;
     }
-    
+
     public void check() {
         if(!running) {
             return;
@@ -113,15 +113,15 @@ public class ConditionalRegistration {
     private synchronized boolean registered() {
         return registration != null;
     }
-    
+
     public void start() {
         running = true;
         check();
     }
-    
+
     public void close() {
         running = false;
         unregister();
     }
-    
+
 }

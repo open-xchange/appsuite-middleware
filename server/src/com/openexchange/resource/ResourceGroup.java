@@ -51,7 +51,7 @@ package com.openexchange.resource;
 
 /**
  * {@link ResourceGroup} - This class implements the data container for the attributes of a resource group.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -97,7 +97,7 @@ public class ResourceGroup {
 
     /**
      * Getter for id.
-     * 
+     *
      * @return @returns the unique identifier.
      */
     public int getId() {
@@ -106,7 +106,7 @@ public class ResourceGroup {
 
     /**
      * Getter for identifier.
-     * 
+     *
      * @return @returns the identifier.
      */
     public String getIdentifier() {
@@ -115,7 +115,7 @@ public class ResourceGroup {
 
     /**
      * Getter for the displayName.
-     * 
+     *
      * @return display name.
      */
     public String getDisplayName() {
@@ -124,7 +124,7 @@ public class ResourceGroup {
 
     /**
      * Returns if the resource group is available. The resources of the group can only be booked if the group is available.
-     * 
+     *
      * @return <code>true</code> if the resource is available.
      */
     public boolean isAvailable() {
@@ -133,7 +133,7 @@ public class ResourceGroup {
 
     /**
      * Setter for member.
-     * 
+     *
      * @param member Identifier of resources that are member.
      */
     public void setMember(final int[] member) {
@@ -142,7 +142,7 @@ public class ResourceGroup {
 
     /**
      * Getter for member.
-     * 
+     *
      * @return Identifier of resources that are member.
      */
     public int[] getMember() {
@@ -153,7 +153,7 @@ public class ResourceGroup {
 
     /**
      * Setter for id.
-     * 
+     *
      * @param id Unique identifier.
      */
     public void setId(final int id) {
@@ -162,7 +162,7 @@ public class ResourceGroup {
 
     /**
      * Setter for identifier.
-     * 
+     *
      * @param identifier identifier.
      */
     public void setIdentifier(final String identifier) {
@@ -171,7 +171,7 @@ public class ResourceGroup {
 
     /**
      * Setter for available.
-     * 
+     *
      * @param available <code>true</code> if the resource group is available.
      */
     public void setAvailable(final boolean available) {
@@ -180,7 +180,7 @@ public class ResourceGroup {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -189,7 +189,7 @@ public class ResourceGroup {
 
     /**
      * Setter for description.
-     * 
+     *
      * @param description Description.
      */
     public void setDescription(final String description) {
@@ -198,7 +198,7 @@ public class ResourceGroup {
 
     /**
      * Getter for description.
-     * 
+     *
      * @return Description.
      */
     public String getDescription() {

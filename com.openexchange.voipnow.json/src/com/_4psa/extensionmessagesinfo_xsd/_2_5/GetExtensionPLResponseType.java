@@ -14,11 +14,11 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionPLInfo;
 
 /**
  * Get extensions permissions and limits: response data
- * 
+ *
  * <p>Java class for GetExtensionPLResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetExtensionPLResponseType">
  *   &lt;complexContent>
@@ -88,8 +88,8 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionPLInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetExtensionPLResponseType", propOrder = {
@@ -103,11 +103,11 @@ public class GetExtensionPLResponseType {
 
     /**
      * Gets the value of the extensionPL property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetExtensionPLResponseType.ExtensionPL }
-     *     
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL getExtensionPL() {
         return extensionPL;
@@ -115,11 +115,11 @@ public class GetExtensionPLResponseType {
 
     /**
      * Sets the value of the extensionPL property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetExtensionPLResponseType.ExtensionPL }
-     *     
+     *
      */
     public void setExtensionPL(GetExtensionPLResponseType.ExtensionPL value) {
         this.extensionPL = value;
@@ -127,25 +127,25 @@ public class GetExtensionPLResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -157,9 +157,9 @@ public class GetExtensionPLResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -218,8 +218,8 @@ public class GetExtensionPLResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -239,25 +239,25 @@ public class GetExtensionPLResponseType {
 
         /**
          * Gets the value of the shareVoicemail property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shareVoicemail property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShareVoicemail().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link GetExtensionPLResponseType.ExtensionPL.ShareVoicemail }
-         * 
-         * 
+         *
+         *
          */
         public List<GetExtensionPLResponseType.ExtensionPL.ShareVoicemail> getShareVoicemail() {
             if (shareVoicemail == null) {
@@ -268,25 +268,25 @@ public class GetExtensionPLResponseType {
 
         /**
          * Gets the value of the shareFaxes property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shareFaxes property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShareFaxes().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link GetExtensionPLResponseType.ExtensionPL.ShareFaxes }
-         * 
-         * 
+         *
+         *
          */
         public List<GetExtensionPLResponseType.ExtensionPL.ShareFaxes> getShareFaxes() {
             if (shareFaxes == null) {
@@ -297,25 +297,25 @@ public class GetExtensionPLResponseType {
 
         /**
          * Gets the value of the shareRecordings property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shareRecordings property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShareRecordings().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link GetExtensionPLResponseType.ExtensionPL.ShareRecordings }
-         * 
-         * 
+         *
+         *
          */
         public List<GetExtensionPLResponseType.ExtensionPL.ShareRecordings> getShareRecordings() {
             if (shareRecordings == null) {
@@ -326,25 +326,25 @@ public class GetExtensionPLResponseType {
 
         /**
          * Gets the value of the shareCallHistory property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the shareCallHistory property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getShareCallHistory().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link GetExtensionPLResponseType.ExtensionPL.ShareCallHistory }
-         * 
-         * 
+         *
+         *
          */
         public List<GetExtensionPLResponseType.ExtensionPL.ShareCallHistory> getShareCallHistory() {
             if (shareCallHistory == null) {
@@ -356,9 +356,9 @@ public class GetExtensionPLResponseType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -371,8 +371,8 @@ public class GetExtensionPLResponseType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -388,11 +388,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the groupID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getGroupID() {
                 return groupID;
@@ -400,11 +400,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the groupID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setGroupID(BigInteger value) {
                 this.groupID = value;
@@ -412,11 +412,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the name property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getName() {
                 return name;
@@ -424,11 +424,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the name property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setName(String value) {
                 this.name = value;
@@ -439,9 +439,9 @@ public class GetExtensionPLResponseType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -454,8 +454,8 @@ public class GetExtensionPLResponseType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -471,11 +471,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the groupID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getGroupID() {
                 return groupID;
@@ -483,11 +483,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the groupID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setGroupID(BigInteger value) {
                 this.groupID = value;
@@ -495,11 +495,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the name property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getName() {
                 return name;
@@ -507,11 +507,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the name property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setName(String value) {
                 this.name = value;
@@ -522,9 +522,9 @@ public class GetExtensionPLResponseType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -537,8 +537,8 @@ public class GetExtensionPLResponseType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -554,11 +554,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the groupID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getGroupID() {
                 return groupID;
@@ -566,11 +566,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the groupID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setGroupID(BigInteger value) {
                 this.groupID = value;
@@ -578,11 +578,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the name property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getName() {
                 return name;
@@ -590,11 +590,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the name property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setName(String value) {
                 this.name = value;
@@ -605,9 +605,9 @@ public class GetExtensionPLResponseType {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -620,8 +620,8 @@ public class GetExtensionPLResponseType {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -637,11 +637,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the groupID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getGroupID() {
                 return groupID;
@@ -649,11 +649,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the groupID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setGroupID(BigInteger value) {
                 this.groupID = value;
@@ -661,11 +661,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Gets the value of the name property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getName() {
                 return name;
@@ -673,11 +673,11 @@ public class GetExtensionPLResponseType {
 
             /**
              * Sets the value of the name property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setName(String value) {
                 this.name = value;

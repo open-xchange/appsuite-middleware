@@ -65,11 +65,13 @@ public class NOTIN extends BinaryPredicate {
 		super(left, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildNOTIN(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "NOT IN";
 	}
 }

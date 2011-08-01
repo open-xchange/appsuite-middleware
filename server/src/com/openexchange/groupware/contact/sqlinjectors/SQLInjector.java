@@ -56,7 +56,7 @@ public interface SQLInjector {
 
     /**
      * Injects this injector's value into given prepared statement
-     * 
+     *
      * @param ps The prepared statement
      * @param parameterIndex The parameter index; the first parameter is 1, the second is 2, ...
      * @throws SQLException If a database access error occurs

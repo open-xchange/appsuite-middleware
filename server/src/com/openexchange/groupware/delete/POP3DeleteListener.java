@@ -63,6 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class POP3DeleteListener implements DeleteListener {
 
+    @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == deleteEvent.getType()) {
             PreparedStatement stmt = null;

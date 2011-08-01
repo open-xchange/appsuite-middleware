@@ -58,7 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link OSGiDatabaseServiceDBProvider} - The {@link DBProvider} backed by tracked {@link DatabaseService} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OSGiDatabaseServiceDBProvider extends AbstractOSGiDelegateService<DatabaseService> implements DBProvider {

@@ -65,7 +65,7 @@ import com.openexchange.folderstorage.StoragePriority;
 
 /**
  * {@link FolderStorageRegistry} - A registry for folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageRegistry implements FolderStorageDiscoverer {
@@ -74,7 +74,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     /**
      * Gets the {@link FolderStorageRegistry} instance.
-     * 
+     *
      * @return The {@link FolderStorageRegistry} instance
      */
     public static FolderStorageRegistry getInstance() {
@@ -100,7 +100,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
 
     /**
      * Associates specified folder storage to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to add
      * @return <code>true</code> If registration was successful; otherwise <code>false</code>
@@ -149,6 +149,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         return true;
     }
 
+    @Override
     public FolderStorage getFolderStorage(final String treeId, final String folderId) {
         final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
@@ -177,6 +178,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         return null;
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForParent(final String treeId, final String parentId) {
         final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
@@ -206,6 +208,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         return l.toArray(new FolderStorage[l.size()]);
     }
 
+    @Override
     public FolderStorage[] getFolderStoragesForTreeID(final String treeId) {
         final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
@@ -229,6 +232,7 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage[] getTreeFolderStorages(final String treeId) {
         final Queue<FolderStorage> genericStorages = genStorages;
         if (!genericStorages.isEmpty()) {
@@ -252,13 +256,14 @@ public final class FolderStorageRegistry implements FolderStorageDiscoverer {
         return storages.toArray(new FolderStorage[storages.size()]);
     }
 
+    @Override
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         return ContentTypeRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
     }
 
     /**
      * Removes specified folder storage bound to given tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The folder storage to remove
      */

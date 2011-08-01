@@ -55,42 +55,42 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ManagedFile} - Holds a file on disk with a time-out setting.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ManagedFile {
 
     /**
      * Gets the (optional) file name.
-     * 
+     *
      * @return The file name
      */
     public String getFileName();
 
     /**
      * Sets the (optional) file name.
-     * 
+     *
      * @param fileName The file name
      */
     public void setFileName(String fileName);
 
     /**
      * Gets the (optional) content type.
-     * 
+     *
      * @return The content type
      */
     public String getContentType();
 
     /**
      * Sets the (optional) content type.
-     * 
+     *
      * @param contentType The content type
      */
     public void setContentType(String contentType);
 
     /**
      * Gets the (optional) size.
-     * 
+     *
      * @return The size
      */
     public long getSize();
@@ -98,28 +98,28 @@ public interface ManagedFile {
     /**
      * Sets the (optional) size. <br>
      * <b><i>Note that size should already be set if created through managed file management.</i></b>
-     * 
+     *
      * @param size The size
      */
     public void setSize(long size);
 
     /**
      * Gets the backed file.
-     * 
+     *
      * @return The backed file or <code>null</code> if already deleted.
      */
     public File getFile();
 
     /**
      * Gets this managed file's unique ID.
-     * 
+     *
      * @return This managed file's unique ID
      */
     public String getID();
 
     /**
      * Gets the backed file's content as an input stream.
-     * 
+     *
      * @return The backed file's content as an input stream or <code>null</code> if already deleted.
      * @throws OXException If file content cannot be returned as an input stream.
      */
@@ -127,7 +127,7 @@ public interface ManagedFile {
 
     /**
      * Gets last-access timestamp.
-     * 
+     *
      * @return The last-access timestamp
      */
     public long getLastAccess();
@@ -144,7 +144,7 @@ public interface ManagedFile {
 
     /**
      * Checks if backed file has been deleted (in the meantime).
-     * 
+     *
      * @return <code>true</code> if backed file has been deleted (in the meantime); otherwise <code>false</code>
      */
     public boolean isDeleted();

@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PushUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushUtility {
@@ -82,7 +82,7 @@ public final class PushUtility {
 
     /**
      * Triggers the OSGi event system and posts a new event for new mails in given folder.
-     * 
+     *
      * @param folder The folder identifier; including account information
      * @param session The session providing needed user data
      * @throws OXException If posting event fails

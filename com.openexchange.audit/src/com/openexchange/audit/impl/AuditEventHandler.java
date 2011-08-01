@@ -88,19 +88,19 @@ public class AuditEventHandler implements EventHandler {
 	private static final Logger LOG = Logger.getLogger(AuditEventHandler.class.getName());
 
 	private static final AuditEventHandler instance = new AuditEventHandler();
-	
+
 	private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+
     public static AuditEventHandler getInstance() {
         return instance;
     }
-	
+
     /**
      * Initializes a new {@link AuditEventHandler}.
      */
 	public AuditEventHandler() {
 		super();
-		
+
 		try {
 			/*
 			 * Find out if the custom FileHandler should be used to log into
@@ -112,7 +112,7 @@ public class AuditEventHandler implements EventHandler {
 				if (AuditConfiguration.getEnabled() == true) {
 					try {
 						final Logger rootLogger = Logger.getLogger("");
-						final Handler[] handlers = rootLogger.getHandlers();		
+						final Handler[] handlers = rootLogger.getHandlers();
 						for (int position = 0; position < handlers.length; position ++) {
 							handlers[position].setFilter(new AuditFilter());
 						}
@@ -131,19 +131,20 @@ public class AuditEventHandler implements EventHandler {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
-	
-	public void handleEvent(final Event event) {
+
+	@Override
+    public void handleEvent(final Event event) {
 		try {
 			final StringBuffer log = new StringBuffer();
-			
+
 			final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 			final Context context = ContextStorage.getInstance().getContext(commonEvent.getContextId());
-			
+
 	        ModuleSwitch: switch (commonEvent.getModule()) {
 	        default: break ModuleSwitch;
-	        case Types.APPOINTMENT:	        	
+	        case Types.APPOINTMENT:
 	        	final Appointment appointment = (Appointment)commonEvent.getActionObj();
-	        	
+
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
 				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
@@ -151,7 +152,7 @@ public class AuditEventHandler implements EventHandler {
 				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
 					log.append("EVENT TYPE: DELETE; ");
 				}
-				
+
 				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
 				log.append("OBJECT TYPE: APPOINTMENT; ");
 				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
@@ -171,7 +172,7 @@ public class AuditEventHandler implements EventHandler {
 	        	 * Contact contact = (Contact)commonEvent.getActionObj();
 	        	 */
 	        	final Contact contact = Contacts.getContactById(((Contact)commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
-	        	
+
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
 				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
@@ -179,7 +180,7 @@ public class AuditEventHandler implements EventHandler {
 				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
 					log.append("EVENT TYPE: DELETE; ");
 				}
-				
+
 				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
 				log.append("OBJECT TYPE: CONTACT; ");
 				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
@@ -188,11 +189,11 @@ public class AuditEventHandler implements EventHandler {
 				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName() + "; ");
 				log.append("CONTACT FULLNAME: " + contact.getDisplayName() + ";");
 				log.append("FOLDER: " + getPathToRoot(contact.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
-				
+
 	        	break ModuleSwitch;
 	        case Types.TASK:
 	        	final Task task = (Task)commonEvent.getActionObj();
-	        	
+
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
 				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
@@ -200,7 +201,7 @@ public class AuditEventHandler implements EventHandler {
 				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
 					log.append("EVENT TYPE: DELETE; ");
 				}
-				
+
 				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
 				log.append("OBJECT TYPE: TASK; ");
 				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
@@ -209,11 +210,11 @@ public class AuditEventHandler implements EventHandler {
 				log.append("MODIFIED BY: " + UserStorage.getInstance().getUser(task.getModifiedBy(), context).getDisplayName() + "; ");
 				log.append("TITLE: " + task.getTitle() + "; ");
 				log.append("FOLDER: " + getPathToRoot(task.getParentFolderID(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
-				
+
 	        	break ModuleSwitch;
 	        case Types.INFOSTORE:
 	        	final DocumentMetadata document = (DocumentMetadata)commonEvent.getActionObj();
-	        	
+
 				if (commonEvent.getAction() == CommonEvent.INSERT) {
 					log.append("EVENT TYPE: INSERT; ");
 				} else if (commonEvent.getAction() == CommonEvent.UPDATE) {
@@ -221,7 +222,7 @@ public class AuditEventHandler implements EventHandler {
 				} else if (commonEvent.getAction() == CommonEvent.DELETE) {
 					log.append("EVENT TYPE: DELETE; ");
 				}
-				
+
 				log.append("EVENT TIME: " + logDateFormat.format(new Date()) + "; ");
 				log.append("OBJECT TYPE: INFOSTORE; ");
 				log.append("CONTEXT ID: " + commonEvent.getContextId() + "; ");
@@ -231,19 +232,19 @@ public class AuditEventHandler implements EventHandler {
 				log.append("TITLE: " + document.getTitle() + "; ");
 				log.append("TITLE: " + document.getFileName() + "; ");
 				log.append("FOLDER: " + getPathToRoot((int)document.getFolderId(), commonEvent.getContextId(), commonEvent.getSession()) + ";");
-				
+
 	        	break ModuleSwitch;
 	        }
-			
+
 			if (LOG.isLoggable(Level.INFO) &&  log.toString().trim().length() > 0) {
 				LOG.log(Level.INFO, log.toString());
 			}
-			
+
 		} catch (final Exception e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
-		}	
+		}
 	}
-	
+
 	/**
 	 * This method will return the full folder path as String.
 	 * @param folderId
@@ -253,7 +254,7 @@ public class AuditEventHandler implements EventHandler {
 	 */
 	private String getPathToRoot(final int folderId, final int contextId, final Session sessionObj) {
 		String retval = "";
-		
+
 		try {
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId)).asQueue();
@@ -265,8 +266,8 @@ public class AuditEventHandler implements EventHandler {
 		} catch (final OXException e) {
 			e.printStackTrace();
 		}
-		
+
 		return retval;
 	}
-	
+
 }

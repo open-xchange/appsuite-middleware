@@ -116,21 +116,21 @@ public class PublicationTargetWriterTest extends TestCase {
             // Hooray!
         }
     }
-    
+
     public void testWriteUserSpecificForm() throws JSONException {
         TestTarget target = new TestTarget();
         target.setId("com.openexchange.publish.test1");
         target.setDisplayName("Test 1 PubTarget");
         target.setIcon("http://example.invalid/icon.png");
         target.setModule("contacts");
-        
+
         JSONObject object = new PublicationTargetWriter(Translator.EMPTY).write(target, null, null);
-        
+
         JSONArray array = object.getJSONArray("formDescription");
         assertEquals(1, array.length());
-        
+
     }
-    
+
     public void testWriteUserSpecificFormInArray() throws OXException, JSONException {
         TestTarget target = new TestTarget();
         target.setId("com.openexchange.publish.test1");
@@ -142,16 +142,16 @@ public class PublicationTargetWriterTest extends TestCase {
 
         JSONArray formDescription = array.getJSONArray(0);
         assertEquals(1, formDescription.length());
-        
-            
+
+
     }
-    
-    
+
+
     private static final class TestTarget extends PublicationTarget implements UserSpecificPublicationTarget {
 
         public DynamicFormDescription getUserSpecificDescription(User user, UserConfiguration configuration) {
             return new DynamicFormDescription().add(FormElement.input("userSpecific", "User Specific"));
         }
-        
+
     }
 }

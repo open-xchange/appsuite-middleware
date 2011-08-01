@@ -61,7 +61,7 @@ import com.openexchange.twitter.internal.TwitterServiceImpl;
 
 /**
  * {@link TwitterActivator} - The activator for twitter bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterActivator implements BundleActivator {

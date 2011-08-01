@@ -74,7 +74,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link ResourceManageRequest} - Executes a resource-manage request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ResourceManageRequest implements AJAXRequestHandler {
@@ -112,7 +112,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 
     /**
      * Performs a create request.
-     * 
+     *
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return The newly created resource's ID wrapped inside a JSON object
      * @throws OXException If creation fails
@@ -145,7 +145,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 
     /**
      * Performs an update request.
-     * 
+     *
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON object
      * @throws OXException If update fails
@@ -181,7 +181,7 @@ public class ResourceManageRequest implements AJAXRequestHandler {
 
     /**
      * Performs a delete request.
-     * 
+     *
      * @param jsonObj The JSON data object (containing "data", "timestamp", etc.)
      * @return An empty JSON array
      * @throws OXException If deletion fails

@@ -71,6 +71,7 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         int counter = 0;
         try {

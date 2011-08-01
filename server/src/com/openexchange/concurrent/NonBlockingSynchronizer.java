@@ -57,7 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link NonBlockingSynchronizer} - Non-blocking reentrant synchronizer; also useful to wrap an existing {@link Runnable runnable}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
@@ -85,7 +85,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     /**
      * Initializes a new {@link NonBlockingSynchronizer} wrapping given {@link Runnable runnable}.
-     * 
+     *
      * @param runnable The runnable to synchronize
      */
     public NonBlockingSynchronizer(final Runnable runnable) {
@@ -99,7 +99,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     /**
      * Gets the runnable.
-     * 
+     *
      * @return The runnable
      */
     public Runnable getRunnable() {
@@ -108,7 +108,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
 
     /**
      * Sets the runnable.
-     * 
+     *
      * @param runnable The runnable to set
      */
     public void setRunnable(final Runnable runnable) {
@@ -116,7 +116,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
     }
 
     /*-
-     * In opposite to NonBlockingBlocker enabling the 1 bit and disabling the 1 bit take place 
+     * In opposite to NonBlockingBlocker enabling the 1 bit and disabling the 1 bit take place
      * in same setSynchronized() method. The setSynchronized() method just switches whether a
      * thread which invokes acquire() must obtain a mutual-exclusive lock or not.
      */
@@ -125,7 +125,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * Sets whether to synchronize access or not.
      * <p>
      * Must not be called from a thread which already acquired this synchronizer.
-     * 
+     *
      * @param synchronize <code>true</code> to synchronize access; otherwise <code>false</code>
      * @return This non-blocking synchronizer with new synchronize policy applied
      */
@@ -150,6 +150,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         return this;
     }
 
+    @Override
     public Lock acquire() {
         if (reentrant.containsKey(Thread.currentThread())) {
             // Reentrant thread
@@ -171,6 +172,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         return lock;
     }
 
+    @Override
     public void release(final Lock lock) {
         if (null != lock) {
             lock.unlock();
@@ -184,6 +186,7 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
      * <p>
      * This method does nothing if runnable is <code>null</code>.
      */
+    @Override
     public void run() {
         final Lock lock = acquire();
         try {
@@ -195,10 +198,12 @@ public final class NonBlockingSynchronizer implements Synchronizer, Runnable {
         }
     }
 
+    @Override
     public void synchronize() {
         setSynchronized(true);
     }
 
+    @Override
     public void unsynchronize() {
         setSynchronized(false);
     }

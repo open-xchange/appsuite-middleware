@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Unlimited attribute on date type
- * 
+ *
  * <p>Java class for unlimitedDate complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="unlimitedDate">
  *   &lt;simpleContent>
@@ -26,8 +26,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "unlimitedDate", propOrder = {
@@ -43,11 +43,11 @@ public class UnlimitedDate {
 
     /**
      * Gets the value of the value property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getValue() {
         return value;
@@ -55,11 +55,11 @@ public class UnlimitedDate {
 
     /**
      * Sets the value of the value property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setValue(XMLGregorianCalendar value) {
         this.value = value;
@@ -67,11 +67,11 @@ public class UnlimitedDate {
 
     /**
      * Gets the value of the unlimited property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isUnlimited() {
         if (unlimited == null) {
@@ -83,11 +83,11 @@ public class UnlimitedDate {
 
     /**
      * Sets the value of the unlimited property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUnlimited(Boolean value) {
         this.unlimited = value;

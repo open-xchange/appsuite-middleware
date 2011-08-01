@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public class MailAttachmentState {
     private  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
     private int accountId;
-    
+
     public  MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailService mailService, final ServerSession session, final int accountId) throws OXException {
         if(mailAccess != null) {
             if(this.accountId == accountId) {
@@ -73,14 +73,14 @@ public class MailAttachmentState {
             }
             throw new IllegalStateException("AccountID does not match");
         }
-        
+
         this.accountId = accountId;
         mailAccess = mailService.getMailAccess(session, accountId);
-        
+
         mailAccess.connect();
         return mailAccess;
     }
-    
+
     public void close() {
         if(mailAccess != null) {
             mailAccess.close(true);

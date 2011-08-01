@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Phone provisioning data
- * 
+ *
  * <p>Java class for DeviceExtension complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DeviceExtension">
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DeviceExtension", propOrder = {
@@ -44,11 +44,11 @@ public class DeviceExtension {
 
     /**
      * Gets the value of the extensionID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Object }
-     *     
+     *
      */
     public Object getExtensionID() {
         return extensionID;
@@ -56,11 +56,11 @@ public class DeviceExtension {
 
     /**
      * Sets the value of the extensionID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Object }
-     *     
+     *
      */
     public void setExtensionID(Object value) {
         this.extensionID = value;
@@ -68,11 +68,11 @@ public class DeviceExtension {
 
     /**
      * Gets the value of the line property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Object }
-     *     
+     *
      */
     public Object getLine() {
         return line;
@@ -80,11 +80,11 @@ public class DeviceExtension {
 
     /**
      * Sets the value of the line property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Object }
-     *     
+     *
      */
     public void setLine(Object value) {
         this.line = value;

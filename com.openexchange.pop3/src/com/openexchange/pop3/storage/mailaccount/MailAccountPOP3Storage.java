@@ -100,7 +100,7 @@ import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link MailAccountPOP3Storage} - The built-in mail account POP3 storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountPOP3Storage implements POP3Storage {
@@ -227,7 +227,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     /**
      * Gets the separator character of underlying mail account.
-     * 
+     *
      * @return The separator character of underlying mail account
      * @throws OXException If separator character cannot be returned
      */
@@ -271,7 +271,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     /**
      * Gets the path to virtual root folder.
-     * 
+     *
      * @return The path to virtual root folder
      */
     public String getPath() {
@@ -620,7 +620,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         }
         /*-
          * From JavaDoc for javax.mail.Folder.getMessages():
-         * 
+         *
          * Folder implementations are expected to provide light-weight Message objects, which get filled on demand.
          */
         final Message[] messages = inbox.getMessages(start, end);
@@ -709,7 +709,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     /**
      * Gets all known UIDLs of the messages kept in this storage.
-     * 
+     *
      * @return All known UIDLs of the messages kept in this storage
      * @throws OXException If fetching all UIDLs fails
      */

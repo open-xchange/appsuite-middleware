@@ -66,7 +66,7 @@ import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link GetAction} - Maps the action to a <tt>get</tt> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends AbstractUserAction {

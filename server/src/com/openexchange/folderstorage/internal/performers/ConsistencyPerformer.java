@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConsistencyPerformer} - Serves the <code>CLEAR</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConsistencyPerformer extends AbstractPerformer {
@@ -70,7 +70,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ConsistencyPerformer}.
-     * 
+     *
      * @param session The session
      */
     public ConsistencyPerformer(final ServerSession session) {
@@ -79,7 +79,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ConsistencyPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -89,7 +89,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ConsistencyPerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -99,7 +99,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ConsistencyPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -110,7 +110,7 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     /**
      * Performs the consistency check.
-     * 
+     *
      * @param treeId The tree identifier
      * @throws OXException If an error occurs during deletion
      */

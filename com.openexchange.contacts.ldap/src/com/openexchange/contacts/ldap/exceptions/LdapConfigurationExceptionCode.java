@@ -39,7 +39,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
      * Mapping file %s not valid
      */
     INVALID_MAPPING_FILE("Mapping file \"%s\" not valid", Category.CATEGORY_CONFIGURATION, 6),
-    
+
     /**
      * The given value for pagesize "%s" is no integer value
      */
@@ -59,12 +59,12 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
      * The given value for userLoginSource "%s" is not a possible one
      */
     USER_LOGIN_SOURCE_WRONG("The given value for userLoginSource \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 10),
-    
+
     /**
      * The given value for contactTypes "%s" is not a possible one
      */
     CONTACT_TYPES_WRONG("The given value for contactTypes \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 11),
-    
+
     /**
      * The given value for searchScope_distributionlist "%s" is not a possible one
      */
@@ -74,7 +74,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
      * Abstract pathname "%1$s" does not denote a directory.
      */
     NOT_DIRECTORY("Abstract pathname \"%1$s\" does not denote a directory.", Category.CATEGORY_CONFIGURATION, 13),
-    
+
     /**
      * The directory "%1$s" is not a context identifier.
      */
@@ -84,7 +84,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
      * The given value for referrals "%s" is not a possible one
      */
     REFERRALS_WRONG("The given value for referrals \"%s\" is not a possible one", Category.CATEGORY_CONFIGURATION, 15),
-    
+
     /**
      * The given value for refreshinterval "%s" is no integer value
      */
@@ -128,7 +128,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
         this.category = category;
         this.number = detailNumber;
     }
-    
+
     public String getPrefix() {
         return "PERMISSION";
     }
@@ -144,14 +144,14 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -160,7 +160,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -170,7 +170,7 @@ public enum LdapConfigurationExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

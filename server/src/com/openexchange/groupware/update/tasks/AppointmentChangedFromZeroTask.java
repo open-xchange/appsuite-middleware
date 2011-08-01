@@ -75,14 +75,17 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 21;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Performing update task to remove 0 set changed_from in appointments.");

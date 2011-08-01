@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MultipartContent} - A multipart content.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -62,7 +62,7 @@ public interface MultipartContent extends MessagingContent {
 
     /**
      * Gets the number of enclosed {@link MessagingBodyPart parts}.
-     * 
+     *
      * @return The number of enclosed parts
      * @throws OXException If the number of enclosed parts cannot be determined
      */
@@ -70,7 +70,7 @@ public interface MultipartContent extends MessagingContent {
 
     /**
      * Get the specified {@link MessagingBodyPart part}. Parts are numbered starting at zero.
-     * 
+     *
      * @param index The zero-based index
      * @return The indexed {@link MessagingBodyPart part}
      * @throws OXException If {@link MessagingBodyPart part} at index position cannot be returned

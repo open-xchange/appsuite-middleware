@@ -58,15 +58,15 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CustomizableSearchIterator<T> implements SearchIterator<T>{
-    private SearchIterator<T> searchIterator;
-    private Customizer<T> customizer;
-    
+    private final SearchIterator<T> searchIterator;
+    private final Customizer<T> customizer;
+
     public CustomizableSearchIterator(SearchIterator<T> searchIterator, Customizer<T> customizer) {
         super();
         this.searchIterator = searchIterator;
         this.customizer = customizer;
     }
-    
+
     public void addWarning(OXException warning) {
         searchIterator.addWarning(warning);
     }
@@ -88,6 +88,6 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     public int size() {
         return searchIterator.size();
     }
-    
-    
+
+
 }

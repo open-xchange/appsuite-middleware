@@ -62,7 +62,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link GroupWriter} - Writes a group object into a JSON.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com"">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -84,7 +84,7 @@ public class GroupWriter extends DataWriter {
     		json.put(group.get(field));
     	}
     }
-    
+
 	public void writeGroup(final Group group, final JSONObject json) throws JSONException {
 
         writeParameter(GroupFields.IDENTIFIER, group.getIdentifier(), json);

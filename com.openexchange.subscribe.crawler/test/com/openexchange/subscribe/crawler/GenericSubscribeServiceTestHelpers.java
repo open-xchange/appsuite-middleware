@@ -73,11 +73,11 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public static final String VALID_NAME = "([a-zA-Z\\s\u00e4\u00f6\u00fc\u00df-\u00e9\u00e8]*)";
     public static final String VALID_PHONE_REGEX = "([0-9\\s\\+\\-\\/\\(\\)]*)";
     public static final String VALID_ADDRESS_PART = "[a-zA-Z0-9\\.\\s\u00e4\u00f6\u00fc\u00df]*";
-    
+
     private HashMap<String, String> map;
     ArrayList<CrawlerDescription> crawlers;
     private Activator activator;
-    
+
     public GenericSubscribeServiceTestHelpers() {
         super();
     }
@@ -85,7 +85,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public GenericSubscribeServiceTestHelpers(final String name) {
         super(name);
     }
-    
+
     /**
      * Get all yml-files in the config directory and create crawlers out of them.
      */
@@ -98,27 +98,27 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        
+
         SimConfigurationService config = new SimConfigurationService();
         //test with the real crawlers (switch for automated tests (Hudson) / local tests)
         config.stringProperties.put("com.openexchange.subscribe.crawler.path", System.getProperty("crawlersConf"));
         // config.stringProperties.put("com.openexchange.subscribe.crawler.path", "conf/crawlers/");
-        activator = new Activator();        
+        activator = new Activator();
         crawlers = activator.getCrawlersFromFilesystem(config);
-        
+
         // insert ical-Parser class (switch for automated tests (Hudson) / local tests)
         //activator.setICalParser(new com.openexchange.data.conversion.ical.ical4j.ICal4JParser());
         activator.setICalParser(null);
     }
-    
+
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler) {
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, false, false);
     }
-    
+
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose) {
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, verbose, false);
     }
-    
+
     protected void findOutIfThereAreContactsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose, final boolean enableJavascript) {
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
@@ -133,7 +133,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
             enableJavascript);
 
         final Workflow testWorkflow = service.getWorkflow();
-        
+
         Contact[] contacts = new Contact[0];
         try {
             contacts = (Contact[]) testWorkflow.execute(username, password);
@@ -167,7 +167,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
                 System.out.println("contacts country of private address : " + contact.getCountryHome());
                 System.out.println("contacts company : " + contact.getCompany());
                 System.out.println("contacts note : " + contact.getNote());
-    
+
                 System.out.println("----------");
             }
         }
@@ -176,7 +176,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         final long after = rightNow.getTime().getTime();
         System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
     }
-    
+
     protected void findOutIfThereAreEventsForThisConfiguration(final String username, final String password, final CrawlerDescription crawler, final boolean verbose, final boolean enableJavascript) {
         Calendar rightNow = Calendar.getInstance();
         final long before = rightNow.getTime().getTime();
@@ -239,9 +239,9 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         assertTrue("There are no tasks for crawler : " + crawler.getDisplayName(), tasks.length != 0);
         if (verbose){
             for (final Task task : tasks) {
-                System.out.println("task retrieved is : " + task.getTitle());                
+                System.out.println("task retrieved is : " + task.getTitle());
                 System.out.println("Start Date is : " + task.getStartDate());
-                System.out.println("End Date is : " + task.getEndDate());                
+                System.out.println("End Date is : " + task.getEndDate());
                 System.out.println("Description is : " + task.getNote());
                 System.out.println("----------");
             }
@@ -251,10 +251,10 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
         final long after = rightNow.getTime().getTime();
         System.out.println("Time : " + Long.toString((after - before) / 1000) + " seconds");
     }
-    
+
     /**
      * Create files for this CrawlerDescription that will be used by the live system
-     * 
+     *
      * @param crawler
      */
     protected void dumpThis(final CrawlerDescription crawler, final String filename) {

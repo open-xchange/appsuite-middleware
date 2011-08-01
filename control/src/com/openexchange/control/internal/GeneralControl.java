@@ -67,7 +67,7 @@ import com.openexchange.server.impl.Version;
 
 /**
  * {@link GeneralControl} - Provides several methods to manage OSGi application.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
@@ -182,7 +182,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     /**
      * Shutdown of active bundles through closing system bundle
-     * 
+     *
      * @param bundleContext The bundle context
      * @param waitForExit <code>true</code> to wait for the OSGi framework being shut down completely; otherwise <code>false</code>
      */

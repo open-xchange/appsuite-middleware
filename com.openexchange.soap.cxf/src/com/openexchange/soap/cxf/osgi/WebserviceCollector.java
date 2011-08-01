@@ -72,9 +72,9 @@ public class WebserviceCollector implements ServiceListener {
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
-    private ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
-    
-    private BundleContext context;
+    private final ConcurrentMap<String, Endpoint> endpoints = new ConcurrentHashMap<String, Endpoint>();
+
+    private final BundleContext context;
 
     private boolean open;
 
@@ -82,7 +82,7 @@ public class WebserviceCollector implements ServiceListener {
         this.context = context;
     }
 
-    
+
     public void serviceChanged(ServiceEvent event) {
         if(!open) {
             return;
@@ -95,21 +95,21 @@ public class WebserviceCollector implements ServiceListener {
             remove(ref);
         }
     }
-    
+
     public void open() {
         try {
             ServiceReference[] allServiceReferences = context.getAllServiceReferences(null, null);
             for (ServiceReference serviceReference : allServiceReferences) {
                 add( serviceReference );
             }
-            
+
         } catch (InvalidSyntaxException e) {
             // Impossible, no filter specified.
         }
-        
+
         open = true;
     }
-    
+
     public void close() {
         open = false;
         for (Entry<String, Endpoint> entry : endpoints.entrySet()) {
@@ -120,7 +120,7 @@ public class WebserviceCollector implements ServiceListener {
 
     private void remove(ServiceReference ref) {
         Object service = context.getService(ref);
-        
+
         if( isWebservice(service) ) {
             String name = getName(ref, service);
             remove( name, service );
@@ -132,7 +132,7 @@ public class WebserviceCollector implements ServiceListener {
         if( isWebservice(service) ) {
             String name = getName(ref, service);
             replace( name, service );
-        }        
+        }
     }
 
     private String getName(ServiceReference ref, Object service) {
@@ -151,8 +151,8 @@ public class WebserviceCollector implements ServiceListener {
             }
         }
         // Next try the WebService annotation
-        
-        {   
+
+        {
             WebService webService = service.getClass().getAnnotation(WebService.class);
             String serviceName = webService.serviceName();
             if(serviceName != null && ! ("".equals(serviceName))) {
@@ -185,6 +185,6 @@ public class WebserviceCollector implements ServiceListener {
         WebService annotation = service.getClass().getAnnotation(WebService.class);
         return annotation != null;
     }
-    
+
 
 }

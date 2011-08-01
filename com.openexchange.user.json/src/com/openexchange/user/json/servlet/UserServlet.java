@@ -55,7 +55,7 @@ import com.openexchange.user.json.actions.UserActionFactory;
 
 /**
  * {@link UserServlet} - The user servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserServlet extends MultipleAdapterServletNew {

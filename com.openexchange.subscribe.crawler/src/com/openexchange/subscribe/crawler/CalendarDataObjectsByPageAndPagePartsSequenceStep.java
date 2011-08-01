@@ -73,38 +73,38 @@ import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 public class CalendarDataObjectsByPageAndPagePartsSequenceStep extends AbstractStep<CalendarDataObject[], HtmlPage> {
 
     private PagePartSequence pageParts;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByPageAndPagePartsSequenceStep.class));
-    
+
     public CalendarDataObjectsByPageAndPagePartsSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;
         this.pageParts = pageParts;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
     public void execute(WebClient webClient) throws OXException {
         ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
-        
-        final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());                
+
+        final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());
         pageParts.setPage(pageString);
         LOG.debug("Page evaluated is : "+pageString);
         final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
-        
+
         for (HashMap<String, String> map : maps){
             final CalendarDataObject oxEvent = Mappings.translateMapToCalendarDataObject(map);
             events.add(oxEvent);
-        }        
-        
+        }
+
         output = new CalendarDataObject[events.size()];
         for (int i = 0; i < events.size() && i < output.length; i++) {
-            output[i] = (CalendarDataObject) events.get(i);
+            output[i] = events.get(i);
         }
-        
+
         executedSuccessfully = true;
-        
+
     }
 
     public PagePartSequence getPageParts() {

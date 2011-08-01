@@ -72,6 +72,7 @@ class CollectionDataSource<I> implements DataSource<I> {
         this.iter = source.iterator();
     }
 
+    @Override
     public int getData(Collection<I> col) {
         int count = 0;
         while (count < blockSize && iter.hasNext()) {
@@ -81,10 +82,12 @@ class CollectionDataSource<I> implements DataSource<I> {
         return count;
     }
 
+    @Override
     public boolean hasData() {
         return iter.hasNext();
     }
 
+    @Override
     public <O> DataSource<O> addFilter(Filter<I, O> filter) {
         Pipe<O> pipe = new Pipe<O>(threadPool);
         FilterTask<I, O> task = new FilterTask<I, O>(this, filter, pipe);

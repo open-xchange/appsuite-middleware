@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingAccountAccess} - Provides access to a messaging account.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -62,14 +62,14 @@ public interface MessagingAccountAccess extends MessagingResource {
 
     /**
      * Gets the account identifier of this access.
-     * 
+     *
      * @return The account identifier
      */
     public int getAccountId();
 
     /**
      * Gets the message access for associated account.
-     * 
+     *
      * @return The message access
      * @throws OXException If message access cannot be returned
      */
@@ -77,7 +77,7 @@ public interface MessagingAccountAccess extends MessagingResource {
 
     /**
      * Gets the folder access for associated account.
-     * 
+     *
      * @return The folder access
      * @throws OXException If folder access cannot be returned
      */
@@ -92,7 +92,7 @@ public interface MessagingAccountAccess extends MessagingResource {
      * <p>
      * Since this account access instance is connected if not already done before, the {@link #close()} operation should be invoked
      * afterwards:
-     * 
+     *
      * <pre>
      * final MessagingMessageAccess access = MailAccess.getInstance(session);
      * final MessagingFolder rootFolder = access.getRootFolder();
@@ -102,7 +102,7 @@ public interface MessagingAccountAccess extends MessagingResource {
      *     access.close();
      * }
      * </pre>
-     * 
+     *
      * @throws OXException If returning the root folder fails
      */
     public MessagingFolder getRootFolder() throws OXException;

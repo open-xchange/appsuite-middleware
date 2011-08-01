@@ -29,12 +29,12 @@ public enum LdapExceptionCode implements OXExceptionCode {
      * Contacts cannot be inserted in LDAP
      */
     INSERT_NOT_POSSIBLE("Contacts cannot be inserted in LDAP", Category.CATEGORY_PERMISSION_DENIED, 4),
-    
+
     /**
      * The folderid object is null. This is an internal error. Please notify Open-Xchange
      */
     FOLDERID_OBJECT_NULL("The folderid object is null. This is an internal error. Please notify Open-Xchange", Category.CATEGORY_ERROR, 5),
-    
+
     /**
      * The search object contains more than one folder id. This is not supported by this implementation
      */
@@ -59,7 +59,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
      * Error while trying to create connection to LDAP server: %s
      */
     INITIAL_LDAP_ERROR("Error while trying to create connection to LDAP server: %s", Category.CATEGORY_ERROR, 10),
-    
+
     /**
      * The LDAP search for the user contains too many results
      */
@@ -84,12 +84,12 @@ public enum LdapExceptionCode implements OXExceptionCode {
      * The imap login for user "%s" is null
      */
     IMAP_LOGIN_NULL("The imap login for user \"%s\" is null", Category.CATEGORY_CONFIGURATION, 15),
-    
+
     /**
      * The primary mail for user "%s" is null
      */
     PRIMARY_MAIL_NULL("The primary mail for user \"%s\" is null", Category.CATEGORY_CONFIGURATION, 16),
-    
+
     /**
      * The mail address "%s" for distributionentry is invalid
      */
@@ -104,7 +104,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
      * The attribute "%s" is missing for object "%s"
      */
     MISSING_ATTRIBUTE("The attribute \"%s\" is missing for object \"%s\"", Category.CATEGORY_CONFIGURATION, 19),
-    
+
     /**
      * No values mapping table found
      */
@@ -121,7 +121,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
     ERROR_GETTING_DEFAULT_NAMING_CONTEXT("An error occurred while trying to get the defaultNamingContext attribute", Category.CATEGORY_ERROR, 22);
 
 
-    
+
     /**
      * Message of the exception.
      */
@@ -149,7 +149,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
         this.category = category;
         this.number = detailNumber;
     }
-    
+
     public String getPrefix() {
         return "PERMISSION";
     }
@@ -165,14 +165,14 @@ public enum LdapExceptionCode implements OXExceptionCode {
     public int getNumber() {
         return number;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -181,7 +181,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -191,7 +191,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

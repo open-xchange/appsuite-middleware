@@ -64,6 +64,7 @@ import com.openexchange.session.Session;
  */
 public class RdbContactInterfaceFactory implements ContactInterfaceFactory {
 
+    @Override
     public ContactInterface create(final int folderId, final Session session) throws OXException {
         return ServerServiceRegistry.getInstance().getService(
             ContactInterfaceDiscoveryService.class).newContactInterface(folderId, session);

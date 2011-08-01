@@ -74,7 +74,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  * <p>
  * Each starting AJP cycle is delegated to a dedicated AJP connection until the end of the AJP cycle is reached (<code>END RESPONSE</code>
  * package sent).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13Listener implements Runnable {
@@ -103,6 +103,7 @@ final class AJPv13Listener implements Runnable {
             this.num = num;
         }
 
+        @Override
         public void execute(final Runnable command) {
             listenerThread = new AJPv13ListenerThread(command);
             listenerThread.setName(getThreadName(this.num, new StringBuilder(NAME_LENGTH).append("AJPListener-")));
@@ -181,7 +182,7 @@ final class AJPv13Listener implements Runnable {
 
     /**
      * Initializes a new {@link AJPv13Listener}.
-     * 
+     *
      * @param num The listener's number
      */
     AJPv13Listener(final int num) {
@@ -190,7 +191,7 @@ final class AJPv13Listener implements Runnable {
 
     /**
      * Initializes a new {@link AJPv13Listener}.
-     * 
+     *
      * @param num The listener's number
      * @param pooled <code>true</code> to mark this listener as pooled (initially put into pool); otherwise <code>false</code>
      */
@@ -208,7 +209,7 @@ final class AJPv13Listener implements Runnable {
 
     /**
      * Starts this listener.
-     * 
+     *
      * @param client The client socket to listen on
      * @return <code>true</code> if this listener could be successfully started; otherwise <code>false</code>
      */
@@ -300,6 +301,7 @@ final class AJPv13Listener implements Runnable {
      * (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @Override
     public void run() {
         boolean keepOnRunning = true;
         changeNumberOfRunningAJPListeners(true);
@@ -633,7 +635,7 @@ final class AJPv13Listener implements Runnable {
 
     /**
      * Increments/decrements the number of running AJP listeners.
-     * 
+     *
      * @param increment whether to increment or to decrement
      */
     static void changeNumberOfRunningAJPListeners(final boolean increment) {
@@ -642,7 +644,7 @@ final class AJPv13Listener implements Runnable {
 
     /**
      * Gets the number of running AJP listeners.
-     * 
+     *
      * @return The number of running AJP listeners
      */
     static int getNumberOfRunningAJPListeners() {

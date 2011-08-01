@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link GenericConfigurationStorageService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface GenericConfigurationStorageService {

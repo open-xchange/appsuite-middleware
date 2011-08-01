@@ -73,7 +73,7 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskForceCLT} - Command-Line access to reset version via update task toolkit.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskForceCLT {

@@ -57,9 +57,9 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMTPReferencedPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPReferencedPart extends ReferencedMailPart {
 
@@ -67,7 +67,7 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 
 	/**
 	 * Initializes a new {@link SMTPReferencedPart}
-	 * 
+	 *
 	 * @param referencedPart
 	 *            The referenced {@link MailPart part}
 	 * @param session
@@ -81,7 +81,7 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 
 	/**
 	 * Initializes a new {@link SMTPReferencedPart}
-	 * 
+	 *
 	 * @param referencedMail
 	 *            The referenced {@link MailMessage mail}
 	 * @param session

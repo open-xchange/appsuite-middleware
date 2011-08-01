@@ -55,7 +55,7 @@ import com.openexchange.oauth.OAuthToken;
 
 /**
  * {@link OAuthInteractionImpl} - The {@link OAuthInteraction} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthInteractionImpl implements OAuthInteraction {
@@ -68,7 +68,7 @@ public final class OAuthInteractionImpl implements OAuthInteraction {
 
     /**
      * Initializes a new {@link OAuthInteractionImpl}.
-     * 
+     *
      * @param requestToken The request token needed to acquire the access token
      * @param authorizationURL The base authorization URL
      * @param interactionType The interaction type

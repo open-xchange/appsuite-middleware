@@ -69,41 +69,41 @@ import com.openexchange.tools.arrays.Arrays;
 public class ContactSimilarity {
 
     public static final int THRESHHOLD = 9;
-    
+
     public static boolean areSimilar(Contact original, Contact candidate) {
         return THRESHHOLD < calculateSimilarityScore(original, candidate);
     }
-    
+
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
-    
+
     public static int calculateSimilarityScore(Contact original, Contact candidate) {
         int score = 0;
-        
+
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
         if ((isset(original.getSurName()) || isset(candidate.getSurName())) && eq(original.getSurName(), candidate.getSurName())) {
             score += 5;
         }
-        
+
         if ((isset(original.getDisplayName()) || isset(candidate.getDisplayName())) && compareDisplayNames(original.getDisplayName(), candidate.getDisplayName())) {
             score += 10;
         }
-        
+
         if (isset(original.getDisplayName()) && isset(candidate.getSurName()) && isset(candidate.getGivenName())) {
             String displayName = original.getDisplayName();
             if (displayName.contains(candidate.getGivenName()) && displayName.contains(candidate.getSurName())) {
                 score += 10;
             }
         }
-        
+
         if (isset(candidate.getDisplayName()) && isset(original.getSurName()) && isset(original.getGivenName())) {
             String displayName = candidate.getDisplayName();
             if (displayName.contains(original.getGivenName()) && displayName.contains(original.getSurName())) {
                 score += 10;
             }
         }
-        
+
         // an email-address is unique so if this is identical the contact should be the same
         Set<String> mails = new HashSet<String>();
         List<String> mails1 = java.util.Arrays.asList(original.getEmail1(), original.getEmail2(), original.getEmail3());
@@ -118,7 +118,7 @@ public class ContactSimilarity {
                 score += 10;
             }
         }
-        
+
         List<String> purged = getPurgedDisplayNameComponents(original.getDisplayName());
         for(String mail : mails2) {
             if (mail == null) {
@@ -139,7 +139,7 @@ public class ContactSimilarity {
                 }
             }
         }
-        
+
         List<String> purged2 = getPurgedDisplayNameComponents(candidate.getDisplayName());
         for(String mail : mails) {
             if (mail == null) {
@@ -160,17 +160,17 @@ public class ContactSimilarity {
                 }
             }
         }
-        
+
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }
-        
+
         if( score < THRESHHOLD && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = THRESHHOLD + 1;
         }
         return score;
     }
-    
+
     public static List<String> getPurgedDisplayNameComponents(String displayName) {
         if (displayName == null) {
             return Collections.emptyList();
@@ -185,7 +185,7 @@ public class ContactSimilarity {
         }
         return p1;
     }
-    
+
     public static boolean compareDisplayNames(String displayName, String displayName2) {
         if (eq(displayName, displayName2)) {
             return true;
@@ -195,7 +195,7 @@ public class ContactSimilarity {
         }
         List<String> p1 = getPurgedDisplayNameComponents(displayName);
         List<String> p2 = getPurgedDisplayNameComponents(displayName2);
-        
+
         // any two must match
         int count = 0;
         for(String string : p2) {
@@ -203,13 +203,13 @@ public class ContactSimilarity {
                 count++;
             }
         }
-        
-        return count == Math.min(p1.size(), p2.size()) && count >= 2; 
+
+        return count == Math.min(p1.size(), p2.size()) && count >= 2;
     }
-    
+
     public static String purge(String component) {
         // throw away non characters
-        
+
         StringBuilder b = new StringBuilder(component.length());
         for(char c : component.toCharArray()) {
             if (Character.isLetter(c)) {
@@ -226,7 +226,7 @@ public class ContactSimilarity {
     public static boolean isset(String s) {
         return s != null && s.length() > 0;
     }
-    
+
     public static boolean eq(Object o1, Object o2) {
         if (o1 == null || o2 == null) {
             return false;

@@ -76,7 +76,7 @@ import com.openexchange.tx.TransactionException;
  */
 public class SimInfostoreFacade implements InfostoreFacade {
 
-    private Map<Integer, byte[]> files = new HashMap<Integer, byte[]>();
+    private final Map<Integer, byte[]> files = new HashMap<Integer, byte[]>();
 
     /* (non-Javadoc)
      * @see com.openexchange.groupware.infostore.InfostoreFacade#countDocuments(long, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
@@ -202,7 +202,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void lock(int id, long diff, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -210,7 +210,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -226,7 +226,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void removeUser(int id, Context context, ServerSession session) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -242,7 +242,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -250,7 +250,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -258,7 +258,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -266,7 +266,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -274,7 +274,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void setSessionHolder(SessionHolder sessionHolder) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -282,7 +282,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void touch(int id, ServerSession session) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -290,7 +290,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void unlock(int id, ServerSession sessionObj) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -298,7 +298,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void commit() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -306,7 +306,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void finish() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -314,7 +314,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void rollback() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -322,7 +322,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void setCommitsTransaction(boolean commits) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -330,7 +330,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void setRequestTransactional(boolean transactional) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -338,7 +338,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void setTransactional(boolean transactional) {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -346,7 +346,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
      */
     public void startTransaction() throws TransactionException {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void simulateDocument(int cid, int folder, int id, String string, byte[] bytes) {

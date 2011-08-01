@@ -60,7 +60,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link ProxyEventHandler} - The {@link EventHandler event handler} for mail push bundle to track newly created and removed sessions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyEventHandler implements EventHandler {

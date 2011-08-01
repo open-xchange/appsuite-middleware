@@ -69,7 +69,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 
 /**
  * {@link ThreadSortMailMessage} - Extends {@link MailMessage} by capability to carry child messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadSortMailMessage extends MailMessage {
@@ -82,7 +82,7 @@ public final class ThreadSortMailMessage extends MailMessage {
 
     /**
      * Initializes a new {@link ThreadSortMailMessage}.
-     * 
+     *
      * @param delegatee
      */
     public ThreadSortMailMessage(final MailMessage delegatee) {
@@ -908,7 +908,7 @@ public final class ThreadSortMailMessage extends MailMessage {
 
     /**
      * Adds specified child message.
-     * 
+     *
      * @param mailMessage The child message
      */
     public void addChildMessage(final ThreadSortMailMessage mailMessage) {
@@ -917,7 +917,7 @@ public final class ThreadSortMailMessage extends MailMessage {
 
     /**
      * Adds specified child messages.
-     * 
+     *
      * @param mailMessages The child messages
      */
     public void addChildMessages(final Collection<ThreadSortMailMessage> mailMessages) {
@@ -926,7 +926,7 @@ public final class ThreadSortMailMessage extends MailMessage {
 
     /**
      * Gets child messages.
-     * 
+     *
      * @return The child messages
      */
     public List<ThreadSortMailMessage> getChildMessages() {
@@ -935,7 +935,7 @@ public final class ThreadSortMailMessage extends MailMessage {
 
     /**
      * Gets the original message.
-     * 
+     *
      * @return The original message
      */
     public MailMessage getOriginalMessage() {

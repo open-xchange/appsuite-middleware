@@ -55,7 +55,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link InternalUserEditEnabled} - Indicates if permission to edit internal user setting is enabled.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -68,6 +68,7 @@ public class InternalUserEditEnabled extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.personaldata", "internal_user_edit" };
     }

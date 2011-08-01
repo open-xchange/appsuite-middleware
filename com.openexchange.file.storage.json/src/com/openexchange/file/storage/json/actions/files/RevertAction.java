@@ -70,12 +70,12 @@ public class RevertAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final TimedResult<File> versions = fileAccess.getVersions(request.getId());
         final List<Integer> versionNumbers = new ArrayList<Integer>(10);
-        
+
         final SearchIterator<File> results = versions.results();
         while(results.hasNext()) {
             final int version = results.next().getVersion();
@@ -83,16 +83,16 @@ public class RevertAction extends AbstractWriteAction {
                 versionNumbers.add(version);
             }
         }
-        
+
         final int[] toDelete = new int[versionNumbers.size()];
         for(int i = 0; i < toDelete.length; i++) {
             toDelete[i] = versionNumbers.get(i);
         }
-        
+
         fileAccess.removeVersion(request.getId(), toDelete);
-        
+
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
-        
+
         return success(fileMetadata.getSequenceNumber());
     }
 

@@ -71,7 +71,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
 
     private final Map<String, SubscribeService> services = new HashMap<String, SubscribeService>();
     private final Map<String, SortedSet<SubscribeService>> shelvedServices = new HashMap<String, SortedSet<SubscribeService>>();
-    
+
     public SubscriptionSource getSource(final String identifier) {
         if(!services.containsKey(identifier)) {
             return null;
@@ -88,7 +88,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         }
         return sources;
     }
-    
+
     public List<SubscriptionSource> getSources() {
         return getSources(-1);
     }
@@ -96,7 +96,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
     public boolean knowsSource(final String identifier) {
         return services.containsKey(identifier);
     }
-    
+
     public SubscriptionSourceDiscoveryService filter(final int user, final int context) throws OXException {
         return new FilteredSubscriptionSourceDiscoveryService(user, context, this);
     }
@@ -113,15 +113,15 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         } else {
             services.put(service.getSubscriptionSource().getId(), service);
         }
-        
+
     }
 
     // FIXME: This is not unique anymore
     public void removeSubscribeService(final String identifier) {
-        services.remove(identifier);        
+        services.remove(identifier);
         resurrectFromShelf(identifier);
     }
-    
+
     public SubscriptionSource getSource(final Context context, final int subscriptionId) throws OXException {
         for(final SubscribeService source : services.values()) {
             if(source.knows(context, subscriptionId)) {
@@ -130,7 +130,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
         }
         return null;
     }
-    
+
 
     private void shelfService(final SubscribeService service) {
         final String identifier = service.getSubscriptionSource().getId();
@@ -141,7 +141,7 @@ public class SubscriptionSourceCollector implements SubscriptionSourceDiscoveryS
                 public int compare(final SubscribeService o1, final SubscribeService o2) {
                     return o1.getSubscriptionSource().getPriority() - o2.getSubscriptionSource().getPriority();
                 }
-                
+
             });
             shelvedServices.put(identifier, set);
         }

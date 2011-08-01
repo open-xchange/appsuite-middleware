@@ -10,11 +10,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Extended phone terminal extension data
- * 
+ *
  * <p>Java class for ExtendedPhoneTerminal complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtendedPhoneTerminal">
  *   &lt;complexContent>
@@ -35,8 +35,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtendedPhoneTerminal", propOrder = {
@@ -70,11 +70,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the terminal property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTerminal() {
         return terminal;
@@ -82,11 +82,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the terminal property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTerminal(String value) {
         this.terminal = value;
@@ -94,11 +94,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the state property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getState() {
         return state;
@@ -106,11 +106,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the state property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setState(String value) {
         this.state = value;
@@ -118,11 +118,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the registration property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getRegistration() {
         return registration;
@@ -130,11 +130,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the registration property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setRegistration(XMLGregorianCalendar value) {
         this.registration = value;
@@ -142,11 +142,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the ip property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIP() {
         return ip;
@@ -154,11 +154,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the ip property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIP(String value) {
         this.ip = value;
@@ -166,11 +166,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the imLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIMLogin() {
         return imLogin;
@@ -178,11 +178,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the imLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIMLogin(String value) {
         this.imLogin = value;
@@ -190,11 +190,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the voicemailMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getVoicemailMsgQuota() {
         return voicemailMsgQuota;
@@ -202,11 +202,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the voicemailMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setVoicemailMsgQuota(String value) {
         this.voicemailMsgQuota = value;
@@ -214,11 +214,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the faxMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFaxMsgQuota() {
         return faxMsgQuota;
@@ -226,11 +226,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the faxMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFaxMsgQuota(String value) {
         this.faxMsgQuota = value;
@@ -238,11 +238,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the musicFilesQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMusicFilesQuota() {
         return musicFilesQuota;
@@ -250,11 +250,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the musicFilesQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMusicFilesQuota(String value) {
         this.musicFilesQuota = value;
@@ -262,11 +262,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the soundFilesQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSoundFilesQuota() {
         return soundFilesQuota;
@@ -274,11 +274,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the soundFilesQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSoundFilesQuota(String value) {
         this.soundFilesQuota = value;
@@ -286,11 +286,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Gets the value of the recordedMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecordedMsgQuota() {
         return recordedMsgQuota;
@@ -298,11 +298,11 @@ public class ExtendedPhoneTerminal
 
     /**
      * Sets the value of the recordedMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecordedMsgQuota(String value) {
         this.recordedMsgQuota = value;

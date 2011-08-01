@@ -60,7 +60,7 @@ import com.openexchange.server.impl.OCLPermission;
  * This depends on if mailing system supports any kind of access control for entities; e.g. for IMAP it is the ACL capability. If no access
  * control is defined by mailing system, {@link DefaultMailPermission} is used which grants full access and therefore bypasses access
  * control.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailPermission extends OCLPermission {
@@ -82,7 +82,7 @@ public abstract class MailPermission extends OCLPermission {
      * <p>
      * Returns <code>-1</code> if there's no special rename permission. Then rename is granted if {@link #isFolderAdmin()} returns
      * <code>true</code>. Otherwise <code>1</code> is returned if rename is granted; <code>0</code> means no rename permission.
-     * 
+     *
      * @return
      */
     public int canRename() {
@@ -93,7 +93,7 @@ public abstract class MailPermission extends OCLPermission {
 
     /**
      * Gets a new mail permission instance
-     * 
+     *
      * @param <P> The permission sub-type
      * @param clazz The permission class
      * @return A new mail permission instance

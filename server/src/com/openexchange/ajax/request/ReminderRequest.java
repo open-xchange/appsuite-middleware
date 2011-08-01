@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReminderRequest} - Handles request to reminder servlet.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ReminderRequest {
@@ -107,7 +107,7 @@ public final class ReminderRequest {
 
     /**
      * Gets the time stamp.
-     * 
+     *
      * @return The time stamp.
      */
     public Date getTimestamp() {
@@ -116,7 +116,7 @@ public final class ReminderRequest {
 
     /**
      * Initializes a new {@link ReminderRequest}.
-     * 
+     *
      * @param session The session
      */
     public ReminderRequest(final ServerSession session) {
@@ -128,7 +128,7 @@ public final class ReminderRequest {
 
     /**
      * Handles the request dependent on specified action string.
-     * 
+     *
      * @param action The action string
      * @param jsonObject The JSON object containing request's data & parameters
      * @return A JSON result object dependent on triggered action method
@@ -297,7 +297,7 @@ public final class ReminderRequest {
             final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? tz : getTimeZone(timeZoneId);
         }
-        
+
         final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         try {
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
@@ -357,7 +357,7 @@ public final class ReminderRequest {
     /**
      * This method returns the lastest reminder object of the recurrence appointment. The reminder object contains only the alarm attribute
      * and the recurrence position.
-     * 
+     *
      * @return <code>true</code> if a latest reminder was found.
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
@@ -399,20 +399,20 @@ public final class ReminderRequest {
         final AppointmentSQLInterface calendarSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
-        
+
         try {
             calendarDataObject = calendarSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
-        
+
         final RecurringResultsInterface recurringResults;
         try {
             // Until is always set to 00:00:00 UTC so we have to recalculate it to get the last occurrence too.
             final long end_mod = calendarDataObject.getEndDate().getTime() % Constants.MILLI_DAY;
             Date until = null;
             until = new Date(calendarDataObject.getUntil().getTime() + end_mod + tz.getOffset(calendarDataObject.getUntil().getTime()));
-            
+
             recurringResults = recColl.calculateRecurring(calendarDataObject, reminder.getDate().getTime(), until.getTime(), 0);
         } catch (final OXException e) {
             LOG.error(

@@ -9,11 +9,11 @@ import com._4psa.extensiondata_xsd._2_5.FaxCenter;
 
 /**
  * Get phone terminal fax centers settings: response type
- * 
+ *
  * <p>Java class for GetFaxCenterSettingsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetFaxCenterSettingsResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.extensiondata_xsd._2_5.FaxCenter;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetFaxCenterSettingsResponseType")

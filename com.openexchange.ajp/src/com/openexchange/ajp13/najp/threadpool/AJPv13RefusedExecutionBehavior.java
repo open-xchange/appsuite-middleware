@@ -64,7 +64,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AJPv13RefusedExecutionBehavior} - The behavior for rejected AJP tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<Object> {
@@ -76,7 +76,7 @@ final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<O
 
     /**
      * Initializes a new {@link AJPv13RefusedExecutionBehavior}.
-     * 
+     *
      * @param watcher The task watcher to remove excess tasks from
      */
     public AJPv13RefusedExecutionBehavior(final AJPv13TaskWatcher watcher) {
@@ -84,6 +84,7 @@ final class AJPv13RefusedExecutionBehavior implements RefusedExecutionBehavior<O
         this.watcher = watcher;
     }
 
+    @Override
     public Object refusedExecution(final Task<Object> task, final ThreadPoolService threadPoolService) {
         if (threadPoolService.isShutdown()) {
             // Proper logging

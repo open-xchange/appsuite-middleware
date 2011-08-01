@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link HeaderCacheMailAccess} - The header cache mail access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, HeaderCacheMessageStorage> {
@@ -86,7 +86,7 @@ public final class HeaderCacheMailAccess extends MailAccess<IMailFolderStorage, 
 
     /**
      * Initializes a new {@link HeaderCacheMailAccess}.
-     * 
+     *
      * @param session The session
      * @param accountId The account Id
      * @param mailAccess The mail access to delegate to

@@ -60,7 +60,7 @@ import com.openexchange.calendar.printing.CPCalendar;
  * need to include weeks that do not belong to that month, in case the first or last week of a month contains days from neighbouring months.
  * To do these checks, this class keeps track of days, weeks and months internally. It works stateful, unlike its super class, which only
  * contains non-stateful classes.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalculator implements CPPartitioningStrategy {
@@ -84,8 +84,9 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     private int lastDay = -1, lastWeek = -1, lastMonth = -1, lastYear = -1;
 
     protected void addDayBreak(CPPartition blocks, int pointer, Date day) {
-        if (lastDay == getDayOfYear(day).intValue())
+        if (lastDay == getDayOfYear(day).intValue()) {
             return;
+        }
         blocks.addFormattingInformation(new CPFormattingInformation(pointer, AbstractWeekPartitioningStrategy.DAYBREAK, day));
         blocks.addFormattingInformation(new CPFormattingInformation(
             pointer,
@@ -95,8 +96,9 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     }
 
     protected void addWeekBreak(CPPartition blocks, int pointer, Date day) {
-        if (lastWeek == getWeekOfYear(day).intValue())
+        if (lastWeek == getWeekOfYear(day).intValue()) {
             return;
+        }
         CPFormattingInformation weekBreak = new CPFormattingInformation(
             pointer,
             AbstractWeekPartitioningStrategy.WEEKBREAK,
@@ -107,8 +109,9 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     }
 
     protected void addMonthBreak(CPPartition blocks, int pointer, Date day) {
-        if (lastMonth == getMonthOfYear(day).intValue())
+        if (lastMonth == getMonthOfYear(day).intValue()) {
             return;
+        }
         CPFormattingInformation monthBreak = new CPFormattingInformation(pointer, AbstractWeekPartitioningStrategy.MONTHBREAK, day);
         blocks.addFormattingInformation(monthBreak);
         fillUpBeginningOfMonth(blocks.getFormattingInformation(), day, pointer);
@@ -118,14 +121,16 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
 
     protected void addYearBreak(CPPartition blocks, int pointer, Date date) {
         CPFormattingInformation yearBreak = new CPFormattingInformation(pointer, AbstractWeekPartitioningStrategy.YEARBREAK, date);
-        if (lastYear != getYear(date).intValue())
+        if (lastYear != getYear(date).intValue()) {
             blocks.addFormattingInformation(yearBreak);
+        }
         lastYear = getYear(date).intValue();
     }
 
     protected boolean isSignalForNewDay(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
+        if (lastStoredAppointment == null) {
             return true;
+        }
 
         return isOnDifferentDays(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isOnDifferentDays(
             lastStoredAppointment.getEndDate(),
@@ -133,8 +138,9 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     }
 
     protected boolean isSignalForNewWeek(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
+        if (lastStoredAppointment == null) {
             return true;
+        }
 
         return isInDifferentWeeks(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentWeeks(
             lastStoredAppointment.getEndDate(),
@@ -142,8 +148,9 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
     }
 
     protected boolean isSignalForNewMonth(CPAppointment appointment) {
-        if (lastStoredAppointment == null)
+        if (lastStoredAppointment == null) {
             return true;
+        }
 
         return isInDifferentMonths(lastStoredAppointment.getStartDate(), appointment.getStartDate()) || isInDifferentMonths(
             lastStoredAppointment.getEndDate(),
@@ -161,50 +168,66 @@ public abstract class AbstractWeekPartitioningStrategy extends WeekAndDayCalcula
         int firstDayOfWeekInMonthInYear = cal.get(Calendar.DAY_OF_YEAR);
 
         int fillersToAdd = 0;
-        if (isMissingDaysInbetween(firstDayOfWeekInMonth, firstDayOfMonth))
+        if (isMissingDaysInbetween(firstDayOfWeekInMonth, firstDayOfMonth)) {
             fillersToAdd = getMissingDaysInbetween(firstDayOfWeekInMonth, firstDayOfMonth).size();
+        }
         if (firstDayOfMonthInYear != firstDayOfWeekInMonthInYear)
+         {
             fillersToAdd++; // takes care of the one day not covered by "inbetween"
+        }
 
         int insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, MONTHBREAK));
-        if (insertionPoint == -1)
+        if (insertionPoint == -1) {
             insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, YEARBREAK));
-        if (insertionPoint == -1)
+        }
+        if (insertionPoint == -1) {
             insertionPoint = 0;
-        else
+        }
+        else {
             insertionPoint++; // insert after the month/year break
-        for (int i = 0; i < fillersToAdd; i++)
+        }
+        for (int i = 0; i < fillersToAdd; i++) {
             info.add(insertionPoint, new CPFormattingInformation(position, FILLDAY, Integer.valueOf(MONTHBREAK)));
+        }
     }
 
     protected void fillUpBeginningOfWorkWeek(List<CPFormattingInformation> info, Date day, int position) {
-        if(!isInWorkWeek(day))
+        if(!isInWorkWeek(day)) {
             return;
+        }
         CPCalendar cal = getCalendar();
         cal.setTime(day);
         int dayInYear = cal.get(Calendar.DAY_OF_YEAR);
-        
+
         cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWorkWeek());
         Date firstDayOfWorkWeek = cal.getTime();
         int firstDayOfWorkWeekInMonthInYear = cal.get(Calendar.DAY_OF_YEAR);
 
         int fillersToAdd = 0;
-        if (isMissingDaysInbetween(firstDayOfWorkWeek, day))
+        if (isMissingDaysInbetween(firstDayOfWorkWeek, day)) {
             fillersToAdd = getMissingDaysInbetween(firstDayOfWorkWeek, day).size();
+        }
         if (dayInYear!= firstDayOfWorkWeekInMonthInYear)
+         {
             fillersToAdd++; // takes care of the one day not covered by "inbetween"
+        }
 
         int insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, WEEKBREAK));
-        if (insertionPoint == -1)
+        if (insertionPoint == -1) {
             insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, MONTHBREAK));
-        if (insertionPoint == -1)
+        }
+        if (insertionPoint == -1) {
             insertionPoint = info.lastIndexOf(new CPFormattingInformation(position, YEARBREAK));
-        if (insertionPoint == -1)
+        }
+        if (insertionPoint == -1) {
             insertionPoint = 0;
-        else
+        }
+        else {
             insertionPoint++; // insert after the week/month/year break
+        }
 
-        for (int i = 0; i < fillersToAdd; i++)
+        for (int i = 0; i < fillersToAdd; i++) {
             info.add(insertionPoint, new CPFormattingInformation(position, FILLDAY, Integer.valueOf(WEEKBREAK)));
+        }
     }
 }

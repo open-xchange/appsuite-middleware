@@ -53,7 +53,7 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link ContactSanitizer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContactSanitizer {

@@ -56,7 +56,7 @@ import com.openexchange.ajp13.AJPv13Config;
 
 /**
  * {@link AJPv13ConnectionPool} - The AJP connection pool
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13ConnectionPool {
@@ -110,7 +110,7 @@ final class AJPv13ConnectionPool {
 
     /**
      * Fetches an existing connection from pool or creates a new instance if none available in pool
-     * 
+     *
      * @param l The AJP listener which is assigned to returned AJP connection
      * @return A pooled or newly created AJP connection
      */
@@ -124,7 +124,7 @@ final class AJPv13ConnectionPool {
 
     /**
      * Puts given AJP Connection back in pool if there's enough space in queue otherwise the instance is going to be discarded
-     * 
+     *
      * @param ajpCon The AJP connection which shall be put into pool
      * @return <code>true</code> if AJP connection was successfully put into pool; otherwise <code>false</code>
      */

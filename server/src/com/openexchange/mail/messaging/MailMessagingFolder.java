@@ -70,101 +70,121 @@ public final class MailMessagingFolder implements MessagingFolder {
         // TODO MailProperties.getInstance().isIgnoreSubscription()
     }
 
+    @Override
     public boolean containsDefaultFolderType() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public Set<String> getCapabilities() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public DefaultFolderType getDefaultFolderType() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getDeletedMessageCount() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public String getId() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getMessageCount() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public String getName() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getNewMessageCount() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public MessagingPermission getOwnPermission() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getParentId() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public List<MessagingPermission> getPermissions() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public char getSeparator() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public int getUnreadMessageCount() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public boolean hasSubfolders() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isDefaultFolder() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isHoldsFolders() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isHoldsMessages() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isRootFolder() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isSubscribed() {
         // TODO Auto-generated method stub
         return false;

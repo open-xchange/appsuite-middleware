@@ -66,23 +66,26 @@ public class FolderFieldCollector implements ServiceTrackerCustomizer {
 
     private final AdditionalFolderFieldList list;
     private final BundleContext context;
-    
+
     public FolderFieldCollector(final BundleContext context, final AdditionalFolderFieldList list) {
         super();
         this.list = list;
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
         list.addField(field);
         return field;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         try {
             final AdditionalFolderField field = (AdditionalFolderField) service;

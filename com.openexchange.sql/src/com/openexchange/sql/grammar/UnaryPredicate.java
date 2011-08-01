@@ -50,7 +50,7 @@
 package com.openexchange.sql.grammar;
 
 public abstract class UnaryPredicate extends Predicate {
-	private Expression expression;
+	private final Expression expression;
 
 	public UnaryPredicate(Expression expression) {
 		super();

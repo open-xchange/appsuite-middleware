@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  * <p>
  * <b>Note</b>: This item is currently disabled in <code>com.openexchange.groupware.settings.impl.ConfigTree</code> class.<br>
  * By now a global option to enable/disable spell check functionality is sufficient.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpellCheck implements PreferencesItemService {
@@ -80,12 +80,15 @@ public final class SpellCheck implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null != set && !set.isEmpty()) {
@@ -94,9 +97,11 @@ public final class SpellCheck implements PreferencesItemService {
                     setting.setSingleValue(Boolean.FALSE);
                 }
             }
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
+            @Override
             public boolean isWritable() {
                 return true;
             }

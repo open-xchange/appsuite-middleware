@@ -230,7 +230,7 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
-                throw LdapExceptionCode.GROUP_NOT_FOUND.create("GRP", 
+                throw LdapExceptionCode.GROUP_NOT_FOUND.create("GRP",
                     Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
@@ -253,7 +253,7 @@ public class RdbGroupStorage extends GroupStorage {
     public Group[] listDeletedGroups(final Date modifiedSince, final Context context) throws OXException {
         return listModifiedOrDeletedGroups(modifiedSince, context, SELECT_DELETED_GROUPS);
     }
-    
+
     private Group[] listModifiedOrDeletedGroups(final Date modifiedSince, final Context context, final String statement) throws OXException {
         final Connection con;
         try {

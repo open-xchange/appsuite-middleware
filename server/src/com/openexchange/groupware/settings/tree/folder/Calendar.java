@@ -77,6 +77,7 @@ public class Calendar implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "folder", "calendar" };
     }
@@ -84,11 +85,14 @@ public class Calendar implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
+            @Override
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {

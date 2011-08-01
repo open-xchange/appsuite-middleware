@@ -60,14 +60,14 @@ import com.openexchange.mail.mime.HeaderName;
 
 /**
  * {@link SyncData}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SyncData {
 
     /**
      * Initializes a new {@link SyncData}.
-     * 
+     *
      * @param uid The mail ID
      * @param flags The system flags
      * @param userFlags The user flags or <code>null</code>
@@ -79,7 +79,7 @@ public final class SyncData {
 
     /**
      * Gets the IDs from specified sync data collection.
-     * 
+     *
      * @param collection The sync data collection
      * @return The IDs from specified sync data collection
      */
@@ -98,7 +98,7 @@ public final class SyncData {
 
     /**
      * Filters specified sync data collection by given IDs.
-     * 
+     *
      * @param ids The IDs
      * @param syncData The sync data collection
      * @return The filtered sync data collection
@@ -127,7 +127,7 @@ public final class SyncData {
 
     /**
      * Initializes a new {@link SyncData}.
-     * 
+     *
      * @param uid The mail ID
      * @param flags The system flags
      * @param userFlags The user flags
@@ -201,7 +201,7 @@ public final class SyncData {
 
     /**
      * Indicates whether some other object is "equal to" this one considering mail ID only.
-     * 
+     *
      * @param obj The reference object with which to compare.
      * @return <code>true</code> if this object is the same as the object argument; <code>false</code> otherwise.
      */
@@ -225,7 +225,7 @@ public final class SyncData {
 
     /**
      * Gets the ID.
-     * 
+     *
      * @return The ID
      */
     public String getId() {
@@ -234,7 +234,7 @@ public final class SyncData {
 
     /**
      * Gets the flags.
-     * 
+     *
      * @return The flags
      */
     public int getFlags() {
@@ -243,7 +243,7 @@ public final class SyncData {
 
     /**
      * Gets the user flags.
-     * 
+     *
      * @return The user flags
      */
     public Set<HeaderName> getUserFlags() {

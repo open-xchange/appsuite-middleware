@@ -57,7 +57,7 @@ import com.openexchange.sso.action.SSOActionFactory;
 
 /**
  * {@link SSOMultipleHandlerFactory} - Factory service for single sign-on bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SSOMultipleHandlerFactory implements MultipleHandlerFactoryService {

@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link RequestParticipants}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {

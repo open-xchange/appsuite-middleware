@@ -16,11 +16,11 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
 
 /**
  * Recharge : response type
- * 
+ *
  * <p>Java class for GetRechargesResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetRechargesResponseType">
  *   &lt;complexContent>
@@ -55,8 +55,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetRechargesResponseType", propOrder = {
@@ -86,25 +86,25 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the credit property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the credit property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCredit().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetRechargesResponseType.Credit }
-     * 
-     * 
+     *
+     *
      */
     public List<GetRechargesResponseType.Credit> getCredit() {
         if (credit == null) {
@@ -115,25 +115,25 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the limit property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the limit property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLimit().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link LimitsList }
-     * 
-     * 
+     *
+     *
      */
     public List<LimitsList> getLimit() {
         if (limit == null) {
@@ -144,11 +144,11 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the planType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPlanType() {
         return planType;
@@ -156,11 +156,11 @@ public class GetRechargesResponseType {
 
     /**
      * Sets the value of the planType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPlanType(String value) {
         this.planType = value;
@@ -168,11 +168,11 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the currentIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getCurrentIn() {
         return currentIn;
@@ -180,11 +180,11 @@ public class GetRechargesResponseType {
 
     /**
      * Sets the value of the currentIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setCurrentIn(UnlimitedUFloat value) {
         this.currentIn = value;
@@ -192,11 +192,11 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the currentOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getCurrentOut() {
         return currentOut;
@@ -204,11 +204,11 @@ public class GetRechargesResponseType {
 
     /**
      * Sets the value of the currentOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setCurrentOut(UnlimitedUFloat value) {
         this.currentOut = value;
@@ -216,11 +216,11 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the currentOverusage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getCurrentOverusage() {
         return currentOverusage;
@@ -228,11 +228,11 @@ public class GetRechargesResponseType {
 
     /**
      * Sets the value of the currentOverusage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setCurrentOverusage(UnlimitedUFloat value) {
         this.currentOverusage = value;
@@ -240,25 +240,25 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -269,11 +269,11 @@ public class GetRechargesResponseType {
 
     /**
      * Gets the value of the currency property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCurrency() {
         return currency;
@@ -281,11 +281,11 @@ public class GetRechargesResponseType {
 
     /**
      * Sets the value of the currency property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCurrency(String value) {
         this.currency = value;
@@ -294,9 +294,9 @@ public class GetRechargesResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -305,8 +305,8 @@ public class GetRechargesResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "")

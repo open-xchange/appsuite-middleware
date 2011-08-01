@@ -126,7 +126,7 @@ public class ICal4JEmitter implements ICalEmitter {
         }
         return calendar.toString();
     }
-    
+
     private VEvent createEvent(final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         return createEvent(index, appointment, ctx, errors, warnings, new ITipContainer());
     }
@@ -147,7 +147,7 @@ public class ICal4JEmitter implements ICalEmitter {
         default:
             converters = AppointmentConverters.ALL;
         }
-        
+
         for (final AttributeConverter<VEvent, Appointment> converter : converters) {
             if (converter.isSet(appointment)) {
                 try {
@@ -181,10 +181,10 @@ public class ICal4JEmitter implements ICalEmitter {
         initCalendar(retval.getCalendar());
         return retval;
     }
-    
+
     public ICalItem writeAppointment(final ICalSession session, final Appointment appointment, final Context ctx, final ITipContainer iTip, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);
-        
+
         switch (iTip.getMethod()) {
         case REPLY:
             calendar.getProperties().remove(Method.REQUEST);
@@ -198,13 +198,13 @@ public class ICal4JEmitter implements ICalEmitter {
         default:
             break;
         }
-        
+
         final VEvent event = createEvent(getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
         calendar.getComponents().add(event);
         addVTimeZone(calendar, appointment);
         return new ICal4jItem(event);
     }
-    
+
     private void addVTimeZone(Calendar calendar, Appointment appointment) {
         if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
             String tzid = appointment.getTimezone().trim();
@@ -226,7 +226,7 @@ public class ICal4JEmitter implements ICalEmitter {
         final Appointment appointment, final Context ctx,
         final List<ConversionError> errors, final List<ConversionWarning> warnings)
         throws ConversionError {
-        
+
         return writeAppointment(session, appointment, ctx, new ITipContainer(), errors, warnings);
     }
 

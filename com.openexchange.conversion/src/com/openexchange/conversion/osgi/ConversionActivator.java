@@ -56,7 +56,7 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Activator for this bundle that registers a new Component.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConversionActivator implements BundleActivator {

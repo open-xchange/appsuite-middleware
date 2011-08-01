@@ -64,7 +64,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForTOnlineDeTest extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testTOnlineDE(){
      // insert valid credentials here
         String username = "";
@@ -73,7 +73,7 @@ public class GenericSubscribeServiceForTOnlineDeTest extends GenericSubscribeSer
         // create a CrawlerDescription
         CrawlerDescription crawler = new CrawlerDescription();
         crawler.setDisplayName("t-online.de");
-        crawler.setId("com.openexchange.subscribe.crawler.t-online.de");   
+        crawler.setId("com.openexchange.subscribe.crawler.t-online.de");
         crawler.setCrawlerApiVersion(618);
         List<Step> steps = new LinkedList<Step>();
         //
@@ -108,8 +108,8 @@ public class GenericSubscribeServiceForTOnlineDeTest extends GenericSubscribeSer
             "",
             ".*postalshow.*",
             true));
-        
-        Workflow workflow = new Workflow(steps);      
+
+        Workflow workflow = new Workflow(steps);
         crawler.setWorkflowString(Yaml.dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);

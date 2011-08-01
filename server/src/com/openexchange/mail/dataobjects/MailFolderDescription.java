@@ -62,7 +62,7 @@ import com.openexchange.mailaccount.MailAccount;
  * <p>
  * See the method descriptions of {@link #setExists(boolean)} and/or {@link #setFullname(String)} how to signal a create or an update
  * operation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailFolderDescription {
@@ -112,7 +112,7 @@ public class MailFolderDescription {
 
     /**
      * Adds a permission
-     * 
+     *
      * @param permission The permission to add
      */
     public void addPermission(final MailPermission permission) {
@@ -127,7 +127,7 @@ public class MailFolderDescription {
 
     /**
      * Adds an array of permissions
-     * 
+     *
      * @param permissions The array of permissions to add
      */
     public void addPermissions(final MailPermission[] permissions) {
@@ -142,7 +142,7 @@ public class MailFolderDescription {
 
     /**
      * Adds a collection of permissions
-     * 
+     *
      * @param permissions The collection of permissions to add
      */
     public void addPermissions(final Collection<? extends MailPermission> permissions) {
@@ -157,7 +157,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if existence status has been set
-     * 
+     *
      * @return <code>true</code> if exists status is set; otherwise <code>false</code>
      */
     public boolean containsExists() {
@@ -166,7 +166,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if fullname has been set
-     * 
+     *
      * @return <code>true</code> if fullname is set; otherwise <code>false</code>
      */
     public boolean containsFullname() {
@@ -175,7 +175,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if name has been set
-     * 
+     *
      * @return <code>true</code> if name is set; otherwise <code>false</code>
      */
     public boolean containsName() {
@@ -184,7 +184,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if parent fullname has been set
-     * 
+     *
      * @return <code>true</code> if parentFullname is set; otherwise <code>false</code>
      */
     public boolean containsParentFullname() {
@@ -193,7 +193,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if permissions have been set
-     * 
+     *
      * @return <code>true</code> if permissions are set; otherwise <code>false</code>
      */
     public boolean containsPermissions() {
@@ -202,7 +202,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if separator has been set
-     * 
+     *
      * @return <code>true</code> if separator is set; otherwise <code>false</code>
      */
     public boolean containsSeparator() {
@@ -211,7 +211,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if subscription status has been set
-     * 
+     *
      * @return <code>true</code> if subscribed is set; otherwise <code>false</code>
      */
     public boolean containsSubscribed() {
@@ -220,7 +220,7 @@ public class MailFolderDescription {
 
     /**
      * Checks if this folder exists
-     * 
+     *
      * @see #setExists(boolean)
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
@@ -230,7 +230,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the fullname
-     * 
+     *
      * @see #setFullname(String)
      * @return the fullname
      */
@@ -240,7 +240,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the account ID belonging to fullname.
-     * 
+     *
      * @return The account ID belonging to fullname.
      */
     public int getAccountId() {
@@ -249,7 +249,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the name
-     * 
+     *
      * @return the name
      */
     public String getName() {
@@ -258,7 +258,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the parent fullname
-     * 
+     *
      * @return the parent fullname
      */
     public String getParentFullname() {
@@ -267,7 +267,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the account ID belonging to parent.
-     * 
+     *
      * @return The account ID belonging to parent.
      */
     public int getParentAccountId() {
@@ -276,7 +276,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the permissions
-     * 
+     *
      * @return the permissions as array of {@link MailPermission}
      */
     public MailPermission[] getPermissions() {
@@ -288,7 +288,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the separator
-     * 
+     *
      * @return the separator
      */
     public char getSeparator() {
@@ -297,7 +297,7 @@ public class MailFolderDescription {
 
     /**
      * Gets the subscription status
-     * 
+     *
      * @return the subscription status
      */
     public boolean isSubscribed() {
@@ -366,7 +366,7 @@ public class MailFolderDescription {
      * This flag is checked at first to detect if an update or create operation shall be performed. If not set - this is
      * {@link #containsExists()} returns <code>false</code> - the folder's fullname in conjunction with
      * {@link MailFolderStorage#exists(String)} is used to determine folder existence.
-     * 
+     *
      * @see #setFullname(String)
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
@@ -380,7 +380,7 @@ public class MailFolderDescription {
      * <p>
      * If {@link #containsExists()} returns <code>false</code> the {@link MailFolderStorage#exists(String)} method is used to determine
      * folder existence.
-     * 
+     *
      * @see #setExists(boolean)
      * @param fullname the fullname to set
      */
@@ -391,7 +391,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the account ID belonging to fullname.
-     * 
+     *
      * @param accountId The account ID
      */
     public void setAccountId(final int accountId) {
@@ -400,7 +400,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name the name to set
      */
     public void setName(final String name) {
@@ -410,7 +410,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the parent fullname
-     * 
+     *
      * @param parentFullname the parent fullname to set
      */
     public void setParentFullname(final String parentFullname) {
@@ -420,7 +420,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the account ID belonging to parent.
-     * 
+     *
      * @param parentAccountId The account ID belonging to parent.
      */
     public void setParentAccountId(final int parentAccountId) {
@@ -429,7 +429,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the separator
-     * 
+     *
      * @param separator the separator to set
      */
     public void setSeparator(final char separator) {
@@ -439,7 +439,7 @@ public class MailFolderDescription {
 
     /**
      * Sets the subscription status
-     * 
+     *
      * @param subscribed the subscription status to set
      */
     public void setSubscribed(final boolean subscribed) {

@@ -51,7 +51,7 @@ package com.openexchange.pop3.storage.mailaccount;
 
 /**
  * {@link SessionCacheProperties} - Provides constants for session-backed caches.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionCacheProperties {

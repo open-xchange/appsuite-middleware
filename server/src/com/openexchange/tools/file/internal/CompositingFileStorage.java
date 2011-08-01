@@ -62,35 +62,37 @@ import com.openexchange.tools.file.external.FileStorage;
 
 /**
  * {@link CompositingFileStorage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositingFileStorage implements FileStorage {
 
-    private Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
+    private final Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
 
     private FileStorage standardFS;
 
     private String savePrefix;
 
+    @Override
     public boolean deleteFile(String identifier) throws OXException {
         PreparedName prepared = prepareName(identifier);
         return prepared.fs.deleteFile(prepared.name);
     }
 
+    @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         Map<FileStorage, List<String>> partitions = new HashMap<FileStorage, List<String>>();
         Map<FileStorage, String> prefixes = new HashMap<FileStorage, String>();
-        
+
         for (String name : identifiers) {
             PreparedName preparedName = prepareName(name);
-            
+
             List<String> list = partitions.get(preparedName.fs);
             if(list == null) {
                 list = new LinkedList<String>();
                 partitions.put(preparedName.fs, list);
             }
-            
+
             list.add(preparedName.name);
             if(preparedName.prefix != null) {
                 prefixes.put(preparedName.fs, preparedName.prefix);
@@ -100,7 +102,7 @@ public class CompositingFileStorage implements FileStorage {
         for(Map.Entry<FileStorage, List<String>> entry: partitions.entrySet()) {
             FileStorage fileStorage = entry.getKey();
             List<String> ids = entry.getValue();
-            
+
             Set<String> files = fileStorage.deleteFiles(ids.toArray(new String[ids.size()]));
             String prefix = prefixes.get(fileStorage);
             if(prefix == null) {
@@ -111,21 +113,23 @@ public class CompositingFileStorage implements FileStorage {
                 }
             }
         }
-        
+
         return notDeleted;
     }
 
+    @Override
     public InputStream getFile(String name) throws OXException {
         PreparedName prepared = prepareName(name);
         return prepared.fs.getFile(prepared.name);
     }
 
+    @Override
     public SortedSet<String> getFileList() throws OXException {
         SortedSet<String> fileList = standardFS.getFileList();
         for(Map.Entry<String, FileStorage> entry: prefixedStores.entrySet()) {
             String prefix = entry.getKey();
             FileStorage fileStorage = entry.getValue();
-            
+
             SortedSet<String> files = fileStorage.getFileList();
             for (String file : files) {
                 fileList.add(prefix+"/"+file);
@@ -134,15 +138,18 @@ public class CompositingFileStorage implements FileStorage {
         return fileList;
     }
 
+    @Override
     public long getFileSize(String name) throws OXException {
         PreparedName preparedName = prepareName(name);
         return preparedName.fs.getFileSize(preparedName.name);
     }
 
+    @Override
     public String getMimeType(String name) throws OXException {
         return standardFS.getMimeType(name);
     }
 
+    @Override
     public void recreateStateFile() throws OXException {
         standardFS.recreateStateFile();
         for(FileStorage fs: prefixedStores.values()) {
@@ -150,6 +157,7 @@ public class CompositingFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public void remove() throws OXException {
         standardFS.remove();
         for(FileStorage fs: prefixedStores.values()) {
@@ -157,6 +165,7 @@ public class CompositingFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public String saveNewFile(InputStream file) throws OXException {
         if (savePrefix != null) {
             return saveNewFileInPrefixedSto(savePrefix, file);
@@ -169,6 +178,7 @@ public class CompositingFileStorage implements FileStorage {
         return prefix + "/" + fileStorage.saveNewFile(file);
     }
 
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         boolean stateFileIsCorrect = standardFS.stateFileIsCorrect();
         if(!stateFileIsCorrect) {

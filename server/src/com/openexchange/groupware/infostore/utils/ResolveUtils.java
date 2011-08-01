@@ -58,7 +58,7 @@ public abstract class ResolveUtils {
 	public static FolderObject getFolder(final Resolved resolved) {
 		return null; //TODO
 	}
-	
+
 	public static DocumentMetadata getDocument(final Resolved resolved) {
 		return null; // TODO
 	}

@@ -56,7 +56,7 @@ import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link ArrayIterator} - A {@link SearchIterator} implementation backed by an array.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ArrayIterator<T> implements SearchIterator<T> {
@@ -69,7 +69,7 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link ArrayIterator}
-     * 
+     *
      * @param array The underlying array
      */
     public ArrayIterator(final T[] array) {

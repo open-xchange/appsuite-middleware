@@ -14,11 +14,11 @@ import com._4psa.pbxmessages_xsd._2_5.EditCustomAlertRequest;
 
 /**
  * Custom alert data
- * 
+ *
  * <p>Java class for CustomAlert complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CustomAlert">
  *   &lt;complexContent>
@@ -55,8 +55,8 @@ import com._4psa.pbxmessages_xsd._2_5.EditCustomAlertRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CustomAlert", propOrder = {
@@ -89,11 +89,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCode() {
         return code;
@@ -101,11 +101,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the code property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCode(String value) {
         this.code = value;
@@ -113,11 +113,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the text property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getText() {
         return text;
@@ -125,11 +125,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the text property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setText(String value) {
         this.text = value;
@@ -137,11 +137,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the priority property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPriority() {
         return priority;
@@ -149,11 +149,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the priority property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPriority(BigInteger value) {
         this.priority = value;
@@ -161,11 +161,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the displayMethod property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDisplayMethod() {
         return displayMethod;
@@ -173,11 +173,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the displayMethod property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDisplayMethod(String value) {
         this.displayMethod = value;
@@ -185,11 +185,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the displayLevel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDisplayLevel() {
         return displayLevel;
@@ -197,11 +197,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the displayLevel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDisplayLevel(String value) {
         this.displayLevel = value;
@@ -209,11 +209,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the displayToOwner property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDisplayToOwner() {
         return displayToOwner;
@@ -221,11 +221,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the displayToOwner property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDisplayToOwner(Boolean value) {
         this.displayToOwner = value;
@@ -233,11 +233,11 @@ public class CustomAlert {
 
     /**
      * Gets the value of the expiration property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public UnlimitedDate getExpiration() {
         return expiration;
@@ -245,11 +245,11 @@ public class CustomAlert {
 
     /**
      * Sets the value of the expiration property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public void setExpiration(UnlimitedDate value) {
         this.expiration = value;

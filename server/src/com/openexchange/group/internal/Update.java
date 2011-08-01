@@ -84,12 +84,12 @@ final class Update {
      * Context.
      */
     private final Context ctx;
-    
+
     /**
      * User.
      */
     private final User user;
-    
+
     /**
      * Group object with changed information.
      */

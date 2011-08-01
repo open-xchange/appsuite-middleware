@@ -63,10 +63,10 @@ import com.openexchange.groupware.contexts.Context;
 public class DatabaseServiceDBProvider implements DBProvider {
 
     private final DatabaseService databaseService;
-    
+
     /**
      * Initializes a new {@link DatabaseServiceDBProvider}.
-     * 
+     *
      * @param databaseService The backing {@link DatabaseService} instance
      */
     public DatabaseServiceDBProvider(final DatabaseService databaseService) {
@@ -74,20 +74,24 @@ public class DatabaseServiceDBProvider implements DBProvider {
         this.databaseService = databaseService;
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         return databaseService.getReadOnly(ctx);
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if (con != null) {
             databaseService.backReadOnly(ctx,con);
         }
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         return databaseService.getWritable(ctx);
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         if (con == null) {
             return;

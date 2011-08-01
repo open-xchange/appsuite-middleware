@@ -57,13 +57,13 @@ import com.openexchange.sessiond.SessiondProperty;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public enum ConfigurationProperty {
-    
+
     /**
      * Configures if some user is able to reenter his existing session after closing the browser tab or the complete browser. Setting this
      * to true may be a security risk for clients running on unsafe computers. If this is configured to true, check that the parameter
      * client contains the same identifier the UI sends as client parameter on normal login request. Otherwise the backend will not be able
      * to rediscover the users session after closing the browser tab.
-     */ 
+     */
     HTTP_AUTH_AUTOLOGIN("com.openexchange.ajax.login.http-auth.autologin", Boolean.FALSE.toString()),
 
     /**
@@ -75,14 +75,14 @@ public enum ConfigurationProperty {
 
     /**
      * The version of the client when using the HTTP Authorization Header based login. This should not be the normal web frontend version
-     * because a different version can be used to distinguish logins through HTTP Authorization Header and normal login request. 
+     * because a different version can be used to distinguish logins through HTTP Authorization Header and normal login request.
      */
     HTTP_AUTH_VERSION("com.openexchange.ajax.login.http-auth.version", "HTTP Auth"),
 
     /**
      * Configures which error page should be used for the login. The error page is only applied for the HTML Form login and the HTTP
      * Authorization Header login. All other login related requests provide normal JSON responses in error cases. The built-in error page
-     * shows the error message for 5 seconds and then redirects to the referrer page. 
+     * shows the error message for 5 seconds and then redirects to the referrer page.
      */
     ERROR_PAGE_TEMPLATE("com.openexchange.ajax.login.errorPageTemplate", null),
 

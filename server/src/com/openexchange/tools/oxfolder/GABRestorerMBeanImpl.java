@@ -64,13 +64,14 @@ public final class GABRestorerMBeanImpl extends StandardMBean implements GABRest
 
     /**
      * Initializes a new {@link GABRestorerMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public GABRestorerMBeanImpl() throws NotCompliantMBeanException {
         super(GABRestorerMBean.class);
     }
 
+    @Override
     public void restoreDefaultPermissions(final int cid) throws MBeanException {
         try {
             new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());

@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Calling card code/Caller-ID rechargement data
- * 
+ *
  * <p>Java class for RechargeInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="RechargeInfo">
  *   &lt;complexContent>
@@ -32,8 +32,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RechargeInfo", propOrder = {
@@ -55,11 +55,11 @@ public class RechargeInfo {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -67,11 +67,11 @@ public class RechargeInfo {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -79,7 +79,7 @@ public class RechargeInfo {
 
     /**
      * Gets the value of the credit property.
-     * 
+     *
      */
     public float getCredit() {
         return credit;
@@ -87,7 +87,7 @@ public class RechargeInfo {
 
     /**
      * Sets the value of the credit property.
-     * 
+     *
      */
     public void setCredit(float value) {
         this.credit = value;
@@ -95,11 +95,11 @@ public class RechargeInfo {
 
     /**
      * Gets the value of the availableCredit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Float }
-     *     
+     *
      */
     public Float getAvailableCredit() {
         return availableCredit;
@@ -107,11 +107,11 @@ public class RechargeInfo {
 
     /**
      * Sets the value of the availableCredit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Float }
-     *     
+     *
      */
     public void setAvailableCredit(Float value) {
         this.availableCredit = value;
@@ -119,11 +119,11 @@ public class RechargeInfo {
 
     /**
      * Gets the value of the orderNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getOrderNo() {
         return orderNo;
@@ -131,11 +131,11 @@ public class RechargeInfo {
 
     /**
      * Sets the value of the orderNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setOrderNo(String value) {
         this.orderNo = value;
@@ -143,11 +143,11 @@ public class RechargeInfo {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -155,11 +155,11 @@ public class RechargeInfo {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

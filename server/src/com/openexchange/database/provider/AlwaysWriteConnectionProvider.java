@@ -61,18 +61,22 @@ public class AlwaysWriteConnectionProvider implements DBProvider {
         this.delegate = delegate;
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         return delegate.getWriteConnection(ctx);
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         return delegate.getWriteConnection(ctx);
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         delegate.releaseWriteConnection(ctx, con);
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         delegate.releaseWriteConnection(ctx, con);
     }

@@ -65,7 +65,7 @@ import com.openexchange.service.messaging.MessageHandler;
 /**
  * {@link DelegateMessageHandler} - A {@link ServiceTracker} for event admin service and a {@link MessageHandler} which delegates incoming
  * messages as events to event admin service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegateMessageHandler extends ServiceTracker implements MessageHandler {
@@ -74,7 +74,7 @@ public final class DelegateMessageHandler extends ServiceTracker implements Mess
 
     /**
      * Initializes a new {@link DelegateMessageHandler}.
-     * 
+     *
      * @param context The bundle context
      */
     public DelegateMessageHandler(final BundleContext context) {

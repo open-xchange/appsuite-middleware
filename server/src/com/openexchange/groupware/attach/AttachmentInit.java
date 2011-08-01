@@ -58,12 +58,14 @@ import com.openexchange.server.Initialization;
 public class AttachmentInit implements Initialization {
     private CopyAttachmentsForChangeExceptions copyAttachments;
 
+    @Override
     public void start() throws OXException {
         copyAttachments = new CopyAttachmentsForChangeExceptions(Attachments.getInstance());
         CalendarCallbacks.getInstance().addListener(copyAttachments);
 
     }
 
+    @Override
     public void stop() throws OXException {
         CalendarCallbacks.getInstance().removeListener(copyAttachments);
     }

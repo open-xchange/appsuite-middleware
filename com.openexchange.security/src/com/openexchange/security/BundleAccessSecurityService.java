@@ -56,9 +56,9 @@ import com.openexchange.security.permission.BundleAccessPermissionCollection;
 
 /**
  * {@link BundleAccessSecurityService} - Security service for bundle access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface BundleAccessSecurityService {
 
@@ -69,7 +69,7 @@ public interface BundleAccessSecurityService {
 	 * {@link BundleAccessPermissionCollection} and
 	 * {@link BundleAccessPermission} from specified arguments to delegate to
 	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
-	 * 
+	 *
 	 * @param paths
 	 *            The paths of permitted bundles such as "a.b.*", or "*".
 	 * @param desiredPath
@@ -86,7 +86,7 @@ public interface BundleAccessSecurityService {
 	 * {@link BundleAccessPermissionCollection} and
 	 * {@link BundleAccessPermission} from specified arguments to delegate to
 	 * {@link #checkPermission(BundleAccessPermissionCollection, BundleAccessPermission)}.
-	 * 
+	 *
 	 * @param paths
 	 *            The paths of permitted bundles such as "a.b.*", or "*".
 	 * @param desiredPath
@@ -98,7 +98,7 @@ public interface BundleAccessSecurityService {
 
 	/**
 	 * Checks if the specified permission is implied by given permissions
-	 * 
+	 *
 	 * @param permissions
 	 *            A collection of permissions
 	 * @param desiredPermission

@@ -5,15 +5,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class JSONUtility {
 
     /**
      * Parses specified parameter into an <code>String</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>String</code> value
@@ -26,5 +26,5 @@ public class JSONUtility {
         }
         return tmp;
     }
-	
+
 }

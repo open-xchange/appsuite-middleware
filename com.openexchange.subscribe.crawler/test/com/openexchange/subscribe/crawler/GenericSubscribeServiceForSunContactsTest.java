@@ -62,7 +62,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
 public class GenericSubscribeServiceForSunContactsTest extends GenericSubscribeServiceTestHelpers {
 
     public void testContacts(){
-        
+
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -75,8 +75,8 @@ public class GenericSubscribeServiceForSunContactsTest extends GenericSubscribeS
         crawler.setModule(FolderObject.CONTACT);
         crawler.setPriority(1);
         crawler.setJavascriptEnabled(true);
-        
-        
+
+
 
         ArrayList<Step> steps = new ArrayList<Step>();
 
@@ -90,25 +90,25 @@ public class GenericSubscribeServiceForSunContactsTest extends GenericSubscribeS
         loginStep.setNameOfPasswordField("IDToken2");
         loginStep.setStringAvailableAfterLogin(".*favicon.ico.*");
         steps.add(loginStep);
-        
+
         PageByUrlStep pageByUrlStep = new PageByUrlStep();
         pageByUrlStep.setUrl("https://uwc1.us.es:444/uwc/abclient/AddressBook");
         steps.add(pageByUrlStep);
-        
+
         StringByFrameNumberAndRegexStep stringByFrameNumberAndRegexStep = new StringByFrameNumberAndRegexStep();
         // the frame we need here is "abbottom", it contains the bookid we need to call the export directly
         stringByFrameNumberAndRegexStep.setFrameNumber(2);
         stringByFrameNumberAndRegexStep.setRegex("document.iabform.actionbookid.value\\s=[\\s]+'([^']*)'");
         steps.add(stringByFrameNumberAndRegexStep);
-        
+
         PageByUrlAndParameterStep pageByUrlAndParameterStep = new PageByUrlAndParameterStep();
         pageByUrlAndParameterStep.setUrl("https://uwc1.us.es:444/uwc/abs/iabvcard.vcf?bookid=");
         steps.add(pageByUrlAndParameterStep);
-        
+
         ContactObjectsByVcardFileStep contactObjectsByVcardFileStep = new ContactObjectsByVcardFileStep();
-        
+
         steps.add(contactObjectsByVcardFileStep);
-        
+
 
         crawler.finishUp(steps);
 

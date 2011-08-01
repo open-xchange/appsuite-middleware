@@ -14,9 +14,9 @@ import com._4psa.channeldata_xsd._2_5.PublicNoInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import com._4psa.channeldata_xsd._2_5.PublicNoInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -53,25 +53,25 @@ public class AddPublicNoRequest {
 
     /**
      * Gets the value of the publicNo property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the publicNo property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getPublicNo().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AddPublicNoRequest.PublicNo }
-     * 
-     * 
+     *
+     *
      */
     public List<AddPublicNoRequest.PublicNo> getPublicNo() {
         if (publicNo == null) {
@@ -83,9 +83,9 @@ public class AddPublicNoRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -97,8 +97,8 @@ public class AddPublicNoRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -113,11 +113,11 @@ public class AddPublicNoRequest {
 
         /**
          * Gets the value of the channelID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getChannelID() {
             return channelID;
@@ -125,11 +125,11 @@ public class AddPublicNoRequest {
 
         /**
          * Sets the value of the channelID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setChannelID(BigInteger value) {
             this.channelID = value;

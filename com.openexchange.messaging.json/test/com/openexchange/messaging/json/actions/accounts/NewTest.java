@@ -70,111 +70,111 @@ import com.openexchange.tools.session.SimServerSession;
  */
 public class NewTest extends TestCase {
     // Success Case
-    
+
     public void testCreate() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
-        
+
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
-        
+
         service.setId("com.openexchange.twitter");
         service.setFormDescription(formDescription);
         registry.add(service);
-        
+
         final NewAction action = new NewAction(registry);
-        
+
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("displayName", "My nice twitter feed");
         accountJSON.put("messagingService", "com.openexchange.twitter");
-       
+
         final JSONObject configJSON = new JSONObject();
         configJSON.put("inputField", "My nice input value");
         accountJSON.put("configuration", configJSON);
-        
+
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final AJAXRequestResult result = action.perform(request, session);
-        
+
         //TODO: Wie steht's mit der ID?
-        
+
         assertNotNull(accManager.getCreatedAccount());
         assertSame(session, accManager.getSession());
-        
+
     }
-    
+
     // Error Cases
-    
+
     public void testOXExceptionFromRegistry() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
-        
+
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
-        
+
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
-        
+
         service.setId("com.openexchange.twitter");
         service.setFormDescription(formDescription);
         registry.add(service);
-        
+
         final NewAction action = new NewAction(registry);
-        
+
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("displayName", "My nice twitter feed");
 
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             // SUCCESS
         }
-        
+
     }
-    
+
     public void testOXExceptionFromAccManager() throws JSONException, OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
-        
+
         final SimAccountManager accManager = new SimAccountManager();
         accManager.setException(new OXException());
-        
+
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
-        
+
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
-        
+
         service.setId("com.openexchange.twitter");
         service.setFormDescription(formDescription);
         registry.add(service);
-        
+
         final NewAction action = new NewAction(registry);
-        
+
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("displayName", "My nice twitter feed");
 
         final AJAXRequestData request = new AJAXRequestData();
         request.setData(accountJSON);
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         try {
             final AJAXRequestResult result = action.perform(request, session);
             fail("Should not swallow exceptions");
         } catch (final OXException x) {
             // SUCCESS
         }
-        
+
     }
-    
+
 }

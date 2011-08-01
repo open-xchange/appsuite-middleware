@@ -67,12 +67,12 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 public class DirectoryWebdavFactory extends AbstractWebdavFactory{
 
     public static final Protocol PROTOCOL = new Protocol();
-    
-    private Node ROOT = new Node("");
 
-    private SessionHolder sessionHolder;
+    private final Node ROOT = new Node("");
 
-    
+    private final SessionHolder sessionHolder;
+
+
 
     public DirectoryWebdavFactory(SessionHolder sessionHolder) {
         super();
@@ -97,7 +97,7 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
     public WebdavResource resolveResource(WebdavPath url) throws OXException {
         return resolveCollection(url);
     }
-    
+
     public void mkdirs(String...components) {
         Node n = ROOT;
         for (String name : components) {

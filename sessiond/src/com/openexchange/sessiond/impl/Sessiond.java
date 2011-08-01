@@ -51,7 +51,7 @@ package com.openexchange.sessiond.impl;
 
 /**
  * {@link Sessiond} - The Sessiond
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

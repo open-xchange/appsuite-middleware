@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessiondService} - The SessionD service.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -65,7 +65,7 @@ public interface SessiondService {
 
     /**
      * Creates a new session object in the SessionD storage with the given session parameters.
-     * 
+     *
      * @param parameterObject The parameter object describing the session to create
      * @return The session identifier of the newly created session as a <code>String</code>
      * @throws OXException If creating the session fails
@@ -74,7 +74,7 @@ public interface SessiondService {
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.
-     * 
+     *
      * @param sessionId The session identifier
      * @param newPassword The new password to apply
      * @throws OXException If new password cannot be applied or corresponding session does not exist or is expired
@@ -83,7 +83,7 @@ public interface SessiondService {
 
     /**
      * Refreshes the time stamp of the session with the given session identifier.
-     * 
+     *
      * @param sessionId The Session identifier
      * @return <code>true</code> if the session time stamp was updated or <code>false</code> if the session identifier was invalid or expired
      */
@@ -91,7 +91,7 @@ public interface SessiondService {
 
     /**
      * Removes the session with the given session identifier.
-     * 
+     *
      * @param sessionId The Session identifier
      * @return <code>true</code> if the session was removed or <code>false</code> if the session identifier doesn't exist
      */
@@ -99,7 +99,7 @@ public interface SessiondService {
 
     /**
      * Removes all sessions belonging to given user in specified context.
-     * 
+     *
      * @param userId The user identifier
      * @param ctx The context
      * @return The number of removed session or zero if no session was removed
@@ -108,7 +108,7 @@ public interface SessiondService {
 
     /**
      * Gets the number of active sessions belonging to given user in specified context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The number of active sessions belonging to given user in specified context
@@ -119,7 +119,7 @@ public interface SessiondService {
      * Gets the <b>local-only</b> sessions associated with specified user in given context.
      * <p>
      * <b>Note</b>: Remote sessions are not considered by this method.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The <b>local-only</b> sessions associated with specified user in given context
@@ -128,7 +128,7 @@ public interface SessiondService {
 
     /**
      * Get the session object related to the given session identifier.
-     * 
+     *
      * @param sessionId The Session identifier
      * @return Return the session object or null if no session exists for the given identifier or if the session is expired
      */
@@ -136,7 +136,7 @@ public interface SessiondService {
 
     /**
      * Get the session object related to the given random token.
-     * 
+     *
      * @param randomToken The random token of the session
      * @param localIp The new local IP to apply to session; pass <code>null</code> to not replace existing IP in session
      * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
@@ -145,7 +145,7 @@ public interface SessiondService {
 
     /**
      * Get the session object related to the given random token.
-     * 
+     *
      * @param randomToken The random token of the session
      * @return The session object or <code>null</code> if no session exists for the given random token or if the random token is already expired
      */
@@ -153,7 +153,7 @@ public interface SessiondService {
 
     /**
      * Gets the number of active sessions.
-     * 
+     *
      * @return The number of active sessions
      */
     public int getNumberOfActiveSessions();

@@ -81,11 +81,11 @@ import com.openexchange.user.UserService;
  * </ul>
  * <p>
  * The complete implementation should be able to handle an ACL like this one:
- * 
+ *
  * <pre>
  * owner aceilrstwx anyone lr user=john w -user=mary r administrators aceilrstwx
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CourierEntity2ACL extends Entity2ACL {
@@ -96,7 +96,7 @@ public class CourierEntity2ACL extends Entity2ACL {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static CourierEntity2ACL getInstance() {

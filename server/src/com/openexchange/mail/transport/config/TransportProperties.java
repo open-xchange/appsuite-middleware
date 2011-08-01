@@ -57,7 +57,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link TransportProperties}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportProperties implements ITransportProperties {
@@ -68,7 +68,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Gets the singleton instance of {@link TransportProperties}
-     * 
+     *
      * @return The singleton instance of {@link TransportProperties}
      */
     public static TransportProperties getInstance() {
@@ -244,13 +244,14 @@ public final class TransportProperties implements ITransportProperties {
         }
     }
 
+    @Override
     public int getReferencedPartLimit() {
         return referencedPartLimit;
     }
 
     /**
      * Gets the default transport provider
-     * 
+     *
      * @return The default transport provider
      */
     public String getDefaultTransportProvider() {
@@ -259,7 +260,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Gets the name of the publishing infostore folder.
-     * 
+     *
      * @return The name of the publishing infostore folder
      */
     public String getPublishingInfostoreFolder() {
@@ -268,7 +269,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Checks if exceeded attachments shall be published rather than throwing an exceeded-quota exception.
-     * 
+     *
      * @return <code>true</code> if exceeded attachments shall be published rather than throwing an exceeded-quota exception; otherwise
      *         <code>false</code>
      */
@@ -278,7 +279,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Checks if publishing of email attachments is only enabled for primary account.
-     * 
+     *
      * @return <code>true</code> if publishing of email attachments is only enabled for primary account; otherwise <code>false</code>
      */
     public boolean isPublishPrimaryAccountOnly() {
@@ -287,7 +288,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Checks if attachments shall be sent to external recipients although quota was exceeded.
-     * 
+     *
      * @return <code>true</code> if attachments shall be sent to external recipients although quota was exceeded; othjerwise
      *         <code>false</code>
      */
@@ -297,7 +298,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Checks if publication links shall be provided in "text/html" file attachment named "links.html".
-     * 
+     *
      * @return <code>true</code> if publication links shall be provided in "text/html" file attachment; otherwise <code>false</code>
      */
     public boolean isProvideLinksInAttachment() {
@@ -306,13 +307,13 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Gets the time-to-live in milliseconds for published documents.
-     * 
+     *
      * @return The time-to-live in milliseconds for published documents
      */
     public long getPublishedDocumentTimeToLive() {
         return publishedDocumentTimeToLive;
     }
-    
+
     /**
      * Determines if published documents should expire.
      */
@@ -322,7 +323,7 @@ public final class TransportProperties implements ITransportProperties {
 
     /**
      * Gets the locale to use when composing text sent to external recipients.
-     * 
+     *
      * @return The locale to use when composing text sent to external recipients
      */
     public Locale getExternalRecipientsLocale() {

@@ -71,15 +71,19 @@ public class SpamButton implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "spambutton" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                 setting.setSingleValue(Boolean.valueOf(settings.isSpamEnabled()));

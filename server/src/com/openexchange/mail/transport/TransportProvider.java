@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TransportProvider} - Provider for mail transport
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class TransportProvider {
@@ -111,7 +111,7 @@ public abstract class TransportProvider {
 
     /**
      * Checks if this provider is deprecated; any cached references should be discarded
-     * 
+     *
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
     public boolean isDeprecated() {
@@ -120,7 +120,7 @@ public abstract class TransportProvider {
 
     /**
      * Sets the deprecated flag
-     * 
+     *
      * @param deprecated <code>true</code> if deprecated; otherwise <code>false</code>
      */
     void setDeprecated(final boolean deprecated) {
@@ -129,7 +129,7 @@ public abstract class TransportProvider {
 
     /**
      * Performs provider's start-up
-     * 
+     *
      * @throws OXException If start-up fails
      */
     protected final void startUp() throws OXException {
@@ -139,7 +139,7 @@ public abstract class TransportProvider {
 
     /**
      * Performs provider's shut-down
-     * 
+     *
      * @throws OXException if shut-down fails
      */
     protected final void shutDown() throws OXException {
@@ -149,7 +149,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets this transport provider's protocol
-     * 
+     *
      * @return The protocol
      */
     public abstract Protocol getProtocol();
@@ -158,7 +158,7 @@ public abstract class TransportProvider {
      * Checks if this transport provider supports the given protocol (which is either in secure or non-secure notation).
      * <p>
      * This is a convenience method that invokes {@link Protocol#isSupported(String)}
-     * 
+     *
      * @param protocol The protocol
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
@@ -168,7 +168,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a newly created {@link MailTransport mail transport}
-     * 
+     *
      * @param session The session providing needed user data
      * @return A newly created {@link MailTransport mail transport}
      * @throws OXException If instantiation fails
@@ -177,7 +177,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a newly created {@link MailTransport mail transport}
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      * @return A newly created {@link MailTransport mail transport}
@@ -187,14 +187,14 @@ public abstract class TransportProvider {
 
     /**
      * Gets the protocol properties
-     * 
+     *
      * @return The protocol properties
      */
     protected abstract AbstractProtocolProperties getProtocolProperties();
 
     /**
      * Gets a new instance of {@link ComposedMailMessage}
-     * 
+     *
      * @param session The session for handling temporary uploaded files which shall be added to composed mail
      * @param ctx The context to load session-related data
      * @return A new instance of {@link ComposedMailMessage}
@@ -204,7 +204,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link UploadFileMailPart}
-     * 
+     *
      * @param uploadFile The upload file
      * @return A new instance of {@link UploadFileMailPart}
      * @throws OXException If a new instance of {@link UploadFileMailPart} cannot be created
@@ -213,7 +213,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link InfostoreDocumentMailPart}
-     * 
+     *
      * @param documentId The infostore document's unique ID
      * @param session The session providing needed user data
      * @return A new instance of {@link InfostoreDocumentMailPart}
@@ -223,7 +223,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link DataMailPart}
-     * 
+     *
      * @param data The data obtained by a data source
      * @param dataProperties The data properties
      * @param session The session providing needed user data
@@ -234,7 +234,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link TextBodyMailPart}
-     * 
+     *
      * @param textBody The text body
      * @return A new instance of {@link TextBodyMailPart}
      * @throws OXException If a new instance of {@link TextBodyMailPart} cannot be created
@@ -243,7 +243,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link ReferencedMailPart}
-     * 
+     *
      * @param referencedPart The referenced part
      * @param session The session providing user data
      * @return A new instance of {@link ReferencedMailPart}
@@ -253,7 +253,7 @@ public abstract class TransportProvider {
 
     /**
      * Gets a new instance of {@link ReferencedMailPart}
-     * 
+     *
      * @param referencedMail The referenced mail
      * @param session The session providing user data
      * @return A new instance of {@link ReferencedMailPart}

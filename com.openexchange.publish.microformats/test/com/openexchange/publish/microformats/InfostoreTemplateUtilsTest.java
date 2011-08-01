@@ -65,42 +65,42 @@ import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
  *
  */
 public class InfostoreTemplateUtilsTest extends TestCase {
-    
-    
-    
+
+
+
     public void testFileURL() {
         SimContext context = new SimContext(1337);
-        
+
         Publication publication = new Publication();
         publication.getConfiguration().put("siteName", "my/nice/site");
         publication.setContext(context);
-        
+
         InfostoreTemplateUtils utils = new InfostoreTemplateUtils();
-        
+
         String url = utils.getFileURL(publication, document);
-        
+
         assertEquals("/publications/files/1337/my/nice/site/23/current", url);
     }
-    
+
     public void testFileURLWithSecret() {
-        
+
         SimContext context = new SimContext(1337);
-        
+
         Publication publication = new Publication();
         publication.getConfiguration().put("siteName", "my/nice/site");
         publication.setContext(context);
         publication.getConfiguration().put("secret", "verySecret");
-        
+
         InfostoreTemplateUtils utils = new InfostoreTemplateUtils();
-        
+
         String url = utils.getFileURL(publication, document);
-        
+
         assertEquals("/publications/files/1337/my/nice/site/23/current?secret=verySecret", url);
     }
-    
-    
-    
-    private DocumentMetadata document = new DocumentMetadata(){
+
+
+
+    private final DocumentMetadata document = new DocumentMetadata(){
 
         public String getCategories() {
             // TODO Auto-generated method stub
@@ -228,109 +228,109 @@ public class InfostoreTemplateUtilsTest extends TestCase {
 
         public void setCategories(String categories) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setColorLabel(int color) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setCreatedBy(int cretor) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setCreationDate(Date creationDate) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setDescription(String description) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFileMD5Sum(String sum) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFileMIMEType(String type) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFileName(String fileName) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFileSize(long length) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFilestoreLocation(String string) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setFolderId(long folderId) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setId(int id) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setIsCurrentVersion(boolean bool) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setLastModified(Date now) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setLockedUntil(Date lockedUntil) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setModifiedBy(int lastEditor) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setNumberOfVersions(int numberOfVersions) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setTitle(String title) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setURL(String url) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setVersion(int version) {
             // TODO Auto-generated method stub
-            
+
         }
 
         public void setVersionComment(String string) {
             // TODO Auto-generated method stub
-            
+
         }
-        
+
     };
-    
+
 }

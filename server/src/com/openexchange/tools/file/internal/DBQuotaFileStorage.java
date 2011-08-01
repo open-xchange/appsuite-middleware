@@ -93,7 +93,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Initializes the QuotaFileStorage
-     * 
+     *
      * @param context Context for the Quota.
      * @param fs The physical FileStorage.
      * @param db The DatabaseService.
@@ -109,10 +109,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public long getQuota() {
         return context.getFileStorageQuota();
     }
 
+    @Override
     public boolean deleteFile(final String identifier) throws OXException {
         try {
             final long fileSize = fileStorage.getFileSize(identifier);
@@ -129,7 +131,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Increases the QuotaUsage.
-     * 
+     *
      * @param usage by that the QuotaUsage has to be increased
      * @return true if Quota is full
      * @throws OXException on Database errors
@@ -179,7 +181,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     /**
      * Decreases the QuotaUsage.
-     * 
+     *
      * @param usage by that the Quota has to be decreased
      * @throws OXException
      */
@@ -233,6 +235,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         final HashMap<String, Long> fileSizes = new HashMap<String, Long>();
         final SortedSet<String> set = new TreeSet<String>();
@@ -259,6 +262,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         return set;
     }
 
+    @Override
     public long getUsage() throws OXException {
         final Connection con = db.getReadOnly(context);
         PreparedStatement stmt = null;
@@ -283,6 +287,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         return usage;
     }
 
+    @Override
     public String saveNewFile(final InputStream is) throws OXException {
         String file = null;
         String retval = null;
@@ -317,6 +322,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     /**
      * Recalculates the Usage if it's inconsistent based on all physically existing files and writes it into quota_usage.
      */
+    @Override
     public void recalculateUsage() throws OXException {
         if (LOG.isInfoEnabled()) {
             LOG.info("Recalculating usage for Context " + context.getContextId());
@@ -332,7 +338,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
         PreparedStatement stmt = null;
         final ResultSet result = null;
-        
+
         try {
             stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
             stmt.setLong(1, entireFileSize);
@@ -354,6 +360,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public SortedSet<String> getFileList() throws OXException {
         try {
             return fileStorage.getFileList();
@@ -362,6 +369,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public InputStream getFile(final String file) throws OXException {
         try {
             return fileStorage.getFile(file);
@@ -370,6 +378,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public long getFileSize(final String name) throws OXException {
         try {
             return fileStorage.getFileSize(name);
@@ -378,6 +387,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public String getMimeType(final String name) throws OXException {
         try {
             return fileStorage.getMimeType(name);
@@ -386,6 +396,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public void remove() throws OXException {
         try {
             fileStorage.remove();
@@ -394,6 +405,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public void recreateStateFile() throws OXException {
         try {
             fileStorage.recreateStateFile();
@@ -402,6 +414,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         }
     }
 
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         try {
             return fileStorage.stateFileIsCorrect();

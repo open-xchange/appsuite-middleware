@@ -64,15 +64,15 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author Benjamin Otterbach
  */
 public class ActionActivator extends DeferredActivator {
-	
+
 	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActionActivator.class));
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
-		
+
 	public ActionActivator() {
 		super();
 	}
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return NEEDED_SERVICES;
@@ -111,7 +111,7 @@ public class ActionActivator extends DeferredActivator {
 					}
 				}
 			}
-			
+
 	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.EMAIL);
 	        context.registerService(ActionService.class.getName(), new ActionEmail(), ht);
@@ -119,11 +119,11 @@ public class ActionActivator extends DeferredActivator {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-		
+
 	}
 
 	@Override
-	protected void stopBundle() throws Exception {		
+	protected void stopBundle() throws Exception {
 		try {
             /*
              * Clear service registry

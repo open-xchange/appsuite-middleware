@@ -68,7 +68,7 @@ public class ContactUtil {
             return;
         }
         boolean hasUsefulGivenName = contact.containsGivenName() && contact.getGivenName() != null && contact.getGivenName().length() > 0;
-        boolean hasUsefulSureName = contact.containsSurName() && contact.getSurName() != null && contact.getSurName().length() > 0; 
+        boolean hasUsefulSureName = contact.containsSurName() && contact.getSurName() != null && contact.getSurName().length() > 0;
         if (hasUsefulGivenName || hasUsefulSureName) {
             StringBuilder sb = new StringBuilder();
             if (hasUsefulSureName) {

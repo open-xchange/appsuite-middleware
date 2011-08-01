@@ -659,7 +659,7 @@ public class Infostore extends PermissionServlet {
         if (t instanceof OXException) {
             e = (OXException) t;
         } else {
-            e = new OXException(t); 
+            e = new OXException(t);
         }
         final Response resp = new Response();
         resp.setException(e);

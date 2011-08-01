@@ -75,7 +75,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPConfig} - The IMAP configuration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPConfig extends MailConfig {
@@ -108,7 +108,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Default constructor
-     * 
+     *
      * @param accountId The account identifier
      */
     public IMAPConfig(final int accountId) {
@@ -119,7 +119,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the optional IMAP store.
-     * 
+     *
      * @return The IMAP store
      */
     public IMAPStore optImapStore() {
@@ -135,7 +135,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Sets specified parameter. If value is <code>null</code> a remove is performed.
-     * 
+     *
      * @param name The name
      * @param value The value
      */
@@ -149,7 +149,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the named parameter.
-     * 
+     *
      * @param name The name
      * @param clazz The parameter's type
      * @return The value
@@ -166,7 +166,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the IMAP capabilities.
-     * 
+     *
      * @return The IMAP capabilities
      */
     public IMAPCapabilities getImapCapabilities() {
@@ -175,7 +175,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the (unmodifiable) map view of the IMAP capabilities.
-     * 
+     *
      * @return The (unmodifiable) map containing IMAP capabilities
      */
     public Map<String, String> asMap() {
@@ -184,7 +184,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the ACL extension appropriate for this IMAP configuration.
-     * 
+     *
      * @return The ACL extension
      */
     public ACLExtension getACLExtension() {
@@ -200,7 +200,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the imapPort
-     * 
+     *
      * @return the imapPort
      */
     @Override
@@ -215,7 +215,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the imapServer
-     * 
+     *
      * @return the imapServer
      */
     @Override
@@ -230,7 +230,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Initializes IMAP server's capabilities if not done, yet
-     * 
+     *
      * @param imapStore The IMAP store from which to fetch the capabilities
      * @param session The session possibly caching capabilities information
      * @throws OXException If IMAP capabilities cannot be initialized
@@ -256,7 +256,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Checks if IMAP search is configured and corresponding capability is available.
-     * 
+     *
      * @return <code>true</code> if IMAP search is configured and corresponding capability is available; otherwise <code>false</code>
      */
     public boolean isImapSearch() {
@@ -267,7 +267,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Checks if IMAP sort is configured and corresponding capability is available.
-     * 
+     *
      * @return <code>true</code> if IMAP sort is configured and corresponding capability is available; otherwise <code>false</code>
      */
     public boolean isImapSort() {
@@ -288,7 +288,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Checks if ACLs are supported
-     * 
+     *
      * @return <code>true</code> if ACLs are supported; otherwise <code>false</code>
      */
     public boolean isSupportsACLs() {
@@ -315,7 +315,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the internet address of the IMAP server.
-     * 
+     *
      * @return The internet address of the IMAP server.
      * @throws OXException If IMAP server cannot be resolved
      */
@@ -334,7 +334,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Gets the socket address (internet address + port) of the IMAP server.
-     * 
+     *
      * @return The socket address (internet address + port) of the IMAP server.
      * @throws OXException If IMAP server cannot be resolved
      */

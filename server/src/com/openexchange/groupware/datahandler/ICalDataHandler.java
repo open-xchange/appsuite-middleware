@@ -93,7 +93,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ICalDataHandler}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class ICalDataHandler implements DataHandler {
@@ -124,7 +124,7 @@ public abstract class ICalDataHandler implements DataHandler {
             if (appointment.containsUid() && (uid = appointment.getUid()) != null) {
                 objectId = appointmentSql.resolveUid(uid);
             }
-                
+
             if (objectId != 0) {
                 if (confirm != null) {
                     try {
@@ -151,7 +151,7 @@ public abstract class ICalDataHandler implements DataHandler {
             }
         }
     }
-    
+
     private void updateAppointment(final CalendarDataObject appointment, final int calendarFolder, final AppointmentSQLInterface appointmentSql) throws OXException {
         try {
             final CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
@@ -161,7 +161,7 @@ public abstract class ICalDataHandler implements DataHandler {
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
-        
+
         appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());
     }
 
@@ -192,7 +192,7 @@ public abstract class ICalDataHandler implements DataHandler {
                     break;
                 }
             }
-            
+
             if (found) {
                 try {
                     appSql.setUserConfirmation(objectId, calendarFolder.getObjectID(), session.getUserId(), confirm.getConfirm(), confirm.getConfirmMessage());
@@ -202,7 +202,7 @@ public abstract class ICalDataHandler implements DataHandler {
             } else {
                 throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Object already exists, but user is not participant.");
             }
-            
+
         } catch (final SQLException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }

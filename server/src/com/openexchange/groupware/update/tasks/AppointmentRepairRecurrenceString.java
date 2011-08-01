@@ -80,6 +80,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 24;
     }
@@ -87,6 +88,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
@@ -94,6 +96,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException, OXException {
         if (LOG.isInfoEnabled()) {

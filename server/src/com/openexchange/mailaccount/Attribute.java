@@ -58,7 +58,7 @@ import com.openexchange.mailaccount.json.fields.MailAccountFields;
 
 /**
  * {@link Attribute}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum Attribute {
@@ -101,7 +101,9 @@ public enum Attribute {
     POP3_STORAGE_LITERAL(MailAccountFields.POP3_STORAGE, 1035),
     POP3_PATH_LITERAL(MailAccountFields.POP3_PATH, 1036),
     // The personal
-    PERSONAL_LITERAL(MailAccountFields.PERSONAL, 1037);
+    PERSONAL_LITERAL(MailAccountFields.PERSONAL, 1037),
+    // The reply-to
+    REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038);
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
         Attribute.MAIL_PORT_LITERAL,
@@ -142,6 +144,8 @@ public enum Attribute {
             return switcher.primaryAddress();
         case PERSONAL_LITERAL:
             return switcher.personal();
+        case REPLY_TO_LITERAL:
+            return switcher.replyTo();
         case SPAM_HANDLER_LITERAL:
             return switcher.spamHandler();
         case TRASH_LITERAL:
@@ -207,7 +211,7 @@ public enum Attribute {
 
     /**
      * Gets the attribute name.
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -216,7 +220,7 @@ public enum Attribute {
 
     /**
      * Gets the field identifier associated with this attribute.
-     * 
+     *
      * @return The field identifier
      */
     public int getId() {
@@ -233,7 +237,7 @@ public enum Attribute {
 
     /**
      * Gets the attribute by given field identifier.
-     * 
+     *
      * @param col The field identifier
      * @return The attribute by given field identifier or <code>null</code> if no such attribute is present
      */

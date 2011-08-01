@@ -63,7 +63,7 @@ import com.openexchange.subscribe.Subscription;
 
 /**
  * {@link SubscriptionJSONWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionJSONWriter {
@@ -81,7 +81,7 @@ public class SubscriptionJSONWriter {
     private static final String DISPLAYNAME = "displayName";
 
     private static final String SOURCE = "source";
-    
+
     private static final String ENABLED = "enabled";
 
     public JSONObject write(final Subscription subscription, final DynamicFormDescription form, final String urlPrefix) throws JSONException, OXException {

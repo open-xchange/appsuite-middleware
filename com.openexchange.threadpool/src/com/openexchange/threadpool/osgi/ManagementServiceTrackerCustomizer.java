@@ -62,7 +62,7 @@ import com.openexchange.threadpool.internal.ThreadPoolInformation;
 
 /**
  * {@link ManagementServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer customizer} for {@link ManagementService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -75,7 +75,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
 
     /**
      * Initializes a new {@link ManagementServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param threadPoolService The thread pool service previously registered
      */
@@ -146,7 +146,7 @@ public final class ManagementServiceTrackerCustomizer implements ServiceTrackerC
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

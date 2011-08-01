@@ -56,7 +56,7 @@ import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 
 /**
  * {@link Utility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utility {
@@ -70,7 +70,7 @@ public final class Utility {
 
     /**
      * Gets the {@link DatabaseService} from service registry.
-     * 
+     *
      * @return The {@link DatabaseService} from service registry
      * @throws OXException If {@link DatabaseService} is not contained in service registry
      */
@@ -80,7 +80,7 @@ public final class Utility {
 
     /**
      * Debugs given statement's SQL string.
-     * 
+     *
      * @param stmt The statement
      */
     public static void debugSQL(final PreparedStatement stmt) {
@@ -95,7 +95,7 @@ public final class Utility {
 
     /**
      * Extracts SQL string from passed statement.
-     * 
+     *
      * @param stmt The statement
      * @return The extracted SQL string
      */

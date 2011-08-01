@@ -52,14 +52,14 @@ package com.openexchange.html;
 
 /**
  * {@link HTMLService} - The HTML service provides several methods concerning processing of HTML content.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface HTMLService {
 
     /**
      * Replaces image URLs with a proxy URI to ensure safe loading of image content.
-     * 
+     *
      * @param content The HTML content
      * @param sessionId The identifier of the session needed to register appropriate proxy URI
      * @return The HTML content with image URLs replaced
@@ -68,7 +68,7 @@ public interface HTMLService {
 
     /**
      * Converts found URLs inside specified content to valid links.
-     * 
+     *
      * @param content The content
      * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
      *            <code>"&lt;!--" + &lt;<i>comment</i>&gt; + " " + <i>&lt;anchor-tag&gt;</i> + "--&gt;"</code>
@@ -81,7 +81,7 @@ public interface HTMLService {
      * <p>
      * Example: <code>http://www.somewhere.com</code> is converted to
      * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>.
-     * 
+     *
      * @param content The content to search in
      * @return The given content with all non-HTML links converted to valid HTML links
      */
@@ -91,7 +91,7 @@ public interface HTMLService {
      * Filters specified HTML content according to white-list filter.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
-     * 
+     *
      * @param htmlContent The <b>validated</b> HTML content
      * @return The filtered HTML content
      * @see #getConformHTML(String, String)
@@ -102,7 +102,7 @@ public interface HTMLService {
      * Filters specified HTML content according to white-list filter.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
-     * 
+     *
      * @param htmlContent The <b>validated</b> HTML content
      * @param configName The name of the whitelist to use.
      * @return The filtered HTML content
@@ -114,7 +114,7 @@ public interface HTMLService {
      * Filters externally loaded images out of specified HTML content.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
-     * 
+     *
      * @param htmlContent The <b>validated</b> HTML content
      * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
      * @return The HTML content stripped by external images
@@ -126,7 +126,7 @@ public interface HTMLService {
      * Converts specified HTML content to plain text.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}
-     * 
+     *
      * @param htmlContent The <b>validated</b> HTML content
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>.<br>
      *            Example: <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code> would be
@@ -139,7 +139,7 @@ public interface HTMLService {
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     * 
+     *
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @param commentId The identifier wrapped in a comment prepended to each formatted URL:<br>
@@ -151,7 +151,7 @@ public interface HTMLService {
     /**
      * Formats plain text to HTML by escaping HTML special characters e.g. <code>&quot;&lt;&quot;</code> is converted to
      * <code>&quot;&amp;lt;&quot;</code>.
-     * 
+     *
      * @param plainText The plain text
      * @param withQuote Whether to escape quotes (<code>&quot;</code>) or not
      * @return properly escaped HTML content
@@ -164,7 +164,7 @@ public interface HTMLService {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -173,7 +173,7 @@ public interface HTMLService {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards. Non-ascii-URLs will be replaced with puny-code-encoded URLs.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @return The HTML content conform to W3C standards
@@ -182,7 +182,7 @@ public interface HTMLService {
 
     /**
      * Creates valid HTML from specified HTML content conform to W3C standards.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param charset The charset parameter
      * @param checkUrls Define if non-ascii-URLs shell be replaced with puny-code-encoded URLs
@@ -192,7 +192,7 @@ public interface HTMLService {
 
     /**
      * Drops <code>&lt;script&gt;</code> tags in HTML content's header.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The HTML content with <code>&lt;script&gt;</code> tags removed
      */
@@ -202,7 +202,7 @@ public interface HTMLService {
      * Checks for existence of a <code>&lt;base&gt;</code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
      * attribute <b><small>AND</small></b> <code>externalImagesAllowed</code> is set to <code>true</code>; otherwise the
      * <code>&lt;base&gt;</code> tag is removed.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param externalImagesAllowed <code>true</code> if external images are allowed; otherwise <code>false</code>
      * @return The HTML content with a proper <code>&lt;base&gt;</code> tag
@@ -211,7 +211,7 @@ public interface HTMLService {
 
     /**
      * Pretty prints specified HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return Pretty printed HTML content
      */
@@ -219,7 +219,7 @@ public interface HTMLService {
 
     /**
      * Replaces all HTML entities occurring in specified HTML content with corresponding unicode character.
-     * 
+     *
      * @param content The content
      * @return The content with HTML entities replaced with corresponding unicode character
      */
@@ -227,7 +227,7 @@ public interface HTMLService {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding ASCII character.
-     * 
+     *
      * @param entity The HTML entity
      * @return The corresponding ASCII character or <code>null</code>
      */

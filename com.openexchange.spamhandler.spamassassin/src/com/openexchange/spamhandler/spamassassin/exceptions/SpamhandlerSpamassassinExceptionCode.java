@@ -25,15 +25,15 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
      * Can't handle spam because MailService isn't available
      */
     MAILSERVICE_MISSING("Can't handle spam because MailService isn't available", CATEGORY_ERROR, 3003),
-    
+
     /**
      * Error while getting spamd provider from service: "%s"
      */
     ERROR_GETTING_SPAMD_PROVIDER("Error while getting spamd provider from service: \"%s\"", CATEGORY_ERROR, 3004);
 
 
-    
-    
+
+
     final Category category;
 
     final int detailNumber;
@@ -45,7 +45,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "MSG";
     }
@@ -61,14 +61,14 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
     public int getNumber() {
         return detailNumber;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -77,7 +77,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -87,7 +87,7 @@ public enum SpamhandlerSpamassassinExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -63,7 +63,7 @@ import com.planetj.math.rabinhash.RabinHashFunction64;
 
 /**
  * {@link UIDUtil} - UID utility class for POP3 bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UIDUtil {
@@ -77,7 +77,7 @@ public final class UIDUtil {
 
     /**
      * Computes the Rabin hash value of specified UID string.
-     * 
+     *
      * @param uidl The UID string as received from POP3 UIDL command
      * @return The Rabin hash value
      */
@@ -87,7 +87,7 @@ public final class UIDUtil {
 
     /**
      * Computes the Rabin hash value of specified UID strings.
-     * 
+     *
      * @param uidls The UID strings as received from POP3 UIDL command
      * @return The Rabin hash values
      */
@@ -106,7 +106,7 @@ public final class UIDUtil {
 
     /**
      * Gets the UIDL for specified UID value.
-     * 
+     *
      * @param uid The UID
      * @param session The session
      * @return The UIDL for specified UID value
@@ -142,7 +142,7 @@ public final class UIDUtil {
 
     /**
      * Gets the UIDLs for specified UID values.
-     * 
+     *
      * @param uids The UIDs
      * @param session The session
      * @return The UIDLs for specified UID values

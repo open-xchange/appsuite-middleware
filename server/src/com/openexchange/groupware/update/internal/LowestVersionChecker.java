@@ -64,6 +64,7 @@ public class LowestVersionChecker implements DependencyChecker {
         super();
     }
 
+    @Override
     public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
         // Tasks without a version can not be sorted by this dependency checker.
         if (Schema.NO_VERSION == task.addedWithVersion()) {

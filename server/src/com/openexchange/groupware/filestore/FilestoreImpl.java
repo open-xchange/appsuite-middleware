@@ -53,36 +53,40 @@ import java.net.URI;
 
 public class FilestoreImpl implements Filestore {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -912578396776397210L;
 	private int id;
 	private URI uri;
 	private long size;
 	private long maxContext;
-	
+
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.filestore.Filestore#getId()
 	 */
-	public int getId() {
+	@Override
+    public int getId() {
 		return id;
 	}
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.filestore.Filestore#getMaxContext()
 	 */
-	public long getMaxContext() {
+	@Override
+    public long getMaxContext() {
 		return maxContext;
 	}
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.filestore.Filestore#getSize()
 	 */
-	public long getSize() {
+	@Override
+    public long getSize() {
 		return size;
 	}
 	/* (non-Javadoc)
 	 * @see com.openexchange.groupware.filestore.Filestore#getUri()
 	 */
-	public URI getUri() {
+	@Override
+    public URI getUri() {
 		return uri;
 	}
 	public void setId(final int id) {
@@ -97,6 +101,6 @@ public class FilestoreImpl implements Filestore {
 	public void setUri(final URI uri) {
 		this.uri = uri;
 	}
-	
-	
+
+
 }

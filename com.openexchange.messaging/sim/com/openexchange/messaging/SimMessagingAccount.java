@@ -80,22 +80,22 @@ public class SimMessagingAccount implements MessagingAccount{
         return messagingService;
     }
 
-    
+
     public void setMessagingService(final MessagingService messagingService) {
         this.messagingService = messagingService;
     }
 
-    
+
     public void setId(final int id) {
         this.id = id;
     }
 
-    
+
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
-    
+
     public void setConfiguration(final Map<String, Object> configuration) {
         this.configuration = configuration;
     }

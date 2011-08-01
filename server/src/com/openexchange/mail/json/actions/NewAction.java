@@ -128,7 +128,7 @@ public final class NewAction extends AbstractMailAction {
                     }
                     /*-
                      * Parse
-                     * 
+                     *
                      * Resolve "From" to proper mail account to select right transport server
                      */
                     final InternetAddress from;
@@ -236,10 +236,12 @@ public final class NewAction extends AbstractMailAction {
                 }
                 data = new PutNewMailData() {
 
+                    @Override
                     public MailMessage getMail() {
                         return mail;
                     }
 
+                    @Override
                     public InternetAddress getFromAddress() {
                         return fromAddress;
                     }

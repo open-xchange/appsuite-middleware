@@ -64,7 +64,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CollectingFileWriter extends FileMetadataWriter {
-    
+
     private SearchIterator<File> files;
     private List<Field> columns;
     private TimeZone timeZone;
@@ -76,16 +76,16 @@ public class CollectingFileWriter extends FileMetadataWriter {
         this.timeZone = timeZone;
         return new JSONArray();
     }
-    
-    
+
+
     public SearchIterator<File> getFiles() {
         return files;
     }
-    
+
     public List<Field> getColumns() {
         return columns;
     }
-    
+
     public TimeZone getTimeZone() {
         return timeZone;
     }

@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link NOTTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
@@ -86,7 +86,7 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
 
     /**
      * Gets the search terms that should be linked with an OR as an array of {@link SearchTerm} with length <code>2</code>.
-     * 
+     *
      * @return The terms that should be linked with an OR
      */
     @Override
@@ -96,7 +96,7 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
 
     /**
      * Sets the search term
-     * 
+     *
      * @param term The search term
      */
     public void setTerm(final SearchTerm term) {

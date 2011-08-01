@@ -72,14 +72,17 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearOrphanedInfostoreDocuments.class));
 
+    @Override
     public int addedWithVersion() {
         return 26;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         PreparedStatement select = null;
         PreparedStatement delete = null;
@@ -92,7 +95,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
             List<ForeignKeyOld> keys = ForeignKeyOld.getForeignKeys(con, "infostore_document");
             ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
-          
+
             if( keys.contains(fk)) {
                 LOG.info("Foreign Key "+fk+" exists. Skipping Update Task.");
                 return;

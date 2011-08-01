@@ -15,9 +15,9 @@ import com._4psa.extensiondata_xsd._2_5.QueueCenterInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -53,8 +53,8 @@ import com._4psa.extensiondata_xsd._2_5.QueueCenterInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -81,11 +81,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -93,11 +93,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -105,11 +105,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -117,11 +117,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -129,11 +129,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the phoneTerminal property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link PhoneTerminal }
-     *     
+     *
      */
     public PhoneTerminal getPhoneTerminal() {
         return phoneTerminal;
@@ -141,11 +141,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the phoneTerminal property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link PhoneTerminal }
-     *     
+     *
      */
     public void setPhoneTerminal(PhoneTerminal value) {
         this.phoneTerminal = value;
@@ -153,11 +153,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the queue property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Queue }
-     *     
+     *
      */
     public Queue getQueue() {
         return queue;
@@ -165,11 +165,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the queue property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Queue }
-     *     
+     *
      */
     public void setQueue(Queue value) {
         this.queue = value;
@@ -177,11 +177,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the queueCenter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link QueueCenterInfo }
-     *     
+     *
      */
     public QueueCenterInfo getQueueCenter() {
         return queueCenter;
@@ -189,11 +189,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the queueCenter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link QueueCenterInfo }
-     *     
+     *
      */
     public void setQueueCenter(QueueCenterInfo value) {
         this.queueCenter = value;
@@ -201,11 +201,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the ivr property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link SetupExtensionRequest.IVR }
-     *     
+     *
      */
     public SetupExtensionRequest.IVR getIVR() {
         return ivr;
@@ -213,11 +213,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the ivr property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link SetupExtensionRequest.IVR }
-     *     
+     *
      */
     public void setIVR(SetupExtensionRequest.IVR value) {
         this.ivr = value;
@@ -225,11 +225,11 @@ public class SetupExtensionRequest {
 
     /**
      * Gets the value of the conference property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ConferenceInfo }
-     *     
+     *
      */
     public ConferenceInfo getConference() {
         return conference;
@@ -237,11 +237,11 @@ public class SetupExtensionRequest {
 
     /**
      * Sets the value of the conference property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ConferenceInfo }
-     *     
+     *
      */
     public void setConference(ConferenceInfo value) {
         this.conference = value;
@@ -250,9 +250,9 @@ public class SetupExtensionRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -264,8 +264,8 @@ public class SetupExtensionRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -279,11 +279,11 @@ public class SetupExtensionRequest {
 
         /**
          * Gets the value of the cloneID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getCloneID() {
             return cloneID;
@@ -291,11 +291,11 @@ public class SetupExtensionRequest {
 
         /**
          * Sets the value of the cloneID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setCloneID(BigInteger value) {
             this.cloneID = value;

@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link SystemContentType} - The folder storage content type for system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemContentType implements ContentType {
@@ -60,7 +60,7 @@ public final class SystemContentType implements ContentType {
 
     /**
      * Gets the {@link SystemContentType} instance.
-     * 
+     *
      * @return The {@link SystemContentType} instance
      */
     public static SystemContentType getInstance() {
@@ -79,11 +79,13 @@ public final class SystemContentType implements ContentType {
         return "system";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.SYSTEM_MODULE
         return 5;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

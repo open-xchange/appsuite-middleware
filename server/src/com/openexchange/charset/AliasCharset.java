@@ -55,7 +55,7 @@ import java.nio.charset.CharsetEncoder;
 
 /**
  * {@link AliasCharset} - An alias charset that delegates an unknown charset name to a supported charset.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AliasCharset extends Charset {
@@ -64,7 +64,7 @@ public final class AliasCharset extends Charset {
 
     /**
      * Initializes a new alias charset
-     * 
+     *
      * @param canonicalName The canonical name of the alias charset
      * @param aliases An array of this charset's aliases, or <code>null</code> if it has no aliases
      * @param delegate The delegate charset

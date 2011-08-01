@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ManagedFileActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManagedFileActionFactory implements AJAXActionServiceFactory {
@@ -69,7 +69,7 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link ManagedFileActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public ManagedFileActionFactory(final ServiceLookup services) {
@@ -79,6 +79,7 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
         actions.put("get", new GetAction(services));
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }

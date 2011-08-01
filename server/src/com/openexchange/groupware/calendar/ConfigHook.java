@@ -50,16 +50,16 @@
 package com.openexchange.groupware.calendar;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
 public class ConfigHook {
-    
+
     public static void setCheckAndRemovePastReminders(boolean value) {
         CalendarConfig.setCheckAndRemovePastReminders(value);
     }
-    
+
     public static void setSoloReminderTriggerEvent(boolean value) {
         CalendarConfig.setSoloReminderTriggerEvent(value);
     }
@@ -67,11 +67,11 @@ public class ConfigHook {
     public static void setMaxOperationsInRecurrenceCalculations(int value) {
         CalendarConfig.setMaxOperationsInRecurrenceCalculations(value);
     }
-    
+
     public static void setSeriesConflictLimit(boolean value) {
         CalendarConfig.setSeriesConflictLimit(value);
     }
-    
+
     public static void setUndefinedStatusConflict(boolean value) {
         CalendarConfig.setUndefinedStatusConflict(value);
     }

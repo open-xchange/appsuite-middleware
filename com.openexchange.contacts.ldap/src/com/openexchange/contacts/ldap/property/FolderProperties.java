@@ -63,12 +63,12 @@ import com.openexchange.exception.OXException;
  */
 public class FolderProperties {
 
-    
+
     private static final int DEFAULT_REFRESH_INTERVAL = 10000;
-    
+
     public interface SetterFallbackClosure {
         public void set(String property);
-        
+
         public String getFallback();
     }
 
@@ -77,7 +77,7 @@ public class FolderProperties {
         anonymous,
         user;
     }
-    
+
     public enum LoginSource {
         /**
          * Login is taken from user.imapLogin kept in storage; e.g. <code>test</code>
@@ -92,13 +92,13 @@ public class FolderProperties {
          */
         name
     }
-    
+
     public enum SearchScope {
         base,
         one,
         sub;
     }
-    
+
     public enum Sorting {
         groupware,
         server;
@@ -108,19 +108,19 @@ public class FolderProperties {
         AdminDN,
         anonymous;
     }
-    
+
     public enum ContactTypes {
         users,
         distributionlists,
         both;
     }
-    
+
     public enum ReferralTypes {
         follow,
         ignore,
         standard
     }
-    
+
     public enum DerefAliases {
         always,
         never,
@@ -128,7 +128,7 @@ public class FolderProperties {
         searching
     }
 
-    
+
     private enum Parameters {
         AdminBindPW("AdminBindPW"),
         AdminDN("AdminDN"),
@@ -160,26 +160,26 @@ public class FolderProperties {
         refreshinterval("refreshinterval"),
         pooltimeout("pooltimeout"),
         derefAliases("derefAliases");
-        
+
         private final String name;
-        
+
         private Parameters(final String name) {
             this.name = name;
         }
 
         public final String getName() {
             return name;
-        }    
+        }
     }
-    
+
     private interface SetterEnumClosure<T> {
         public void set(final T enumeration);
-        
+
         public T valueOf(final String string) throws IllegalArgumentException;
     }
 
     private String adminBindPW;
-    
+
     private String adminDN;
 
     private AuthType authtype;
@@ -217,33 +217,33 @@ public class FolderProperties {
     private String userSearchFilter;
 
     private SearchScope userSearchScope;
-    
+
     private ContactTypes contacttypes;
-    
+
     private String searchfilterDistributionlist;
-    
+
     private SearchScope searchScopeDistributionlist;
-    
+
     private String baseDNDistributionlist;
-    
+
     private boolean outlook_support;
-    
+
     private boolean ads_deletion_support;
-    
+
     private ReferralTypes referrals;
-    
+
     private int refreshinterval;
-    
+
     private int pooltimeout;
-    
+
     private DerefAliases derefAliases;
-    
+
     public static FolderProperties getFolderPropertiesFromProperties(final ConfigurationService configuration, final String name, final String folder, final String contextnr, final StringBuilder logBuilder) throws OXException {
         final String prefix = PropertyHandler.bundlename + "context" + contextnr + "." + folder + ".";
-        
+
         final Properties conf = configuration.getFile(name);
         final FolderProperties retval = new FolderProperties();
-        
+
         final CheckStringPropertyEnumParameter parameterObject = new CheckStringPropertyEnumParameter(conf, logBuilder, prefix, name);
 
         checkStringPropertyNonOptional(parameterObject, Parameters.foldername, new SetterClosure() {
@@ -269,7 +269,7 @@ public class FolderProperties {
             public void set(final String string) {
                 retval.setSearchfilter(string);
             }
-        }); 
+        });
         logBuilder.append("\tSearchfilter: ").append(retval.getSearchfilter()).append('\n');
 
         // Here we iterate over all properties...
@@ -279,27 +279,27 @@ public class FolderProperties {
             }
         });
         logBuilder.append("\tUri: ").append(retval.getUri()).append('\n');
-        
+
         checkStringPropertyNonOptional(parameterObject, Parameters.baseDN, new SetterClosure() {
             public void set(final String string) {
                 retval.setBaseDN(string);
             }
         });
         logBuilder.append("\tBaseDN: ").append(retval.getBaseDN()).append('\n');
-        
+
         checkStringProperty(parameterObject, Parameters.AdminDN, new SetterClosure() {
             public void set(final String string) {
                 retval.setAdminDN(string);
             }
         });
         logBuilder.append("\tAdminDN: ").append(retval.getAdminDN()).append('\n');
-        
+
         checkStringProperty(parameterObject, Parameters.AdminBindPW, new SetterClosure() {
             public void set(final String string) {
                 retval.setAdminBindPW(string);
             }
         });
-        
+
         checkStringPropertyEnum(parameterObject, Parameters.searchScope, LdapConfigurationExceptionCode.SEARCH_SCOPE_WRONG, new SetterEnumClosure<SearchScope>() {
             public void set(final SearchScope enumeration) {
                 retval.setSearchScope(enumeration);
@@ -335,7 +335,7 @@ public class FolderProperties {
                 return LoginSource.valueOf(string);
             }
         });
-        
+
         checkStringProperty(parameterObject, Parameters.userSearchFilter, new SetterClosure() {
             public void set(final String string) {
                 retval.setUserSearchFilter(string);
@@ -354,22 +354,22 @@ public class FolderProperties {
             retval.setUserSearchScope(retval.getSearchScope());
         }
         logBuilder.append("\tuserSearchScope: ").append(retval.getUserSearchScope()).append('\n');
-        
+
         checkStringProperty(parameterObject, Parameters.userSearchAttribute, new SetterClosure() {
             public void set(final String string) {
                 retval.setUserSearchAttribute(string);
             }
         });
         logBuilder.append("\tuserSearchAttribute: ").append(retval.getUserSearchAttribute()).append('\n');
-        
+
         final String userSearchBaseDNString = checkStringProperty(parameterObject, Parameters.userSearchBaseDN);
         if (null != userSearchBaseDNString) {
             retval.setUserSearchBaseDN(userSearchBaseDNString);
         } else {
             retval.setUserSearchBaseDN(retval.getBaseDN());
-        }        
+        }
         logBuilder.append("\tuserSearchBaseDN: ").append(retval.getUserSearchBaseDN()).append('\n');
-        
+
         final String userAuthTypeString = checkStringProperty(parameterObject, Parameters.userAuthType);
         if (null != userAuthTypeString) {
             try {
@@ -379,7 +379,7 @@ public class FolderProperties {
             }
         }
         logBuilder.append("\tuserAuthType: ").append(retval.getUserAuthType()).append('\n');
-        
+
         final String userAdminDNString = checkStringProperty(parameterObject, Parameters.userAdminDN);
         if (null != userAdminDNString) {
             retval.setUserAdminDN(userAdminDNString);
@@ -387,14 +387,14 @@ public class FolderProperties {
             retval.setUserAdminDN(retval.getAdminDN());
         }
         logBuilder.append("\tuserAdminDN: ").append(retval.getUserAdminDN()).append('\n');
-        
+
         final String userAdminBindPWString = checkStringProperty(parameterObject, Parameters.userAdminBindPW);
         if (null != userAdminBindPWString) {
             retval.setUserAdminBindPW(userAdminBindPWString);
         } else {
             retval.setUserAdminBindPW(retval.getAdminBindPW());
         }
-        
+
         checkStringProperty(parameterObject, Parameters.searchfilter_distributionlist, new SetterFallbackClosure() {
             public void set(final String string) {
                 retval.setSearchfilterDistributionlist(string);
@@ -405,7 +405,7 @@ public class FolderProperties {
             }
         });
         logBuilder.append("\tsearchfilter_distributionlist: ").append(retval.getSearchfilterDistributionlist()).append('\n');
-        
+
         final String searchScopeString = checkStringProperty(parameterObject, Parameters.searchScope_distributionlist);
         if (null != searchScopeString) {
             try {
@@ -417,7 +417,7 @@ public class FolderProperties {
             retval.setSearchScopeDistributionlist(retval.getSearchScope());
         }
         logBuilder.append("\tsearchScope_distributionlist: ").append(retval.getSearchScopeDistributionlist()).append('\n');
-        
+
         checkStringProperty(parameterObject, Parameters.baseDN_distributionlist, new SetterFallbackClosure() {
             public void set(final String string) {
                 retval.setBaseDNDistributionlist(string);
@@ -435,7 +435,7 @@ public class FolderProperties {
         final String ads_deletion_supportString = checkStringProperty(parameterObject, Parameters.ADS_deletion_support);
         retval.setAds_deletion_support(Boolean.parseBoolean(ads_deletion_supportString));
         logBuilder.append("\tADS_deletion_support: ").append(retval.isAds_deletion_support()).append('\n');
-        
+
         checkStringPropertyEnum(parameterObject, Parameters.referrals, LdapConfigurationExceptionCode.REFERRALS_WRONG, new SetterEnumClosure<ReferralTypes>() {
             public void set(final ReferralTypes enumeration) {
                 retval.setReferrals(enumeration);
@@ -444,7 +444,7 @@ public class FolderProperties {
                 return ReferralTypes.valueOf(string);
             }
         });
-        
+
         final String refreshintervalstring = checkStringProperty(parameterObject, Parameters.refreshinterval);
         try {
             if (null != refreshintervalstring) {
@@ -468,7 +468,7 @@ public class FolderProperties {
         } catch (final NumberFormatException e) {
             throw LdapConfigurationExceptionCode.INVALID_POOLTIMEOUT.create(pooltimeoutString, parameterObject.getFilename());
         }
-        
+
         final String derefAliasesString = checkStringProperty(parameterObject, Parameters.derefAliases);
         if (null != derefAliasesString) {
             try {
@@ -480,7 +480,7 @@ public class FolderProperties {
         logBuilder.append("\tderefAliases (null for not set): ").append(retval.getDerefAliases()).append('\n');
 
         final String memoryMappingString = checkStringProperty(parameterObject, Parameters.memorymapping);
-        
+
         // TODO: Throws no error, so use an error checking method
         retval.setMemorymapping(Boolean.parseBoolean(memoryMappingString));
         logBuilder.append("\tmemorymapping: ").append(retval.isMemorymapping()).append('\n');
@@ -506,12 +506,12 @@ public class FolderProperties {
         } else {
             throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + Parameters.mappingfile.getName(), parameterObject.getFilename());
         }
-        
+
         return retval;
     }
 
-    
-    
+
+
     public String getAdminBindPW() {
         return adminBindPW;
     }
@@ -528,8 +528,8 @@ public class FolderProperties {
         return baseDN;
     }
 
-    
-    
+
+
     /**
      * Gets the contacttypes
      *
@@ -566,7 +566,7 @@ public class FolderProperties {
     public int getPagesize() {
         return pagesize;
     }
-    
+
     public int getPooltimeout() {
         return pooltimeout;
     }
@@ -719,7 +719,7 @@ public class FolderProperties {
     private void setPagesize(final int pagesize) {
         this.pagesize = pagesize;
     }
-    
+
     private void setPooltimeout(final int pooltimeout) {
         this.pooltimeout = pooltimeout;
     }
@@ -737,54 +737,54 @@ public class FolderProperties {
     private void setSearchfilter(final String searchfilter) {
         this.searchfilter = searchfilter;
     }
-    
+
     private void setSearchScope(final SearchScope searchScope) {
         this.searchScope = searchScope;
     }
-    
+
     private void setSorting(final Sorting sorting) {
         this.sorting = sorting;
     }
-    
+
     private void setUri(final String uri) {
         this.uri = uri;
     }
-    
+
     /**
      * @param userAdminBindPW
      */
     private void setUserAdminBindPW(final String userAdminBindPW) {
         this.userAdminBindPW = userAdminBindPW;
     }
-    
+
     /**
      * @param userAdminDN
      */
     private void setUserAdminDN(final String userAdminDN) {
         this.userAdminDN = userAdminDN;
     }
-    
+
     /**
      * @param userAuthType
      */
     private void setUserAuthType(final UserAuthType userAuthType) {
         this.userAuthType = userAuthType;
     }
-    
+
     /**
      * @param userLoginSource
      */
     private void setUserLoginSource(final LoginSource userLoginSource) {
         this.userLoginSource = userLoginSource;
     }
-    
+
     /**
      * @param userSearchAttribute
      */
     private void setUserSearchAttribute(final String userSearchAttribute) {
         this.userSearchAttribute = userSearchAttribute;
     }
-    
+
     /**
      * @param userSearchBaseDN
      */
@@ -884,7 +884,7 @@ public class FolderProperties {
             throw LdapConfigurationExceptionCode.PARAMETER_NOT_SET.create(parameterObject.getPrefix() + param.getName(), parameterObject.getFilename());
         }
     }
-    
+
     private static String checkStringProperty(final CheckStringPropertyEnumParameter parameterObject, final Parameters param) throws OXException {
         return PropertyHandler.checkStringProperty(parameterObject.getProps(), parameterObject.getPrefix() + param.getName());
     }

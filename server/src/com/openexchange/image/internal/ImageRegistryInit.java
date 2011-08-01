@@ -56,7 +56,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageRegistryInit} - Initialization for image registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageRegistryInit implements Initialization {
@@ -73,6 +73,7 @@ public final class ImageRegistryInit implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("image registry initialized twice", new Throwable());
@@ -83,6 +84,7 @@ public final class ImageRegistryInit implements Initialization {
         ServerServiceRegistry.getInstance().addService(ImageService.class, new ImageServiceImpl());
     }
 
+    @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.warn("image registry stopped twice", new Throwable());

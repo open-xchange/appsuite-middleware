@@ -51,7 +51,7 @@ package com.openexchange.config;
 
 /**
  * {@link PropertyEvent} - Provides information about a property event.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PropertyEvent {
@@ -65,21 +65,21 @@ public interface PropertyEvent {
 
     /**
      * Gets the event type.
-     * 
+     *
      * @return The event type.
      */
     public Type getType();
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName();
 
     /**
      * Gets the value. The value is <code>null</code> if corresponding event type is {@link Type#DELETED}.
-     * 
+     *
      * @return The value.
      */
     public String getValue();

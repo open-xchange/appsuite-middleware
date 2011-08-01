@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteAction extends AbstractMailAccountAction {
@@ -79,6 +79,7 @@ public final class DeleteAction extends AbstractMailAccountAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         /*
          * Compose JSON array with id

@@ -55,7 +55,7 @@ import com.openexchange.oauth.OAuthToken;
 /**
  * {@link ScribeOAuthToken} - An {@link OAuthToken} backed by a Scribe {@link Token} instance. If passed instance is <code>null</code>, an
  * empty token is assumed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ScribeOAuthToken implements OAuthToken {
@@ -66,7 +66,7 @@ public final class ScribeOAuthToken implements OAuthToken {
 
     /**
      * Initializes a new {@link ScribeOAuthToken}.
-     * 
+     *
      * @param token The Scribe token
      */
     public ScribeOAuthToken(final Token token) {

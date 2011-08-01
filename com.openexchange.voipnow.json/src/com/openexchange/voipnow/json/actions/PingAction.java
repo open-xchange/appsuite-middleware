@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link PingAction} - The action ping.
  * <p>
  * Using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PingAction extends AbstractVoipNowSOAPAction<PBXInterface> {

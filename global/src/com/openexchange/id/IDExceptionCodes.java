@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link IDExceptionCodes} - Enumeration of all {@link IDException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum IDExceptionCodes implements OXExceptionCode {
@@ -77,9 +77,9 @@ public enum IDExceptionCodes implements OXExceptionCode {
      * ID generation failed
      */
     ID_GEN_FAILED(IDExceptionMessages.ID_GEN_FAILED_MSG, CATEGORY_ERROR, 4),
-    
-    
-    
+
+
+
     ;
 
     private final Category category;
@@ -93,7 +93,7 @@ public enum IDExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "IDGEN";
     }
@@ -116,7 +116,7 @@ public enum IDExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -125,7 +125,7 @@ public enum IDExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -135,7 +135,7 @@ public enum IDExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

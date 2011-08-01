@@ -70,10 +70,10 @@ import de.rtner.security.auth.spi.PBKDF2Parameters;
 
 /**
  * This Service provides Methods for encrypting and decrypting of Strings.
- * 
+ *
  * Warning: Do not change the parameters (IV, salt, algorithms, ...) in productive environment,
  * because decryption of former encrypted date will be impossible.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
@@ -88,12 +88,12 @@ public class CryptoServiceImpl implements CryptoService {
      * Key Charset
      */
     private static final String CHARSET = "UTF-8";
-    
+
     /**
      * Algorithm for creating random salt.
      */
     private static final String RANDOM_ALGORITHM = "SHA1PRNG";
-    
+
     /**
      * Key length
      */
@@ -161,7 +161,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     /**
      * Encrypts specified data with given key.
-     * 
+     *
      * @param data The data to encrypt
      * @param password The password
      * @return The encrypted data as Base64 encoded string
@@ -176,11 +176,11 @@ public class CryptoServiceImpl implements CryptoService {
             /*-
              * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
-             * 
+             *
              * A 65-character subset of US-ASCII is used, enabling 6 bits to be
              * represented per printable character. (The extra 65th character, "=",
              * is used to signify a special processing function.)
-             * 
+             *
              * NOTE: This subset has the important property that it is represented
              * identically in all versions of ISO 646, including US-ASCII, and all
              * characters in the subset are also represented identically in all
@@ -189,7 +189,7 @@ public class CryptoServiceImpl implements CryptoService {
              * the base85 encoding specified as part of Level 2 PostScript, do not
              * share these properties, and thus do not fulfill the portability
              * requirements a binary transport encoding for mail must meet.
-             * 
+             *
              */
             retval = new String(Base64.encodeBase64(outputBytes), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
@@ -203,7 +203,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     /**
      * Decrypts specified encrypted data with given Key.
-     * 
+     *
      * @param encryptedData The Base64 encoded encrypted data
      * @param key The Key
      * @return The decrypted data
@@ -217,11 +217,11 @@ public class CryptoServiceImpl implements CryptoService {
             /*-
              * It's safe to use "US-ASCII" to turn Base64 encoded encrypted password string into bytes.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
-             * 
+             *
              * A 65-character subset of US-ASCII is used, enabling 6 bits to be
              * represented per printable character. (The extra 65th character, "=",
              * is used to signify a special processing function.)
-             * 
+             *
              * NOTE: This subset has the important property that it is represented
              * identically in all versions of ISO 646, including US-ASCII, and all
              * characters in the subset are also represented identically in all
@@ -230,7 +230,7 @@ public class CryptoServiceImpl implements CryptoService {
              * the base85 encoding specified as part of Level 2 PostScript, do not
              * share these properties, and thus do not fulfill the portability
              * requirements a binary transport encoding for mail must meet.
-             * 
+             *
              */
             encrypted = Base64.decodeBase64(encryptedData.getBytes("US-ASCII"));
 
@@ -256,7 +256,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     /**
      * Generates a secret key from specified password string.
-     * 
+     *
      * @param password The password string
      * @return A secret key generated from specified password string
      * @throws OXException

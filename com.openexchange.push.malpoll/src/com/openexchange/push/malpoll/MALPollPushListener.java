@@ -74,7 +74,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link MALPollPushListener} - The MAL poll {@link PushListener}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollPushListener implements PushListener {
@@ -96,7 +96,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Gets the account ID constant.
-     * 
+     *
      * @return The account ID constant
      */
     public static int getAccountId() {
@@ -105,7 +105,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Sets static folder fullname.
-     * 
+     *
      * @param folder The folder fullname
      */
     public static void setFolder(final String folder) {
@@ -114,7 +114,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Gets static folder fullname.
-     * 
+     *
      * @return The folder fullname
      */
     public static String getFolder() {
@@ -123,7 +123,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Sets static period milliseconds.
-     * 
+     *
      * @param periodMillis The period milliseconds
      */
     public static void setPeriodMillis(final long periodMillis) {
@@ -132,7 +132,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Initializes a new {@link MALPollPushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      * @param startTimerTask <code>true</code> to start a timer task for this listener
      * @return A new {@link MALPollPushListener}.
@@ -161,7 +161,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Initializes a new {@link MALPollPushListener}.
-     * 
+     *
      * @param session The needed session to obtain and connect mail access instance
      * @param ignoreOnGlobal <code>true</code> to ignore during global run
      */
@@ -184,7 +184,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
-     * 
+     *
      * @throws OXException If listener cannot be opened
      */
     public void open() throws OXException {
@@ -225,7 +225,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Checks whether to ignore this listener on global run.
-     * 
+     *
      * @return <code>true</code> to ignore this listener on global run; otherwise <code>false</code>
      */
     public boolean isIgnoreOnGlobal() {
@@ -234,7 +234,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Check for new mails
-     * 
+     *
      * @throws OXException If check for new mails fails
      */
     public void checkNewMail() throws OXException {
@@ -397,7 +397,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Checks if this listener has been started.
-     * 
+     *
      * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
      */
     public boolean isStarted() {
@@ -406,7 +406,7 @@ public final class MALPollPushListener implements PushListener {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public Session getSession() {

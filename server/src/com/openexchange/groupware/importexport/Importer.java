@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * This interface defines an importer, meaning a class able to
  * import one or more data formats into the OX.
- *  
+ *
  * @author Tobias Prinz, mailto:tobias.prinz@open-xchange.com
  *
  */
@@ -76,7 +76,7 @@ public interface Importer {
 	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws OXException;
 
 	/**
-	 * 
+	 *
 	 * @param sessObj: session object enabling us to check access rights (write rights needed)
 	 * @param format: Format of the data to be imported
 	 * @param is: InputStream containing data to be imported
@@ -90,7 +90,7 @@ public interface Importer {
 			ServerSession sessObj,
 			Format format,
 			InputStream is,
-			List<String> folders, 
+			List<String> folders,
 			Map<String, String[]> optionalParams ) throws OXException;
 
 }

@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingFolderAccess} - The facebook folder access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -129,7 +129,7 @@ public class FacebookMessagingFolderAccess extends AbstractFacebookAccess implem
 
     /**
      * Initializes a new {@link FacebookMessagingFolderAccess}.
-     * 
+     *
      * @param facebookOAuthAccess The Facebook OAuth access
      * @param messagingAccount The Facebook messaging account
      * @param session The associated session

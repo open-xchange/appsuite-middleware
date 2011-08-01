@@ -53,14 +53,14 @@ import java.io.Serializable;
 
 /**
  * {@link Component} - Error abbreviation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Component extends Serializable {
 
     /**
      * Gets the error abbreviation
-     * 
+     *
      * @return The error abbreviation
      */
     public String getAbbreviation();

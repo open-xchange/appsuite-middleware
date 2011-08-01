@@ -64,7 +64,7 @@ import javax.crypto.spec.SecretKeySpec;
  * (PBE).
  * <p>
  * PBE is a form of symmetric encryption where the same key or password is used to encrypt and decrypt a string.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailPasswordUtil {
@@ -88,7 +88,7 @@ public final class MailPasswordUtil {
 
     /**
      * Encrypts specified password with given key.
-     * 
+     *
      * @param password The password
      * @param key The key
      * @return The encrypted password as Base64 encoded string
@@ -100,7 +100,7 @@ public final class MailPasswordUtil {
 
     /**
      * Decrypts specified encrypted password with given key.
-     * 
+     *
      * @param encryptedPassword The Base64 encoded encrypted password
      * @param key The key
      * @return The decrypted password
@@ -112,7 +112,7 @@ public final class MailPasswordUtil {
 
     /**
      * Encrypts specified password with given key.
-     * 
+     *
      * @param password The password to encrypt
      * @param key The key
      * @return The encrypted password as Base64 encoded string
@@ -130,11 +130,11 @@ public final class MailPasswordUtil {
             /*-
              * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
-             * 
+             *
              * A 65-character subset of US-ASCII is used, enabling 6 bits to be
              * represented per printable character. (The extra 65th character, "=",
              * is used to signify a special processing function.)
-             * 
+             *
              * NOTE: This subset has the important property that it is represented
              * identically in all versions of ISO 646, including US-ASCII, and all
              * characters in the subset are also represented identically in all
@@ -143,7 +143,7 @@ public final class MailPasswordUtil {
              * the base85 encoding specified as part of Level 2 PostScript, do not
              * share these properties, and thus do not fulfill the portability
              * requirements a binary transport encoding for mail must meet.
-             * 
+             *
              */
             return new String(org.apache.commons.codec.binary.Base64.encodeBase64(outputBytes), "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
@@ -155,7 +155,7 @@ public final class MailPasswordUtil {
 
     /**
      * Decrypts specified encrypted password with given key.
-     * 
+     *
      * @param encryptedPassword The Base64 encoded encrypted password
      * @param key The key
      * @return The decrypted password
@@ -170,11 +170,11 @@ public final class MailPasswordUtil {
             /*-
              * It's safe to use "US-ASCII" to turn Base64 encoded encrypted password string into bytes.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
-             * 
+             *
              * A 65-character subset of US-ASCII is used, enabling 6 bits to be
              * represented per printable character. (The extra 65th character, "=",
              * is used to signify a special processing function.)
-             * 
+             *
              * NOTE: This subset has the important property that it is represented
              * identically in all versions of ISO 646, including US-ASCII, and all
              * characters in the subset are also represented identically in all
@@ -183,7 +183,7 @@ public final class MailPasswordUtil {
              * the base85 encoding specified as part of Level 2 PostScript, do not
              * share these properties, and thus do not fulfill the portability
              * requirements a binary transport encoding for mail must meet.
-             * 
+             *
              */
             encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(encryptedPassword.getBytes("US-ASCII"));
         } catch (final UnsupportedEncodingException e) {
@@ -217,7 +217,7 @@ public final class MailPasswordUtil {
 
     /**
      * Generates a secret key from specified key string.
-     * 
+     *
      * @param key The key string
      * @return A secret key generated from specified key string
      * @throws GeneralSecurityException If generating secret key fails
@@ -254,7 +254,7 @@ public final class MailPasswordUtil {
 
     /*-
      * Encode a secret key as a string that can be stored for later use.
-     * 
+     *
      * @param key
      * @return
     public static String encodeKey(final Key key) {
@@ -265,7 +265,7 @@ public final class MailPasswordUtil {
 
     /*-
      * Reconstruct a secret key from a string representation.
-     * 
+     *
      * @param encodedKey
      * @return
      * @throws IOException

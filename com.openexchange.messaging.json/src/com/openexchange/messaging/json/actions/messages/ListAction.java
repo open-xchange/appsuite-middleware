@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * </dl>
  * The body of the request must contain a JSONArray with the message IDs that are to be loaded. Returns a JSONArray containing a JSONArray
  * for every message that is to be loaded. The sub arrays consist of one entry for each requested field.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

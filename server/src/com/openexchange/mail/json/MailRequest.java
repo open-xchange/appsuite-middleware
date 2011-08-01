@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailRequest {
@@ -73,7 +73,7 @@ public final class MailRequest {
 
     /**
      * Initializes a new {@link MailRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -93,7 +93,7 @@ public final class MailRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
@@ -117,7 +117,7 @@ public final class MailRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -141,7 +141,7 @@ public final class MailRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -156,7 +156,7 @@ public final class MailRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -170,7 +170,7 @@ public final class MailRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -179,7 +179,7 @@ public final class MailRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {

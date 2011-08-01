@@ -61,7 +61,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link IMAPNotifierRegistry} - The registry for {@link IMAPNotifierTask notifier tasks}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
@@ -70,7 +70,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The instance
      */
     public static IMAPNotifierRegistryService getInstance() {

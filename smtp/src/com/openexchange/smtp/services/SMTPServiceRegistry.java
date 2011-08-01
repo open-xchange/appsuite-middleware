@@ -53,9 +53,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link SMTPServiceRegistry} - A registry for services needed by SMTP bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SMTPServiceRegistry {
 
@@ -63,7 +63,7 @@ public final class SMTPServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

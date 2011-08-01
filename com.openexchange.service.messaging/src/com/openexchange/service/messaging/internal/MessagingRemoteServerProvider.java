@@ -63,12 +63,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.MDNSServiceEntry;
 import com.openexchange.mdns.MDNSServiceInfo;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingRemoteServerProvider} - Provides the addresses to remote messaging servers either dynamically looked-up or statically
  * configured.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingRemoteServerProvider extends ServiceTracker {
@@ -80,7 +79,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MessagingRemoteServerProvider getInstance() {
@@ -89,7 +88,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
 
     /**
      * Initializes the instance.
-     * 
+     *
      * @param context The bundle context
      */
     public static void initInstance(final BundleContext context) {
@@ -178,7 +177,7 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
 
     /**
      * Gets remote messaging servers.
-     * 
+     *
      * @return
      * @throws OXException
      */

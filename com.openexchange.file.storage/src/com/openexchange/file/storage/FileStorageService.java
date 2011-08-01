@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FileStorageService} - The file storage service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -65,43 +65,43 @@ public interface FileStorageService extends FileStorageConstants {
 
     /**
      * Gets the identifier of this file storage service.
-     * 
+     *
      * @return The identifier
      */
     public String getId();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     public String getDisplayName();
 
     /**
      * Get the form description.
-     * 
+     *
      * @return The form description
      */
     public DynamicFormDescription getFormDescription();
 
     /**
      * Gets those properties from configuration which should be encrypted.
-     * 
+     *
      * @return Those properties from configuration which should be encrypted
      */
     public Set<String> getSecretProperties();
 
     /**
      * Gets the account manager for this file storage service.
-     * 
+     *
      * @return The account manager
-     * @throws OXException 
+     * @throws OXException
      */
     public FileStorageAccountManager getAccountManager() throws OXException;
 
     /**
      * Gets the account access for specified account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account access for specified account identifier

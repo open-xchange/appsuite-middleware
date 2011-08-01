@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * Participants
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class Participants {

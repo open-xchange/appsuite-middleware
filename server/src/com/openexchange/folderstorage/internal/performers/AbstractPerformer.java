@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractPerformer} - Abstract action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractPerformer {
@@ -96,7 +96,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
-     * 
+     *
      * @param session The session
      */
     protected AbstractPerformer(final ServerSession session) {
@@ -105,7 +105,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -123,7 +123,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Initializes a new {@link AbstractPerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -133,7 +133,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Initializes a new {@link AbstractPerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -150,7 +150,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the context information for an error message.
-     * 
+     *
      * @return The context information for an error message.
      */
     protected String getContextInfo4Error() {
@@ -167,7 +167,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the user information for an error message.
-     * 
+     *
      * @return The user information for an error message.
      */
     protected String getUserInfo4Error() {
@@ -184,7 +184,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the folder information for an error message.
-     * 
+     *
      * @return The folder information for an error message.
      */
     protected String getFolderInfo4Error(final Folder folder) {
@@ -201,7 +201,7 @@ public abstract class AbstractPerformer {
     /**
      * Adds a warning to this performer. <br>
      * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
-     * 
+     *
      * @param warning The warning to add
      */
     protected void addWarning(final OXException warning) {
@@ -211,7 +211,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the number of warnings.
-     * 
+     *
      * @return The number of warnings
      */
     public int getNumOfWarnings() {
@@ -220,7 +220,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the warnings of this performer as an unmodifiable {@link Set set}.
-     * 
+     *
      * @return The warnings as an unmodifiable set
      */
     public Set<OXException> getWarnings() {
@@ -229,7 +229,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Creates a new storage parameter instance.
-     * 
+     *
      * @return A new storage parameter instance.
      */
     protected StorageParameters newStorageParameters() {
@@ -241,7 +241,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets an opened storage for given tree-folder-pair.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param storageParameters The storage parameters to use
@@ -271,7 +271,7 @@ public abstract class AbstractPerformer {
     /**
      * Checks if given folder storage is already contained in collection of opened storages. If yes, this method terminates immediately.
      * Otherwise the folder storage is opened according to specified modify flag and is added to specified collection of opened storages.
-     * 
+     *
      * @param checkMe The folder storage to check
      * @param modify <code>true</code> if the storage is supposed to be opened for a modifying operation; otherwise <code>false</code>
      * @param openedStorages The collection of already opened storages
@@ -292,7 +292,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the context.
-     * 
+     *
      * @return The context
      */
     public Context getContext() {
@@ -301,7 +301,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the context identifier.
-     * 
+     *
      * @return The context identifier
      */
     public int getContextId() {
@@ -310,7 +310,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Sets the storage parameters.
-     * 
+     *
      * @param storageParameters The storage parameters
      */
     public void setStorageParameters(final StorageParameters storageParameters) {
@@ -319,7 +319,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the storage parameters.
-     * 
+     *
      * @return The storage parameters
      */
     public StorageParameters getStorageParameters() {
@@ -328,7 +328,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the user.
-     * 
+     *
      * @return The user
      */
     public User getUser() {
@@ -337,7 +337,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier
      */
     public int getUserId() {
@@ -346,7 +346,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {
@@ -355,7 +355,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Gets the folder storage discoverer.
-     * 
+     *
      * @return The folder storage discoverer
      */
     public FolderStorageDiscoverer getFolderStorageDiscoverer() {

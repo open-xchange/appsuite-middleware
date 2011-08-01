@@ -83,7 +83,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MailActionFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
@@ -92,7 +92,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     /**
      * Initializes a new {@link MailActionFactory}.
-     * 
+     *
      * @param services The service look-up
      */
     public MailActionFactory(final ServiceLookup services) {
@@ -122,14 +122,17 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("edit", new EditAction(services));
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
 
+    @Override
     public void begin(final AJAXState state) throws OXException {
         // Nope
     }
 
+    @Override
     public void end(final AJAXState state) throws OXException {
         /*
          * Drop possibly opened mail access instances

@@ -33,11 +33,11 @@ public class PollResultConverter implements ResultConverter {
 	public void convert(AJAXRequestData request, AJAXRequestResult result,
 			ServerSession session, Converter converter) throws OXException {
 		Poll poll = (Poll) result.getResultObject();
-		
+
 		result.setResultObject(convert(poll), "json");
-		
+
 	}
-	
+
 	private JSONObject convert(final Poll poll) throws OXException {
         try {
             final JSONObject object = new JSONObject();

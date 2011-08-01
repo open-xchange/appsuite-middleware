@@ -69,6 +69,7 @@ public class CalendarFreeBusy extends AbstractModules {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "calendar", "calendar_freebusy" };
     }

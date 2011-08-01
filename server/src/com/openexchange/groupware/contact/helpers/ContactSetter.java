@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.LinkEntryObject;
  */
 public class ContactSetter implements ContactSwitcher {
 
+    @Override
     public Object displayname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DisplayName");
@@ -82,6 +83,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object surname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SurName");
@@ -95,6 +97,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object givenname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("GivenName");
@@ -108,6 +111,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object middlename(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MiddleName");
@@ -121,6 +125,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object suffix(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Suffix");
@@ -134,6 +139,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object title(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Title");
@@ -147,6 +153,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object streethome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetHome");
@@ -160,6 +167,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object postalcodehome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeHome");
@@ -173,6 +181,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object cityhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityHome");
@@ -186,6 +195,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object statehome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateHome");
@@ -199,6 +209,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object countryhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryHome");
@@ -212,6 +223,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object maritalstatus(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("MaritalStatus");
@@ -225,6 +237,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object numberofchildren(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfChildren");
@@ -238,6 +251,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object profession(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Profession");
@@ -251,6 +265,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object nickname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Nickname");
@@ -264,6 +279,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object spousename(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SpouseName");
@@ -277,6 +293,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object note(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Note");
@@ -290,6 +307,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object company(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Company");
@@ -303,6 +321,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object department(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Department");
@@ -316,6 +335,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object position(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Position");
@@ -329,6 +349,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object employeetype(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("EmployeeType");
@@ -342,6 +363,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object roomnumber(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("RoomNumber");
@@ -355,6 +377,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object streetbusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetBusiness");
@@ -368,6 +391,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object postalcodebusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeBusiness");
@@ -381,6 +405,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object citybusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityBusiness");
@@ -394,6 +419,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object statebusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateBusiness");
@@ -407,6 +433,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object countrybusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryBusiness");
@@ -420,6 +447,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object numberofemployee(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfEmployee");
@@ -433,6 +461,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object salesvolume(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("SalesVolume");
@@ -446,6 +475,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object taxid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TaxID");
@@ -459,6 +489,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object commercialregister(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CommercialRegister");
@@ -472,6 +503,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object branches(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Branches");
@@ -485,6 +517,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object businesscategory(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("BusinessCategory");
@@ -498,6 +531,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object info(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Info");
@@ -511,6 +545,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object managername(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ManagerName");
@@ -524,6 +559,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object assistantname(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("AssistantName");
@@ -537,6 +573,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object streetother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StreetOther");
@@ -550,6 +587,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object postalcodeother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PostalCodeOther");
@@ -563,6 +601,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object cityother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CityOther");
@@ -576,6 +615,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object stateother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("StateOther");
@@ -589,6 +629,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object countryother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CountryOther");
@@ -602,6 +643,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneassistant(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneAssistant");
@@ -615,6 +657,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonebusiness1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness1");
@@ -628,6 +671,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonebusiness2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneBusiness2");
@@ -641,6 +685,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object faxbusiness(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxBusiness");
@@ -654,6 +699,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonecallback(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCallback");
@@ -667,6 +713,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonecar(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCar");
@@ -680,6 +727,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonecompany(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneCompany");
@@ -693,6 +741,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonehome1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome1");
@@ -706,6 +755,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonehome2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneHome2");
@@ -719,6 +769,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object faxhome(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxHome");
@@ -732,6 +783,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneisdn(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneISDN");
@@ -745,6 +797,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object cellulartelephone1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone1");
@@ -758,6 +811,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object cellulartelephone2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CellularTelephone2");
@@ -771,6 +825,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneOther");
@@ -784,6 +839,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object faxother(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FaxOther");
@@ -797,6 +853,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonepager(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePager");
@@ -810,6 +867,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneprimary(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephonePrimary");
@@ -823,6 +881,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneradio(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneRadio");
@@ -836,6 +895,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonetelex(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTelex");
@@ -849,6 +909,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephonettyttd(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneTTYTTD");
@@ -862,6 +923,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object instantmessenger1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger1");
@@ -875,6 +937,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object instantmessenger2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InstantMessenger2");
@@ -888,6 +951,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object telephoneip(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("TelephoneIP");
@@ -901,6 +965,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object email1(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email1");
@@ -914,6 +979,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object email2(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email2");
@@ -927,6 +993,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object email3(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Email3");
@@ -940,6 +1007,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object url(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("URL");
@@ -953,6 +1021,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object categories(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Categories");
@@ -966,6 +1035,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield01(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField01");
@@ -979,6 +1049,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield02(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField02");
@@ -992,6 +1063,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield03(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField03");
@@ -1005,6 +1077,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield04(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField04");
@@ -1018,6 +1091,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield05(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField05");
@@ -1031,6 +1105,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield06(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField06");
@@ -1044,6 +1119,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield07(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField07");
@@ -1057,6 +1133,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield08(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField08");
@@ -1070,6 +1147,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield09(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField09");
@@ -1083,6 +1161,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield10(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField10");
@@ -1096,6 +1175,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield11(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField11");
@@ -1109,6 +1189,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield12(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField12");
@@ -1122,6 +1203,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield13(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField13");
@@ -1135,6 +1217,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield14(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField14");
@@ -1148,6 +1231,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield15(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField15");
@@ -1161,6 +1245,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield16(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField16");
@@ -1174,6 +1259,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield17(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField17");
@@ -1187,6 +1273,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield18(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField18");
@@ -1200,6 +1287,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield19(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField19");
@@ -1213,6 +1301,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object userfield20(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UserField20");
@@ -1226,6 +1315,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object objectid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ObjectID");
@@ -1239,6 +1329,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object numberofdistributionlists(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfDistributionLists");
@@ -1252,6 +1343,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object numberoflinks(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfLinks");
@@ -1265,6 +1357,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object distributionlist(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DistributionList");
@@ -1278,6 +1371,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object links(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Links");
@@ -1291,6 +1385,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object parentfolderid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ParentFolderID");
@@ -1304,6 +1399,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object contextid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ContextId");
@@ -1317,6 +1413,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object privateflag(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("PrivateFlag");
@@ -1330,6 +1427,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object createdby(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreatedBy");
@@ -1343,6 +1441,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object modifiedby(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ModifiedBy");
@@ -1356,6 +1455,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object creationdate(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("CreationDate");
@@ -1369,6 +1469,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object lastmodified(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("LastModified");
@@ -1382,6 +1483,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object birthday(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Birthday");
@@ -1395,6 +1497,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object anniversary(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
@@ -1408,6 +1511,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object imagelastmodified(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("ImageLastModified");
@@ -1421,6 +1525,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object internaluserid(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("InternalUserId");
@@ -1434,6 +1539,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object label(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Label");
@@ -1447,6 +1553,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object fileas(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("FileAs");
@@ -1460,6 +1567,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object defaultaddress(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("DefaultAddress");
@@ -1473,6 +1581,7 @@ public class ContactSetter implements ContactSwitcher {
         return conObj;
     }
 
+    @Override
     public Object numberofattachments(final Object... objects) throws OXException {
         if (objects.length < 2) {
             throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfAttachments");
@@ -1516,6 +1625,7 @@ public class ContactSetter implements ContactSwitcher {
         return true;
     }
 
+    @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {
         if(fieldname == null || fieldname.equals("")) {
             return false;

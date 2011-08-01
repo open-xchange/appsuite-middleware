@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Extended queue extension data
- * 
+ *
  * <p>Java class for ExtendedQueue complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtendedQueue">
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtendedQueue", propOrder = {
@@ -46,11 +46,11 @@ public class ExtendedQueue
 
     /**
      * Gets the value of the agents property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAgents() {
         return agents;
@@ -58,11 +58,11 @@ public class ExtendedQueue
 
     /**
      * Sets the value of the agents property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAgents(BigInteger value) {
         this.agents = value;
@@ -70,11 +70,11 @@ public class ExtendedQueue
 
     /**
      * Gets the value of the registeredAgents property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRegisteredAgents() {
         return registeredAgents;
@@ -82,11 +82,11 @@ public class ExtendedQueue
 
     /**
      * Sets the value of the registeredAgents property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRegisteredAgents(BigInteger value) {
         this.registeredAgents = value;
@@ -94,11 +94,11 @@ public class ExtendedQueue
 
     /**
      * Gets the value of the supervisors property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSupervisors() {
         return supervisors;
@@ -106,11 +106,11 @@ public class ExtendedQueue
 
     /**
      * Sets the value of the supervisors property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSupervisors(BigInteger value) {
         this.supervisors = value;

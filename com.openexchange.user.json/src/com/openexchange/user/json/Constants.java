@@ -53,7 +53,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Constants} - Constants for the HTTP JSON interface of the user component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {

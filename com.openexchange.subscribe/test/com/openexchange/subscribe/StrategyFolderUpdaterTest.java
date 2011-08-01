@@ -66,16 +66,17 @@ public class StrategyFolderUpdaterTest extends TestCase {
     private SimFolderUpdaterStrategy simStrategy;
     private StrategyFolderUpdaterService<String> updater;
 
+    @Override
     public void setUp() {
         simStrategy = new SimFolderUpdaterStrategy();
         simStrategy.setDataSet("aaaac", "baaaa");
         updater = new StrategyFolderUpdaterService<String>(simStrategy);
     }
-    
+
     public void testMerging() throws Exception {
         updater.save(Arrays.asList("aaaab", "baaaa", "new"), null);
         assertTrue("Expected update to aaaac", simStrategy.wasUpdated("aaaac", "aaaab"));
         assertTrue("Expected creation of 'new'", simStrategy.wasCreated("new"));
     }
-    
+
 }

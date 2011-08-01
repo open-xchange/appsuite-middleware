@@ -63,11 +63,11 @@ import com.openexchange.tools.session.ServerSession;
 public class SubscriptionSourcesServlet extends MultipleAdapterServlet {
 
  private static SubscriptionSourceMultipleFactory multipleFactory = null;
-    
+
     public static void setFactory(SubscriptionSourceMultipleFactory factory) {
         multipleFactory = factory;
     }
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return multipleFactory.createMultipleHandler();
@@ -82,7 +82,7 @@ public class SubscriptionSourcesServlet extends MultipleAdapterServlet {
         return session.getUserConfiguration().isSubscription();
     }
 
-    
-    
-    
+
+
+
 }

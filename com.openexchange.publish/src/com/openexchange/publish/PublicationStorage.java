@@ -67,19 +67,19 @@ public interface PublicationStorage {
     public List<Publication> getPublications(Context ctx, String module, String entityId) throws OXException;
 
     public List<Publication> getPublications(Context ctx, String publicationTarget) throws OXException;
-    
+
     public List<Publication> getPublicationsOfUser(Context ctx, int userId)  throws OXException;
-    
+
     public List<Publication> getPublicationsOfUser(Context ctx, int userId, String module)  throws OXException;
 
-    public Publication getPublication(Context ctx, int publicationId) throws OXException;    
-    
+    public Publication getPublication(Context ctx, int publicationId) throws OXException;
+
     public Collection<Publication> search(Context ctx, String targetId, Map<String, Object> query) throws OXException;
-    
+
     public void updatePublication(Publication publication) throws OXException;
-    
+
     public void deletePublicationsOfUser(int userID, Context context) throws OXException;
-    
+
     public void deletePublicationsInContext(int contextId, Context ctx) throws OXException;
-    
+
 }

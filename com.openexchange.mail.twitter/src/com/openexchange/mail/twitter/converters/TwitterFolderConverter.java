@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TwitterFolderConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterFolderConverter {
@@ -73,7 +73,7 @@ public final class TwitterFolderConverter {
 
     /**
      * Gets the twitter INBOX folder.
-     * 
+     *
      * @param session The user's session
      * @return The twitter INBOX folder
      * @throws OXException If twitter INBOX folder cannot be returned
@@ -131,7 +131,7 @@ public final class TwitterFolderConverter {
 
     /**
      * Gets the twitter root folder.
-     * 
+     *
      * @param session The user's session
      * @return The twitter root folder
      */

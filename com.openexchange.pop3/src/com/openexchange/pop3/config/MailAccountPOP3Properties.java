@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountPOP3Properties} - POP3 properties read from mail account with fallback to properties read from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountPOP3Properties extends MailAccountProperties implements IPOP3Properties {
@@ -64,7 +64,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
 
     /**
      * Initializes a new {@link MailAccountPOP3Properties}.
-     * 
+     *
      * @param mailAccount The mail account
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */

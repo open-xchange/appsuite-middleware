@@ -66,6 +66,7 @@ public final class MailCounterImpl implements MailCounter {
         super();
     }
 
+    @Override
     public int getCount() {
         return MailAccessWatcher.getNumberOfMailAccesses();
     }

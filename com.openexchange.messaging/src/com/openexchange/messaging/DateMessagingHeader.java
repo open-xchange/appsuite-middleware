@@ -51,14 +51,14 @@ package com.openexchange.messaging;
 
 /**
  * {@link DateMessagingHeader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DateMessagingHeader extends MessagingHeader {
 
     /**
      * Gets the number of milliseconds since January 1, 1970, 00:00:00 GMT represented by this date header.
-     * 
+     *
      * @return The number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
     public long getTime();

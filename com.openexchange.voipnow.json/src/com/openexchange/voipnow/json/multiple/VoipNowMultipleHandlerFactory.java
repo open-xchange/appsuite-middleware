@@ -57,7 +57,7 @@ import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
 
 /**
  * {@link VoipNowMultipleHandlerFactory} - The multiple handler factory for VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VoipNowMultipleHandlerFactory implements MultipleHandlerFactoryService {

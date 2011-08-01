@@ -55,7 +55,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * AbstractConfigWrapper
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 

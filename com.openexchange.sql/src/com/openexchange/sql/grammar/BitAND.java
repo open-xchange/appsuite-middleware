@@ -53,14 +53,14 @@ import com.openexchange.sql.builder.IStatementBuilder;
 
 /**
  * {@link BitAND}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class BitAND extends BinaryBitFunction {
 
     /**
      * Initializes a new {@link BitAND}.
-     * 
+     *
      * @param left
      * @param right
      */

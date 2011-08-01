@@ -58,7 +58,7 @@ import com.openexchange.search.SearchAttributeFetcher;
 
 /**
  * {@link TaskAttributeFetcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
@@ -77,6 +77,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.ACTUAL_COSTS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Float.valueOf(candidate.getActualCosts());
             }
@@ -84,6 +85,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.ACTUAL_DURATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Long.valueOf(candidate.getActualDuration());
             }
@@ -91,6 +93,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.AFTER_COMPLETE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getAfterComplete();
             }
@@ -98,6 +101,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.BILLING_INFORMATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getBillingInformation();
             }
@@ -105,6 +109,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.COMPANIES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getCompanies();
             }
@@ -112,6 +117,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.CURRENCY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getCurrency();
             }
@@ -119,6 +125,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.DATE_COMPLETED, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getDateCompleted();
             }
@@ -126,6 +133,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.PERCENT_COMPLETED, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getPercentComplete());
             }
@@ -133,6 +141,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.PRIORITY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getPriority());
             }
@@ -140,6 +149,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.PROJECT_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getProjectID());
             }
@@ -147,6 +157,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.STATUS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getStatus());
             }
@@ -154,6 +165,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.TARGET_COSTS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Float.valueOf(candidate.getTargetCosts());
             }
@@ -161,6 +173,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.TARGET_DURATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Long.valueOf(candidate.getTargetDuration());
             }
@@ -168,6 +181,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.TRIP_METER, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getTripMeter();
             }
@@ -179,6 +193,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.ALARM, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getAlarm();
             }
@@ -186,6 +201,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.CHANGE_EXCEPTIONS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getChangeException();
             }
@@ -193,6 +209,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(ParticipantsFields.CONFIRM_MESSAGE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getConfirmMessage();
             }
@@ -200,6 +217,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(ParticipantsFields.CONFIRMATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getConfirm());
             }
@@ -207,6 +225,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.DAY_IN_MONTH, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getDayInMonth());
             }
@@ -214,6 +233,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.DAYS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getDays());
             }
@@ -221,6 +241,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.DELETE_EXCEPTIONS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getDeleteException();
             }
@@ -228,6 +249,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.END_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getEndDate();
             }
@@ -235,6 +257,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.INTERVAL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getInterval());
             }
@@ -242,6 +265,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.MONTH, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getMonth());
             }
@@ -249,6 +273,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.NOTE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getNote();
             }
@@ -256,6 +281,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.NOTIFICATION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Boolean.valueOf(candidate.getNotification());
             }
@@ -263,6 +289,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.OCCURRENCES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getOccurrence());
             }
@@ -270,6 +297,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.PARTICIPANTS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getParticipants();
             }
@@ -277,6 +305,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_CALCULATOR, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getRecurrenceCalculator());
             }
@@ -284,6 +313,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_DATE_POSITION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getRecurrenceDatePosition();
             }
@@ -291,6 +321,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getRecurrenceID());
             }
@@ -298,6 +329,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_POSITION, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getRecurrencePosition());
             }
@@ -305,6 +337,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_START, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 // TODO: Proper recurrence start date
                 return candidate.getStartDate();
@@ -313,6 +346,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.RECURRENCE_TYPE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getRecurrenceType());
             }
@@ -320,6 +354,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.START_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getStartDate();
             }
@@ -327,6 +362,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.TITLE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getTitle();
             }
@@ -334,12 +370,14 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.UNTIL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getUntil();
             }
         });
         m.put(TaskFields.USERS, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getUsers();
             }
@@ -351,6 +389,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.CATEGORIES, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getCategories();
             }
@@ -358,6 +397,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.COLORLABEL, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getLabel());
             }
@@ -365,6 +405,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.CREATED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getCreatedBy());
             }
@@ -372,6 +413,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.CREATION_DATE, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getCreationDate();
             }
@@ -379,6 +421,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.FOLDER_ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getParentFolderID());
             }
@@ -386,6 +429,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.ID, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getObjectID());
             }
@@ -393,6 +437,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.LAST_MODIFIED, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return candidate.getLastModified();
             }
@@ -400,6 +445,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.MODIFIED_BY, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Integer.valueOf(candidate.getModifiedBy());
             }
@@ -407,6 +453,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
         m.put(TaskFields.PRIVATE_FLAG, new AttributeGetter() {
 
+            @Override
             public Object getObject(final Task candidate) {
                 return Boolean.valueOf(candidate.getPrivateFlag());
             }
@@ -419,7 +466,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
     /**
      * Gets the task attribute fetcher instance.
-     * 
+     *
      * @return The task attribute fetcher instance.
      */
     public static TaskAttributeFetcher getInstance() {
@@ -433,6 +480,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
         super();
     }
 
+    @Override
     public <T> T getAttribute(final String attributeName, final Task candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {

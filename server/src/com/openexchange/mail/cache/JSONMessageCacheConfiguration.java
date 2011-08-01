@@ -55,7 +55,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link JSONMessageCacheConfiguration} - The configuration for JSON message cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageCacheConfiguration {
@@ -64,7 +64,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the configuration for JSON message cache.
-     * 
+     *
      * @return The configuration for JSON message cache.
      */
     public static JSONMessageCacheConfiguration getInstance() {
@@ -73,7 +73,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Initializes the cache instance.
-     * 
+     *
      * @return The cache instance
      * @throws OXException If initialization fails
      */
@@ -144,7 +144,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Loads the JSON message cache properties.
-     * 
+     *
      * @throws OXException If loading of properties fails
      */
     public void loadProperties() throws OXException {
@@ -259,7 +259,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Indicates if the JSON mail cache is enabled.
-     * 
+     *
      * @return <code>true</code> if the JSON mail cache is enabled; otherwise <code>false</code>
      */
     public boolean isEnabled() {
@@ -268,7 +268,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the shrinker interval in seconds for the superior user map.
-     * 
+     *
      * @return The shrinker interval in seconds for the superior user map
      */
     public int getShrinkerIntervalUserMap() {
@@ -277,7 +277,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the shrinker interval in seconds for folder maps.
-     * 
+     *
      * @return The shrinker interval in seconds for folder maps
      */
     public int getShrinkerIntervalFolderMap() {
@@ -286,7 +286,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the time-to-live in seconds for folder maps put into user map.
-     * 
+     *
      * @return The time-to-live in seconds for folder maps put into user map
      */
     public int getTTLUserMap() {
@@ -295,7 +295,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the time-to-live in seconds for an ID-to-JSON mapping put into folder map.
-     * 
+     *
      * @return The time-to-live in seconds for an ID-to-JSON mapping put into folder map
      */
     public int getTTLFolderMap() {
@@ -304,7 +304,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Gets the max. time in milliseconds to wait for a mail's JSON representation to become available in a folder map.
-     * 
+     *
      * @return The max. time in milliseconds to wait for a mail's JSON representation to become available in a folder map
      */
     public int getMaxWaitTimeMillis() {
@@ -313,7 +313,7 @@ public final class JSONMessageCacheConfiguration {
 
     /**
      * Whether to prefetch unseen mails only.
-     * 
+     *
      * @return <code>true</code> if only unseen mails are prefetched; otherwise <code>false</code>
      */
     public boolean isUnseenOnly() {

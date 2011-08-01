@@ -51,7 +51,6 @@ package com.openexchange.caldav.mixins;
 
 import java.util.List;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -66,7 +65,7 @@ public class CTag extends SingleXMLPropertyMixin {
 
     public CTag(List<Appointment> appointments, int folderId) {
         super("http://calendarserver.org/ns/", "getctag");
-        
+
         Appointment youngest = null;
         for (Appointment appointment : appointments) {
             if (youngest == null || youngest.getLastModified().before(appointment.getLastModified())) {
@@ -77,7 +76,7 @@ public class CTag extends SingleXMLPropertyMixin {
             value = "http://www.open-xchange.com/caldav/ctag/"+folderId+"_"+youngest.getLastModified().getTime();
         } else {
             value = "http://www.open-xchange.com/caldav/ctag/"+folderId;
-            
+
         }
     }
 

@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Outgoing routing rules group list
- * 
+ *
  * <p>Java class for CallRulesOutGroupList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallRulesOutGroupList">
  *   &lt;complexContent>
@@ -34,8 +34,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallRulesOutGroupList", propOrder = {
@@ -63,11 +63,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -75,11 +75,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -87,11 +87,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -99,11 +99,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -111,7 +111,7 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      */
     public boolean isStatus() {
         return status;
@@ -119,7 +119,7 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      */
     public void setStatus(boolean value) {
         this.status = value;
@@ -127,7 +127,7 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the rulesNo property.
-     * 
+     *
      */
     public long getRulesNo() {
         return rulesNo;
@@ -135,7 +135,7 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the rulesNo property.
-     * 
+     *
      */
     public void setRulesNo(long value) {
         this.rulesNo = value;
@@ -143,11 +143,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the inUse property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isInUse() {
         return inUse;
@@ -155,11 +155,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the inUse property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setInUse(Boolean value) {
         this.inUse = value;
@@ -167,11 +167,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -179,11 +179,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;
@@ -191,11 +191,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Gets the value of the default property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDefault() {
         return _default;
@@ -203,11 +203,11 @@ public class CallRulesOutGroupList {
 
     /**
      * Sets the value of the default property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDefault(Boolean value) {
         this._default = value;

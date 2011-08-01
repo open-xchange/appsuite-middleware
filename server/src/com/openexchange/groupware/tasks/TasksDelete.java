@@ -81,6 +81,7 @@ public class TasksDelete implements DeleteListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         switch (event.getType()) {
         case DeleteEvent.TYPE_USER:

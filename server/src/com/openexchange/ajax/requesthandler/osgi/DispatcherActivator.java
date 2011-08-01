@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.Multiple;
@@ -87,94 +88,107 @@ public class DispatcherActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
-        
+
         final DefaultConverter defaultConverter = new DefaultConverter();
         defaultConverter.addConverter(new JSONResponseConverter());
         defaultConverter.addConverter(new DebugConverter());
-        
+
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
-            public void added(final ServiceReference ref, final ResultConverter thing) {
+            @Override
+            public void added(final ServiceReference<ResultConverter> ref, final ResultConverter thing) {
                 defaultConverter.addConverter(thing);
             }
 
-            public void removed(final ServiceReference ref, final ResultConverter thing) {
+            @Override
+            public void removed(final ServiceReference<ResultConverter> ref, final ResultConverter thing) {
                 defaultConverter.removeConverter(thing);
             }
-            
+
         });
-        
+
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
-        
+
         final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
         Multiple.setDispatcher(dispatcher);
-        
+
         DispatcherServlet.registerRenderer(new JSONResponseOutputter());
         final FileResponseOutputter fileRenderer = new FileResponseOutputter();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseOutputter());
-        
+
         track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
 
-            public void added(final ServiceReference ref, final ResponseOutputter thing) {
+            @Override
+            public void added(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
                 DispatcherServlet.registerRenderer(thing);
             }
 
-            public void removed(final ServiceReference ref, final ResponseOutputter thing) {
-                DispatcherServlet.unregisterRenderer(thing);    
+            @Override
+            public void removed(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
+                DispatcherServlet.unregisterRenderer(thing);
             }
-            
+
         });
-        
-        
-        track(AJAXActionServiceFactory.class, new Registerer(dispatcher, servlet));
-        
+
+
+        track(AJAXActionServiceFactory.class, new Registerer(context, dispatcher, servlet));
+
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
-            public void added(final ServiceReference ref, final ImageScalingService thing) {
+            @Override
+            public void added(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(thing);
             }
 
-            public void removed(final ServiceReference ref, final ImageScalingService thing) {
+            @Override
+            public void removed(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(null);
             }
-            
+
         });
-        
+
         openTrackers();
     }
-    
+
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
 
+        private final BundleContext rcontext;
         private final DefaultDispatcher dispatcher;
         private final DispatcherServlet servlet;
-        
+
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
-        private final Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
-        
-        public Registerer(final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
+        private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
+
+        public Registerer(final BundleContext context, final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
+            super();
+            this.rcontext = context;
             this.dispatcher = dispatcher;
             this.servlet = servlet;
         }
 
-        public void added(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+        @Override
+        public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
-            final SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
+
+            final SessionServletRegistration registration = new SessionServletRegistration(rcontext, servlet, "/ajax/"+module);
             registrations.put(module, registration);
             rememberTracker(registration);
         }
-        
-        public void removed(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+
+        @Override
+        public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
-            dispatcher.remove(module);
+            dispatcher.remove(module, thing);
+
             final SessionServletRegistration tracker = registrations.remove(module);
             tracker.remove();
             forgetTracker(tracker);
             serviceRegistrations.remove(module).unregister();
         }
 
-        
+
     }
 
 }

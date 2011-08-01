@@ -15,9 +15,9 @@ import com._4psa.common_xsd._2_5.AdvertisingTemplate;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -59,8 +59,8 @@ import com._4psa.common_xsd._2_5.AdvertisingTemplate;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -115,11 +115,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -127,11 +127,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -139,11 +139,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the industry property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIndustry() {
         return industry;
@@ -151,11 +151,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the industry property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIndustry(String value) {
         this.industry = value;
@@ -163,11 +163,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the advertisingTemplate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link AdvertisingTemplate }
-     *     
+     *
      */
     public AdvertisingTemplate getAdvertisingTemplate() {
         return advertisingTemplate;
@@ -175,11 +175,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the advertisingTemplate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link AdvertisingTemplate }
-     *     
+     *
      */
     public void setAdvertisingTemplate(AdvertisingTemplate value) {
         this.advertisingTemplate = value;
@@ -187,11 +187,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the channelRuleID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelRuleID() {
         return channelRuleID;
@@ -199,11 +199,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the channelRuleID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelRuleID(BigInteger value) {
         this.channelRuleID = value;
@@ -211,11 +211,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -223,11 +223,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -235,11 +235,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -247,11 +247,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -259,11 +259,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -271,11 +271,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;
@@ -283,11 +283,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the parentLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentLogin() {
         return parentLogin;
@@ -295,11 +295,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the parentLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentLogin(String value) {
         this.parentLogin = value;
@@ -307,11 +307,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -319,11 +319,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -331,11 +331,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -343,11 +343,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;
@@ -355,11 +355,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the fromUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getFromUser() {
         return fromUser;
@@ -367,11 +367,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the fromUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setFromUser(BigInteger value) {
         this.fromUser = value;
@@ -379,11 +379,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the fromUserIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFromUserIdentifier() {
         return fromUserIdentifier;
@@ -391,11 +391,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the fromUserIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFromUserIdentifier(String value) {
         this.fromUserIdentifier = value;
@@ -403,11 +403,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the verbose property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isVerbose() {
         return verbose;
@@ -415,11 +415,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the verbose property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setVerbose(Boolean value) {
         this.verbose = value;
@@ -427,11 +427,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the notifyOnly property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotifyOnly() {
         return notifyOnly;
@@ -439,11 +439,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the notifyOnly property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotifyOnly(String value) {
         this.notifyOnly = value;
@@ -451,11 +451,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -463,11 +463,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -475,11 +475,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the linkResourceID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getLinkResourceID() {
         return linkResourceID;
@@ -487,11 +487,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the linkResourceID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setLinkResourceID(BigInteger value) {
         this.linkResourceID = value;
@@ -499,11 +499,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the linkUUID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLinkUUID() {
         return linkUUID;
@@ -511,11 +511,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the linkUUID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLinkUUID(String value) {
         this.linkUUID = value;
@@ -523,11 +523,11 @@ public class AddClientRequest
 
     /**
      * Gets the value of the dku property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDku() {
         return dku;
@@ -535,11 +535,11 @@ public class AddClientRequest
 
     /**
      * Sets the value of the dku property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDku(String value) {
         this.dku = value;
@@ -547,25 +547,25 @@ public class AddClientRequest
 
     /**
      * Gets the value of the accountFlag property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accountFlag property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccountFlag().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAccountFlag() {
         if (accountFlag == null) {

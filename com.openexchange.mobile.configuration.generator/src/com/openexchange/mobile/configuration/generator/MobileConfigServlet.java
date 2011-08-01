@@ -38,7 +38,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 public class MobileConfigServlet extends HttpServlet {
 
-    
+
     private static final String PARAMETER_MAIL = "m";
 
     private static final String PARAMETER_LOGIN = "l";
@@ -54,11 +54,11 @@ public class MobileConfigServlet extends HttpServlet {
         MSG_PARAMETER_LOGIN_IS_MISSING("Der Parameter \"l\" fehlt", "The \"l\" parameter is missing"),
         MSG_UNSECURE_ACCESS("Unsicherer Zugriff mit http ist nicht erlaubt. Bitte https benutzen.", "Unsecured http access is not allowed. Use https instead."),
         MSG_INVALID_ERROR_PARAMETER("Der übergebene \"error\"-Parameter ist ungültig.", "Invalid \"error\" parameter.");
-        
+
         private final String english;
-        
+
         private final String german;
-        
+
         private static Map<Integer, ErrorMessage> members = new ConcurrentHashMap<Integer, ErrorMessage>();
 
         private ErrorMessage(final String german, final String english) {
@@ -66,35 +66,35 @@ public class MobileConfigServlet extends HttpServlet {
             this.english = english;
         }
 
-        
+
         public String getEnglish() {
             return english;
         }
 
-        
+
         public String getGerman() {
             return german;
         }
-        
+
         static {
             for (final ErrorMessage errmsg : ErrorMessage.values()) {
                 members.put(errmsg.ordinal(), errmsg);
             }
         }
-        
+
         public static ErrorMessage getErrorMessageByNumber(final int value) {
             return members.get(Integer.valueOf(value));
         }
-        
+
     }
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobileConfigServlet.class));
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7913468326542861986L;
-    
+
     public static String write(final String email, final String host, final String username, final String domain) throws OXException {
             final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
             final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
@@ -116,7 +116,7 @@ public class MobileConfigServlet extends HttpServlet {
         if (split.length > 2) {
             throw new ConfigurationException("Splitting of login returned wrong length. Array is " + Arrays.toString(split));
         }
-        
+
         if (split.length == 1) {
             return new String[]{split[0], "defaultcontext"};
         } else {
@@ -176,7 +176,7 @@ public class MobileConfigServlet extends HttpServlet {
             printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
             return;
         }
-        
+
         final Device device = detectDevice(req);
         final String login = req.getParameter(PARAMETER_LOGIN);
         if (null == device) {
@@ -316,7 +316,7 @@ public class MobileConfigServlet extends HttpServlet {
             writer.println("</body></html>");
             writer.close();
         }
-        
+
     }
 
     private void generateConfig(final HttpServletRequest req, final HttpServletResponse resp, final String login, final Device device) throws IOException, OXException {

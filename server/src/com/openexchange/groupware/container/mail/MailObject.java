@@ -93,7 +93,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * MailObject
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailObject {
@@ -132,7 +132,7 @@ public class MailObject {
 
     /**
      * Initializes a new {@link MailObject}
-     * 
+     *
      * @param session The session providing needed user data
      * @param objectId The object ID this message refers to
      * @param folderId The folder ID to which the referred object belongs
@@ -164,7 +164,7 @@ public class MailObject {
 
     /**
      * Adds a file attachment to this mail object.
-     * 
+     *
      * @param contentType The content type (incl. charset parameter)
      * @param file The file to attach
      * @throws OXException If file attachment cannot be added
@@ -238,7 +238,7 @@ public class MailObject {
 
     /**
      * Adds a file attachment to this mail object.
-     * 
+     *
      * @param contentType The content type (incl. charset parameter)
      * @param fileName The attachment's file name
      * @param inputStream The attachment's data as an input stream

@@ -65,7 +65,7 @@ public class MailDataRetrievalActivator extends DeferredActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{MailService.class};
     private ServiceRegistration registration;
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
