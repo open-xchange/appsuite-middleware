@@ -95,12 +95,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
             @Override
-            public void added(final ServiceReference ref, final ResultConverter thing) {
+            public void added(final ServiceReference<ResultConverter> ref, final ResultConverter thing) {
                 defaultConverter.addConverter(thing);
             }
 
             @Override
-            public void removed(final ServiceReference ref, final ResultConverter thing) {
+            public void removed(final ServiceReference<ResultConverter> ref, final ResultConverter thing) {
                 defaultConverter.removeConverter(thing);
             }
 
@@ -119,12 +119,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
 
             @Override
-            public void added(final ServiceReference ref, final ResponseOutputter thing) {
+            public void added(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
                 DispatcherServlet.registerRenderer(thing);
             }
 
             @Override
-            public void removed(final ServiceReference ref, final ResponseOutputter thing) {
+            public void removed(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
                 DispatcherServlet.unregisterRenderer(thing);
             }
 
@@ -136,12 +136,12 @@ public class DispatcherActivator extends HousekeepingActivator {
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
             @Override
-            public void added(final ServiceReference ref, final ImageScalingService thing) {
+            public void added(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(thing);
             }
 
             @Override
-            public void removed(final ServiceReference ref, final ImageScalingService thing) {
+            public void removed(final ServiceReference<ImageScalingService> ref, final ImageScalingService thing) {
                 fileRenderer.setScaler(null);
             }
 
@@ -156,7 +156,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         private final DispatcherServlet servlet;
 
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
-        private final Map<String, ServiceRegistration> serviceRegistrations = new HashMap<String, ServiceRegistration>();
+        private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
 
         public Registerer(final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
             this.dispatcher = dispatcher;
@@ -164,7 +164,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         }
 
         @Override
-        public void added(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+        public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
             final SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
@@ -173,7 +173,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         }
 
         @Override
-        public void removed(final ServiceReference ref, final AJAXActionServiceFactory thing) {
+        public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.remove(module);
             final SessionServletRegistration tracker = registrations.remove(module);

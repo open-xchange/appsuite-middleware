@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,47 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.group.json.actions;
 
-import org.osgi.framework.ServiceReference;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.GroupWriter;
+import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.group.json.GroupAJAXRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link SimpleRegistryListener}
+ * {@link GetAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SimpleRegistryListener<T> {
-    public void added(ServiceReference<T> ref, T thing);
+public final class GetAction extends AbstractGroupAction {
 
-    public void removed(ServiceReference<T> ref, T thing);
+    /**
+     * Initializes a new {@link GetAction}.
+     * @param services
+     */
+    public GetAction(final ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+        final int groupId = req.checkInt(PARAMETER_ID);
+        Date timestamp = new Date(0);
+        final GroupStorage groupStorage = GroupStorage.getInstance();
+        final Group group = groupStorage.getGroup(groupId, req.getSession().getContext());
+        final GroupWriter groupWriter = new GroupWriter();
+        final JSONObject retval = new JSONObject();
+        groupWriter.writeGroup(group, retval);
+        timestamp = group.getLastModified();
+        return new AJAXRequestResult(retval, timestamp, "json");
+    }
+
 }

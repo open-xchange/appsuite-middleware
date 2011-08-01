@@ -77,22 +77,26 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
-    private final class DeferredSTC implements ServiceTrackerCustomizer {
+    private <S> DeferredSTC<S> newDeferredSTC(final Class<? extends S> clazz, final int index, final Map<Class<?>, Object> services) {
+        return new DeferredSTC<S>(clazz, index, services);
+    }
 
-        private final Class<?> clazz;
+    private final class DeferredSTC<S> implements ServiceTrackerCustomizer<S, S> {
+
+        private final Class<? extends S> clazz;
 
         private final int index;
 
         private final Map<Class<?>, Object> stcServices;
 
-        public DeferredSTC(final Class<?> clazz, final int index, final Map<Class<?>, Object> services) {
+        public DeferredSTC(final Class<? extends S> clazz, final int index, final Map<Class<?>, Object> services) {
             super();
             this.clazz = clazz;
             this.index = index;
             stcServices = services;
         }
 
-        public Object addingService(final ServiceReference reference) {
+        public S addingService(final ServiceReference<S> reference) {
             final Object addedService = context.getService(reference);
             if (clazz.isInstance(addedService)) {
                 stcServices.put(clazz, addedService);
@@ -100,17 +104,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Signal availability
                  */
                 signalAvailability(index, clazz);
-                return addedService;
+                return clazz.cast(addedService);
             }
             context.ungetService(reference);
             return null;
         }
 
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<S> reference, final S service) {
             // Nothing to do
         }
 
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<S> reference, final S service) {
             if (null != service) {
                 try {
                     if (clazz.isInstance(service)) {
@@ -157,7 +161,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The initialized service trackers for needed services.
      */
-    private ServiceTracker[] serviceTrackers;
+    private ServiceTracker<?, ?>[] serviceTrackers;
 
     /**
      * The available service instances.
@@ -223,7 +227,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
              * Initialize service trackers for needed services
              */
             for (int i = 0; i < len; i++) {
-                serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredSTC(classes[i], i, services));
+                final Class<? extends Object> clazz = classes[i];
+                serviceTrackers[i] = new ServiceTracker<Object, Object>(context, clazz.getName(), newDeferredSTC(clazz, i, services));
                 serviceTrackers[i].open();
             }
             if (len == 0) {

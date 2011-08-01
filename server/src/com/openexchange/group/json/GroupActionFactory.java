@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,39 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.group.json;
 
-import org.osgi.framework.ServiceReference;
-
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.group.json.actions.AbstractGroupAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SimpleRegistryListener}
+ * {@link GroupActionFactory}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SimpleRegistryListener<T> {
-    public void added(ServiceReference<T> ref, T thing);
+public class GroupActionFactory implements AJAXActionServiceFactory {
 
-    public void removed(ServiceReference<T> ref, T thing);
+    private final Map<String, AbstractGroupAction> actions;
+
+    /**
+     * Initializes a new {@link GroupActionFactory}.
+     *
+     * @param services The service look-up
+     */
+    public GroupActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4);
+
+    }
+
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
+
 }
