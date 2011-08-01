@@ -96,12 +96,13 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
     public void add(final AJAXActionServiceFactory factory) {
         if (null == facs.put(factory, PRESENT)) {
             final Set<String> actions = getActionsFrom(factory);
-            for (final AJAXActionServiceFactory cur : facs.keySet()) {
-                final Set<String> curActions = getActionsFrom(cur);
-                if (curActions.retainAll(actions)) {
+            final ConcurrentMap<String, Object> thisActions = this.actions;
+            for (final String action : actions) {
+                if (thisActions.containsKey(action)) {
                     throw new IllegalArgumentException(
-                        "Conflicting actions. " + curActions + ". Factory \"" + factory.getClass() + "\" conflicts with \"" + cur.getClass() + "\".");
+                        "Conflicting action \"" + action + "\" provided by factory \"" + factory.getClass() + "\".");
                 }
+                thisActions.put(action, PRESENT);
             }
         }
     }
