@@ -64,6 +64,13 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link AJAXModuleActivator}.
+     */
+    protected AJAXModuleActivator() {
+        super();
+    }
+
     public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
     }
