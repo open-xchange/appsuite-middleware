@@ -54,10 +54,9 @@ import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
-
 /**
  * {@link AJAXModuleActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
@@ -70,11 +69,23 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
         this.registerInternal(factory, module, false);
     }
 
-    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+    public void registerModule(final AJAXActionServiceFactory factory, final String module, final String... actions) {
+        this.registerInternal(factory, module, true, actions);
+    }
 
+    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple, final String... actions) {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("module", module);
         properties.put("multiple", multiple ? "true" : "false");
+        if (null != actions && actions.length > 0) {
+            final StringBuilder sb = new StringBuilder(actions.length * 8);
+            sb.append(actions[0]);
+            for (int i = 1; i < actions.length; i++) {
+                sb.append(',').append(actions[i]);
+            }
+            properties.put("actions", module);
+        }
+
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }
 }

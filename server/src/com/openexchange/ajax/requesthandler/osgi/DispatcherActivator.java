@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.Multiple;
@@ -131,7 +132,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         });
 
 
-        track(AJAXActionServiceFactory.class, new Registerer(dispatcher, servlet));
+        track(AJAXActionServiceFactory.class, new Registerer(context, dispatcher, servlet));
 
         track(ImageScalingService.class, new SimpleRegistryListener<ImageScalingService>() {
 
@@ -152,13 +153,16 @@ public class DispatcherActivator extends HousekeepingActivator {
 
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
 
+        private final BundleContext rcontext;
         private final DefaultDispatcher dispatcher;
         private final DispatcherServlet servlet;
 
         private final Map<String, SessionServletRegistration> registrations = new HashMap<String, SessionServletRegistration>();
         private final Map<String, ServiceRegistration<AJAXActionServiceFactory>> serviceRegistrations = new HashMap<String, ServiceRegistration<AJAXActionServiceFactory>>();
 
-        public Registerer(final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
+        public Registerer(final BundleContext context, final DefaultDispatcher dispatcher, final DispatcherServlet servlet) {
+            super();
+            this.rcontext = context;
             this.dispatcher = dispatcher;
             this.servlet = servlet;
         }
@@ -167,7 +171,8 @@ public class DispatcherActivator extends HousekeepingActivator {
         public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.register(module, thing);
-            final SessionServletRegistration registration = new SessionServletRegistration(context, servlet, "/ajax/"+module);
+
+            final SessionServletRegistration registration = new SessionServletRegistration(rcontext, servlet, "/ajax/"+module);
             registrations.put(module, registration);
             rememberTracker(registration);
         }
@@ -176,6 +181,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory thing) {
             final String module = (String) ref.getProperty("module");
             dispatcher.remove(module);
+
             final SessionServletRegistration tracker = registrations.remove(module);
             tracker.remove();
             forgetTracker(tracker);
