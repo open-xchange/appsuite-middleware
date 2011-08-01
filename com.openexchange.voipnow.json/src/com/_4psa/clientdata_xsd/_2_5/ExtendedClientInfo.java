@@ -17,11 +17,11 @@ import com._4psa.resellerdata_xsd._2_5.ExtendedResellerInfo;
 
 /**
  * Client account details data
- * 
+ *
  * <p>Java class for ExtendedClientInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtendedClientInfo">
  *   &lt;complexContent>
@@ -74,8 +74,8 @@ import com._4psa.resellerdata_xsd._2_5.ExtendedResellerInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtendedClientInfo", propOrder = {
@@ -127,11 +127,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -139,11 +139,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -151,11 +151,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -163,11 +163,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -175,11 +175,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the phoneStatus property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneStatus() {
         return phoneStatus;
@@ -187,11 +187,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the phoneStatus property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneStatus(String value) {
         this.phoneStatus = value;
@@ -199,11 +199,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the cpAccess property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCpAccess() {
         return cpAccess;
@@ -211,11 +211,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the cpAccess property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCpAccess(Boolean value) {
         this.cpAccess = value;
@@ -223,11 +223,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -235,11 +235,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -247,11 +247,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -259,11 +259,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;
@@ -271,11 +271,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -283,11 +283,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -295,11 +295,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -307,11 +307,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;
@@ -319,11 +319,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the chargingPlan property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlan() {
         return chargingPlan;
@@ -331,11 +331,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the chargingPlan property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlan(String value) {
         this.chargingPlan = value;
@@ -343,11 +343,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the parentName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentName() {
         return parentName;
@@ -355,11 +355,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the parentName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentName(String value) {
         this.parentName = value;
@@ -367,11 +367,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -379,11 +379,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -391,11 +391,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -403,11 +403,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;
@@ -415,11 +415,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -427,11 +427,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -439,11 +439,11 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -451,11 +451,11 @@ public class ExtendedClientInfo
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -463,25 +463,25 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the link property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the link property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getLink().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ExtendedClientInfo.Link }
-     * 
-     * 
+     *
+     *
      */
     public List<ExtendedClientInfo.Link> getLink() {
         if (link == null) {
@@ -492,25 +492,25 @@ public class ExtendedClientInfo
 
     /**
      * Gets the value of the accountFlag property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accountFlag property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccountFlag().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAccountFlag() {
         if (accountFlag == null) {
@@ -522,9 +522,9 @@ public class ExtendedClientInfo
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -537,8 +537,8 @@ public class ExtendedClientInfo
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -554,11 +554,11 @@ public class ExtendedClientInfo
 
         /**
          * Gets the value of the resourceID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getResourceID() {
             return resourceID;
@@ -566,11 +566,11 @@ public class ExtendedClientInfo
 
         /**
          * Sets the value of the resourceID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setResourceID(BigInteger value) {
             this.resourceID = value;
@@ -578,11 +578,11 @@ public class ExtendedClientInfo
 
         /**
          * Gets the value of the uuid property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getUUID() {
             return uuid;
@@ -590,11 +590,11 @@ public class ExtendedClientInfo
 
         /**
          * Sets the value of the uuid property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setUUID(String value) {
             this.uuid = value;

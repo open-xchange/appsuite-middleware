@@ -59,7 +59,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link OutlookFolder} - A MS Outlook folder backed by a real folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolder implements Folder {
@@ -93,7 +93,7 @@ public final class OutlookFolder implements Folder {
 
     /**
      * Initializes a {@link OutlookFolder} with specified real folder.
-     * 
+     *
      * @param source The real folder which is mapped by this virtual folder
      */
     public OutlookFolder(final Folder source) {
@@ -135,54 +135,67 @@ public final class OutlookFolder implements Folder {
         }
     }
 
+    @Override
     public String getNewID() {
         return newId;
     }
 
+    @Override
     public void setNewID(final String newId) {
         this.newId = newId;
     }
 
+    @Override
     public int getCreatedBy() {
         return realFolder.getCreatedBy();
     }
 
+    @Override
     public Date getCreationDate() {
         return realFolder.getCreationDate();
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified == null ? realFolder.getLastModified() : cloneDate(lastModified);
     }
 
+    @Override
     public int getModifiedBy() {
         return -1 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
     }
 
+    @Override
     public void setCreatedBy(final int createdBy) {
         // Nothing to do
     }
 
+    @Override
     public void setCreationDate(final Date creationDate) {
         // Nothing to do
     }
 
+    @Override
     public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified == null ? null : new Date(lastModified.getTime());
     }
 
+    @Override
     public void setModifiedBy(final int modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
+    @Override
     public ContentType getContentType() {
         return realFolder.getContentType();
     }
 
+    @Override
     public String getID() {
         return realFolder.getID();
     }
 
+    @Override
     public String getLocalizedName(final Locale locale) {
         if (null == name) {
             return realFolder.getLocalizedName(locale);
@@ -193,23 +206,26 @@ public final class OutlookFolder implements Folder {
         return localizedName;
     }
 
+    @Override
     public String getName() {
         return null == name ? realFolder.getName() : name;
     }
 
+    @Override
     public String getParentID() {
         return null == parent ? realFolder.getParentID() : parent;
     }
 
     /**
      * Gets either real folder's permissions or virtual folder's individual permissions (if set)
-     * 
+     *
      * <pre>
      * return permissions == null ? realFolder.getPermissions() : permissions;
      * </pre>
-     * 
+     *
      * @return The permissions for this virtual folder
      */
+    @Override
     public Permission[] getPermissions() {
         /*
          * If no permissions applied return real folder's permissions
@@ -217,155 +233,191 @@ public final class OutlookFolder implements Folder {
         return null == permissions ? realFolder.getPermissions() : permissions;
     }
 
+    @Override
     public String[] getSubfolderIDs() {
         return b_subfolders ? subfolders : realFolder.getSubfolderIDs();
     }
 
+    @Override
     public String getTreeID() {
         return treeId;
     }
 
+    @Override
     public Type getType() {
         return realFolder.getType();
     }
 
+    @Override
     public void setContentType(final ContentType contentType) {
         // Nothing to do
     }
 
+    @Override
     public void setID(final String id) {
         // Nothing to do
     }
 
+    @Override
     public void setName(final String name) {
         this.name = name;
         localizedName = null;
     }
 
+    @Override
     public void setParentID(final String parentId) {
         parent = parentId;
     }
 
+    @Override
     public void setPermissions(final Permission[] permissions) {
         this.permissions = permissions;
     }
 
+    @Override
     public void setSubfolderIDs(final String[] subfolderIds) {
         subfolders = subfolderIds;
         b_subfolders = true;
     }
 
+    @Override
     public void setTreeID(final String id) {
         treeId = id;
     }
 
+    @Override
     public void setType(final Type type) {
         // Nothing to do
     }
 
+    @Override
     public boolean isSubscribed() {
         return null == subscribed ? realFolder.isSubscribed() : subscribed.booleanValue();
     }
 
+    @Override
     public void setSubscribed(final boolean subscribed) {
         this.subscribed = Boolean.valueOf(subscribed);
     }
 
+    @Override
     public boolean hasSubscribedSubfolders() {
         return null == subscribedSubfolders ? realFolder.hasSubscribedSubfolders() : subscribedSubfolders.booleanValue();
         /*-
-         * 
+         *
         if (null == subscribedSubfolders) {
             return null == subfolders || subfolders.length > 0;
         }
         return subscribedSubfolders.booleanValue();
         */
     }
-    
+
+    @Override
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
         this.subscribedSubfolders = Boolean.valueOf(subscribedSubfolders);
     }
 
+    @Override
     public boolean isVirtual() {
         return true;
     }
 
+    @Override
     public boolean isGlobalID() {
         return realFolder.isGlobalID();
     }
 
+    @Override
     public boolean isCacheable() {
         return false;
     }
 
+    @Override
     public int getCapabilities() {
         return realFolder.getCapabilities();
     }
 
+    @Override
     public int getDeleted() {
         return realFolder.getDeleted();
     }
 
+    @Override
     public int getNew() {
         return realFolder.getNew();
     }
 
+    @Override
     public String getSummary() {
         return realFolder.getSummary();
     }
 
+    @Override
     public int getTotal() {
         return realFolder.getTotal();
     }
 
+    @Override
     public int getUnread() {
         return realFolder.getUnread();
     }
 
+    @Override
     public boolean isDefault() {
         return realFolder.isDefault();
     }
 
+    @Override
     public void setCapabilities(final int capabilities) {
         // Nothing to do
     }
 
+    @Override
     public void setDefault(final boolean deefault) {
         // Nothing to do
     }
 
+    @Override
     public void setDeleted(final int deleted) {
         // Nothing to do
     }
 
+    @Override
     public void setNew(final int nu) {
         // Nothing to do
     }
 
+    @Override
     public void setSummary(final String summary) {
         // Nothing to do
     }
 
+    @Override
     public void setTotal(final int total) {
         // Nothing to do
     }
 
+    @Override
     public void setUnread(final int unread) {
         // Nothing to do
     }
 
+    @Override
     public int getDefaultType() {
         return realFolder.getDefaultType();
     }
 
+    @Override
     public void setDefaultType(final int defaultType) {
         // Nothing to do
     }
 
+    @Override
     public int getBits() {
         return realFolder.getBits();
     }
 
+    @Override
     public void setBits(final int bits) {
         // Nothing to do
     }

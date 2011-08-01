@@ -67,8 +67,8 @@ public class InMemoryConfigProvider implements ConfigProviderService{
 
     ConcurrentHashMap<String, String> values = new ConcurrentHashMap<String, String>();
     ConcurrentHashMap<String, ConcurrentHashMap<String, String>> metadata = new ConcurrentHashMap<String, ConcurrentHashMap<String, String>>();
-    
-    
+
+
     public BasicProperty get(final String property, final int context, final int user) throws OXException {
         return new BasicProperty() {
 
@@ -106,7 +106,7 @@ public class InMemoryConfigProvider implements ConfigProviderService{
             public List<String> getMetadataNames() throws OXException {
                 return Collections.emptyList();
             }
-            
+
         };
     }
 

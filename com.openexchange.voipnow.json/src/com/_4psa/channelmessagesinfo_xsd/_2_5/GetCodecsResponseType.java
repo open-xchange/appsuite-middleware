@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Get channel codecs: response type
- * 
+ *
  * <p>Java class for GetCodecsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCodecsResponseType">
  *   &lt;complexContent>
@@ -39,8 +39,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCodecsResponseType", propOrder = {
@@ -54,11 +54,11 @@ public class GetCodecsResponseType {
 
     /**
      * Gets the value of the codecs property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetCodecsResponseType.Codecs }
-     *     
+     *
      */
     public GetCodecsResponseType.Codecs getCodecs() {
         return codecs;
@@ -66,11 +66,11 @@ public class GetCodecsResponseType {
 
     /**
      * Sets the value of the codecs property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetCodecsResponseType.Codecs }
-     *     
+     *
      */
     public void setCodecs(GetCodecsResponseType.Codecs value) {
         this.codecs = value;
@@ -78,11 +78,11 @@ public class GetCodecsResponseType {
 
     /**
      * Gets the value of the channelID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelID() {
         return channelID;
@@ -90,11 +90,11 @@ public class GetCodecsResponseType {
 
     /**
      * Sets the value of the channelID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelID(BigInteger value) {
         this.channelID = value;
@@ -103,9 +103,9 @@ public class GetCodecsResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -118,8 +118,8 @@ public class GetCodecsResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -133,25 +133,25 @@ public class GetCodecsResponseType {
 
         /**
          * Gets the value of the assigned property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the assigned property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAssigned().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link com._4psa.channeldata_xsd._2_5.Codecs }
-         * 
-         * 
+         *
+         *
          */
         public List<com._4psa.channeldata_xsd._2_5.Codecs> getAssigned() {
             if (assigned == null) {
@@ -162,25 +162,25 @@ public class GetCodecsResponseType {
 
         /**
          * Gets the value of the available property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the available property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getAvailable().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link com._4psa.channeldata_xsd._2_5.Codecs }
-         * 
-         * 
+         *
+         *
          */
         public List<com._4psa.channeldata_xsd._2_5.Codecs> getAvailable() {
             if (available == null) {

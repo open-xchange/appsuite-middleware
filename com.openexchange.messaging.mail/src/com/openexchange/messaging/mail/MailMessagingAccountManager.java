@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailMessagingAccountManager}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -396,6 +396,13 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 if (null != mailServer) {
                     accountDescription.setMailServer(mailServer);
                     attributes.add(Attribute.MAIL_SERVER_LITERAL);
+                }
+            }
+            {
+                final String replyTo = optString(MailConstants.MAIL_REPLY_TO, configuration);
+                if (null != replyTo) {
+                    accountDescription.setReplyTo(replyTo);
+                    attributes.add(Attribute.REPLY_TO_LITERAL);
                 }
             }
             {

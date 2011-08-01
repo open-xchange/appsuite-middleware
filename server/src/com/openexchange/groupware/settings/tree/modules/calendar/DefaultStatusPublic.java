@@ -67,17 +67,21 @@ public class DefaultStatusPublic implements PreferencesItemService {
 
     private static final String[] PATH = new String[] { "modules", "calendar", "defaultStatusPublic" };
 
+    @Override
     public String[] getPath() {
         return PATH;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new IValueHandler() {
 
+            @Override
             public int getId() {
                 return -1;
             }
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 Integer value = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx.getContextId(), user.getId());
                 if (value == null) {
@@ -86,14 +90,17 @@ public class DefaultStatusPublic implements PreferencesItemService {
                 setting.setSingleValue(value);
             }
 
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
             }
 
+            @Override
             public boolean isWritable() {
                 return true;
             }
 
+            @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                 Integer value;
                 try {

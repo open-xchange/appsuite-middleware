@@ -56,9 +56,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link StatusReplacement} - Replacement for a confirmation status.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class StatusReplacement extends LocalizedStringReplacement {
 
@@ -81,7 +81,7 @@ public final class StatusReplacement extends LocalizedStringReplacement {
 
     /**
      * Initializes a new {@link StatusReplacement}
-     * 
+     *
      * @param status The status; supposed to be either {@link #STATUS_ACCEPTED},
      *            {@link #STATUS_DECLINED}, {@link #STATUS_TENTATIVE}, or
      *            {@link #STATUS_WAITING}
@@ -92,7 +92,7 @@ public final class StatusReplacement extends LocalizedStringReplacement {
 
     /**
      * Initializes a new {@link StatusReplacement}
-     * 
+     *
      * @param status The status; supposed to be either {@link #STATUS_ACCEPTED},
      *            {@link #STATUS_DECLINED}, {@link #STATUS_TENTATIVE}, or
      *            {@link #STATUS_WAITING}

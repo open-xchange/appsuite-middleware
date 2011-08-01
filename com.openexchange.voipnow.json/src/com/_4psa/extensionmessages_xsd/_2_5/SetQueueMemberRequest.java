@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -52,7 +52,7 @@ public class SetQueueMemberRequest {
 
     /**
      * Gets the value of the auth property.
-     * 
+     *
      */
     public boolean isAuth() {
         return auth;
@@ -60,7 +60,7 @@ public class SetQueueMemberRequest {
 
     /**
      * Sets the value of the auth property.
-     * 
+     *
      */
     public void setAuth(boolean value) {
         this.auth = value;
@@ -68,11 +68,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPIN() {
         return pin;
@@ -80,11 +80,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPIN(String value) {
         this.pin = value;
@@ -92,11 +92,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -104,11 +104,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -116,11 +116,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -128,11 +128,11 @@ public class SetQueueMemberRequest {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

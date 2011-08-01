@@ -51,14 +51,14 @@ package com.openexchange.systemname;
 
 /**
  * {@link SystemNameService} - Provides access to system name
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SystemNameService {
 
     /**
      * Gets the unique system name that may be used for logging or other purposes.
-     * 
+     *
      * @return The unique system name or <code>null</code> if none available
      */
     public String getSystemName();

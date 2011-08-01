@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthService} - The OAuth service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -64,14 +64,14 @@ public interface OAuthService {
 
     /**
      * Gets the meta data registry.
-     * 
+     *
      * @return The meta data registry
      */
     OAuthServiceMetaDataRegistry getMetaDataRegistry();
 
     /**
      * Gets all accounts belonging to specified user.
-     * 
+     *
      * @param password The user password
      * @param user The user identifier
      * @param contextId The context identifier
@@ -82,7 +82,7 @@ public interface OAuthService {
 
     /**
      * Gets all accounts belonging to specified user with given service identifier.
-     * 
+     *
      * @param serviceMetaData The identifier of service meta data
      * @param password The user password
      * @param user The user identifier
@@ -94,7 +94,7 @@ public interface OAuthService {
 
     /**
      * Initializes a new OAuth account.
-     * 
+     *
      * @param serviceMetaData The identifier of service meta data
      * @param callbackUrl The optional call-back URL
      * @throws OXException If initialization fails
@@ -104,7 +104,7 @@ public interface OAuthService {
 
     /**
      * Creates a new OAuth account completely from specified arguments.
-     * 
+     *
      * @param serviceMetaData The identifier of service meta data
      * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, {@link OAuthConstants#ARGUMENT_PASSWORD}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
      * @param user The user identifier
@@ -124,7 +124,7 @@ public interface OAuthService {
      * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
      * <li>user password; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
-     * 
+     *
      * @param serviceMetaData The identifier of service meta data
      * @param type The interaction type
      * @param arguments The arguments appropriate for interaction type
@@ -137,7 +137,7 @@ public interface OAuthService {
 
     /**
      * Deletes the specified account.
-     * 
+     *
      * @param accountId The account identifier
      * @param user The user identifier
      * @param contextId The context identifier
@@ -154,7 +154,7 @@ public interface OAuthService {
      * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
      * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
      * </ul>
-     * 
+     *
      * @param accountId The account identifier
      * @param arguments The arguments to update
      * @param user The user identifier
@@ -162,12 +162,12 @@ public interface OAuthService {
      * @throws OXException If deletion fails
      */
     void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
-    
+
     OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
      * Gets the specified account.
-     * 
+     *
      * @param accountId The account identifier
      * @param password The user password
      * @param user The user identifier

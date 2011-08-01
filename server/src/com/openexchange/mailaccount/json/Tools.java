@@ -52,7 +52,7 @@ package com.openexchange.mailaccount.json;
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Tools {
@@ -71,7 +71,7 @@ public final class Tools {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

@@ -56,7 +56,7 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * {@link ActionUtility} - Utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ActionUtility {
@@ -87,7 +87,7 @@ public final class ActionUtility {
 
     /**
      * Computes SHA-1 hash from specified text.
-     * 
+     *
      * @param text The text
      * @return The SHA-1 hash
      * @throws NoSuchAlgorithmException If the <code>SHA-1</code> algorithm is not available in the caller's environment.
@@ -103,7 +103,7 @@ public final class ActionUtility {
 
     /**
      * Generates URL-encoding of specified text.
-     * 
+     *
      * @param text The text
      * @return The URL-encoded text
      * @throws UnsupportedEncodingException If the <code>ISO-8859-1</code> encoding is not available
@@ -119,7 +119,7 @@ public final class ActionUtility {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

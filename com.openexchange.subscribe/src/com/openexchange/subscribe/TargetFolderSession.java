@@ -57,21 +57,21 @@ import com.openexchange.session.Session;
 
 public class TargetFolderSession implements Session {
     private final TargetFolderDefinition target;
-    private Map<String, Object> params = new HashMap<String, Object>();
-    
+    private final Map<String, Object> params = new HashMap<String, Object>();
+
     public TargetFolderSession(final TargetFolderDefinition target){
         this.target = target;
     }
-    
+
     //IMPLEMENTED:
     public int getContextId() {
         return target.getContext().getContextId();
     }
-    
+
     public int getUserId() {
         return target.getUserId();
     }
-    
+
     //NOT IMPLEMENTED AT ALL:
     public String getLocalIp() {
         throw new UnsupportedOperationException();

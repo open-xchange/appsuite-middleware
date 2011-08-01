@@ -51,7 +51,7 @@ package com.openexchange.tools;
 
 /**
  * {@link ImageTypeDetector} - Detects MIME type of passed image bytes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageTypeDetector {
@@ -282,7 +282,7 @@ public final class ImageTypeDetector {
      * </tr>
      * </tbody>
      * </table>
-     * 
+     *
      * @param bytes The starting image bytes; at least with a length of ten to reliably detect MIME type
      * @return The image's MIME type or <code>"application/octet-stream"</code> if unknown
      */

@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.ContentType;
 
 /**
  * {@link FileStorageContentType} - The folder storage content type for file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileStorageContentType implements ContentType {
@@ -62,7 +62,7 @@ public class FileStorageContentType implements ContentType {
 
     /**
      * Gets the {@link FileStorageContentType} instance.
-     * 
+     *
      * @return The {@link FileStorageContentType} instance
      */
     public static FileStorageContentType getInstance() {
@@ -85,6 +85,7 @@ public class FileStorageContentType implements ContentType {
         return "infostore";
     }
 
+    @Override
     public int getModule() {
         // From FolderObject.FILE
         /*
@@ -93,6 +94,7 @@ public class FileStorageContentType implements ContentType {
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return 0;
     }

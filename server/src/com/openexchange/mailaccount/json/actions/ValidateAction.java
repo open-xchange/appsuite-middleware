@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ValidateAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ValidateAction extends AbstractMailAccountTreeAction {
@@ -99,12 +99,13 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final JSONObject jData = (JSONObject) request.getData();
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw 
+                throw
                     MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

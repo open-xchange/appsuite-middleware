@@ -81,6 +81,7 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
@@ -90,6 +91,7 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND, SCHEMA);
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         ProgressState state = params.getProgressState();

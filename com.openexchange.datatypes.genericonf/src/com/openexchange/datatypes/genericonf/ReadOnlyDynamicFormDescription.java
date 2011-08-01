@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * {@link ReadOnlyDynamicFormDescription}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -66,7 +66,7 @@ public final class ReadOnlyDynamicFormDescription extends DynamicFormDescription
 
     /**
      * Initializes a new {@link ReadOnlyDynamicFormDescription}.
-     * 
+     *
      * @param delegatee The delegate form description
      */
     public ReadOnlyDynamicFormDescription(final DynamicFormDescription delegatee) {

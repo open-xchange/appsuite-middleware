@@ -56,14 +56,14 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UserService} - Offers access method to user module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserService {
 
     /**
      * Gets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param userId The user identifier
      * @param context The context
@@ -74,7 +74,7 @@ public interface UserService {
 
     /**
      * Sets specified user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
@@ -85,7 +85,7 @@ public interface UserService {
 
     /**
      * Sets specified unscoped user attribute.
-     * 
+     *
      * @param name The attribute name
      * @param value The attribute value
      * @param userId The user identifier
@@ -96,7 +96,7 @@ public interface UserService {
 
     /**
      * Searches for a user whose login matches the given uid.
-     * 
+     *
      * @param loginInfo Login name of the user.
      * @param context The context.
      * @return The unique identifier of the user.
@@ -106,7 +106,7 @@ public interface UserService {
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
-     * 
+     *
      * @param uid User identifier.
      * @return a user object.
      * @param context The context.
@@ -116,7 +116,7 @@ public interface UserService {
 
     /**
      * Reads the data for a set of user from the underlying persistent data storage.
-     * 
+     *
      * @param userIds User identifier.
      * @return the users objects.
      * @param context The context.
@@ -134,7 +134,7 @@ public interface UserService {
 
     /**
      * This method updates some values of a user.
-     * 
+     *
      * @param user user object with the updated values.
      * @param context The context.
      * @throws OXException if an error occurs.
@@ -143,17 +143,17 @@ public interface UserService {
 
     /**
      * Searches a user by its email address. This is used for converting iCal to appointments.
-     * 
+     *
      * @param email the email address of the user.
      * @param context The context.
      * @return a User object if the user was found by its email address or <code>null</code> if no user could be found.
      * @throws OXException if an error occurs.
      */
     User searchUser(String email, Context context) throws OXException;
-    
+
     /**
      * Returns an array with all user identifier of the context.
-     * 
+     *
      * @param context The context.
      * @return an array with all user identifier of the context.
      * @throws OXException if generating this list fails.
@@ -162,7 +162,7 @@ public interface UserService {
 
     /**
      * Searches for users whose IMAP login name matches the given login name.
-     * 
+     *
      * @param imapLogin the IMAP login name to search for
      * @param context The context.
      * @return The unique identifiers of the users.
@@ -172,7 +172,7 @@ public interface UserService {
 
     /**
      * Searches users who where modified later than the given date.
-     * 
+     *
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
      * @return a string array with the uids of the matching user.
@@ -182,7 +182,7 @@ public interface UserService {
 
     /**
      * Removes a user from the cache if caching is used.
-     * 
+     *
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @throws OXException if removing gives an exception.
@@ -191,7 +191,7 @@ public interface UserService {
 
     /**
      * Authenticates the given password against the given user object.
-     * 
+     *
      * @param user user that password is compared with given one.
      * @param password password to check.
      * @return <code>true</code> if the password matches.

@@ -57,7 +57,7 @@ import com.openexchange.groupware.delete.DeleteRegistry;
 
 /**
  * {@link DeleteListenerServiceTrackerCustomizer} - The {@link ServiceTrackerCustomizer} for delete registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -66,7 +66,7 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
 
     /**
      * Initializes a new {@link DeleteListenerServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public DeleteListenerServiceTrackerCustomizer(final BundleContext context) {
@@ -74,6 +74,7 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (DeleteRegistry.getInstance().registerDeleteListener((DeleteListener) addedService)) {
@@ -84,10 +85,12 @@ public final class DeleteListenerServiceTrackerCustomizer implements ServiceTrac
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

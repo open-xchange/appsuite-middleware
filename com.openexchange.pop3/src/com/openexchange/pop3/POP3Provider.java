@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link POP3Provider} - The provider for POP3 protocol.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Provider extends MailProvider {
@@ -73,7 +73,7 @@ public final class POP3Provider extends MailProvider {
 
     /**
      * Gets the singleton instance of POP3 provider.
-     * 
+     *
      * @return The singleton instance of POP3 provider
      */
     public static POP3Provider getInstance() {

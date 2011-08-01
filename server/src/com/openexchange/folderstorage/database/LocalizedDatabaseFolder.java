@@ -62,7 +62,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link LocalizedDatabaseFolder} - A locale-sensitive database folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LocalizedDatabaseFolder extends DatabaseFolder {
@@ -78,7 +78,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
-     * 
+     *
      * @param folderObject The underlying database folder
      */
     public LocalizedDatabaseFolder(final FolderObject folderObject) {
@@ -90,7 +90,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
-     * 
+     *
      * @param folderObject The underlying database folder
      * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
      */
@@ -127,6 +127,7 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
             }
             final FutureTask<String> ft = new FutureTask<String>(new Callable<String>() {
 
+                @Override
                 public String call() throws Exception {
                     return new StringHelper(locale).getString(fname);
                 }

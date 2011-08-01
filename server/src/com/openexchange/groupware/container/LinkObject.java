@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link LinkObject} - Represents a link.
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Benjamin Frederic Pahne</a>
  */
 public class LinkObject {
@@ -79,7 +79,7 @@ public class LinkObject {
 
     /**
      * Initializes a new {@link LinkObject}.
-     * 
+     *
      * @param firstId The first object's ID
      * @param firstType The first object's type
      * @param firstFolder The first object's folder
@@ -101,7 +101,7 @@ public class LinkObject {
 
     /**
      * Sets all link information.
-     * 
+     *
      * @param firstId The first object's ID
      * @param firstType The first object's type
      * @param firstFolder The first object's folder
@@ -122,7 +122,7 @@ public class LinkObject {
 
     /**
      * Sets the first object's ID.
-     * 
+     *
      * @param id The first object's ID
      */
     public void setFirstId(final int id) {
@@ -131,7 +131,7 @@ public class LinkObject {
 
     /**
      * Sets the first object's type.
-     * 
+     *
      * @param type The first object's type
      */
     public void setFirstType(final int type) {
@@ -140,7 +140,7 @@ public class LinkObject {
 
     /**
      * Sets the first object's folder.
-     * 
+     *
      * @param folder The first object's folder
      */
     public void setFirstFolder(final int folder) {
@@ -149,7 +149,7 @@ public class LinkObject {
 
     /**
      * Sets the second object's ID.
-     * 
+     *
      * @param id The second object's ID.
      */
     public void setSecondId(final int id) {
@@ -158,7 +158,7 @@ public class LinkObject {
 
     /**
      * Sets the second object's type.
-     * 
+     *
      * @param type The second object's type.
      */
     public void setSecondType(final int type) {
@@ -167,7 +167,7 @@ public class LinkObject {
 
     /**
      * Sets the second object's folder.
-     * 
+     *
      * @param folder The second object's folder.
      */
     public void setSecondFolder(final int folder) {
@@ -176,7 +176,7 @@ public class LinkObject {
 
     /**
      * Sets the context ID.
-     * 
+     *
      * @param cid The context ID.
      */
     public void setContext(final int cid) {
@@ -185,7 +185,7 @@ public class LinkObject {
 
     /**
      * Gets the first object's ID
-     * 
+     *
      * @return The first object's ID
      */
     public int getFirstId() {
@@ -194,7 +194,7 @@ public class LinkObject {
 
     /**
      * Gets the second object's ID
-     * 
+     *
      * @return The second object's ID
      */
     public int getSecondId() {
@@ -203,7 +203,7 @@ public class LinkObject {
 
     /**
      * Gets the first object's type
-     * 
+     *
      * @return The first object's type
      */
     public int getFirstType() {
@@ -212,7 +212,7 @@ public class LinkObject {
 
     /**
      * Gets the second object's type
-     * 
+     *
      * @return The second object's type
      */
     public int getSecondType() {
@@ -221,7 +221,7 @@ public class LinkObject {
 
     /**
      * Gets the first object's folder ID
-     * 
+     *
      * @return The first object's folder ID
      */
     public int getFirstFolder() {
@@ -230,7 +230,7 @@ public class LinkObject {
 
     /**
      * Gets the second object's folder ID
-     * 
+     *
      * @return The second object's folder ID
      */
     public int getSecondFolder() {
@@ -239,7 +239,7 @@ public class LinkObject {
 
     /**
      * Gets the context ID
-     * 
+     *
      * @return The context ID
      */
     public int getContectId() {

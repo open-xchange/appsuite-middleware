@@ -65,7 +65,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 
 /**
  * {@link CIFSFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFolder extends DefaultFileStorageFolder {
@@ -91,7 +91,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder {
 
     /**
      * Parses specified CIFS/SMB file.
-     * 
+     *
      * @param smbFile The CIFS/SMB file denoting the directory
      * @throws OXException If parsing  CIFS/SMB file property set fails
      */

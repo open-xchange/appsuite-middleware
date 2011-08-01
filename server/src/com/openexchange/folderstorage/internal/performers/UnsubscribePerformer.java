@@ -64,14 +64,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UnsubscribePerformer} - Serves the <code>UNSUBSCRIBE</code> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     * 
+     *
      * @param session
      */
     public UnsubscribePerformer(final ServerSession session) {
@@ -80,7 +80,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     * 
+     *
      * @param user
      * @param context
      */
@@ -90,7 +90,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -100,7 +100,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UnsubscribePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -111,7 +111,7 @@ public final class UnsubscribePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>UNSUBSCRIBE</code> action.
-     * 
+     *
      * @param treeId The virtual tree identifier
      * @param folderId The folder identifier
      * @throws OXException If a folder error occurs

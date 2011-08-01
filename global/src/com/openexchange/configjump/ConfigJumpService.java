@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * This interface defines the methods that will be used to generate browser links that redirect the user to the setup system.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface ConfigJumpService {
 
     /**
      * This method has to return the user specific link to the setup system.
-     * 
+     *
      * @param values the implementation of this method can define a number of objects to pass for generating a user specific link.
      * @return a ready to use link to redirect the user to the setup system.
      * @throws OXException if creating the url fails.

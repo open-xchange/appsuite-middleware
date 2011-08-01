@@ -52,11 +52,11 @@
 package com.openexchange.webdav.xml.fields;
 
 public interface CommonFields extends FolderChildFields {
-	
+
 	public static final String CATEGORIES = "categories";
 
 	public static final String PRIVATE_FLAG = "private_flag";
-	
+
 	public static final String COLORLABEL = "color_label";
-	
+
 }

@@ -65,8 +65,8 @@ public class EntityMap implements Map<String, EntityType>{
 
     private static final EntityType ID = new IDType();
     private static final EntityType FOLDER = new FolderType();
-    
-    
+
+
     public void clear() {
         throw new UnsupportedOperationException();
     }

@@ -74,6 +74,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void getValue(final Session session, final Context ctx,
         final User user, final UserConfiguration userConfig,
         final Setting setting) throws OXException {
@@ -99,6 +100,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isWritable() {
         return true;
     }
@@ -106,7 +108,8 @@ public abstract class AbstractMailFuncs implements IValueHandler {
     /**
 	 * {@inheritDoc}
 	 */
-	public void writeValue(final Session session, final Context ctx, final User user,
+	@Override
+    public void writeValue(final Session session, final Context ctx, final User user,
 	    final Setting setting) throws OXException {
         final UserSettingMailStorage storage = UserSettingMailStorage
             .getInstance();
@@ -136,6 +139,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getId() {
         return -1;
     }

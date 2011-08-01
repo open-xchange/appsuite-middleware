@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ICalMailPartDataSource} - The {@link MailPartDataSource} for VCard parts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ICalMailPartDataSource extends MailPartDataSource {
@@ -78,6 +78,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         super();
     }
 
+    @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());

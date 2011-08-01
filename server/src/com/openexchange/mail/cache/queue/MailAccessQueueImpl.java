@@ -62,7 +62,7 @@ import com.openexchange.mail.cache.PooledMailAccess;
  * {@link MailAccessQueueImpl} - A {@link Queue} additionally providing {@link #pollDelayed()} method to obtain expired elements.
  * <p>
  * <b>Note</b>: This queue is not thread-safe!
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessQueueImpl implements MailAccessQueue {
@@ -84,7 +84,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
 
     /**
      * Creates a new <tt>MailAccessQueue</tt> that is initially empty.
-     * 
+     *
      * @param capacity The queue's capacity or <code>-1</code> if unbounded
      */
     public MailAccessQueueImpl(final int capacity) {
@@ -97,24 +97,27 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
     /**
      * Marks this queue as deprecated.
      */
+    @Override
     public void markDeprecated() {
         deprecated.set(true);
     }
 
     /**
      * Checks if this queue is marked as deprecated.
-     * 
+     *
      * @return <code>true</code> if this queue is marked as deprecated; otherwise <code>false</code>
      */
+    @Override
     public boolean isDeprecated() {
         return deprecated.get();
     }
 
     /**
      * Retrieves and removes the head of this queue, or <tt>null</tt> if head has not expired, yet.
-     * 
+     *
      * @return The head of this queue or <tt>null</tt> if head has not expired, yet.
      */
+    @Override
     public PooledMailAccess pollDelayed() {
         final PooledMailAccess first = priorityQueue.peek();
         if (first == null || first.getDelay(TimeUnit.MILLISECONDS) > 0) {
@@ -128,18 +131,22 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.hashCode();
     }
 
+    @Override
     public PooledMailAccess remove() {
         return priorityQueue.remove();
     }
 
+    @Override
     public boolean isEmpty() {
         return priorityQueue.isEmpty();
     }
 
+    @Override
     public boolean contains(final Object o) {
         return priorityQueue.contains(o);
     }
 
+    @Override
     public PooledMailAccess element() {
         return priorityQueue.element();
     }
@@ -149,6 +156,7 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.equals(obj);
     }
 
+    @Override
     public boolean addAll(final Collection<? extends PooledMailAccess> c) {
         if ((capacity > 0) && ((capacity - priorityQueue.size()) < c.size())) {
             return false;
@@ -156,18 +164,22 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.addAll(c);
     }
 
+    @Override
     public Object[] toArray() {
         return priorityQueue.toArray();
     }
 
+    @Override
     public <T> T[] toArray(final T[] a) {
         return priorityQueue.toArray(a);
     }
 
+    @Override
     public boolean containsAll(final Collection<?> c) {
         return priorityQueue.containsAll(c);
     }
 
+    @Override
     public boolean offer(final PooledMailAccess o) {
         if ((capacity > 0) && (capacity <= priorityQueue.size())) {
             return false;
@@ -175,10 +187,12 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.offer(o);
     }
 
+    @Override
     public PooledMailAccess peek() {
         return priorityQueue.peek();
     }
 
+    @Override
     public boolean add(final PooledMailAccess o) {
         if ((capacity > 0) && (capacity <= priorityQueue.size())) {
             return false;
@@ -186,18 +200,22 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.add(o);
     }
 
+    @Override
     public boolean removeAll(final Collection<?> c) {
         return priorityQueue.removeAll(c);
     }
 
+    @Override
     public boolean remove(final Object o) {
         return priorityQueue.remove(o);
     }
 
+    @Override
     public Iterator<PooledMailAccess> iterator() {
         return priorityQueue.iterator();
     }
 
+    @Override
     public boolean retainAll(final Collection<?> c) {
         return priorityQueue.retainAll(c);
     }
@@ -207,14 +225,17 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         return priorityQueue.toString();
     }
 
+    @Override
     public int size() {
         return priorityQueue.size();
     }
 
+    @Override
     public void clear() {
         priorityQueue.clear();
     }
 
+    @Override
     public PooledMailAccess poll() {
         return priorityQueue.poll();
     }

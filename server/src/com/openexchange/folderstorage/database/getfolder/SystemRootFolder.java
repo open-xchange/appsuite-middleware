@@ -59,7 +59,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link SystemRootFolder} - Gets the system shared folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemRootFolder {
@@ -73,7 +73,7 @@ public final class SystemRootFolder {
 
     /**
      * Gets the database folder representing system root folder.
-     * 
+     *
      * @param fo The folder object fetched from database
      * @return The database folder representing system root folder
      */
@@ -101,7 +101,7 @@ public final class SystemRootFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system root folder for given user.
-     * 
+     *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
     public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
@@ -119,7 +119,7 @@ public final class SystemRootFolder {
 
     /**
      * Gets the subfolder identifiers of database folder representing system root folder for given user.
-     * 
+     *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
     public static int[] getSystemRootFolderSubfolderAsInt() {

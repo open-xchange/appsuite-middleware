@@ -12,9 +12,9 @@ import com._4psa.billingdata_xsd._2_5.Limits;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import com._4psa.billingdata_xsd._2_5.Limits;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -53,11 +53,11 @@ public class RechargeRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -65,11 +65,11 @@ public class RechargeRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -77,11 +77,11 @@ public class RechargeRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -89,11 +89,11 @@ public class RechargeRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -101,11 +101,11 @@ public class RechargeRequest {
 
     /**
      * Gets the value of the limit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limits }
-     *     
+     *
      */
     public Limits getLimit() {
         return limit;
@@ -113,11 +113,11 @@ public class RechargeRequest {
 
     /**
      * Sets the value of the limit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limits }
-     *     
+     *
      */
     public void setLimit(Limits value) {
         this.limit = value;
@@ -125,11 +125,11 @@ public class RechargeRequest {
 
     /**
      * Gets the value of the credit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credits }
-     *     
+     *
      */
     public Credits getCredit() {
         return credit;
@@ -137,11 +137,11 @@ public class RechargeRequest {
 
     /**
      * Sets the value of the credit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credits }
-     *     
+     *
      */
     public void setCredit(Credits value) {
         this.credit = value;

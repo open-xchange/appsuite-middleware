@@ -74,7 +74,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
  * <li>Removed CSS: <code>background: url(an-url);</code></li>
  * <li>Removed CSS: <code>background-image: url(an-url);</code></li>
  * </ol>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HTMLImageFilterHandler implements HTMLHandler {
@@ -301,7 +301,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     /**
      * Gets the HTML content with external image content removed
-     * 
+     *
      * @return The HTML content with external image content removed
      */
     public String getHTML() {
@@ -310,7 +310,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     /**
      * Indicates if an image source has been found (and suppressed)
-     * 
+     *
      * @return <code>true</code> if an image source has been found; otherwise <code>false</code>
      */
     public boolean isImageURLFound() {

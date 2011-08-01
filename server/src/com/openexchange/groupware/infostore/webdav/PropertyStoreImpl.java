@@ -86,6 +86,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         this.tablename = tablename;
     }
 
+    @Override
     public Map<Integer, List<WebdavProperty>> loadProperties(final List<Integer> entities, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -136,6 +137,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         return prop;
     }
 
+    @Override
     public List<WebdavProperty> loadProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -170,6 +172,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
+    @Override
     public void saveProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -201,6 +204,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         stmt.setBoolean(7, prop.isXML());
     }
 
+    @Override
     public List<WebdavProperty> loadAllProperties(final int entity, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -231,6 +235,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
+    @Override
     public Map<Integer, List<WebdavProperty>> loadAllProperties(final List<Integer> entities, final Context ctx) throws OXException {
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -269,6 +274,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         }
     }
 
+    @Override
     public void removeAll(final List<Integer> entities, final Context ctx) throws OXException {
         Connection writeCon = null;
         PreparedStatement stmt = null;
@@ -301,6 +307,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         b.setLength(b.length()-1);
     }
 
+    @Override
     public void removeProperties(final int entity, final List<WebdavProperty> properties, final Context ctx) throws OXException {
         Connection writeCon = null;
         final PreparedStatement stmt = null;
@@ -355,6 +362,7 @@ public class PropertyStoreImpl extends DBService implements PropertyStore {
         builder.setLength(builder.length()-3);
     }
 
+    @Override
     public void removeAll(final int entity, final Context ctx) throws OXException {
         removeAll(Arrays.asList(entity), ctx);
     }

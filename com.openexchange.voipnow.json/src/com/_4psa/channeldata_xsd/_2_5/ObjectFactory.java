@@ -9,18 +9,18 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.channeldata_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.channeldata_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -30,14 +30,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.channeldata_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link PublicNoInfo }
-     * 
+     *
      */
     public PublicNoInfo createPublicNoInfo() {
         return new PublicNoInfo();
@@ -45,7 +45,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PublicNoSelection }
-     * 
+     *
      */
     public PublicNoSelection createPublicNoSelection() {
         return new PublicNoSelection();
@@ -53,7 +53,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelGroupSelection }
-     * 
+     *
      */
     public ChannelGroupSelection createChannelGroupSelection() {
         return new ChannelGroupSelection();
@@ -61,7 +61,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link SIPChannelInfo }
-     * 
+     *
      */
     public SIPChannelInfo createSIPChannelInfo() {
         return new SIPChannelInfo();
@@ -69,7 +69,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelGroupInfo }
-     * 
+     *
      */
     public ChannelGroupInfo createChannelGroupInfo() {
         return new ChannelGroupInfo();
@@ -77,7 +77,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RoutingRuleGroupInfo }
-     * 
+     *
      */
     public RoutingRuleGroupInfo createRoutingRuleGroupInfo() {
         return new RoutingRuleGroupInfo();
@@ -85,7 +85,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PublicNoInfo.IncomingCost }
-     * 
+     *
      */
     public PublicNoInfo.IncomingCost createPublicNoInfoIncomingCost() {
         return new PublicNoInfo.IncomingCost();
@@ -93,7 +93,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RoutingRuleInfo }
-     * 
+     *
      */
     public RoutingRuleInfo createRoutingRuleInfo() {
         return new RoutingRuleInfo();
@@ -101,7 +101,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallRulesOutGroupList }
-     * 
+     *
      */
     public CallRulesOutGroupList createCallRulesOutGroupList() {
         return new CallRulesOutGroupList();
@@ -109,7 +109,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PublicNoList }
-     * 
+     *
      */
     public PublicNoList createPublicNoList() {
         return new PublicNoList();
@@ -117,7 +117,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelGroupList }
-     * 
+     *
      */
     public ChannelGroupList createChannelGroupList() {
         return new ChannelGroupList();
@@ -125,7 +125,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelList }
-     * 
+     *
      */
     public ChannelList createChannelList() {
         return new ChannelList();
@@ -133,7 +133,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Codecs }
-     * 
+     *
      */
     public Codecs createCodecs() {
         return new Codecs();
@@ -141,7 +141,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PublicNoSelection.Available }
-     * 
+     *
      */
     public PublicNoSelection.Available createPublicNoSelectionAvailable() {
         return new PublicNoSelection.Available();
@@ -149,7 +149,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PublicNoSelection.Assigned }
-     * 
+     *
      */
     public PublicNoSelection.Assigned createPublicNoSelectionAssigned() {
         return new PublicNoSelection.Assigned();
@@ -157,7 +157,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelGroupSelection.Available }
-     * 
+     *
      */
     public ChannelGroupSelection.Available createChannelGroupSelectionAvailable() {
         return new ChannelGroupSelection.Available();
@@ -165,7 +165,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChannelGroupSelection.Assigned }
-     * 
+     *
      */
     public ChannelGroupSelection.Assigned createChannelGroupSelectionAssigned() {
         return new ChannelGroupSelection.Assigned();
@@ -173,7 +173,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelData.xsd/2.5.1", name = "qualify", scope = SIPChannelInfo.class)
     public JAXBElement<BigDecimal> createSIPChannelInfoQualify(BigDecimal value) {
@@ -182,7 +182,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ChannelData.xsd/2.5.1", name = "concurentCalls", scope = SIPChannelInfo.class, defaultValue = "10")
     public JAXBElement<BigDecimal> createSIPChannelInfoConcurentCalls(BigDecimal value) {

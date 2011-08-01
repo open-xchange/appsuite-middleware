@@ -63,7 +63,7 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link ParticipantsReplacement} - Replacement for {@link TemplateToken#PARTICIPANTS participants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParticipantsReplacement implements TemplateReplacement {
@@ -88,6 +88,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         this.participantsSet = participantsSet;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
@@ -104,10 +105,12 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         return clone;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public String getReplacement() {
         if (participantsSet.isEmpty()) {
             return "";
@@ -199,10 +202,12 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         return isWhitespace;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.PARTICIPANTS;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
@@ -222,6 +227,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         return stringHelper;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         if (locale == null || locale.equals(this.locale)) {
             return this;
@@ -231,10 +237,12 @@ public final class ParticipantsReplacement implements TemplateReplacement {
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!ParticipantsReplacement.class.isInstance(other)) {
             /*

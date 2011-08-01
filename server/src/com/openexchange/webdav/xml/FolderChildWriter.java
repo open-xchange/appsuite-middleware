@@ -67,31 +67,31 @@ import com.openexchange.webdav.xml.fields.DataFields;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class FolderChildWriter extends DataWriter {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderChildWriter.class));
-	
+
 	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) {
 		writeDataElements(folderchildobject, e_prop);
-		
+
 		if (folderchildobject.containsParentFolderID()) {
 			addElement("folder_id", folderchildobject.getParentFolderID(), e_prop);
-		} 
+		}
 	}
-	
+
 	public void writeList(final SearchIterator<? extends DataObject> searchIterator, final XMLOutputter xo, final OutputStream os) throws Exception {
 		int status = 200;
 		String description = "OK";
 		int object_id = 0;
-		
+
 		final Element eProp = new Element("prop", "D", "DAV:");
-		
+
 		try {
 			addElement("object_status", "LIST", eProp);
 			final Element eIds = new Element("object_list", namespace);
 			while (searchIterator.hasNext()) {
 				addElement(DataFields.ID, searchIterator.next().getObjectID(), eIds);
 			}
-			
+
 			eProp.addContent(eIds);
 		} catch (final Exception exc) {
 			LOG.error("writeList", exc);

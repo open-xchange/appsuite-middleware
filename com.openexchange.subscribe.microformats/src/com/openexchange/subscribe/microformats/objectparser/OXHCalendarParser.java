@@ -81,7 +81,7 @@ import com.openexchange.subscribe.microformats.parser.ObjectParser;
 public class OXHCalendarParser implements ObjectParser<Appointment>{
 
     private List<Appointment> calendarData;
-    
+
     public Collection<Appointment> parse(Reader html) throws OXException {
         DOMParser parser = new DOMParser();
         reset();
@@ -99,57 +99,69 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
     }
 
     private void recurse(Node node) {
-        if(node == null)
+        if(node == null) {
             return;
+        }
         extractInformation(node);
-            
+
         NodeList children = node.getChildNodes();
-        
-        if(children != null && children.getLength() != 0)
-            for(int i = 0, length =children.getLength(); i < length; i++)
+
+        if(children != null && children.getLength() != 0) {
+            for(int i = 0, length =children.getLength(); i < length; i++) {
                 recurse(children.item(i));
+            }
+        }
     }
 
     private void extractInformation(Node node) {
-        if(node.getNodeType() != Node.ELEMENT_NODE)
+        if(node.getNodeType() != Node.ELEMENT_NODE) {
             return;
+        }
         Element elem = (Element) node;
-        
+
         List<String> classes = getClasses(elem);
-        if(classes == null)
+        if(classes == null) {
             return;
-                
+        }
+
         String name = node.getNodeName();
-        
+
         String value = null;
         if("ABBR".equalsIgnoreCase(name)){
             value = elem.getAttribute("title");
         }
-        
-        if(value == null)
+
+        if(value == null) {
             value = elem.getTextContent();
-        
+        }
+
         storeInformation(elem, value);
     }
-    
+
     private void storeInformation(Element elem, String value){
         List<String> classes = getClasses(elem);
         for(String classname: classes){
-            if("vevent".equalsIgnoreCase(classname))
+            if("vevent".equalsIgnoreCase(classname)) {
                 calendarData.add(new Appointment());
-            if(value == null)
+            }
+            if(value == null) {
                 continue;
-            if("location".equalsIgnoreCase(classname))
+            }
+            if("location".equalsIgnoreCase(classname)) {
                 last().setLocation(value);
-            if("summary".equalsIgnoreCase(classname))
+            }
+            if("summary".equalsIgnoreCase(classname)) {
                 last().setNote(value);
-            if("dtstart".equalsIgnoreCase(classname))
+            }
+            if("dtstart".equalsIgnoreCase(classname)) {
                 last().setStartDate(parseDate(value));
-            if("dtend".equalsIgnoreCase(classname))
+            }
+            if("dtend".equalsIgnoreCase(classname)) {
                 last().setEndDate(parseDate(value));
+            }
         }
     }
-    
+
     public static Date parseDate(String data){
         List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
         int[] styles = new int [] {SimpleDateFormat.FULL, SimpleDateFormat.LONG, SimpleDateFormat.MEDIUM, SimpleDateFormat.SHORT };
@@ -157,26 +169,28 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
             for(int dateStyle: styles){
                 for(int timeStyle: styles){
                     DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
-                    try { return sdf.parse(data); 
+                    try { return sdf.parse(data);
                         } catch (ParseException e) {/*Next*/ };
                 }
                 DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
-                try { return sdf.parse(data); 
+                try { return sdf.parse(data);
                     } catch (ParseException e) {/*Next*/ }
                 }
         }
         DateFormat sdf = SimpleDateFormat.getInstance();
-        try { return sdf.parse(data); 
+        try { return sdf.parse(data);
             } catch (ParseException e) {/*Next*/ }
-        
+
         return null;
     }
 
-    
+
     private Appointment last() {
         if(calendarData == null || calendarData.size() == 0)
+         {
             return new Appointment(); //no one cares about this, it will be dropped
-        
+        }
+
         return calendarData.get(calendarData.size() - 1);
     }
 
@@ -188,7 +202,7 @@ public class OXHCalendarParser implements ObjectParser<Appointment>{
             }
             return keys;
     }
-    
+
     private void reset() {
         calendarData = new LinkedList<Appointment>();
     }

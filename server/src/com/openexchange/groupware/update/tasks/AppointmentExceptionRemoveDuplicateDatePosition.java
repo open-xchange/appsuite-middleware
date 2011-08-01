@@ -74,14 +74,17 @@ public final class AppointmentExceptionRemoveDuplicateDatePosition implements Up
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 22;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
         LOG.info("Performing update task to remove duplicate date recurrence position from appointment change exceptions on schema " + schema.getSchema());

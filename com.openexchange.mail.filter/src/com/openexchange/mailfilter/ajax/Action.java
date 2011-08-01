@@ -93,7 +93,7 @@ public enum Action {
     GETSCRIPT("getscript");
 
 
-    
+
     private String ajaxName;
 
     private Action(final String name) {
@@ -108,7 +108,7 @@ public enum Action {
     }
 
     private static final Map<String, Action> name2Action;
-    
+
     public static Action byName(final String ajaxName) {
         return name2Action.get(ajaxName);
     }

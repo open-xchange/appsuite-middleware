@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * {@link JCharsetActivator} - Activator for <a href="http://www.freeutils.net/source/jcharset/">JCharset</a>'s charset provider
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCharsetActivator implements BundleActivator {

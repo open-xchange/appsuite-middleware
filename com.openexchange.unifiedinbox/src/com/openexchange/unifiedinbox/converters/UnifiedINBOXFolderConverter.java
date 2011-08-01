@@ -80,7 +80,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
  * {@link UnifiedINBOXFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXFolderConverter {
@@ -141,7 +141,7 @@ public final class UnifiedINBOXFolderConverter {
 
     /**
      * Gets the instance of {@link MailFolder} for root folder.
-     * 
+     *
      * @return The instance of {@link MailFolder} for root folder.
      */
     public static MailFolder getRootFolder() {
@@ -150,7 +150,7 @@ public final class UnifiedINBOXFolderConverter {
 
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
-     * 
+     *
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
      * @param fullName The folder's full name
@@ -164,7 +164,7 @@ public final class UnifiedINBOXFolderConverter {
 
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
-     * 
+     *
      * @param unifiedInboxAccountId The account ID of the Unified INBOX account
      * @param session The session
      * @param fullname The folder's full name
@@ -345,7 +345,7 @@ public final class UnifiedINBOXFolderConverter {
 
     /**
      * Gets the default folder's message counts of denoted account.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session providing needed user data
      * @param fullnames The fullnames
@@ -396,7 +396,7 @@ public final class UnifiedINBOXFolderConverter {
 
     /**
      * Merges specified default folders.
-     * 
+     *
      * @param accountFolders The default folders
      * @param fullnames The fullnames
      * @param localizedNames The localized names

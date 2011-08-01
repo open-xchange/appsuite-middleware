@@ -72,18 +72,18 @@ public class UpdateIterator implements MapIterator<String, Object> {
 
     private static final String UPDATE_STRING = "UPDATE genconf_attributes_strings SET value = ? WHERE cid = ? AND id = ? AND name = ?";
     private static final String UPDATE_BOOL = "UPDATE genconf_attributes_bools SET value = ? WHERE cid = ? AND id = ? AND name = ?";
-    
+
     private static final String DELETE_STRING = "DELETE FROM genconf_attributes_strings WHERE cid = ? AND id = ? AND name = ?";
     private static final String DELETE_BOOL = "DELETE FROM genconf_attributes_bools WHERE cid = ? AND id = ? AND name = ?";
-    
-    
-    private Map<Class, PreparedStatement> updateStatements = new HashMap<Class, PreparedStatement>();
-    private List<PreparedStatement> deleteStatements = new LinkedList<PreparedStatement>();
-    
+
+
+    private final Map<Class, PreparedStatement> updateStatements = new HashMap<Class, PreparedStatement>();
+    private final List<PreparedStatement> deleteStatements = new LinkedList<PreparedStatement>();
+
     private SQLException exception;
-    
-    private InsertIterator insertIterator = new InsertIterator();
-    
+
+    private final InsertIterator insertIterator = new InsertIterator();
+
     public void handle(String name, Object value) throws IterationBreak {
         try {
             if(original.containsKey(name)) {
@@ -121,10 +121,10 @@ public class UpdateIterator implements MapIterator<String, Object> {
 
         updateStatements.put(String.class, updateString);
         updateStatements.put(Boolean.class, updateBool);
-        
+
         PreparedStatement deleteString = tx.prepare(DELETE_STRING);
         PreparedStatement deleteBool = tx.prepare(DELETE_BOOL);
-       
+
         deleteStatements.add(deleteString);
         deleteStatements.add(deleteBool);
     }
@@ -141,7 +141,7 @@ public class UpdateIterator implements MapIterator<String, Object> {
             deleteStatement.setInt(2, id);
         }
     }
-    
+
     public void throwException() throws SQLException {
         insertIterator.throwException();
         if(null != exception) {
@@ -152,10 +152,10 @@ public class UpdateIterator implements MapIterator<String, Object> {
     public void close() {
         List<PreparedStatement> allStatements = new ArrayList<PreparedStatement>(updateStatements.size()+deleteStatements.size());
         Collection<PreparedStatement> updates = updateStatements.values();
-        
+
         allStatements.addAll(updates);
         allStatements.addAll(deleteStatements);
-        
+
         for (PreparedStatement preparedStatement : allStatements) {
             try {
                 preparedStatement.close();
@@ -163,7 +163,7 @@ public class UpdateIterator implements MapIterator<String, Object> {
                 //IGNORE
             }
         }
-        
+
     }
 
 }

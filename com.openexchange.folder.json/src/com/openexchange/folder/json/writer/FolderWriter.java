@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderWriter {
@@ -341,7 +341,7 @@ public final class FolderWriter {
 
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 /*-
-                 * 
+                 *
                 final String[] obj = folder.getSubfolderIDs();
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), null == obj ? JSONObject.NULL : Boolean.valueOf(obj.length > 0));
                  */
@@ -372,7 +372,7 @@ public final class FolderWriter {
 
     /**
      * Writes requested fields of given folder into a JSON array.
-     * 
+     *
      * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON array carrying requested fields of given folder
@@ -405,7 +405,7 @@ public final class FolderWriter {
 
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
-     * 
+     *
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON arrays of given folders
@@ -465,7 +465,7 @@ public final class FolderWriter {
 
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
-     * 
+     *
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON arrays of given folders
@@ -503,7 +503,7 @@ public final class FolderWriter {
 
     /**
      * Writes requested fields of given folder into a JSON object.
-     * 
+     *
      * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
      * @return The JSON object carrying requested fields of given folder
@@ -565,7 +565,7 @@ public final class FolderWriter {
 
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON objects.
-     * 
+     *
      * @param fields The fields to write to each JSON object or <code>null</code> to write all
      * @param folders The folders
      * @return The JSON array carrying JSON objects of given folders
@@ -649,7 +649,7 @@ public final class FolderWriter {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

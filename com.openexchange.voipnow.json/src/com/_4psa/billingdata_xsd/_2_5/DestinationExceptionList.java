@@ -13,11 +13,11 @@ import com._4psa.common_xsd._2_5.Notice;
 
 /**
  * Destination exception charges list
- * 
+ *
  * <p>Java class for DestinationExceptionList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DestinationExceptionList">
  *   &lt;complexContent>
@@ -50,8 +50,8 @@ import com._4psa.common_xsd._2_5.Notice;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DestinationExceptionList", propOrder = {
@@ -68,11 +68,11 @@ public class DestinationExceptionList {
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -80,11 +80,11 @@ public class DestinationExceptionList {
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -92,25 +92,25 @@ public class DestinationExceptionList {
 
     /**
      * Gets the value of the exception property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the exception property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getException().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link DestinationExceptionList.Exception }
-     * 
-     * 
+     *
+     *
      */
     public List<DestinationExceptionList.Exception> getException() {
         if (exception == null) {
@@ -121,25 +121,25 @@ public class DestinationExceptionList {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -151,9 +151,9 @@ public class DestinationExceptionList {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -174,8 +174,8 @@ public class DestinationExceptionList {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -207,11 +207,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the id property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getID() {
             return id;
@@ -219,11 +219,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the id property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setID(BigInteger value) {
             this.id = value;
@@ -231,11 +231,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the areaCode property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getAreaCode() {
             return areaCode;
@@ -243,11 +243,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the areaCode property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setAreaCode(String value) {
             this.areaCode = value;
@@ -255,11 +255,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the minutes property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getMinutes() {
             return minutes;
@@ -267,11 +267,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the minutes property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setMinutes(BigInteger value) {
             this.minutes = value;
@@ -279,11 +279,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the description property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDescription() {
             return description;
@@ -291,11 +291,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the description property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDescription(String value) {
             this.description = value;
@@ -303,11 +303,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the initialAmount property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getInitialAmount() {
             return initialAmount;
@@ -315,11 +315,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the initialAmount property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setInitialAmount(Float value) {
             this.initialAmount = value;
@@ -327,11 +327,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the initialInterval property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getInitialInterval() {
             return initialInterval;
@@ -339,11 +339,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the initialInterval property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setInitialInterval(BigInteger value) {
             this.initialInterval = value;
@@ -351,11 +351,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the amount property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getAmount() {
             return amount;
@@ -363,11 +363,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the amount property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setAmount(Float value) {
             this.amount = value;
@@ -375,11 +375,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the interval property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getInterval() {
             return interval;
@@ -387,11 +387,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the interval property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setInterval(BigInteger value) {
             this.interval = value;
@@ -399,11 +399,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the chargingPackageID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getChargingPackageID() {
             return chargingPackageID;
@@ -411,11 +411,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the chargingPackageID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setChargingPackageID(BigInteger value) {
             this.chargingPackageID = value;
@@ -423,11 +423,11 @@ public class DestinationExceptionList {
 
         /**
          * Gets the value of the chargingPackage property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getChargingPackage() {
             return chargingPackage;
@@ -435,11 +435,11 @@ public class DestinationExceptionList {
 
         /**
          * Sets the value of the chargingPackage property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setChargingPackage(String value) {
             this.chargingPackage = value;

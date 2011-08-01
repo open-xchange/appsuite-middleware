@@ -53,7 +53,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
  * {@link CustomUncaughtExceptionhandler} - A custom {@link UncaughtExceptionHandler}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {

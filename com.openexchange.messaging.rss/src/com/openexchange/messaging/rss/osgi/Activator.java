@@ -71,7 +71,7 @@ public class Activator implements BundleActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private List<ServiceTracker> trackers;
-    
+
 	public void start(final BundleContext context) throws Exception {
 	    try {
 	        trackers = new ArrayList<ServiceTracker>(1);
@@ -80,7 +80,7 @@ public class Activator implements BundleActivator {
 	        for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
-	        
+
 	        context.registerService(MessagingService.class.getName(), new RSSMessagingService(), null);
 	    } catch (final Exception x) {
 	        LOG.error(x.getMessage(), x);
@@ -95,7 +95,7 @@ public class Activator implements BundleActivator {
             }
 	        trackers = null;
         }
-	    
+
 	    // Services are deregistered automatically by the framework
 	}
 

@@ -75,7 +75,7 @@ import com.openexchange.proxy.Restriction;
 
 /**
  * {@link ProxyServlet}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ProxyServlet extends SessionServlet {
@@ -227,7 +227,7 @@ public class ProxyServlet extends SessionServlet {
         final Header ctHeader = method.getResponseHeader("Content-Type");
         if (null != ctHeader) {
             /*-
-             * 
+             *
             final String value = ctHeader.getValue();
             if ("text/html".equals(value)) {
                 resp.setContentType("text/html; charset=" + resp.getCharacterEncoding());
@@ -244,7 +244,7 @@ public class ProxyServlet extends SessionServlet {
 
         /*-
          * Enable this to consider all header
-         * 
+         *
         for (final Header header : method.getResponseHeaders()) {
 
             final String name = header.getName();
@@ -269,7 +269,7 @@ public class ProxyServlet extends SessionServlet {
 
     /**
      * Closes specified HTTP method.
-     * 
+     *
      * @param httpMethod The HTTP method to close
      */
     private static void closeHttpMethod(final HttpMethod httpMethod) {

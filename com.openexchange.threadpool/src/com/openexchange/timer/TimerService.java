@@ -55,14 +55,14 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link TimerService} that can schedule commands to run after a given delay, or to execute periodically.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TimerService {
 
     /**
      * Creates and executes a one-shot action that becomes enabled after the given delay.
-     * 
+     *
      * @param task The task to execute.
      * @param delay The time from now to delay execution.
      * @param unit The time unit of the delay parameter.
@@ -76,7 +76,7 @@ public interface TimerService {
      * Convenience method that invokes {@link #schedule(Runnable, long, TimeUnit)} with time unit set to {@link TimeUnit#MILLISECONDS}.
      * <p>
      * Creates and executes a one-shot action that becomes enabled after the given delay.
-     * 
+     *
      * @param task The task to execute.
      * @param delay The time from now to delay execution.
      * @return A cancelable scheduled timer task representing pending completion of the task.
@@ -90,7 +90,7 @@ public interface TimerService {
      * period; that is executions will commence after <tt>initialDelay</tt> then <tt>initialDelay+period</tt>, then
      * <tt>initialDelay + 2 * period</tt>, and so on. If any execution of the task encounters an exception, subsequent executions are
      * suppressed. Otherwise, the task will only terminate via cancellation or termination of the executor.
-     * 
+     *
      * @param task The task to execute.
      * @param initialDelay The time to delay first execution.
      * @param period The period between successive executions.
@@ -110,7 +110,7 @@ public interface TimerService {
      * period; that is executions will commence after <tt>initialDelay</tt> then <tt>initialDelay+period</tt>, then
      * <tt>initialDelay + 2 * period</tt>, and so on. If any execution of the task encounters an exception, subsequent executions are
      * suppressed. Otherwise, the task will only terminate via cancellation or termination of the executor.
-     * 
+     *
      * @param task The task to execute.
      * @param initialDelay The time to delay first execution.
      * @param period The period between successive executions.
@@ -126,7 +126,7 @@ public interface TimerService {
      * delay between the termination of one execution and the commencement of the next. If any execution of the task encounters an
      * exception, subsequent executions are suppressed. Otherwise, the task will only terminate via cancellation or termination of the
      * executor.
-     * 
+     *
      * @param task The task to execute.
      * @param initialDelay The time to delay first execution.
      * @param delay The delay between the termination of one execution and the commencement of the next.
@@ -146,7 +146,7 @@ public interface TimerService {
      * delay between the termination of one execution and the commencement of the next. If any execution of the task encounters an
      * exception, subsequent executions are suppressed. Otherwise, the task will only terminate via cancellation or termination of the
      * executor.
-     * 
+     *
      * @param task The task to execute.
      * @param initialDelay The time to delay first execution.
      * @param delay The delay between the termination of one execution and the commencement of the next.
@@ -168,7 +168,7 @@ public interface TimerService {
 
     /**
      * Returns an {@link Executor view on this timer service.
-     * 
+     *
      * @return An unmodifiable {@link Executor} backing this timer service
      */
     public Executor getExecutor();

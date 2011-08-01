@@ -60,15 +60,15 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CreationDateReplacement} - Creation date replacement.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class CreationDateReplacement extends AbstractDateReplacement {
 
     /**
      * Initializes a new {@link CreationDateReplacement}
-     * 
+     *
      * @param creationDate The creation date
      * @param locale The locale
      */
@@ -78,7 +78,7 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
 
     /**
      * Initializes a new {@link CreationDateReplacement}
-     * 
+     *
      * @param creationDate The creation date
      * @param locale The locale
      * @param timeZone The time zone
@@ -87,6 +87,7 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
         super(trimDateToMinutesOnly(creationDate), true, locale, timeZone);
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.CREATION_DATETIME;
     }

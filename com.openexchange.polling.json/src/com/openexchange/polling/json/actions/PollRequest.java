@@ -10,11 +10,11 @@ import com.openexchange.tools.session.ServerSession;
 
 public class PollRequest {
 
-	private ServerSession session;
-	private AJAXRequestData request;
+	private final ServerSession session;
+	private final AJAXRequestData request;
 
 	private static final PollParser PARSER = new PollParser();
-	
+
 	public PollRequest(AJAXRequestData request, ServerSession session) {
 		this.session = session;
 		this.request = request;

@@ -53,7 +53,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link DatabaseFolderStorageUtility} - Utility methods for database folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderStorageUtility {
@@ -72,7 +72,7 @@ public final class DatabaseFolderStorageUtility {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
@@ -126,7 +126,7 @@ public final class DatabaseFolderStorageUtility {
 
     /**
      * Checks if passed <code>String</code> starts with shared prefix.
-     * 
+     *
      * @param str The string to check
      * @return <code>true</code> if passed <code>String</code> starts with shared prefix; otherwise <code>false</code>
      */

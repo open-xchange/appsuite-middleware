@@ -54,7 +54,7 @@ import com.openexchange.messaging.generic.Utility;
 
 /**
  * {@link MimeStringMessagingHeader} - A string header whose value is possibly RFC 2047 style encoded.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -66,7 +66,7 @@ public class MimeStringMessagingHeader implements MessagingHeader {
 
     /**
      * Initializes a new {@link MimeStringMessagingHeader}.
-     * 
+     *
      * @param name The header name
      * @param value The possibly RFC 2047 style encoded header value
      */

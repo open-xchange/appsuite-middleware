@@ -65,7 +65,7 @@ import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFacto
  */
 public class ListingParserTest extends TestCase {
 
-    private static final String LISTING1 = 
+    private static final String LISTING1 =
         "<html>\n\n"+
         "   <head>\n"+
         "        <title>Subscription Sources</title>\n"+
@@ -92,16 +92,16 @@ public class ListingParserTest extends TestCase {
         "    </body>\n"+
         "</html>";
 
-    
-    
+
+
     public void testParseCompleteListing() throws OXException {
         final List<ExternalSubscriptionSource> externalSources = new ListingParser(new HTMLMicroformatParserFactory()).parse(LISTING1);
-    
+
         assertNotNull(externalSources);
         assertEquals(2, externalSources.size());
-        
+
         boolean foundA = false, foundB = false;
-        
+
         for (final ExternalSubscriptionSource source : externalSources) {
             if("com.openexchange.subscribe.tasks.rally".equals(source.getId())) {
                 assertEquals("http://localhost/icon.png", source.getIcon());
@@ -119,10 +119,10 @@ public class ListingParserTest extends TestCase {
                 fail("Don't know subscription source id "+source.getId());
             }
         }
-        
+
         assertTrue(foundA);
         assertTrue(foundB);
     }
-    
-    
+
+
 }

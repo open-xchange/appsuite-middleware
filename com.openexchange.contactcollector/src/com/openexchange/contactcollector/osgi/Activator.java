@@ -72,7 +72,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link BundleActivator Activator} for contact collector.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Activator extends DeferredActivator {

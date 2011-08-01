@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * An interface that defines a method to register instances of <code>com.openexchange.groupware.upload.UploadListener</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UploadRegistry {
@@ -63,7 +63,7 @@ public interface UploadRegistry {
     /**
      * Fires the upload event by delegating this event to all registered listeners. Finally the <code>UploadEvent.cleanUp()</code> method is
      * invoked to delete temporary files from disk.
-     * 
+     *
      * @param uploadEvent The upload event
      * @param uploadListeners The upload listeners for current upload event
      * @throws OXException if an error like over quota occurs
@@ -72,7 +72,7 @@ public interface UploadRegistry {
 
     /**
      * Create an <code>UpdateEvent</code> object from incoming multipart form data
-     * 
+     *
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
      * @throws OXException if an error like over quota occurs

@@ -143,6 +143,7 @@ public class OldObjectDefinition implements VersitDefinition {
         fw.writeln(object.name.getBytes(fw.charset));
     }
 
+    @Override
     public Reader getReader(final InputStream stream, final String charset) throws IOException {
         final OldScanner s = new OldScanner(stream);
         s.DefaultCharset = charset;
@@ -150,6 +151,7 @@ public class OldObjectDefinition implements VersitDefinition {
         return s;
     }
 
+    @Override
     public VersitObject parse(final Reader reader) throws IOException {
         VersitObject child;
         final VersitObject object = parseBegin(reader);
@@ -161,6 +163,7 @@ public class OldObjectDefinition implements VersitDefinition {
         return object;
     }
 
+    @Override
     public VersitObject parseBegin(final Reader reader) throws IOException {
         final OldScanner s = (OldScanner) reader;
         final VersitObject object = new VersitObject(Name);
@@ -178,6 +181,7 @@ public class OldObjectDefinition implements VersitDefinition {
         return null;
     }
 
+    @Override
     public VersitObject parseChild(final Reader reader, final VersitObject object) throws IOException {
         final OldScanner s = (OldScanner) reader;
         while (s.peek != -1) {
@@ -225,15 +229,18 @@ public class OldObjectDefinition implements VersitDefinition {
         return null;
     }
 
+    @Override
     public Writer getWriter(final OutputStream stream, final String charset) throws IOException {
         return new OldFoldingWriter(stream, charset);
     }
 
+    @Override
     public void write(final Writer writer, final VersitObject object) throws IOException {
         writeProperties(writer, object);
         writeEnd(writer, object);
     }
 
+    @Override
     public void writeProperties(final Writer writer, final VersitObject object) throws IOException {
         final OldFoldingWriter fw = (OldFoldingWriter) writer;
         fw.write("BEGIN");
@@ -255,6 +262,7 @@ public class OldObjectDefinition implements VersitDefinition {
         }
     }
 
+    @Override
     public void writeEnd(final Writer writer, final VersitObject object) throws IOException {
         final OldFoldingWriter fw = (OldFoldingWriter) writer;
         fw.write("END");
@@ -262,14 +270,17 @@ public class OldObjectDefinition implements VersitDefinition {
         fw.writeln(object.name.getBytes(fw.charset));
     }
 
+    @Override
     public VersitDefinition getChildDef(final String name) {
         return Children.get(name);
     }
 
+    @Override
     public VersitDefinition copy() {
         return new OldObjectDefinition(Name, Properties, Children);
     }
 
+    @Override
     public Iterator iterator() {
         return Properties.values().iterator();
     }

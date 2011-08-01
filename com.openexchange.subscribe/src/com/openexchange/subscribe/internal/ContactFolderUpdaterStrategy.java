@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link ContactFolderUpdaterStrategy}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -90,7 +90,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
         final int threshold = getThreshold(session);
-        
+
         // For the sake of simplicity we assume that equal names mean equal contacts
         // TODO: This needs to be diversified in the form of "unique-in-context" later (if there is only one "Max Mustermann" in a folder it
         // is unique and qualifies as identifier. If there are two "Max Mustermann" it does not.)
@@ -116,7 +116,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }
-        
+
         if( score < threshold && original.matches(candidate, MATCH_COLUMNS)) { //the score check is only to speed the process up
             score = threshold + 1;
         }
@@ -195,7 +195,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
         newElement.setUserField20(UUID.randomUUID().toString());
-        
+
         contacts.forceInsertContactObject(newElement);
     }
 

@@ -66,7 +66,7 @@ import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
 
 /**
  * {@link VoipNowMultipleHandler} - The multiple handler for VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VoipNowMultipleHandler implements MultipleHandler {

@@ -85,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * <tt>OXFolderProperties</tt> contains both folder properties and folder cache properties
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderProperties implements Initialization, CacheAvailabilityListener {
@@ -120,6 +120,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         super();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error("Folder properties have already been started", new Throwable());
@@ -136,6 +137,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         FolderQueryCacheManager.initInstance();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
@@ -161,6 +163,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         reset();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
@@ -172,6 +175,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         }
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         final FolderCacheManager fcm = FolderCacheManager.getInstance();
         if (null != fcm) {
@@ -230,6 +234,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         final org.apache.commons.logging.Log logger = LOG;
         value = configurationService.getProperty("ENABLE_INTERNAL_USER_EDIT", (propertyListener = new PropertyListener() {
 
+            @Override
             public void onPropertyChange(final PropertyEvent event) {
                 if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
                     final boolean enableInternalUsersEditNew = Boolean.parseBoolean(event.getValue());
@@ -256,7 +261,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                 } else {
                     // Run in separate thread
                     final Runnable r = new Runnable() {
-                        
+
+                        @Override
                         public void run() {
                             updatePermissions();
                         }
@@ -418,7 +424,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     /**
      * Context's system folder "<code>Global address book</code>" is created with write permission set to
      * {@link OCLPermission#WRITE_OWN_OBJECTS} if this property is set to <code>true</code>
-     * 
+     *
      * @return <code>true</code> if contacts located in global address book may be edited; otherwise <code>false</code>
      */
     public static boolean isEnableInternalUsersEdit() {
@@ -434,7 +440,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     /**
      * Registers the global address book restorer MBean.
-     * 
+     *
      * @param managementService The management service
      * @return The object name of registered MBean
      */
@@ -455,7 +461,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     /**
      * Unregisters the global address book restorer MBean.
-     * 
+     *
      * @param objectName The object name of registered MBean
      * @param managementService The management service
      */
@@ -471,7 +477,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

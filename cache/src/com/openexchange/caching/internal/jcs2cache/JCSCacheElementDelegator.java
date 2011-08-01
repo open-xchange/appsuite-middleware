@@ -53,7 +53,7 @@ import org.apache.jcs.engine.CacheElement;
 
 /**
  * {@link JCSCacheElementDelegator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCacheElementDelegator extends CacheElement {

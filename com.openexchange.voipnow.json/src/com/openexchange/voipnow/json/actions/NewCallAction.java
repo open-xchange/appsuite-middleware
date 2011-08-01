@@ -70,7 +70,7 @@ import com.openexchange.voipnow.json.VoipNowExceptionCodes;
  * {@link NewCallAction} - Maps the action to a <tt>newcall</tt> action.
  * <p>
  * A new call is initiated using VoipNow's HTTP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NewCallAction extends AbstractVoipNowHTTPAction<GetMethod> {

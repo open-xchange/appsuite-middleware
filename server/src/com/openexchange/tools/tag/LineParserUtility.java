@@ -53,7 +53,7 @@ import com.openexchange.tools.file.TagFiller;
 
 /**
  * Utility Class for Methode parseLine.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class LineParserUtility {
@@ -67,7 +67,7 @@ public final class LineParserUtility {
     /**
      * Parses one input line and replaces all tags in square brackets. If null or the same string that is passed by tag to the replace
      * method is returned by the replace method of TagFiller this parseLine method does not replace the tag.
-     * 
+     *
      * @param line Input line to parse.
      * @param fill Implementation of the interface TagFiller to replace tags.
      * @param data To pass some data in an object.

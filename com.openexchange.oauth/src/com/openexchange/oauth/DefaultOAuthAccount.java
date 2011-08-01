@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link DefaultOAuthAccount}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccount {
@@ -83,7 +83,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final int id) {
@@ -92,7 +92,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
 
     /**
      * Sets the display name
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -101,7 +101,7 @@ public class DefaultOAuthAccount extends DefaultOAuthToken implements OAuthAccou
 
     /**
      * Sets the meta data
-     * 
+     *
      * @param metaData The meta data to set
      */
     public void setMetaData(final OAuthServiceMetaData metaData) {

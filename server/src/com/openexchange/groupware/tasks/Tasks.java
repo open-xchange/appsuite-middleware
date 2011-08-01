@@ -137,5 +137,5 @@ public abstract class Tasks {
         throws OXException;
 
     public abstract boolean isFolderEmpty(Context ctx, Connection con,
-        int folderId) throws OXException;    
+        int folderId) throws OXException;
 }

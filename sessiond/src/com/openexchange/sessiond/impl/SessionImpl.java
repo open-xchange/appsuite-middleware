@@ -65,7 +65,7 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -99,12 +99,12 @@ public final class SessionImpl implements Session {
     private String client;
 
     private final Map<String, Object> parameters;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
     /**
      * Initializes a new {@link SessionImpl}
-     * 
+     *
      * @param userId The user ID
      * @param loginName The login name
      * @param password The password
@@ -133,7 +133,7 @@ public final class SessionImpl implements Session {
 
     /**
      * Initializes a new {@link SessionImpl} from specified cached session.
-     * 
+     *
      * @param cachedSession The cached session
      */
     protected SessionImpl(final CachedSession cachedSession) {
@@ -160,7 +160,7 @@ public final class SessionImpl implements Session {
 
     /**
      * Creates a new instance of {@link CachedSession} holding this session's state and information ready for being put into session cache.
-     * 
+     *
      * @return An appropriate instance of {@link CachedSession}
      */
     public CachedSession createCachedSession() {
@@ -176,7 +176,7 @@ public final class SessionImpl implements Session {
             return string;
         }
     }
-    
+
     private String getObfuscationKey() {
         return SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getProperty(OBFUSCATION_KEY_PROPERTY);
     }
@@ -237,7 +237,7 @@ public final class SessionImpl implements Session {
     public String getLocalIp() {
         return localIp;
     }
-    
+
 
     public void setLocalIp(final String localIp) {
         this.localIp = localIp;
@@ -265,7 +265,7 @@ public final class SessionImpl implements Session {
 
     /**
      * Sets the password
-     * 
+     *
      * @param password The password to set
      */
     public void setPassword(final String password) {

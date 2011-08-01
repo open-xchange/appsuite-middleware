@@ -77,7 +77,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ManagedFileManagementImpl} - The file management designed to keep large content as a temporary file on disk.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ManagedFileManagementImpl implements ManagedFileManagement {
@@ -97,6 +97,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             ttmpDirReference = tmpDirReference;
         }
 
+        @Override
         public void onPropertyChange(final PropertyEvent event) {
             if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
                 ttmpDirReference.set(getTmpDirByPath(event.getValue()));
@@ -123,6 +124,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             this.logger = logger;
         }
 
+        @Override
         public void run() {
             try {
                 final long now = System.currentTimeMillis();
@@ -153,7 +155,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     /**
      * Gets the file management instance.
-     * 
+     *
      * @return The file management instance
      */
     static ManagedFileManagementImpl getInstance() {
@@ -218,26 +220,32 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
             TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public InputStream createInputStream(final byte[] bytes) throws OXException {
         return new ManagedInputStream(bytes, this);
     }
 
+    @Override
     public InputStream createInputStream(final byte[] bytes, final int capacity) throws OXException {
         return new ManagedInputStream(bytes, capacity, this);
     }
 
+    @Override
     public InputStream createInputStream(final InputStream in) throws OXException {
         return new ManagedInputStream(in, this);
     }
 
+    @Override
     public InputStream createInputStream(final InputStream in, final int capacity) throws OXException {
         return new ManagedInputStream(in, capacity, this);
     }
 
+    @Override
     public InputStream createInputStream(final InputStream in, final int size, final int capacity) throws OXException {
         return new ManagedInputStream(in, size, capacity, this);
     }
 
+    @Override
     public void clear() {
         for (final Iterator<ManagedFile> iter = files.values().iterator(); iter.hasNext();) {
             iter.next().delete();
@@ -245,6 +253,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         files.clear();
     }
 
+    @Override
     public File newTempFile() throws OXException {
         File tmpFile = null;
         File directory = null;
@@ -271,7 +280,8 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         return tmpFile;
     }
-    
+
+    @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
         final ManagedFile mf = new ManagedFileImpl(UUID.randomUUID().toString(), temporaryFile);
         mf.setSize(temporaryFile.length());
@@ -279,10 +289,12 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
 
+    @Override
     public ManagedFile createManagedFile(final byte[] bytes) throws OXException {
         return createManagedFile0(new UnsynchronizedByteArrayInputStream(bytes), false);
     }
 
+    @Override
     public ManagedFile createManagedFile(final InputStream inputStream) throws OXException {
         return createManagedFile0(inputStream, true);
     }
@@ -344,6 +356,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
 
+    @Override
     public boolean contains(final String id) {
         final ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
@@ -353,6 +366,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return true;
     }
 
+    @Override
     public ManagedFile getByID(final String id) throws OXException {
         final ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
@@ -376,6 +390,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return tmpDir;
     }
 
+    @Override
     public void removeByID(final String id) {
         final ManagedFile mf = files.get(id);
         if (null == mf) {

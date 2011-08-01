@@ -70,7 +70,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * <p>
  * This cache is highly volatile. With every new list request all caches entries belonging to requesting user are removed. See this cache
  * region's configuration settings in file "@conf-path@/mailcache.ccf" for further information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailMessageCache {
@@ -87,6 +87,7 @@ public final class MailMessageCache {
 
     private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
 
+        @Override
         public void updateField(final MailMessage mail, final Object newValue) {
             int newFlags = mail.getFlags();
             int flags = ((Integer) newValue).intValue();
@@ -125,6 +126,7 @@ public final class MailMessageCache {
 
     private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
 
+        @Override
         public void updateField(final MailMessage mail, final Object newValue) {
             mail.setColorLabel(((Integer) newValue).intValue());
         }
@@ -165,7 +167,7 @@ public final class MailMessageCache {
 
     /**
      * Singleton instantiation.
-     * 
+     *
      * @throws OXException If cache instantiation fails
      */
     private MailMessageCache() throws OXException {
@@ -175,7 +177,7 @@ public final class MailMessageCache {
 
     /**
      * Initializes cache reference.
-     * 
+     *
      * @throws OXException If initializing the cache reference fails
      */
     public void initCache() throws OXException {
@@ -193,7 +195,7 @@ public final class MailMessageCache {
 
     /**
      * Releases cache reference.
-     * 
+     *
      * @throws OXException If clearing cache fails
      */
     public void releaseCache() throws OXException {
@@ -213,7 +215,7 @@ public final class MailMessageCache {
 
     /**
      * Fetches the appropriate lock.
-     * 
+     *
      * @param key The lock's key
      * @return The appropriate lock
      */
@@ -231,7 +233,7 @@ public final class MailMessageCache {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @return The singleton instance
      * @throws OXException If instance initialization failed
      */
@@ -263,7 +265,7 @@ public final class MailMessageCache {
 
     /**
      * Updates cached message
-     * 
+     *
      * @param uids The messages' identifiers; pass <code>null</code>  update all cached message of given folder
      * @param accountId The account ID
      * @param fullname The fullname
@@ -307,7 +309,7 @@ public final class MailMessageCache {
 
     /**
      * Updates cached message
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param userId The user identifier
@@ -346,7 +348,7 @@ public final class MailMessageCache {
 
     /**
      * Detects if cache holds messages belonging to given user.
-     * 
+     *
      * @param userId The user ID
      * @param cid The context ID
      * @return <code>true</code> if messages are present; otherwise <code>false</code>
@@ -360,7 +362,7 @@ public final class MailMessageCache {
 
     /**
      * Detects if cache holds messages belonging to a certain folder.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -382,7 +384,7 @@ public final class MailMessageCache {
 
     /**
      * Removes the messages cached for a user.
-     * 
+     *
      * @param userId The user ID
      * @param cid The context ID
      * @throws OXException
@@ -403,7 +405,7 @@ public final class MailMessageCache {
 
     /**
      * Removes cached messages belonging to a certain folder.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -430,7 +432,7 @@ public final class MailMessageCache {
 
     /**
      * Removes the messages appearing in given UIDs belonging to a certain folder.
-     * 
+     *
      * @param uids The mail IDs; pass <code>null</code> to remove all associated with folder
      * @param accountId The account ID
      * @param fullname The folder fullname
@@ -463,7 +465,7 @@ public final class MailMessageCache {
     /**
      * Gets the corresponding messages from cache. If a cache entry could not be found <code>null</code> is returned to force a reload from
      * mail server.
-     * 
+     *
      * @param uids The UIDs
      * @param accountId The account ID
      * @param fullname The folder fullname
@@ -509,7 +511,7 @@ public final class MailMessageCache {
 
     /**
      * Puts given messages into cache.
-     * 
+     *
      * @param accountId The account ID
      * @param mails The messages to cache
      * @param userId The user ID

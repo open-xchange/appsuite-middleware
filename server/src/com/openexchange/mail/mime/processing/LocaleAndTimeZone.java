@@ -56,7 +56,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link LocaleAndTimeZone} - Helper class to pack up {@link Locale} and {@link TimeZone} combination.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class LocaleAndTimeZone {
@@ -73,7 +73,7 @@ final class LocaleAndTimeZone {
 
     /**
      * Initializes a new {@link LocaleAndTimeZone} from specified user.
-     * 
+     *
      * @param user The user
      */
     LocaleAndTimeZone(final User user) {
@@ -82,7 +82,7 @@ final class LocaleAndTimeZone {
 
     /**
      * Initializes a new {@link LocaleAndTimeZone}.
-     * 
+     *
      * @param locale The locale
      * @param timeZoneId The time zone ID
      */
@@ -92,7 +92,7 @@ final class LocaleAndTimeZone {
 
     /**
      * Initializes a new {@link LocaleAndTimeZone}.
-     * 
+     *
      * @param locale The locale
      * @param timeZone The time zone
      */

@@ -12,6 +12,7 @@ public class PeekNamedPipe {
         ReceiverThread( InputStream in ) {
             this.in = in;
         }
+        @Override
         public void run() {
             try {
                 while( true ) {

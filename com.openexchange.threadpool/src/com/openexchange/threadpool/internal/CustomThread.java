@@ -53,7 +53,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomThread extends Thread implements ThreadRenamer {
@@ -73,7 +73,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param target The object whose run method is called
      */
     public CustomThread(final Runnable target) {
@@ -82,7 +82,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param name The name of the new thread which is also used as original name
      */
     public CustomThread(final String name) {
@@ -92,7 +92,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param group The thread group
      * @param target The object whose run method is called
      */
@@ -102,7 +102,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param group The thread group
      * @param name The name of the new thread which is also set used its original name
      */
@@ -113,7 +113,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param target The object whose run method is called
      * @param name The name of the new thread which is also used as original name
      */
@@ -124,7 +124,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param group The thread group
      * @param target The object whose run method is called
      * @param name The name of the new thread which is also used as original name
@@ -136,7 +136,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Initializes a new {@link CustomThread}.
-     * 
+     *
      * @param group The thread group
      * @param target The object whose run method is called
      * @param name The name of the new thread which is also used as original name
@@ -159,7 +159,7 @@ public final class CustomThread extends Thread implements ThreadRenamer {
 
     /**
      * Gets the original name.
-     * 
+     *
      * @return The original name
      */
     public String getOriginalName() {

@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 /**
  * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener} whose
  * {@link DeleteListener#deletePerformed(DeleteEvent, Connection, Connection)} methods are executed in the order added to this registry.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteRegistry {
@@ -109,7 +109,7 @@ public final class DeleteRegistry {
 
     /**
      * Gets the singleton instance of {@link DeleteRegistry}.
-     * 
+     *
      * @return The singleton instance of {@link DeleteRegistry}.
      */
     public static DeleteRegistry getInstance() {
@@ -201,7 +201,7 @@ public final class DeleteRegistry {
      * <p>
      * <b>Note</b>: Only one instance of a certain <code>{@link DeleteListener}</code> implementation is added, meaning if you try to
      * register a certain implementation twice, the latter one is going to be discarded and <code>false</code> is returned.
-     * 
+     *
      * @param listener The listener to register
      * @return <code>true</code> if specified delete listener has been added to registry; otherwise <code>false</code>
      */
@@ -214,7 +214,7 @@ public final class DeleteRegistry {
 
     /**
      * Removes given instance of <code>{@link DeleteListener}</code> from this registry's known listeners.
-     * 
+     *
      * @param listener The listener to remove
      */
     public void unregisterDeleteListener(final DeleteListener listener) {
@@ -226,7 +226,7 @@ public final class DeleteRegistry {
 
     /**
      * Fires the delete event.
-     * 
+     *
      * @param deleteEvent The delete event
      * @param readCon A readable connection
      * @param writeCon A writable connection

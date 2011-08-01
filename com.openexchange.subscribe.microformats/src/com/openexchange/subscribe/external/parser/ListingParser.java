@@ -75,8 +75,8 @@ public class ListingParser {
     private static final String DISPLAY_NAME = "ox_displayName";
     private static final String LINK = "ox_link";
     private static final String PRIORITY = "ox_priority";
-    
-    
+
+
     private final OXMFParserFactoryService parserFactory;
 
     /**
@@ -91,18 +91,18 @@ public class ListingParser {
     public List<ExternalSubscriptionSource> parse(final String html) throws OXException {
         return parse(new StringReader(html));
     }
-    
+
     public List<ExternalSubscriptionSource> parse(final Reader html) throws OXException {
         final OXMFParser parser = parserFactory.getParser();
         parser.addAttributePrefix("ox_");
         parser.addContainerElement("ox_subscriptionSource");
         final List<Map<String, String>> parsed = parser.parse(html);
-     
+
         final List<ExternalSubscriptionSource> sources = new ArrayList<ExternalSubscriptionSource>(parsed.size());
         for(final Map<String, String> attributes : parsed) {
             sources.add(transform(attributes));
         }
-        
+
         return sources;
     }
 
@@ -111,7 +111,7 @@ public class ListingParser {
         apply(source, attributes);
         return source;
     }
-    
+
     public static void apply(final ExternalSubscriptionSource source, final Map<String, String> attributes) {
         if(attributes.containsKey(SOURCE_ID)) {
             source.setId(attributes.get(SOURCE_ID));

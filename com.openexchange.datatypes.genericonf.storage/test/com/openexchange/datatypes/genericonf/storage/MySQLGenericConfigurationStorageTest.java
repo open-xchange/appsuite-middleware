@@ -62,7 +62,7 @@ import com.openexchange.tools.sql.SQLTestCase;
 
 /**
  * {@link MySQLGenericConfigurationStorageTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
@@ -137,7 +137,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1001,'thirdBool', 0)");
 
         final Map<String, Object> content = new HashMap<String, Object>();
-        
+
 
         content.put("field", "updatedValue");
         content.put("fourthField", "newValue");
@@ -146,7 +146,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         content.put("bool", true);
         content.put("fourthBool", true);
         content.put("thirdBool", null); // Will be removed
-        
+
         final int id = 1001;
         final int contextId = 1002;
         final Context ctx = new SimContext(contextId);
@@ -178,7 +178,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
-        
+
         final int id = 1001;
         final int contextId = 1002;
         final Context ctx = new SimContext(contextId);
@@ -192,7 +192,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         assertResult("SELECT 1 FROM genconf_attributes_bools WHERE cid = 1002 AND id = 1004");
 
     }
-    
+
     public void testSearchDynamicConfiguration() throws SQLException, OXException {
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'field', 'value')");
         exec("INSERT INTO genconf_attributes_strings (cid, id, name, value) VALUES (1002,1001,'otherField', 'otherValue')");
@@ -206,17 +206,17 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
         exec("INSERT INTO genconf_attributes_bools (cid, id, name, value) VALUES (1002,1004,'otherBoolID', 1)");
 
-        
+
         final Map<String, Object> query = new HashMap<String, Object>();
         query.put("field", "value");
-        
+
         List<Integer> ids = storage.search(new SimContext(1002), query);
         assertNotNull("ids was null", ids);
         assertEquals("Wrong size of search result", 1, ids.size());
         assertEquals("Got wrong ID", new Integer(1001), ids.get(0));
 
         // Try with join
-        
+
         query.put("bool", true);
         ids = storage.search(new SimContext(1002), query);
         assertNotNull("ids was null", ids);
@@ -227,5 +227,5 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     // Save encrypted passwords
 
-    
+
 }

@@ -60,7 +60,7 @@ import com.sun.mail.imap.protocol.UID;
 /**
  * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given array of <code>Message</code> as an array of
  * <code>long</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
@@ -75,7 +75,7 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     /**
      * Initializes a new {@link MessageUIDsIMAPCommand}
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param msgs The messages
      */

@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingResource}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -85,7 +85,7 @@ public class FacebookMessagingResource implements MessagingResource {
 
     /**
      * Initializes a new {@link FacebookMessagingResource}.
-     * 
+     *
      * @param messagingAccount The facebook account
      * @throws OXException If initialization fails
      */

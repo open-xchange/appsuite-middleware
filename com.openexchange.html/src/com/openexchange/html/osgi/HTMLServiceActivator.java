@@ -78,7 +78,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link HTMLServiceActivator} - Activator for JSON folder interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HTMLServiceActivator extends DeferredActivator {
@@ -517,7 +517,7 @@ public class HTMLServiceActivator extends DeferredActivator {
 
     /**
      * Gets the messages used by JTidy as an input stream.
-     * 
+     *
      * @param tidyMessagesFilename The file name for the file containing the tidy messages
      * @return The messages used by JTidy as an input stream
      */

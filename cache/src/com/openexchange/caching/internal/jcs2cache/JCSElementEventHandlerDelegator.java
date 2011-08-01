@@ -59,7 +59,7 @@ import com.openexchange.caching.internal.cache2jcs.ElementEvent2JCS;
 
 /**
  * {@link JCSElementEventHandlerDelegator} - A JSC element event handler that delegates events to an instance of {@link ElementEventHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSElementEventHandlerDelegator implements IElementEventHandler, Serializable {

@@ -165,7 +165,7 @@ public class MockUser implements User {
 
     private Locale locale;
 
-    private Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
 
     public MockUser(int id) {
         super();
@@ -179,25 +179,27 @@ public class MockUser implements User {
 
     /**
      * Getter for userPassword.
-     * 
+     *
      * @return Password.
      */
+    @Override
     public String getUserPassword() {
         return userPassword;
     }
 
     /**
      * Getter for uid.
-     * 
+     *
      * @return User identifier.
      */
+    @Override
     public int getId() {
         return id;
     }
 
     /**
      * Setter for userPassword.
-     * 
+     *
      * @param userPassword Password.
      */
     public void setUserPassword(final String userPassword) {
@@ -206,16 +208,17 @@ public class MockUser implements User {
 
     /**
      * Getter for mailEnabled.
-     * 
+     *
      * @return <code>true</code> if user is enabled.
      */
+    @Override
     public boolean isMailEnabled() {
         return mailEnabled;
     }
 
     /**
      * Setter for mailEnabled.
-     * 
+     *
      * @param mailEnabled <code>true</code> to enable user.
      */
     public void setMailEnabled(final boolean mailEnabled) {
@@ -224,16 +227,17 @@ public class MockUser implements User {
 
     /**
      * Getter for shadowLastChange.
-     * 
+     *
      * @return Days since Jan 1, 1970 that password was last changed.
      */
+    @Override
     public int getShadowLastChange() {
         return shadowLastChange;
     }
 
     /**
      * Setter for shadowLastChange.
-     * 
+     *
      * @param shadowLastChange Days since Jan 1, 1970 that password was last changed.
      */
     public void setShadowLastChange(final int shadowLastChange) {
@@ -242,7 +246,7 @@ public class MockUser implements User {
 
     /**
      * Setter for imapServer.
-     * 
+     *
      * @param imapServer IMAP server.
      */
     public void setImapServer(final String imapServer) {
@@ -251,16 +255,17 @@ public class MockUser implements User {
 
     /**
      * Getter for imapServer.
-     * 
+     *
      * @return IMAP server.
      */
+    @Override
     public String getImapServer() {
         return imapServer;
     }
 
     /**
      * Setter for smtpServer.
-     * 
+     *
      * @param smtpServer SMTP server.
      */
     public void setSmtpServer(final String smtpServer) {
@@ -269,16 +274,17 @@ public class MockUser implements User {
 
     /**
      * Getter for smtpServer.
-     * 
+     *
      * @return SMTP server.
      */
+    @Override
     public String getSmtpServer() {
         return smtpServer;
     }
 
     /**
      * Setter for mailDomain.
-     * 
+     *
      * @param mailDomain mail domain.
      */
     public void setMailDomain(final String mailDomain) {
@@ -287,16 +293,17 @@ public class MockUser implements User {
 
     /**
      * Getter for mailDomain.
-     * 
+     *
      * @return mail domain.
      */
+    @Override
     public String getMailDomain() {
         return mailDomain;
     }
 
     /**
      * Setter for givenName.
-     * 
+     *
      * @param givenName given name.
      */
     public void setGivenName(final String givenName) {
@@ -305,16 +312,17 @@ public class MockUser implements User {
 
     /**
      * Getter for givenName.
-     * 
+     *
      * @return given name.
      */
+    @Override
     public String getGivenName() {
         return givenName;
     }
 
     /**
      * Setter for sure name.
-     * 
+     *
      * @param sureName sure name.
      */
     public void setSurname(final String sureName) {
@@ -323,16 +331,17 @@ public class MockUser implements User {
 
     /**
      * Getter for sure name.
-     * 
+     *
      * @return sure name.
      */
+    @Override
     public String getSurname() {
         return surname;
     }
 
     /**
      * Setter for mail.
-     * 
+     *
      * @param mail Mail address.
      */
     public void setMail(final String mail) {
@@ -341,9 +350,10 @@ public class MockUser implements User {
 
     /**
      * Getter for mail.
-     * 
+     *
      * @return mail address.
      */
+    @Override
     public String getMail() {
         return mail;
     }
@@ -351,10 +361,12 @@ public class MockUser implements User {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getAliases() {
         return new String[] { getMail() };
     }
 
+    @Override
     public Map<String, Set<String>> getAttributes() {
         return attributes ;
     }
@@ -365,7 +377,7 @@ public class MockUser implements User {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -374,16 +386,17 @@ public class MockUser implements User {
 
     /**
      * Getter for displayName.
-     * 
+     *
      * @return Display name.
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
 
     /**
      * Setter for timeZone.
-     * 
+     *
      * @param timeZone Timezone.
      */
     public void setTimeZone(final String timeZone) {
@@ -392,16 +405,17 @@ public class MockUser implements User {
 
     /**
      * Getter for timeZone.
-     * 
+     *
      * @return Timezone.
      */
+    @Override
     public String getTimeZone() {
         return timeZone;
     }
 
     /**
      * Setter for appointmentDays.
-     * 
+     *
      * @param appointmentDays Portal show appointments for this number of days.
      */
     public void setAppointmentDays(final int appointmentDays) {
@@ -410,7 +424,7 @@ public class MockUser implements User {
 
     /**
      * Getter for appointmentDays.
-     * 
+     *
      * @return Portal show appointments for this number of days.
      */
     public int getAppointmentDays() {
@@ -419,7 +433,7 @@ public class MockUser implements User {
 
     /**
      * Setter for taskDays.
-     * 
+     *
      * @param taskDays Portal show tasks for this number of days.
      */
     public void setTaskDays(final int taskDays) {
@@ -428,7 +442,7 @@ public class MockUser implements User {
 
     /**
      * Getter for taskDays.
-     * 
+     *
      * @return Portal show tasks for this number of days.
      */
     public int getTaskDays() {
@@ -437,7 +451,7 @@ public class MockUser implements User {
 
     /**
      * Setter for preferredLanguage.
-     * 
+     *
      * @param preferredLanguage Preferred language.
      */
     public void setPreferredLanguage(final String preferredLanguage) {
@@ -447,25 +461,27 @@ public class MockUser implements User {
     /**
      * Getter for preferredLanguage. The preferred language of the user. According to RFC 2798 and 2068 it should be something like de-de,
      * en-gb or en.
-     * 
+     *
      * @return Preferred Language.
      */
+    @Override
     public String getPreferredLanguage() {
         return preferredLanguage;
     }
 
     /**
      * Getter for groups.
-     * 
+     *
      * @return the groups this user is member of.
      */
+    @Override
     public int[] getGroups() {
         return groups.clone();
     }
 
     /**
      * Setter for groups.
-     * 
+     *
      * @param groups the groups this user is member of.
      */
     public void setGroups(final int[] groups) {
@@ -474,7 +490,7 @@ public class MockUser implements User {
 
     /**
      * Adds the group identifier for all groups and users.
-     * 
+     *
      * @param groups groups of the user.
      * @return groups of the user and 0 will be added if it is missing.
      */
@@ -495,6 +511,7 @@ public class MockUser implements User {
     /**
      * @return the contactId
      */
+    @Override
     public int getContactId() {
         return contactId;
     }
@@ -509,6 +526,7 @@ public class MockUser implements User {
     /**
      * @return the imapLogin
      */
+    @Override
     public String getImapLogin() {
         return imapLogin;
     }
@@ -517,6 +535,7 @@ public class MockUser implements User {
         this.imapLogin = imapLogin;
     }
 
+    @Override
     public String getPasswordMech() {
         return passwordMech;
     }
@@ -529,10 +548,12 @@ public class MockUser implements User {
         this.loginInfo = loginInfo;
     }
 
+    @Override
     public String getLoginInfo() {
         return loginInfo;
     }
 
+    @Override
     public Locale getLocale() {
         if (locale == null && preferredLanguage != null) {
             final String[] lang = preferredLanguage.split("_");

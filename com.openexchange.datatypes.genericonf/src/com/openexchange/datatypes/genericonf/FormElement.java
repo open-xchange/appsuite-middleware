@@ -56,7 +56,7 @@ import org.w3c.dom.Element;
 
 /**
  * {@link FormElement}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FormElement {
@@ -64,7 +64,7 @@ public class FormElement {
     public static enum Widget {
         INPUT("input"), PASSWORD("password"), CHECKBOX("checkbox"), LINK("link"), TEXT("text"), CUSTOM("custom");
 
-        private String keyword;
+        private final String keyword;
 
 
         private Widget(String keyword) {
@@ -125,13 +125,13 @@ public class FormElement {
     private Widget widget;
 
     private String customWidget;
-    
+
     private Object defaultValue;
 
     private boolean mandatory;
 
-    private Map<String, String> options = new HashMap<String, String>();
-    
+    private final Map<String, String> options = new HashMap<String, String>();
+
     public String getName() {
         return name;
     }
@@ -151,11 +151,11 @@ public class FormElement {
     public Widget getWidget() {
         return widget;
     }
-    
+
     public String getCustomWidget() {
         return customWidget;
     }
-    
+
     public void setCustomWidget(String customWidget) {
         this.customWidget = customWidget;
     }
@@ -179,26 +179,27 @@ public class FormElement {
     public void setMandatory(boolean mandatory) {
         this.mandatory = mandatory;
     }
-    
+
     public FormElement setOption(String optionName, String value) {
         options.put(optionName, value);
         return this;
     }
-    
+
     public FormElement removeOption(String optionName) {
         options.remove(optionName);
         return this;
     }
-    
+
     public FormElement clearOptions() {
         options.clear();
         return this;
     }
-    
+
     public Map<String, String> getOptions() {
         return options;
     }
-    
+
+    @Override
     public String toString() {
         return name;
     }
@@ -248,7 +249,7 @@ public class FormElement {
     public static FormElement text(String name, String displayName) {
         return text(name, displayName, true, null);
     }
-    
+
     public static FormElement checkbox(String name, String displayName, boolean mandatory, Boolean defaultValue) {
         FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
         formElement.setWidget(Widget.CHECKBOX);
@@ -257,7 +258,7 @@ public class FormElement {
     public static FormElement checkbox(String name, String displayName) {
         return checkbox(name, displayName, true, null);
     }
-    
+
     public static FormElement custom(String widget, String name, String displayName, boolean mandatory, String defaultValue) {
         FormElement formElement = formElement(name, displayName, mandatory, defaultValue);
         formElement.setWidget(Widget.CUSTOM);
@@ -269,8 +270,8 @@ public class FormElement {
         return custom(widget, name, displayName, true, null);
     }
 
-    
-    
+
+
     public Object doSwitch(WidgetSwitcher switcher, Object...args) {
         return widget.doSwitch(switcher, args);
     }

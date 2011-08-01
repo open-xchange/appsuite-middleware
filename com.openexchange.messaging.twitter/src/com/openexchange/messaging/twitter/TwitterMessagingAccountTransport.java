@@ -64,14 +64,14 @@ import com.openexchange.twitter.TwitterExceptionCodes;
 
 /**
  * {@link TwitterMessagingAccountTransport}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingAccountTransport extends AbstractTwitterMessagingAccess implements MessagingAccountTransport {
 
     /**
      * Initializes a new {@link TwitterMessagingAccountTransport}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public TwitterMessagingAccountTransport(final MessagingAccount account, final Session session) throws OXException {

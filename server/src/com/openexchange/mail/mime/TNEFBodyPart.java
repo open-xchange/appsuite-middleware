@@ -53,7 +53,7 @@ import net.freeutils.tnef.mime.TNEFMimeBodyPart;
 
 /**
  * {@link TNEFBodyPart} - A simple class that extends {@link TNEFMimeBodyPart} by a setter method for part's size
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TNEFBodyPart extends TNEFMimeBodyPart {
@@ -69,7 +69,7 @@ public class TNEFBodyPart extends TNEFMimeBodyPart {
 
     /**
      * Sets this part's size
-     * 
+     *
      * @param size The size in bytes
      */
     public void setSize(final int size) {

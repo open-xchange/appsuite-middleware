@@ -59,7 +59,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link SpellCheckServletActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpellCheckServletActivator extends DeferredActivator {
@@ -120,7 +120,7 @@ public final class SpellCheckServletActivator extends DeferredActivator {
              * Register spell check servlet to newly available HTTP service
              */
             servletRegistration = new SessionServletRegistration(context, new SpellCheckServlet(), SC_SRVLT_ALIAS);
-            
+
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

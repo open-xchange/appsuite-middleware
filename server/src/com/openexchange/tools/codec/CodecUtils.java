@@ -60,7 +60,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * The class <code>QuotedPrintable</code> offers static methods to encode/decode <code>String</code> instances with quoted-printable codec
  * based on <code>javax.mail.internet.MimeUtility</code> class
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CodecUtils {
@@ -100,7 +100,7 @@ public class CodecUtils {
 
     /**
      * Encodes specified original string with given character encoding and transfer encoding <code>QUOTED PRINTABLE</code>.
-     * 
+     *
      * @param originalStr The original string to encode
      * @param charset The character encoding
      * @return The quoted-printable encoded string
@@ -117,7 +117,7 @@ public class CodecUtils {
 
     /**
      * Encodes specified original string with given character encoding and transfer encoding <code>BASE 64</code>.
-     * 
+     *
      * @param originalStr The original string to encode
      * @param charset The character encoding
      * @return The base64 encoded string
@@ -132,7 +132,7 @@ public class CodecUtils {
     /**
      * Decodes the specified possibly decoded string using the following encodings: "quoted-printable", "base64", "7bit", "8bit", "binary",
      * and "uuencode". If not encoded the string is returned as is.
-     * 
+     *
      * @param encoded The (possibly) encoded string
      * @param charset The charset encoding to use
      * @return The decoded string if encoded; otherwise the specified string itself
@@ -168,7 +168,7 @@ public class CodecUtils {
 
     /**
      * Decodes specified quoted-printable encoded string using given character encoding.
-     * 
+     *
      * @param quotedPrintableStr The quoted-printable encoded string
      * @param charset The character encoding
      * @return The quoted-printable decoded string
@@ -181,7 +181,7 @@ public class CodecUtils {
 
     /**
      * Decodes specified base64 encoded string using given character encoding.
-     * 
+     *
      * @param base64Str The base64 encoded string
      * @param charset The character encoding
      * @return The base64 decoded string
@@ -194,7 +194,7 @@ public class CodecUtils {
 
     /**
      * Decodes specified encoded string using given transfer-encoding and character-encoding.
-     * 
+     *
      * @param encodedStr The encoded string
      * @param transferEncoding The transfer encoding
      * @param charset The character encoding
@@ -217,7 +217,7 @@ public class CodecUtils {
 
     /**
      * Checks whether the specified string only consists of ASCII 7 bit characters.
-     * 
+     *
      * @param s the string to check
      * @return <code>true</code> if less than 128; otherwise <code>false</code>
      */

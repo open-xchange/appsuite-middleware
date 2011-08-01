@@ -69,13 +69,14 @@ import com.openexchange.json.JSONAssertion;
 public class FormDescriptionWriterTest extends TestCase{
 
     private DynamicFormDescription form;
-    
-    private TestTranslator translator = new TestTranslator();
 
+    private final TestTranslator translator = new TestTranslator();
+
+    @Override
     public void setUp() throws Exception {
          form = new DynamicFormDescription();
     }
-    
+
     public void testWriteElement() throws JSONException {
         FormElement element = new FormElement();
         element.setWidget(FormElement.Widget.INPUT);
@@ -83,9 +84,9 @@ public class FormDescriptionWriterTest extends TestCase{
         element.setName("login");
         element.setMandatory(true);
         element.setDefaultValue("admin");
-        
+
         JSONObject object = new FormDescriptionWriter(translator).write(element);
-        
+
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("input")
             .hasKey("name").withValue("login")
@@ -93,43 +94,43 @@ public class FormDescriptionWriterTest extends TestCase{
             .hasKey("mandatory").withValue(true)
             .hasKey("defaultValue").withValue("admin")
         .objectEnds();
-        
+
         assertValidates(assertion, object);
-    
+
         element.setWidget(FormElement.Widget.PASSWORD);
         element.setDisplayName("Password");
         element.setName("password");
         element.setMandatory(false);
         element.setDefaultValue(null);
-        
+
         object = new FormDescriptionWriter(translator).write(element);
-        
+
         assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("password")
             .hasKey("name").withValue("password")
             .hasKey("displayName").withValue("Password")
             .hasKey("mandatory").withValue(false)
         .objectEnds();
-        
+
         assertValidates(assertion, object);
-        
+
         element.setWidget(FormElement.Widget.CHECKBOX);
         element.setDisplayName("Checkbox");
         element.setName("checkbox");
-        
+
         object = new FormDescriptionWriter(translator).write(element);
-        
+
         assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("checkbox")
             .hasKey("name").withValue("checkbox")
             .hasKey("displayName").withValue("Checkbox")
             .hasKey("mandatory").withValue(false)
         .objectEnds();
-    
+
         assertValidates(assertion, object);
-    
+
     }
-    
+
     public void testWriteArray() throws JSONException {
         FormElement element = new FormElement();
         element.setWidget(FormElement.Widget.INPUT);
@@ -137,12 +138,12 @@ public class FormDescriptionWriterTest extends TestCase{
         element.setName("login");
         element.setMandatory(true);
         element.setDefaultValue("admin");
-        
+
         form.add(element);
         JSONArray array = new FormDescriptionWriter(translator).write(form);
-        
+
         assertEquals(1, array.length());
-        
+
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("input")
             .hasKey("name").withValue("login")
@@ -150,10 +151,10 @@ public class FormDescriptionWriterTest extends TestCase{
             .hasKey("mandatory").withValue(true)
             .hasKey("defaultValue").withValue("admin")
        .objectEnds();
-        
+
         assertValidates(assertion, array.getJSONObject(0));
     }
-    
+
     public void testCustom() throws JSONException {
         FormElement element = new FormElement();
         element.setWidget(FormElement.Widget.CUSTOM);
@@ -162,9 +163,9 @@ public class FormDescriptionWriterTest extends TestCase{
         element.setMandatory(true);
         element.setDefaultValue("admin");
         element.setCustomWidget("com.openexchange.test.thingamajickChooser");
-        
+
         JSONObject object = new FormDescriptionWriter(translator).write(element);
-        
+
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("com.openexchange.test.thingamajickChooser")
             .hasKey("name").withValue("thingamajick")
@@ -172,10 +173,10 @@ public class FormDescriptionWriterTest extends TestCase{
             .hasKey("mandatory").withValue(true)
             .hasKey("defaultValue").withValue("admin")
         .objectEnds();
-        
+
         assertValidates(assertion,object);
     }
-    
+
     public void testOptions() throws JSONException {
         FormElement element = new FormElement();
         element.setWidget(FormElement.Widget.INPUT);
@@ -185,9 +186,9 @@ public class FormDescriptionWriterTest extends TestCase{
         element.setDefaultValue("admin");
         element.setOption("someOption", "12")
                .setOption("someOtherOption", "23");
-        
+
         JSONObject object = new FormDescriptionWriter(translator).write(element);
-        
+
         JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("widget").withValue("input")
             .hasKey("name").withValue("login")
@@ -199,15 +200,15 @@ public class FormDescriptionWriterTest extends TestCase{
                 .hasKey("someOtherOption").withValue("23")
                 .objectEnds()
         .objectEnds();
-        
+
         assertValidates(assertion,object);
     }
-    
+
     private static final class TestTranslator implements Translator {
 
         public String translate(String toTranslate) {
             return toTranslate;
         }
-        
+
     }
 }

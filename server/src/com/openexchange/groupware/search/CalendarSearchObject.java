@@ -58,7 +58,7 @@ public class CalendarSearchObject extends SearchObject {
 	private String title = NO_TITLE;
 
 	private Participant[] participants;
-	
+
 	private boolean searchInNote;
 
 	/**

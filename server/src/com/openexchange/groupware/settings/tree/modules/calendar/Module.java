@@ -68,6 +68,7 @@ public class Module extends AbstractModules {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "calendar", "module" };
     }

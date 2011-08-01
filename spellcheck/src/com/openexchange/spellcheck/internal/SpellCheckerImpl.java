@@ -68,15 +68,15 @@ import com.swabunga.spell.event.StringWordTokenizer;
 /**
  * {@link SpellCheckerImpl} - Implements {@link SpellChecker} based on <a
  * href="http://jazzy.sourceforge.net/">jazzy</a> library.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Creates a new spell check with only the user dictionary added
-	 * 
+	 *
 	 * @param userId
 	 *            The user ID
 	 * @param ctx
@@ -91,7 +91,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Creates a new spell check
-	 * 
+	 *
 	 * @param userId
 	 *            The user ID
 	 * @param localeStr
@@ -114,7 +114,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Creates a new spell check
-	 * 
+	 *
 	 * @param userId
 	 *            The user ID
 	 * @param locale
@@ -144,7 +144,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Initializes a new {@link SpellCheckerImpl}
-	 * 
+	 *
 	 * @param localeDictionary
 	 *            The locale-specific dictionary
 	 */
@@ -154,7 +154,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Initializes a new {@link SpellCheckerImpl}
-	 * 
+	 *
 	 * @param localeDictionary
 	 *            The locale-specific dictionary
 	 * @param userDictionary
@@ -177,7 +177,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#addWord(java.lang.String[])
 	 */
 	public void addWord(final String... words) {
@@ -192,7 +192,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#removeWord(java.lang.String[])
 	 */
 	public void removeWord(final String... words) {
@@ -207,7 +207,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#getUserWords()
 	 */
 	public List<String> getUserWords() {
@@ -221,7 +221,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#checkSpelling(java.lang.String)
 	 */
 	public SpellCheckError[] checkSpelling(final String text) {
@@ -232,7 +232,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#checkSpelling(java.lang.String)
 	 */
 	public SpellCheckError[] checkSpelling(final Document document) {
@@ -243,7 +243,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#getSuggestions(java.lang.String,
 	 *      int)
 	 */
@@ -261,7 +261,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheck#isCorrect(java.lang.String)
 	 */
 	public boolean isCorrect(final String word) {
@@ -282,7 +282,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see com.swabunga.spell.event.SpellCheckListener#spellingError(com.swabunga.spell.event.SpellCheckEvent)
 		 */
 		public void spellingError(final SpellCheckEvent event) {
@@ -315,7 +315,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 
 		/**
 		 * Initializes a new {@link _SpellCheckError}
-		 * 
+		 *
 		 * @param event
 		 *            The spell check event from which the error is created
 		 */

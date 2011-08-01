@@ -53,7 +53,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link POP3MailFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3MailFolder extends MailFolder {

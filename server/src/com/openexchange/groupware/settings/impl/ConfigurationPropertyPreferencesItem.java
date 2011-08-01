@@ -62,16 +62,16 @@ import com.openexchange.session.Session;
 
 /**
  * Makes a certain configuration setting in the configuration service available as a preferences item service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigurationPropertyPreferencesItem implements PreferencesItemService {
 
-    private ConfigurationService config;
+    private final ConfigurationService config;
 
-    private String[] path;
+    private final String[] path;
 
-    private String key;
+    private final String key;
 
     public ConfigurationPropertyPreferencesItem(String key, ConfigurationService config, String... path) {
         super();
@@ -80,20 +80,24 @@ public class ConfigurationPropertyPreferencesItem implements PreferencesItemServ
         this.key = key;
     }
 
+    @Override
     public String[] getPath() {
         return path;
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new Property();
     }
 
     protected final class Property extends ReadOnlyValue {
 
+        @Override
         public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
             setting.setSingleValue(convert(config.getProperty(key)));
         }
 
+        @Override
         public boolean isAvailable(UserConfiguration userConfig) {
             return config.getProperty(key) != null;
         }

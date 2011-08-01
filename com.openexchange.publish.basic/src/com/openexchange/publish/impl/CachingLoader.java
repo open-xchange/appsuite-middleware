@@ -69,17 +69,17 @@ import com.openexchange.server.osgiservice.Whiteboard;
 public class CachingLoader implements PublicationDataLoaderService {
 
     private static final String CACHE_REGION = "com.openexchange.publish.dataloader";
-    
+
     private PublicationDataLoaderService delegate = null;
     private final Whiteboard whiteboard;
     private final CacheService cachingService;
-    
+
     public CachingLoader(final Whiteboard whiteboard, final PublicationDataLoaderService delegate) {
         this.whiteboard = whiteboard;
         this.delegate = delegate;
         this.cachingService = whiteboard.getService(CacheService.class);
     }
-    
+
     public Collection<? extends Object> load(final Publication publication) throws OXException {
         try {
             final Collection<? extends Object> fromCache = tryCache(publication);
@@ -89,7 +89,7 @@ public class CachingLoader implements PublicationDataLoaderService {
                 return loaded;
             }
             return fromCache;
-        
+
         } catch (final OXException x) {
             throw x;
         }
@@ -107,7 +107,7 @@ public class CachingLoader implements PublicationDataLoaderService {
     }
 
     private ElementAttributes modifyAttributes(final ElementAttributes attributes) {
-       
+
         if(attributes.getMaxLifeSeconds() == -1) {
             attributes.setMaxLifeSeconds(30);
         }
@@ -136,7 +136,7 @@ public class CachingLoader implements PublicationDataLoaderService {
         }
         return (Collection<? extends Object>) cache.get(new PublicationKey(publication));
     }
-    
+
     private Cache getCache() throws OXException {
         if(! whiteboard.isActive(cachingService)) {
             return null;
@@ -182,8 +182,8 @@ public class CachingLoader implements PublicationDataLoaderService {
             }
             return true;
         }
-        
-        
+
+
     }
 
 }

@@ -64,12 +64,12 @@ public class Activator implements BundleActivator {
 	     * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
 	     */
 	    /*-
-	     * 
+	     *
 	    new com.openexchange.logging.internal.JdkCorrector().correct();
 	    try {
 	        Class<?> clazz = Class.forName("org.apache.log4j.Logger");
     	    if (null != clazz) {
-                com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector corrector = 
+                com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector corrector =
                     (com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
     	        corrector.correct();
     	    }

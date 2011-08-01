@@ -119,6 +119,7 @@ public final class Configuration {
 
     String getProperty(final Property property, final String def) {
         return getUniversal(property, def, new Convert<String>() {
+            @Override
             public String convert(final String toConvert) {
                 return toConvert;
             }
@@ -127,6 +128,7 @@ public final class Configuration {
 
     int getInt(final Property property, final int def) {
         return getUniversal(property, Integer.valueOf(def), new Convert<Integer>() {
+            @Override
             public Integer convert(final String toConvert) {
                 return Integer.valueOf(toConvert);
             }
@@ -135,6 +137,7 @@ public final class Configuration {
 
     long getLong(final Property property, final long def) {
         return getUniversal(property, Long.valueOf(def), new Convert<Long>() {
+            @Override
             public Long convert(final String toConvert) {
                 return Long.valueOf(toConvert);
             }
@@ -143,6 +146,7 @@ public final class Configuration {
 
     boolean getBoolean(final Property property, final boolean def) {
         return getUniversal(property, Boolean.valueOf(def), new Convert<Boolean>() {
+            @Override
             public Boolean convert(final String toConvert) {
                 return Boolean.valueOf(toConvert);
             }

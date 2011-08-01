@@ -109,20 +109,20 @@ public class Group extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 	    final ServerSession session = getSessionObject(httpServletRequest);
         final Response response = new Response(session);
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			
+
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
-			
+
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
@@ -132,10 +132,10 @@ public class Group extends DataServlet {
 	            return;
 			}
 			final GroupRequest groupRequest = new GroupRequest(session);
-			
+
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
-			
+
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jData);
 
 				final Object responseObj = groupRequest.action(action, jsonObj);
@@ -148,7 +148,7 @@ public class Group extends DataServlet {
 				final JSONObject jData = new JSONObject(data);
 
 				jsonObj.put(AJAXServlet.PARAMETER_DATA, jData);
-				
+
 				final Object responseObj = groupRequest.action(action, jsonObj);
 				response.setTimestamp(groupRequest.getTimestamp());
 				// According to the documentation this is definitely an array
@@ -165,10 +165,10 @@ public class Group extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final ServerSession session) {
 		return true;

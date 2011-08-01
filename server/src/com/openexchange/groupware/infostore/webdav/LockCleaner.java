@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class LockCleaner implements FolderEventInterface, InfostoreEventInterface {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LockCleaner.class));
-	
+
 	private final EntityLockManager infoLockManager;
 	private final FolderLockManager folderLockManager;
 
@@ -74,8 +74,9 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		this.infoLockManager = infoLockManager;
 	}
 
-	
-	public void folderDeleted(final FolderObject folderObj, final Session session) {
+
+	@Override
+    public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
@@ -84,8 +85,9 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		}
     }
 
-	
-	public void infoitemDeleted(final DocumentMetadata metadata, final Session session) {
+
+	@Override
+    public void infoitemDeleted(final DocumentMetadata metadata, final Session session) {
 		try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
@@ -94,20 +96,24 @@ public class LockCleaner implements FolderEventInterface, InfostoreEventInterfac
 		}
     }
 
-	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
-		
-	}
-	
-	public void folderModified(final FolderObject folderObj, final Session sessionObj) {
-		
+	@Override
+    public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
+
 	}
 
-	public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
-		
+	@Override
+    public void folderModified(final FolderObject folderObj, final Session sessionObj) {
+
 	}
-	
-	public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
-		
+
+	@Override
+    public void infoitemCreated(final DocumentMetadata metadata, final Session sessionObject) {
+
+	}
+
+	@Override
+    public void infoitemModified(final DocumentMetadata metadata, final Session sessionObject) {
+
 	}
 
 }

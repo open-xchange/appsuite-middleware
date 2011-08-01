@@ -75,7 +75,7 @@ public final class Permission {
     }
 
     /**
-     * Checks if a user 
+     * Checks if a user
      * @param ctx
      * @param user
      * @param userConfig
@@ -209,7 +209,7 @@ public final class Permission {
             DBPool.closeReaderSilent(ctx, con);
         }
     }
-    
+
     /**
      * Checks if the user is allowed to read the task.
      * @param ctx Context.

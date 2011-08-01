@@ -67,11 +67,13 @@ public class Activator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         targetTracker = new ServiceTracker(context, TargetService.class.getName(), new TargetRegistryCustomizer(context));
         targetTracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         targetTracker.close();
     }

@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -47,11 +47,11 @@ public class ServerInfo {
 
     /**
      * Gets the value of the edition property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEdition() {
         return edition;
@@ -59,11 +59,11 @@ public class ServerInfo {
 
     /**
      * Sets the value of the edition property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEdition(String value) {
         this.edition = value;
@@ -71,11 +71,11 @@ public class ServerInfo {
 
     /**
      * Gets the value of the version property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getVersion() {
         return version;
@@ -83,11 +83,11 @@ public class ServerInfo {
 
     /**
      * Sets the value of the version property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setVersion(String value) {
         this.version = value;
@@ -95,11 +95,11 @@ public class ServerInfo {
 
     /**
      * Gets the value of the infrastructureID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInfrastructureID() {
         return infrastructureID;
@@ -107,11 +107,11 @@ public class ServerInfo {
 
     /**
      * Sets the value of the infrastructureID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInfrastructureID(String value) {
         this.infrastructureID = value;

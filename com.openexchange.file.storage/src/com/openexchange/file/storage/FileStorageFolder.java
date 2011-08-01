@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * {@link FileStorageFolder} - Represents a file storage folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -89,21 +89,21 @@ public interface FileStorageFolder extends FileStorageConstants {
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
-     * 
+     *
      * @return The list of capabilities
      */
     public Set<String> getCapabilities();
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     public String getId();
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName();
@@ -115,35 +115,35 @@ public interface FileStorageFolder extends FileStorageConstants {
      * of {@link DefaultFileStoragePermission} is supposed to be returned on missing permissions support except for the root folder. The
      * root folder should indicate no object permissions in any case, but the folder permission varies if file storage system allows
      * subfolder creation below root folder or not. The returned permission must reflect the allowed behavior.
-     * 
+     *
      * @return The own permission
      */
     public FileStoragePermission getOwnPermission();
 
     /**
      * Gets the parent identifier or <code>null</code> if this file storage folder denotes the root folder.
-     * 
+     *
      * @return The parent identifier or <code>null</code> if this file storage folder denotes the root folder
      */
     public String getParentId();
 
     /**
      * Gets the permissions associated with this file storage folder.
-     * 
+     *
      * @return The permissions as a collection of {@link FileStoragePermission}
      */
     public List<FileStoragePermission> getPermissions();
 
     /**
      * Checks if this file storage folder has subfolders.
-     * 
+     *
      * @return <code>true</code> if this file storage folder has subfolders; otherwise <code>false</code>
      */
     public boolean hasSubfolders();
 
     /**
      * Checks if this file storage folder has subscribed subfolders.
-     * 
+     *
      * @return <code>true</code> if this file storage folder has subscribed subfolders; otherwise <code>false</code>
      */
     public boolean hasSubscribedSubfolders();
@@ -152,56 +152,56 @@ public interface FileStorageFolder extends FileStorageConstants {
      * Checks whether the denoted file storage folder is subscribed or not.
      * <p>
      * If file storage system does not support subscription, <code>true</code> is supposed to be returned.
-     * 
+     *
      * @return Whether the denoted file storage folder is subscribed or not
      */
     public boolean isSubscribed();
 
     /**
      * Gets the creation date.
-     * 
+     *
      * @return The creation date
      */
     public Date getCreationDate();
 
     /**
      * Gets the last modified date.
-     * 
+     *
      * @return The last modified date
      */
     public Date getLastModifiedDate();
 
     /**
      * Checks if this folder is able to hold folders.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
     public boolean isHoldsFolders();
 
     /**
      * Checks if this folder is able to hold files.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold files; otherwise <code>false</code>
      */
     public boolean isHoldsFiles();
 
     /**
      * Checks if this folder denotes the root folder
-     * 
+     *
      * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
      */
     public boolean isRootFolder();
 
     /**
      * Checks if this folder denotes a default folder.
-     * 
+     *
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder();
 
     /**
      * Gets the number of files.
-     * 
+     *
      * @return The number of files or <code>-1</code> if this folder does not hold files
      * @see #isHoldsFiles()
      */
@@ -209,7 +209,7 @@ public interface FileStorageFolder extends FileStorageConstants {
 
     /**
      * Gets the properties associated with this folder.
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> getProperties();

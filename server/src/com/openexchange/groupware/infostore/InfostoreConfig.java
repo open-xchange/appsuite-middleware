@@ -71,13 +71,13 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
     public static enum InfoProperty{
 		MAX_UPLOAD_SIZE;
 	}
-	
+
     private static final Property KEY = Property.INFOSTORE;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreConfig.class));
-    
+
     private static InfostoreConfig singleton;
-    
+
     private static final Lock INIT_LOCK = new ReentrantLock();
 
     private static boolean loaded = false;
@@ -114,10 +114,10 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 				LOG.error("Can't init config:",e);
 			}
 		}
-			
+
         return singleton.getPropertyInternal(key);
     }
-    
+
     public static long getMaxUploadSize(){
     	final String sizeS = getProperty(InfoProperty.MAX_UPLOAD_SIZE.name());
     	if(null == sizeS) {
@@ -138,6 +138,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 		return Long.parseLong(sizeS);
 	}
 
+    @Override
     public void start() throws OXException {
         if (!loaded || singleton == null) {
 			INIT_LOCK.lock();
@@ -147,9 +148,10 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
             } finally {
 				INIT_LOCK.unlock();
 			}
-		}   
+		}
     }
 
+    @Override
     public void stop() throws OXException {
         singleton = null;
         loaded = false;

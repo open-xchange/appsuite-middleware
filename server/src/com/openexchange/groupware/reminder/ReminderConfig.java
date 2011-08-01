@@ -53,17 +53,17 @@ package com.openexchange.groupware.reminder;
 
 /**
  * ReminderConfig
- * 
- * 
+ *
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
 public interface ReminderConfig {
-	
+
 	public boolean isReminderEnabled();
-	
+
 	public int getReminderInterval();
-	
+
 }
 
 

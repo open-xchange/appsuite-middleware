@@ -66,7 +66,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link CapabilitiesCache} - A cache to check for capabilities for a certain IMAP server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CapabilitiesCache {
@@ -95,7 +95,7 @@ public final class CapabilitiesCache {
 
         /**
          * Gets the ACL extension.
-         * 
+         *
          * @return The ACL extension
          */
         public ACLExtension getAclExtension() {
@@ -104,7 +104,7 @@ public final class CapabilitiesCache {
 
         /**
          * Gets the IMAP capabilities.
-         * 
+         *
          * @return The IMAP capabilities
          */
         public IMAPCapabilities getImapCapabilities() {
@@ -113,7 +113,7 @@ public final class CapabilitiesCache {
 
         /**
          * Gets the map.
-         * 
+         *
          * @return The map
          */
         public Map<String, String> getMap() {
@@ -167,7 +167,7 @@ public final class CapabilitiesCache {
 
     /**
      * Gets cached capabilities for given IMAP store.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapConfig The IMAP configuration
      * @param session The session providing the session-bound cache
@@ -212,7 +212,7 @@ public final class CapabilitiesCache {
 
     /**
      * Removes cached capabilities.
-     * 
+     *
      * @param user The user identifier
      * @param session The session providing the session-bound cache
      * @param accontId The account ID

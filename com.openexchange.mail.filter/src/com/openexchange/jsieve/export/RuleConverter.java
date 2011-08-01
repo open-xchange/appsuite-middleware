@@ -76,9 +76,9 @@ import com.openexchange.jsieve.commands.TestCommand;
 /**
  * This class contains all the methods to convert a list of rules into the AST
  * notation
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class RuleConverter {
 
@@ -254,7 +254,7 @@ public class RuleConverter {
 
     /**
      * Converts specified rules to an appropriate {@link Node} instance.
-     * 
+     *
      * @param rules The rules to convert
      * @return The resulting {@link Node} instance
      */

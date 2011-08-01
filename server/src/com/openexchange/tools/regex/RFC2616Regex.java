@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  * {@link RFC2616Regex} - Provides a collection of regular expression patterns defined in <a
  * href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a> (Hypertext Transfer Protocol -- HTTP/1.1) or - as extension - defined in <a
  * href="http://www.faqs.org/rfcs/rfc2965.html">RFC 2965</a> (HTTP State Management Mechanism).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RFC2616Regex {
@@ -71,7 +71,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies a <i>token</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
-     * 
+     *
      * <pre>
      * token          = 1*&lt;any CHAR except CTLs or separators&gt;
      * separators     = &quot;(&quot; | &quot;)&quot; | &quot;&lt;&quot; | &quot;&gt;&quot; | &quot;@&quot;
@@ -86,7 +86,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies a <i>qdtext</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
-     * 
+     *
      * <pre>
      * qdtext	= &lt;any TEXT except &lt;&quot;&gt;&gt;
      * TEXT		= &lt;any OCTET except CTLs, but including LWS&gt;
@@ -98,7 +98,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies a <i>quoted-pair</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
-     * 
+     *
      * <pre>
      * &quot;\&quot; CHAR
      * CHAR		= &lt;any US-ASCII character (octets 0 - 127)&gt;
@@ -110,7 +110,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies a <code>quoted-string</code> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
-     * 
+     *
      * <pre>
      * quoted-string	= ( &lt;&quot;&gt; *(qdtext | quoted-pair ) &lt;&quot;&gt; )
      * </pre>
@@ -123,7 +123,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies a <i>value</i> as per <a href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
-     * 
+     *
      * <pre>
      * value = token | quoted - string
      * </pre>
@@ -149,11 +149,11 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies <i>cookie-value</i> as per <a href="http://www.faqs.org/rfcs/rfc2965.html">RFC 2965</a>:
-     * 
+     *
      * <pre>
      * cookie-value    =  NAME &quot;=&quot; VALUE [&quot;;&quot; path] [&quot;;&quot; domain] [&quot;;&quot; port]
      * </pre>
-     * 
+     *
      * The group count defined in this pattern is 5 with the following associations:
      * <ol>
      * <li>cookie name</li>
@@ -169,7 +169,7 @@ public final class RFC2616Regex {
 
     /**
      * Regular expression that satisfies <i>cookie-version</i> as per <a href="http://www.faqs.org/rfcs/rfc2965.html">RFC 2965</a>:
-     * 
+     *
      * <pre>
      * cookie-version  =  &quot;$Version&quot; &quot;=&quot; value
      * </pre>

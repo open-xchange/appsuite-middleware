@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum Parameter {
@@ -62,9 +62,9 @@ public enum Parameter {
     ACTION("action", true),
     USERNAME("username", false),
     FLAG("flag", false);
-    
+
     private final String name;
-    
+
     private final boolean required;
 
     private Parameter(final String name, final boolean required) {
@@ -85,9 +85,9 @@ public enum Parameter {
     public final boolean isRequired() {
         return required;
     }
-    
+
     private static final Map<String, Parameter> name2Parameter;
-    
+
     public static Parameter byName(final String name) {
         return name2Parameter.get(name);
     }

@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException.Truncated;
 
 /**
  * JSON writer for the response container objekt.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ResponseWriter {
@@ -85,7 +85,7 @@ public final class ResponseWriter {
 
     /**
      * Gets the JSON object resulting from specified response using default locale.
-     * 
+     *
      * @param response The response
      * @return The JSON object
      * @throws JSONException If writing JSON fails
@@ -98,7 +98,7 @@ public final class ResponseWriter {
 
     /**
      * Gets the JSON object resulting from specified response using given locale.
-     * 
+     *
      * @param response The response
      * @param locale The locale
      * @return The JSON object
@@ -112,7 +112,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified response to given JSON object using default locale.
-     * 
+     *
      * @param response The response to write
      * @param json The JOSN object to write to
      * @throws JSONException If writing JSON fails
@@ -123,7 +123,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified response to given JSON object using passed locale.
-     * 
+     *
      * @param response The response to write
      * @param json The JOSN object to write to
      * @param locale The locale
@@ -149,7 +149,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified warning to given JSON object using passed locale.
-     * 
+     *
      * @param json The JSON object
      * @param warning The warning
      * @param locale The locale
@@ -166,7 +166,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified warnings to given JSON object using default locale.
-     * 
+     *
      * @param json The JSON object
      * @param warnings The warnings
      * @throws JSONException If writing JSON fails
@@ -177,7 +177,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified warnings to given JSON object using passed locale.
-     * 
+     *
      * @param json The JSON object
      * @param warnings The warnings
      * @param locale The locale
@@ -204,7 +204,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified exception to given JSON object using default locale.
-     * 
+     *
      * @param json The JSON object
      * @param exception The exception to write
      * @throws JSONException If writing JSON fails
@@ -215,7 +215,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified exception to given JSON object using passed locale.
-     * 
+     *
      * @param json The JSON object
      * @param exception The exception to write
      * @param locale The locale
@@ -324,7 +324,7 @@ public final class ResponseWriter {
 
     /**
      * Serializes a Response object to given instance of <code>{@link JSONWriter}</code> .
-     * 
+     *
      * @param response - the <code>{@link Response}</code> object to serialize.
      * @param writer - the <code>{@link JSONWriter}</code> to write to
      * @throws JSONException - if writing fails
@@ -345,7 +345,7 @@ public final class ResponseWriter {
 
     /**
      * Serializes a Response object to the writer.
-     * 
+     *
      * @param response Response object to serialize.
      * @param writer the serialized object will be written to this writer.
      * @throws JSONException if writing fails.
@@ -373,7 +373,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified warnings to {@link JSONWriter} instance using default locale.
-     * 
+     *
      * @param warnings The warnings
      * @param writer The JSON writer
      * @throws JSONException If writing JSON fails
@@ -384,7 +384,7 @@ public final class ResponseWriter {
 
     /**
      * Writes specified warnings to {@link JSONWriter} instance.
-     * 
+     *
      * @param warnings The warnings
      * @param writer The JSON writer
      * @param locale The locale
@@ -422,7 +422,7 @@ public final class ResponseWriter {
     /**
      * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode is
      * already set to writing a JSON object
-     * 
+     *
      * @param exc - the exception to write
      * @param writer - the writer to write to
      * @throws JSONException - if writing fails
@@ -434,7 +434,7 @@ public final class ResponseWriter {
     /**
      * Writes given instance of <code>OXException</code> into given instance of <code>JSONWriter</code> assuming that writer's mode is
      * already set to writing a JSON object
-     * 
+     *
      * @param exc - the exception to write
      * @param writer - the writer to write to
      * @param locale The locale to use for internationalization of the error message

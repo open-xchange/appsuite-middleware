@@ -69,8 +69,8 @@ import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link ContactObjectsByPageAndPagePartSequenceStep}
- * 
- * This returns 
+ *
+ * This returns
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
@@ -83,14 +83,14 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByPageAndPagePartSequenceStep.class));
 
     public ContactObjectsByPageAndPagePartSequenceStep() {
-        
+
     }
-    
+
     public ContactObjectsByPageAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
         this.description = description;
         this.pageParts = pageParts;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
@@ -98,7 +98,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
     public void execute(WebClient webClient) throws OXException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
             try {
-                final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());                
+                final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
                 LOG.debug("Page evaluated is : "+pageString);
                 final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
@@ -107,25 +107,25 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
                     final Contact contact = Mappings.translateMapToContact(map);
                     SANITIZER.sanitize(contact);
                     contactObjects.add(contact);
-                }               
-                                
-            } catch (final ConverterException e) {                
-                LOG.error(e.getMessage() 
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId() 
+                }
+
+            } catch (final ConverterException e) {
+                LOG.error(e.getMessage()
+                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
                     + ", User : " + workflow.getSubscription().getUserId()
                     + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
-                
+
                 exception = e;
             }
             executedSuccessfully = true;
-        
+
 
         if (!executedSuccessfully && input != null){
-            
+
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
     }
-    
+
     public PagePartSequence getPageParts() {
         return pageParts;
     }

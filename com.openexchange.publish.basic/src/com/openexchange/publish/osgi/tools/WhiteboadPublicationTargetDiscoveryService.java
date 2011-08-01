@@ -66,17 +66,17 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class WhiteboadPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private ServiceTracker tracker;
+    private final ServiceTracker tracker;
 
     public WhiteboadPublicationTargetDiscoveryService(BundleContext context) {
         this.tracker = new ServiceTracker(context, PublicationTargetDiscoveryService.class.getName(), null);
         tracker.open();
     }
-    
+
     public void close() {
         tracker.close();
     }
-    
+
     public PublicationTarget getTarget(Context context, int publicationId) throws OXException {
         return getDelegate().getTarget(context, publicationId);
     }
@@ -95,11 +95,11 @@ public class WhiteboadPublicationTargetDiscoveryService implements PublicationTa
 
     public Collection<PublicationTarget> listTargets() throws OXException {
         return getDelegate().listTargets();
-    }   
-    
+    }
+
     private PublicationTargetDiscoveryService getDelegate() {
         return (PublicationTargetDiscoveryService) tracker.getService();
     }
-    
+
 
 }

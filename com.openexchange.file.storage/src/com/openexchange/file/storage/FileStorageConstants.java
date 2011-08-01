@@ -51,7 +51,7 @@ package com.openexchange.file.storage;
 
 /**
  * {@link FileStorageConstants} - Provides constants for file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileStorageConstants {

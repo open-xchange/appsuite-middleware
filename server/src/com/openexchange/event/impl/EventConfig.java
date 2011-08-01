@@ -53,18 +53,18 @@ package com.openexchange.event.impl;
 
 /**
  * EventConfig
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
 public interface EventConfig {
-	
+
 	public boolean isEventQueueEnabled();
-	
+
 	public void setEventQueueEnabled(boolean isEventQueueEnabled);
-	
+
 	public int getEventQueueDelay();
-	
-	public void setEventQueueDelay(int eventQueueDelay);	
+
+	public void setEventQueueDelay(int eventQueueDelay);
 }
 

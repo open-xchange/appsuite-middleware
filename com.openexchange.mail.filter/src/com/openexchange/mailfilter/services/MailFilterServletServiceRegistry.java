@@ -53,9 +53,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MailFilterServletServiceRegistry} - A registry for services needed by Mail Filter bundle
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
+ *
  */
 public final class MailFilterServletServiceRegistry {
 
@@ -63,7 +63,7 @@ public final class MailFilterServletServiceRegistry {
 
 	/**
 	 * Gets the service registry
-	 * 
+	 *
 	 * @return The service registry
 	 */
 	public static ServiceRegistry getServiceRegistry() {

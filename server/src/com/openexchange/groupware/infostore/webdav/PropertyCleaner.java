@@ -61,23 +61,25 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
-	
+
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
-	
+
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;
 		this.infoProperties = infoProperties;
-		
-	}
-
-	public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
-	public void folderDeleted(final FolderObject folderObj, final Session session) {
+	@Override
+    public void folderCreated(final FolderObject folderObj, final Session sessionObj) {
+
+	}
+
+	@Override
+    public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = new ServerSessionAdapter(session);
             folderProperties.startTransaction();
@@ -94,16 +96,19 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 		}
 	}
 
-	public void folderModified(final FolderObject folderObj, final Session sessionObj) {
+	@Override
+    public void folderModified(final FolderObject folderObj, final Session sessionObj) {
 
 	}
 
-	public void infoitemCreated(final DocumentMetadata metadata,
+	@Override
+    public void infoitemCreated(final DocumentMetadata metadata,
 			final Session sessionObject) {
 
 	}
 
-	public void infoitemDeleted(final DocumentMetadata metadata,
+	@Override
+    public void infoitemDeleted(final DocumentMetadata metadata,
 			final Session session) {
 		try {
             final ServerSession sessionObject = new ServerSessionAdapter(session);
@@ -121,9 +126,10 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 		}
 	}
 
-	public void infoitemModified(final DocumentMetadata metadata,
+	@Override
+    public void infoitemModified(final DocumentMetadata metadata,
 			final Session sessionObj) {
-		
+
 	}
 
 }

@@ -75,7 +75,7 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
     private InfostoreFacade infostore = null;
     private final UserService users;
     private final UserConfigurationService userConfigs;
-    
+
     public InfostoreFolderLoader(final InfostoreFacade infostore, final UserService users, final UserConfigurationService userConfigs) {
         super();
         this.infostore = infostore;

@@ -61,13 +61,13 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link SpecificServiceChooser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SpecificServiceChooser<T> {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SpecificServiceChooser.class));
-    
+
     private final SortedSet<WeightedRegistration<T>> general = new TreeSet<WeightedRegistration<T>>();
 
     private final TIntObjectHashMap<SortedSet<WeightedRegistration<T>>> contextSpecific = new TIntObjectHashMap<SortedSet<WeightedRegistration<T>>>();
@@ -100,7 +100,7 @@ public class SpecificServiceChooser<T> {
         }
         set.removeAll(remove);
     }
-    
+
     private void add(final SortedSet<WeightedRegistration<T>> set, final T serviceInstance, final int ranking) throws ServicePriorityConflictException {
         notNull(serviceInstance);
         final WeightedRegistration<T> newRegistration = new WeightedRegistration<T>(ranking);
@@ -133,7 +133,7 @@ public class SpecificServiceChooser<T> {
     public synchronized void registerForContextAndFolder(final T serviceInstance, final int ranking, final int cid, final int folderId) throws ServicePriorityConflictException {
         registerForContextAndFolder(serviceInstance, ranking, cid, String.valueOf(folderId));
     }
-    
+
     public synchronized void removeForContextAndFolder(final T serviceInstance, final int cid, final int folderId) {
         removeForContextAndFolder(serviceInstance, cid, String.valueOf(folderId));
     }
@@ -147,7 +147,7 @@ public class SpecificServiceChooser<T> {
         if (!folderSpecific.containsKey(folderId)) {
             folderSpecific.put(folderId, new TreeSet<WeightedRegistration<T>>());
         }
-        
+
         add( folderSpecific.get(folderId), serviceInstance, ranking);
     }
 
@@ -159,7 +159,7 @@ public class SpecificServiceChooser<T> {
         final SortedSet<WeightedRegistration<T>> registeredServices = folderSpecific.get(folderId);
         remove(registeredServices, serviceInstance);
     }
-    
+
     public void registerForFolder(final T serviceInstance, final int ranking, final int folderId) throws ServicePriorityConflictException {
         registerForFolder(serviceInstance, ranking, String.valueOf(folderId));
     }
@@ -170,11 +170,11 @@ public class SpecificServiceChooser<T> {
         }
         add(folderSpecific.get(folderId), serviceInstance, ranking);
     }
-    
+
     public void removeForFolder(final T serviceInstance, final int folderId) {
         removeForFolder(serviceInstance, String.valueOf(folderId));
     }
-    
+
     public synchronized void removeForFolder(final T serviceInstance, final String folderId) {
         remove (folderSpecific.get(folderId), serviceInstance);
     }
@@ -264,6 +264,7 @@ public class SpecificServiceChooser<T> {
             this.ranking = ranking;
         }
 
+        @Override
         public int compareTo(final WeightedRegistration<T> o) {
             return o.ranking - ranking;
         }
@@ -272,7 +273,7 @@ public class SpecificServiceChooser<T> {
         public int hashCode() {
             return ranking;
         }
-        
+
         @Override
         public boolean equals(final Object o) {
             if (this == o) {
@@ -283,7 +284,7 @@ public class SpecificServiceChooser<T> {
             }
             return ranking == ((WeightedRegistration<T>)o).ranking;
         }
-        
+
         public T getPayload() {
             return payload;
         }

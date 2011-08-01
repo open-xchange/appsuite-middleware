@@ -63,7 +63,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MailAccountAddPersonalTask} - Add "personal" column to mail/transport account table.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
@@ -84,10 +84,12 @@ public final class MailAccountAddPersonalTask extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { GlobalAddressBookPermissionsResolverTask.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con;

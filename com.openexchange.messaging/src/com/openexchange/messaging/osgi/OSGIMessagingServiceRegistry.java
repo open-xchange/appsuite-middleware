@@ -68,7 +68,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link OSGIMessagingServiceRegistry}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -86,7 +86,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     private ServiceTracker tracker;
 
     private ServiceTracker configTracker;
-    
+
     /**
      * Initializes a new {@link OSGIMessagingServiceRegistry}.
      */
@@ -97,7 +97,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
 
     /**
      * Starts the tracker.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
@@ -151,7 +151,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             return (configProperty.isDefined() && configProperty.get());
         } catch (final OXException e) {
             throw e;
-        }        
+        }
     }
 
     private List<MessagingService> filter(final ArrayList<MessagingService> arrayList, final int user, final int context) throws OXException {
@@ -170,7 +170,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         } catch (final OXException x) {
             throw x;
         }
-        
+
         return filteredList;
     }
 
@@ -247,5 +247,5 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     } // End of Customizer class
 
-    
+
 }

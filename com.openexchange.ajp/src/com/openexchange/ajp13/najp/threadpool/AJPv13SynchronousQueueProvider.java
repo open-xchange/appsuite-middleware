@@ -56,7 +56,7 @@ import java.util.concurrent.SynchronousQueue;
  * {@link AJPv13SynchronousQueueProvider} - Provider for appropriate synchronous queue instance dependent on JRE version.
  * <p>
  * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AJPv13SynchronousQueueProvider {
@@ -72,7 +72,7 @@ public abstract class AJPv13SynchronousQueueProvider {
 
     /**
      * Initializes appropriate instance of synchronous queue provider.
-     * 
+     *
      * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
      *            {@link Java6SynchronousQueue}
      */
@@ -115,7 +115,7 @@ public abstract class AJPv13SynchronousQueueProvider {
 
     /**
      * Gets the {@link AJPv13SynchronousQueueProvider} instance.
-     * 
+     *
      * @return The {@link AJPv13SynchronousQueueProvider} instance
      */
     public static AJPv13SynchronousQueueProvider getInstance() {
@@ -124,7 +124,7 @@ public abstract class AJPv13SynchronousQueueProvider {
 
     /**
      * Gets a newly created synchronous queue.
-     * 
+     *
      * @param <V> The queue's type
      * @return A newly created synchronous queue
      */
@@ -132,7 +132,7 @@ public abstract class AJPv13SynchronousQueueProvider {
 
     /**
      * Gets a newly created synchronous queue.
-     * 
+     *
      * @param <V> The queue's type
      * @param clazz The queue's type class
      * @return A newly created synchronous queue

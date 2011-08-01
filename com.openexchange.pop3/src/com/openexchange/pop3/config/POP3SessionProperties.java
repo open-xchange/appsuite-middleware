@@ -56,7 +56,7 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
 /**
  * {@link POP3SessionProperties} - Default properties for an POP3 session established via <code>JavaMail</code> API
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3SessionProperties {
@@ -72,7 +72,7 @@ public final class POP3SessionProperties {
 
     /**
      * Creates a <b>cloned</b> version of default POP3 session properties
-     * 
+     *
      * @return a cloned version of default POP3 session properties
      */
     public static Properties getDefaultSessionProperties() {

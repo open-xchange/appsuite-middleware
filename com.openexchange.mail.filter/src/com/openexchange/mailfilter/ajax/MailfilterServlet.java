@@ -53,13 +53,13 @@ import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.actions.MailfilterRequest;
 
 /**
- * 
+ *
  * @author d7
  */
 public class MailfilterServlet extends AJAXServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1472856427482243156L;
 

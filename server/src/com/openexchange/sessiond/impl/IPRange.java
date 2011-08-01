@@ -57,24 +57,24 @@ package com.openexchange.sessiond.impl;
  */
 public class IPRange {
 
-    private int[] start;
-    private int[] end;
-    
+    private final int[] start;
+    private final int[] end;
+
     public IPRange(int[] start, int[] end) {
         super();
         this.start = start;
         this.end = end;
     }
-    
+
     public IPRange(int[] start) {
         this.start = start;
         this.end = start;
     }
-    
+
     public int[] getStart() {
         return start;
     }
-    
+
     public int[] getEnd() {
         return end;
     }
@@ -84,7 +84,7 @@ public class IPRange {
 
         boolean endCarryOver = false;
         boolean startCarryOver = false;
-        
+
         for(int i = 0; i < 4; i++) {
             int part = other[i];
             endCarryOver = endCarryOver || part < end[i];

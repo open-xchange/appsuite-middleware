@@ -60,7 +60,7 @@ import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link POP3Properties} - POP3 properties loaded from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Properties extends AbstractProtocolProperties implements IPOP3Properties {
@@ -71,7 +71,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the singleton instance of {@link POP3Properties}
-     * 
+     *
      * @return The singleton instance of {@link POP3Properties}
      */
     public static POP3Properties getInstance() {
@@ -236,7 +236,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
     /**
      * Gets the spam handler name.
-     * 
+     *
      * @return The spam handler name
      */
     public String getSpamHandlerName() {

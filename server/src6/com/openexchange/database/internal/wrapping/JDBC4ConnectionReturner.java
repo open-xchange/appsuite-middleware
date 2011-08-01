@@ -73,54 +73,67 @@ public class JDBC4ConnectionReturner extends JDBC3ConnectionReturner {
         super(pools, assign, delegate, noTimeout, write, usedAsRead);
     }
 
+    @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
         return delegate.createArrayOf(typeName, elements);
     }
 
+    @Override
     public Blob createBlob() throws SQLException {
         return delegate.createBlob();
     }
 
+    @Override
     public Clob createClob() throws SQLException {
         return delegate.createClob();
     }
 
+    @Override
     public NClob createNClob() throws SQLException {
         return delegate.createNClob();
     }
 
+    @Override
     public SQLXML createSQLXML() throws SQLException {
         return delegate.createSQLXML();
     }
 
+    @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
         return delegate.createStruct(typeName, attributes);
     }
 
+    @Override
     public Properties getClientInfo() throws SQLException {
         return delegate.getClientInfo();
     }
 
+    @Override
     public String getClientInfo(String name) throws SQLException {
         return delegate.getClientInfo(name);
     }
 
+    @Override
     public boolean isValid(int timeout) throws SQLException {
         return delegate.isValid(timeout);
     }
 
+    @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         delegate.setClientInfo(properties);
     }
 
+    @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
         delegate.setClientInfo(name, value);
     }
 
+    @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return delegate.isWrapperFor(iface);
     }
 
+    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         return delegate.unwrap(iface);
     }

@@ -66,7 +66,7 @@ public class SecretActivator implements BundleActivator {
 	public void start(final BundleContext context) throws Exception {
 	    final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
 	    properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
-	    
+
 	    context.registerService(SecretService.class.getName(), new SessionSecretService(), properties);
 	}
 

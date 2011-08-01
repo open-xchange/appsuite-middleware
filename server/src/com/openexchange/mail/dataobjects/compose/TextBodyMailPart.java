@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link TextBodyMailPart} - Designed to keep a mail's (text) body while offering a suitable implementation of {@link MailPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class TextBodyMailPart extends MailPart implements ComposedMailPart {
@@ -80,7 +80,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * Constructs a new {@link TextBodyMailPart}
      * <p>
      * The body part is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
-     * 
+     *
      * @param mailBody The mail body as HTML content
      */
     public TextBodyMailPart(final String mailBody) {
@@ -90,7 +90,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     /**
      * Gets a copy of this {@link TextBodyMailPart}.
-     * 
+     *
      * @return A copy of this {@link TextBodyMailPart
      * @throws OXException If creating a copy fails
      */
@@ -100,7 +100,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * Fills specified instance with this body part's content.
      * <p>
      * This method is supposed to be invoked in subclass' {@link #copy()} method.
-     * 
+     *
      * @param newInstance The new instance to fill
      */
     protected final void fillInstance(final TextBodyMailPart newInstance) {
@@ -113,7 +113,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * Sets this part's text.
      * <p>
      * The body part is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
-     * 
+     *
      * @param mailBody The mail body as HTML content
      */
     public void setText(final String mailBody) {
@@ -130,7 +130,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     /**
      * Appends specified HTML text to this part.
-     * 
+     *
      * @param html The HTML text to append
      */
     public void append(final String html) {
@@ -146,7 +146,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     /**
      * Sets this part's optional plain text.
-     * 
+     *
      * @param text The mail body as plain text
      */
     public void setPlainText(final String text) {
@@ -160,16 +160,16 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     /**
      * Gets this part's optional plain text.
-     * 
+     *
      * @return The mail body as plain text or <code>null</code>
      */
     public String getPlainText() {
         return null == plainText ? null : plainText.toString();
     }
-   
+
     /**
      * Gets this part's HTML text.
-     * 
+     *
      * @return The mail body as HTML text or <code>null</code>
      */
     public String getHTML() {
@@ -178,7 +178,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
 
     /**
      * Appends specified plain text to this part.
-     * 
+     *
      * @param text The plain text to append
      */
     public void appendPlainText(final String text) {
@@ -283,6 +283,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
      * (non-Javadoc)
      * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
      */
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.BODY;
     }

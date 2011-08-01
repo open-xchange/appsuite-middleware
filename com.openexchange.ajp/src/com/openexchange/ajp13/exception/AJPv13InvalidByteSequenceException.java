@@ -51,7 +51,7 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13InvalidByteSequenceException} - Thrown to indicate an invalid byte sequence inside a received AJP package's data
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
@@ -60,7 +60,7 @@ public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13InvalidByteSequenceException}
-     * 
+     *
      * @param packageNumber The package number
      * @param magic1 The first read magic byte
      * @param magic2 The second read magic byte

@@ -55,7 +55,7 @@ import twitter4j.internal.http.HttpResponse;
 
 /**
  * {@link OXTwitterImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OXTwitterImpl extends twitter4j.TwitterImpl implements OXTwitter {
@@ -64,7 +64,7 @@ public class OXTwitterImpl extends twitter4j.TwitterImpl implements OXTwitter {
 
     /**
      * Initializes a new {@link OXTwitterImpl}.
-     * 
+     *
      * @param conf
      * @param auth
      */

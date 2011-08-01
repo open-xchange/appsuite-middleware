@@ -66,7 +66,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
     private final Map<String, MessagingService> services = new HashMap<String, MessagingService>();
 
     private OXException exception;
-    
+
     public List<MessagingService> getAllServices(int user, int context) throws OXException {
         exception();
         return new ArrayList<MessagingService>(services.values());
@@ -82,7 +82,7 @@ public class SimMessagingServiceRegistry implements MessagingServiceRegistry{
             throw exception;
         }
     }
-    
+
     public void add(final MessagingService service) {
         services.put(service.getId(), service);
     }

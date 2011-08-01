@@ -70,11 +70,11 @@ public class Asserts {
     public static void assertKnows(SubscriptionSourceDiscoveryService discoverer, String id) {
         assertTrue("Did not know: "+id, discoverer.knowsSource(id));
     }
-    
+
     public static void assertDoesNotKnow(SubscriptionSourceDiscoveryService discoverer, String id) {
         assertFalse("Did know: "+id, discoverer.knowsSource(id));
     }
-    
+
     public static void assertSources(List<SubscriptionSource> sources, String...expectedIdentifiers) {
         List<String> identifier = new ArrayList<String>();
         for(SubscriptionSource source : sources) {
@@ -82,15 +82,15 @@ public class Asserts {
         }
         List<String> expectedList = Arrays.asList(expectedIdentifiers);
         assertEquals("Expected: "+expectedList+" Got: "+identifier, sources.size(), expectedIdentifiers.length);
-        
+
         Set<String> actual = new HashSet<String>(identifier);
         for(String expected : expectedIdentifiers) {
             assertTrue("Expected: "+expectedList+" Got: "+identifier +" Missing: "+expected, actual.remove(expected));
         }
         assertTrue("Expected: "+expectedList+" Got: "+identifier, actual.isEmpty());
-        
+
     }
-    
+
     public static void assertPriority(List<SubscriptionSource> sources, String identifier, int priority) {
         for (SubscriptionSource subscriptionSource : sources) {
             if(subscriptionSource.getId().equals(identifier)) {
@@ -100,7 +100,7 @@ public class Asserts {
         }
         fail("Did not found subscription source with identifier "+identifier);
     }
-    
+
     public static void assertPriority(SubscriptionSource source, int priority) {
         assertEquals(priority, source.getPriority());
     }

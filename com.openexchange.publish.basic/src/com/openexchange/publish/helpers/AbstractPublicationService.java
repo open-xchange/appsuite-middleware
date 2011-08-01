@@ -62,7 +62,7 @@ import com.openexchange.publish.impl.DummyStorage;
 
 /**
  * {@link AbstractPublicationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractPublicationService implements PublicationService {
@@ -80,11 +80,11 @@ public abstract class AbstractPublicationService implements PublicationService {
     public static void setDefaultStorage(final PublicationStorage storage) {
         STORAGE = storage;
     }
-    
+
     public static PublicationStorage getDefaultStorage() {
         return STORAGE;
     }
-    
+
     public void create(final Publication publication) throws OXException {
         checkPermission(Permission.CREATE, publication);
         modifyIncoming(publication);
@@ -118,7 +118,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         afterLoad(publications);
         return publications;
     }
-    
+
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
     	List<Publication> publications;
     	if (module == null) {
@@ -126,7 +126,7 @@ public abstract class AbstractPublicationService implements PublicationService {
     	} else {
     		publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
     	}
-    	
+
     	for (final Publication publication : publications) {
             modifyOutgoing(publication);
         }
@@ -143,7 +143,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         if(publication != null) {
             modifyOutgoing(publication);
         }
-        
+
         return publication;
     }
 

@@ -68,7 +68,7 @@ import com.openexchange.ajp13.servlet.ServletConfigLoader;
 /**
  * {@link AJPv13ServerImpl} - The AJP server which accepts incoming socket connections and delegates its processing to a dedicated AJP
  * listener
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
@@ -91,7 +91,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     /**
      * Gets the listener monitor.
-     * 
+     *
      * @return The listener monitor.
      */
     public static AJPv13TaskMonitorMBean getListenerMonitor() {
@@ -115,7 +115,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     /**
      * Starts this AJP server instance
-     * 
+     *
      * @throws AJPv13Exception If starting this instance fails
      */
     @Override
@@ -249,7 +249,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     /**
      * Checks if this AJP server instance is running
-     * 
+     *
      * @return <code>true</code> if this AJP server instance is running; otherwise <code>false</code>
      */
     @Override
@@ -257,6 +257,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
         return running.get();
     }
 
+    @Override
     public void run() {
         boolean keepOnRunning = true;
         AcceptSocket: while (keepOnRunning && running.get()) {
@@ -308,6 +309,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             this.logger = logger;
         }
 
+        @Override
         public void run() {
             try {
                 latch.await();

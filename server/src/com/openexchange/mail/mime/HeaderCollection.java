@@ -71,7 +71,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * {@link HeaderCollection} - Represents a collection of <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small>
  * headers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HeaderCollection implements Serializable {
@@ -108,7 +108,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Initializes a new {@link HeaderCollection}
-     * 
+     *
      * @param initialCapacity The collection's initial capacity
      */
     public HeaderCollection(final int initialCapacity) {
@@ -118,7 +118,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Copy constructor for {@link HeaderCollection}
-     * 
+     *
      * @param headers The source headers
      */
     public HeaderCollection(final HeaderCollection headers) {
@@ -129,7 +129,7 @@ public class HeaderCollection implements Serializable {
     /**
      * Initializes a new {@link HeaderCollection} from specified headers' <small><b><a
      * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> source
-     * 
+     *
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
     public HeaderCollection(final String headerSrc) {
@@ -140,7 +140,7 @@ public class HeaderCollection implements Serializable {
     /**
      * Initializes a new {@link HeaderCollection} from specified headers' <small><b><a
      * href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> input stream
-     * 
+     *
      * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
      * @throws OXException If parsing the header input stream fails
      */
@@ -151,7 +151,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets a read-only {@link HeaderCollection collection} constructed from this collection's current content
-     * 
+     *
      * @return A read-only {@link HeaderCollection collection}
      */
     public HeaderCollection getReadOnlyCollection() {
@@ -166,7 +166,7 @@ public class HeaderCollection implements Serializable {
      * the existing list of headers, in order.
      * <p>
      * Provided input stream is not going to be closed but is read until <code>EOF</code> or two subsequent <code>CRLF</code>s occur.
-     * 
+     *
      * @param inputStream The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input stream
      * @throws OXException If reading from headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> input
      *             stream fails
@@ -206,7 +206,7 @@ public class HeaderCollection implements Serializable {
      * <p>
      * Note that the header lines are added, so any existing headers in this object will not be affected. Headers are added to the end of
      * the existing list of headers, in order.
-     * 
+     *
      * @param headerSrc The headers' <small><b><a href="http://www.ietf.org/rfc/rfc822.txt" >RFC822</a></b></small> source
      */
     public void load(final String headerSrc) {
@@ -294,7 +294,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Returns <code>true</code> if no headers are contained in this collection
-     * 
+     *
      * @return <code>true</code> if no headers are contained in this collection
      */
     public boolean isEmpty() {
@@ -305,7 +305,7 @@ public class HeaderCollection implements Serializable {
      * Gets the number of headers contained in this collection.
      * <p>
      * This method is a constant-time operation.
-     * 
+     *
      * @return The number of headers contained in this collection
      */
     public int size() {
@@ -317,7 +317,7 @@ public class HeaderCollection implements Serializable {
      * <p>
      * Note that the header lines are added, so any existing headers in this object will not be affected. Headers are added to the end of
      * the existing list of headers, in order.
-     * 
+     *
      * @param headers The header collection to add
      */
     public void addHeaders(final HeaderCollection headers) {
@@ -344,7 +344,7 @@ public class HeaderCollection implements Serializable {
      * <p>
      * Note that <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers can only contain
      * <small><b>US-ASCII</b></small> characters.
-     * 
+     *
      * @param name The header name
      * @param value The header value
      * @return This header collection with specified header added
@@ -361,7 +361,7 @@ public class HeaderCollection implements Serializable {
      * <p>
      * Note that <small><b><a href="http://www.ietf.org/rfc/rfc822.txt">RFC822</a></b></small> headers can only contain
      * <small><b>US-ASCII</b></small> characters.
-     * 
+     *
      * @param name The header name
      * @param value The header value
      * @return This header collection with specified header set
@@ -412,7 +412,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Checks if this header collection contains a header entry for specified header
-     * 
+     *
      * @param name The header name
      * @return <code>true</code> if this header collection contains a header entry for specified header; otherwise <code>false</code>
      */
@@ -425,7 +425,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Return all the values for the specified header. Returns <code>null</code> if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @return An array of header values, or <code>null</code> if none exists
      * @throws IllegalArgumentException If name is invalid
@@ -444,7 +444,7 @@ public class HeaderCollection implements Serializable {
     /**
      * Get all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
      * <code>null</code>, only the first header is returned. Returns <code>null</code> if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @param delimiter The delimiter
      * @return The value fields for all headers with this name, or <code>null</code> if none
@@ -471,7 +471,7 @@ public class HeaderCollection implements Serializable {
     /**
      * Get all the headers for this header name, returned as a single String, with headers separated by the delimiter. If the delimiter is
      * <code>'\0'</code>, only the first header is returned. Returns <code>null</code> if no headers with the specified name exist.
-     * 
+     *
      * @param name The header name
      * @param delimiter The delimiter character
      * @return The value fields for all headers with this name, or <code>null</code> if none
@@ -497,7 +497,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Remove all header entries that match the given name
-     * 
+     *
      * @param name The header name
      * @return This header collection with specified header removed
      */
@@ -514,7 +514,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets an  instance of {@link Iterator} to iterate all header names.
-     * 
+     *
      * @return An  instance of {@link Iterator} to iterate all header names
      */
     public Iterator<String> getHeaderNames() {
@@ -527,7 +527,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets an instance of {@link Iterator} to iterate all headers.
-     * 
+     *
      * @return An instance of {@link Iterator} to iterate all headers
      */
     public Iterator<Map.Entry<String, String>> getAllHeaders() {
@@ -539,7 +539,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets the matching headers
-     * 
+     *
      * @param matchingHeaders The matching headers
      * @return The matching headers
      */
@@ -553,7 +553,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets the non-matching headers
-     * 
+     *
      * @param nonMatchingHeaders The non-matching headers
      * @return The non-matching headers
      */
@@ -579,7 +579,7 @@ public class HeaderCollection implements Serializable {
      * Indicates whether some other object is "equal to" this one. However this method should be used with care since checking a given
      * header collection for equality with this one requires sorting according to header names and then comparing each header one-by-one.
      * Besides this method behaves exactly as stated in {@link Object#equals(Object) equal} method.
-     * 
+     *
      * @param obj The reference object with which to compare.
      * @return <code>true</code> if this object is the same as the object argument; <code>false</code> otherwise.
      */
@@ -648,14 +648,17 @@ public class HeaderCollection implements Serializable {
 
     private static final transient Iterator<Map.Entry<String, String>> EMPTY_ITER = new Iterator<Map.Entry<String, String>>() {
 
+        @Override
         public boolean hasNext() {
             return false;
         }
 
+        @Override
         public Entry<String, String> next() {
             throw new NoSuchElementException();
         }
 
+        @Override
         public void remove() {
             // Nothing to remove
         }
@@ -689,6 +692,7 @@ public class HeaderCollection implements Serializable {
             this.headers = headers;
         }
 
+        @Override
         public boolean hasNext() {
             if (entry == null || index >= size) {
                 while (iter.hasNext()) {
@@ -705,6 +709,7 @@ public class HeaderCollection implements Serializable {
             return (index < size);
         }
 
+        @Override
         public Entry<String, String> next() {
             if (entry == null || index >= size) {
                 while (iter.hasNext()) {
@@ -721,6 +726,7 @@ public class HeaderCollection implements Serializable {
             return new HeaderEntry(entry, index++);
         }
 
+        @Override
         public void remove() {
             if (entry == null) {
                 throw new IllegalStateException(
@@ -748,14 +754,17 @@ public class HeaderCollection implements Serializable {
             this.index = index;
         }
 
+        @Override
         public String getKey() {
             return entry.getKey().toString();
         }
 
+        @Override
         public String getValue() {
             return entry.getValue().get(index);
         }
 
+        @Override
         public String setValue(final String value) {
             return entry.getValue().set(index, value);
         }
@@ -800,7 +809,7 @@ public class HeaderCollection implements Serializable {
     /**
      * Specified string is invalid if it is <code>null</code>, empty, its characters are whitespace characters only or contains Non-ASCII 7
      * bit
-     * 
+     *
      * @param str The string to check
      * @param isName <code>true</code> to check a header name; otherwise <code>false</code> to check a header value
      * @return <code>true</code> if string is invalid; otherwise <code>false</code>
@@ -835,7 +844,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -850,7 +859,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Checks whether the specified string is empty
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string is empty; otherwise <code>false</code>
      */

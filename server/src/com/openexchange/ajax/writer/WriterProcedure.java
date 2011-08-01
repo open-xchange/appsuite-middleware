@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.SystemObject;
 
 /**
  * {@link WriterProcedure}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -82,6 +82,7 @@ public class WriterProcedure<T extends SystemObject> implements TObjectProcedure
         this.tz = tz;
     }
 
+    @Override
     public boolean execute(final FieldWriter<T> writer) {
         try {
             writer.write(obj, tz, json);
@@ -94,7 +95,7 @@ public class WriterProcedure<T extends SystemObject> implements TObjectProcedure
 
     /**
      * Gets the possible JSON error if {@link #execute(FieldWriter)} returned <code>false</code>.
-     * 
+     *
      * @return The JSON error or <code>null</code>
      */
     public JSONException getError() {

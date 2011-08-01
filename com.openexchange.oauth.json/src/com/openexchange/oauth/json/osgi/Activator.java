@@ -71,7 +71,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends DeferredActivator {
@@ -79,7 +79,7 @@ public class Activator extends DeferredActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private List<ServiceRegistration> serviceRegistrations;
-    
+
     private List<ServiceTracker> trackers;
 
     private OSGiOAuthService oAuthService;

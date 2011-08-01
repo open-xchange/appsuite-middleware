@@ -68,7 +68,7 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link CalendarServiceTracker}.
-     * @param context 
+     * @param context
      */
     public CalendarServiceTracker(final BundleContext context) {
         super();

@@ -12,9 +12,9 @@ import com._4psa.pbxdata_xsd._2_5.TimeInterval;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com._4psa.pbxdata_xsd._2_5.TimeInterval;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -47,11 +47,11 @@ public class EditTimeIntervalRequest
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -59,11 +59,11 @@ public class EditTimeIntervalRequest
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -71,11 +71,11 @@ public class EditTimeIntervalRequest
 
     /**
      * Gets the value of the intervalID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getIntervalID() {
         return intervalID;
@@ -83,11 +83,11 @@ public class EditTimeIntervalRequest
 
     /**
      * Sets the value of the intervalID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setIntervalID(BigInteger value) {
         this.intervalID = value;

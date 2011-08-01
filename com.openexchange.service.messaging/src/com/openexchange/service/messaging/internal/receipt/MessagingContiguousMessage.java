@@ -62,7 +62,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link MessagingContiguousMessage} - A contiguous message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingContiguousMessage {
@@ -78,7 +78,7 @@ public final class MessagingContiguousMessage {
 
     /**
      * Initializes a new {@link MessagingContiguousMessage}.
-     * 
+     *
      * @param topic The message topic
      * @param firstChunk The first data chunk
      */
@@ -92,7 +92,7 @@ public final class MessagingContiguousMessage {
 
     /**
      * Atomically adds given bytes to this contiguous message.
-     * 
+     *
      * @param cnum The chunk number
      * @param chunk The chunk to add
      */
@@ -112,7 +112,7 @@ public final class MessagingContiguousMessage {
      * Converts this contiguous message into a {@link Message} instance.
      * <p>
      * This method may only be invoked if contiguous message has completed gathering data.
-     * 
+     *
      * @return The resulting {@link Message} instance
      * @throws OXException If conversion fails
      */

@@ -62,6 +62,7 @@ public class SharedFolders extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "folder", "read_create_shared_folders" };
     }

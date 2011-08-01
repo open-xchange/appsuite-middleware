@@ -57,7 +57,7 @@ import com.openexchange.user.json.actions.UserActionFactory;
 
 /**
  * {@link UserMultipleHandlerFactory} - The multiple handler factory for user component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserMultipleHandlerFactory implements MultipleHandlerFactoryService {

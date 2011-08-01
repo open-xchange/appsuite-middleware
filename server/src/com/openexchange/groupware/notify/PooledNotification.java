@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PooledNotification} - Holds all necessary information about the most up-to-date object status.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PooledNotification implements Delayed {
@@ -89,7 +89,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Initializes a new {@link PooledNotification} and sets its last-accessed time stamp to now.
-     * 
+     *
      * @param p The participant to notify
      * @param title The objects's title
      * @param state The notification state
@@ -113,10 +113,12 @@ public final class PooledNotification implements Delayed {
         this.hash = _hashCode();
     }
 
+    @Override
     public long getDelay(final TimeUnit unit) {
         return unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp.get()), TimeUnit.MILLISECONDS);
     }
 
+    @Override
     public int compareTo(final Delayed o) {
         final long thisStamp = this.stamp.get();
         final long otherStamp = ((PooledNotification) o).stamp.get();
@@ -132,7 +134,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Merges this pooled notification with specified pooled notification.
-     * 
+     *
      * @param other The other pooled notification
      */
     public void merge(final PooledNotification other) {
@@ -144,7 +146,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Sets the title.
-     * 
+     *
      * @param title The title
      */
     public void setTitle(final String title) {
@@ -153,7 +155,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Sets the locale.
-     * 
+     *
      * @param locale The locale
      */
     public void setLocale(final Locale locale) {
@@ -162,7 +164,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Sets the state.
-     * 
+     *
      * @param state The state
      */
     public void setState(final State state) {
@@ -171,7 +173,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the participant.
-     * 
+     *
      * @return the participant
      */
     public EmailableParticipant getParticipant() {
@@ -180,7 +182,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the state.
-     * 
+     *
      * @return the state
      */
     public State getState() {
@@ -189,7 +191,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the locale.
-     * 
+     *
      * @return the locale
      */
     public Locale getLocale() {
@@ -198,7 +200,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the render map.
-     * 
+     *
      * @return the render map
      */
     public RenderMap getRenderMap() {
@@ -207,7 +209,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the title.
-     * 
+     *
      * @return the title
      */
     public String getTitle() {
@@ -216,7 +218,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return the session
      */
     public ServerSession getSession() {
@@ -225,7 +227,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets the calendar object.
-     * 
+     *
      * @return the calendar object
      */
     public CalendarObject getCalendarObject() {
@@ -234,7 +236,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Gets this pooled notification's last-accessed time stamp.
-     * 
+     *
      * @return The last-accessed time stamp.
      */
     public long lastAccessed() {
@@ -243,7 +245,7 @@ public final class PooledNotification implements Delayed {
 
     /**
      * Checks if the calendar object held by this pooled notification is denoted by specified object ID and context ID.
-     * 
+     *
      * @param objectId The calendar object's ID
      * @param contextId The calendar object's context ID
      * @return <code>true</code> if the calendar object held by this pooled notification denotes the specified calendar object; otherwise

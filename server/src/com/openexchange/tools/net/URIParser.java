@@ -75,7 +75,7 @@ public final class URIParser {
 
     /**
      * Parses specified URL string.
-     * 
+     *
      * @param input The URL string
      * @param defaults The defaults for parsing or {@link URIDefaults#NULL} for no defaults
      * @return The parsed URI instance
@@ -104,7 +104,7 @@ public final class URIParser {
 
     /**
      * Checks if specified input is a valid URI.
-     * 
+     *
      * @param input The input to check
      * @return <code>true</code> if specified input is a valid URI; otherwise <code>false</code>
      */
@@ -145,7 +145,7 @@ public final class URIParser {
 
     /**
      * Tries to sanitize specified broken URI string.
-     * 
+     *
      * @param input The broken URI string
      * @param defaults The defaults for parsing
      * @return The sanitized URI or <code>null</code> if not able to sanitize

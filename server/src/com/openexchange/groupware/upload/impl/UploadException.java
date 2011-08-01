@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link UploadException} - Indicates an error during an upload.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UploadException extends OXException {
@@ -116,7 +116,7 @@ public class UploadException extends OXException {
          * An error occurred: %1$s
          */
         UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 12),
-        
+
         ;
 
         private final String message;
@@ -131,29 +131,34 @@ public class UploadException extends OXException {
             this.detailNumber = detailNumber;
         }
 
+        @Override
         public String getPrefix() {
             return "UPL";
         }
 
+        @Override
         public final Category getCategory() {
             return category;
         }
 
+        @Override
         public final int getNumber() {
             return detailNumber;
         }
 
+        @Override
         public final String getMessage() {
             return message;
         }
 
+        @Override
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link UploadException} instance
          */
         public UploadException create() {
@@ -162,7 +167,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
          */
@@ -172,7 +177,7 @@ public class UploadException extends OXException {
 
         /**
          * Creates a new {@link UploadException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link UploadException} instance
@@ -201,7 +206,7 @@ public class UploadException extends OXException {
 
     /**
      * Initializes a new {@link UploadException}.
-     * 
+     *
      * @param code The code
      * @param displayMessage The display message
      * @param cause The cause
@@ -213,7 +218,7 @@ public class UploadException extends OXException {
 
     /**
      * Sets the action string.
-     * 
+     *
      * @param action The action string
      * @return This exception with action string applied
      */
@@ -224,7 +229,7 @@ public class UploadException extends OXException {
 
     /**
      * Gets the action string.
-     * 
+     *
      * @return The action string
      */
     public String getAction() {

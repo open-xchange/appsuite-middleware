@@ -86,10 +86,12 @@ public class LastVersionedUpdateTask extends UpdateTaskAdapter {
         return 200;
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         Schema schema = params.getSchema();
         List<String> executed = determineExecuted(schema.getDBVersion(), Updater.getInstance().getAvailableUpdateTasks());

@@ -67,7 +67,7 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
 
     private final LinkedInSubscribeService liService;
     private final ContextService contexts;
-    
+
     public LinkedInSubscriptionsOAuthAccountDeleteListener(final LinkedInSubscribeService liService, final ContextService contexts) {
         super();
         this.liService = liService;
@@ -81,7 +81,7 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
             throw new OXException(e);
         }
     }
-    
+
     private Context getContext(final int cid) throws OXException {
         try {
             return contexts.getContext(cid);

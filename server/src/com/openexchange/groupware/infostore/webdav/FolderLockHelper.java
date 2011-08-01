@@ -86,7 +86,7 @@ public class FolderLockHelper extends LockHelper {
 		}
 		throw new IllegalArgumentException("Lock must be of type FolderLock");
 	}
-	
+
 	@Override
 	protected int saveLock(final WebdavLock lock) throws OXException {
         try {
@@ -127,6 +127,6 @@ public class FolderLockHelper extends LockHelper {
         return new ServerSessionAdapter(sessionHolder.getSessionObject());
     }
 
-	
+
 
 }

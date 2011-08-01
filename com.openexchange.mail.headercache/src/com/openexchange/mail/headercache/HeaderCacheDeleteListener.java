@@ -61,7 +61,7 @@ import com.openexchange.mail.headercache.services.HeaderCacheServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link HeaderCacheDeleteListener} 
+ * {@link HeaderCacheDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

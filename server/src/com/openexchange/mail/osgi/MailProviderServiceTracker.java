@@ -58,7 +58,7 @@ import com.openexchange.mail.api.MailProvider;
 
 /**
  * Service tracker for mail providers
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailProviderServiceTracker implements ServiceTrackerCustomizer {
@@ -75,6 +75,7 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         if (addedService instanceof MailProvider) {
@@ -111,10 +112,12 @@ public final class MailProviderServiceTracker implements ServiceTrackerCustomize
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

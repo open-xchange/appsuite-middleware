@@ -51,7 +51,7 @@ package com.openexchange.push;
 
 /**
  * {@link PushEventConstants} - Provides constants for push events.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushEventConstants {
@@ -84,7 +84,7 @@ public final class PushEventConstants {
      * Gets an array of {@link String string} including all known topics.
      * <p>
      * Needed on event handler registration to a bundle context.
-     * 
+     *
      * @return An array of {@link String string} including all known topics.
      */
     public static String[] getAllTopics() {

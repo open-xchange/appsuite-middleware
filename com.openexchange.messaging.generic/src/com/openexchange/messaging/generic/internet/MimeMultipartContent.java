@@ -59,7 +59,7 @@ import com.openexchange.messaging.MultipartContent;
 
 /**
  * {@link MimeMultipartContent} - The implementation of the {@link MultipartContent} using MIME conventions for the multipart data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -84,7 +84,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Initializes a new {@link MimeMultipartContent}.
-     * 
+     *
      * @param subtype The multipart sub-type; e.g. "mixed", "alternative", or "related"
      */
     public MimeMultipartContent(final String subtype) {
@@ -94,7 +94,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     public String getSectionId() {
@@ -103,7 +103,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Sets the identifier.
-     * 
+     *
      * @param sectionId The identifier to set
      */
     public void setSectionId(final String sectionId) {
@@ -112,7 +112,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Initializes a new {@link MimeMultipartContent}.
-     * 
+     *
      * @param mimeMultipart The MIME multipart
      */
     protected MimeMultipartContent(final MimeMultipart mimeMultipart) {
@@ -141,7 +141,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Adds a part to the multipart. The part is appended to the list of existing parts.
-     * 
+     *
      * @param part The part to be appended
      * @throws OXException If part cannot be appended
      */
@@ -157,7 +157,7 @@ public class MimeMultipartContent implements MultipartContent {
     /**
      * Adds a part at position <code>index</code>. If <code>index</code> is not the last one in the list, the subsequent parts are shifted
      * up. If <code>index</code> is larger than the number of parts present, the part is appended to the end.
-     * 
+     *
      * @param part The part to be inserted
      * @param index The index where to insert the part
      * @exception OXException If part cannot be inserted
@@ -173,7 +173,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Remove the specified part from the multipart. Shifts all the parts after the removed part down one.
-     * 
+     *
      * @param part The part to remove
      * @return <code>true</code> if part removed, <code>false</code> otherwise
      * @exception OXException If removing part fails
@@ -188,7 +188,7 @@ public class MimeMultipartContent implements MultipartContent {
 
     /**
      * Remove the part at specified location (starting from 0). Shifts all the parts after the removed part down one.
-     * 
+     *
      * @param index Index of the part to remove
      * @exception OXException If removing part fails
      */

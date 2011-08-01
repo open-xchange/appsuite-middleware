@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SimpleContent} - Simple content
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -62,7 +62,7 @@ public interface SimpleContent<D> extends MessagingContent {
 
     /**
      * Gets the data.
-     * 
+     *
      * @return The data
      * @throws OXException If data cannot be returned
      */

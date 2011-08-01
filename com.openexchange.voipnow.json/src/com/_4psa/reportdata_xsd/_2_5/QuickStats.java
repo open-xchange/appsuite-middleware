@@ -14,11 +14,11 @@ import com._4psa.reportmessagesinfo_xsd._2_5.QuickStatsResponseType;
 
 /**
  * System statistics data
- * 
+ *
  * <p>Java class for QuickStats complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="QuickStats">
  *   &lt;complexContent>
@@ -59,8 +59,8 @@ import com._4psa.reportmessagesinfo_xsd._2_5.QuickStatsResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "QuickStats", propOrder = {
@@ -98,11 +98,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the resellers property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserStatistics }
-     *     
+     *
      */
     public UserStatistics getResellers() {
         return resellers;
@@ -110,11 +110,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the resellers property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserStatistics }
-     *     
+     *
      */
     public void setResellers(UserStatistics value) {
         this.resellers = value;
@@ -122,11 +122,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the clients property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserStatistics }
-     *     
+     *
      */
     public UserStatistics getClients() {
         return clients;
@@ -134,11 +134,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the clients property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserStatistics }
-     *     
+     *
      */
     public void setClients(UserStatistics value) {
         this.clients = value;
@@ -146,11 +146,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the extensions property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link QuickStats.Extensions }
-     *     
+     *
      */
     public QuickStats.Extensions getExtensions() {
         return extensions;
@@ -158,11 +158,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the extensions property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link QuickStats.Extensions }
-     *     
+     *
      */
     public void setExtensions(QuickStats.Extensions value) {
         this.extensions = value;
@@ -170,11 +170,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the incomingCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallStatistics }
-     *     
+     *
      */
     public CallStatistics getIncomingCalls() {
         return incomingCalls;
@@ -182,11 +182,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the incomingCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallStatistics }
-     *     
+     *
      */
     public void setIncomingCalls(CallStatistics value) {
         this.incomingCalls = value;
@@ -194,11 +194,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the outgoingCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallStatistics }
-     *     
+     *
      */
     public CallStatistics getOutgoingCalls() {
         return outgoingCalls;
@@ -206,11 +206,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the outgoingCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallStatistics }
-     *     
+     *
      */
     public void setOutgoingCalls(CallStatistics value) {
         this.outgoingCalls = value;
@@ -218,11 +218,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the currency property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCurrency() {
         return currency;
@@ -230,11 +230,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the currency property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCurrency(String value) {
         this.currency = value;
@@ -242,11 +242,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the lastLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getLastLogin() {
         return lastLogin;
@@ -254,11 +254,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the lastLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setLastLogin(XMLGregorianCalendar value) {
         this.lastLogin = value;
@@ -266,11 +266,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the soundFilesQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public DiskSpace getSoundFilesQuota() {
         return soundFilesQuota;
@@ -278,11 +278,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the soundFilesQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public void setSoundFilesQuota(DiskSpace value) {
         this.soundFilesQuota = value;
@@ -290,11 +290,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the musicFilesQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public DiskSpace getMusicFilesQuota() {
         return musicFilesQuota;
@@ -302,11 +302,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the musicFilesQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public void setMusicFilesQuota(DiskSpace value) {
         this.musicFilesQuota = value;
@@ -314,11 +314,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the faxMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public DiskSpace getFaxMsgQuota() {
         return faxMsgQuota;
@@ -326,11 +326,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the faxMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public void setFaxMsgQuota(DiskSpace value) {
         this.faxMsgQuota = value;
@@ -338,11 +338,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the voicemailMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public DiskSpace getVoicemailMsgQuota() {
         return voicemailMsgQuota;
@@ -350,11 +350,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the voicemailMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public void setVoicemailMsgQuota(DiskSpace value) {
         this.voicemailMsgQuota = value;
@@ -362,11 +362,11 @@ public class QuickStats {
 
     /**
      * Gets the value of the recordedMsgQuota property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public DiskSpace getRecordedMsgQuota() {
         return recordedMsgQuota;
@@ -374,11 +374,11 @@ public class QuickStats {
 
     /**
      * Sets the value of the recordedMsgQuota property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DiskSpace }
-     *     
+     *
      */
     public void setRecordedMsgQuota(DiskSpace value) {
         this.recordedMsgQuota = value;
@@ -387,9 +387,9 @@ public class QuickStats {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -409,8 +409,8 @@ public class QuickStats {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -439,11 +439,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the phoneTerminal property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getPhoneTerminal() {
             return phoneTerminal;
@@ -451,11 +451,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the phoneTerminal property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setPhoneTerminal(UserStatistics value) {
             this.phoneTerminal = value;
@@ -463,11 +463,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the queue property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getQueue() {
             return queue;
@@ -475,11 +475,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the queue property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setQueue(UserStatistics value) {
             this.queue = value;
@@ -487,11 +487,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the queueCenter property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getQueueCenter() {
             return queueCenter;
@@ -499,11 +499,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the queueCenter property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setQueueCenter(UserStatistics value) {
             this.queueCenter = value;
@@ -511,11 +511,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the ivr property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getIVR() {
             return ivr;
@@ -523,11 +523,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the ivr property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setIVR(UserStatistics value) {
             this.ivr = value;
@@ -535,11 +535,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the voicemailCenter property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getVoicemailCenter() {
             return voicemailCenter;
@@ -547,11 +547,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the voicemailCenter property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setVoicemailCenter(UserStatistics value) {
             this.voicemailCenter = value;
@@ -559,11 +559,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the conference property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getConference() {
             return conference;
@@ -571,11 +571,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the conference property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setConference(UserStatistics value) {
             this.conference = value;
@@ -583,11 +583,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the callback property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getCallback() {
             return callback;
@@ -595,11 +595,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the callback property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setCallback(UserStatistics value) {
             this.callback = value;
@@ -607,11 +607,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the callingCard property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getCallingCard() {
             return callingCard;
@@ -619,11 +619,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the callingCard property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setCallingCard(UserStatistics value) {
             this.callingCard = value;
@@ -631,11 +631,11 @@ public class QuickStats {
 
         /**
          * Gets the value of the intercomPaging property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public UserStatistics getIntercomPaging() {
             return intercomPaging;
@@ -643,11 +643,11 @@ public class QuickStats {
 
         /**
          * Sets the value of the intercomPaging property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link UserStatistics }
-         *     
+         *
          */
         public void setIntercomPaging(UserStatistics value) {
             this.intercomPaging = value;

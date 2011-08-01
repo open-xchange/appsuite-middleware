@@ -107,6 +107,7 @@ public class OsgiOXConsistency extends Consistency {
         //   Francisco
 
         return filter(getAllContexts(), new Filter() {
+            @Override
             public boolean accepts(final Context ctx) {
                 return ctx.getFilestoreId() == filestoreId;
             }

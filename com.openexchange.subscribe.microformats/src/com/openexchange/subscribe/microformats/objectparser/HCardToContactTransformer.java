@@ -74,17 +74,19 @@ public class HCardToContactTransformer {
 
     public List<Contact> transform(List<HCard> hcards){
         LinkedList<Contact> results = new LinkedList<Contact>();
-        for(HCard hcard: hcards)
+        for(HCard hcard: hcards) {
             results.add(transform(hcard));
+        }
         return results;
     }
 
 
     private Contact transform(HCard hcard) {
         Contact contact = new Contact();
-        if(hcard == null)
+        if(hcard == null) {
             return contact;
-        
+        }
+
         handleName(hcard, contact);
         handleCompany(hcard, contact);
         handleAdresses(hcard, contact);
@@ -97,101 +99,104 @@ public class HCardToContactTransformer {
     }
 
     private void handleAdditionalInfo(HCard hcard, Contact c) {
-        if(hcard.bday != null)
-            c.setBirthday(new Date(hcard.bday)); 
+        if(hcard.bday != null) {
+            c.setBirthday(new Date(hcard.bday));
+        }
 //        if( hcard.urls != null && hcard.urls.size() > 0)
 //            c.setURL(hcard.urls.get(0).toString());
-        if( hcard.notes != null && hcard.notes.size() > 0)
+        if( hcard.notes != null && hcard.notes.size() > 0) {
             c.setNote(hcard.notes.get(0));
+        }
     }
 
 
     private void handleOXSpecific(HCard hcard, Contact c) {
 /*      if( key.equals("x-ox-maritalStatus"))
-            c.setMaritalStatus(value); 
+            c.setMaritalStatus(value);
         if( key.equals("x-ox-numberOfChildren"))
             c.setNumberOfChildren(value);
         if( key.equals("x-ox-profession"))
-            c.setProfession(value); 
+            c.setProfession(value);
         if( key.equals("x-ox-nickname"))
-            c.setNickname(value); 
+            c.setNickname(value);
         if( key.equals("x-ox-spouse_name""))
-            c.setSpouseName(value);  
+            c.setSpouseName(value);
         if( key.equals("x-ox-department"))
-            c.setdepartment(value); 
+            c.setdepartment(value);
         if( key.equals("x-ox-employeeType"))
-            c.setEmployeeType(value); 
+            c.setEmployeeType(value);
         if( key.equals("x-ox-roomNumber"))
-            c.setRoomNumber(value); 
+            c.setRoomNumber(value);
         if( key.equals("x-ox-numberOfEmployees"))
-            c.setNumberOfEmployee(value); 
+            c.setNumberOfEmployee(value);
         if( key.equals("x-ox-salesVolume""))
-            c.setSalesVolume(value); 
+            c.setSalesVolume(value);
         if( key.equals("x-ox-taxId"))
-            c.setTaxID(value); 
+            c.setTaxID(value);
         if( key.equals("x-ox-commercialRegister"))
-            c.setCommercialRegister(value); 
+            c.setCommercialRegister(value);
         if( key.equals("x-ox-branches"))
-            c.setBranches(value); 
+            c.setBranches(value);
         if( key.equals("x-ox-businessCategory"))
-            c.setBusinessCategory(value); 
+            c.setBusinessCategory(value);
         if( key.equals("x-ox-info""))
-            c.setInfo(value); 
+            c.setInfo(value);
         if( key.equals("x-ox-managerName"))
-            c.setManagerName(value); 
+            c.setManagerName(value);
         if( key.equals("x-ox-assistantName""))
-            c.setAssistantName(value); 
+            c.setAssistantName(value);
         if( key.equals("x-ox-instantMessenger1"))
-            c.setInstantMessenger1(value); 
+            c.setInstantMessenger1(value);
         if( key.equals("x-ox-instantMessenger2"))
-            c.setInstantMessenger2(value);         
+            c.setInstantMessenger2(value);
         if( key.equals("x-ox-userfield01"))
-            c.setUserField01(value); 
+            c.setUserField01(value);
         if( key.equals("x-ox-userfield02""))
-            c.setUserField02(value); 
+            c.setUserField02(value);
         if( key.equals("x-ox-userfield03""))
-            c.setUserField03(value); 
+            c.setUserField03(value);
         if( key.equals("x-ox-userfield04""))
-            c.setUserField04(value); 
+            c.setUserField04(value);
         if( key.equals("x-ox-userfield05""))
-            c.setUserField05(value); 
+            c.setUserField05(value);
         if( key.equals("x-ox-userfield06""))
-            c.setUserField06(value); 
+            c.setUserField06(value);
         if( key.equals("x-ox-userfield07"))
-            c.setUserField07(value); 
+            c.setUserField07(value);
         if( key.equals("x-ox-userfield08"))
-            c.setUserField08(value); 
+            c.setUserField08(value);
         if( key.equals("x-ox-userfield09"))
-            c.setUserField09(value); 
+            c.setUserField09(value);
         if( key.equals("x-ox-userfield10"))
-            c.setUserField10(value); 
+            c.setUserField10(value);
         if( key.equals("x-ox-userfield11"))
-            c.setUserField11(value); 
+            c.setUserField11(value);
         if( key.equals("x-ox-userfield12"))
-            c.setUserField12(value); 
+            c.setUserField12(value);
         if( key.equals("x-ox-userfield13"))
-            c.setUserField13(value); 
+            c.setUserField13(value);
         if( key.equals("x-ox-userfield14"))
-            c.setUserField14(value); 
+            c.setUserField14(value);
         if( key.equals("x-ox-userfield15"))
-            c.setUserField15(value); 
+            c.setUserField15(value);
         if( key.equals("x-ox-userfield16"))
-            c.setUserField16(value); 
+            c.setUserField16(value);
         if( key.equals("x-ox-userfield17"))
-            c.setUserField17(value); 
+            c.setUserField17(value);
         if( key.equals("x-ox-userfield18"))
-            c.setUserField18(value); 
+            c.setUserField18(value);
         if( key.equals("x-ox-userfield19"))
-            c.setUserField19(value); 
+            c.setUserField19(value);
         if( key.equals("x-ox-userfield20"))
-            c.setUserField20(value); 
+            c.setUserField20(value);
         */
     }
 
 
     private void handleImage(HCard hcard, Contact c) {
-        if(hcard.photos == null || hcard.photos.size() == 0)
+        if(hcard.photos == null || hcard.photos.size() == 0) {
             return;
+        }
         URI uri = hcard.photos.get(0);
         if("data".equalsIgnoreCase( uri.getScheme() ) ){
             String info = uri.getSchemeSpecificPart();
@@ -222,19 +227,21 @@ public class HCardToContactTransformer {
                 postponed.add(email);
             }
         }
-        for(Email email : postponed)
-            for(int field = Contact.EMAIL1; field <= Contact.EMAIL3; field++)
+        for(Email email : postponed) {
+            for(int field = Contact.EMAIL1; field <= Contact.EMAIL3; field++) {
                 if(!c.contains(field)){
                     c.set(field, email.value);
                     continue;
                 }
+            }
+        }
     }
 
 
     private void handleTelephones(HCard hcard, Contact c) {
         List<Tel> postponed = new LinkedList<Tel>();
         List<Tel> postponedFax = new LinkedList<Tel>();
-        
+
         for(Tel tel : hcard.tels){
             if(tel.types.contains("home") && tel.types.contains("fax")) {
                 c.setFaxHome(tel.value);
@@ -278,39 +285,49 @@ public class HCardToContactTransformer {
                 postponed.add(tel);
             }
         }
-        for(Tel tel : postponedFax)
-            for(int field: new int[]{Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER})
+        for(Tel tel : postponedFax) {
+            for(int field: new int[]{Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER}) {
                 if(!c.contains(field)){
                     c.set(field, tel.value);
                     continue;
                 }
-        
-        for(Tel tel : postponed)
-            for(int field = Contact.TELEPHONE_BUSINESS1; field <= Contact.FAX_OTHER ; field++)
+            }
+        }
+
+        for(Tel tel : postponed) {
+            for(int field = Contact.TELEPHONE_BUSINESS1; field <= Contact.FAX_OTHER ; field++) {
                 if(!c.contains(field)){
                     c.set(field, tel.value);
                     continue;
                 }
+            }
+        }
     }
 
 
     private void handleName(HCard hcard, Contact c) {
-        
+
         c.setGivenName(hcard.n.givenName);
         c.setSurName(hcard.n.familyName);
-        if(exist(hcard.n.additionalNames))
+        if(exist(hcard.n.additionalNames)) {
             c.setMiddleName( Strings.join( hcard.n.additionalNames, " "));
-        if(exist(hcard.titles))
+        }
+        if(exist(hcard.titles)) {
             c.setTitle( Strings.join( hcard.titles, " "));
-        if(exist(hcard.n.honorificPrefixes))
-            if(c.containsTitle())
+        }
+        if(exist(hcard.n.honorificPrefixes)) {
+            if(c.containsTitle()) {
                 c.setTitle(c.getTitle() + " " + Strings.join( hcard.n.honorificSuffixes, " "));
-            else
+            } else {
                 c.setTitle( Strings.join( hcard.n.honorificSuffixes, " "));
-        if(exist(hcard.n.honorificSuffixes))
+            }
+        }
+        if(exist(hcard.n.honorificSuffixes)) {
             c.setSuffix( Strings.join( hcard.n.honorificSuffixes, " "));
-        if(exist(hcard.nicknames))
+        }
+        if(exist(hcard.nicknames)) {
             c.setDisplayName( Strings.join(hcard.nicknames, ","));
+        }
     }
 
 
@@ -321,17 +338,19 @@ public class HCardToContactTransformer {
 
 
     private void handleCompany(HCard hcard, Contact c) {
-        if(exist(hcard.orgs))
+        if(exist(hcard.orgs)) {
             c.setCompany(Strings.join(hcard.orgs, ","));
-        if(exist(hcard.roles))
+        }
+        if(exist(hcard.roles)) {
             c.setPosition(Strings.join(hcard.roles, ","));
+        }
     }
 
 
     private void handleAdresses(HCard hcard, Contact contact) {
         boolean setHome = false, setWork = false, setOther = false;
         List<Address> postponed = new LinkedList<Address>();
-        
+
         for(Address adr: hcard.adrs){
             if(adr.types.contains("home")){
                 addHomeAddress(contact, adr);
@@ -346,7 +365,7 @@ public class HCardToContactTransformer {
                 postponed.add(adr);
             }
         }
-        
+
         for(Address adr: postponed){
             if(! setHome){
                 addHomeAddress(contact, adr);

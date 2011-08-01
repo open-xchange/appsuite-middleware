@@ -73,7 +73,7 @@ import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 /**
  * This class is used to deal with the communication with sieve. For a description of the communication system to sieve see
  * {@see <a href="http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt">http://www.ietf.org/internet-drafts/draft-martin-managesieve-07.txt</a>}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class SieveHandler {
@@ -163,7 +163,7 @@ public class SieveHandler {
      * SieveHandler use socket-connection to manage sieve-scripts.<br>
      * <br>
      * Important: Don't forget to close the SieveHandler!
-     * 
+     *
      * @param userName
      * @param passwd
      * @param host
@@ -187,12 +187,12 @@ public class SieveHandler {
         sieve_host_port = port; // 2000
 
     }
-    
+
     public String getSieveHost() {
         return sieve_host;
     }
 
-    
+
     public int getSievePort() {
         return sieve_host_port;
     }
@@ -211,7 +211,7 @@ public class SieveHandler {
     /**
      * Use this function to initialize the connection. It will get the welcome messages from the server, parse the capabilities and login
      * the user.
-     * 
+     *
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
@@ -246,7 +246,7 @@ public class SieveHandler {
         measureEnd("capa.getSasl");
 
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
-        
+
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
 
         final StringBuilder commandBuilder = new StringBuilder(64);
@@ -257,7 +257,7 @@ public class SieveHandler {
              *
              *
              * Send STARTTLS
-             * 
+             *
              * C: STARTTLS
              * S: OK
              * <TLS negotiation, further commands are under TLS layer>
@@ -333,7 +333,7 @@ public class SieveHandler {
 
     /**
      * Upload this byte[] as sieve script
-     * 
+     *
      * @param script_name
      * @param script
      * @param commandBuilder
@@ -391,7 +391,7 @@ public class SieveHandler {
 
     /**
      * Activate/Deactivate sieve script. Is status is true, activate this script.
-     * 
+     *
      * @param script_name
      * @param status
      * @param commandBuilder
@@ -409,7 +409,7 @@ public class SieveHandler {
 
     /**
      * Get the sieveScript, if a script doesn't exists a byte[] with a size of 0 is returned
-     * 
+     *
      * @param script_name
      * @return the read script
      * @throws OXSieveHandlerException
@@ -428,9 +428,9 @@ public class SieveHandler {
         /*-
          * If the script does not exist the server MUST reply with a NO response. Upon success a string with the contents of the script is
          * returned followed by a OK response.
-         * 
+         *
          * Example:
-         * 
+         *
          * C: GETSCRIPT "myscript"
          * S: {54+}
          * S: #this is my wonderful script
@@ -470,8 +470,8 @@ public class SieveHandler {
             sb.append(CRLF);
         }
         /*-
-         * 
-         * 
+         *
+         *
         boolean firstread = true;
         while (true) {
             final String temp = bis_sieve.readLine();
@@ -498,7 +498,7 @@ public class SieveHandler {
 
     /**
      * Get the list of sieveScripts
-     * 
+     *
      * @return List of scripts
      * @throws IOException
      * @throws UnsupportedEncodingException
@@ -535,7 +535,7 @@ public class SieveHandler {
 
     /**
      * Get the list of active sieve scripts
-     * 
+     *
      * @return List of scripts
      * @throws IOException
      * @throws UnsupportedEncodingException
@@ -572,7 +572,7 @@ public class SieveHandler {
 
     /**
      * Remove the sieve script. If the script is active it is deactivated before removing
-     * 
+     *
      * @param script_name
      * @throws IOException
      * @throws UnsupportedEncodingException
@@ -611,7 +611,7 @@ public class SieveHandler {
 
     /**
      * Close socket-connection to sieve
-     * 
+     *
      * @throws IOException
      * @throws UnsupportedEncodingException
      */
@@ -857,7 +857,7 @@ public class SieveHandler {
 
     /**
      * COnverts given string to Base64 using given charset encoding.
-     * 
+     *
      * @param toConvert The string to convert to Base64
      * @param charset The charset encoding to use when retrieving bytes from passed string
      * @return The Base64 string
@@ -874,7 +874,7 @@ public class SieveHandler {
      * Examples:<br>
      * &nbsp;<code>{54+}</code><br>
      * &nbsp;<code>No {31+}</code><br>
-     * 
+     *
      * @param firstLine The first line
      * @return An array of <code>int</code> with length 2. The first position holds the response code if any available ({@link #NO} or
      *         {@link #OK}), otherwise {@link #UNDEFINED}. The second position holds the number of octets of a following literal or
@@ -958,7 +958,7 @@ public class SieveHandler {
 
     /**
      * Gets the capabilities.
-     * 
+     *
      * @return The capabilities
      */
     public Capabilities getCapabilities() {

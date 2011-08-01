@@ -61,14 +61,14 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class DummyLockNull extends DummyCollection {
-	
+
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
 	private WebdavResource realResource;
-	
+
 	public DummyLockNull(final DummyResourceManager manager, final WebdavPath url) {
 		super(manager, url);
 	}
-	
+
 	public void setRealResource(final WebdavResource res) {
 		this.realResource = res;
 	}
@@ -77,16 +77,16 @@ public class DummyLockNull extends DummyCollection {
 	public boolean isLockNull(){
 		return true;
 	}
-	
+
 	@Override
 	protected boolean isset(final Property p) {
 		switch(p.getId()) {
-		case Protocol.LOCKDISCOVERY : case Protocol.SUPPORTEDLOCK : case Protocol.DISPLAYNAME : 
+		case Protocol.LOCKDISCOVERY : case Protocol.SUPPORTEDLOCK : case Protocol.DISPLAYNAME :
 			return true;
 		default: return false;
 		}
 	}
-	
+
 	@Override
 	public void unlock(final String token) throws OXException {
 		super.unlock(token);
@@ -94,7 +94,7 @@ public class DummyLockNull extends DummyCollection {
 			mgr.removeLockNull(this.getUrl());
 		}
 	}
-	
+
 	@Override
 	public WEBDAV_METHOD[] getOptions(){
 		return OPTIONS;
@@ -117,12 +117,12 @@ public class DummyLockNull extends DummyCollection {
 			final DummyResource dres = (DummyResource) res;
 			dres.locks = new HashMap<String, WebdavLock>(locks);
 		}
-		
+
 	}
 
 	private WebdavResource getRealResource() {
 		return realResource;
 	}
-	
-	
+
+
 }

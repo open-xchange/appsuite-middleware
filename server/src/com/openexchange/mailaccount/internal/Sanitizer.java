@@ -67,7 +67,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Sanitizer} - Sanitizes mail accounts if needed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class Sanitizer {
@@ -86,6 +86,7 @@ final class Sanitizer {
             this.contextId = contextId;
         }
 
+        @Override
         public boolean execute(final int accountId) {
             try {
                 storageService.invalidateMailAccount(accountId, user, contextId);
@@ -111,6 +112,7 @@ final class Sanitizer {
             this.stmt = stmt;
         }
 
+        @Override
         public boolean execute(final int accountId, final String uri) {
             try {
                 stmt.setString(1, uri);
@@ -134,7 +136,7 @@ final class Sanitizer {
 
     /**
      * Sanitizes specified user's mail accounts.
-     * 
+     *
      * @param user The user identifier
      * @param contextId The context identifier
      * @param storageService The storage service
@@ -146,7 +148,7 @@ final class Sanitizer {
 
     /**
      * Sanitizes specified user's mail accounts.
-     * 
+     *
      * @param user The user identifier
      * @param contextId The context identifier
      * @param storageService The storage service

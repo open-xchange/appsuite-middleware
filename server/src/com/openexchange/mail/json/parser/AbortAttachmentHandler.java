@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 /**
  * {@link AbortAttachmentHandler} - An {@link IAttachmentHandler attachment handler} that throws a {@link OXException} on exceeded quota
  * (either overall or per-file quota).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
@@ -71,7 +71,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
     /**
      * Initializes a new {@link AbortAttachmentHandler}.
-     * 
+     *
      * @param session The session providing needed user information
      * @throws OXException If initialization fails
      */
@@ -79,6 +79,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         super(session);
     }
 
+    @Override
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction) {
             final long size = attachment.getSize();
@@ -103,6 +104,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         attachments.add(attachment);
     }
 
+    @Override
     public ComposedMailMessage[] generateComposedMails(final ComposedMailMessage source) throws OXException {
         source.setBodyPart(textPart);
         for (final MailPart attachment : attachments) {
@@ -111,6 +113,7 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
         return new ComposedMailMessage[] { source };
     }
 
+    @Override
     public void setTextPart(final TextBodyMailPart textPart) {
         this.textPart = textPart;
     }

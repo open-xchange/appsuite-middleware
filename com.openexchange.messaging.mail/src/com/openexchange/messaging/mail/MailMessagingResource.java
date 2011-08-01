@@ -73,7 +73,7 @@ public class MailMessagingResource implements MessagingResource {
 
     /**
      * Initializes a new {@link MailMessagingResource}.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @throws OXException If initialization fails

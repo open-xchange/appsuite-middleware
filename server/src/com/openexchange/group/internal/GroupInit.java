@@ -81,6 +81,7 @@ public final class GroupInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (initialized.get()) {
             LOG.debug("GroupStorage duplicate initialization.");
@@ -92,6 +93,7 @@ public final class GroupInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         if (!initialized.get()) {
             LOG.debug("GroupStorage duplicate shutdown.");

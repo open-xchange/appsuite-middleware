@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccount;
 /**
  * {@link MailAccountTransportProperties} - Transport properties read from mail account with fallback to properties read from properties
  * file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountTransportProperties implements ITransportProperties {
@@ -66,7 +66,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
 
     /**
      * Initializes a new {@link MailAccountTransportProperties}.
-     * 
+     *
      * @param mailAccount The mail account providing the properties
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
@@ -78,6 +78,7 @@ public class MailAccountTransportProperties implements ITransportProperties {
         properties = mailAccount.getProperties();
     }
 
+    @Override
     public int getReferencedPartLimit() {
         final String referencedPartLimitStr = properties.get("com.openexchange.mail.transport.referencedPartLimit");
         if (null == referencedPartLimitStr) {

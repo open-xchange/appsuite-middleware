@@ -158,7 +158,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class MailServletInterfaceImpl extends MailServletInterface {
@@ -206,12 +206,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private User user;
 
     private final Collection<OXException> warnings;
-    
+
     private final ArrayList<MailImportResult> mailImportResults;
 
     /**
      * Initializes a new {@link MailServletInterfaceImpl}.
-     * 
+     *
      * @throws OXException If user has no mail access or properties cannot be successfully loaded
      */
     MailServletInterfaceImpl(final Session session) throws OXException {
@@ -642,7 +642,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (pop3StorageFolders.contains(mailFolder.getFullname())) {
                     it.remove();
                 }
-            }            
+            }
         }
         /*
          * Check if denoted parent can hold default folders like Trash, Sent, etc.
@@ -897,7 +897,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Store them temporary to files
          */
         final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
-        
+
         final ManagedFile[] files = new ManagedFile[mails.length];
         try {
             final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream(8192);
@@ -1349,7 +1349,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     /**
      * Checks if specified fields only consist of mail ID and folder ID
-     * 
+     *
      * @param fields The fields to check
      * @return <code>true</code> if specified fields only consist of mail ID and folder ID; otherwise <code>false</code>
      */
@@ -1367,7 +1367,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         return (i == 3);
     }
-    
+
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws OXException {
         return appendMessages(destFolder, mails, force, false);
@@ -1377,7 +1377,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     public String[] importMessages(final String destFolder, final MailMessage[] mails, final boolean force) throws OXException {
         return appendMessages(destFolder, mails, force, true);
     }
-    
+
     public String[] appendMessages(final String destFolder, final MailMessage[] mails, final boolean force, final boolean isImport) throws OXException {
         if ((mails == null) || (mails.length == 0)) {
             return new String[0];
@@ -1401,7 +1401,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final InternetAddress[] from = mail.getFrom();
                     final List<InternetAddress> froms = Arrays.asList(from);
                     if (!validAddrs.containsAll(froms)) {
-                        throw 
+                        throw
                             MailExceptionCode.INVALID_SENDER.create(
                             froms.size() == 1 ? froms.get(0).toString() : Arrays.toString(from));
                     }
@@ -1438,17 +1438,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mir.setId(idStr[0]);
                 idList.add(idStr[0]);
             } catch (final OXException e) {
-                mir.setException(e);                
+                mir.setException(e);
             }
             mailImportResults.add(mir);
         }
-        
+
         final String[] ids = new String[idList.size()];
         for (int i = 0; i < idList.size(); i++) {
             ids[i] = idList.get(i);
         }
-        
-        return ids;        
+
+        return ids;
     }
 
     @Override
@@ -1982,7 +1982,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
         /*-
-         * 
+         *
         // Ensure flags
         final String[] arr = new String[1];
         for (int i = 0; i < msgs.length; i++) {
@@ -2085,7 +2085,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             transport.close();
         }
     }
-    
+
     @Override
     public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws OXException {
         /*
@@ -2160,6 +2160,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final org.apache.commons.logging.Log l = LOG;
         final Runnable r = new Runnable() {
 
+            @Override
             public void run() {
                 try {
                     final RetentionData retentionData = retentionService.newInstance();
@@ -2503,7 +2504,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
             }
         }
-        
+
     }
 
     @Override
@@ -2804,6 +2805,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return ret;
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             if (o1.isDefaultFolder()) {
                 if (o2.isDefaultFolder()) {
@@ -2828,6 +2830,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             return collator.compare(o1.getName(), o2.getName());
         }
@@ -2896,7 +2899,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         for (int i = 0; i < mars.length; i++) {
             mars[i] = mailImportResults.get(i);
         }
-        
+
         return mars;
     }
 

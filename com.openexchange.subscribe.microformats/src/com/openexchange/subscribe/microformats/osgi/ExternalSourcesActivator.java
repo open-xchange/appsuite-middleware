@@ -74,7 +74,7 @@ import com.openexchange.timer.TimerService;
 public class ExternalSourcesActivator extends DeferredActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
-    
+
     private static final String SOURCES_LIST = "com.openexchange.subscribe.external.sources";
 
     private static final int MINUTES = 60 * 1000;
@@ -105,9 +105,9 @@ public class ExternalSourcesActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        
+
     }
-    
+
     private void tryConfig() {
         ConfigurationService config = getService(ConfigurationService.class);
         TimerService timer = getService(TimerService.class);
@@ -115,10 +115,10 @@ public class ExternalSourcesActivator extends DeferredActivator {
             return;
         }
         String sourcesList = config.getProperty(SOURCES_LIST);
-        
+
         OXMFParserFactoryService oxmfParserFactory = new HTMLMicroformatParserFactory();
         OXMFFormParser formParser = new CybernekoOXMFFormParser();
-        
+
         if(sourcesList != null) {
             final List<ExternalSubscriptionSourceDiscoveryService> services = new ArrayList<ExternalSubscriptionSourceDiscoveryService>();
             for(String source : sourcesList.split("\\s*,\\s*")) {
@@ -126,7 +126,7 @@ public class ExternalSourcesActivator extends DeferredActivator {
                 services.add(discoveryService);
                 context.registerService(SubscriptionSourceDiscoveryService.class.getName(), discoveryService, null);
             }
-            
+
             timer.scheduleAtFixedRate(new Runnable() {
 
                 public void run() {
@@ -138,16 +138,16 @@ public class ExternalSourcesActivator extends DeferredActivator {
                         }
                     }
                 }
-                
+
             }, 0, 30 *MINUTES);
-            
+
         }
-        
-        
-        
+
+
+
     }
 
-    
-    
+
+
 
 }

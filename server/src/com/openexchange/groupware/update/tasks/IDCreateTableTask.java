@@ -63,13 +63,14 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link IDCreateTableTask} - Inserts necessary tables.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IDCreateTableTask extends UpdateTaskAdapter {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IDCreateTableTask.class));
 
+    @Override
     public String[] getDependencies() {
         return new String[] { };
     }
@@ -83,6 +84,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         createTable("sequenceIds", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {
@@ -121,7 +123,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
 
     /**
      * Check a table's existence
-     * 
+     *
      * @param tableName The table name to check
      * @param dbmd The database's meta data
      * @return <code>true</code> if table exists; otherwise <code>false</code>

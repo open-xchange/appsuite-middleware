@@ -59,14 +59,14 @@ import java.util.Set;
  * to their contexts and is the base distinguished name used in the directory service to separate contexts. Objects implementing this
  * interface must implement {@link java.lang.Object#equals(java.lang.Object)} and {@link java.lang.Object#hashCode()} because this interface
  * is used as key for maps.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public interface Context extends Serializable {
 
     /**
      * Returns the unique identifier of the context.
-     * 
+     *
      * @return unique identifier of the context.
      */
     int getContextId();
@@ -83,7 +83,7 @@ public interface Context extends Serializable {
 
     /**
      * Returns the unique identifier of context's admin.
-     * 
+     *
      * @return unique identifier of the context's admin
      */
     int getMailadmin();
@@ -106,14 +106,14 @@ public interface Context extends Serializable {
     /**
      * Returns if a context is enabled. All sessions that belong to a disabled context have to die as fast as possible to be able to
      * maintain these contexts.
-     * 
+     *
      * @return <code>true</code> if the context is enabled, <code>false</code> otherwise.
      */
     boolean isEnabled();
 
     /**
      * Returns if a context is being updated. This will be <code>true</code> if the schema is being updated the context is stored in.
-     * 
+     *
      * @return <code>true</code> if an update takes place.
      */
     boolean isUpdating();
@@ -130,12 +130,12 @@ public interface Context extends Serializable {
      * @return the context specific location inside the filestore.
      */
     String getFilestoreName();
-    
+
     /**
      * Gets the user attributes as an unmodifiable map.
      * <p>
      * Each attribute may point to multiple values.
-     * 
+     *
      * @return user attributes
      */
     Map<String, Set<String>> getAttributes();

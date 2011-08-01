@@ -51,7 +51,6 @@ package com.openexchange.subscribe;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.ServerSession;
 
 

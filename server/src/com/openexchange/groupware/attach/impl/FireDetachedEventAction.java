@@ -79,6 +79,7 @@ public class FireDetachedEventAction extends AttachmentEventAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         try {
             fireDetached(getAttachments(), getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());

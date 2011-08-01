@@ -80,7 +80,7 @@ public class SubscriptionSourceJSONWriter implements SubscriptionSourceJSONWrite
         super();
         this.translator = translator;
         formWriter = new FormDescriptionWriter(translator);
-        
+
     }
 
     public JSONObject writeJSON(final SubscriptionSource source) throws OXException {

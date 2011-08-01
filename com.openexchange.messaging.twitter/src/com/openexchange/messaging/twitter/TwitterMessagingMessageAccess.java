@@ -73,7 +73,7 @@ import com.openexchange.twitter.TwitterAccess;
 
 /**
  * {@link TwitterMessagingMessageAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingMessageAccess implements MessagingMessageAccess {
@@ -153,7 +153,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             throw e;
         }
     }
-    
+
     private TwitterMessagingMessage get(final long id) throws OXException {
         return new TwitterMessagingMessage(twitterAccess.showStatus(id), session);
     }
@@ -171,8 +171,8 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
             throw e;
         }
     }
-    
-    
+
+
 
     public List<String> moveMessages(final String sourceFolder, final String destFolder, final String[] messageIds, final boolean fast) throws OXException {
         checkFolder(sourceFolder);
@@ -269,7 +269,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 
     /**
      * Converts specified strings to an array of <code>long</code>.
-     * 
+     *
      * @param strings The strings
      * @return An array of <code>long</code>
      */
@@ -286,7 +286,7 @@ public final class TwitterMessagingMessageAccess implements MessagingMessageAcce
 
 //    /**
 //     * Converts specified numbers to an array of <code>String</code>.
-//     * 
+//     *
 //     * @param longs The numbers
 //     * @return An array of <code>String</code>
 //     */

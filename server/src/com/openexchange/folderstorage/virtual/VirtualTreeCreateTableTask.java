@@ -63,7 +63,7 @@ import com.openexchange.groupware.update.UpdateTask;
 
 /**
  * {@link VirtualTreeCreateTableTask} - Inserts necessary tables to support virtual folder trees.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VirtualTreeCreateTableTask implements UpdateTask {
@@ -75,10 +75,12 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 72;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.HIGHEST.priority;
     }
@@ -107,6 +109,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         return "CREATE TABLE virtualBackupSubscription (" + "cid INT4 unsigned NOT NULL, " + "tree INT4 unsigned NOT NULL, " + "user INT4 unsigned NOT NULL, " + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " + "subscribed tinyint(3) unsigned NOT NULL, " + "PRIMARY KEY (cid, tree, user, folderId), " + "FOREIGN KEY (cid, tree, user, folderId) REFERENCES virtualBackupTree (cid, tree, user, folderId) " + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         createTable("virtualTree", getTable1(), contextId);
         createTable("virtualPermission", getTable2(), contextId);
@@ -141,7 +144,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
 
     /**
      * Check a table's existence
-     * 
+     *
      * @param tableName The table name to check
      * @param dbmd The database's meta data
      * @return <code>true</code> if table exists; otherwise <code>false</code>

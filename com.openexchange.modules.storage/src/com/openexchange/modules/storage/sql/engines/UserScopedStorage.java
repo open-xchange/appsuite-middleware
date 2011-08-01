@@ -62,20 +62,20 @@ import com.openexchange.modules.model.Model;
  */
 public class UserScopedStorage<T extends Model<T>> extends BasicStorage<T>{
 
-    private int userId;
+    private final int userId;
 
     public UserScopedStorage(Metadata<T> metadata, DatabaseService dbService, int userId, int ctxId) {
         super(metadata, dbService, ctxId);
         this.userId = userId;
     }
-    
+
     @Override
     protected List<String> getExtraFields() {
         List<String> fields = super.getExtraFields();
         fields.add("user");
         return fields;
     }
-    
+
     @Override
     protected List<Object> getExtraValues() {
         List<Object> values = super.getExtraValues();

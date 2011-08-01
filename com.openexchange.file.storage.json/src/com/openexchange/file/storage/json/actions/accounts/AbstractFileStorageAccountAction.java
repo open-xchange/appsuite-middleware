@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * The common superclass for all AJAXActionServices handling file storage account management. Provides a unified handling
- * for JSONExceptions and stores commonly used services (the registry, a writer and a parser) for subclasses. 
+ * for JSONExceptions and stores commonly used services (the registry, a writer and a parser) for subclasses.
  * Subclasses must implement the {@link #doIt(AJAXRequestData, ServerSession)} method.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -74,13 +74,13 @@ public abstract class AbstractFileStorageAccountAction implements AJAXActionServ
     protected FileStorageServiceRegistry registry;
     protected FileStorageAccountWriter writer;
     protected FileStorageAccountParser parser;
-    
+
     public AbstractFileStorageAccountAction(final FileStorageServiceRegistry registry) {
         this.registry = registry;
         writer = new FileStorageAccountWriter();
         parser = new FileStorageAccountParser(registry);
     }
-    
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             return doIt(request, session);

@@ -81,21 +81,21 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 public class Contact extends DataServlet {
-    
+
     /**
      * For serialization.
      */
     private static final long serialVersionUID = 1635881627528234660L;
-    
+
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Contact.class));
-    
+
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final ServerSession session = getSessionObject(httpServletRequest);
         final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            
+
             JSONObject jsonObj = null;
             try {
                 jsonObj = convertParameter2JSONObject(httpServletRequest);
@@ -105,14 +105,14 @@ public class Contact extends DataServlet {
                 writeResponse(response, httpServletResponse);
                 return;
             }
-            
+
             if (action.equals(ACTION_IMAGE)) {
                 final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
                 final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
-                
+
                 OutputStream os = null;
-                
-                
+
+
                 final Context ctx = session.getContext();
 
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
@@ -141,14 +141,14 @@ public class Contact extends DataServlet {
                     LOG.error("actionImage", e);
                     httpServletResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "");
                 }
-                
+
                 if (os != null) {
                     os.flush();
                 }
-                
+
                 return;
             }
-            
+
             final ContactRequest contactRequest = new ContactRequest(session);
             final JSONValue responseObj = contactRequest.action(action, jsonObj);
             response.setTimestamp(contactRequest.getTimestamp());
@@ -160,22 +160,22 @@ public class Contact extends DataServlet {
         } catch (final OXException e) {
             response.setException(e);
         }
-        
+
         writeResponse(response, httpServletResponse);
-        
+
     }
-    
+
     @Override
     protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final ServerSession session = getSessionObject(httpServletRequest);
         final Response response = new Response(session);
         try {
             final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-            
+
             final String data = getBody(httpServletRequest);
             if (data.length() > 0) {
                 final JSONObject jsonObj;
-                
+
                 try {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
                 } catch (final JSONException e) {
@@ -186,18 +186,18 @@ public class Contact extends DataServlet {
                 }
 
                 final ContactRequest contactRequest = new ContactRequest(session);
-                
+
                 if (data.charAt(0) == '[') {
                     final JSONArray jsonDataArray = new JSONArray(data);
                     jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
-                    
+
                     final JSONValue responseObj = contactRequest.action(action, jsonObj);
                     response.setTimestamp(contactRequest.getTimestamp());
                     response.setData(responseObj);
                 } else if (data.charAt(0) == '{') {
                     final JSONObject jsonDataObj = new JSONObject(data);
                     jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObj);
-                    
+
                     final Object responseObj = contactRequest.action(action, jsonObj);
                     response.setTimestamp(contactRequest.getTimestamp());
                     response.setData(responseObj);
@@ -217,9 +217,9 @@ public class Contact extends DataServlet {
         } catch (final OXException e) {
             response.setException(e);
         }
-        
+
         writeResponse(response, httpServletResponse);
-        
+
     }
 
     @Override
@@ -358,7 +358,7 @@ public class Contact extends DataServlet {
         }
 
     }
-    
+
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().hasContact();

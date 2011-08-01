@@ -59,10 +59,12 @@ public class DefaultFileStorageActivator implements BundleActivator {
 
     private ServiceRegistration reg;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         reg = context.registerService(FileStorageFactory.class.getName(), new CompositeFileStorageFactory(), null);
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         reg.unregister();
     }

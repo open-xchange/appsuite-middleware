@@ -102,6 +102,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         MODE = new CACHE_MODE(provider);
     }
 
+    @Override
     public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
             final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         final Map<Integer, WebdavPath> cache = docPathCache.get();
@@ -123,6 +124,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
     }
 
+    @Override
     public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId,
             final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
@@ -173,6 +175,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         return relative(relativeToFolder, thePath, ctx, user, userConfig);
     }
 
+    @Override
     public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
             final User user, final UserConfiguration userConfig) throws OXException {
 
@@ -291,6 +294,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
         cache.put(res.getPath(), res);
     }
 
+    @Override
     public void invalidate(final WebdavPath url, final int id , final Type type) {
 
         resolveCache.get().remove(url);
@@ -353,6 +357,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
             this.provider = provider;
         }
 
+        @Override
         public FolderObject getFolder(final int folderid, final Context ctx) throws OXException {
             try {
                 Connection readCon = null;
@@ -371,6 +376,7 @@ public class PathResolverImpl extends AbstractPathResolver implements URLCache {
 
     private static final class NORMAL_MODE implements Mode {
 
+        @Override
         public FolderObject getFolder(final int folderid, final Context ctx) throws OXException {
             return FolderObject.loadFolderObjectFromDB(folderid, ctx);
         }

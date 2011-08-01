@@ -66,7 +66,7 @@ public class SimEntry<T1, T2> implements Map.Entry<T1, T2>{
         this.key = key;
         this.value = value;
     }
-    
+
     public T1 getKey() {
         return key;
     }

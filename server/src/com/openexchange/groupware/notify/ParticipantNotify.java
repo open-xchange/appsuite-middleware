@@ -170,7 +170,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Sends specified message
-     * 
+     *
      * @param mmsg The message
      * @param session The session
      * @param obj The calendar object
@@ -300,6 +300,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return UserSettingMailStorage.getInstance().loadUserSettingMail(id, context);
     }
 
+    @Override
     public void appointmentCreated(final Appointment appointmentObj, final Session session) {
         int folderOwner = session.getUserId();
         try {
@@ -311,16 +312,19 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             AppointmentActionReplacement.ACTION_NEW), folderOwner == session.getUserId() ? Notifications.APPOINTMENT_CREATE_MAIL : Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF, State.Type.NEW), false, false, false);
     }
 
+    @Override
     public void appointmentModified(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
         sendNotification(oldAppointment, newAppointment, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_ACCEPTED),
@@ -329,6 +333,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.ACCEPTED), false, false, false);
     }
 
+    @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DECLINED),
@@ -337,6 +342,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DECLINED), false, false, false);
     }
 
+    @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
         sendNotification(null, appointmentObj, session, new AppointmentState(
             new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
@@ -345,6 +351,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
+    @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
         /*
          * Clear calendar object from notification pool
@@ -366,6 +373,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             false);
     }
 
+    @Override
     public void taskCreated(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_NEW),
@@ -373,6 +381,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.NEW), false, false, false);
     }
 
+    @Override
     public void taskModified(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
@@ -381,6 +390,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     }
 
+    @Override
     public void taskModified(final Task oldTask, final Task newTask, final Session session) {
         sendNotification(oldTask, newTask, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
@@ -388,6 +398,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.MODIFIED), false, false, true);
     }
 
+    @Override
     public void taskAccepted(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
@@ -396,6 +407,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.ACCEPTED), false, false, false);
     }
 
+    @Override
     public void taskDeclined(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
@@ -404,6 +416,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.DECLINED), false, false, false);
     }
 
+    @Override
     public void taskTentativelyAccepted(final Task taskObj, final Session session) {
         sendNotification(null, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
@@ -412,6 +425,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
+    @Override
     public void taskDeleted(final Task taskObj, final Session session) {
         /*
          * Clear calendar object from notification pool
@@ -716,7 +730,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Checks if specified user participant has read permission on given calendar object.
-     * 
+     *
      * @param participant The user participant
      * @param obj The calendar object
      * @param session The session providing needed user data
@@ -750,7 +764,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Gets the folder name.
-     * 
+     *
      * @param folderId The folder ID
      * @param locale The locale
      * @param access The folder access instance
@@ -771,7 +785,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Creates a message for specified user.
-     * 
+     *
      * @param session
      * @param p The participant
      * @param canRead <code>true</code> if provided participant has read permission; otherwise <code>false</code>
@@ -790,7 +804,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Creates a message for specified participant.
-     * 
+     *
      * @param session
      * @param p The participant
      * @param title The object's title
@@ -886,7 +900,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                      */
                     return null;
                 }
-                
+
                 String textMessage = "";
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
                     final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
@@ -988,7 +1002,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         if (Participant.RESOURCE == p.type) {
             /*-
              * Special prefixes for resource participant receivers.
-             * 
+             *
              * Prefix already applied to multipart/* content, therefore only check for text/plain content
              */
             final Object content = msg.message;
@@ -1014,7 +1028,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Builds a multipart object containing the text/plain and iCal part
-     * 
+     *
      * @return The multipart object or given text if building failed
      */
     private static Object generateMessageMultipart(final ServerSession session, final CalendarObject cal, final String text, final int module, final State.Type type, final ITipMethod method, final EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
@@ -1148,7 +1162,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             return Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF;
         }
     }
-    
+
     private static int getFolderOwner(final CalendarObject cal, final ServerSession session) {
         final OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
         try {
@@ -1299,7 +1313,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Set end time to first occurrence's end time if necessary
              */
-            
+
             if (newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
                 if (start != null && end != null) {
                     end = computeFirstOccurrenceEnd(start.getTime(), end.getTime());
@@ -2023,7 +2037,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Compares given {@link Object} references.
-     * 
+     *
      * @param o1 The first object
      * @param o2 The second object
      * @return <code>true</code> if both {@link Object} references are considered to be equal; otherwise <code>false</code>
@@ -2062,7 +2076,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * <p>
      * Note: A <code>null</code> reference and an empty string are considered to be equal. Otherwise use
      * {@link #compareObjects(Object, Object)}
-     * 
+     *
      * @param s1 The first string
      * @param s2 The second string
      * @return <code>true</code> if both {@link String} references are considered to be equal; otherwise <code>false</code>
@@ -2090,7 +2104,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * {@link System#currentTimeMillis()}.</li>
      * <li>For a recurring event: if its until date is in the past</li>
      * </ul>
-     * 
+     *
      * @param calendarObj The calendar object whose start and end date is ought to be checked
      * @param module The module
      * @return <code>true</code> if notifications shall be dropped; otherwise <code>false</code>.
@@ -2143,7 +2157,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Compares if given time millis fit into the date denoted by specified date millis.
-     * 
+     *
      * @param date The date millis
      * @param millis The time millis
      * @return <code>true</code> if given time millis fit into the date denoted by specified date millis; otherwise <code>false</code>
@@ -2154,7 +2168,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Computes the first occurence's end time.
-     * 
+     *
      * @param startMillis The start time in UTC milliseconds
      * @param endMillis The end time in UTC milliseconds
      * @return The first occurence's end time.
@@ -2179,7 +2193,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Checks if specified appointment is a change exception.
-     * 
+     *
      * @param event The event to examine
      * @return <code>true</code> if specified appointment is a change exception; otherwise <code>false</code>
      */
@@ -2189,7 +2203,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Gets the recurrence master's title of specified event.
-     * 
+     *
      * @param appointment The change exception
      * @param ctx The context
      * @return The recurrence master's title or <code>null</code>.

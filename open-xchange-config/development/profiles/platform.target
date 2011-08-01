@@ -1,52 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="OX Platform" sequenceNumber="44">
+<target name="OX Platform">
 <locations>
-<location path="${eclipse_home}" type="Directory"/>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="false" type="InstallableUnit">
-<unit id="javax.servlet" version="3.0.0.v201103241727"/>
-<unit id="javax.servlet.source" version="3.0.0.v201103241727"/>
-<unit id="org.apache.commons.cli" version="1.2.0.v201105210650"/>
-<unit id="org.apache.commons.cli.source" version="1.2.0.v201105210650"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository/"/>
+<location includeAllPlatforms="false" includeMode="slicer" type="InstallableUnit">
+<unit id="org.eclipse.orbit.build.feature.set1.feature.group" version="1.0.0.v20100831-0720-DaFCAFBwISlNOCPBAtLG1Qe0Pj7F"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/S20100831105311/updateSite"/>
 </location>
+<location path="${eclipse_home}" type="Directory"/>
 </locations>
 <includeBundles>
-<plugin id="org.eclipse.ecf.identity"/>
-<plugin id="org.eclipse.ecf.identity.source"/>
-<plugin id="org.eclipse.equinox.registry.source"/>
-<plugin id="org.apache.commons.logging" version="1.1.1.v201101211721"/>
-<plugin id="org.eclipse.ecf"/>
-<plugin id="org.eclipse.core.jobs"/>
-<plugin id="org.apache.commons.logging" version="1.0.4.v201101211617"/>
-<plugin id="org.eclipse.ecf.source"/>
-<plugin id="org.eclipse.core.jobs.source"/>
-<plugin id="org.apache.commons.cli"/>
-<plugin id="org.eclipse.equinox.util"/>
-<plugin id="org.eclipse.equinox.event.source"/>
-<plugin id="org.eclipse.osgi.source"/>
-<plugin id="org.eclipse.equinox.common.source"/>
-<plugin id="org.eclipse.ecf.ssl.source"/>
+<plugin id="org.apache.log4j" version="1.2.15.v201005080500"/>
 <plugin id="org.eclipse.osgi"/>
-<plugin id="org.eclipse.ecf.ssl"/>
-<plugin id="org.eclipse.osgi.services.source"/>
-<plugin id="org.apache.commons.cli.source"/>
-<plugin id="org.apache.commons.logging.source"/>
-<plugin id="org.eclipse.equinox.ds.source"/>
+<plugin id="org.apache.commons.cli"/>
 <plugin id="org.eclipse.equinox.ds"/>
-<plugin id="org.eclipse.equinox.registry"/>
-<plugin id="org.eclipse.equinox.util.source"/>
-<plugin id="org.apache.commons.lang"/>
-<plugin id="javax.servlet" version="2.5.0.v201103041518"/>
+<plugin id="org.apache.commons.logging" version="1.1.1.v201005080502"/>
 <plugin id="org.eclipse.equinox.event"/>
-<plugin id="javax.servlet.source" version="2.5.0.v201103041518"/>
-<plugin id="org.eclipse.equinox.concurrent"/>
-<plugin id="org.eclipse.core.runtime.compatibility.registry.source"/>
-<plugin id="org.eclipse.equinox.common"/>
-<plugin id="javax.servlet.source" version="3.0.0.v201103241727"/>
+<plugin id="org.eclipse.osgi.source"/>
+<plugin id="org.eclipse.equinox.util"/>
+<plugin id="javax.servlet" version="2.4.0.v200806031604"/>
+<plugin id="org.apache.commons.lang" version="2.4.0.v201005080502"/>
 <plugin id="org.eclipse.osgi.services"/>
-<plugin id="org.eclipse.core.runtime.compatibility.registry"/>
+<plugin id="org.eclipse.osgi.services.source"/>
+<plugin id="org.eclipse.equinox.event.source"/>
 </includeBundles>
 <environment>
 <os>linux</os>

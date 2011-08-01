@@ -71,6 +71,7 @@ public class ForwardMessage implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "forwardmessage" };
     }
@@ -78,10 +79,12 @@ public class ForwardMessage implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractMailFuncs() {
             private static final String INLINE = "Inline";
             private static final String ATTACHMENT = "Attachment";
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }

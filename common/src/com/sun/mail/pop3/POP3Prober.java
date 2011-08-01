@@ -59,7 +59,7 @@ import javax.mail.MessagingException;
  * {@link POP3Prober} - Probes support of <code><small>UIDL</small></code> and <code><small>TOP</small></code> POP3 commands.
  * <p>
  * Any occurred exception can be retrieved via {@link #getWarnings()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Prober {
@@ -72,7 +72,7 @@ public final class POP3Prober {
 
     /**
      * Initializes a new {@link POP3Prober}.
-     * 
+     *
      * @param pop3Store The connected POP3 store
      * @param pop3Folder The POP3 folder to check with
      * @throws MessagingException If initialization fails
@@ -86,7 +86,7 @@ public final class POP3Prober {
 
     /**
      * Gets the UIDLs of contained messages.
-     * 
+     *
      * @return The UIDLs
      */
     public String[] getUIDLs() {
@@ -104,7 +104,7 @@ public final class POP3Prober {
 
     /**
      * Probes the <code><small>UIDL</small></code> command.
-     * 
+     *
      * @return <code>true</code> if <code><small>UIDL</small></code> command is supported; otherwise <code>false</code>
      */
     public boolean probeUIDL() {
@@ -124,7 +124,7 @@ public final class POP3Prober {
 
     /**
      * Probes the <code><small>TOP</small></code> command.
-     * 
+     *
      * @return <code>true</code> if <code><small>TOP</small></code> command is supported; otherwise <code>false</code>
      */
     public boolean probeTOP() {
@@ -144,7 +144,7 @@ public final class POP3Prober {
 
     /**
      * Gets an unmodifiable list of occurred warnings during probing.
-     * 
+     *
      * @return An unmodifiable list of occurred warnings
      */
     public List<Exception> getWarnings() {

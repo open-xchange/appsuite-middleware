@@ -86,7 +86,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXFolderStorage} - The Unified INBOX folder storage implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
@@ -103,7 +103,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     /**
      * Initializes a new {@link UnifiedINBOXFolderStorage}
-     * 
+     *
      * @param access The Unified INBOX access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
@@ -494,7 +494,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     /**
      * Gets session user's locale.
-     * 
+     *
      * @return The session user's locale
      * @throws OXException If retrieving user's locale fails
      */

@@ -58,16 +58,16 @@ import com.openexchange.exception.OXException;
 /**
  * Contains information on the result of an import as done by
  * implementors of Importer (see link).
- * 
+ *
  * Usage: Usually, you only want to check whether the import
  * hasErrors or isCorrect (one is the inversion of the other,
- * no reason for having both besides that I'm lazy) 
- * 
+ * no reason for having both besides that I'm lazy)
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  * @see com.openexchange.groupware.importexport.Importer
  */
 public class ImportResult {
-	
+
 	private String objectId;
 	private String folder;
 	private OXException exception;
@@ -84,7 +84,7 @@ public class ImportResult {
 	public ImportResult() {
 		super();
 	}
-	
+
 	/**
 	 * Constructor for correct result
 	 * @param objectId
@@ -94,7 +94,7 @@ public class ImportResult {
 	public ImportResult(final String objectId, final String folder, final Date date){
 		this(objectId, folder, date, null);
 	}
-	
+
 	/**
 	 * Constructor for botched result
 	 * @param objectId
@@ -123,7 +123,7 @@ public class ImportResult {
 	}
 
 	/** Constructor for correct result using timestamp instead of a Date
-	 * 
+	 *
 	 * @param objectId
 	 * @param folder
 	 * @param timestamp
@@ -131,7 +131,7 @@ public class ImportResult {
 	public ImportResult(final String objectId, final String folder, final long timestamp){
 		this(objectId, folder, new Date(timestamp));
 	}
-	
+
 	/**
 	 * Constructor for a botched result using a timestamp instead of a Date
 	 * @param objectId
@@ -142,10 +142,10 @@ public class ImportResult {
 	public ImportResult(final String objectId, final String folder, final long timestamp, final OXException exception){
 		this(objectId, folder, new Date(timestamp), exception);
 	}
-	
-	
-	
-	
+
+
+
+
 	public boolean isCorrect(){
 		return exception == null;
 	}

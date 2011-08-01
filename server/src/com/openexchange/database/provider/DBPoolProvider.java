@@ -61,6 +61,7 @@ public class DBPoolProvider implements DBProvider {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBPoolProvider.class));
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         try {
             final Connection readCon = DBPool.pickup(ctx);
@@ -71,12 +72,14 @@ public class DBPoolProvider implements DBProvider {
         }
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         if (con != null) {
             DBPool.closeReaderSilent(ctx,con); //FIXME
         }
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         try {
             final Connection writeCon = DBPool.pickupWriteable(ctx);
@@ -86,6 +89,7 @@ public class DBPoolProvider implements DBProvider {
         }
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         if (con == null) {
             return;

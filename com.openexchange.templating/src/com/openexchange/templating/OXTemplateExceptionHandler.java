@@ -60,12 +60,12 @@ import com.openexchange.exception.OXException;
  */
 public interface OXTemplateExceptionHandler {
 
-    void handleTemplateException(OXException te, Writer out) throws OXException;    
-    
+    void handleTemplateException(OXException te, Writer out) throws OXException;
+
     OXTemplateExceptionHandler RETHROW_HANDLER = new OXTemplateExceptionHandler() {
-        
+
         public void handleTemplateException(OXException te, Writer out) throws OXException {
-            throw te;            
+            throw te;
         }
     };
 }

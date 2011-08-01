@@ -67,13 +67,14 @@ public class UseCountComparator implements Comparator<Contact> {
         this.specialSort = specialSort;
         this.contactComparator = new SpecialAlphanumSortContactComparator();
     }
-    
+
     public UseCountComparator(final boolean specialSort, final Comparator comp) {
         this(specialSort);
         this.contactComparator = comp;
     }
 
 
+    @Override
     public int compare(final Contact o1, final Contact o2) {
         if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
             if (specialSort) {

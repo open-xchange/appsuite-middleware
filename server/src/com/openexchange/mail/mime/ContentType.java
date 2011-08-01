@@ -60,7 +60,7 @@ import com.openexchange.tools.Collections;
 
 /**
  * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentType extends ParameterizedHeader {
@@ -81,7 +81,7 @@ public class ContentType extends ParameterizedHeader {
 
         /**
          * Initializes a new {@link UnmodifiableContentType}.
-         * 
+         *
          * @param contentType The backing content type
          */
         public UnmodifiableContentType(final ContentType contentType) {
@@ -246,7 +246,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * The MIME type delimiter
-     * 
+     *
      * @value /
      */
     private static final char DELIMITER = '/';
@@ -275,7 +275,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Initializes a new {@link ContentType}
-     * 
+     *
      * @param contentType The content type
      * @throws OXException If content type cannot be parsed
      */
@@ -403,7 +403,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Applies given content type to this content type
-     * 
+     *
      * @param contentType The content type to apply
      */
     public void setContentType(final ContentType contentType) {
@@ -425,7 +425,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets primary type
-     * 
+     *
      * @return This content type with new primary type applied
      */
     public ContentType setPrimaryType(final String primaryType) {
@@ -443,7 +443,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets sub-type
-     * 
+     *
      * @return This content type with new sub-type applied
      */
     public ContentType setSubType(final String subType) {
@@ -454,7 +454,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Gets this content type's base type without any parameters appended; e.g. <code>"text/plain"</code>.
-     * 
+     *
      * @return The base type
      */
     public String getBaseType() {
@@ -466,7 +466,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets base type (e.g. text/plain)
-     * 
+     *
      * @return This content type with new base type applied
      */
     public ContentType setBaseType(final String baseType) throws OXException {
@@ -476,7 +476,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets <code>"charset"</code> parameter
-     * 
+     *
      * @param charset The charset parameter value; e.g. <code>"UTF-8"</code>
      * @return This content type with new <code>"charset"</code> parameter applied
      */
@@ -501,7 +501,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets <code>"name"</code> parameter
-     * 
+     *
      * @param filename The name parameter
      * @return This content type with new <code>"name"</code> parameter applied
      */
@@ -526,7 +526,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Sets the content type to specified content type string; e.g. "text/plain; charset=US-ASCII"
-     * 
+     *
      * @param contentType The content type string
      * @throws OXException If specified content type string cannot be parsed
      */
@@ -536,7 +536,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Checks if Content-Type's base type matches given wildcard pattern (e.g text/plain, text/* or text/htm*)
-     * 
+     *
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
     public boolean isMimeType(final String pattern) {
@@ -545,7 +545,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Checks if Content-Type's base type ignore-case starts with specified prefix.
-     * 
+     *
      * @param prefix The prefix
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>
@@ -559,7 +559,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
-     * 
+     *
      * @param contentType The content-type string to process
      * @return Prepared content-type string ready for being inserted into a MIME part's headers.
      * @throws OXException If parsing content-type string fails
@@ -570,7 +570,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Parses and prepares specified content-type string for being inserted into a MIME part's headers.
-     * 
+     *
      * @param contentType The content-type string to process
      * @param name The optional name parameter to set if no <tt>"name"</tt> parameter is present in specified content-type string; pass
      *            <code>null</code> to ignore
@@ -587,7 +587,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Checks if given MIME type's base type matches given wildcard pattern (e.g text/plain, text/* or text/htm*)
-     * 
+     *
      * @param mimeType The MIME type
      * @param pattern The pattern
      * @return <code>true</code> if pattern matches; otherwise <code>false</code>
@@ -599,7 +599,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Detects the base type of given MIME type
-     * 
+     *
      * @param mimeType The MIME type
      * @return the base type
      * @throws OXException If an invalid MIME type is detected
@@ -626,7 +626,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */
@@ -658,7 +658,7 @@ public class ContentType extends ParameterizedHeader {
 
     /**
      * Returns a RFC2045 style (ASCII-only) string representation of this content type.
-     * 
+     *
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */

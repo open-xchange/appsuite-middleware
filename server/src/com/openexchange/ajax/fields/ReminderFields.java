@@ -52,17 +52,17 @@ package com.openexchange.ajax.fields;
 public interface ReminderFields extends DataFields {
 
 	public static final String TARGET_ID = "target_id";
-	
+
 	public static final String FOLDER = "folder";
 
 	public static final String ALARM = "alarm";
 
 	public static final String MODULE = "module";
-	
+
 	public static final String USER_ID = "user_id";
-	
+
 	public static final String RECURRENCE_APPOINTMENT = "recurrence_appointment";
-	
+
 	public static final String SERVER_TIME = "server_time";
-	
+
 }

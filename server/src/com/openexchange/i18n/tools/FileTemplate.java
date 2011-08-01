@@ -71,7 +71,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param f from this file the template is read.
      * @param charset this charset is used to have proper special characters.
      */

@@ -56,7 +56,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link FolderStorage} - A folder storage bound to a certain folder source (e.g database, email, etc).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderStorage {
@@ -100,35 +100,35 @@ public interface FolderStorage {
      * Gets the content types supported by this folder storage.
      * <p>
      * A zero length array means this folder storage supports all content types for a certain tree identifier.
-     * 
+     *
      * @return The content types supported by this folder storage or a zero length array to indicate no content type limitations
      */
     ContentType[] getSupportedContentTypes();
 
     /**
      * Gets the storage's folder type.
-     * 
+     *
      * @return The storage's folder type
      */
     FolderType getFolderType();
 
     /**
      * Gets the storage's priority.
-     * 
+     *
      * @return The storage's priority
      */
     StoragePriority getStoragePriority();
 
     /**
      * Gets the default content type for this folder storage.
-     * 
+     *
      * @return The default content type or <code>null</code> if this folder storage has no default content type
      */
     ContentType getDefaultContentType();
 
     /**
      * Checks if denoted folder is empty.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
@@ -139,7 +139,7 @@ public interface FolderStorage {
 
     /**
      * Checks if denoted folder contains user-foreign objects.
-     * 
+     *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param folderId The folder identifier
@@ -151,7 +151,7 @@ public interface FolderStorage {
 
     /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
@@ -162,7 +162,7 @@ public interface FolderStorage {
 
     /**
      * Checks if the folder denoted by specified folder ID exists in this folder storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageType The storage type from which to get the folder
@@ -174,7 +174,7 @@ public interface FolderStorage {
 
     /**
      * Checks consistency of the tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param storageParameters The storage parameters
      * @throws OXException If consistency check fails
@@ -183,7 +183,7 @@ public interface FolderStorage {
 
     /**
      * Restores the folder with given folder identifier
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
@@ -193,7 +193,7 @@ public interface FolderStorage {
 
     /**
      * Prepares specified folder with user-sensitive informations if needed.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folder The folder identifier
      * @param storageParameters The storage parameters
@@ -204,7 +204,7 @@ public interface FolderStorage {
 
     /**
      * Gets the folder denoted by specified folder ID.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageParameters The storage parameters
@@ -215,7 +215,7 @@ public interface FolderStorage {
 
     /**
      * Gets the folders denoted by specified folder IDs.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderIds The folder identifiers
      * @param storageParameters The storage parameters
@@ -226,7 +226,7 @@ public interface FolderStorage {
 
     /**
      * Gets the folder denoted by specified folder ID.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param storageType The storage type from which to get the folder
@@ -238,7 +238,7 @@ public interface FolderStorage {
 
     /**
      * Gets the folders denoted by specified folder IDs.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderIds The folder identifiers
      * @param storageType The storage type from which to get the folder
@@ -250,7 +250,7 @@ public interface FolderStorage {
 
     /**
      * Gets this storage's default folder identifier for specified user for given content type.
-     * 
+     *
      * @param user The user whose default folder shall be returned
      * @param treeId The tree identifier
      * @param contentType The content type or the default folder
@@ -263,7 +263,7 @@ public interface FolderStorage {
 
     /**
      * Gets the type as indicated by specified parent.
-     * 
+     *
      * @param user The user
      * @param treeId The tree identifier
      * @param parentId The parent identifier
@@ -277,7 +277,7 @@ public interface FolderStorage {
      * Deletes the folder denoted by specified folder ID.
      * <p>
      * A {@link OXException} is thrown if denoted folder contains subfolders.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
@@ -287,7 +287,7 @@ public interface FolderStorage {
 
     /**
      * Clears the content of the folder denoted by specified folder ID.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder ID
      * @param storageParameters The storage parameters
@@ -297,7 +297,7 @@ public interface FolderStorage {
 
     /**
      * Updates the data of the given folder on the storage.
-     * 
+     *
      * @param folder object containing new folder data.
      * @param storageParameters The storage parameters
      * @throws OXException If changing the folder data fails.
@@ -306,7 +306,7 @@ public interface FolderStorage {
 
     /**
      * Updates the last-modified time stamp of the given folder in the storage.
-     * 
+     *
      * @param lastModified The last-modified time stamp to set
      * @param treeId The tree identifier
      * @param folderId The folder ID
@@ -319,7 +319,7 @@ public interface FolderStorage {
      * Creates the given folder on the storage.
      * <p>
      * Implementation is expected to set the identifier of created folder in passed folder instance through {@link Folder#setID(String)}.
-     * 
+     *
      * @param folder The object containing the new folder data.
      * @param storageParameters The storage parameters
      * @throws OXException If creating the folder fails.
@@ -328,7 +328,7 @@ public interface FolderStorage {
 
     /**
      * Gets the folder identifiers for specified content type and type.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      * @param type The type
@@ -340,7 +340,7 @@ public interface FolderStorage {
 
     /**
      * Gets the subfolder identifiers for specified parent which are visible to storage parameter's entity.
-     * 
+     *
      * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @param storageParameters The storage parameters
@@ -353,7 +353,7 @@ public interface FolderStorage {
      * Gets the identifiers of all new and modified folders from this storage since given time stamp.
      * <p>
      * If a certain implementation does not support this feature an empty array is supposed to be returned.
-     * 
+     *
      * @param treeId The tree identifier
      * @param timeStamp The time stamp
      * @param includeContentTypes The content types to include
@@ -367,7 +367,7 @@ public interface FolderStorage {
      * Gets the identifiers of all deleted folders from this storage since given time stamp.
      * <p>
      * If a certain implementation does not support this feature an empty array is supposed to be returned.
-     * 
+     *
      * @param treeId The tree identifier
      * @param timeStamp The time stamp
      * @param storageParameters The storage parameters
@@ -378,7 +378,7 @@ public interface FolderStorage {
 
     /**
      * Starts a transaction on folder storage.
-     * 
+     *
      * @param parameters The parameters
      * @param modify <code>true</code> if started transaction is supposed to modify storage's content; otherwise <code>false</code>
      * @return <code>true</code> if call started the transaction; otherwise <code>false</code> if transaction has already been started
@@ -389,7 +389,7 @@ public interface FolderStorage {
 
     /**
      * Publishes made changes on the storage.
-     * 
+     *
      * @param params The storage parameters
      * @throws OXException If committing the made changes fails.
      */
@@ -398,7 +398,7 @@ public interface FolderStorage {
     /**
      * Discards made changes on the storage. This method does not throw an exception because a rollback should only be used if already some
      * problem or exception occurred. Problems occurred while executing this method should only be logged.
-     * 
+     *
      * @param params The storage parameters.
      */
     void rollback(StorageParameters params);

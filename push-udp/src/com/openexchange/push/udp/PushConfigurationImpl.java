@@ -60,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * PushConfigInterface
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 

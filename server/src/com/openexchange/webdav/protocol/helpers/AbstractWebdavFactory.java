@@ -59,31 +59,35 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link AbstractWebdavFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractWebdavFactory implements WebdavFactory {
 
     private PropertyMixin[] mixins;
 
+    @Override
     public void beginRequest() {
 
     }
 
+    @Override
     public void endRequest(final int status) {
 
     }
 
+    @Override
     public WebdavCollection resolveCollection(String url) throws OXException {
         url = normalize(url);
         return resolveCollection(decode(new WebdavPath(url)));
     }
 
+    @Override
     public WebdavResource resolveResource(String url) throws OXException {
         url = normalize(url);
         return resolveResource(decode(new WebdavPath(url)));
     }
-    
+
     public WebdavPath decode(final WebdavPath webdavPath) {
         final WebdavPath path = new WebdavPath();
         for(final String component : webdavPath) {
@@ -102,7 +106,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
         }
         return thing;
     }
-    
+
     protected String normalize(String url) {
         if(url.length()==0) {
             return "/";
@@ -113,7 +117,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
         }
         return url;
     }
-    
+
     public void setGlobalMixins(final PropertyMixin...mixins) {
         this.mixins = mixins;
     }

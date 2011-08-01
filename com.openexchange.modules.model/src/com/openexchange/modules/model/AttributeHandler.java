@@ -61,7 +61,7 @@ public interface AttributeHandler<T extends Model<T>> {
         public Object handle(Attribute attr, Object... args) {
             return null;
         }
-        
+
     };
 
     public Object handle(Attribute<T> attr, Object...args);

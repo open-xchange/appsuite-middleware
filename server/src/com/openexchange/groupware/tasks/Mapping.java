@@ -93,138 +93,175 @@ public final class Mapping {
      */
     public static final Mapper<? extends Object>[] MAPPERS = new Mapper<?>[] {
         new Mapper<Boolean>() {
+            @Override
             public int getId() {
                 return Task.PRIVATE_FLAG;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsPrivateFlag();
             }
+            @Override
             public String getDBColumnName() {
                 return "private";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setBoolean(pos, task.getPrivateFlag());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 // NOT NULL constraint
                 task.setPrivateFlag(result.getBoolean(pos));
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPrivateFlag() == task2.getPrivateFlag();
             }
+            @Override
             public Boolean get(final Task task) {
                 return Boolean.valueOf(task.getPrivateFlag());
             }
+            @Override
             public void set(final Task task, final Boolean value) {
                 task.setPrivateFlag(value.booleanValue());
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.CREATION_DATE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsCreationDate();
             }
+            @Override
             public String getDBColumnName() {
                 return "creating_date";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setTimestamp(pos, new Timestamp(task.getCreationDate()
                     .getTime()));
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 // NOT NULL constraint
                 task.setCreationDate(result.getTimestamp(pos));
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getCreationDate(),
                     task2.getCreationDate());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getCreationDate();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setCreationDate(value);
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.LAST_MODIFIED;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsLastModified();
             }
+            @Override
             public String getDBColumnName() {
                 return "last_modified";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setLong(pos, task.getLastModified().getTime());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 // NOT NULL constraint
                 task.setLastModified(new Date(result.getLong(pos)));
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getLastModified(),
                     task2.getLastModified());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getLastModified();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setLastModified(value);
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.CREATED_BY;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsCreatedBy();
             }
+            @Override
             public String getDBColumnName() {
                 return "created_from";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getCreatedBy());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 // NOT NULL constraint
                 task.setCreatedBy(result.getInt(pos));
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getCreatedBy() == task2.getCreatedBy();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getCreatedBy());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setCreatedBy(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.MODIFIED_BY;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsModifiedBy();
             }
+            @Override
             public String getDBColumnName() {
                 return "changed_from";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getModifiedBy());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int changedBy = result.getInt(pos);
@@ -232,26 +269,33 @@ public final class Mapping {
                     task.setModifiedBy(changedBy);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getModifiedBy() == task2.getModifiedBy();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getModifiedBy());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setModifiedBy(value.intValue());
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.START_DATE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsStartDate();
             }
+            @Override
             public String getDBColumnName() {
                 return "start";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getStartDate()) {
@@ -261,6 +305,7 @@ public final class Mapping {
                         .getTime()));
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final Date start = result.getTimestamp(pos);
@@ -268,27 +313,34 @@ public final class Mapping {
                     task.setStartDate(start);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getStartDate(),
                     task2.getStartDate());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getStartDate();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setStartDate(value);
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.END_DATE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsEndDate();
             }
+            @Override
             public String getDBColumnName() {
                 return "end";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getEndDate()) {
@@ -298,6 +350,7 @@ public final class Mapping {
                         .getTime()));
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final Date end = result.getTimestamp(pos);
@@ -305,26 +358,33 @@ public final class Mapping {
                     task.setEndDate(end);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getEndDate(), task2.getEndDate());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getEndDate();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setEndDate(value);
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.DATE_COMPLETED;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsDateCompleted();
             }
+            @Override
             public String getDBColumnName() {
                 return "completed";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getDateCompleted()) {
@@ -334,6 +394,7 @@ public final class Mapping {
                         .getTime()));
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final Date completed = result.getTimestamp(pos);
@@ -341,27 +402,34 @@ public final class Mapping {
                     task.setDateCompleted(completed);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getDateCompleted(),
                     task2.getDateCompleted());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getDateCompleted();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setDateCompleted(value);
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.TITLE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsTitle();
             }
+            @Override
             public String getDBColumnName() {
                 return "title";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getTitle()) {
@@ -370,6 +438,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getTitle());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String title = result.getString(pos);
@@ -377,26 +446,33 @@ public final class Mapping {
                     task.setTitle(title);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getTitle(), task2.getTitle());
             }
+            @Override
             public String get(final Task task) {
                 return task.getTitle();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setTitle(value);
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.NOTE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsNote();
             }
+            @Override
             public String getDBColumnName() {
                 return "description";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getNote()) {
@@ -405,6 +481,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getNote());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String description = result.getString(pos);
@@ -412,31 +489,39 @@ public final class Mapping {
                     task.setNote(description);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getNote(), task2.getNote());
             }
+            @Override
             public String get(final Task task) {
                 return task.getNote();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setNote(value);
             }
         },
         Status.SINGLETON,
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.PRIORITY;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsPriority();
             }
+            @Override
             public String getDBColumnName() {
                 return "priority";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getPriority());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int priority = result.getInt(pos);
@@ -444,30 +529,38 @@ public final class Mapping {
                     task.setPriority(priority);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPriority() == task2.getPriority();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getPriority());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setPriority(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.PERCENT_COMPLETED;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsPercentComplete();
             }
+            @Override
             public String getDBColumnName() {
                 return "progress";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getPercentComplete());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int progress = result.getInt(pos);
@@ -475,26 +568,33 @@ public final class Mapping {
                     task.setPercentComplete(progress);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getPercentComplete() == task2.getPercentComplete();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getPercentComplete());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setPercentComplete(value.intValue());
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.CATEGORIES;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsCategories();
             }
+            @Override
             public String getDBColumnName() {
                 return "categories";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getCategories()) {
@@ -503,6 +603,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getCategories());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String categories = result.getString(pos);
@@ -510,31 +611,39 @@ public final class Mapping {
                     task.setCategories(categories);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getCategories(),
                     task2.getCategories());
             }
+            @Override
             public String get(final Task task) {
                 return task.getCategories();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setCategories(value);
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.PROJECT_ID;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsProjectID();
             }
+            @Override
             public String getDBColumnName() {
                 return "project";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getProjectID());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int project = result.getInt(pos);
@@ -542,12 +651,15 @@ public final class Mapping {
                     task.setProjectID(project);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getProjectID() == task2.getProjectID();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getProjectID());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setProjectID(value.intValue());
             }
@@ -557,15 +669,19 @@ public final class Mapping {
         TargetCosts.SINGLETON,
         ActualCosts.SINGLETON,
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.CURRENCY;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsCurrency();
             }
+            @Override
             public String getDBColumnName() {
                 return "currency";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getCurrency()) {
@@ -574,6 +690,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getCurrency());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String currency = result.getString(pos);
@@ -581,27 +698,34 @@ public final class Mapping {
                     task.setCurrency(currency);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getCurrency(),
                     task2.getCurrency());
             }
+            @Override
             public String get(final Task task) {
                 return task.getCurrency();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setCurrency(value);
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.TRIP_METER;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsTripMeter();
             }
+            @Override
             public String getDBColumnName() {
                 return "trip_meter";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getTripMeter()) {
@@ -610,6 +734,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getTripMeter());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String tripMeter = result.getString(pos);
@@ -617,27 +742,34 @@ public final class Mapping {
                     task.setTripMeter(tripMeter);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getTripMeter(),
                     task2.getTripMeter());
             }
+            @Override
             public String get(final Task task) {
                 return task.getTripMeter();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setTripMeter(value);
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.BILLING_INFORMATION;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsBillingInformation();
             }
+            @Override
             public String getDBColumnName() {
                 return "billing";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getBillingInformation()) {
@@ -646,6 +778,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getBillingInformation());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String billing = result.getString(pos);
@@ -653,27 +786,34 @@ public final class Mapping {
                     task.setBillingInformation(billing);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getBillingInformation(),
                     task2.getBillingInformation());
             }
+            @Override
             public String get(final Task task) {
                 return task.getBillingInformation();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setBillingInformation(value);
             }
         },
         new Mapper<String>() {
+            @Override
             public int getId() {
                 return Task.COMPANIES;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsCompanies();
             }
+            @Override
             public String getDBColumnName() {
                 return "companies";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getCompanies()) {
@@ -682,6 +822,7 @@ public final class Mapping {
                     stmt.setString(pos, task.getCompanies());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final String companies = result.getString(pos);
@@ -689,31 +830,39 @@ public final class Mapping {
                     task.setCompanies(companies);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getCompanies(),
                     task2.getCompanies());
             }
+            @Override
             public String get(final Task task) {
                 return task.getCompanies();
             }
+            @Override
             public void set(final Task task, final String value) {
                 task.setCompanies(value);
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.COLOR_LABEL;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsLabel();
             }
+            @Override
             public String getDBColumnName() {
                 return "color_label";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getLabel());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int colorLabel = result.getInt(pos);
@@ -721,59 +870,75 @@ public final class Mapping {
                     task.setLabel(colorLabel);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getLabel() == task2.getLabel();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getLabel());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setLabel(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.RECURRENCE_TYPE;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsRecurrenceType();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_type";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getRecurrenceType());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 // NOT NULL constraint
                 task.setRecurrenceType(result.getInt(pos));
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getRecurrenceType() == task2.getRecurrenceType();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getRecurrenceType());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setRecurrenceType(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.INTERVAL;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsInterval();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_interval";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getInterval());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int interval = result.getInt(pos);
@@ -781,26 +946,33 @@ public final class Mapping {
                     task.setInterval(interval);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getInterval() == task2.getInterval();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getInterval());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setInterval(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.DAYS;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsDays();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_days";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (0 == task.getDays()) {
@@ -809,6 +981,7 @@ public final class Mapping {
                     stmt.setInt(pos, task.getDays());
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int days = result.getInt(pos);
@@ -816,30 +989,38 @@ public final class Mapping {
                     task.setDays(days);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getDays() == task2.getDays();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getDays());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setDays(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.DAY_IN_MONTH;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsDayInMonth();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_dayinmonth";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getDayInMonth());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int dayInMonth = result.getInt(pos);
@@ -847,30 +1028,38 @@ public final class Mapping {
                     task.setDayInMonth(dayInMonth);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getDayInMonth() == task2.getDayInMonth();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getDayInMonth());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setDayInMonth(value.intValue());
             }
         },
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.MONTH;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsMonth();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_month";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getMonth());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int month = result.getInt(pos);
@@ -878,26 +1067,33 @@ public final class Mapping {
                     task.setMonth(month);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getMonth() == task2.getMonth();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getMonth());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setMonth(value.intValue());
             }
         },
         new Mapper<Date>() {
+            @Override
             public int getId() {
                 return Task.UNTIL;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsUntil();
             }
+            @Override
             public String getDBColumnName() {
                 return "recurrence_until";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 if (null == task.getUntil()) {
@@ -907,6 +1103,7 @@ public final class Mapping {
                         new Timestamp(task.getUntil().getTime()));
                 }
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final Date until = result.getTimestamp(pos);
@@ -914,31 +1111,39 @@ public final class Mapping {
                     task.setUntil(until);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return Mapping.equals(task1.getUntil(), task2.getUntil());
             }
+            @Override
             public Date get(final Task task) {
                 return task.getUntil();
             }
+            @Override
             public void set(final Task task, final Date value) {
                 task.setUntil(value);
             }
         },
         RecurrenceCount.SINGLETON,
         new Mapper<Integer>() {
+            @Override
             public int getId() {
                 return Task.NUMBER_OF_ATTACHMENTS;
             }
+            @Override
             public boolean isSet(final Task task) {
                 return task.containsNumberOfAttachments();
             }
+            @Override
             public String getDBColumnName() {
                 return "number_of_attachments";
             }
+            @Override
             public void toDB(final PreparedStatement stmt, final int pos,
                 final Task task) throws SQLException {
                 stmt.setInt(pos, task.getNumberOfAttachments());
             }
+            @Override
             public void fromDB(final ResultSet result, final int pos,
                 final Task task) throws SQLException {
                 final int numAttachments = result.getInt(pos);
@@ -946,13 +1151,16 @@ public final class Mapping {
                     task.setNumberOfAttachments(numAttachments);
                 }
             }
+            @Override
             public boolean equals(final Task task1, final Task task2) {
                 return task1.getNumberOfAttachments() == task2
                     .getNumberOfAttachments();
             }
+            @Override
             public Integer get(final Task task) {
                 return Integer.valueOf(task.getNumberOfAttachments());
             }
+            @Override
             public void set(final Task task, final Integer value) {
                 task.setNumberOfAttachments(value.intValue());
             }

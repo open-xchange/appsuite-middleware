@@ -57,9 +57,9 @@ import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
 /**
  * {@link MergerUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class MergerUtility {
 
@@ -78,7 +78,7 @@ public final class MergerUtility {
 	 * Updates the permission assigned to specified <code>entity</code> with
 	 * given <code>mergedPerm</code> and reassigns it to specified
 	 * <code>setToEntity</code>.
-	 * 
+	 *
 	 * @param mergedPerm
 	 *            The merged permission holding appropriate permission settings
 	 * @param entity
@@ -130,7 +130,7 @@ public final class MergerUtility {
 	 * corresponding folder. If it does, value of <code>delete</code> is turned
 	 * to hold <code>true</code> to indicate need for deletion, otherwise is
 	 * left to <code>false</code>.
-	 * 
+	 *
 	 * @param entity
 	 *            The entity's ID
 	 * @param fallbackEntity
@@ -232,7 +232,7 @@ public final class MergerUtility {
 
 	/**
 	 * Deletes specified permission
-	 * 
+	 *
 	 * @param entity
 	 *            The entity ID
 	 * @param fuid
@@ -270,7 +270,7 @@ public final class MergerUtility {
 	/**
 	 * Determines the ID of the user who is defined as admin for given context
 	 * or <code>-1</code> if none found
-	 * 
+	 *
 	 * @param cid
 	 *            The context ID
 	 * @param con

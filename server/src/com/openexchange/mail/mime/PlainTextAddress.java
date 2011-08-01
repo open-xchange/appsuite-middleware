@@ -55,14 +55,14 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link PlainTextAddress} - A plain text internet address without a personal part.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PlainTextAddress extends InternetAddress {
 
     /**
      * Creates a newly allocated array of {@link PlainTextAddress} generated from specified addresses.
-     * 
+     *
      * @param addresses The source addresses as an array of {@link String}
      * @return A newly allocated array of {@link PlainTextAddress}
      */
@@ -87,7 +87,7 @@ public final class PlainTextAddress extends InternetAddress {
 
     /**
      * Constructs a new {@link PlainTextAddress}.
-     * 
+     *
      * @param address The plain text address
      */
     public PlainTextAddress(final String address) {

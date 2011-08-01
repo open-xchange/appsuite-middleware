@@ -11,6 +11,7 @@ public class UrlReader extends Thread {
         buf = new byte[bufsiz];
     }
 
+    @Override
     public void run() {
         try {
             InputStream in = url.openStream();

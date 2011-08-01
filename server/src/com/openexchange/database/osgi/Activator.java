@@ -72,6 +72,7 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration<CreateTableService> createTableRegistration;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         createTableRegistration = context.registerService(CreateTableService.class, new CreateReplicationTable(), null);
         trackers.push(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class.getName(), new DatabaseServiceRegisterer(context)));
@@ -83,6 +84,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         while (!trackers.isEmpty()) {
             trackers.pop().close();

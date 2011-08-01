@@ -50,9 +50,9 @@
 package com.openexchange.mobile.configuration.json.action;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public enum ActionTypes {
 
@@ -60,11 +60,11 @@ public enum ActionTypes {
 	EMAIL("email"),
 	TELEPHONE("telephone"),
 	OTHER("other");
-	
+
     public final String code;
-    
+
     private ActionTypes(final String code) {
-        this.code = code; 
+        this.code = code;
     }
-    
+
 }

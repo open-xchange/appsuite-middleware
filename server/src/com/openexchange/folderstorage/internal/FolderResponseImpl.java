@@ -56,7 +56,7 @@ import com.openexchange.folderstorage.FolderResponse;
 
 /**
  * {@link FolderResponseImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -64,7 +64,7 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
 
     /**
      * Generates a new {@link FolderResponse}.
-     * 
+     *
      * @param response The response object
      * @param warnings The warnings
      * @return A new {@link FolderResponse}
@@ -79,7 +79,7 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
 
     /**
      * Initializes a new {@link FolderResponseImpl}.
-     * 
+     *
      * @param response The response object
      * @param warnings The warnings
      */
@@ -89,10 +89,12 @@ public final class FolderResponseImpl<R> implements FolderResponse<R> {
         this.warnings = null == warnings ? Collections.<OXException> emptySet() : warnings;
     }
 
+    @Override
     public R getResponse() {
         return response;
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         return warnings;
     }

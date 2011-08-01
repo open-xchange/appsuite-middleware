@@ -58,7 +58,7 @@ import com.openexchange.oauth.OAuthAccountDeleteListener;
 
 /**
  * {@link DeleteListenerRegistry} - Registry for OAuth account delete listeners.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteListenerRegistry {
@@ -81,7 +81,7 @@ public final class DeleteListenerRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static DeleteListenerRegistry getInstance() {
@@ -104,7 +104,7 @@ public final class DeleteListenerRegistry {
 
     /**
      * Adds specified delete listener to this registry.
-     * 
+     *
      * @param deleteListener The delete listener to add
      * @return <code>true</code> if listener could be successfully added; otherwise <code>false</code>
      */
@@ -114,7 +114,7 @@ public final class DeleteListenerRegistry {
 
     /**
      * Removes specified delete listener from this registry.
-     * 
+     *
      * @param deleteListener The delete listener to add
      */
     public void removeDeleteListener(final OAuthAccountDeleteListener deleteListener) {

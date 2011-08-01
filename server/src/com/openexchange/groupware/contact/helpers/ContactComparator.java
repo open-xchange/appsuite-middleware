@@ -68,7 +68,7 @@ public class ContactComparator implements Comparator<Contact> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @deprecated Use {@link SpecialAlphanumSortContactComparator} instead!!!
      */
     @Deprecated
@@ -77,10 +77,10 @@ public class ContactComparator implements Comparator<Contact> {
         this.comparator = new AlphanumComparator();
         weight = 1;
     }
-    
+
     /**
      * Initializes a new {@link ContactComparator}.
-     * 
+     *
      * @param comp The string comparator
      * @param sortOrder The sort order
      * @deprecated Use {@link SpecialAlphanumSortContactComparator} instead!!!
@@ -92,6 +92,7 @@ public class ContactComparator implements Comparator<Contact> {
         this.weight = sortOrder == Order.DESCENDING ? -1 : 1;
     }
 
+    @Override
     public int compare(final Contact contact1, final Contact contact2) {
         final String s1 = getFirstNotNull(contact1);
         final String s2 = getFirstNotNull(contact2);
@@ -113,7 +114,7 @@ public class ContactComparator implements Comparator<Contact> {
         } else if (contact.containsSurName()) {
             /*-
              * Consider (yomi) given name, too
-             * 
+             *
              * TODO: Prefer normal given name when sorting by normal surname?
              */
             String appendix = contact.getYomiFirstName();

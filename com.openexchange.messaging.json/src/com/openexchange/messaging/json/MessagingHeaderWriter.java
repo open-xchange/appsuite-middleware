@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * A pair of {@link MessagingHeaderParser} and {@link MessagingHeaderWriter} are used for customizing header reading and writing. Instances
  * of those classes can be registered in a given {@link MessagingMessageWriter}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +68,7 @@ public interface MessagingHeaderWriter {
     /**
      * Checks if this writer feels responsible for specified header map entry. Will usually orient itself along the key of the entry
      * {@link Entry#getKey()}
-     * 
+     *
      * @return <code>true</code> if this writer is responsible for header map entry; otherwise <code>false</code>
      */
     boolean handles(Entry<String, Collection<MessagingHeader>> entry);
@@ -77,7 +77,7 @@ public interface MessagingHeaderWriter {
      * Gets this writer priority.
      * <p>
      * If multiple header writers feel responsible for a certain header, the one with the highest ranking will win.
-     * 
+     *
      * @return The priority
      */
     int getRanking();

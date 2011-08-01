@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * Exception messages for {@link OXException} that must be translated.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class DataExceptionMessages implements LocalizableStrings {
@@ -73,7 +73,7 @@ public final class DataExceptionMessages implements LocalizableStrings {
     public static final String ERROR_MSG = "An error occurred: %1$s";
 
     public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
-    
+
     public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
 
     // An I/O error occurred: %1$s

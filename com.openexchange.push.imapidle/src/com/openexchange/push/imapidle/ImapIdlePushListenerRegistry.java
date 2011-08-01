@@ -71,7 +71,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static ImapIdlePushListenerRegistry getInstance() {
@@ -93,7 +93,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Sets the enabled flag to specified <code>newEnabledFlag</code> if current value equals <code>expectedEnabledFlag</code>.
-     * 
+     *
      * @param expectedEnabledFlag The expected enabled flag
      * @param newEnabledFlag The new enabled flags
      * @return <code>true</code> if compare-and-set was successful; otherwise <code>false</code>
@@ -104,7 +104,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Sets the enabled flag.
-     * 
+     *
      * @param enabled The flag
      */
     public final void setEnabled(final boolean enabled) {
@@ -164,7 +164,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Adds specified push listener.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param pushListener The push listener to add
@@ -189,7 +189,7 @@ public final class ImapIdlePushListenerRegistry {
     /**
      * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
      * user-associated session identifiers are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -207,7 +207,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Purges specified user's push listener.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a push listener for given user-context-pair was found and purged; otherwise <code>false</code>
@@ -218,7 +218,7 @@ public final class ImapIdlePushListenerRegistry {
 
     /**
      * Purges all listeners and their data.
-     * 
+     *
      * @return <code>true</code> on success; otherwise <code>false</code>
      */
     public boolean purgeAllPushListener() {
@@ -258,7 +258,7 @@ public final class ImapIdlePushListenerRegistry {
      * Gets a read-only {@link Iterator iterator} over the push listeners in this registry.
      * <p>
      * Invoking {@link Iterator#remove() remove} will throw an {@link UnsupportedOperationException}.
-     * 
+     *
      * @return A read-only {@link Iterator iterator} over the push listeners in this registry.
      */
     public Iterator<ImapIdlePushListener> getPushListeners() {

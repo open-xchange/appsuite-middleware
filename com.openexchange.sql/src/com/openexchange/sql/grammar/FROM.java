@@ -64,7 +64,7 @@ public class FROM extends Element {
 	protected void addTable(String table) {
 		tables.add(new Table(table));
 	}
-	
+
 	protected void addTable(Table table) {
 	    tables.add(table);
 	}
@@ -74,7 +74,7 @@ public class FROM extends Element {
 			addTable(table);
 		}
 	}
-	
+
 	protected void addTables(Table... tables) {
 	    for (Table table : tables) {
 	        addTable(table);
@@ -95,7 +95,8 @@ public class FROM extends Element {
 		return tables;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildFROM(this);
 	}
 }

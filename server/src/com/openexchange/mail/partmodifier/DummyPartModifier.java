@@ -53,7 +53,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link DummyPartModifier} - Just returns given mail part as-is
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DummyPartModifier extends PartModifier {

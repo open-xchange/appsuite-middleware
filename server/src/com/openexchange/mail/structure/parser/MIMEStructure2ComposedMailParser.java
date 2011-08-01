@@ -103,7 +103,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEStructure2ComposedMailParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEStructure2ComposedMailParser {
@@ -128,7 +128,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     /**
      * Initializes a new {@link MIMEStructure2ComposedMailParser}.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @param protocol The server's protocol
@@ -153,7 +153,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     /**
      * Gets the managed files created during parsing process.
-     * 
+     *
      * @return The managed files
      */
     public List<ManagedFile> getManagedFiles() {
@@ -162,7 +162,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     /**
      * Parses specified JSON message structure & returns the resulting {@link ComposedMailMessage} instances.
-     * 
+     *
      * @param jsonMessage The JSON message structure
      * @return The resulting {@link ComposedMailMessage} instances.
      * @throws OXException If parsing fails
@@ -553,7 +553,7 @@ public final class MIMEStructure2ComposedMailParser {
      * <li><code>text/plain</code></li>
      * <li><code>text/htm</code>&nbsp;or&nbsp;<code>text/html</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */

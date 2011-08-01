@@ -75,7 +75,7 @@ import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link CompositeUWAService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositeUWAService implements UWAWidgetService {
@@ -107,11 +107,11 @@ public class CompositeUWAService implements UWAWidgetService {
         }
 
         serverScope = new MemoryStorage<UWAWidget>(configValues, UWAWidget.METADATA);
-   
+
         this.idGenerator = idGenerator;
         this.ctxId = ctxId;
     }
-    
+
 
     private Map<String, Map<String, Object>> ensureType(final Object yaml) throws OXException {
         if (Map.class.isInstance(yaml)) {
@@ -163,7 +163,7 @@ public class CompositeUWAService implements UWAWidgetService {
                     }
                 }
             }
-            
+
             return all;
 
         } catch (final SQLException x) {
@@ -188,29 +188,29 @@ public class CompositeUWAService implements UWAWidgetService {
         try {
             final int dbId = idGenerator.getId("uwaWidget", ctxId);
             final String id = IDMangler.mangle("user", ""+dbId);
-            
+
             widget.setId(String.valueOf(dbId));
             userScope.create(widget);
 
             widget.setId(id);
             positions.create(widget);
-            
+
         } catch (final OXException e) {
             throw new OXException(e);
         } catch (final SQLException e) {
             throw UWAWidgetExceptionCodes.SQLError.create(e.getMessage());
         }
-        
+
     }
 
     public void delete(final String id) throws OXException {
         if (isProtected(id)) {
             throw UWAWidgetExceptionCodes.PROTECTED.create(id);
         }
-        
+
         try {
             final List<String> components = IDMangler.unmangle(id);
-            
+
             userScope.delete(components.get(1));
             positions.delete(id);
         } catch (final SQLException x) {
@@ -218,7 +218,7 @@ public class CompositeUWAService implements UWAWidgetService {
         } catch (final OXException x) {
             throw new OXException(x);
         }
-        
+
     }
 
     public UWAWidget get(final String id) throws OXException {

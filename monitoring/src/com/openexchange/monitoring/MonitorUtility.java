@@ -54,7 +54,7 @@ import javax.management.ObjectName;
 
 /**
  * {@link MonitorUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MonitorUtility {
@@ -73,7 +73,7 @@ public final class MonitorUtility {
      * Example:<br>
      * If class name is <code>my.path.to.class.ClassName</code>, then its domain is <code>my.path.to.class</code> and its name is
      * <code>ClassName</code>.
-     * 
+     *
      * @param className The class name
      * @param defaultDomain Whether to use default domain or not
      * @return An array which contains the domain and name of given class name
@@ -88,7 +88,7 @@ public final class MonitorUtility {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param defaultDomain <code>true</code> to use the default domain {@link MonitorMBean#DEFAULT_DOMAIN}; otherwise the canonical class
      *            path extracted from <code>className</code> argument

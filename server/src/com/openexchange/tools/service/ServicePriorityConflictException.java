@@ -58,5 +58,5 @@ package com.openexchange.tools.service;
  */
 public class ServicePriorityConflictException extends Exception {
 
-    
+
 }

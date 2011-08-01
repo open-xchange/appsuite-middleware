@@ -55,7 +55,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CPTypeTest extends TestCase {
-    
+
     private void checkType(String template, CPType expected) {
         assertEquals(
             "The template string '" + template + "' should lead to a template of type " + expected,

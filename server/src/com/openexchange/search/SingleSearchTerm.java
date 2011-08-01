@@ -64,7 +64,7 @@ import com.openexchange.search.internal.terms.NotEqualTerm;
 
 /**
  * {@link SingleSearchTerm} - A single search term; e.g. <i>equals</i>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SingleSearchTerm implements SearchTerm<Operand<?>> {
@@ -83,6 +83,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Equals comparison
          */
         EQUALS("=", 2, "=", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new EqualsTerm();
             }
@@ -91,6 +92,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Less-than comparison
          */
         LESS_THAN("<", 2, "<", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new LessThanTerm();
             }
@@ -99,6 +101,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Greater-than comparison
          */
         GREATER_THAN(">", 2, ">", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new GreaterThanTerm();
             }
@@ -107,6 +110,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Not-equal comparison
          */
         NOT_EQUALS("<>", 2, "<>", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new NotEqualTerm();
             }
@@ -115,6 +119,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Greater-than or equal comparison
          */
         GREATER_OR_EQUAL(">=", 2, ">=", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new GreaterOrEqualTerm();
             }
@@ -123,6 +128,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Less-than or equal comparison
          */
         LESS_OR_EQUAL("<=", 2, "<=", OperationPosition.BETWEEN, new InstanceCreator() {
+            @Override
             public SingleSearchTerm newInstance() {
                 return new LessOrEqualTerm();
             }
@@ -131,7 +137,8 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * is null check
          */
         ISNULL("isNull", 1, "IS NULL", OperationPosition.AFTER, new InstanceCreator() {
-          public SingleSearchTerm newInstance() {
+          @Override
+        public SingleSearchTerm newInstance() {
               return new IsNullTerm();
           }
       })
@@ -140,7 +147,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         private final String str;
 
         private final String sql;
-        
+
         private final InstanceCreator creator;
 
         private final int maxOperands;
@@ -156,17 +163,19 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
             this.pos = pos;
         }
 
+        @Override
         public String getOperation() {
             return str;
         }
 
+        @Override
         public boolean equalsOperation(final String other) {
             return str.equalsIgnoreCase(other);
         }
 
         /**
          * Gets a new single search term for this operation.
-         * 
+         *
          * @return A new single search term for this operation.
          */
         public SingleSearchTerm newInstance() {
@@ -175,13 +184,14 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         /**
          * Gets the max. number of operands.
-         * 
+         *
          * @return The max. number of operands.
          */
         public int getMaxOperands() {
             return maxOperands;
         }
-        
+
+        @Override
         public OperationPosition getPosition() {
         	return pos;
         }
@@ -199,7 +209,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         /**
          * Gets the single operation corresponding to specified operation string.
-         * 
+         *
          * @param operation The operation string.
          * @return The operation corresponding to specified operation string or <code>null</code>.
          */
@@ -219,7 +229,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
         /**
          * Checks if specified operation string is a single operation.
-         * 
+         *
          * @param operation The operation string
          * @return <code>true</code> if specified operation string is a single operation; otherwise <code>false</code>
          */
@@ -227,7 +237,8 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
             return (null != getSingleOperation(operation));
         }
 
-		public String getSqlRepresentation() {
+		@Override
+        public String getSqlRepresentation() {
 			return sql;
 		}
     }
@@ -249,7 +260,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
     /**
      * Initializes a new {@link SingleSearchTerm} with default capacity (4).
-     * 
+     *
      * @param operation The operation
      */
     public SingleSearchTerm(final SingleOperation operation) {
@@ -258,7 +269,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
     /**
      * Initializes a new {@link SingleSearchTerm}.
-     * 
+     *
      * @param operation The operation
      * @param initialCapacity The initial capacity
      */
@@ -268,17 +279,19 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         operands = new ArrayList<Operand<?>>(initialCapacity);
     }
 
+    @Override
     public Operand<?>[] getOperands() {
         return operands.toArray(new Operand<?>[operands.size()]);
     }
 
+    @Override
     public Operation getOperation() {
         return operation;
     }
 
     /**
      * Adds specified operand to this search term.
-     * 
+     *
      * @param operand The operand to add.
      */
     public void addOperand(final Operand<?> operand) {

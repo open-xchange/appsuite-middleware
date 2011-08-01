@@ -66,12 +66,12 @@ public class UnlockAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         fileAccess.unlock(request.getId());
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
-        
+
         return success(fileMetadata.getSequenceNumber());
     }
 

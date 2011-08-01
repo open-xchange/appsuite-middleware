@@ -71,6 +71,7 @@ public class OldQuotedPrintable implements OldEncoding {
         return retval;
     }
 
+    @Override
     public byte[] decode(final OldScanner s) throws IOException {
         final ArrayList<Byte> al = new ArrayList<Byte>();
         int len = 0;
@@ -111,6 +112,7 @@ public class OldQuotedPrintable implements OldEncoding {
 
     private static final byte[] SoftBreak = { '=', '\r', '\n' };
 
+    @Override
     public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
         int len = fw.lineLength();
         fw.rawStart();

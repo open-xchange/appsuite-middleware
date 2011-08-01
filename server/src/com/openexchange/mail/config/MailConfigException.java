@@ -54,7 +54,7 @@ import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link MailConfigException} - Errors related to mail configuration
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailConfigException extends OXException {

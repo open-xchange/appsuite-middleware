@@ -73,7 +73,7 @@ import com.openexchange.timer.TimerService;
  * {@link NotificationPool} - Pools instances of {@link PooledNotification} for a consolidated update notification.
  * <p>
  * Ensure method {@link #startup()} is invoked prior to using this pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NotificationPool {
@@ -84,7 +84,7 @@ public final class NotificationPool {
 
     /**
      * Gets the {@link NotificationPool} instance
-     * 
+     *
      * @return The {@link NotificationPool} instance
      */
     public static NotificationPool getInstance() {
@@ -117,7 +117,7 @@ public final class NotificationPool {
 
     /**
      * Removes all pooled notifications from this pool whose calendar object matches specified object ID and context ID
-     * 
+     *
      * @param objectId The calendar object's ID
      * @param contextId The calendar object's context ID
      */
@@ -139,7 +139,7 @@ public final class NotificationPool {
     /**
      * Puts given pooled notification into this pool. If an equal pooled notification is already present, it is merged with given pooled
      * notification. Moreover its time stamp is updated.
-     * 
+     *
      * @param pooledNotification The pooled notification to put.
      */
     public void put(final PooledNotification pooledNotification) {
@@ -238,6 +238,7 @@ public final class NotificationPool {
             this.taskWriteLock = writeLock;
         }
 
+        @Override
         public void run() {
             taskWriteLock.lock();
             try {

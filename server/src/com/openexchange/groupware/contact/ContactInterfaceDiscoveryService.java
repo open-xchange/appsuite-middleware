@@ -58,14 +58,14 @@ import com.openexchange.session.Session;
  * provides the {@link ContactInterface} instance.
  * <p>
  * The appropriate {@link ContactInterface} instance may also be directly obtained by {@link #newContactInterface(int, Session)}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ContactInterfaceDiscoveryService {
 
     /**
      * Gets the appropriate {@link ContactInterfaceProvider} instance responsible for given folder ID/context ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return The appropriate {@link ContactInterfaceProvider} instance responsible for given folder ID/context ID pair
@@ -79,7 +79,7 @@ public interface ContactInterfaceDiscoveryService {
      * <p>
      * This method obtains appropriate {@link ContactInterfaceProvider} and invokes
      * {@link ContactInterfaceProvider#newContactInterface(Session)}.
-     * 
+     *
      * @param folderId The folder ID
      * @param session The session
      * @return A newly created {@link ContactInterface} instance
@@ -89,7 +89,7 @@ public interface ContactInterfaceDiscoveryService {
 
     /**
      * Checks if a specific {@link ContactInterfaceProvider} instance is associated with given folder ID/context ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param contextId The context ID
      * @return <code>true</code> if a specific {@link ContactInterfaceProvider} instance is available; otherwise <code>false</code>
@@ -98,13 +98,13 @@ public interface ContactInterfaceDiscoveryService {
 
     /**
      * Gets a newly created default {@link ContactInterface} instance appropriate for specified session.
-     * 
+     *
      * @param session The session
      * @return A newly created {@link ContactInterface} instance
      * @throws OXException If returning an appropriate {@link ContactInterface} instance fails
      */
     public ContactInterface newDefaultContactInterface(Session session) throws OXException;
-    
+
     /**
      * Gets a list of all currently known contactInterface providers along with their folderIds for a specified context
      * @param The contextId for which the list shall be retrieved

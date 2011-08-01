@@ -79,11 +79,11 @@ import com.openexchange.tools.session.ServerSession;
 
 public class PerformAction extends AbstractMessagingAction {
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
-    
+
     public PerformAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }
-    
+
     public PerformAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         super(registry, writer, parser, cache);
     }
@@ -94,7 +94,7 @@ public class PerformAction extends AbstractMessagingAction {
     protected AJAXRequestResult doIt(final MessagingRequestData req, final ServerSession session) throws JSONException, IOException, OXException {
         final MessagingMessage input = req.getMessage();
         MessagingMessage output = null;
-        
+
         if(input == null) {
             if(req.isset("folder", "id")) {
                 output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(req.getFolderId(), req.getId(), req.getMessageAction());
@@ -104,12 +104,12 @@ public class PerformAction extends AbstractMessagingAction {
         } else {
             output = req.getMessageAccess(session.getUserId(), session.getContextId()).perform(input, req.getMessageAction());
         }
-        
+
         if(output == null) {
             return new AJAXRequestResult(1);
-        } 
+        }
         return new AJAXRequestResult(writer.write(output, req.getAccountAddress(), session, DISPLAY_MODE));
-        
+
     }
 
 }

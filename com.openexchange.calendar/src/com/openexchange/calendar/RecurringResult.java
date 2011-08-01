@@ -55,7 +55,7 @@ import com.openexchange.groupware.calendar.RecurringResultInterface;
 
 /**
  * {@link RecurringResult} - Represents an occurrence in a recurring event.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public final class RecurringResult implements RecurringResultInterface {
@@ -72,7 +72,7 @@ public final class RecurringResult implements RecurringResultInterface {
 
 	/**
 	 * Initializes a new {@link RecurringResult}
-	 * 
+	 *
 	 * @param start
 	 *            The start time in milliseconds
 	 * @param diff

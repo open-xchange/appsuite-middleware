@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ServerConfig {
@@ -176,7 +176,7 @@ public final class ServerConfig {
 
     /**
      * Returns the value of the property with the specified key. This method returns <code>null</code> if the property is not found.
-     * 
+     *
      * @param key the property key.
      * @return the value of the property or <code>null</code> if the property is not found.
      */
@@ -235,7 +235,7 @@ public final class ServerConfig {
      * The test of this string is case insensitive.
      * <p>
      * If there is no property with the specified name, or if the specified name is empty or null, then <code>false</code> is returned.
-     * 
+     *
      * @param property the property.
      * @return the <code>boolean</code> value of the property.
      */

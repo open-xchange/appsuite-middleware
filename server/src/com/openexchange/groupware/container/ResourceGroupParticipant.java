@@ -51,7 +51,7 @@ package com.openexchange.groupware.container;
 
 /**
  * {@link ResourceGroupParticipant} - Represents a group of resources as participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ResourceGroupParticipant implements Participant, Comparable<Participant> {
@@ -66,7 +66,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the resource group.
      */
     public ResourceGroupParticipant(final int id) {
@@ -85,6 +85,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setIdentifier(final int id) {
         this.id = id;
     }
@@ -92,6 +93,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getIdentifier() {
         return id;
     }
@@ -99,6 +101,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
@@ -106,6 +109,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -113,6 +117,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmailAddress() {
         return emailaddress;
     }
@@ -127,6 +132,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getType() {
         return RESOURCEGROUP;
     }
@@ -158,6 +164,7 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     /**
      * {@inheritDoc}
      */
+    @Override
     public int compareTo(final Participant part) {
         final int retval;
         if (RESOURCEGROUP == part.getType()) {
@@ -173,14 +180,17 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
         return super.clone();
     }
 
+    @Override
     public Participant getClone() throws CloneNotSupportedException {
         return (Participant) clone();
     }
 
+    @Override
     public boolean isIgnoreNotification() {
         return ignoreNotification;
     }
 
+    @Override
     public void setIgnoreNotification(final boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
     }

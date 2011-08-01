@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link DiscardBehavior} - Implements "Discard" behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
@@ -65,7 +65,7 @@ public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
 
     /**
      * Gets the "Discard" behavior.
-     * 
+     *
      * @return The "Discard behavior
      */
     @SuppressWarnings("unchecked")
@@ -82,7 +82,7 @@ public final class DiscardBehavior implements RefusedExecutionBehavior<Object> {
 
     /**
      * Does nothing, which has the effect of silently discarding task.
-     * 
+     *
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
      * @return The {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant.

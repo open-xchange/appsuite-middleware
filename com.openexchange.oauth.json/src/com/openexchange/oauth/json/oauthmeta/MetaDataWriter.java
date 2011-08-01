@@ -55,7 +55,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 
 /**
  * The OAuth service meta data writer
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MetaDataWriter {
@@ -69,7 +69,7 @@ public class MetaDataWriter {
 
     /**
      * Writes specified meta data as a JSON object.
-     * 
+     *
      * @param metaData The meta data
      * @return The JSON object
      * @throws JSONException If writing to JSON fails

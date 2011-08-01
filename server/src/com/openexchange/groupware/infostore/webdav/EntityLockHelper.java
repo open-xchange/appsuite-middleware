@@ -62,17 +62,17 @@ public class EntityLockHelper extends LockHelper {
 
 	private final EntityLockManager entityLockManager;
 	protected SessionHolder sessionHolder;
-	
-	
+
+
 	private static final String TOKEN_PREFIX = "http://www.open-xchange.com/webdav/locks/";
 	private static final int TOKEN_PREFIX_LENGTH = TOKEN_PREFIX.length();
-	
+
 	public EntityLockHelper(final EntityLockManager entityLockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		super(entityLockManager, sessionHolder, url);
 		this.sessionHolder = sessionHolder;
 		this.entityLockManager = entityLockManager;
 	}
-	
+
 	@Override
 	protected WebdavLock toWebdavLock(final Lock lock) {
 		final WebdavLock l = new WebdavLock();
@@ -84,7 +84,7 @@ public class EntityLockHelper extends LockHelper {
 		l.setOwner(lock.getOwnerDescription());
 		return l;
 	}
-	
+
 	@Override
 	protected Lock toLock(final WebdavLock lock) {
 		final Lock l = new Lock();
@@ -103,10 +103,10 @@ public class EntityLockHelper extends LockHelper {
 		return entityLockManager.lock(id,
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(),
 						lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
-						LockManager.Type.WRITE, 
+						LockManager.Type.WRITE,
 						lock.getOwner(),
-						session.getContext(), 
-						UserStorage.getStorageUser(session.getUserId(), session.getContext()), 
+						session.getContext(),
+						UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 						UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
 	}
 
@@ -118,10 +118,10 @@ public class EntityLockHelper extends LockHelper {
 				lockId,
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(),
 						lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
-						LockManager.Type.WRITE, 
+						LockManager.Type.WRITE,
 						lock.getOwner(),
-						session.getContext(), 
-						UserStorage.getStorageUser(session.getUserId(), session.getContext()), 
+						session.getContext(),
+						UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 						UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
 		);
 	}

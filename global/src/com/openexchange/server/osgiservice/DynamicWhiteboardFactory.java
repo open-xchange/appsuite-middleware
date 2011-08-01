@@ -63,7 +63,7 @@ import com.openexchange.tools.global.OXCloseable;
 
 /**
  * {@link DynamicWhiteboardFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DynamicWhiteboardFactory implements OXCloseable {

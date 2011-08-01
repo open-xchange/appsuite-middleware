@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeletePerformer} - Serves the <code>DELETE</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeletePerformer extends AbstractPerformer {
@@ -78,7 +78,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link DeletePerformer}.
-     * 
+     *
      * @param session The session
      */
     public DeletePerformer(final ServerSession session) {
@@ -87,7 +87,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link DeletePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -97,7 +97,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link DeletePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -107,7 +107,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link DeletePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -118,7 +118,7 @@ public final class DeletePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>DELETE</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param timeStamp The requestor's last-modified time stamp
@@ -144,7 +144,7 @@ public final class DeletePerformer extends AbstractPerformer {
             } else {
                 /*-
                  * Virtual delete:
-                 * 
+                 *
                  * 1. Delete from virtual storage
                  * 2. Delete from real storage
                  */

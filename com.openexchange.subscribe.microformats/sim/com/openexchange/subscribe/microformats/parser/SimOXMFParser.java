@@ -67,16 +67,16 @@ import com.openexchange.subscribe.microformats.OXMFParser;
  */
 public class SimOXMFParser implements OXMFParser {
 
-    private List<Map<String, String>> data;
+    private final List<Map<String, String>> data;
     private String html;
-    
-    private Set<String> containerElements = new HashSet<String>();
-    private Set<String> prefixes = new HashSet<String>();
+
+    private final Set<String> containerElements = new HashSet<String>();
+    private final Set<String> prefixes = new HashSet<String>();
 
     public SimOXMFParser(List<Map<String, String>> data) {
         this.data = data;
     }
-    
+
     public void addAttributePrefix(String prefix) {
         prefixes.add(prefix);
     }
@@ -89,7 +89,7 @@ public class SimOXMFParser implements OXMFParser {
         this.html  = html;
         return data;
     }
-    
+
     public List<Map<String, String>> parse(Reader html) throws OXException {
         this.html  = readAll(html);
         return data;

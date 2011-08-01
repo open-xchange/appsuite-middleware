@@ -71,10 +71,10 @@ public interface Credentials {
      * object in the directory service.
      */
     final String USER_DN = "userDN";
-	
+
     /**
      * Unique ID of the user
-     */	
+     */
 	final String USER_ID = "userID";
 
     /**

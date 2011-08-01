@@ -57,9 +57,9 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
 
 /**
  * {@link AJAXRequestHandlerCustomizer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomizer {
 
@@ -70,7 +70,7 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 
 	/**
 	 * Initializes a new {@link AJAXRequestHandlerCustomizer}
-	 * 
+	 *
 	 * @param context
 	 *            The bundle context
 	 */
@@ -79,7 +79,8 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 		this.context = context;
 	}
 
-	public Object addingService(final ServiceReference reference) {
+	@Override
+    public Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
@@ -90,13 +91,15 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 		return addedService;
 	}
 
-	public void modifiedService(final ServiceReference reference, final Object service) {
+	@Override
+    public void modifiedService(final ServiceReference reference, final Object service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("AJAXRequestHandlerCustomizer.modifiedService()");
 		}
 	}
 
-	public void removedService(final ServiceReference reference, final Object service) {
+	@Override
+    public void removedService(final ServiceReference reference, final Object service) {
 		try {
 			if (service instanceof AJAXRequestHandler) {
 				ServerRequestHandlerRegistry.getInstance().removeHandler((AJAXRequestHandler) service);

@@ -70,7 +70,7 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
  * {@link OXMFParserImpl} - Implements {@link OXMFParser} based on <a href='http://stax.codehaus.org/'>StAX</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXMFParserImpl implements OXMFParser {
@@ -169,7 +169,7 @@ public final class OXMFParserImpl implements OXMFParser {
 
     /**
      * Handles a starting element. Checks if it contains a "class" attribute whose value is contained in set of container elements.
-     * 
+     *
      * @param parser The XMLStreamReader instance
      * @throws XMLStreamException If parsing fails
      */
@@ -201,7 +201,7 @@ public final class OXMFParserImpl implements OXMFParser {
 
     /**
      * Parses a container element. Precondition is that current event is XMLStreamConstants.START_ELEMENT from container element.
-     * 
+     *
      * @param parser The XMLStreamReader instance
      * @return A {@link Map map} containing container element's name-value-pairs
      * @throws XMLStreamException If parsing fails
@@ -224,7 +224,7 @@ public final class OXMFParserImpl implements OXMFParser {
 
     /**
      * Parses a nested element inside a container element
-     * 
+     *
      * @param parser The XMLStreamReader instance
      * @param map The map backing container element's name-value-pairs
      * @throws XMLStreamException If parsing fails
@@ -266,7 +266,7 @@ public final class OXMFParserImpl implements OXMFParser {
 
     /**
      * Checks if specified "class" attribute's value starts with one of this parser's prefixes.
-     * 
+     *
      * @param attributeValue The "class" attribute's value
      * @return <code>true</code> if specified "class" attribute's value starts with one of this parser's prefixes; otherwise
      *         <code>false</code>

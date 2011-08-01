@@ -79,7 +79,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessiondActivator} - Activator for sessiond bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondActivator extends DeferredActivator {
@@ -156,16 +156,16 @@ public final class SessiondActivator extends DeferredActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.open();
             }
-            
-            
+
+
             final SessiondSessionSpecificRetrievalService retrievalService = new SessiondSessionSpecificRetrievalService();
             final SessiondEventHandler eventHandler = new SessiondEventHandler();
             eventHandler.addListener(retrievalService);
-            
+
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
-            
+
             retrievalServiceRegistration = context.registerService(SessionSpecificContainerRetrievalService.class.getName(), retrievalService, null);
-            
+
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
@@ -192,7 +192,7 @@ public final class SessiondActivator extends DeferredActivator {
                 retrievalServiceRegistration.unregister();
                 retrievalServiceRegistration = null;
             }
-            
+
             for (final ServiceTracker tracker : trackers) {
                 tracker.close();
             }

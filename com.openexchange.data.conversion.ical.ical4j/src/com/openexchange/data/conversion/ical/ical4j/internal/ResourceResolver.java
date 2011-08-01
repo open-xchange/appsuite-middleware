@@ -53,7 +53,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.resource.Resource;
-import com.openexchange.exception.OXException;
 
 /**
  *

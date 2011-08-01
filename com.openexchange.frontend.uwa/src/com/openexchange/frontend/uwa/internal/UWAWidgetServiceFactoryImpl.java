@@ -65,10 +65,10 @@ import com.openexchange.id.IDGeneratorService;
  */
 public class UWAWidgetServiceFactoryImpl implements UWAWidgetServiceFactory {
 
-    private DatabaseService dbService;
-    private ConfigViewFactory configViews;
-    private ConfigurationService config;
-    private IDGeneratorService idGenerator;
+    private final DatabaseService dbService;
+    private final ConfigViewFactory configViews;
+    private final ConfigurationService config;
+    private final IDGeneratorService idGenerator;
 
     public UWAWidgetServiceFactoryImpl(DatabaseService dbService, ConfigViewFactory configViews, ConfigurationService config, IDGeneratorService idGenerator) {
         super();

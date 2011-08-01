@@ -300,7 +300,7 @@ public class Contact extends CommonObject implements Serializable {
      * The same as USAGE_COUNT, but with respect to the global addressbook (only for searching purpose).
      */
     public static final int USE_COUNT_GLOBAL_FIRST = 609;
-    
+
     /**
      * Additional fields for kana based search in japanese environments.
      */
@@ -538,11 +538,11 @@ public class Contact extends CommonObject implements Serializable {
     protected String imageContentType;
 
     protected boolean mark_as_distributionlist;
-    
+
     protected String yomiFirstName;
-    
+
     protected String yomiLastName;
-    
+
     protected String yomiCompany;
 
     protected boolean b_display_name;
@@ -762,11 +762,11 @@ public class Contact extends CommonObject implements Serializable {
     protected int useCount;
 
     protected boolean b_useCount;
-    
+
     protected boolean b_yomiFirstName;
-    
+
     protected boolean b_yomiLastName;
-    
+
     protected boolean b_yomiCompany;
 
     protected DistributionListEntryObject[] dlists;
@@ -783,7 +783,7 @@ public class Contact extends CommonObject implements Serializable {
 
     /**
      * Adds specified warning to this contact.
-     * 
+     *
      * @param warning The warning
      */
     public void addWarning(final OXException warning) {
@@ -795,7 +795,7 @@ public class Contact extends CommonObject implements Serializable {
 
     /**
      * Gets the warnings.
-     * 
+     *
      * @return The warnings
      */
     public Collection<OXException> getWarnings() {
@@ -1219,11 +1219,11 @@ public class Contact extends CommonObject implements Serializable {
     public int getUseCount() {
         return useCount;
     }
-    
+
     public String getYomiFirstName() {
         return yomiFirstName;
     }
-    
+
     public String getYomiLastName() {
         return yomiLastName;
     }
@@ -1231,7 +1231,7 @@ public class Contact extends CommonObject implements Serializable {
     public String getYomiCompany() {
         return yomiCompany;
     }
-    
+
     // SET METHODS
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
@@ -1769,17 +1769,17 @@ public class Contact extends CommonObject implements Serializable {
         this.useCount = useCount;
         b_useCount = true;
     }
-    
+
     public void setYomiFirstName(final String yomiFirstName) {
         this.yomiFirstName = yomiFirstName;
         b_yomiFirstName = true;
     }
-    
+
     public void setYomiLastName(final String yomiLastName) {
         this.yomiLastName = yomiLastName;
         b_yomiLastName = true;
     }
-    
+
     public void setYomiCompany(final String yomiCompany) {
         this.yomiCompany = yomiCompany;
         b_yomiCompany = true;
@@ -2307,17 +2307,17 @@ public class Contact extends CommonObject implements Serializable {
         useCount = 0;
         b_useCount = false;
     }
-    
+
     public void removeYomiFirstName() {
         yomiFirstName = null;
         b_yomiFirstName = false;
     }
-    
+
     public void removeYomiLastName() {
         yomiLastName = null;
         b_yomiLastName = false;
     }
-    
+
     public void removeYomiCompany() {
         yomiCompany = null;
         b_yomiCompany = false;
@@ -2744,15 +2744,15 @@ public class Contact extends CommonObject implements Serializable {
     public boolean containsUseCount() {
         return b_useCount;
     }
-    
+
     public boolean containsYomiFirstName() {
         return b_yomiFirstName;
     }
-    
+
     public boolean containsYomiLastName() {
         return b_yomiLastName;
     }
-    
+
     public boolean containsYomiCompany() {
         return b_yomiCompany;
     }

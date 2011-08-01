@@ -88,7 +88,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * {@link ContactMySql} - The MySQL implementation of {@link ContactSql}.
  * <p>
  * This implementation is <b>not</b> designed for multi-threaded access and therefore is not thread-safe.
- * 
+ *
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -141,7 +141,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param so The session
      * @throws OXException If context cannot be resolved
      */
@@ -154,7 +154,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param ctx The context
      * @param userId The user ID
      */
@@ -165,7 +165,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Initializes a new {@link ContactMySql}
-     * 
+     *
      * @param so The session
      * @param ctx The context
      */
@@ -174,10 +174,12 @@ public class ContactMySql implements ContactSql {
         this.user = so.getUserId();
     }
 
+    @Override
     public String getOrder() {
         return order;
     }
 
+    @Override
     public PreparedStatement getSqlStatement(final Connection con) throws SQLException {
         final StringBuilder sb = new StringBuilder(256);
 
@@ -244,7 +246,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Parses denoted fields out of specified <code>ORDER BY</code> statement; <code>" ORDER BY co.field01 DESC "</code>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The parsed fields
      */
@@ -266,11 +268,11 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Prepares given <code>ORDER BY</code> statement to be used within a <code>UNION</code> statement.
-     * 
+     *
      * <pre>
      * ORDER BY co.field01 DESC -&gt; ORDER BY field01 DESC
      * </pre>
-     * 
+     *
      * @param orderBy The <code>ORDER BY</code> statement
      * @return The prepared <code>ORDER BY</code> statement
      */
@@ -409,7 +411,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Appends appendix to string builder with contact search object proeprly set.
-     * 
+     *
      * @param sb The string builder
      * @param field The affected field
      * @param union <code>true</code> if a UNION statement is generated
@@ -465,7 +467,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Appends appendix to string builder
-     * 
+     *
      * @param sb The string builder
      */
     private void appendix(final StringBuilder sb) {
@@ -488,34 +490,42 @@ public class ContactMySql implements ContactSql {
         sb.append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(") OR (co.pflag is null))");
     }
 
+    @Override
     public String getSelect() {
         return this.select;
     }
 
+    @Override
     public void setSelect(final String select) {
         this.select = select;
     }
 
+    @Override
     public void setOrder(final String order) {
         this.order = order;
     }
 
+    @Override
     public void setFolder(final int folder) {
         this.folder = folder;
     }
 
+    @Override
     public void setObjectID(final int objectID) {
         this.objectID = objectID;
     }
 
+    @Override
     public void setReadOnlyOwnFolder(final int onlyown) {
         this.can_read_only_own = onlyown;
     }
 
+    @Override
     public void setContactSearchObject(final ContactSearchObject cso) {
         this.cso = cso;
     }
 
+    @Override
     public void setObjectArray(final int[][] object_id) {
         this.object_id_array = new int[object_id.length][];
         for (int i = 0; i < object_id.length; i++) {
@@ -525,35 +535,43 @@ public class ContactMySql implements ContactSql {
         // this.object_id_array = object_id;
     }
 
+    @Override
     public void getInternalUsers() {
         this.internal_user_only = true;
     }
 
+    @Override
     public void setInternalUser(final int userid) {
         this.userid = userid;
     }
 
+    @Override
     public void setInternalUsers(final int[] userIds) {
         this.where = null;
         this.userIds = userIds;
     }
 
+    @Override
     public void setSearchHabit(final String habit) {
         this.search_habit = habit;
     }
 
+    @Override
     public void getAllChangedSince(final long chs) {
         this.changed_since = chs;
     }
 
+    @Override
     public void getAllCreatedSince(final long crs) {
         this.created_since = crs;
     }
 
+    @Override
     public void getAllSince(final long bs) {
         this.both_since = bs;
     }
 
+    @Override
     public String buildContactSelectString(final int cols[]) {
         final StringBuilder sb = new StringBuilder();
         for (int a = 0; a < cols.length; a++) {
@@ -570,6 +588,7 @@ public class ContactMySql implements ContactSql {
         return len > 0 ? sb.toString().substring(0, len - 1) : sb.toString();
     }
 
+    @Override
     public String getRangeSearch(final String field, final String a, final String b, final String sh) {
         final StringBuilder sb = new StringBuilder(32);
 
@@ -593,6 +612,7 @@ public class ContactMySql implements ContactSql {
         return sb.toString();
     }
 
+    @Override
     public String buildAllFolderSearchString(final int user, final int[] group, final Session so) throws OXException, SearchIteratorException {
         final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
         final List<FolderObject> list =
@@ -610,6 +630,7 @@ public class ContactMySql implements ContactSql {
         return buildFolderSearch(user, group, folders, so);
     }
 
+    @Override
     public String buildFolderSearch(final int user, final int[] group, final int[] folders, final Session so) throws OXException {
         final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx);
         final StringBuilder read_all = new StringBuilder();
@@ -658,88 +679,107 @@ public class ContactMySql implements ContactSql {
     private static String rightsSelectString =
         "SELECT co.intfield01,co.intfield02,co.intfield03,co.intfield04,co.fid,co.created_from,co.pflag,co.cid FROM prg_contacts AS co ";
 
+    @Override
     public String iFgetRightsSelectString() {
         return rightsSelectString;
     }
 
+    @Override
     public String iFgetFolderSelectString(final int fid, final int cid) {
         return new StringBuilder(rightsSelectString).append(" where fid = ").append(fid).append(" AND cid = ").append(cid).toString();
     }
 
+    @Override
     public String iFgetNumberOfContactsString() {
         return "SELECT COUNT(co.intfield01) FROM prg_contacts AS co ";
     }
 
+    @Override
     public String iFgetRightsSelectString(final int uid, final int cid) {
         return new StringBuilder(rightsSelectString).append(" where created_from = ").append(uid).append(" AND cid = ").append(cid).toString();
     }
 
+    @Override
     public String iFcontainsForeignObjectInFolder(final int fid, final int uid, final int cid) {
         return new StringBuilder(" SELECT intfield01 FROM prg_contacts where fid = ").append(fid).append(" AND cid = ").append(cid).append(
             " AND created_from != ").append(uid).append(" AND ((pflag = 1 and created_from != ").append(uid).append(") OR (pflag is null))").toString();
     }
 
+    @Override
     public String iFdeleteDistributionListEntriesByIds(final int cid) {
         return new StringBuilder("DELETE FROM prg_dlist where intfield01 = ? AND intfield02 IS NULL AND intfield03 IS NULL AND cid = ").append(
             cid).toString();
     }
 
+    @Override
     public String iFfillDistributionListArray(final int id, final int cid) {
         return new StringBuilder(
             "Select intfield01, intfield02, intfield03, intfield04, field01, field02, field03, field04 from prg_dlist where intfield01 = ").append(
             id).append(" AND cid = ").append(cid).toString();
     }
 
+    @Override
     public String iFwriteDistributionListArrayInsert() {
         return "INSERT INTO prg_dlist (intfield01, intfield02, intfield03, field01, field02, field03, field04, cid, intfield04) VALUES (?,?,?,?,?,?,?,?,?)";
     }
 
+    @Override
     public String iFupdateDistributionListEntriesByIds() {
         return "UPDATE prg_dlist set intfield01 = ?, intfield02 = ?, intfield03 = ?, intfield04 = ?, field01 = ?, field02 = ?, field03 = ?, field04 = ? WHERE (intfield01 = ?) AND (intfield02 = ?) AND (intfield03 = ?) AND (cid = ?)";
     }
 
+    @Override
     public String iFdeleteDistributionListEntriesByIds2() {
         return "DELETE FROM prg_dlist where intfield01 = ? AND intfield02 = ? AND intfield03 = ? AND  cid = ?";
     }
 
+    @Override
     public String iFgetFillLinkArrayString(final int id, final int cid) {
         return new StringBuilder("Select intfield01, intfield02, field01, field02 from prg_contacts_linkage where intfield01 = ").append(id).append(
             " AND cid = ").append(cid).toString();
     }
 
+    @Override
     public String iFwriteContactLinkArrayInsert() {
         return "INSERT INTO prg_contacts_linkage (intfield01, intfield02, field01, field02, cid) VALUES (?,?,?,?,?)";
     }
 
+    @Override
     public String iFgetdeleteLinkEntriesByIdsString() {
         return "DELETE FROM prg_contacts_linkage where intfield01 = ? AND intfield02 = ? AND cid = ?";
     }
 
+    @Override
     public String iFgetContactImageLastModified(final int id, final int cid) {
         return new StringBuilder("SELECT changing_date from prg_contacts_image WHERE intfield01 = ").append(id).append(" AND cid = ").append(
             cid).toString();
     }
 
+    @Override
     public String iFgetContactImageContentType(final int id, final int cid) {
         return new StringBuilder("SELECT mime_type from prg_contacts_image WHERE intfield01 = ").append(id).append(" AND cid = ").append(
             cid).toString();
     }
 
+    @Override
     public String iFgetContactImage(final int contact_id, final int cid) {
         return new StringBuilder("SELECT image1, changing_date, mime_type  from prg_contacts_image WHERE intfield01 = ").append(contact_id).append(
             " AND cid = ").append(cid).toString();
     }
 
+    @Override
     public String iFwriteContactImage() {
         return new StringBuilder("INSERT INTO prg_contacts_image (intfield01, image1, mime_type, cid, changing_date) VALUES (?,?,?,?,").append(
             System.currentTimeMillis()).append(')').toString();
     }
 
+    @Override
     public String iFupdateContactImageString() {
         return new StringBuilder("UPDATE prg_contacts_image SET intfield01 = ?, image1 = ?, mime_type = ?, cid = ?, changing_date = ").append(
             System.currentTimeMillis()).append(" WHERE intfield01 = ? AND cid = ? ").toString();
     }
 
+    @Override
     public StringBuilder iFperformContactStorageInsert(final StringBuilder insert_fields, final StringBuilder insert_values, final int user, final long lmd, final int cid, final int id) {
         final StringBuilder insert =
             new StringBuilder("INSERT INTO prg_contacts (").append(insert_fields).append("created_from,").append("changed_from,").append(
@@ -749,6 +789,7 @@ public class ContactMySql implements ContactSql {
         return insert;
     }
 
+    @Override
     public StringBuilder iFperformOverridingContactStorageInsert(final StringBuilder insert_fields, final StringBuilder insert_values, final int user, final long lmd, final int cid, final int id) {
         final StringBuilder insert =
             new StringBuilder("INSERT IGNORE INTO prg_contacts (").append(insert_fields).append("created_from,").append("changed_from,").append(
@@ -758,6 +799,7 @@ public class ContactMySql implements ContactSql {
         return insert;
     }
 
+    @Override
     public StringBuilder iFperformContactStorageUpdate(final StringBuilder update, final long lmd, final int id, final int cid) {
         final StringBuilder updater =
             new StringBuilder("UPDATE prg_contacts SET ").append(update).append("changed_from = ").append(user).append(',').append(
@@ -765,12 +807,14 @@ public class ContactMySql implements ContactSql {
         return updater;
     }
 
+    @Override
     public StringBuilder iFgetContactById(final String fieldList) {
         final StringBuilder sb = new StringBuilder("SELECT ").append(fieldList);
         sb.append(" from prg_contacts AS co ");
         return sb;
     }
 
+    @Override
     public String iFdeleteContactObject(final int oid, final int cid) {
         return new StringBuilder("SELECT fid, created_from, changing_date, pflag from prg_contacts where intfield01 = ").append(oid).append(
             " AND cid = ").append(cid).toString();
@@ -778,6 +822,7 @@ public class ContactMySql implements ContactSql {
 
     public static final String PREFIXED_FIELDS = "co.fid,co.cid,co.created_from,co.creating_date,co.changed_from,co.changing_date,co.intfield01";
 
+    @Override
     public StringBuilder iFgetColsStringFromDeleteTable(final int[] cols) {
         final String fields = buildContactSelectString(cols);
         final int len = fields.length();
@@ -790,6 +835,7 @@ public class ContactMySql implements ContactSql {
         return sb;
     }
 
+    @Override
     public StringBuilder iFgetColsString(final int[] cols) {
         final String fields = buildContactSelectString(cols);
         final int len = fields.length();
@@ -802,6 +848,7 @@ public class ContactMySql implements ContactSql {
         return sb;
     }
 
+    @Override
     public void iFdeleteContact(final int id, final int cid, final Statement del) throws SQLException {
         final StringBuilder tmp = new StringBuilder(256);
         tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(id);
@@ -847,6 +894,7 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
     }
 
+    @Override
     public void iFtrashContactsFromFolder(final boolean deleteit, final Statement del, final int oid, final int cid) throws SQLException {
         final StringBuilder tmp = new StringBuilder(256);
         if (deleteit) {
@@ -892,6 +940,7 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
     }
 
+    @Override
     public void iFbackupContact(final Statement stmt, final int cid, final int oid, final int uid) throws SQLException {
         final StringBuilder tmp = new StringBuilder(256);
         tmp.append("DELETE FROM del_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
@@ -916,11 +965,13 @@ public class ContactMySql implements ContactSql {
         stmt.execute(tmp.toString());
     }
 
+    @Override
     public String iFtrashContactsFromFolderUpdateString(final int fid, final int cid) {
         return new StringBuilder("UPDATE del_contacts SET changing_date = ").append(System.currentTimeMillis()).append(" WHERE cid = ").append(
             cid).append(" AND fid = ").append(fid).toString();
     }
 
+    @Override
     public void iFtrashDistributionList(final boolean delete, final int id, final int cid, final Statement smt) throws SQLException {
         if (delete) {
             if (DEBUG) {
@@ -952,6 +1003,7 @@ public class ContactMySql implements ContactSql {
         }
     }
 
+    @Override
     public void iFtrashLinks(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE from prg_contacts_linkage where (intfield01 = ").append(id).append(" OR intfield02 = ").append(id).append(
@@ -962,6 +1014,7 @@ public class ContactMySql implements ContactSql {
         smt.execute(tmp.toString());
     }
 
+    @Override
     public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final int admin_fid, final Context ct) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
@@ -973,6 +1026,7 @@ public class ContactMySql implements ContactSql {
         smt.execute(tmp.toString());
     }
 
+    @Override
     public void iFtrashImage(final boolean delete, final Statement smt, final int id, final int cid) throws SQLException {
         if (delete) {
             final StringBuilder tmp =
@@ -1007,6 +1061,7 @@ public class ContactMySql implements ContactSql {
         }
     }
 
+    @Override
     public void iFtrashAllUserContacts(final boolean delete, final Statement del, final int cid, final int oid, final int uid, final ResultSet rs, final Session so) throws SQLException {
 
         final StringBuilder tmp = new StringBuilder(256);
@@ -1072,6 +1127,7 @@ public class ContactMySql implements ContactSql {
         }
     }
 
+    @Override
     public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Context ct) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
@@ -1083,6 +1139,7 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
     }
 
+    @Override
     public void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
@@ -1092,6 +1149,7 @@ public class ContactMySql implements ContactSql {
         del.execute(tmp.toString());
     }
 
+    @Override
     public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE FROM del_contacts WHERE intfield01 = ").append(uid).append(" and cid = ").append(cid);
@@ -1102,7 +1160,7 @@ public class ContactMySql implements ContactSql {
     }
 
 
-  
+
 
     private static interface SearchFiller {
 
@@ -1119,6 +1177,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getPattern() != null && cso.getPattern().length() > 0) {
@@ -1150,7 +1209,7 @@ public class ContactMySql implements ContactSql {
                             sb.append(" AND ");
 
                             /*-
-                             * 
+                             *
                             sb.append(field);
                             sb.append(" LIKE ? AND ");
                              */
@@ -1173,6 +1232,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0) {
@@ -1265,6 +1325,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0) {
@@ -1295,6 +1356,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0) {
@@ -1325,6 +1387,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0) {
@@ -1347,6 +1410,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0) {
@@ -1377,6 +1441,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0) {
@@ -1407,6 +1472,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0) {
@@ -1429,6 +1495,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0) {
@@ -1447,6 +1514,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0) {
@@ -1465,6 +1533,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0) {
@@ -1487,6 +1556,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getGivenName() != null && cso.getGivenName().length() > 0) {
@@ -1519,6 +1589,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getYomiFirstName() != null && cso.getYomiFirstName().length() > 0) {
@@ -1552,6 +1623,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getSurname() != null && cso.getSurname().length() > 0) {
@@ -1584,6 +1656,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getYomiLastName() != null && cso.getYomiLastName().length() > 0) {
@@ -1617,6 +1690,7 @@ public class ContactMySql implements ContactSql {
 
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getDisplayName() != null && cso.getDisplayName().length() > 0) {
@@ -1649,6 +1723,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getEmail1() != null && cso.getEmail1().length() > 0) {
@@ -1681,6 +1756,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getEmail2() != null && cso.getEmail2().length() > 0) {
@@ -1712,6 +1788,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getEmail3() != null && cso.getEmail3().length() > 0) {
@@ -1743,6 +1820,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getCatgories() != null && cso.getCatgories().length() > 0) {
@@ -1787,6 +1865,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getCompany() != null && cso.getCompany().length() > 0) {
@@ -1813,6 +1892,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getYomiCompany() != null && cso.getYomiCompany().length() > 0) {
@@ -1839,6 +1919,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getDepartment() != null && cso.getDepartment().length() > 0) {
@@ -1864,6 +1945,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getStreetBusiness() != null && cso.getStreetBusiness().length() > 0) {
@@ -1889,6 +1971,7 @@ public class ContactMySql implements ContactSql {
         });
         searchFillers.add(new SearchFiller() {
 
+            @Override
             public int fillSearchCriteria(final ContactMySql instance, final StringBuilder sb, final boolean isSingleSelect) {
                 final ContactSearchObject cso = instance.cso;
                 if (cso.getCityBusiness() != null && cso.getCityBusiness().length() > 0) {
@@ -1918,7 +2001,7 @@ public class ContactMySql implements ContactSql {
 
     /**
      * Checks if specified {@link StringBuilder string builder} ends with given suffix
-     * 
+     *
      * @param stringBuilder The string builder to check
      * @param suffix The suffix
      * @param ignoreTrailingWhitespaces <code>true</code> to ignore trailing whitespace characters following after suffix location;

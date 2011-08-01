@@ -82,7 +82,7 @@ public class FolderChildParser extends DataParser {
 		if (jsonobject.has(FolderChildFields.FOLDER_ID)) {
 			folderchildobject.setParentFolderID(parseInt(jsonobject, FolderChildFields.FOLDER_ID));
 		}
-		
+
 		parseElementDataObject(folderchildobject, jsonobject);
 	}
 }

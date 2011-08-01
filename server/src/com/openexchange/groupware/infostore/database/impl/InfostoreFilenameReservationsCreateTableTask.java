@@ -75,31 +75,34 @@ import com.openexchange.tools.sql.DBUtils;
 public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     /**
-     * 
+     *
      */
     private static final String INFOSTORE_RESERVED_PATHS = "infostoreReservedPaths";
 
     private String getTableSQL() {
-        return "CREATE TABLE infostoreReservedPaths (" + 
+        return "CREATE TABLE infostoreReservedPaths (" +
         " cid INT4 unsigned NOT NULL," +
         " folder INT4 unsigned NOT NULL, " +
         " name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL "+
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
     @Override
     protected String[] getCreateStatements() {
         return new String[] { getTableSQL() };
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), contextId);
@@ -109,22 +112,27 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         }
     }
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { INFOSTORE_RESERVED_PATHS };
     }

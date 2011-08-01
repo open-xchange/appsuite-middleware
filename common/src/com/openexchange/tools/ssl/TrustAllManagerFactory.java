@@ -58,7 +58,7 @@ import javax.net.ssl.TrustManagerFactorySpi;
 
 /**
  * Implementation of the trust manager factory service provider interface for the trust manager that trusts all certificates.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllManagerFactory extends TrustManagerFactorySpi {

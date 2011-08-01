@@ -60,5 +60,5 @@ public interface InfoDatabase extends TransactionAware {
 	void insertDocument(DocumentMetadata document, Context ctx) throws OXException;
 	void insertVersion(DocumentMetadata document, Context ctx) throws OXException;
 	void insertVersion(DocumentMetadata document, Context ctx, String filestoreLocation) throws OXException;
-	
+
 }

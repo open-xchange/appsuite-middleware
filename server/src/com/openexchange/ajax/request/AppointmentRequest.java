@@ -111,7 +111,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentRequest} - Processes appointment requests.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class AppointmentRequest extends CalendarRequest {
@@ -145,7 +145,7 @@ public class AppointmentRequest extends CalendarRequest {
 
     /**
      * Initializes a new {@link AppointmentRequest}.
-     * 
+     *
      * @param session The session.
      */
     public AppointmentRequest(final ServerSession session) {
@@ -202,7 +202,7 @@ public class AppointmentRequest extends CalendarRequest {
             throw AjaxExceptionCodes.UnknownAction.create( action);
         }
     }
-    
+
     private JSONObject actionResolveUid(final JSONObject jsonObj) throws JSONException, OXException {
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
         final JSONObject json = new JSONObject();
@@ -232,9 +232,9 @@ public class AppointmentRequest extends CalendarRequest {
         if (!appointmentObj.containsParentFolderID()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_FOLDERID);
         }
-        
+
         convertExternalToInternalUsersIfPossible(appointmentObj, ctx, LOG);
-        
+
         final AppointmentSQLInterface appointmentSql = appointmentFactory.createAppointmentSql(session);
         final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
 
@@ -258,7 +258,7 @@ public class AppointmentRequest extends CalendarRequest {
         return jsonResponseObj;
     }
 
-    
+
 	public JSONObject actionUpdate(final JSONObject jsonObj) throws JSONException, OXException {
         final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
@@ -526,7 +526,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
 
         final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
-        
+
         final TIntIntHashMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {
             JSONObject jObject = null;
@@ -534,8 +534,8 @@ public class AppointmentRequest extends CalendarRequest {
                 jObject = jData.getJSONObject(a);
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jData.toString());
-            }            
-            
+            }
+
             final int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
             final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 
@@ -576,7 +576,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields); 
+        it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
         try {
             int counter = 0;
             final JSONArray jsonResponseArray = new JSONArray();
@@ -683,7 +683,7 @@ public class AppointmentRequest extends CalendarRequest {
             }
         }
     }
-   
+
 
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,OXException {
         timestamp = new Date(0);
@@ -746,17 +746,17 @@ public class AppointmentRequest extends CalendarRequest {
                 final Appointment appointment = it.next();
                 final AppointmentWriter writer = new AppointmentWriter(timeZone);
                 boolean written = false;
-                
-                // Workaround to fill appointments with alarm times 
+
+                // Workaround to fill appointments with alarm times
                 // TODO: Move me down into the right layer if there is time for some refactoring.
                 if (com.openexchange.tools.arrays.Arrays.contains(columns, Appointment.ALARM)) {
                     if (!appointment.containsAlarm() && appointment.containsUserParticipants()) {
                         final OXFolderAccess ofa = new OXFolderAccess(ctx);
-                        
+
                         try {
                             final int folderType = ofa.getFolderType(appointment.getParentFolderID(), user.getId());
                             final int owner = ofa.getFolderOwner(appointment.getParentFolderID());
-                            
+
                             switch (folderType) {
                             case FolderObject.PRIVATE:
                                 for (final UserParticipant u : appointment.getUsers()) {
@@ -773,16 +773,16 @@ public class AppointmentRequest extends CalendarRequest {
                                         appointment.setAlarm(u.getAlarmMinutes());
                                         break;
                                     }
-                                }               
+                                }
                                 break;
                             }
                         } catch (final OXException e) {
                             LOG.error("An error occurred during filling an appointment with alarm information.", e);
-                        }                        
-                    }                  
+                        }
+                    }
                 }
                 // End of workaround
-                
+
                 if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
                     if (bRecurrenceMaster) {
                         RecurringResultsInterface recuResults = null;
@@ -900,7 +900,7 @@ public class AppointmentRequest extends CalendarRequest {
             if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
                 anonymize(appointmentobject);
             }
-                
+
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 
             final JSONObject jsonResponseObj = new JSONObject();
@@ -944,9 +944,9 @@ public class AppointmentRequest extends CalendarRequest {
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         //DataParser.checkInt(jData, ParticipantsFields.CONFIRMATION);
-        
+
         final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
-        
+
         int userId = user.getId();
         if (jData.has(AJAXServlet.PARAMETER_ID)) {
             userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
@@ -986,7 +986,7 @@ public class AppointmentRequest extends CalendarRequest {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         timestamp = new Date(0);
-        
+
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
         final AppointmentSearchObject searchObj = new AppointmentSearchObject();
 
@@ -998,11 +998,11 @@ public class AppointmentRequest extends CalendarRequest {
         if (jData.has(SearchFields.PATTERN)) {
             searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
         }
-        
+
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final String orderDirString = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
         final Order orderDir = OrderFields.parse(orderDirString);
-        
+
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final SearchIterator<Appointment> it = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
 
@@ -1011,12 +1011,12 @@ public class AppointmentRequest extends CalendarRequest {
         try {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
-            
+
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
 
                 if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
-                    
+
                     // If this is an recurring appointment, add the first occurrence to the result object
                     RecurringResultsInterface recuResults = null;
                     try {
@@ -1034,7 +1034,7 @@ public class AppointmentRequest extends CalendarRequest {
 
                         appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                     }
-                } else {   
+                } else {
                     appointmentwriter.writeArray(appointment, columns, jsonResponseArray);
                 }
 
@@ -1050,12 +1050,12 @@ public class AppointmentRequest extends CalendarRequest {
             }
         }
     }
-    
+
 
     public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-        
+
         final TimeZone timeZone;
         {
             final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
@@ -1179,10 +1179,10 @@ public class AppointmentRequest extends CalendarRequest {
             final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
         }
-        
+
         final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
         final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
-        
+
 
         timestamp = new Date(0);
 
@@ -1306,14 +1306,14 @@ public class AppointmentRequest extends CalendarRequest {
 
     /**
      * Creates a new <code>java.util.Date</code> instance with this request's time zone offset subtracted from specified UTC time.
-     * 
+     *
      * @param utcTime The UTC time
      * @return A new <code>java.util.Date</code> with time zone offset applied
      */
     private Date applyTimeZone2Date(final long utcTime) {
         return new Date(utcTime - timeZone.getOffset(utcTime));
     }
-    
+
     private void anonymize(final Appointment anonymized){
         //TODO: Solve dependency problem and use AnonymizingIterator#anonymize instead
         anonymized.setTitle("Private");

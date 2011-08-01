@@ -251,7 +251,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
         private final Date lastModified;
 
         private final int inFolder;
-        
+
         private LastModifiedCache lastModifiedCache;
 
         /**
@@ -275,6 +275,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
             this.lastModifiedCache = new LastModifiedCache();
         }
 
+        @Override
         public void actionPerformed(final AppointmentSQLInterface appointmentsSQL, final OutputStream os, final int user)
                 throws IOException {
 
@@ -289,7 +290,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         if (lastModified == null) {
                             throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);
                         }
-                        
+
                         final Date currentLastModified = lastModifiedCache.getLastModified(appointmentobject.getObjectID(), lastModified);
                         lastModifiedCache.update(appointmentobject.getObjectID(), appointmentobject.getRecurrenceID(), lastModified);
                         conflicts = appointmentsSQL.updateAppointmentObject(appointmentobject, inFolder, currentLastModified);
@@ -383,7 +384,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         + exc.toString(), clientId, os, xo);
             }
         }
-        
+
         public void setLastModifiedCache(final LastModifiedCache lastModifiedCache) {
             this.lastModifiedCache = lastModifiedCache;
         }

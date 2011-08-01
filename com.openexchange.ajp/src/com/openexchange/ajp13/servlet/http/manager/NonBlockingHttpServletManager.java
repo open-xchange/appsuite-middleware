@@ -66,7 +66,7 @@ import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * {@link NonBlockingHttpServletManager} - A HTTP servlet manager using a {@link NonBlockingRWLock non-blocking read-write lock}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonBlockingHttpServletManager extends AbstractHttpServletManager {
@@ -75,7 +75,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
 
     /**
      * Initializes a new {@link NonBlockingHttpServletManager}.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map from which to initialize static servlet instances
      */
     public NonBlockingHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
@@ -83,6 +83,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
         readWriteLock = new NonBlockingRWLock(true);
     }
 
+    @Override
     public void destroyServlet(final String id, final HttpServlet servletObj) {
         readWriteLock.acquireWrite();
         try {
@@ -99,6 +100,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
         }
     }
 
+    @Override
     public HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
         int state;
         HttpServlet retval = null;
@@ -155,6 +157,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
         return retval;
     }
 
+    @Override
     public void putServlet(final String path, final HttpServlet servlet) {
         ServletQueue servletQueue = servletPool.get(path);
         if (null != servletQueue && servletQueue.isSingleton()) {
@@ -195,6 +198,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
 
     }
 
+    @Override
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         readWriteLock.acquireWrite();
         try {
@@ -204,6 +208,7 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
         }
     }
 
+    @Override
     public void unregisterServlet(final String id) {
         readWriteLock.acquireWrite();
         try {

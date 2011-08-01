@@ -71,7 +71,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link FolderCache} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderCache {
@@ -91,7 +91,7 @@ public final class FolderCache {
 
     /**
      * Gets cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @return The cached IMAP folder or <code>null</code>
@@ -123,7 +123,7 @@ public final class FolderCache {
 
     /**
      * Updates the cached IMAP folder
-     * 
+     *
      * @param fullName The full name
      * @param folderStorage The folder storage
      * @throws OXException If loading the folder fails
@@ -134,7 +134,7 @@ public final class FolderCache {
 
     /**
      * Updates the cached IMAP folder
-     * 
+     *
      * @param fullName The full name
      * @param folderStorage The folder storage
      * @param imapFolder The optional IMAP folder
@@ -163,7 +163,7 @@ public final class FolderCache {
 
     /**
      * Gets cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @return The cached IMAP folder
@@ -175,7 +175,7 @@ public final class FolderCache {
 
     /**
      * Gets cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param folderStorage The connected IMAP folder storage
      * @param The possibly loaded IMAP folder; may be <code>null</code>
@@ -286,7 +286,7 @@ public final class FolderCache {
 
     /**
      * Removes all cached IMAP folders.
-     * 
+     *
      * @param session The session providing the session-bound cache
      * @param accountId The account ID
      */
@@ -301,7 +301,7 @@ public final class FolderCache {
 
     /**
      * Removes cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param session The session providing the session-bound cache
      * @param accountId The account ID
@@ -317,7 +317,7 @@ public final class FolderCache {
 
     /**
      * Decrements unread message counter from cached IMAP folder.
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param session The session providing the session-bound cache
      * @param accountId The account ID

@@ -104,7 +104,7 @@ public class TemplateServiceImpl implements TemplateService {
     private OXFolderHelper folders;
 
     private OXInfostoreHelper infostore;
-    
+
     private TemplateExceptionHandler exceptionHandler;
 
     public TemplateServiceImpl(final ConfigurationService config) {
@@ -183,7 +183,7 @@ public class TemplateServiceImpl implements TemplateService {
             }
 
             if (templateText == null) {
-                
+
                 if (existsInFilesystem(templateName)) {
                     templateText = loadFromFileSystem(templateName);
                     final OXTemplateImpl template = new OXTemplateImpl();
@@ -191,7 +191,7 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setLevel(TemplateLevel.SERVER);
                     return template;
                 }
-                
+
                 templateText = loadFromFileSystem(defaultTemplateName);
                 if (privateFolder == null) {
                     folder = folders.createPrivateTemplateFolder(session);
@@ -215,7 +215,7 @@ public class TemplateServiceImpl implements TemplateService {
     private boolean isEmpty(final String templateName) {
         return templateName == null || "".equals(templateName);
     }
-    
+
     protected boolean existsInFilesystem(final String templateName) {
         final File templateFile = getTemplateFile(templateName);
         if (!templateFile.exists() || !templateFile.exists() || !templateFile.canRead()) {
@@ -269,11 +269,11 @@ public class TemplateServiceImpl implements TemplateService {
         if (!templateDir.isDirectory() || !templateDir.exists()) {
             return new ArrayList<String>(0);
         }
-        
+
         final Set<String> sieve = new HashSet<String>(Arrays.asList(filter));
-        
+
         final Map<String, Set<String>> tagMap = getTagMap(templateDir);
-        
+
         final File[] files = templateDir.listFiles();
         if (files == null) {
             return new ArrayList<String>(0);
@@ -291,7 +291,7 @@ public class TemplateServiceImpl implements TemplateService {
                 } else {
                     names.add(file.getName());
                 }
-                
+
             }
         }
         final List<String> a = new ArrayList(defaults);
@@ -299,17 +299,17 @@ public class TemplateServiceImpl implements TemplateService {
         Collections.sort(a);
         Collections.sort(b);
         a.addAll(b);
-        
+
         return a;
     }
 
     private Map<String, Set<String>> getTagMap(final File templateDir) {
     	final String absolutePath = templateDir.getAbsolutePath();
-    	
+
 		if(cachedTags.containsKey(absolutePath)){
     		return cachedTags.get(absolutePath);
 		}
-		
+
     	final File[] files = templateDir.listFiles(new FileFilter(){
 			public boolean accept(final File pathname) {
 				return pathname.getName().endsWith(".properties")
@@ -321,7 +321,7 @@ public class TemplateServiceImpl implements TemplateService {
 			cachedTags.put(absolutePath, emptyMap);
     		return emptyMap;
     	}
-    	
+
         final HashMap<String, Set<String>> tagMap = new HashMap<String, Set<String>>();
     	for (final File file : files) {
     		final Properties index = new Properties();
@@ -330,7 +330,7 @@ public class TemplateServiceImpl implements TemplateService {
 				inStream = new FileInputStream(file);
 				index.load(inStream);
 				final Set<Entry<Object, Object>> entrySet = index.entrySet();
-				
+
 				for (final Entry<Object, Object> entry : entrySet) {
 					final String filename = (String) entry.getKey();
 					final String[] categoriesArr = ((String) entry.getValue()).split("\\s*,\\s*");
@@ -387,15 +387,15 @@ public class TemplateServiceImpl implements TemplateService {
 	}
 
     public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
-             
+
         return loadTemplate(templateName);
     }
 
     public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
-        setExceptionHandler(exceptionHandler);   
+        setExceptionHandler(exceptionHandler);
         return loadTemplate(templateName, defaultTemplateName, session);
     }
-	
+
     private void setExceptionHandler(final OXTemplateExceptionHandler exceptionHandler) {
         final TemplateExceptionHandler wrapper = new TemplateExceptionHandlerWrapper(exceptionHandler);
         this.exceptionHandler = wrapper;

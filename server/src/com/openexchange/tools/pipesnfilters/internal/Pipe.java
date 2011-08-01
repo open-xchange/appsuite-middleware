@@ -81,10 +81,12 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         this.threadPool = threadPool;
     }
 
+    @Override
     public boolean hasData() {
         return !finished || !queue.isEmpty();
     }
 
+    @Override
     public int getData(Collection<T> col) throws PipesAndFiltersException {
         int retval = 0;
         if (queue.isEmpty()) {
@@ -118,7 +120,8 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         }
         return retval;
     }
-    
+
+    @Override
     public void put(T element) throws PipesAndFiltersException {
         try {
             queue.put(element);
@@ -127,6 +130,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         }
     }
 
+    @Override
     public void exception(PipesAndFiltersException e) {
         try {
             queue.put(e);
@@ -135,6 +139,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         }
     }
 
+    @Override
     public void finished() throws PipesAndFiltersException {
         try {
             queue.put(eof);
@@ -143,6 +148,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         }
     }
 
+    @Override
     public <O> DataSource<O> addFilter(Filter<T, O> filter) {
         Pipe<O> pipe = new Pipe<O>(threadPool);
         FilterTask<T, O> task = new FilterTask<T, O>(this, filter, pipe);

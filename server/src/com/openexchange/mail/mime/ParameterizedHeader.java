@@ -55,7 +55,7 @@ import java.util.Iterator;
 
 /**
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ParameterizedHeader implements Serializable, Comparable<ParameterizedHeader> {
@@ -74,6 +74,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         super();
     }
 
+    @Override
     public int compareTo(final ParameterizedHeader other) {
         if (this == other) {
             return 0;
@@ -121,7 +122,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Adds specified value to given parameter name. If existing, the parameter is treated as a contiguous parameter according to RFC2231.
-     * 
+     *
      * @param key The parameter name
      * @param value The parameter value to add
      */
@@ -131,7 +132,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Sets the given parameter. Existing value is overwritten.
-     * 
+     *
      * @param key The parameter name
      * @param value The parameter value
      */
@@ -141,7 +142,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Gets specified parameter's value
-     * 
+     *
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -151,7 +152,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Removes specified parameter and returns its value
-     * 
+     *
      * @param key The parameter name
      * @return The parameter's value or <code>null</code> if not existing
      */
@@ -161,7 +162,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Checks if parameter is present
-     * 
+     *
      * @param key the parameter name
      * @return <code>true</code> if parameter is present; otherwise <code>false</code>
      */
@@ -171,7 +172,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
 
     /**
      * Gets all parameter names wrapped in an {@link Iterator}
-     * 
+     *
      * @return All parameter names wrapped in an {@link Iterator}
      */
     public Iterator<String> getParameterNames() {
@@ -187,7 +188,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * <li>Trims starting/ending whitespace characters</li>
      * <li>Removes ending ";" character</li>
      * </ol>
-     * 
+     *
      * @param paramHdrArg The parameterized header string argument
      * @return The prepared parameterized header's string.
      */

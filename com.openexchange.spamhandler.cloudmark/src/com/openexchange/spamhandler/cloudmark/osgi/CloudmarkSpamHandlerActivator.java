@@ -62,9 +62,9 @@ import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
 
 /**
  * {@link CloudmarkSpamHandlerActivator}
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 
@@ -91,7 +91,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
 	 */
 	@Override
@@ -117,7 +117,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
 	 */
 	@Override
@@ -144,7 +144,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 				LOG.info("A temporary absent service is available again");
 				return;
 			}
-			
+
 			serviceRegistration = context.registerService(SpamHandler.class.getName(), CloudmarkSpamHandler.getInstance(), dictionary);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -155,7 +155,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
 	 */
 	@Override

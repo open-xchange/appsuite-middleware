@@ -60,7 +60,7 @@ import com.openexchange.tools.net.URIParser;
 
 /**
  * {@link ProviderUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProviderUtility {
@@ -74,7 +74,7 @@ public final class ProviderUtility {
 
     /**
      * Turns given server URL to an instance of {@link InetSocketAddress}.
-     * 
+     *
      * @param serverUrl The server URL
      * @param defaultPort The default port to use if server URL does not specify a port
      * @return An instance of {@link InetSocketAddress} denoting given server URL
@@ -84,15 +84,19 @@ public final class ProviderUtility {
         final URI uri;
         try {
             uri = URIParser.parse(serverUrl, new URIDefaults() {
+                @Override
                 public String getProtocol() {
                     return null;
                 }
+                @Override
                 public String getSSLProtocol() {
                     return null;
                 }
+                @Override
                 public int getPort() {
                     return defaultPort;
                 }
+                @Override
                 public int getSSLPort() {
                     return defaultPort;
                 }});
@@ -105,7 +109,7 @@ public final class ProviderUtility {
     /**
      * Extracts the protocol from specified server URL:<br>
      * <code>(&lt;protocol&gt;://)?(&lt;host&gt;)(:&lt;port&gt;)?</code>
-     * 
+     *
      * @param serverUrl The server URL
      * @param fallback The fallback protocol if URL does not contain a protocol
      * @return Extracted protocol or <code>fallback</code> parameter

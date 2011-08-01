@@ -69,7 +69,7 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 
 /**
  * RdbFolderSyncInterface
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RdbFolderSyncInterface implements FolderSyncInterface {
@@ -108,6 +108,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
      * (non-Javadoc)
      * @see com.openexchange.api2.sync.FolderSyncInterface#deleteFolderContent(int)
      */
+    @Override
     public int clearFolder(final FolderObject folder, final Date clientLastModified) throws OXException {
         try {
             if (folder.getType() == FolderObject.PUBLIC && !userConfiguration.hasFullPublicFolderAccess()) {

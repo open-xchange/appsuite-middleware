@@ -58,7 +58,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * {@link MessagingActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */

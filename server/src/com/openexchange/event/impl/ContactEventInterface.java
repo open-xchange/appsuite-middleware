@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * ContactEvent
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public interface ContactEventInterface {

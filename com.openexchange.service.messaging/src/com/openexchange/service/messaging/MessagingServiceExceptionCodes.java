@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MessagingServiceExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
@@ -75,7 +75,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
      */
     UNKNOWN_HOST(MessagingServiceExceptionMessages.UNKNOWN_HOST_MSG, CATEGORY_ERROR, 3),
     /**
-     * 
+     *
      */
     INT_TOO_BIG(MessagingServiceExceptionMessages.INT_TOO_BIG_MSG, CATEGORY_ERROR, 4),
     /**
@@ -110,7 +110,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
      * Messaging server socket could not be bound to port %1$d. Probably another process is already listening on this port.
      */
     BIND_ERROR(MessagingServiceExceptionMessages.BIND_ERROR_MSG, CATEGORY_ERROR, 12),
-    
+
     ;
 
     private final Category category;
@@ -151,7 +151,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -160,7 +160,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -170,7 +170,7 @@ public enum MessagingServiceExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

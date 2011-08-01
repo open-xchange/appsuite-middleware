@@ -57,7 +57,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigTools {
-    
+
 
     /**
      * A timespan specification consists of a number and a unit of measurement. Units are:
@@ -67,8 +67,8 @@ public class ConfigTools {
      * h for hours
      * D for days
      * W for weeks
-     * 
-     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds  
+     *
+     * So, for example 2D 1h 12ms would be 2 days and one hour and 12 milliseconds
      * @param span
      * @return
      */

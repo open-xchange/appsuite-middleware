@@ -54,7 +54,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link ConfigurationServiceSupplier} - Supplies the configuration service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigurationServiceSupplier {
@@ -63,7 +63,7 @@ public final class ConfigurationServiceSupplier {
 
     /**
      * Gets the configuration service supplier.
-     * 
+     *
      * @return The configuration service supplier.
      */
     public static ConfigurationServiceSupplier getInstance() {
@@ -82,7 +82,7 @@ public final class ConfigurationServiceSupplier {
 
     /**
      * Sets the configuration service.
-     * 
+     *
      * @param confService The configuration service
      */
     public void setConfigurationService(final ConfigurationService confService) {
@@ -91,7 +91,7 @@ public final class ConfigurationServiceSupplier {
 
     /**
      * Gets the configuration service.
-     * 
+     *
      * @return The configuration service
      */
     public ConfigurationService getConfigurationService() {

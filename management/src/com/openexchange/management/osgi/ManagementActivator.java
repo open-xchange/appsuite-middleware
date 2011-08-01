@@ -63,7 +63,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link ManagementActivator} - Activator for management bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementActivator extends DeferredActivator {

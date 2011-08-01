@@ -58,7 +58,7 @@ import org.junit.Test;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FolderIDTest {
-    
+
     @Test
     public void shouldDefaultToInfostoreAndDefaultAccount() {
         FolderID folderID = new FolderID("12");
@@ -66,7 +66,7 @@ public class FolderIDTest {
         assertEquals("infostore", folderID.getAccountId());
         assertEquals("12", folderID.getFolderId());
     }
-    
+
     @Test
     public void shouldReturnSimpleUniqueIDForInfostore() {
         FolderID folderID = new FolderID("12");

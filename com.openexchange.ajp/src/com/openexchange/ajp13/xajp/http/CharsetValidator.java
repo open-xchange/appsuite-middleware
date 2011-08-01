@@ -60,7 +60,7 @@ import java.util.concurrent.FutureTask;
 
 /**
  * {@link CharsetValidator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CharsetValidator {
@@ -69,7 +69,7 @@ final class CharsetValidator {
 
     /**
      * Gets the {@link CharsetValidator} instance.
-     * 
+     *
      * @return The {@link CharsetValidator} instance
      */
     static CharsetValidator getInstance() {
@@ -92,7 +92,7 @@ final class CharsetValidator {
 
     /**
      * Check charset.
-     * 
+     *
      * @param charset The charset to check
      * @throws UnsupportedEncodingException If charset check fails
      */
@@ -102,6 +102,7 @@ final class CharsetValidator {
         if (null == future) {
             FutureTask<Boolean> ft = new FutureTask<Boolean>(new Callable<Boolean>() {
 
+                @Override
                 public Boolean call() throws Exception {
                     "Bla".getBytes(charset);
                     return Boolean.TRUE;
@@ -130,7 +131,7 @@ final class CharsetValidator {
 
         /**
          * Initializes a new ignore-case string from specified string.
-         * 
+         *
          * @param s The string
          * @return The new ignore-case string
          */
@@ -184,6 +185,7 @@ final class CharsetValidator {
             return hashcode;
         }
 
+        @Override
         public int compareTo(final IgnoreCaseString other) {
             return s.compareToIgnoreCase(other.s);
         }

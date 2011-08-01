@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link ExecutorService} for Unified INBOX bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXExecutors {
@@ -76,7 +76,7 @@ public final class UnifiedINBOXExecutors {
 
     /**
      * Creates a thread pool that reuses a fixed set of threads operating off a shared unbounded queue.
-     * 
+     *
      * @param numberOfThreads The number of threads in the pool
      * @return The newly created thread pool
      */
@@ -98,7 +98,7 @@ public final class UnifiedINBOXExecutors {
 
     /**
      * Creates a thread pool that creates new threads as needed, but will reuse previously constructed threads when they are available.
-     * 
+     *
      * @param numberOfTasks The number of tasks that shall be executed by returned thread pool
      * @return The newly created thread pool
      */
@@ -118,7 +118,7 @@ public final class UnifiedINBOXExecutors {
 
     /**
      * Creates a thread pool that creates new threads as needed, but will reuse previously constructed threads when they are available.
-     * 
+     *
      * @param numberOfTasks The number of tasks that shall be executed by returned thread pool
      * @param namePrefix The name prefix applied to newly created threads by returned thread pool
      * @return The newly created thread pool
@@ -163,7 +163,7 @@ public final class UnifiedINBOXExecutors {
     /**
      * Creates a thread pool with unlimited max. pool size that creates new threads as needed, but will reuse previously constructed threads
      * when they are available.
-     * 
+     *
      * @return The newly created thread pool
      */
     public static ExecutorService newUnlimitedCachedThreadPool() {
@@ -182,7 +182,7 @@ public final class UnifiedINBOXExecutors {
     /**
      * Creates a thread pool with unlimited max. pool size that creates new threads as needed, but will reuse previously constructed threads
      * when they are available.
-     * 
+     *
      * @param namePrefix The name prefix applied to newly created threads by returned thread pool
      * @return The newly created thread pool
      */

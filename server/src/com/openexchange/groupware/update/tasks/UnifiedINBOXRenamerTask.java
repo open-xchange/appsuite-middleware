@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link UnifiedINBOXRenamerTask} - Renames "Unified INBOX" to "Unified Mail".
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
@@ -73,6 +73,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { MailAccountMigrationTask.class.getName() };
     }
@@ -82,6 +83,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
         return new Attributes(BACKGROUND);
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         /*

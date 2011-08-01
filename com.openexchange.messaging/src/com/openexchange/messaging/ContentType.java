@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ContentType} - The Content-Type header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -78,14 +78,14 @@ public interface ContentType extends ParameterizedMessagingHeader {
 
     /**
      * Gets the base type.
-     * 
+     *
      * @return The base type (e.g. text/plain)
      */
     public String getBaseType();
 
     /**
      * Sets base type (e.g. text/plain)
-     * 
+     *
      * @param baseType The base type
      * @throws OXException If base type cannot be set
      */
@@ -108,7 +108,7 @@ public interface ContentType extends ParameterizedMessagingHeader {
 
     /**
      * Sets <code>"name"</code> parameter
-     * 
+     *
      * @param filename The <code>"name"</code> parameter
      */
     public void setNameParameter(String filename);
@@ -125,7 +125,7 @@ public interface ContentType extends ParameterizedMessagingHeader {
 
     /**
      * Sets this content type to given content type.
-     * 
+     *
      * @param contentType The content type to apply
      * @throws OXException If content type cannot be set
      */
@@ -133,7 +133,7 @@ public interface ContentType extends ParameterizedMessagingHeader {
 
     /**
      * Sets this content type to given content type.
-     * 
+     *
      * @param contentType The content type to apply
      * @throws OXException If content type cannot be set
      */
@@ -141,14 +141,14 @@ public interface ContentType extends ParameterizedMessagingHeader {
 
     /**
      * Checks if Content-Type's base type matches given wildcard pattern (e.g text/plain, text/* or text/htm*)
-     * 
+     *
      * @return <code>true</code> if Content-Type's base type matches given pattern, <code>false</code> otherwise
      */
     public boolean isMimeType(String pattern);
 
     /**
      * Checks if Content-Type's base type ignore-case starts with specified prefix.
-     * 
+     *
      * @param prefix The prefix
      * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
      * @throws IllegalArgumentException If specified prefix is <code>null</code>

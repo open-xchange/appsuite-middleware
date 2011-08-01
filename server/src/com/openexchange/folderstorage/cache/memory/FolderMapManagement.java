@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FolderMapManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMapManagement {
@@ -67,7 +67,7 @@ public final class FolderMapManagement {
 
     /**
      * Gets the {@link FolderMapManagement management} instance.
-     * 
+     *
      * @return The management instance
      */
     public static FolderMapManagement getInstance() {
@@ -86,7 +86,7 @@ public final class FolderMapManagement {
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param session The session
      */
     public void dropFor(final Session session) {
@@ -99,7 +99,7 @@ public final class FolderMapManagement {
 
     /**
      * Gets the folder map for specified session.
-     * 
+     *
      * @param session The session
      * @return The folder map
      */
@@ -118,7 +118,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified session.
-     * 
+     *
      * @param session The session
      * @return The folder map or <code>null</code> if absent
      */
@@ -128,7 +128,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified user in given context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The folder map or <code>null</code> if absent

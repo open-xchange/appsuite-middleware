@@ -59,7 +59,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 
 /**
- * 
+ *
  * {@link MicroformatAppointmentParser}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>

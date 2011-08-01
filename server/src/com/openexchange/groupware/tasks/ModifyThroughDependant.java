@@ -70,6 +70,7 @@ public final class ModifyThroughDependant implements TargetService {
         super();
     }
 
+    @Override
     public void updateTargetObject(final Context ctx, final Connection con, final int targetId) throws OXException {
         final Task task;
         try {
@@ -85,6 +86,7 @@ public final class ModifyThroughDependant implements TargetService {
         stor.updateTask(ctx, con, task, lastModified, new int[] { Task.LAST_MODIFIED }, ACTIVE);
     }
 
+    @Override
     public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId) throws OXException {
         final Task task;
         try {

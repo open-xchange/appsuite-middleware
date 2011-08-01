@@ -59,9 +59,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 /**
  * {@link ChangeExceptionsReplacement} - The replacement for change exceptions
  * of a recurring calendar object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDateReplacement {
 
@@ -71,7 +71,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
 
     /**
      * Initializes a new {@link ChangeExceptionsReplacement}
-     * 
+     *
      * @param dates The change exception dates
      */
     public ChangeExceptionsReplacement(final Date[] dates) {
@@ -80,7 +80,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
 
     /**
      * Initializes a new {@link ChangeExceptionsReplacement}
-     * 
+     *
      * @param dates The change exception dates
      * @param locale The locale
      * @param timeZone The time zone
@@ -122,13 +122,14 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
         return new StringBuilder(1 + result.length()).append(result).append('\n').toString();
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.CHANGE_EXCEPTIONS;
     }
 
     /**
      * Checks if associated event is a change exception.
-     * 
+     *
      * @return <code>true</code> if associated event is a change exception;
      *         otherwise <code>false</code>
      */
@@ -138,7 +139,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
 
     /**
      * Sets whether associated event is a change exception.
-     * 
+     *
      * @param changeException <code>true</code> if associated event is a change
      *            exception; otherwise <code>false</code>
      */
@@ -149,7 +150,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
     /**
      * Gets the recurrence title.<br>
      * Only useful if {@link #isChangeException()} returns <code>true</code>.
-     * 
+     *
      * @return The recurrence title
      */
     public String getRecurrenceTitle() {
@@ -159,7 +160,7 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
     /**
      * Sets the recurrence title.<br>
      * Only useful if {@link #isChangeException()} returns <code>true</code>.
-     * 
+     *
      * @param recurrenceTitle The recurrence title
      */
     public void setRecurrenceTitle(final String recurrenceTitle) {

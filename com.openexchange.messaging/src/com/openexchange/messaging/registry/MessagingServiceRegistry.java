@@ -55,7 +55,7 @@ import com.openexchange.messaging.MessagingService;
 
 /**
  * {@link MessagingServiceRegistry}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -64,7 +64,7 @@ public interface MessagingServiceRegistry {
 
     /**
      * Gets the messaging service associated with specified identifier.
-     * 
+     *
      * @param id The messaging service identifier
      * @return The messaging service associated with specified identifier
      * @throws OXException If no messaging service is associated with specified identifier
@@ -73,7 +73,7 @@ public interface MessagingServiceRegistry {
 
     /**
      * Checks if there is a messaging service associated with specified identifier.
-     * 
+     *
      * @param id The messaging service identifier
      * @return <code>true</code> if there is a messaging service associated with specified identifier; otherwise <code>false</code>
      */
@@ -81,7 +81,7 @@ public interface MessagingServiceRegistry {
 
     /**
      * Gets all messaging services kept in this registry.
-     * 
+     *
      * @return All messaging services kept in this registry
      * @throws OXException If messaging services cannot be returned
      */

@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DataRetentionService} - The data retention or Sch&auml;uble service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DataRetentionService {
 
     /**
      * Stores specified retention data on a mail transport event.
-     * 
+     *
      * @param retentionData The retention data
      * @throws OXException If data retention fails
      */
@@ -68,7 +68,7 @@ public interface DataRetentionService {
 
     /**
      * Stores specified retention data on a mailbox access event.
-     * 
+     *
      * @param retentionData The retention data
      * @throws OXException If data retention fails
      */
@@ -76,7 +76,7 @@ public interface DataRetentionService {
 
     /**
      * Gets a newly created instance of {@link RetentionData} ready for being filled with available retention data.
-     * 
+     *
      * @return A newly created instance of {@link RetentionData} ready for being filled with available retention data.
      */
     public RetentionData newInstance();

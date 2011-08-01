@@ -58,20 +58,20 @@ import com.openexchange.tools.update.Tools;
 
 
 /**
- * A {@link ChangeColumnTypeUpdateTask} is a utility class for writing update tasks that want to modify a column type. 
- * The UpdateTask checks the current column type against the given sqlType (according to java.sql.Types) and, if the 
+ * A {@link ChangeColumnTypeUpdateTask} is a utility class for writing update tasks that want to modify a column type.
+ * The UpdateTask checks the current column type against the given sqlType (according to java.sql.Types) and, if the
  * type does not match, issues an alter table statement to change the column type.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
 
-    private DatabaseService dbService;
-    private String tableName;
-    private Column column;
-    
+    private final DatabaseService dbService;
+    private final String tableName;
+    private final Column column;
+
     /**
-     * 
+     *
      * Initializes a new {@link ChangeColumnTypeUpdateTask}.
      * @param tableName The name of the table that may have to be modified
      * @param columnName The name of the column that may have to be modified
@@ -84,18 +84,21 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         this.tableName = tableName;
         this.dbService = dbService;
     }
-    
-    
+
+
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = null;
         try {
@@ -142,6 +145,6 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         }
         return name.equalsIgnoreCase(column.getDefinition());
     }
-    
+
 
 }

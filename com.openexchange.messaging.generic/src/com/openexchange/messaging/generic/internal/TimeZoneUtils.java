@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link TimeZoneUtils} - Utility class for time zone.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -72,7 +72,7 @@ public final class TimeZoneUtils {
 
     /**
      * Gets the {@link TimeZone} instance for the given ID.
-     * 
+     *
      * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
      * @return The specified {@link TimeZone} instance, or the GMT zone if the given ID cannot be understood.
@@ -91,7 +91,7 @@ public final class TimeZoneUtils {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone identifier
      * @return The date millis with time zone offset added
@@ -102,7 +102,7 @@ public final class TimeZoneUtils {
 
     /**
      * Adds the time zone offset to given date millis.
-     * 
+     *
      * @param date The date millis
      * @param timeZone The time zone
      * @return The date millis with time zone offset added

@@ -60,7 +60,7 @@ import com.openexchange.folderstorage.Folder;
 
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMap {

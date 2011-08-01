@@ -55,7 +55,7 @@ import java.util.Set;
 
 /**
  * DataObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

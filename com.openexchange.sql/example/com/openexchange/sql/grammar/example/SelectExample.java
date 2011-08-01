@@ -80,7 +80,7 @@ public class SelectExample {
 
     /**
      * This SELECT-Statement contains several OX-Modifications for selecting with joins, aliases and other stuff.
-     * 
+     *
      * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
      */
     public void extendedSelect() {
@@ -89,14 +89,14 @@ public class SelectExample {
             FROM(dates).
             JOIN(dateRights, new EQUALS(dates.getColumn("intfield01"), dateRights.getColumn("object_id"))).
             WHERE(new EQUALS(dates.getColumn("intfield01"), dates.getColumn("intfield02")).AND(new NOTNULL(dates.getColumn("field06"))));
-        
+
         System.out.println(new StatementBuilder().buildCommand(select));
     }
-    
+
     public void selectWithIn() {
         SELECT select =
             new SELECT(new COUNT(ASTERISK)).FROM(dates).WHERE(new IN("intfield01", new LIST(PLACEHOLDER, PLACEHOLDER)));
-        
+
         System.out.println(new StatementBuilder().buildCommand(select));
     }
 }

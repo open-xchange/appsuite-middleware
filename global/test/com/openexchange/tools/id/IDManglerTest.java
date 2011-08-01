@@ -56,7 +56,7 @@ import junit.framework.TestCase;
 
 /**
  * {@link IDManglerTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IDManglerTest extends TestCase {
@@ -113,12 +113,12 @@ public class IDManglerTest extends TestCase {
 
         assertEquals(Arrays.asList("something\\with", "neato\\backslashes"), unmangled);
     }
-    
+
     public void testContainsPrimaryDelim() {
         List<String> unmangled = IDMangler.unmangle("some:/partial:id://component");
         assertEquals(Arrays.asList("some:/partial:id", "component"), unmangled);
     }
-    
+
     public void testContainsFragmentsOfPrimaryDelim() {
         String id = IDMangler.mangle("some:/service:this is", "someFolder", "someId");
         assertNotNull(id);
@@ -127,6 +127,6 @@ public class IDManglerTest extends TestCase {
 
         assertEquals(Arrays.asList("some:/service:this is", "someFolder", "someId"), unmangled);
     }
-    
+
 
 }

@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointme
 import com.openexchange.groupware.update.tasks.CorrectOrganizerInAppointments;
 import com.openexchange.groupware.update.tasks.CreateIndexOnContextAttributesTask;
 import com.openexchange.groupware.update.tasks.CreateIndexOnUserAttributesForAliasLookupTask;
+import com.openexchange.groupware.update.tasks.MailAccountAddReplyToTask;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -358,13 +359,13 @@ public final class InternalList {
         // new com.openexchange.folderstorage.virtual.VirtualTreeMigrationTask()
 
         // +++++++++++++++++++++++++++++++++ Version 6.20 starts here. +++++++++++++++++++++++++++++++++
-        
+
         // Transforms the "info" field to a TEXT field. This fields seems not to be used anywhere.
         new com.openexchange.groupware.update.tasks.ContactInfoField2Text(),
-        
+
         // Creates new Contact fields (First Name, Last Name, Company) for Kana based search in japanese environments.
         new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch(),
-        
+
         // Remove facebook subscriptions to force use of new oauth
         new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask(),
 
@@ -373,24 +374,27 @@ public final class InternalList {
 
         // Remove yahoo subscriptions to force use of new oauth
         new com.openexchange.groupware.update.tasks.DeleteOldYahooSubscriptions(),
-        
+
         // Switch the column type of 'value' in contextAttribute to TEXT
         new AllowTextInValuesOfDynamicContextAttributesTask(),
-        
+
         // Switch the column type of 'value' in user_attribute to TEXT
         new AllowTextInValuesOfDynamicUserAttributesTask(),
-        
+
         // Recreate the index on the context attributes table
         new CreateIndexOnContextAttributesTask(),
-        
+
         // Recreate the index on the user attributes table for alias lookup
         new CreateIndexOnUserAttributesForAliasLookupTask(),
-        
+
         // Correct the attachment count in the dates table
         new CorrectAttachmentCountInAppointments(),
 
         // Corrects the organizer in appointments. When exporting iCal and importing it again the organizer gets value 'null' instead of SQL
         // NULL. This task corrects this.
-        new CorrectOrganizerInAppointments()
+        new CorrectOrganizerInAppointments(),
+
+        // Add "replyTo" column to mail/transport account table
+        new MailAccountAddReplyToTask(),
     };
 }

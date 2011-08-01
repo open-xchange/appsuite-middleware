@@ -59,7 +59,7 @@ import com.openexchange.messaging.generic.Utility;
 
 /**
  * {@link MimeDateMessagingHeader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -73,7 +73,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
 
     /**
      * Initializes a new {@link MimeDateMessagingHeader}.
-     * 
+     *
      * @param name The name
      * @param time The number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
@@ -89,7 +89,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
 
     /**
      * Initializes a new {@link MimeDateMessagingHeader}.
-     * 
+     *
      * @param name The name
      * @param formattedDate The formatted date as per RFC822 pattern
      *            (&quot;EEE,&nbsp;d&nbsp;MMM&nbsp;yyyy&nbsp;HH:mm:ss&nbsp;'XXXXX'&nbsp;(z)&quot;)
@@ -112,7 +112,7 @@ public final class MimeDateMessagingHeader implements DateMessagingHeader {
 
     /**
      * Initializes a new {@link MimeDateMessagingHeader}.
-     * 
+     *
      * @param name The name
      * @param date The date
      */

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link XAJPv13ThreadFactory} - A thread factory for AJP threads taking a custom name prefix for created threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
@@ -78,6 +78,7 @@ final class XAJPv13ThreadFactory implements java.util.concurrent.ThreadFactory {
         len = namePrefix.length() + APPENDIX_LENGTH;
     }
 
+    @Override
     public Thread newThread(final Runnable r) {
         final Thread t = new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new XAJPv13UncaughtExceptionhandler());

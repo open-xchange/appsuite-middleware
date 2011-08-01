@@ -55,7 +55,7 @@ import twitter4j.User;
 
 /**
  * {@link UserImpl} - The user implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserImpl implements com.openexchange.twitter.User {
@@ -64,7 +64,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
 
     /**
      * Initializes a new {@link UserImpl}.
-     * 
+     *
      * @param twitter4jUser The twitter4j user
      */
     public UserImpl(final User twitter4jUser) {

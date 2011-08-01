@@ -71,7 +71,7 @@ public class TransactionException extends OXException {
     public StackTraceElement[] getElements() {
         return elements;
     }
-    
+
     public void printStarterTrace(){
         if(elements == null) {
             System.err.println("No Stack Trace recorded");

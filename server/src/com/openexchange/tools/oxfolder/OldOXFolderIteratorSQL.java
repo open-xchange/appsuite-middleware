@@ -81,7 +81,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * This class provides SQL related methods to fill instances of <code>com.openexchange.tools.iterator.FolderObjectIterator</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OldOXFolderIteratorSQL {
@@ -489,7 +489,7 @@ public final class OldOXFolderIteratorSQL {
 
     /**
      * Gets all visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not visible)
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's group IDs
      * @param userConfig The user configuration
@@ -504,7 +504,7 @@ public final class OldOXFolderIteratorSQL {
 
     /**
      * Gets all visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not visible)
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's group IDs
      * @param userConfig The user configuration
@@ -521,7 +521,7 @@ public final class OldOXFolderIteratorSQL {
     /**
      * Gets specified module's visible public folders that are not visible in hierarchic tree-view (because any ancestor folder is not
      * visible)
-     * 
+     *
      * @param module The module whose non-hierarchic-visible folders should be determined
      * @param userId The user ID
      * @param groups The user's group IDs

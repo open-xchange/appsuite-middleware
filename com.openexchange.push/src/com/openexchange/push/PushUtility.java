@@ -55,7 +55,6 @@ import java.util.Hashtable;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
@@ -65,12 +64,12 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PushUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class))));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
@@ -83,7 +82,7 @@ public final class PushUtility {
 
     /**
      * Triggers the OSGi event system and posts a new event for new mails in given folder.
-     * 
+     *
      * @param folder The folder identifier; including account information
      * @param session The session providing needed user data
      * @throws OXException If posting event fails

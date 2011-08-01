@@ -54,9 +54,9 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link SpellCheckInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class SpellCheckInit implements Initialization {
 
@@ -64,7 +64,7 @@ public class SpellCheckInit implements Initialization {
 
 	/**
 	 * Gets the singleton instance of {@link SpellCheckInit}
-	 * 
+	 *
 	 * @return The singleton instance of {@link SpellCheckInit}
 	 */
 	public static SpellCheckInit getInstance() {
@@ -80,7 +80,7 @@ public class SpellCheckInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws OXException {
@@ -90,7 +90,7 @@ public class SpellCheckInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() {

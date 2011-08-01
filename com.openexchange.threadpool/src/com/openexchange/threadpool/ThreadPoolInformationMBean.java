@@ -51,7 +51,7 @@ package com.openexchange.threadpool;
 
 /**
  * {@link ThreadPoolInformationMBean} - The MBean for thread pool information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ThreadPoolInformationMBean {
@@ -63,21 +63,21 @@ public interface ThreadPoolInformationMBean {
 
     /**
      * Returns the current number of threads in the pool.
-     * 
+     *
      * @return The number of threads
      */
     int getPoolSize();
 
     /**
      * Returns the approximate number of threads that are actively executing tasks.
-     * 
+     *
      * @return The number of threads
      */
     int getActiveCount();
 
     /**
      * Returns the largest number of threads that have ever simultaneously been in the pool.
-     * 
+     *
      * @return The number of threads
      */
     int getLargestPoolSize();
@@ -86,7 +86,7 @@ public interface ThreadPoolInformationMBean {
      * Returns the approximate total number of tasks that have been scheduled for execution. Because the states of tasks and threads may
      * change dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across
      * successive calls.
-     * 
+     *
      * @return The number of tasks
      */
     long getTaskCount();
@@ -95,7 +95,7 @@ public interface ThreadPoolInformationMBean {
      * Returns the approximate total number of tasks that have completed execution. Because the states of tasks and threads may change
      * dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across successive
      * calls.
-     * 
+     *
      * @return The number of tasks
      */
     long getCompletedTaskCount();

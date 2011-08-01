@@ -69,7 +69,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link CheckPermission}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class CheckPermission {
@@ -84,7 +84,7 @@ abstract class CheckPermission {
 
     /**
      * Initializes a new {@link CheckPermission}
-     * 
+     *
      * @param session The session
      * @param writeCon A connection with write capability
      * @param ctx The context
@@ -99,7 +99,7 @@ abstract class CheckPermission {
 
     /**
      * Gets the folder from master database
-     * 
+     *
      * @param folderId The folder ID
      * @return The folder from master database
      * @throws OXException If folder cannot be fetched from master database
@@ -110,7 +110,7 @@ abstract class CheckPermission {
 
     /**
      * Gets the folder from master database with or without subfolder IDs loaded
-     * 
+     *
      * @param folderId The folder ID
      * @param withSubfolders whether to load subfolder IDs, too
      * @return The folder from master database
@@ -140,7 +140,7 @@ abstract class CheckPermission {
 
     /**
      * Gets the effective user permission
-     * 
+     *
      * @param userId The user ID
      * @param userConfig The user's configuration
      * @param folder The folder needed to determine type, module, etc.
@@ -193,7 +193,7 @@ abstract class CheckPermission {
 
     /**
      * Checks if specified permissions contain a system-read-folder permission for given entity
-     * 
+     *
      * @param permissions The permissions to check
      * @param entity The entity
      * @return <code>true</code> if specified permissions contain a system-read-folder permission for given entity; otherwise
@@ -210,7 +210,7 @@ abstract class CheckPermission {
 
     /**
      * Broadcast folder event.
-     * 
+     *
      * @param folderId The folder identifier
      * @param deleted <code>true</code> if deleted; otherwise changed
      * @param eventAdmin The event admin service reference

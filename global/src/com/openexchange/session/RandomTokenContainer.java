@@ -52,7 +52,7 @@ package com.openexchange.session;
 /**
  * A {@link RandomTokenContainer} maintains an association of a random token string to a certain value. The lifetime of the association is
  * scoped by the lifetime of a session.
- * 
+ *
  * @see SessionSpecificContainerRetrievalService
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -61,7 +61,7 @@ public interface RandomTokenContainer<T> {
     /**
      * Generates a new random token an associates the value with it. The lifetime of this association is bound by the lifetime of the given
      * session.
-     * 
+     *
      * @param session The session that the lifetime of this association is bound to.
      * @param value The value to store.
      * @return The newly created random token
@@ -76,7 +76,7 @@ public interface RandomTokenContainer<T> {
     public T get(String token);
 
     /**
-     * Removes a value from this token container. If the value is found the clean up operation will be used on it. 
+     * Removes a value from this token container. If the value is found the clean up operation will be used on it.
      * @param token The token used to store the value.
      * @return The value after having run clean up on it.
      */

@@ -12,9 +12,9 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -37,8 +37,8 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -64,11 +64,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -76,11 +76,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -88,11 +88,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -100,11 +100,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -112,11 +112,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the fromUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getFromUser() {
         return fromUser;
@@ -124,11 +124,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the fromUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setFromUser(BigInteger value) {
         this.fromUser = value;
@@ -136,11 +136,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the fromUserIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFromUserIdentifier() {
         return fromUserIdentifier;
@@ -148,11 +148,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the fromUserIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFromUserIdentifier(String value) {
         this.fromUserIdentifier = value;
@@ -160,11 +160,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -172,11 +172,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -184,11 +184,11 @@ public class EditExtensionRequest
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -196,11 +196,11 @@ public class EditExtensionRequest
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;

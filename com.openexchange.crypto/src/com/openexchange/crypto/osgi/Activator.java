@@ -60,7 +60,7 @@ import com.openexchange.crypto.internal.CryptoServiceImpl;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class Activator implements BundleActivator {
-    
+
     private ServiceRegistration<CryptoService> cryptoRegistration;
 
     public void start(final BundleContext context) throws Exception {

@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link JSONMessageCache} - A JSON message cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessageCache {
@@ -88,7 +88,7 @@ public final class JSONMessageCache {
 
     /**
      * Gets the cache instance.
-     * 
+     *
      * @return The cache instance or <code>null</code>
      */
     public static JSONMessageCache getInstance() {
@@ -97,7 +97,7 @@ public final class JSONMessageCache {
 
     /**
      * Initializes the cache instance.
-     * 
+     *
      * @return The cache instance
      * @throws OXException If initialization fails
      */
@@ -133,7 +133,7 @@ public final class JSONMessageCache {
 
     /**
      * Initializes a new {@link JSONMessageCache}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private JSONMessageCache() throws OXException {
@@ -145,6 +145,7 @@ public final class JSONMessageCache {
                     JSONMessageCacheConfiguration.getInstance().getShrinkerIntervalUserMap());
             superMap.setDefaultTimeoutListener(new TimeoutListener<TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>>>() {
 
+                @Override
                 public void onTimeout(final TimeoutConcurrentMap<FolderKey, ConcurrentMap<String, FutureTask<JSONObject>>> element) {
                     // Perform time out on all entries contained in timed out folder map
                     element.timeoutAll();
@@ -161,7 +162,7 @@ public final class JSONMessageCache {
     /**
      * Associates given JSON mail object with specified account ID, folder fullname and mail ID. If the cache previously contained a mapping
      * for this key, the old value is replaced by the specified value.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -176,7 +177,7 @@ public final class JSONMessageCache {
     /**
      * Associates given JSON mail object with specified account ID, folder fullname and mail ID. If the cache previously contained a mapping
      * for this key, the old value is replaced by the specified value.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -232,7 +233,7 @@ public final class JSONMessageCache {
 
     /**
      * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -245,7 +246,7 @@ public final class JSONMessageCache {
 
     /**
      * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -275,7 +276,7 @@ public final class JSONMessageCache {
 
     /**
      * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -288,7 +289,7 @@ public final class JSONMessageCache {
 
     /**
      * Checks if a JSON mail object is associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -307,7 +308,7 @@ public final class JSONMessageCache {
 
     /**
      * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -321,7 +322,7 @@ public final class JSONMessageCache {
 
     /**
      * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -336,7 +337,7 @@ public final class JSONMessageCache {
 
     /**
      * Gets the <b>cloned</b> JSON mail object associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -377,7 +378,7 @@ public final class JSONMessageCache {
         /*-
          * A future is already present; meaning associated message's JSON representation is at least planned for being put into cache, but
          * does not guarantee being already present.
-         * 
+         *
          * Therefore:
          * 1. Invoke Future.get() with a time out and return if return value is present within time out range
          * 2. Otherwise catch possible TimeoutException and handle it by performing Future's task with calling thread
@@ -424,7 +425,7 @@ public final class JSONMessageCache {
 
     /**
      * Switch the \Seen flag for specified mails' JSON representations. Decrements unread message counter for each message.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param id The mail ID
@@ -439,7 +440,7 @@ public final class JSONMessageCache {
 
     /**
      * Switch the \Seen flag for specified mails' JSON representations. Decrements unread message counter for each message.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param id The mail ID
@@ -518,7 +519,7 @@ public final class JSONMessageCache {
 
     /**
      * Switch the \Seen flag for specified mails' JSON representations. Decrements unread message counter for each message.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param seen <code>true</code> to set \Seen flag; otherwise <code>false</code>
@@ -532,7 +533,7 @@ public final class JSONMessageCache {
 
     /**
      * Switch the \Seen flag for specified mails' JSON representations. Decrements unread message counter for each message.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param seen <code>true</code> to set \Seen flag; otherwise <code>false</code>
@@ -596,7 +597,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates flags for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param id The mail ID
@@ -611,7 +612,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates flags for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param id The mail ID
@@ -674,7 +675,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates flags for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param flags The flags bit mask
@@ -688,7 +689,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates flags for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param flags The flags bit mask
@@ -739,7 +740,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates the color flag for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param ids The mail IDs
@@ -753,7 +754,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates the color flag for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param ids The mail IDs
@@ -814,7 +815,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates the color flag for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param colorFlag The color flag to set
@@ -827,7 +828,7 @@ public final class JSONMessageCache {
 
     /**
      * Updates the color flag for specified mails' JSON representations.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname
      * @param colorFlag The color flag to set
@@ -873,7 +874,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes the JSON mail object associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -887,7 +888,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes the JSON mail object associated with specified account ID, folder fullname and mail ID.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -902,7 +903,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects associated with specified account ID and folder fullname.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param session The session providing user and context information
@@ -913,7 +914,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects associated with specified account ID and folder fullname.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param userId The user ID
@@ -934,7 +935,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects except the ones associated with specified account ID and folder fullname.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname of the folder whose mails shall be kept
      * @param session The session providing user and context information
@@ -945,7 +946,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects except the ones associated with specified account ID and folder fullname.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The fullname of the folder whose mails shall be kept
      * @param userId The user ID
@@ -971,7 +972,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects associated with specified user ID and context ID.
-     * 
+     *
      * @param session The session providing user and context information
      */
     public void removeUser(final Session session) {
@@ -980,7 +981,7 @@ public final class JSONMessageCache {
 
     /**
      * Removes all JSON mail objects associated with specified user ID and context ID.
-     * 
+     *
      * @param userId The user ID
      * @param cid The context ID
      */
@@ -1010,7 +1011,7 @@ public final class JSONMessageCache {
 
     /**
      * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link OXException} if invocation fails.
-     * 
+     *
      * @param future The future whose <tt>get()</tt> method is supposed to be invoked
      * @return The result object
      * @throws OXException If invocation fails
@@ -1037,7 +1038,7 @@ public final class JSONMessageCache {
 
     /**
      * Invokes {@link Future#get()} in a safe manner. Throwing an appropriate {@link OXException} if invocation fails.
-     * 
+     *
      * @param future The future whose <tt>get()</tt> method is supposed to be invoked
      * @param timeout The timeout millis
      * @return The result object
@@ -1199,6 +1200,7 @@ public final class JSONMessageCache {
             this.fullname = fullname;
         }
 
+        @Override
         public void onTimeout(final ConcurrentMap<String, FutureTask<JSONObject>> element) {
             final StringBuilder sb = new StringBuilder(64);
             sb.append("Removed ").append(element.size()).append(" messages from JSON message cache belonging to folder ");
@@ -1211,7 +1213,7 @@ public final class JSONMessageCache {
 
     /**
      * Generates a deep-clone of specified JSONObject instance.
-     * 
+     *
      * @param source The JSONObject instance to clone
      * @return The deep-clone of specified JSONObject instance
      * @throws JSONException If a JSON error occurs
@@ -1226,7 +1228,7 @@ public final class JSONMessageCache {
 
     /**
      * Generates a deep-clone of specified JSONArray instance.
-     * 
+     *
      * @param source The JSONArray instance to clone
      * @return The deep-clone of specified JSONArray instance
      * @throws JSONException If a JSON error occurs
@@ -1244,7 +1246,7 @@ public final class JSONMessageCache {
      * Clones given object. If the object is an immutable instance of <code>Boolean</code>, <code>Double</code>, <code>Integer</code>,
      * <code>Long</code>, <code>String</code>, or the {@link JSONObject#NULL} object, the object itself is returned. Otherwise the object is
      * an instance of <code>JSONObject</code> or <code>JSONArray</code>, then a deep clone is returned.
-     * 
+     *
      * @param source The object to clone
      * @return The cloned object
      * @throws JSONException If a JSON error occurs

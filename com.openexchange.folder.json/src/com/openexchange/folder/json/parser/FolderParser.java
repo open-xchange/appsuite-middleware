@@ -63,7 +63,7 @@ import com.openexchange.folderstorage.Permission;
 
 /**
  * {@link FolderParser} - Parses a folder from JSON data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderParser {
@@ -77,7 +77,7 @@ public final class FolderParser {
 
     /**
      * Parses a folder from given JSON object.
-     * 
+     *
      * @param folderJsonObject The JSON object containing folder data
      * @return The parsed folder
      * @throws OXException If parsing folder fails
@@ -157,7 +157,7 @@ public final class FolderParser {
 
     /**
      * Parses permissions from given JSON array.
-     * 
+     *
      * @param permissionsAsJSON The JSON array containing permissions data
      * @return The parsed permissions
      * @throws OXException If parsing permissions fails

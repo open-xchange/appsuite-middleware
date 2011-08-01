@@ -63,13 +63,13 @@ import com.openexchange.subscribe.msn.MSNSubscribeService;
 public class Activator extends HousekeepingActivator {
 
     private static final Class[] NEEDED = new Class[] { OAuthService.class, ContextService.class, MSNService.class};
-    
+
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-    
+
     private OAuthServiceMetaData oAuthServiceMetaData;
-    
+
     private MSNService msnService;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     @Override
@@ -77,19 +77,20 @@ public class Activator extends HousekeepingActivator {
         return NEEDED;
     }
 
+    @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));        
+        ServiceTracker metaDataTracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new OAuthServiceMetaDataRegisterer(context, this));
         rememberTracker(metaDataTracker);
         openTrackers();
         msnService = getService(MSNService.class);
-    }        
-    
+    }
+
     public OAuthServiceMetaData getOAuthServiceMetaData() {
         return oAuthServiceMetaData;
     }
 
-    
+
     public void setOAuthServiceMetaData(OAuthServiceMetaData authServiceMetaData) {
         oAuthServiceMetaData = authServiceMetaData;
     }
@@ -101,16 +102,16 @@ public class Activator extends HousekeepingActivator {
     }
 
     public void unregisterSubscribeService() {
-        unregisterServices();   
+        unregisterServices();
         LOG.info("MSNSubscribeService was stopped");
     }
 
-    
+
     public MSNService getMsnService() {
         return msnService;
     }
 
-    
+
     public void setMsnService(MSNService msnService) {
         this.msnService = msnService;
     }

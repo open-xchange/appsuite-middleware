@@ -53,7 +53,7 @@ import com.openexchange.search.Operand;
 
 /**
  * {@link ColumnOperand} - The columns operand.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ColumnOperand implements Operand<String> {
@@ -62,7 +62,7 @@ public final class ColumnOperand implements Operand<String> {
 
     /**
      * Initializes a new {@link ColumnOperand}.
-     * 
+     *
      * @param name The column name
      */
     public ColumnOperand(final String name) {
@@ -70,10 +70,12 @@ public final class ColumnOperand implements Operand<String> {
         this.name = name;
     }
 
+    @Override
     public com.openexchange.search.Operand.Type getType() {
         return Type.COLUMN;
     }
 
+    @Override
     public String getValue() {
         return name;
     }

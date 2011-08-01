@@ -54,7 +54,7 @@ import com.openexchange.mail.api.MailCapabilities;
 /**
  * {@link IMAPCapabilities} - The capabilities of underlying IMAP server with {@link #hasTimeStamps()} hard-coded to return
  * <code>false</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IMAPCapabilities extends MailCapabilities {

@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link ResourceRequestServiceRegistry} - The service registry for resource-manage request
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceRequestServiceRegistry {
@@ -62,7 +62,7 @@ public final class ResourceRequestServiceRegistry {
 
     /**
      * Gets the singleton instance
-     * 
+     *
      * @return The singleton instance
      */
     public static ServiceRegistry getServiceRegistry() {

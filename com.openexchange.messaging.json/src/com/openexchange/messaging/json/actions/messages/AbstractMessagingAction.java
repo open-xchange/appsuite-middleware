@@ -76,18 +76,18 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     protected MessagingMessageWriter writer;
     protected MessagingMessageParser parser;
     private Cache cache;
-    
+
     public AbstractMessagingAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         this(registry, writer, parser, null);
     }
-    
+
     public AbstractMessagingAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser, final Cache cache) {
         this.registry = registry;
         this.writer = writer;
         this.parser = parser;
         this.cache = cache;
     }
-    
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
         try {
@@ -104,7 +104,7 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
 
     protected abstract AJAXRequestResult doIt(MessagingRequestData messagingRequestData, ServerSession session) throws JSONException, IOException, OXException;
 
-    
+
     public void setCache(final Cache cache) {
         this.cache = cache;
     }

@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link LocalizedStringReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class LocalizedStringReplacement implements TemplateReplacement {
 
@@ -90,6 +90,7 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
         return clone;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
@@ -105,23 +106,28 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
         return stringHelper;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
 
+    @Override
     public String getReplacement() {
         return getStringHelper().getString(replacement);
     }
 
+    @Override
     public TemplateToken getToken() {
         return token;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
     }
 
+    @Override
     public final TemplateReplacement setLocale(final Locale locale) {
         if (locale == null || locale.equals(this.locale)) {
             return this;
@@ -131,11 +137,13 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
         return this;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         // Not applicable
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!LocalizedStringReplacement.class.isInstance(other)) {
             /*

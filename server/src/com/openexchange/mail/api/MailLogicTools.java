@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailLogicTools} - Provides convenience methods to reply/forward a mail message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailLogicTools {
@@ -75,7 +75,7 @@ public class MailLogicTools {
 
     /**
      * Initializes a new {@link MailLogicTools}
-     * 
+     *
      * @param session The session providing user data
      * @param accountId The account ID
      */
@@ -91,7 +91,7 @@ public class MailLogicTools {
      * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
      * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
      * implementation is needed.
-     * 
+     *
      * @param originalMail The original mail
      * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
      * @return An instance of {@link MailMessage} representing the reply message
@@ -107,7 +107,7 @@ public class MailLogicTools {
      * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
      * {@link MimeReply#getReplyMail(MailMessage, boolean, Session)} and can be left unchanged. Otherwise an message data specific
      * implementation is needed.
-     * 
+     *
      * @param originalMail The original mail
      * @param replyAll <code>true</code> to reply to all recipients; otherwise <code>false</code>
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
@@ -125,7 +125,7 @@ public class MailLogicTools {
      * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
      * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left unchanged. Otherwise a message data specific implementation
      * is needed.
-     * 
+     *
      * @param originalMails The original mails
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
@@ -141,7 +141,7 @@ public class MailLogicTools {
      * If mailing system deals with common RFC822 messages, this convenience method only delegates its request to
      * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left unchanged. Otherwise a message data specific implementation
      * is needed.
-     * 
+     *
      * @param originalMails The original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
      * @return An instance of {@link MailMessage} representing the forward message

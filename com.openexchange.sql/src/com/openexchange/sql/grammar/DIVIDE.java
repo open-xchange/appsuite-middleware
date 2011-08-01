@@ -57,11 +57,13 @@ public class DIVIDE extends BinaryArithmeticExpression {
 		super(left, right);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "/";
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildDIVIDE(this);
 	}
 

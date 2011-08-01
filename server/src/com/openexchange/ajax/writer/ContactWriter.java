@@ -69,7 +69,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link ContactWriter} - The writer for contacts
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -79,7 +79,7 @@ public class ContactWriter extends CommonWriter {
 
     /**
      * Initializes a new {@link ContactWriter}
-     * 
+     *
      * @param timeZone The user time zone
      * @param ctx The context
      */
@@ -98,17 +98,17 @@ public class ContactWriter extends CommonWriter {
         writeCommonFields(contact, json);
         /* TODO: Refactoring - this can be done with ContactGetter rather easily. sadly not now when 50% of our tests are broken due to the big HttpUnit/HttpClient rewrite
         EXAMPLE:
-        
+
         Iterator<String> keys = json.keys();
         ContactSetter cs = new ContactSetter();
         //extend: We'll need to nest several specialized setters here, e.g. one for dates
         while(keys.hasNext()){
-        	String jsonKey = keys.next(); 
+        	String jsonKey = keys.next();
         	ContactField field = ContactField.getByAjaxName(jsonKey);
         	field.doSwitch(cs, contact, json.get(jsonKey));
         }
-        */	
-        
+        */
+
         writeParameter(ContactFields.LAST_NAME, contact.getSurName(), json);
         writeParameter(ContactFields.FIRST_NAME, contact.getGivenName(), json);
         writeParameter(ContactFields.ANNIVERSARY, contact.getAnniversary(), json);
@@ -321,7 +321,7 @@ public class ContactWriter extends CommonWriter {
 
         /**
          * Writes this writer's value taken from specified contact object to given JSON array
-         * 
+         *
          * @param contactObject The contact object
          * @param jsonArray The JSON array
          * @param session TODO
@@ -343,6 +343,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.OBJECT_ID, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getObjectID(), jsonArray, contactObject.containsObjectID());
             }
@@ -350,6 +351,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CREATED_BY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCreatedBy(), jsonArray, contactObject.containsCreatedBy());
             }
@@ -357,6 +359,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.MODIFIED_BY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getModifiedBy(), jsonArray, contactObject.containsModifiedBy());
             }
@@ -364,6 +367,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.FOLDER_ID, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getParentFolderID(), jsonArray, contactObject.containsParentFolderID());
             }
@@ -371,6 +375,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.PRIVATE_FLAG, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getPrivateFlag(), jsonArray, contactObject.containsPrivateFlag());
             }
@@ -378,13 +383,15 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.SUR_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getSurName(), jsonArray);
             }
         });
-        
+
         m.put(Contact.YOMI_FIRST_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiFirstName(), jsonArray);
             }
@@ -392,6 +399,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.GIVEN_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getGivenName(), jsonArray);
             }
@@ -399,6 +407,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.YOMI_LAST_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiLastName(), jsonArray);
             }
@@ -406,6 +415,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.ANNIVERSARY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getAnniversary(), jsonArray);
             }
@@ -413,6 +423,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.ASSISTANT_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getAssistantName(), jsonArray);
             }
@@ -420,6 +431,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.BIRTHDAY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getBirthday(), jsonArray);
             }
@@ -427,6 +439,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.BRANCHES, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getBranches(), jsonArray);
             }
@@ -434,6 +447,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.BUSINESS_CATEGORY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getBusinessCategory(), jsonArray);
             }
@@ -441,6 +455,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CATEGORIES, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCategories(), jsonArray);
             }
@@ -448,6 +463,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CELLULAR_TELEPHONE1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCellularTelephone1(), jsonArray);
             }
@@ -455,6 +471,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CELLULAR_TELEPHONE2, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCellularTelephone2(), jsonArray);
             }
@@ -462,6 +479,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CITY_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCityHome(), jsonArray);
             }
@@ -469,6 +487,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CITY_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCityBusiness(), jsonArray);
             }
@@ -476,6 +495,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.CITY_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCityOther(), jsonArray);
             }
@@ -483,6 +503,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COLOR_LABEL, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getLabel(), jsonArray, contactObject.containsLabel());
             }
@@ -490,6 +511,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COMMERCIAL_REGISTER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCommercialRegister(), jsonArray);
             }
@@ -497,6 +519,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COMPANY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCompany(), jsonArray);
             }
@@ -504,6 +527,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.YOMI_COMPANY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiCompany(), jsonArray);
             }
@@ -511,6 +535,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COUNTRY_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCountryHome(), jsonArray);
             }
@@ -518,6 +543,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COUNTRY_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCountryBusiness(), jsonArray);
             }
@@ -525,6 +551,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.COUNTRY_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getCountryOther(), jsonArray);
             }
@@ -532,6 +559,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.DEFAULT_ADDRESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getDefaultAddress(), jsonArray, contactObject.containsDefaultAddress());
             }
@@ -539,6 +567,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.DEPARTMENT, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getDepartment(), jsonArray);
             }
@@ -546,6 +575,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.DISPLAY_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getDisplayName(), jsonArray);
             }
@@ -553,6 +583,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.MARK_AS_DISTRIBUTIONLIST, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getMarkAsDistribtuionlist(), jsonArray, contactObject.containsMarkAsDistributionlist());
             }
@@ -560,6 +591,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.EMAIL1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getEmail1(), jsonArray);
             }
@@ -567,6 +599,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.EMAIL2, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getEmail2(), jsonArray);
             }
@@ -574,6 +607,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.EMAIL3, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getEmail3(), jsonArray);
             }
@@ -581,6 +615,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.EMPLOYEE_TYPE, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getEmployeeType(), jsonArray);
             }
@@ -588,6 +623,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.FAX_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getFaxBusiness(), jsonArray);
             }
@@ -595,6 +631,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.FAX_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getFaxHome(), jsonArray);
             }
@@ -602,6 +639,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.FAX_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getFaxOther(), jsonArray);
             }
@@ -609,6 +647,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.IMAGE1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 final byte[] imageData = contactObject.getImage1();
                 if (imageData == null) {
@@ -621,6 +660,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.IMAGE1_URL, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 if (contactObject.containsContextId()) {
                     final byte[] imageData2 = contactObject.getImage1();
@@ -648,12 +688,14 @@ public class ContactWriter extends CommonWriter {
             }
         });
         m.put(Contact.NUMBER_OF_IMAGES, new ContactFieldWriter() {
+            @Override
             public void write(final Contact contact, final JSONArray json, final Session session) {
                 writeValue(contact.getNumberOfImages(), json);
             }
         });
         m.put(Contact.INFO, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getInfo(), jsonArray);
             }
@@ -661,6 +703,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.INSTANT_MESSENGER1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getInstantMessenger1(), jsonArray);
             }
@@ -668,6 +711,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.INSTANT_MESSENGER2, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getInstantMessenger2(), jsonArray);
             }
@@ -675,6 +719,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.INTERNAL_USERID, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getInternalUserId(), jsonArray, contactObject.containsInternalUserId());
             }
@@ -682,6 +727,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.MANAGER_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getManagerName(), jsonArray);
             }
@@ -689,6 +735,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.MARITAL_STATUS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getMaritalStatus(), jsonArray);
             }
@@ -696,6 +743,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.MIDDLE_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getMiddleName(), jsonArray);
             }
@@ -703,6 +751,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NICKNAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNickname(), jsonArray);
             }
@@ -710,6 +759,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NOTE, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNote(), jsonArray);
             }
@@ -717,6 +767,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NUMBER_OF_CHILDREN, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNumberOfChildren(), jsonArray);
             }
@@ -724,6 +775,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NUMBER_OF_EMPLOYEE, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNumberOfEmployee(), jsonArray);
             }
@@ -731,6 +783,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.POSITION, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getPosition(), jsonArray);
             }
@@ -738,6 +791,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.POSTAL_CODE_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getPostalCodeHome(), jsonArray);
             }
@@ -745,6 +799,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.POSTAL_CODE_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getPostalCodeBusiness(), jsonArray);
             }
@@ -752,6 +807,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.POSTAL_CODE_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getPostalCodeOther(), jsonArray);
             }
@@ -759,6 +815,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.PROFESSION, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getProfession(), jsonArray);
             }
@@ -766,6 +823,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.ROOM_NUMBER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getRoomNumber(), jsonArray);
             }
@@ -773,6 +831,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.SALES_VOLUME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getSalesVolume(), jsonArray);
             }
@@ -780,6 +839,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.SPOUSE_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getSpouseName(), jsonArray);
             }
@@ -787,6 +847,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STATE_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStateHome(), jsonArray);
             }
@@ -794,6 +855,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STATE_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStateBusiness(), jsonArray);
             }
@@ -801,6 +863,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STATE_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStateOther(), jsonArray);
             }
@@ -808,6 +871,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STREET_HOME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStreetHome(), jsonArray);
             }
@@ -815,6 +879,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STREET_BUSINESS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStreetBusiness(), jsonArray);
             }
@@ -822,6 +887,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.STREET_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getStreetOther(), jsonArray);
             }
@@ -829,6 +895,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.SUFFIX, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getSuffix(), jsonArray);
             }
@@ -836,6 +903,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TAX_ID, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTaxID(), jsonArray);
             }
@@ -843,6 +911,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_ASSISTANT, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneAssistant(), jsonArray);
             }
@@ -850,6 +919,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_BUSINESS1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneBusiness1(), jsonArray);
             }
@@ -857,6 +927,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_BUSINESS2, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneBusiness2(), jsonArray);
             }
@@ -864,6 +935,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_CALLBACK, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneCallback(), jsonArray);
             }
@@ -871,6 +943,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_CAR, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneCar(), jsonArray);
             }
@@ -878,6 +951,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_COMPANY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneCompany(), jsonArray);
             }
@@ -885,6 +959,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_HOME1, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneHome1(), jsonArray);
             }
@@ -892,6 +967,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_HOME2, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneHome2(), jsonArray);
             }
@@ -899,6 +975,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_IP, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneIP(), jsonArray);
             }
@@ -906,6 +983,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_ISDN, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneISDN(), jsonArray);
             }
@@ -913,6 +991,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_OTHER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneOther(), jsonArray);
             }
@@ -920,6 +999,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_PAGER, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephonePager(), jsonArray);
             }
@@ -927,6 +1007,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_PRIMARY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephonePrimary(), jsonArray);
             }
@@ -934,6 +1015,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_RADIO, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneRadio(), jsonArray);
             }
@@ -941,6 +1023,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_TELEX, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneTelex(), jsonArray);
             }
@@ -948,6 +1031,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TELEPHONE_TTYTDD, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTelephoneTTYTTD(), jsonArray);
             }
@@ -955,6 +1039,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.TITLE, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getTitle(), jsonArray);
             }
@@ -962,6 +1047,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.URL, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getURL(), jsonArray);
             }
@@ -969,6 +1055,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD01, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField01(), jsonArray);
             }
@@ -976,6 +1063,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD02, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField02(), jsonArray);
             }
@@ -983,6 +1071,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD03, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField03(), jsonArray);
             }
@@ -990,6 +1079,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD04, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField04(), jsonArray);
             }
@@ -997,6 +1087,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD05, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField05(), jsonArray);
             }
@@ -1004,6 +1095,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD06, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField06(), jsonArray);
             }
@@ -1011,6 +1103,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD07, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField07(), jsonArray);
             }
@@ -1018,6 +1111,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD08, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField08(), jsonArray);
             }
@@ -1025,6 +1119,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD09, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField09(), jsonArray);
             }
@@ -1032,6 +1127,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD10, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField10(), jsonArray);
             }
@@ -1039,6 +1135,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD11, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField11(), jsonArray);
             }
@@ -1046,6 +1143,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD12, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField12(), jsonArray);
             }
@@ -1053,6 +1151,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD13, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField13(), jsonArray);
             }
@@ -1060,6 +1159,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD14, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField14(), jsonArray);
             }
@@ -1067,6 +1167,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD15, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField15(), jsonArray);
             }
@@ -1074,6 +1175,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD16, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField16(), jsonArray);
             }
@@ -1081,6 +1183,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD17, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField17(), jsonArray);
             }
@@ -1088,6 +1191,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD18, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField18(), jsonArray);
             }
@@ -1095,6 +1199,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD19, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField19(), jsonArray);
             }
@@ -1102,6 +1207,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USERFIELD20, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUserField20(), jsonArray);
             }
@@ -1109,11 +1215,13 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NUMBER_OF_ATTACHMENTS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNumberOfAttachments(), jsonArray, contactObject.containsNumberOfAttachments());
             }
         });
         m.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new ContactFieldWriter() {
+            @Override
             public void write(final Contact contact, final JSONArray json, final Session session) {
                 writeValue(contact.getLastModifiedOfNewestAttachment(), json, contact.containsLastModifiedOfNewestAttachment());
             }
@@ -1121,6 +1229,7 @@ public class ContactWriter extends CommonWriter {
         {
             final ContactFieldWriter fieldWriter = new ContactFieldWriter() {
 
+                @Override
                 public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                     writeValue(contactObject.getNumberOfLinks(), jsonArray, contactObject.containsNumberOfLinks());
                 }
@@ -1132,6 +1241,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.NUMBER_OF_DISTRIBUTIONLIST, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getNumberOfDistributionLists(), jsonArray, contactObject.containsNumberOfDistributionLists());
             }
@@ -1139,17 +1249,20 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.IMAGE_LAST_MODIFIED, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getImageLastModified(), jsonArray);
             }
         });
         m.put(Contact.FILE_AS, new ContactFieldWriter() {
+            @Override
             public void write(final Contact contact, final JSONArray json, final Session session) {
                 writeValue(contact.getFileAs(), json, contact.containsFileAs());
             }
         });
         m.put(Contact.IMAGE1_CONTENT_TYPE, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getImageContentType(), jsonArray);
             }
@@ -1157,6 +1270,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.USE_COUNT, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getUseCount(), jsonArray);
             }
@@ -1164,6 +1278,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.LINKS, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) throws JSONException {
                 final JSONArray jsonLinksArray = getLinksAsJSONArray(contactObject);
                 if (jsonLinksArray == null) {
@@ -1176,6 +1291,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.DISTRIBUTIONLIST, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) throws JSONException {
                 final JSONArray jsonDistributionListArray = getDistributionListAsJSONArray(contactObject);
                 if (jsonDistributionListArray == null) {
@@ -1188,6 +1304,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.YOMI_FIRST_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiFirstName(), jsonArray);
             }
@@ -1195,6 +1312,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.YOMI_LAST_NAME, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiLastName(), jsonArray);
             }
@@ -1202,6 +1320,7 @@ public class ContactWriter extends CommonWriter {
 
         m.put(Contact.YOMI_COMPANY, new ContactFieldWriter() {
 
+            @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiCompany(), jsonArray);
             }

@@ -108,7 +108,7 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code> methods
  * of given {@link MailMessageHandler} object
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailMessageParser {
@@ -121,14 +121,17 @@ public final class MailMessageParser {
 
     private static final Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
 
+        @Override
         public boolean hasNext() {
             return false;
         }
 
+        @Override
         public Entry<String, String> next() {
             throw new NoSuchElementException("Iterator is empty");
         }
 
+        @Override
         public void remove() {
             // Nothing to do
         }
@@ -145,6 +148,7 @@ public final class MailMessageParser {
      */
     private static final InlineDetector LENIENT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (fileName == null));
         }
@@ -156,6 +160,7 @@ public final class MailMessageParser {
      */
     private static final InlineDetector STRICT_DETECTOR = new InlineDetector() {
 
+        @Override
         public boolean isInline(final String disposition, final String fileName) {
             return (Part.INLINE.equalsIgnoreCase(disposition) || (disposition == null)) && (fileName == null);
         }
@@ -203,7 +208,7 @@ public final class MailMessageParser {
 
     /**
      * Switches the INLINE detector behavior.
-     * 
+     *
      * @param strict <code>true</code> to perform strict INLINE detector behavior; otherwise <code>false</code>
      * @return This parser with new behavior applied
      */
@@ -214,7 +219,7 @@ public final class MailMessageParser {
 
     /**
      * Gets possible warnings occurred during parsing.
-     * 
+     *
      * @return The warnings
      */
     public List<OXException> getWarnings() {
@@ -223,7 +228,7 @@ public final class MailMessageParser {
 
     /**
      * Resets this parser and returns itself
-     * 
+     *
      * @return The parser itself
      */
     public MailMessageParser reset() {
@@ -235,7 +240,7 @@ public final class MailMessageParser {
 
     /**
      * Parses specified mail using given handler as call-back
-     * 
+     *
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @throws OXException If parsing specified mail fails
@@ -247,7 +252,7 @@ public final class MailMessageParser {
     /**
      * Parses specified mail using given handler as call-back and given initial prefix for mail part identifiers; e.g.
      * <code>&quot;1.1&quot;</code>.
-     * 
+     *
      * @param mail The mail to parse
      * @param handler The call-back handler
      * @param prefix The initial prefix for mail part identifiers; e.g. <code>&quot;1.1&quot;</code>
@@ -272,7 +277,7 @@ public final class MailMessageParser {
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw 
+            throw
                 MailExceptionCode.UNREADBALE_PART_CONTENT.create(
                 e,
                 null == mailId ? "" : mailId,
@@ -826,7 +831,7 @@ public final class MailMessageParser {
     /**
      * Generates an appropriate filename from either specified <code>rawFileName</code> if not <code>null</code> or generates a filename
      * composed with <code>"Part_" + sequenceId</code>
-     * 
+     *
      * @param rawFileName The raw filename obtained from mail part
      * @param sequenceId The part's sequence ID
      * @param baseMimeType The base MIME type to look up an appropriate file extension, if <code>rawFileName</code> is <code>null</code>
@@ -866,7 +871,7 @@ public final class MailMessageParser {
 
     /**
      * Composes part's sequence ID from given prefix and part's count
-     * 
+     *
      * @param prefix The prefix (may be <code>null</code>)
      * @param partCount The part count
      * @return The sequence ID
@@ -880,7 +885,7 @@ public final class MailMessageParser {
 
     /**
      * Generates a filename consisting of common prefix "Part_" and part's sequence ID appended
-     * 
+     *
      * @param sequenceId Part's sequence ID
      * @param baseMimeType The base MIME type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
      * @return The generated filename
@@ -1007,7 +1012,7 @@ public final class MailMessageParser {
      * <li><code>text/richtext</code></li>
      * <li><code>text/rtf</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
@@ -1027,7 +1032,7 @@ public final class MailMessageParser {
 
     /**
      * Checks if content type matches <code>text/htm*</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>text/htm*</code>; otherwise <code>false</code>
      */
@@ -1039,7 +1044,7 @@ public final class MailMessageParser {
 
     /**
      * Checks if content type matches <code>multipart/*</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>multipart/*</code>; otherwise <code>false</code>
      */
@@ -1051,7 +1056,7 @@ public final class MailMessageParser {
 
     /**
      * Checks if content type matches <code>image/*</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>image/*</code>; otherwise <code>false</code>
      */
@@ -1063,7 +1068,7 @@ public final class MailMessageParser {
 
     /**
      * Checks if content type matches <code>message/rfc822</code> content type.
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches <code>message/rfc822</code>; otherwise <code>false</code>
      */
@@ -1088,7 +1093,7 @@ public final class MailMessageParser {
      * <li><code>text/calendar</code></li>
      * <li><code>text/x-vcalendar</code></li>
      * </ul>
-     * 
+     *
      * @param contentType The content type
      * @return <code>true</code> if content type matches special; otherwise <code>false</code>
      */

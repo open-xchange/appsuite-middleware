@@ -15,9 +15,9 @@ import com._4psa.resellerdata_xsd._2_5.ResellerInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -46,8 +46,8 @@ import com._4psa.resellerdata_xsd._2_5.ResellerInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -83,11 +83,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -95,11 +95,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -107,11 +107,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -119,11 +119,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -131,11 +131,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -143,11 +143,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;
@@ -155,11 +155,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the verbose property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isVerbose() {
         return verbose;
@@ -167,11 +167,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the verbose property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setVerbose(Boolean value) {
         this.verbose = value;
@@ -179,11 +179,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the notifyOnly property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getNotifyOnly() {
         return notifyOnly;
@@ -191,11 +191,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the notifyOnly property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setNotifyOnly(BigDecimal value) {
         this.notifyOnly = value;
@@ -203,11 +203,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -215,11 +215,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -227,11 +227,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the linkResourceID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getLinkResourceID() {
         return linkResourceID;
@@ -239,11 +239,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the linkResourceID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setLinkResourceID(BigInteger value) {
         this.linkResourceID = value;
@@ -251,11 +251,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the linkUUID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLinkUUID() {
         return linkUUID;
@@ -263,11 +263,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the linkUUID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLinkUUID(String value) {
         this.linkUUID = value;
@@ -275,11 +275,11 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the dku property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDku() {
         return dku;
@@ -287,11 +287,11 @@ public class AddResellerRequest
 
     /**
      * Sets the value of the dku property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDku(String value) {
         this.dku = value;
@@ -299,25 +299,25 @@ public class AddResellerRequest
 
     /**
      * Gets the value of the accountFlag property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accountFlag property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccountFlag().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAccountFlag() {
         if (accountFlag == null) {

@@ -54,7 +54,7 @@ import java.util.Locale;
 
 /**
  * {@link UserizedFolder} - Extends/overwrites {@link Folder} interface methods with user-sensitive methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UserizedFolder extends Folder {
@@ -64,53 +64,54 @@ public interface UserizedFolder extends Folder {
      * <p>
      * <b>Note</b>: In opposite to {@link Folder#getSubfolderIDs()} this method does not return complete list of subfolder identifiers.
      * Since a user-sensitive folder is only meant to indicate if it contains any subfolder at all, it only serves the condition:
-     * 
+     *
      * <pre>
      * final boolean hasSubfolders = userizedFolder.getSubfolderIDs() &gt; 0
      * </pre>
-     * 
+     *
      * @return The subfolder IDs or <code>null</code> if not available
      */
+    @Override
     String[] getSubfolderIDs();
 
     /**
      * Gets the permission for requesting user.
-     * 
+     *
      * @return The permission for requesting user
      */
     Permission getOwnPermission();
 
     /**
      * Sets the permission for requesting user.
-     * 
+     *
      * @param ownPermission The permission for requesting user
      */
     void setOwnPermission(Permission ownPermission);
 
     /**
      * Gets the last-modified date in UTC.
-     * 
+     *
      * @return The last-modified date in UTC
      */
     Date getLastModifiedUTC();
 
     /**
      * Sets the last-modified date in UTC.
-     * 
+     *
      * @param lastModifiedUTC The last-modified date in UTC
      */
     void setLastModifiedUTC(Date lastModifiedUTC);
 
     /**
      * Gets the locale for this user-sensitive folder.
-     * 
+     *
      * @return The locale for this user-sensitive folder
      */
     Locale getLocale();
 
     /**
      * Sets the locale for this user-sensitive folder.
-     * 
+     *
      * @param locale The locale for this user-sensitive folder
      */
     void setLocale(Locale locale);

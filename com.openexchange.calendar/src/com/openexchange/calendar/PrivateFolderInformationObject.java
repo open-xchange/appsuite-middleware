@@ -54,28 +54,28 @@ package com.openexchange.calendar;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class PrivateFolderInformationObject {
-    
+
     private final int object_id;
     private final int pfid;
     private final int uid;
-    
+
     public PrivateFolderInformationObject(final int object_id, final int pfid, final int uid) {
         this.object_id = object_id;
         this.pfid = pfid;
         this.uid = uid;
     }
-    
+
     final boolean compareObjectId(final int oid) {
         return oid == object_id;
     }
-    
+
     final int getPrivateFolder() {
         return pfid;
     }
-    
+
     final int getParticipant() {
         return uid;
     }
-    
-    
+
+
 }

@@ -54,7 +54,7 @@ import java.util.Comparator;
 /**
  * {@link FolderStorageComparator} - A {@link Comparator} for folder storages which orders according to {@link StoragePriority storage's
  * priority}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageComparator implements Comparator<FolderStorage> {
@@ -63,7 +63,7 @@ public final class FolderStorageComparator implements Comparator<FolderStorage> 
 
     /**
      * Gets the {@link FolderStorageComparator} instance.
-     * 
+     *
      * @return The {@link FolderStorageComparator} instance
      */
     public static FolderStorageComparator getInstance() {
@@ -77,6 +77,7 @@ public final class FolderStorageComparator implements Comparator<FolderStorage> 
         super();
     }
 
+    @Override
     public int compare(final FolderStorage o1, final FolderStorage o2) {
         final int firstOrdinal = o1.getStoragePriority().ordinal();
         final int secondOrdinal = o2.getStoragePriority().ordinal();

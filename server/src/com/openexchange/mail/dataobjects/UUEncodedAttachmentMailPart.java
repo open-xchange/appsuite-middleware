@@ -59,7 +59,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link UUEncodedAttachmentMailPart} - Subclass of {@link MailPart} designed for designed for uuencoded mail parts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UUEncodedAttachmentMailPart extends MailPart {
@@ -70,7 +70,7 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
 
     /**
      * Initializes a new {@link UUEncodedAttachmentMailPart}
-     * 
+     *
      * @param uuencPart The uuencoded part
      */
     public UUEncodedAttachmentMailPart(final UUEncodedPart uuencPart) {

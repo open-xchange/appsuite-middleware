@@ -94,5 +94,5 @@ public abstract class AbstractWebDAVFileStorageTest extends TestCase {
 
         return new WebDAVFileStorageAccountAccess(null, account, session);
     }
-    
+
 }

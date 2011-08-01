@@ -80,10 +80,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileDeliveryServlet extends HttpServlet {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileDeliveryServlet.class));
-    
+
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
     public static DataProviderRegistry DATA_PROVIDERS = null;
-    
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Configuration configuration = Services.getConfiguration();
@@ -96,27 +96,27 @@ public class FileDeliveryServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        
+
         final String id = (String) parameters.get(Constants.DATA_PROVDER_KEY);
         final ServerSession session = (ServerSession) parameters.get(Constants.SESSION_KEY);
-        
+
         if(configuration.hasExpired((Long)parameters.get(Constants.CREATED))) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        
+
         DataProvider provider = null;
         Object state = null;
         try {
             provider = DATA_PROVIDERS.getProvider(id);
-            
+
             state = provider.start();
-            
+
             final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
-            
+
             InputStream stream = provider.retrieve(state, parameters, session);
             stream = setHeaders(stream, metadata, req, resp);
-            
+
             IOTools.copy(stream, resp.getOutputStream());
             if(configuration.expiresAfterAccess()) {
                 PARAM_MAP.remove(token);
@@ -144,16 +144,16 @@ public class FileDeliveryServlet extends HttpServlet {
         } finally {
             in.close();
             out.close();
-            
+
         }
-        
+
         resp.setContentLength(count);
-        
+
         if(metadata.getType() != null) {
             resp.setContentType(metadata.getType());
         }
-        
+
         return new ByteArrayInputStream(out.toByteArray());
     }
-    
+
 }

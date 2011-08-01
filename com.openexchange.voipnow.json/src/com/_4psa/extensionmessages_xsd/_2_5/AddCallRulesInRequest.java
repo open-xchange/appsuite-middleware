@@ -15,9 +15,9 @@ import com._4psa.extensiondata_xsd._2_5.CallRuleTransferInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -129,8 +129,8 @@ import com._4psa.extensiondata_xsd._2_5.CallRuleTransferInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -148,25 +148,25 @@ public class AddCallRulesInRequest {
 
     /**
      * Gets the value of the rule property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rule property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRule().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link AddCallRulesInRequest.Rule }
-     * 
-     * 
+     *
+     *
      */
     public List<AddCallRulesInRequest.Rule> getRule() {
         if (rule == null) {
@@ -177,11 +177,11 @@ public class AddCallRulesInRequest {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -189,11 +189,11 @@ public class AddCallRulesInRequest {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -201,11 +201,11 @@ public class AddCallRulesInRequest {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -213,11 +213,11 @@ public class AddCallRulesInRequest {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -226,9 +226,9 @@ public class AddCallRulesInRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -326,8 +326,8 @@ public class AddCallRulesInRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -351,11 +351,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the busy property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public CallRuleInfo getBusy() {
             return busy;
@@ -363,11 +363,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the busy property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public void setBusy(CallRuleInfo value) {
             this.busy = value;
@@ -375,11 +375,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the congestion property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public CallRuleInfo getCongestion() {
             return congestion;
@@ -387,11 +387,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the congestion property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public void setCongestion(CallRuleInfo value) {
             this.congestion = value;
@@ -399,11 +399,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the hangup property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public CallRuleInfo getHangup() {
             return hangup;
@@ -411,11 +411,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the hangup property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link CallRuleInfo }
-         *     
+         *
          */
         public void setHangup(CallRuleInfo value) {
             this.hangup = value;
@@ -423,11 +423,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the transfer property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddCallRulesInRequest.Rule.Transfer }
-         *     
+         *
          */
         public AddCallRulesInRequest.Rule.Transfer getTransfer() {
             return transfer;
@@ -435,11 +435,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the transfer property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddCallRulesInRequest.Rule.Transfer }
-         *     
+         *
          */
         public void setTransfer(AddCallRulesInRequest.Rule.Transfer value) {
             this.transfer = value;
@@ -447,11 +447,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the cascade property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddCallRulesInRequest.Rule.Cascade }
-         *     
+         *
          */
         public AddCallRulesInRequest.Rule.Cascade getCascade() {
             return cascade;
@@ -459,11 +459,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the cascade property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddCallRulesInRequest.Rule.Cascade }
-         *     
+         *
          */
         public void setCascade(AddCallRulesInRequest.Rule.Cascade value) {
             this.cascade = value;
@@ -471,11 +471,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the authenticate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddCallRulesInRequest.Rule.Authenticate }
-         *     
+         *
          */
         public AddCallRulesInRequest.Rule.Authenticate getAuthenticate() {
             return authenticate;
@@ -483,11 +483,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the authenticate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddCallRulesInRequest.Rule.Authenticate }
-         *     
+         *
          */
         public void setAuthenticate(AddCallRulesInRequest.Rule.Authenticate value) {
             this.authenticate = value;
@@ -495,11 +495,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Gets the value of the setCallPriority property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link AddCallRulesInRequest.Rule.SetCallPriority }
-         *     
+         *
          */
         public AddCallRulesInRequest.Rule.SetCallPriority getSetCallPriority() {
             return setCallPriority;
@@ -507,11 +507,11 @@ public class AddCallRulesInRequest {
 
         /**
          * Sets the value of the setCallPriority property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link AddCallRulesInRequest.Rule.SetCallPriority }
-         *     
+         *
          */
         public void setSetCallPriority(AddCallRulesInRequest.Rule.SetCallPriority value) {
             this.setCallPriority = value;
@@ -520,9 +520,9 @@ public class AddCallRulesInRequest {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -536,8 +536,8 @@ public class AddCallRulesInRequest {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -557,11 +557,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the password property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link String }
-             *     
+             *
              */
             public String getPassword() {
                 return password;
@@ -569,11 +569,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the password property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link String }
-             *     
+             *
              */
             public void setPassword(String value) {
                 this.password = value;
@@ -581,11 +581,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the soundID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getSoundID() {
                 return soundID;
@@ -593,11 +593,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the soundID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setSoundID(BigInteger value) {
                 this.soundID = value;
@@ -605,11 +605,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the final property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Boolean }
-             *     
+             *
              */
             public Boolean isFinal() {
                 return _final;
@@ -617,11 +617,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the final property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Boolean }
-             *     
+             *
              */
             public void setFinal(Boolean value) {
                 this._final = value;
@@ -632,9 +632,9 @@ public class AddCallRulesInRequest {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -659,8 +659,8 @@ public class AddCallRulesInRequest {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -681,11 +681,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the ring property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getRing() {
                 return ring;
@@ -693,11 +693,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the ring property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setRing(BigInteger value) {
                 this.ring = value;
@@ -705,11 +705,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the final property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Boolean }
-             *     
+             *
              */
             public Boolean isFinal() {
                 return _final;
@@ -717,11 +717,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the final property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Boolean }
-             *     
+             *
              */
             public void setFinal(Boolean value) {
                 this._final = value;
@@ -729,25 +729,25 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the toNumbers property.
-             * 
+             *
              * <p>
              * This accessor method returns a reference to the live list,
              * not a snapshot. Therefore any modification you make to the
              * returned list will be present inside the JAXB object.
              * This is why there is not a <CODE>set</CODE> method for the toNumbers property.
-             * 
+             *
              * <p>
              * For example, to add a new item, do as follows:
              * <pre>
              *    getToNumbers().add(newItem);
              * </pre>
-             * 
-             * 
+             *
+             *
              * <p>
              * Objects of the following type(s) are allowed in the list
              * {@link AddCallRulesInRequest.Rule.Cascade.ToNumbers }
-             * 
-             * 
+             *
+             *
              */
             public List<AddCallRulesInRequest.Rule.Cascade.ToNumbers> getToNumbers() {
                 if (toNumbers == null) {
@@ -759,9 +759,9 @@ public class AddCallRulesInRequest {
 
             /**
              * <p>Java class for anonymous complex type.
-             * 
+             *
              * <p>The following schema fragment specifies the expected content contained within this class.
-             * 
+             *
              * <pre>
              * &lt;complexType>
              *   &lt;complexContent>
@@ -774,8 +774,8 @@ public class AddCallRulesInRequest {
              *   &lt;/complexContent>
              * &lt;/complexType>
              * </pre>
-             * 
-             * 
+             *
+             *
              */
             @XmlAccessorType(XmlAccessType.FIELD)
             @XmlType(name = "", propOrder = {
@@ -791,11 +791,11 @@ public class AddCallRulesInRequest {
 
                 /**
                  * Gets the value of the number property.
-                 * 
+                 *
                  * @return
                  *     possible object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public String getNumber() {
                     return number;
@@ -803,11 +803,11 @@ public class AddCallRulesInRequest {
 
                 /**
                  * Sets the value of the number property.
-                 * 
+                 *
                  * @param value
                  *     allowed object is
                  *     {@link String }
-                 *     
+                 *
                  */
                 public void setNumber(String value) {
                     this.number = value;
@@ -815,11 +815,11 @@ public class AddCallRulesInRequest {
 
                 /**
                  * Gets the value of the ringAfter property.
-                 * 
+                 *
                  * @return
                  *     possible object is
                  *     {@link BigInteger }
-                 *     
+                 *
                  */
                 public BigInteger getRingAfter() {
                     return ringAfter;
@@ -827,11 +827,11 @@ public class AddCallRulesInRequest {
 
                 /**
                  * Sets the value of the ringAfter property.
-                 * 
+                 *
                  * @param value
                  *     allowed object is
                  *     {@link BigInteger }
-                 *     
+                 *
                  */
                 public void setRingAfter(BigInteger value) {
                     this.ringAfter = value;
@@ -844,9 +844,9 @@ public class AddCallRulesInRequest {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -858,8 +858,8 @@ public class AddCallRulesInRequest {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -874,11 +874,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the priority property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getPriority() {
                 return priority;
@@ -886,11 +886,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the priority property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setPriority(BigInteger value) {
                 this.priority = value;
@@ -901,9 +901,9 @@ public class AddCallRulesInRequest {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -938,8 +938,8 @@ public class AddCallRulesInRequest {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -962,11 +962,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the toNumbers property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link CallRuleTransferInfo }
-             *     
+             *
              */
             public CallRuleTransferInfo getToNumbers() {
                 return toNumbers;
@@ -974,11 +974,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the toNumbers property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link CallRuleTransferInfo }
-             *     
+             *
              */
             public void setToNumbers(CallRuleTransferInfo value) {
                 this.toNumbers = value;
@@ -986,11 +986,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the toVoicemail property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Boolean }
-             *     
+             *
              */
             public Boolean isToVoicemail() {
                 return toVoicemail;
@@ -998,11 +998,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the toVoicemail property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Boolean }
-             *     
+             *
              */
             public void setToVoicemail(Boolean value) {
                 this.toVoicemail = value;
@@ -1010,11 +1010,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the callStatus property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getCallStatus() {
                 return callStatus;
@@ -1022,11 +1022,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the callStatus property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setCallStatus(BigInteger value) {
                 this.callStatus = value;
@@ -1034,11 +1034,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the extensionStatus property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getExtensionStatus() {
                 return extensionStatus;
@@ -1046,11 +1046,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the extensionStatus property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setExtensionStatus(BigInteger value) {
                 this.extensionStatus = value;
@@ -1058,11 +1058,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Gets the value of the final property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link Boolean }
-             *     
+             *
              */
             public Boolean isFinal() {
                 return _final;
@@ -1070,11 +1070,11 @@ public class AddCallRulesInRequest {
 
             /**
              * Sets the value of the final property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link Boolean }
-             *     
+             *
              */
             public void setFinal(Boolean value) {
                 this._final = value;

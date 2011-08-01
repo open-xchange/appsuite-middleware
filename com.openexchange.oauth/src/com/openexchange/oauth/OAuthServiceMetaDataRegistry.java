@@ -54,21 +54,21 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OAuthServiceMetaDataRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthServiceMetaDataRegistry {
 
     /**
      * Gets all known services.
-     * 
+     *
      * @return All services
      */
     List<OAuthServiceMetaData> getAllServices();
 
     /**
      * Gets the service belonging to specified identifier.
-     * 
+     *
      * @param id The service identifier
      * @return The service
      * @throws OXException If service look-up fails
@@ -77,7 +77,7 @@ public interface OAuthServiceMetaDataRegistry {
 
     /**
      * Checks for existence of specified service
-     * 
+     *
      * @param id The service identifier
      * @return <code>true</code> if such a service exists; otherwise <code>false</code>
      */

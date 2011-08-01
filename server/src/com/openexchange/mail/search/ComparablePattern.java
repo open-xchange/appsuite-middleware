@@ -59,14 +59,14 @@ public interface ComparablePattern<P> {
 
     /**
      * Gets the comparison type.
-     * 
+     *
      * @return The comparison type
      */
     ComparisonType getComparisonType();
-    
+
     /**
      * Gets the pattern.
-     * 
+     *
      * @return The pattern
      */
     P getPattern();

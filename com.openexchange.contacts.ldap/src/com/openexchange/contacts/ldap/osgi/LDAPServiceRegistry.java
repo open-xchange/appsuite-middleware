@@ -51,7 +51,7 @@ package com.openexchange.contacts.ldap.osgi;
 
 /**
  * {@link LDAPServiceRegistry} - The service registry for Ldap.
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class LDAPServiceRegistry extends com.openexchange.server.osgiservice.ServiceRegistry {
@@ -60,7 +60,7 @@ public final class LDAPServiceRegistry extends com.openexchange.server.osgiservi
 
     /**
      * Gets the service registry instance.
-     * 
+     *
      * @return The service registry instance.
      */
     public static LDAPServiceRegistry getInstance() {

@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentFactoryService} - Factory service for appointment module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AppointmentFactoryService implements MultipleHandlerFactoryService {
@@ -75,10 +75,12 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new AppointmentHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "calendar";
     }
@@ -91,14 +93,17 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final AppointmentRequest appointmentRequest = new AppointmentRequest(session);
             final JSONValue retval = appointmentRequest.action(action, jsonObject);
@@ -106,6 +111,7 @@ public final class AppointmentFactoryService implements MultipleHandlerFactorySe
             return retval;
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

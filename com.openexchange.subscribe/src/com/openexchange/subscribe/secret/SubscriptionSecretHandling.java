@@ -66,9 +66,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionSecretHandling implements SecretConsistencyCheck, SecretMigrator {
-    
+
     private SubscriptionSourceDiscoveryService discovery = null;
-    
+
     public SubscriptionSecretHandling(SubscriptionSourceDiscoveryService discovery) {
         super();
         this.discovery = discovery;
@@ -81,14 +81,14 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
             if(passwordFields.isEmpty()) {
                 continue;
             }
-            
+
             SubscribeService subscribeService = subscriptionSource.getSubscribeService();
-            
+
             String diagnosis = subscribeService.checkSecretCanDecryptPasswords(session.getContext(), session.getUser(), secret);
             if(diagnosis != null) {
                 return diagnosis;
             }
-            
+
         }
         return null;
     }
@@ -100,9 +100,9 @@ public class SubscriptionSecretHandling implements SecretConsistencyCheck, Secre
             if(passwordFields.isEmpty()) {
                 continue;
             }
-            
+
             SubscribeService subscribeService = subscriptionSource.getSubscribeService();
-            
+
             subscribeService.migrateSecret(session.getContext(), session.getUser(), oldSecret, newSecret);
         }
     }

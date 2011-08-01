@@ -54,7 +54,7 @@ import java.util.Map;
 /**
  * This is an adapter for TagFiller. With this adapter you must not implement every method from interface TagFiller. You only have to
  * override methods that are usefull for you.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class TagFillerAdapter implements TagFiller {
@@ -67,6 +67,7 @@ public abstract class TagFillerAdapter implements TagFiller {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String replace(final String tag) {
         return EMPTY;
     }
@@ -74,6 +75,7 @@ public abstract class TagFillerAdapter implements TagFiller {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String replace(final String tag, final Object data) {
         return EMPTY;
     }

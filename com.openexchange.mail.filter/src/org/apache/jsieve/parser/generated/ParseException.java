@@ -94,7 +94,8 @@ public class ParseException extends Exception {
    * of the final stack trace, and hence the correct error message
    * gets displayed.
    */
-  public String getMessage() {
+  @Override
+public String getMessage() {
     if (!specialConstructor) {
       return super.getMessage();
     }
@@ -115,13 +116,15 @@ public class ParseException extends Exception {
     String retval = "Encountered \"";
     Token tok = currentToken.next;
     for (int i = 0; i < maxSize; i++) {
-      if (i != 0) retval += " ";
+      if (i != 0) {
+        retval += " ";
+    }
       if (tok.kind == 0) {
         retval += tokenImage[0];
         break;
       }
       retval += add_escapes(tok.image);
-      tok = tok.next; 
+      tok = tok.next;
     }
     retval += "\" at line " + currentToken.next.beginLine + ", column " + currentToken.next.beginColumn;
     retval += "." + eol;
@@ -138,7 +141,7 @@ public class ParseException extends Exception {
    * The end of line string for this machine.
    */
   protected String eol = System.getProperty("line.separator", "\n");
- 
+
   /**
    * Used to convert raw characters to their escaped version
    * when these raw version cannot be used as part of an ASCII

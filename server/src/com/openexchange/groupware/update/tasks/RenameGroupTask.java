@@ -96,10 +96,12 @@ public class RenameGroupTask extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { ContactsAddUseCountColumnUpdateTask.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);

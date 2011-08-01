@@ -59,7 +59,7 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * DistributionListObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -116,7 +116,7 @@ public class DistributionListEntryObject {
 
     /**
      * Initializes a new {@link DistributionListEntryObject}
-     * 
+     *
      * @param displayname The display name
      * @param emailaddress The email address
      * @param emailfield The email field
@@ -186,7 +186,7 @@ public class DistributionListEntryObject {
 
     /**
      * Sets the distribution list entry's email address
-     * 
+     *
      * @param emailaddress The email address to set
      * @throws OXException If specified email address is invalid
      */

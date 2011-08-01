@@ -67,7 +67,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link MultipleVcardsTest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MultipleVcardsTest extends TestCase {

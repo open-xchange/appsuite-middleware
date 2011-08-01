@@ -64,6 +64,7 @@ public class CreateIndexOnContextAttributesTask extends CreateIndexUpdateTask {
         super(null, "contextAttribute", "cid", "cid", "name", "value(20)");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[]{AllowTextInValuesOfDynamicContextAttributesTask.class.getName()};
     }

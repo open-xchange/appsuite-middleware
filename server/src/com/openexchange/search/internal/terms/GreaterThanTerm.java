@@ -53,7 +53,7 @@ import com.openexchange.search.SingleSearchTerm;
 
 /**
  * {@link GreaterThanTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GreaterThanTerm extends SingleSearchTerm {

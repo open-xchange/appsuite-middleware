@@ -123,10 +123,12 @@ public class ObjectDefinition implements VersitDefinition {
         return propdef.parse(s, name);
     }
 
+    @Override
     public Reader getReader(final InputStream stream, final String charset) throws IOException {
         return new ReaderScanner(new InputStreamReader(stream, charset));
     }
 
+    @Override
     public VersitObject parse(final VersitDefinition.Reader reader) throws IOException {
         VersitObject child;
         final VersitObject object = parseBegin(reader);
@@ -138,6 +140,7 @@ public class ObjectDefinition implements VersitDefinition {
         return object;
     }
 
+    @Override
     public VersitObject parseBegin(final VersitDefinition.Reader reader) throws IOException {
         final Scanner s = (Scanner) reader;
         Property begin;
@@ -158,6 +161,7 @@ public class ObjectDefinition implements VersitDefinition {
         return new VersitObject((String) begin.getValue());
     }
 
+    @Override
     public VersitObject parseChild(final VersitDefinition.Reader reader, final VersitObject object) throws IOException {
         final Scanner s = (Scanner) reader;
         Property property = parseProperty(s);
@@ -188,15 +192,18 @@ public class ObjectDefinition implements VersitDefinition {
         return null;
     }
 
+    @Override
     public Writer getWriter(final OutputStream stream, final String charset) throws IOException {
         return new FoldingWriter(new OutputStreamWriter(stream, charset));
     }
 
+    @Override
     public void write(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
         writeProperties(writer, object);
         writeEnd(writer, object);
     }
 
+    @Override
     public void writeProperties(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
         final FoldingWriter fw = (FoldingWriter) writer;
         fw.write("BEGIN:");
@@ -217,12 +224,14 @@ public class ObjectDefinition implements VersitDefinition {
         }
     }
 
+    @Override
     public void writeEnd(final VersitDefinition.Writer writer, final VersitObject object) throws IOException {
         final FoldingWriter fw = (FoldingWriter) writer;
         fw.write("END:");
         fw.writeln(object.name);
     }
 
+    @Override
     public VersitDefinition getChildDef(final String name) {
         final VersitDefinition child = Children.get(name.toUpperCase(Locale.ENGLISH));
         if (child == null) {
@@ -231,10 +240,12 @@ public class ObjectDefinition implements VersitDefinition {
         return child;
     }
 
+    @Override
     public Iterator<PropertyDefinition> iterator() {
         return Properties.values().iterator();
     }
 
+    @Override
     public VersitDefinition copy() {
         return new ObjectDefinition(Properties, Children);
     }

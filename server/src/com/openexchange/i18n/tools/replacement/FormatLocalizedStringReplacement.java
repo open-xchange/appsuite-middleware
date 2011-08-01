@@ -59,9 +59,9 @@ import com.openexchange.i18n.tools.TemplateToken;
  * {@link FormatLocalizedStringReplacement} - An implementation of a
  * {@link TemplateReplacement replacement} enhanced with a {@link Locale locale}
  * and capable to prepend <i>changed</i> marker.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class FormatLocalizedStringReplacement implements TemplateReplacement {
 
@@ -79,7 +79,7 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 
     /**
      * Initializes a new {@link FormatLocalizedStringReplacement}
-     * 
+     *
      * @param token The token
      * @param format The format string; leave to <code>null</code> to avoid
      *            formatting
@@ -92,6 +92,7 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         this.format = format;
     }
 
+    @Override
     public TemplateReplacement setLocale(final Locale locale) {
         if (locale == null || locale.equals(this.locale)) {
             return this;
@@ -112,15 +113,18 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         return stringHelper;
     }
 
+    @Override
     public boolean changed() {
         return changed;
     }
 
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
     }
 
+    @Override
     public String getReplacement() {
         if (format == null) {
             return replacement;
@@ -135,21 +139,24 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
 
     /**
      * Gets the sole replacement
-     * 
+     *
      * @return The sole replacement
      */
     protected final String getSoleReplacement() {
         return replacement;
     }
 
+    @Override
     public TemplateToken getToken() {
         return token;
     }
 
+    @Override
     public TemplateReplacement setTimeZone(final TimeZone timeZone) {
         return this;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
@@ -161,6 +168,7 @@ public class FormatLocalizedStringReplacement implements TemplateReplacement {
         return clone;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!FormatLocalizedStringReplacement.class.isInstance(other)) {
             /*

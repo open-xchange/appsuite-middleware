@@ -57,15 +57,15 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link StartDateReplacement} - Start date replacement
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class StartDateReplacement extends AbstractFormatDateReplacement {
 
     /**
      * Initializes a new {@link StartDateReplacement}
-     * 
+     *
      * @param startDate The start date
      * @param fulltime <code>true</code> if given start date denotes a full-time
      *            start date; otherwise <code>false</code>
@@ -76,7 +76,7 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
 
     /**
      * Initializes a new {@link StartDateReplacement}
-     * 
+     *
      * @param startDate The start date
      * @param fulltime <code>true</code> if given start date denotes a full-time
      *            start date; otherwise <code>false</code>
@@ -89,6 +89,7 @@ public final class StartDateReplacement extends AbstractFormatDateReplacement {
         fallback = Notifications.NO_START_DATE;
     }
 
+    @Override
     public TemplateToken getToken() {
         return TemplateToken.START;
     }

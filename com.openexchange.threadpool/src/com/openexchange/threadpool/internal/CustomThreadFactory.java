@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link CustomThreadFactory} - A thread factory taking a custom name prefix for created threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomThreadFactory implements java.util.concurrent.ThreadFactory {
@@ -68,7 +68,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
 
     /**
      * Initializes a new {@link CustomThreadFactory}.
-     * 
+     *
      * @param namePrefix The name prefix
      */
     public CustomThreadFactory(final String namePrefix) {
@@ -100,7 +100,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
         /*-
          * Previous approach which could possibly result in an infinite cycle
          * when two threads enter the loop simultaneously
-         * 
+         *
         while (threadNum <= 0) {
             if (threadNumber.compareAndSet(threadNum, 1)) {
                 threadNum = 1;

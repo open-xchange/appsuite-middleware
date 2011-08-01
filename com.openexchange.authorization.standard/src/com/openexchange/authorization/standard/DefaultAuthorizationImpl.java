@@ -62,7 +62,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link DefaultAuthorizationImpl}
- * 
+ *
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
@@ -72,7 +72,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static DefaultAuthorizationImpl getInstance() {

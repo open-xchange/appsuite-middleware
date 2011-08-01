@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EventFactoryServiceImpl} - Implementation of {@link EventFactoryService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EventFactoryServiceImpl implements EventFactoryService {
@@ -70,10 +70,12 @@ public final class EventFactoryServiceImpl implements EventFactoryService {
         super();
     }
 
+    @Override
     public CommonEvent newCommonEvent(final int contextId, final int userId, Map<Integer, Set<Integer>> affectedUsers, final int action, final int module, final Object actionObj, final Object oldObj, final Object sourceFolder, final Object destinationFolder, final Session session) {
         return new CommonEventImpl(contextId, userId, affectedUsers, action, module, actionObj, oldObj, sourceFolder, destinationFolder, session);
     }
 
+    @Override
     public RemoteEvent newRemoteEvent(final int folderId, final int userId, final int contextId, final int action, final int module, final long timestamp) {
         return new RemoteEventImpl(folderId, userId, contextId, action, module, timestamp);
     }

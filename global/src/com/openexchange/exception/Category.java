@@ -51,7 +51,7 @@ package com.openexchange.exception;
 
 /**
  * {@link Category} - The category for an {@link OXException} determines its behavior during exception handling and logging.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Category extends Comparable<Category> {
@@ -327,7 +327,7 @@ public interface Category extends Comparable<Category> {
 
         /**
          * Gets the name for parental category.
-         * 
+         *
          * @return The name
          */
         String getName();
@@ -378,7 +378,7 @@ public interface Category extends Comparable<Category> {
          */
         CAPACITY,
         /**
-         * The warning type 
+         * The warning type
          */
         WARNING;
 
@@ -389,14 +389,14 @@ public interface Category extends Comparable<Category> {
 
     /**
      * Gets the log level in which associated exception shall be logged.
-     * 
+     *
      * @return The log level
      */
     LogLevel getLogLevel();
 
     /**
      * Gets this category's type.
-     * 
+     *
      * @return The type
      */
     Type getType();

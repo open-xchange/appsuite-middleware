@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link POP3StorageProviderRegistry} - The registry for {@link POP3StorageProvider POP3 storage providers}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3StorageProviderRegistry {
@@ -63,7 +63,7 @@ public final class POP3StorageProviderRegistry {
 
     /**
      * Gets the POP3 storage provider registry.
-     * 
+     *
      * @return The POP3 storage provider registry
      */
     public static POP3StorageProviderRegistry getInstance() {
@@ -86,7 +86,7 @@ public final class POP3StorageProviderRegistry {
 
     /**
      * Gets the provider from this registry which is bound to specified provider name.
-     * 
+     *
      * @param providerName The provider name
      * @return The provider bound to specified provider name or <code>null</code> if none found
      */
@@ -96,7 +96,7 @@ public final class POP3StorageProviderRegistry {
 
     /**
      * Adds given provider to this registry bound to name obtained by {@link POP3StorageProvider#getPOP3StorageName()}.
-     * 
+     *
      * @param provider The provider
      * @return <code>true</code> if provider could be successfully added; otherwise <code>false</code>
      */
@@ -106,7 +106,7 @@ public final class POP3StorageProviderRegistry {
 
     /**
      * Adds given provider to this registry bound to specified provider name.
-     * 
+     *
      * @param providerName The provider name
      * @param provider The provider
      * @return <code>true</code> if provider could be successfully added; otherwise <code>false</code>
@@ -117,7 +117,7 @@ public final class POP3StorageProviderRegistry {
 
     /**
      * Removes the provider from this registry which is bound to specified provider name.
-     * 
+     *
      * @param providerName The provider name
      * @return The removed provider or <code>null</code> if none removed
      */

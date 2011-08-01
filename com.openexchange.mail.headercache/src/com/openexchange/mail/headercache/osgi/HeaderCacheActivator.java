@@ -71,7 +71,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link HeaderCacheActivator} - The {@link BundleActivator activator} for header cache bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheActivator extends DeferredActivator {

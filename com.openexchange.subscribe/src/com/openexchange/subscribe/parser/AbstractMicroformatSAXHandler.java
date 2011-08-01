@@ -61,7 +61,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.subscribe.Subscription;
 
 /**
- * 
+ *
  * {@link AbstractMicroformatSAXHandler}
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -79,7 +79,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
      * @return
      */
     public abstract T instantiate();
-    
+
     public AbstractMicroformatSAXHandler() {
         super();
         objects = new LinkedList<T>();
@@ -122,7 +122,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
         }
         return bob.toString();
     }
-    
+
     /**
      * This should be called each time an object is done reading
      */
@@ -137,6 +137,7 @@ public abstract class AbstractMicroformatSAXHandler<T> extends DefaultHandler {
 
 
 
+    @Override
     public void endElement(String uri, String name, String qName) {
         currentlyReading = null;
     }

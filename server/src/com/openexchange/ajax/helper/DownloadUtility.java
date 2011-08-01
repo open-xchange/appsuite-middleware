@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DownloadUtility} - Utility class for download.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DownloadUtility {
@@ -77,14 +77,14 @@ public final class DownloadUtility {
     private DownloadUtility() {
         super();
     }
-    
+
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
     /**
      * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
-     * 
+     *
      * @param inputStream The input stream
      * @param fileName The file name
      * @param contentTypeStr The content-type string
@@ -191,15 +191,15 @@ public final class DownloadUtility {
              */
             in = new CombinedInputStream(sequence, in);
         }
-        
+
         if(overridingDisposition == null) {
             overridingDisposition = "attachment";
         }
-        
+
         if(!overridingDisposition.contains(";")) {
             overridingDisposition = new StringBuilder(64).append(overridingDisposition).append("; filename=\"").append(preparedFileName).append('"').toString();
         }
-        
+
         return new CheckedDownload(
             contentType.getBaseType(),
             overridingDisposition,
@@ -246,7 +246,7 @@ public final class DownloadUtility {
      * Gets a safe form (as per RFC 2047) for specified file name.
      * <p>
      * {@link BrowserDetector} may be used to parse browser and/or platform identifier from <i>"user-agent"</i> header.
-     * 
+     *
      * @param fileName The file name
      * @param internetExplorer <code>true</code> if <i>"user-agent"</i> header indicates to be Internet Explorer on a Windows platform;
      *            otherwise <code>false</code>
@@ -271,16 +271,21 @@ public final class DownloadUtility {
         }
         if (null != baseCT) {
             if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+                if (!hasExtension(fileName) && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
                     tmp.append(".txt");
                 }
             } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+                if (!hasExtension(fileName) && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
                     tmp.append(".html");
                 }
             }
         }
         return tmp.toString();
+    }
+
+    private static boolean hasExtension(final String fileName) {
+        final int pos = fileName.lastIndexOf('.');
+        return pos > 0 && pos < fileName.length() - 1;
     }
 
     /**
@@ -304,7 +309,7 @@ public final class DownloadUtility {
 
         /**
          * Gets the content type.
-         * 
+         *
          * @return The content type
          */
         public String getContentType() {
@@ -313,7 +318,7 @@ public final class DownloadUtility {
 
         /**
          * Gets the content disposition.
-         * 
+         *
          * @return The content disposition
          */
         public String getContentDisposition() {
@@ -322,7 +327,7 @@ public final class DownloadUtility {
 
         /**
          * Gets the input stream.
-         * 
+         *
          * @return The input stream
          */
         public InputStream getInputStream() {

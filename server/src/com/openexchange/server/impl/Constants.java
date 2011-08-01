@@ -61,9 +61,9 @@ import com.openexchange.groupware.contact.ContactInterface;
 public class Constants {
 
     public static final String OX_MODULE = "com.openexchange.server.module";
-    
+
     public static final String OX_OVERRIDE_FOLDER = ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE;
     public static final String OX_OVERRIDE_CONTEXT = ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE;
-    
-    
+
+
 }

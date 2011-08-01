@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 
 /**
  * {@link AbstractFormatMultipleDateReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractFormatMultipleDateReplacement extends AbstractMultipleDateReplacement {
 
@@ -76,7 +76,7 @@ public abstract class AbstractFormatMultipleDateReplacement extends AbstractMult
 
     /**
      * Initializes a new AbstractFormatDateReplacement
-     * 
+     *
      * @param dates The dates
      * @param format The format string
      */
@@ -87,7 +87,7 @@ public abstract class AbstractFormatMultipleDateReplacement extends AbstractMult
 
     /**
      * Initializes a new AbstractFormatDateReplacement
-     * 
+     *
      * @param dates The dates
      * @param format The format string
      * @param locale The locale

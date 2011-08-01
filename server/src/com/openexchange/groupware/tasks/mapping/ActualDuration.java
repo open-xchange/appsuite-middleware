@@ -73,18 +73,22 @@ public final class ActualDuration implements Mapper<Long> {
         super();
     }
 
+    @Override
     public int getId() {
         return Task.ACTUAL_DURATION;
     }
 
+    @Override
     public boolean isSet(Task task) {
         return task.containsActualDuration();
     }
 
+    @Override
     public String getDBColumnName() {
         return "actual_duration";
     }
 
+    @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getActualDuration()) {
             stmt.setNull(pos, Types.BIGINT);
@@ -93,6 +97,7 @@ public final class ActualDuration implements Mapper<Long> {
         }
     }
 
+    @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         long actualDuration = result.getLong(pos);
         if (!result.wasNull()) {
@@ -100,14 +105,17 @@ public final class ActualDuration implements Mapper<Long> {
         }
     }
 
+    @Override
     public boolean equals(Task task1, Task task2) {
         return task1.getActualDuration().equals(task2.getActualDuration());
     }
 
+    @Override
     public Long get(Task task) {
         return task.getActualDuration();
     }
 
+    @Override
     public void set(Task task, Long value) {
         task.setActualDuration(value);
     }

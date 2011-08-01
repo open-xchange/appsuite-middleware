@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.action.AbstractAction;
@@ -82,9 +81,7 @@ import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavPutAction;
-import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
-import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.directory.internal.DirectoryWebdavFactory;
@@ -101,12 +98,12 @@ public class WebdavDirectoryPerformer implements SessionHolder {
     private static final Log LOG = LogFactory.getLog(WebdavDirectoryPerformer.class);
 
     private static WebdavDirectoryPerformer INSTANCE = null;
-    
+
     private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
-    
+
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static WebdavDirectoryPerformer getInstance() {
@@ -256,7 +253,7 @@ public class WebdavDirectoryPerformer implements SessionHolder {
     public DirectoryWebdavFactory getFactory() {
         return factory;
     }
-    
+
     public void setGlobalMixins(PropertyMixin...mixins) {
         factory.setGlobalMixins(mixins);
     }

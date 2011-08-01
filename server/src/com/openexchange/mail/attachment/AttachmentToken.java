@@ -51,7 +51,6 @@ package com.openexchange.mail.attachment;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -59,6 +58,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.session.Session;
 
 /**
  * {@link AttachmentToken}
@@ -87,15 +87,13 @@ public final class AttachmentToken implements AttachmentTokenConstants {
 
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
 
-    /**
-     * Initializes a new {@link AttachmentToken}.
-     */
-    public AttachmentToken() {
-        super();
-        this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
-        this.ttlMillis = DEFAULT_TIMEOUT;
-        timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
-    }
+    private String sessionId;
+
+    private String clientIp;
+
+    private String client;
+
+    private String userAgent;
 
     /**
      * Initializes a new {@link AttachmentToken}.
@@ -105,17 +103,9 @@ public final class AttachmentToken implements AttachmentTokenConstants {
         if (ttlMillis <= 0) {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
-        this.id = new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(UUIDs.getUnformattedString(UUID.randomUUID())).toString();
-        this.ttlMillis = ttlMillis;
-        timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
-    }
-
-    /**
-     * Initializes a new {@link AttachmentToken}.
-     */
-    public AttachmentToken(final String id, final int ttlMillis) {
-        super();
-        this.id = id;
+        this.id =
+            new StringBuilder(64).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
+                UUIDs.getUnformattedString(UUID.randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
     }
@@ -124,14 +114,17 @@ public final class AttachmentToken implements AttachmentTokenConstants {
      * Sets the access information.
      * 
      * @param accountId The account identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      * @return This token with access information applied
      */
-    public AttachmentToken setAccessInfo(final int accountId, final int userId, final int contextId) {
+    public AttachmentToken setAccessInfo(final int accountId, final Session session) {
         this.accountId = accountId;
-        this.contextId = contextId;
-        this.userId = userId;
+        this.contextId = session.getContextId();
+        this.userId = session.getUserId();
+        this.sessionId = session.getSessionID();
+        this.clientIp = session.getLocalIp();
+        this.client = session.getClient();
+        this.userAgent = (String) session.getParameter("user-agent");
         return this;
     }
 
@@ -192,7 +185,10 @@ public final class AttachmentToken implements AttachmentTokenConstants {
     public MailPart getAttachment() throws OXException {
         mailAccess = MailAccess.getInstance(userId, contextId, accountId);
         mailAccess.connect();
-        return mailAccess.getMessageStorage().getAttachment(MailFolderUtility.prepareMailFolderParam(fullName).getFullname(), mailId, attachmentId);
+        return mailAccess.getMessageStorage().getAttachment(
+            MailFolderUtility.prepareMailFolderParam(fullName).getFullname(),
+            mailId,
+            attachmentId);
     }
 
     /**
@@ -203,6 +199,60 @@ public final class AttachmentToken implements AttachmentTokenConstants {
             mailAccess.close(true);
             mailAccess = null;
         }
+    }
+
+    /**
+     * Gets the user agent identifier.
+     * 
+     * @return The user agent identifier
+     */
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     * Gets the client IP address.
+     * 
+     * @return The client IP address
+     */
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    /**
+     * Gets the client
+     * 
+     * @return The client
+     */
+    public String getClient() {
+        return client;
+    }
+
+    /**
+     * Gets the session identifier
+     * 
+     * @return The session identifier
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Gets the contextId
+     * 
+     * @return The contextId
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the userId
+     * 
+     * @return The userId
+     */
+    public int getUserId() {
+        return userId;
     }
 
 }

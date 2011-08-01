@@ -67,13 +67,13 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PrincipalWebdavFactory extends AbstractWebdavFactory {
-    
+
     private static final Protocol PROTOCOL = new Protocol();
 
     private final UserService userService;
     private final SessionHolder sessionHolder;
 
-    
+
     public PrincipalWebdavFactory(final UserService userService, final SessionHolder sessionHolder) {
         super();
         this.userService = userService;
@@ -95,7 +95,7 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
         if (url.size() == 0) {
             return mixin(new RootPrincipal(this));
         }
-        
+
         return mixin(new RootPrincipal(this).resolveUser(url));
     }
 

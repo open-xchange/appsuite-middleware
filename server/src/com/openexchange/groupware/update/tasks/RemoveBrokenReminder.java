@@ -91,6 +91,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 20;
     }
@@ -98,6 +99,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
@@ -105,6 +107,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
         LOG.info("Performing update task TaskModifiedByNotNull.");

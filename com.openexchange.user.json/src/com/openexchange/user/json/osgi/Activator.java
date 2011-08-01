@@ -66,7 +66,7 @@ import com.openexchange.user.json.servlet.UserServlet;
 
 /**
  * {@link Activator} - Activator for user component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator implements BundleActivator {

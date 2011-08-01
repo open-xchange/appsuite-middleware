@@ -72,6 +72,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         try {
             doUpdates( getQueryCatalog().getDocumentInsert(), getQueryCatalog().getWritableDocumentFields(), getDocuments());

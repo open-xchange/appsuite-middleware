@@ -51,7 +51,7 @@ package com.openexchange.voipnow.json.actions;
 
 /**
  * {@link VoipNowServerSetting} - VoipNow setting.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VoipNowServerSetting {
@@ -75,7 +75,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Gets the host.
-     * 
+     *
      * @return The host
      */
     public String getHost() {
@@ -84,7 +84,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Sets the host.
-     * 
+     *
      * @param host The host to set
      */
     public void setHost(final String host) {
@@ -93,7 +93,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Gets the port.
-     * 
+     *
      * @return The port
      */
     public int getPort() {
@@ -102,7 +102,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Sets the port.
-     * 
+     *
      * @param port The port to set
      */
     public void setPort(final int port) {
@@ -111,7 +111,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Gets the secure flag.
-     * 
+     *
      * @return The secure flag
      */
     public boolean isSecure() {
@@ -120,7 +120,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Sets the secure flag.
-     * 
+     *
      * @param secure The secure flag to set
      */
     public void setSecure(final boolean secure) {
@@ -129,7 +129,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Gets the login.
-     * 
+     *
      * @return The login
      */
     public String getLogin() {
@@ -138,7 +138,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Sets the login.
-     * 
+     *
      * @param login The login to set
      */
     public void setLogin(final String login) {
@@ -147,7 +147,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Gets the password.
-     * 
+     *
      * @return The password
      */
     public String getPassword() {
@@ -156,7 +156,7 @@ public final class VoipNowServerSetting {
 
     /**
      * Sets the password.
-     * 
+     *
      * @param password The password to set
      */
     public void setPassword(final String password) {

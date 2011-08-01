@@ -77,7 +77,7 @@
 //public class MailFilterTestPreferencesItem extends MailFilterPreferencesItem {
 //
 //    /**
-//     * 
+//     *
 //     */
 //    public MailFilterTestPreferencesItem() {
 //        super();
@@ -161,7 +161,7 @@
 //            public boolean isAvailable(UserConfiguration userConfig) {
 //                return true;
 //            }
-//            
+//
 //        };
 //    }
 //

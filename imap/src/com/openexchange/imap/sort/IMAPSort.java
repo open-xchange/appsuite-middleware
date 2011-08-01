@@ -80,7 +80,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSort {
@@ -96,7 +96,7 @@ public final class IMAPSort {
 
     /**
      * Sorts messages located in given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param usedFields The desired fields
      * @param filter Pre-Selected messages' sequence numbers to sort or <code>null</code> to sort all
@@ -253,7 +253,7 @@ public final class IMAPSort {
      * <p>
      * Example:<br>
      * {@link MailSortField#SENT_DATE} in descending order is turned to <code>"REVERSE DATE"</code>.
-     * 
+     *
      * @param sortField The sort field
      * @param descendingDirection The order direction
      * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command
@@ -291,7 +291,7 @@ public final class IMAPSort {
 
     /**
      * Gets all UIDs of specified (selected) IMAP folder in either ascending or descending received date order.
-     * 
+     *
      * @param imapFolder The (selected) IMAP folder
      * @param descending Whether in ascending or descending received date order
      * @param imapConfig The IMAP configuration

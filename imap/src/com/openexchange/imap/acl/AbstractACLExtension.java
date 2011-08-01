@@ -66,7 +66,7 @@ import com.sun.mail.imap.Rights;
  * <li><b><code>p</code></b> - post (send mail to submission address for mailbox, not enforced by IMAP4 itself)</li>
  * <ul>
  * <br>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractACLExtension implements ACLExtension {

@@ -56,18 +56,18 @@ import com.openexchange.session.Session;
 
 /**
  * FolderEvent
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
 public interface FolderEventInterface {
-	
+
     public void folderCreated(FolderObject folderObj, Session sessionObj);
-	
+
     public void folderModified(FolderObject folderObj, Session sessionObj);
-		
+
     public void folderDeleted(FolderObject folderObj, Session sessionObj);
-	
+
 }
 
 

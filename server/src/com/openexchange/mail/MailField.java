@@ -60,7 +60,7 @@ import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link MailField} - An enumeration of mail fields to define which fields to prefill.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MailField {
@@ -205,7 +205,7 @@ public enum MailField {
 
     /**
      * Gets the corresponding instance of {@link MailListField} or <code>null</code> if none exists.
-     * 
+     *
      * @return The corresponding instance of {@link MailListField} or <code>null</code> if none exists.
      */
     public MailListField getListField() {
@@ -216,7 +216,7 @@ public enum MailField {
      * Gets the corresponding instances of {@link MailListField} for specified instances of {@link MailField}.
      * <p>
      * Those mail fields which have no corresponding list field are omitted.
-     * 
+     *
      * @param fields The instances of {@link MailField}
      * @return The corresponding instances of {@link MailListField}
      */
@@ -237,7 +237,7 @@ public enum MailField {
      * Gets the corresponding instances of {@link MailListField} for specified collection of {@link MailField}.
      * <p>
      * Those mail fields which have no corresponding list field are omitted.
-     * 
+     *
      * @param fields The collection of {@link MailField}
      * @return The corresponding instances of {@link MailListField}
      */
@@ -250,7 +250,7 @@ public enum MailField {
 
     /**
      * Gets the corresponding instances of {@link MailField} for specified instances of {@link MailListField}.
-     * 
+     *
      * @param listFields The instances of {@link MailListField}
      * @return The corresponding instances of {@link MailField}
      */
@@ -267,7 +267,7 @@ public enum MailField {
 
     /**
      * Gets the corresponding instance of {@link MailField} for specified instance of {@link MailListField}.
-     * 
+     *
      * @param listField The instance of {@link MailListField}
      * @return The corresponding instance of {@link MailField}
      */
@@ -284,7 +284,7 @@ public enum MailField {
      * Creates an array of {@link MailField} corresponding to given <code>int</code> values.
      * <p>
      * This is just a convenience method that invokes {@link #getField(int)} for every <code>int</code> value.
-     * 
+     *
      * @see #getField(int)
      * @param fields The <code>int</code> values
      * @return The array of {@link MailField} corresponding to given <code>int</code> values
@@ -305,7 +305,7 @@ public enum MailField {
      * <p>
      * Mail fields which do not hold a corresponding list field are not mappable to an <code>int</code> value; in consequence they are
      * ignored
-     * 
+     *
      * @param field The <code>int</code> value
      * @return The mapped {@link MailField} or <code>null</code> if no corresponding mail field could be found
      */
@@ -318,7 +318,7 @@ public enum MailField {
 
     /**
      * Gets the mail fields addressed by given search term
-     * 
+     *
      * @param searchTerm The search term
      * @return The addressed mail fields
      */

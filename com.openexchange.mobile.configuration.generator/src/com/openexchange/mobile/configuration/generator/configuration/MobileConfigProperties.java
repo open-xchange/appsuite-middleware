@@ -13,12 +13,12 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  *
  */
 public class MobileConfigProperties {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobileConfigProperties.class));
-    
+
     /**
      * Fetches the property (convenience method)
-     * 
+     *
      * @param <T>
      * @param configuration
      * @param prop
@@ -55,10 +55,10 @@ public class MobileConfigProperties {
         }
 
     }
-    
+
     /**
      * Fetches the property
-     * 
+     *
      * @param <T>
      * @param configuration
      * @param prop
@@ -89,13 +89,13 @@ public class MobileConfigProperties {
             return null;
         }
     }
-    
+
     /**
      * Checks if all required properties are set and throws an exception if not. Also prints out the settings values
      * @param configuration the {@link ConfigurationService} from which the properties are read
      * @param props an array of props which should be checked
      * @param bundlename the bundlename (needed for output of the properties)
-     * 
+     *
      * @throws ConfigurationException
      */
     public static void check(final ServiceRegistry registry, final PropertyInterface[] props, final String bundlename) throws ConfigurationException {

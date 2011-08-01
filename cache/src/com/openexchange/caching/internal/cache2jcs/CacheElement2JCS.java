@@ -57,7 +57,7 @@ import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator
 
 /**
  * {@link CacheElement2JCS}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheElement2JCS implements CacheElement {

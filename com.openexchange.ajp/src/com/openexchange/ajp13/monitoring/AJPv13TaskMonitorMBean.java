@@ -53,49 +53,49 @@ import com.openexchange.monitoring.MonitorMBean;
 
 /**
  * {@link AJPv13TaskMonitorMBean} - The AJP task monitor MBean.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJPv13TaskMonitorMBean extends MonitorMBean {
 
     /**
      * Gets the number of AJP threads currently waiting on an incoming AJP package.
-     * 
+     *
      * @return The number of AJP threads currently waiting on an incoming AJP package.
      */
     int getNumWaiting();
 
     /**
      * Gets the number of AJP threads currently processing a received AJP package.
-     * 
+     *
      * @return The number of AJP threads currently processing a received AJP package.
      */
     int getNumProcessing();
 
     /**
      * Gets the number of received AJP cycles.
-     * 
+     *
      * @return The number of received AJP cycles.
      */
     long getNumRequests();
 
     /**
      * Gets the maximum time an AJP thread took for processing a received AJP package.
-     * 
+     *
      * @return The maximum time an AJP thread took for processing a received AJP package.
      */
     long getMaxProcessingTime();
 
     /**
      * Gets the minimum time an AJP thread took for processing a received AJP package.
-     * 
+     *
      * @return The minimum time an AJP thread took for processing a received AJP package.
      */
     long getMinProcessingTime();
 
     /**
      * Gets the average time an AJP thread took for processing a received AJP package.
-     * 
+     *
      * @return The average time an AJP thread took for processing a received AJP package.
      */
     double getAvgProcessingTime();

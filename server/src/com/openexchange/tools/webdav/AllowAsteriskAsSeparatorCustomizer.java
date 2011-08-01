@@ -62,49 +62,60 @@ import com.openexchange.login.LoginRequest;
  */
 public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
 
+    @Override
     public LoginRequest modifyLogin(final LoginRequest loginReq) {
         return new LoginRequest() {
 
+            @Override
             public String getAuthId() {
                 return loginReq.getAuthId();
             }
 
+            @Override
             public String getClient() {
                 return loginReq.getClient();
             }
 
+            @Override
             public String getClientIP() {
                 return loginReq.getClientIP();
             }
 
+            @Override
             public String getHash() {
                 return loginReq.getHash();
             }
 
+            @Override
             public Map<String, List<String>> getHeaders() {
                 return loginReq.getHeaders();
             }
 
+            @Override
             public Interface getInterface() {
                 return loginReq.getInterface();
             }
 
+            @Override
             public String getLogin() {
                 return loginReq.getLogin().replaceAll("\\*", "@");
             }
 
+            @Override
             public String getPassword() {
                 return loginReq.getPassword();
             }
 
+            @Override
             public String getUserAgent() {
                 return loginReq.getUserAgent();
             }
 
+            @Override
             public String getVersion() {
                 return loginReq.getVersion();
             }
-            
+
         };
     }
 }

@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link SSOActionFactory} - The action factory for single sign-on bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SSOActionFactory implements AJAXActionServiceFactory {
@@ -68,7 +68,7 @@ public final class SSOActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Gets the action factory instance.
-     * 
+     *
      * @return The action factory instance
      */
     public static final SSOActionFactory getInstance() {

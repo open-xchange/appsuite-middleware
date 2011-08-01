@@ -64,7 +64,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends DeferredActivator {
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
 
     private final AtomicBoolean started;
@@ -135,7 +135,7 @@ public class Activator extends DeferredActivator {
             }
 
             MailFilterServletInit.getInstance().start();
-            
+
             checkConfigfile();
 
             serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(), null);
@@ -169,7 +169,7 @@ public class Activator extends DeferredActivator {
 
     /**
      * This method checks for a valid configfile and throws and exception if now configfile is there or one of the properties is missing
-     * @throws Exception 
+     * @throws Exception
      */
     // protected to be able to test this
     protected static void checkConfigfile() throws Exception {
@@ -188,7 +188,7 @@ public class Activator extends DeferredActivator {
         } catch (final NumberFormatException e) {
             throw new Exception("Property " + MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property + " is no integer value");
         }
-        
+
         final String passwordsrc = config.getProperty(MailFilterProperties.Values.SIEVE_PASSWORDSRC.property);
         if (null != passwordsrc) {
             if (MailFilterProperties.PasswordSource.GLOBAL.name.equals(passwordsrc)) {

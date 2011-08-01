@@ -67,7 +67,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link StorageUtility} - Offers utility methods for both folder and message storage
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StorageUtility {
@@ -106,7 +106,7 @@ public final class StorageUtility {
 
     /**
      * Gets the default max. running millis.
-     * 
+     *
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
@@ -134,7 +134,7 @@ public final class StorageUtility {
 
     /**
      * Parses specified headers into a map
-     * 
+     *
      * @param headers The headers as raw bytes
      * @return An instance of {@link Map} containing the headers
      */
@@ -154,7 +154,7 @@ public final class StorageUtility {
 
     /**
      * Parses specified headers into a map
-     * 
+     *
      * @param headers The headers as {@link String}
      * @return An instance of {@link Map} containing the headers
      */
@@ -178,7 +178,7 @@ public final class StorageUtility {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param accountId The account ID
      * @param usm The user's mail settings
      * @return The default folder names as an array of {@link String}
@@ -191,7 +191,7 @@ public final class StorageUtility {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param accountId The account ID
      * @param usm The user's mail settings
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
@@ -212,7 +212,7 @@ public final class StorageUtility {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param trash The trash name
      * @param sent The sent name
      * @param drafts The drafts name

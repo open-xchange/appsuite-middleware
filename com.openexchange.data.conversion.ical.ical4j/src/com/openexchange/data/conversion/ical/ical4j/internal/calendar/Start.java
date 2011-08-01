@@ -118,7 +118,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final boolean isDateTime = isDateTime(component, dtStart);
         final TimeZone UTC = TimeZone.getTimeZone("UTC");
         final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
-        
+
         calendar.setStartDate(start);
         // If an end is specified end date will be overwritten.
         if (isDateTime) {

@@ -72,7 +72,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 /**
  * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
  * an attachment later
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class UploadFileMailPart extends MailPart implements ComposedMailPart {
@@ -90,7 +90,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 
     /**
      * Initializes a new {@link UploadFileMailPart}
-     * 
+     *
      * @param uploadFile The upload file
      * @throws OXException If upload file's content type cannot be parsed
      */
@@ -122,7 +122,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         }
         if ("multipart/form-data".equalsIgnoreCase(retval)) {
             return MIMEType2ExtMap.getContentType(preparedFileName);
-            
+
         }
         return contentType;
     }
@@ -157,7 +157,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 
     /**
      * Gets the upload file associated with this mail part
-     * 
+     *
      * @return The upload file associated with this mail part
      */
     public File getUploadFile() {
@@ -270,6 +270,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
      * (non-Javadoc)
      * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
      */
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.FILE;
     }

@@ -83,14 +83,14 @@ import com.openexchange.tools.session.ServerSession;
  * <dd>A comma separated list of MessagingFields that should be loaded.</dd>
  * </dl>
  * Returns a JSONArray containing a JSONArray for every message in the folder. The sub arrays consist of one entry for each requested field.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractMessagingAction {
 
     private static final DisplayMode DISPLAY_MODE = DisplayMode.RAW;
-    
+
     public AllAction(final MessagingServiceRegistry registry, final MessagingMessageWriter writer, final MessagingMessageParser parser) {
         super(registry, writer, parser);
     }

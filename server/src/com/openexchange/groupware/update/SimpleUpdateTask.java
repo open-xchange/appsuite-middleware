@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
 
+    @Override
     public final void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
@@ -92,6 +93,7 @@ public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
         return true;
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }

@@ -74,6 +74,7 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         TargetService targetService = (TargetService) context.getService(reference);
         final int module = parseModule(reference);
@@ -86,10 +87,12 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
         return targetService;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         if (null == service) {
             return;

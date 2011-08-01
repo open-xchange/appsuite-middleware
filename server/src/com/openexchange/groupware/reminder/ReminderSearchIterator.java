@@ -91,10 +91,12 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         }
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return next != null;
     }
 
+    @Override
     public ReminderObject next() throws OXException {
         final ReminderObject reminderObj = next;
         try {
@@ -107,6 +109,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         return reminderObj;
     }
 
+    @Override
     public void close() throws SearchIteratorException, OXException {
         try {
             if (rs != null) {
@@ -123,6 +126,7 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }
@@ -131,14 +135,17 @@ class ReminderSearchIterator implements SearchIterator<ReminderObject> {
         return false;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }

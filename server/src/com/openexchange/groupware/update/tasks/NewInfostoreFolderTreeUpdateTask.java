@@ -101,10 +101,12 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
         return systemPermission;
     }
 
+    @Override
     public int addedWithVersion() {
         return 32;
     }
 
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -115,6 +117,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     private static final String SQL_01 = "SELECT cid FROM oxfolder_tree WHERE fuid = "
             + FolderObject.SYSTEM_INFOSTORE_FOLDER_ID + " GROUP BY cid";
 
+    @Override
     public void perform(final Schema schema, final int cid) throws OXException {
         final SortedSet<Integer> contextIds = new TreeSet<Integer>();
         /*

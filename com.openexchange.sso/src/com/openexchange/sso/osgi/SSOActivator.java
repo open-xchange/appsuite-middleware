@@ -63,7 +63,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link SSOActivator} - Activator for JSON single sign-on interface.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SSOActivator implements BundleActivator {

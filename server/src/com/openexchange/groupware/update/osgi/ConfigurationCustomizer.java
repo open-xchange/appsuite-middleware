@@ -69,16 +69,19 @@ public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ConfigurationService configService = (ConfigurationService) context.getService(reference);
         ExcludedList.getInstance().configure(configService);
         return configService;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         context.ungetService(reference);
     }

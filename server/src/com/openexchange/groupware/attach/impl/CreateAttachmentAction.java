@@ -74,6 +74,7 @@ public class CreateAttachmentAction extends AttachmentListQueryAction {
     }
 
 
+    @Override
     public void perform() throws OXException {
         if(getAttachments().size() == 0) {
             return;

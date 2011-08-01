@@ -53,7 +53,7 @@ import com.openexchange.twitter.Paging;
 
 /**
  * {@link PagingImpl} - The paging implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PagingImpl implements Paging {
@@ -62,7 +62,7 @@ public final class PagingImpl implements Paging {
 
     /**
      * Initializes a new {@link PagingImpl}.
-     * 
+     *
      * @param twitter4jPaging The twitter4j paging
      */
     public PagingImpl(final twitter4j.Paging twitter4jPaging) {

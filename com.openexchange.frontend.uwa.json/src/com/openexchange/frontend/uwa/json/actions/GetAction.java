@@ -72,9 +72,9 @@ public class GetAction extends AbstractUWAAction {
     protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         req.require("id");
         String id = req.getParameter("id");
-        
+
         UWAWidget widget = widgets.get(id);
-        
+
         return result(widget);
     }
 

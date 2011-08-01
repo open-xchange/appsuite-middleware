@@ -13,9 +13,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -42,8 +42,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -66,11 +66,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -78,11 +78,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -90,11 +90,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -102,11 +102,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -114,11 +114,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -126,11 +126,11 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -138,25 +138,25 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Gets the value of the ruleStatus property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the ruleStatus property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRuleStatus().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link EditCallRulesOutGroupRequest.RuleStatus }
-     * 
-     * 
+     *
+     *
      */
     public List<EditCallRulesOutGroupRequest.RuleStatus> getRuleStatus() {
         if (ruleStatus == null) {
@@ -167,25 +167,25 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * Gets the value of the changeOrder property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the changeOrder property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getChangeOrder().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link BigInteger }
-     * 
-     * 
+     *
+     *
      */
     public List<BigInteger> getChangeOrder() {
         if (changeOrder == null) {
@@ -197,9 +197,9 @@ public class EditCallRulesOutGroupRequest {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -212,8 +212,8 @@ public class EditCallRulesOutGroupRequest {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -229,11 +229,11 @@ public class EditCallRulesOutGroupRequest {
 
         /**
          * Gets the value of the ruleID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getRuleID() {
             return ruleID;
@@ -241,11 +241,11 @@ public class EditCallRulesOutGroupRequest {
 
         /**
          * Sets the value of the ruleID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setRuleID(BigInteger value) {
             this.ruleID = value;
@@ -253,7 +253,7 @@ public class EditCallRulesOutGroupRequest {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          */
         public boolean isStatus() {
             return status;
@@ -261,7 +261,7 @@ public class EditCallRulesOutGroupRequest {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          */
         public void setStatus(boolean value) {
             this.status = value;

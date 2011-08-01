@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link FileStorageType} - The messaging type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageType implements Type {
@@ -62,7 +62,7 @@ public final class FileStorageType implements Type {
 
     /**
      * Gets the {@link FileStorageType} instance.
-     * 
+     *
      * @return The {@link FileStorageType} instance
      */
     public static FileStorageType getInstance() {
@@ -76,6 +76,7 @@ public final class FileStorageType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.FILE
         return 14;

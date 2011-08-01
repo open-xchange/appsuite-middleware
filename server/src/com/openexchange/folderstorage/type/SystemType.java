@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link SystemType} - The system type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SystemType implements Type {
@@ -62,7 +62,7 @@ public final class SystemType implements Type {
 
     /**
      * Gets the {@link SystemType} instance.
-     * 
+     *
      * @return The {@link SystemType} instance
      */
     public static SystemType getInstance() {
@@ -76,6 +76,7 @@ public final class SystemType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.SYSTEM_TYPE
         return 5;

@@ -58,7 +58,7 @@ import com.openexchange.mail.mime.MIMEMailExceptionCode;
 
 /**
  * {@link UnifiedINBOXException} - Indicates a Unified INBOX error.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXException extends OXException {
@@ -184,14 +184,14 @@ public final class UnifiedINBOXException extends OXException {
         public String getMessage() {
             return message;
         }
-        
+
         public boolean equals(final OXException e) {
             return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
         }
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @return The newly created {@link OXException} instance
          */
         public OXException create() {
@@ -200,7 +200,7 @@ public final class UnifiedINBOXException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
          */
@@ -210,7 +210,7 @@ public final class UnifiedINBOXException extends OXException {
 
         /**
          * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-         * 
+         *
          * @param cause The optional initial cause
          * @param args The message arguments in case of printf-style message
          * @return The newly created {@link OXException} instance
@@ -222,7 +222,7 @@ public final class UnifiedINBOXException extends OXException {
 
     /**
      * Gets the message corresponding to specified error code with given message arguments applied.
-     * 
+     *
      * @param code The code
      * @param msgArgs The message arguments
      * @return The message corresponding to specified error code with given message arguments applied

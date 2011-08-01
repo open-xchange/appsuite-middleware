@@ -123,7 +123,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link MessageParser} - Parses instances of {@link JSONObject} to instances of {@link MailMessage}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - {@link #parseBasics(JSONObject, MailMessage, TimeZone)}
  */
@@ -148,7 +148,7 @@ public final class MessageParser {
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to a corresponding
      * {@link ComposedMailMessage} object dedicated for being saved as a draft message. Moreover the user's quota limitations are
      * considered.
-     * 
+     *
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
@@ -163,7 +163,7 @@ public final class MessageParser {
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
      * {@link ComposedMailMessage} objects dedicated for being sent. Moreover the user's quota limitations are considered.
-     * 
+     *
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
@@ -180,7 +180,7 @@ public final class MessageParser {
     /**
      * Completely parses given instance of {@link JSONObject} and given instance of {@link UploadEvent} to corresponding
      * {@link ComposedMailMessage} objects. Moreover the user's quota limitations are considered.
-     * 
+     *
      * @param jsonObj The JSON object
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
@@ -355,7 +355,7 @@ public final class MessageParser {
     /**
      * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
      * considered.
-     * 
+     *
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
      * @param session The session
@@ -380,7 +380,7 @@ public final class MessageParser {
     /**
      * Parses given instance of {@link JSONObject} to given instance of {@link MailMessage}. Moreover the user's quota limitations are
      * considered.
-     * 
+     *
      * @param jsonObj The JSON object (source)
      * @param mail The mail(target), which should be empty
      * @param timeZone The user time zone
@@ -448,7 +448,7 @@ public final class MessageParser {
     /**
      * Takes a mail as jsonObj and extracts the values into a given MailMessage object. Handles all basic values that do not need
      * information about the session, like attachments.
-     * 
+     *
      * @param jsonObj
      * @param mail
      * @param timeZone
@@ -598,7 +598,7 @@ public final class MessageParser {
 
     /**
      * Checks if specified header name is a custom header that is it starts ignore-case with <code>"X-"</code>.
-     * 
+     *
      * @param headerName The header name to check
      * @return <code>true</code> if specified header name is a custom header; otherwise <code>false</code>
      */
@@ -815,7 +815,7 @@ public final class MessageParser {
 
     /**
      * Parses "From" field out of passed JSON object.
-     * 
+     *
      * @param jo The JSON object
      * @return The parsed "From" address
      * @throws AddressException If parsing the address fails
@@ -827,7 +827,7 @@ public final class MessageParser {
 
     /**
      * Parses address field out of passed JSON object.
-     * 
+     *
      * @param key The key of the address field
      * @param jo The JSON object
      * @return The parsed address(es)
@@ -842,7 +842,7 @@ public final class MessageParser {
 
     /**
      * Parses address field out of passed JSON object.
-     * 
+     *
      * @param key The key of the address field
      * @param jo The JSON object
      * @return The parsed address(es)
@@ -878,11 +878,11 @@ public final class MessageParser {
 
     /**
      * Expects the specified JSON array to be an array of arrays. Each inner array conforms to pattern:
-     * 
+     *
      * <pre>
      * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
      * </pre>
-     * 
+     *
      * @param jsonArray The JSON array
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs

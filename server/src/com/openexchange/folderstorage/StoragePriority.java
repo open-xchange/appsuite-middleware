@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link StoragePriority} - The folder storage priority.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum StoragePriority {

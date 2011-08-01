@@ -109,8 +109,10 @@ public final class UpdateAction extends AbstractMailAccountAction {
     private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(
         Attribute.ID_LITERAL,
         Attribute.PERSONAL_LITERAL,
+        Attribute.REPLY_TO_LITERAL,
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final JSONObject jData = (JSONObject) request.getData();
 
@@ -121,7 +123,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
             final Set<Attribute> notAllowed = new HashSet<Attribute>(fieldsToUpdate);
             notAllowed.removeAll(WEBMAIL_ALLOWED);
             if (!session.getUserConfiguration().isMultipleMailAccounts() && (!isDefaultMailAccount(accountDescription) || (!notAllowed.isEmpty()))) {
-                throw 
+                throw
                     MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
@@ -157,7 +159,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
                  */
                 MailSessionCache.getInstance(session).removeAccountParameters(id);
                 /*-
-                 * 
+                 *
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
                 session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
                  */
@@ -185,5 +187,5 @@ public final class UpdateAction extends AbstractMailAccountAction {
             throw AjaxExceptionCodes.JSONError.create( e, e.getMessage());
         }
     }
-    
+
 }

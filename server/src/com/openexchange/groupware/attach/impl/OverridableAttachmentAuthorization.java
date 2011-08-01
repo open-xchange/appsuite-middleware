@@ -66,21 +66,24 @@ import com.openexchange.tools.service.SpecificServiceChooser;
  */
 public class OverridableAttachmentAuthorization implements AttachmentAuthorization {
 
-    private SpecificServiceChooser<AttachmentAuthorization> chooser;
+    private final SpecificServiceChooser<AttachmentAuthorization> chooser;
 
     public OverridableAttachmentAuthorization(SpecificServiceChooser<AttachmentAuthorization> chooser) {
         super();
         this.chooser = chooser;
     }
 
+    @Override
     public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayAttach(folderId, objectId, user, userConfig, ctx);
     }
 
+    @Override
     public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayDetach(folderId, objectId, user, userConfig, ctx);
     }
 
+    @Override
     public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         getDelegate(folderId, ctx.getContextId()).checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
     }

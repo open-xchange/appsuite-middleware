@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link InlineImageDataSource} - A {@link DataSource} for image parts inside a mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InlineImageDataSource implements ImageDataSource {
@@ -121,14 +121,17 @@ public final class InlineImageDataSource implements ImageDataSource {
      * <li>com.openexchange.mail.conversion.cid</li>
      * </ul>
      */
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
             throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(type.getName());
@@ -189,6 +192,7 @@ public final class InlineImageDataSource implements ImageDataSource {
 
     private static final String REGISTRATION_NAME = "com.openexchange.mail.image";
 
+    @Override
     public String getRegistrationName() {
         return REGISTRATION_NAME;
     }

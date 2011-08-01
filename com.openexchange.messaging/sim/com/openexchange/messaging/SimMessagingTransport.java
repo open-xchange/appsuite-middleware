@@ -83,11 +83,11 @@ public class SimMessagingTransport implements MessagingAccountTransport {
     public boolean ping() throws OXException {
         return true;
     }
-    
+
     public MessagingMessage getMessage() {
         return message;
     }
-    
+
     public Collection<MessagingAddressHeader> getRecipients() {
         return recipients;
     }

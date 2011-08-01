@@ -73,14 +73,17 @@ class UserFactory implements OXObjectFactory<User> {
         this.userId = userId;
     }
 
+    @Override
     public Serializable getKey() {
         return cacheService.newCacheKey(ctx.getContextId(), userId);
     }
 
+    @Override
     public User load() throws OXException, OXException {
         return delegate.getUser(userId, ctx);
     }
 
+    @Override
     public Lock getCacheLock() {
         return lock;
     }

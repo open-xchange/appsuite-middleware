@@ -14,11 +14,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Incoming call rule data
- * 
+ *
  * <p>Java class for CallRuleInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallRuleInfo">
  *   &lt;complexContent>
@@ -42,8 +42,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallRuleInfo", propOrder = {
@@ -80,11 +80,11 @@ public class CallRuleInfo {
 
     /**
      * Gets the value of the match property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMatch() {
         return match;
@@ -92,11 +92,11 @@ public class CallRuleInfo {
 
     /**
      * Sets the value of the match property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMatch(Integer value) {
         this.match = value;
@@ -104,11 +104,11 @@ public class CallRuleInfo {
 
     /**
      * Gets the value of the number property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNumber() {
         return number;
@@ -116,11 +116,11 @@ public class CallRuleInfo {
 
     /**
      * Sets the value of the number property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNumber(String value) {
         this.number = value;
@@ -128,11 +128,11 @@ public class CallRuleInfo {
 
     /**
      * Gets the value of the intervalID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public JAXBElement<BigInteger> getIntervalID() {
         return intervalID;
@@ -140,23 +140,23 @@ public class CallRuleInfo {
 
     /**
      * Sets the value of the intervalID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link BigInteger }{@code >}
-     *     
+     *
      */
     public void setIntervalID(JAXBElement<BigInteger> value) {
-        this.intervalID = ((JAXBElement<BigInteger> ) value);
+        this.intervalID = value;
     }
 
     /**
      * Gets the value of the position property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getPosition() {
         return position;
@@ -164,11 +164,11 @@ public class CallRuleInfo {
 
     /**
      * Sets the value of the position property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setPosition(Long value) {
         this.position = value;
@@ -176,11 +176,11 @@ public class CallRuleInfo {
 
     /**
      * Gets the value of the key property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public BigDecimal getKey() {
         return key;
@@ -188,11 +188,11 @@ public class CallRuleInfo {
 
     /**
      * Sets the value of the key property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigDecimal }
-     *     
+     *
      */
     public void setKey(BigDecimal value) {
         this.key = value;

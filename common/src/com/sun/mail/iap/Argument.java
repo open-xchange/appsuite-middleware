@@ -122,7 +122,7 @@ public class Argument {
 
     /**
      * Write out given string as an Atom. Note that an Atom can contain only
-     * certain US-ASCII characters.  No validation is done on the characters 
+     * certain US-ASCII characters.  No validation is done on the characters
      * in the string.
      * @param s  String
      */
@@ -157,7 +157,7 @@ public class Argument {
     /*
      * Write out all the buffered items into the output stream.
      */
-    public void write(final Protocol protocol) 
+    public void write(final Protocol protocol)
         throws IOException, ProtocolException {
     final int size = items != null ? items.size() : 0;
     final DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
@@ -208,7 +208,7 @@ public class Argument {
     /**
      * Write out given String as either an Atom, QuotedString or Literal
      */
-    private void astring(final byte[] bytes, final Protocol protocol) 
+    private void astring(final byte[] bytes, final Protocol protocol)
             throws IOException, ProtocolException {
     final DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
     final int len = bytes.length;
@@ -260,7 +260,7 @@ public class Argument {
         } else {
             os.write(bytes);
         }
- 
+
 
     if (quote) {
         os.write('"');
@@ -270,7 +270,7 @@ public class Argument {
     /**
      * Write out given byte[] as a literal
      */
-    private void literal(final byte[] b, final Protocol protocol) 
+    private void literal(final byte[] b, final Protocol protocol)
             throws IOException, ProtocolException {
     startLiteral(protocol, b.length).write(b);
     }
@@ -278,7 +278,7 @@ public class Argument {
     /**
      * Write out given ByteArrayOutputStream as a literal.
      */
-    private void literal(final ByteArrayOutputStream b, final Protocol protocol) 
+    private void literal(final ByteArrayOutputStream b, final Protocol protocol)
             throws IOException, ProtocolException {
     b.writeTo(startLiteral(protocol, b.size()));
     }
@@ -286,12 +286,12 @@ public class Argument {
     /**
      * Write out given Literal as a literal.
      */
-    private void literal(final Literal b, final Protocol protocol) 
+    private void literal(final Literal b, final Protocol protocol)
             throws IOException, ProtocolException {
     b.writeTo(startLiteral(protocol, b.size()));
     }
 
-    private OutputStream startLiteral(final Protocol protocol, final int size) 
+    private OutputStream startLiteral(final Protocol protocol, final int size)
             throws IOException, ProtocolException {
     final DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
     final boolean nonSync = protocol.supportsNonSyncLiterals();

@@ -61,7 +61,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testWKW() {
         // insert valid credentials here
         final String username = "";
@@ -72,22 +72,22 @@ public class GenericSubscribeServiceForWKWTest extends GenericSubscribeServiceTe
         crawler.setDisplayName("wer-kennt-wen.de");
         crawler.setId("com.openexchange.subscribe.crawler.wkw");
         final List<Step> steps = new LinkedList<Step>();
-        
-        // #####################################################################        
+
+        // #####################################################################
         //TODO: insert steps
         steps.add(new LoginPageByFormActionStep("", "http://www.wer-kennt-wen.de", username, password, "start.php", "loginName", "pass", "\\/people\\/friends", 1, ""));
         steps.add(new PageByUrlStep("", "http://www.wer-kennt-wen.de/people/friends"));
-        
+
 //        final ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
 //        final PagePartSequence sequence = new PagePartSequence(pageParts, "");
 //        steps.add(new ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(
 //            "Get the info-bits from the contact-page.",
 //            sequence));
         // #####################################################################
-        
-        
+
+
         final Workflow workflow = new Workflow(steps);
-        
+
         final String yamlString = Yaml.dump(workflow);
         crawler.setWorkflowString(yamlString);
 

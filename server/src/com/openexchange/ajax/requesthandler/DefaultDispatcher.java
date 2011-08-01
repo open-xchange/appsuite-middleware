@@ -64,55 +64,71 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultDispatcher}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private Map<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+    private final Map<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
 
-    private Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+    private final Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+    @Override
+    public AJAXState begin() throws OXException {
+        return new AJAXState();
+    }
+
+    @Override
+    public void end(final AJAXState state) {
+        state.close();
+    }
+
+    @Override
+    public boolean handles(final String module) {
+        return actionFactories.containsKey(module);
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
-        List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
-        
-        for (AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
-            AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
+        final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
+
+        for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
+            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
             if(customizer != null) {
                 todo.add(customizer);
             }
         }
-        
+
         while(!todo.isEmpty()) {
-            Iterator<AJAXActionCustomizer> iterator = todo.iterator();
+            final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
             while(iterator.hasNext()) {
-                AJAXActionCustomizer customizer = iterator.next();
+                final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    AJAXRequestData modified = customizer.incoming(request, session);
+                    final AJAXRequestData modified = customizer.incoming(request, session);
                     if (modified != null) {
                         request = modified;
                     }
 
                     outgoing.add(customizer);
                     iterator.remove();
-                } catch (FlowControl.Later l) {
+                } catch (final FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }
         }
-        
-        AJAXActionServiceFactory factory = lookupFactory(request.getModule());
-        
+
+        final AJAXActionServiceFactory factory = lookupFactory(request.getModule());
+
         if (factory == null) {
             throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
         }
-        AJAXActionService action = factory.createActionService(request.getAction());
+        final AJAXActionService action = factory.createActionService(request.getAction());
         if (action == null) {
             throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
         }
-        Action actionMetadata = getActionMetadata(action);
-        
+        final Action actionMetadata = getActionMetadata(action);
+
         if (actionMetadata != null) {
             if (request.getFormat() == null) {
                 request.setFormat(actionMetadata.defaultFormat());
@@ -122,34 +138,44 @@ public class DefaultDispatcher implements Dispatcher {
                 request.setFormat("apiResponse");
             }
         }
-        
+
+        /*
+         * State already initialized for module?
+         */
+        if (factory instanceof AJAXStateHandler) {
+            final AJAXStateHandler handler = (AJAXStateHandler) factory;
+            if (state.addInitializer(request.getModule(), handler)) {
+                handler.begin(state);
+            }
+        }
+        request.setState(state);
         AJAXRequestResult result = action.perform(
             request,
             session);
-        
+
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
         while(!outgoing.isEmpty()) {
-            Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
-            
+            final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
+
             while (iterator.hasNext()) {
-                AJAXActionCustomizer customizer = iterator.next();
+                final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    AJAXRequestResult modified = customizer.outgoing(request, result, session);
+                    final AJAXRequestResult modified = customizer.outgoing(request, result, session);
                     if (modified != null) {
                         result = modified;
                     }
                     iterator.remove();
-                } catch (FlowControl.Later l) {
+                } catch (final FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }
-            
+
         }
         return result;
     }
 
-    private AJAXActionServiceFactory lookupFactory(String module) {
+    private AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (serviceFactory == null && module.contains("/")) {
             // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
@@ -158,19 +184,19 @@ public class DefaultDispatcher implements Dispatcher {
         return serviceFactory;
     }
 
-    private Action getActionMetadata(AJAXActionService action) {
+    private Action getActionMetadata(final AJAXActionService action) {
         return action.getClass().getAnnotation(Action.class);
     }
 
-    public void register(String module, AJAXActionServiceFactory factory) {
+    public void register(final String module, final AJAXActionServiceFactory factory) {
         actionFactories.put(module, factory);
     }
 
-    public void addCustomizer(AJAXActionCustomizerFactory factory) {
+    public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
 
-    public void remove(String module) {
+    public void remove(final String module) {
         actionFactories.remove(module);
     }
 

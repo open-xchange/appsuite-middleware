@@ -106,7 +106,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link MIMEMessageUtility} - Utilities for MIME messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEMessageUtility {
@@ -143,7 +143,7 @@ public final class MIMEMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
@@ -152,7 +152,7 @@ public final class MIMEMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @return The {@link MailDateFormat} for specified session
      */
     public static MailDateFormat getDefaultMailDateFormat() {
@@ -164,7 +164,7 @@ public final class MIMEMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
@@ -173,7 +173,7 @@ public final class MIMEMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @param session The user session
      * @return The {@link MailDateFormat} for specified session
      * @throws OXException If {@link MailDateFormat} cannot be returned
@@ -193,7 +193,7 @@ public final class MIMEMessageUtility {
      * <p>
      * Note that returned instance of {@link MailDateFormat} is shared, therefore use a surrounding synchronized block to preserve thread
      * safety:
-     * 
+     *
      * <pre>
      * ...
      * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
@@ -202,7 +202,7 @@ public final class MIMEMessageUtility {
      * }
      * ...
      * </pre>
-     * 
+     *
      * @param timeZoneId The time zone identifier
      * @return The {@link MailDateFormat} for specified time zone identifier
      * @throws OXException If {@link MailDateFormat} cannot be returned
@@ -212,6 +212,7 @@ public final class MIMEMessageUtility {
         if (null == future) {
             final FutureTask<MailDateFormat> ft = new FutureTask<MailDateFormat>(new Callable<MailDateFormat>() {
 
+                @Override
                 public MailDateFormat call() throws Exception {
                     final MailDateFormat mdf = new MailDateFormat();
                     mdf.setTimeZone(TimeZoneUtils.getTimeZone(timeZoneId));
@@ -238,7 +239,7 @@ public final class MIMEMessageUtility {
     /**
      * Checks if specified headers are empty. The passed headers are considered as all the values for a certain header or <code>null</code>
      * if no headers exist.
-     * 
+     *
      * @param headers The values for a certain header
      * @return <code>true</code> if specified headers are empty; otherwise <code>false</code>
      */
@@ -277,11 +278,11 @@ public final class MIMEMessageUtility {
      * Detects if given HTML content contains inlined images
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The HTML content
      * @return <code>true</code> if given HTML content contains inlined images; otherwise <code>false</code>
      */
@@ -291,7 +292,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Gathers all occurring content IDs in HTML content and returns them as a list
-     * 
+     *
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
      */
@@ -311,7 +312,7 @@ public final class MIMEMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     * 
+     *
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
@@ -343,7 +344,7 @@ public final class MIMEMessageUtility {
      * &nbsp;&nbsp;&lt;img&nbsp;src=&quot;/ajax/image?uid=12gf356j7&quot;&gt;
      * </code></li>
      * </ul>
-     * 
+     *
      * @param htmlContent The HTML content
      * @param session The user session
      * @return <code>true</code> if given HTML content contains references to local image files; otherwise <code>false</code>
@@ -381,7 +382,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Determines specified part's real filename if any available.
-     * 
+     *
      * @param part The part whose filename shall be determined
      * @return The part's real filename or <code>null</code> if none present
      */
@@ -433,7 +434,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Checks if given multipart contains (file) attachments
-     * 
+     *
      * @param mp The multipart to examine
      * @param subtype The multipart's subtype
      * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
@@ -479,7 +480,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Checks if given BODYSTRUCTURE item indicates to contain (file) attachments
-     * 
+     *
      * @param bodystructure The BODYSTRUCTURE item
      * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
@@ -514,7 +515,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Decodes a "Subject" header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param subject The subject obtained from ENVELOPE fetch item
      * @return The decoded subject value
      */
@@ -524,11 +525,11 @@ public final class MIMEMessageUtility {
         }
         /*-
          * Hmm... Why does ENVELOPE FETCH response omit CR?LFs in subject?!
-         * 
+         *
          * Example:
          * Subject: =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?=
          *  =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
-         *  
+         *
          * is transferred as:
          * =?UTF-8?Q?Nur_noch_kurze_Zeit:_1_Freimona?= =?UTF-8?Q?t_f=C3=BCr_3_erfolgreiche_Einladungen?=
          */
@@ -557,7 +558,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Decodes a string header obtained from ENVELOPE fetch item.
-     * 
+     *
      * @param headerValue The header value
      * @return The decoded header value
      */
@@ -586,7 +587,7 @@ public final class MIMEMessageUtility {
      * If the charset-conversion fails for any sequence, an {@link UnsupportedEncodingException} is thrown.
      * <p>
      * If the String is not a RFC 2047 style encoded header, it is returned as-is
-     * 
+     *
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
@@ -692,7 +693,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Checks if given raw header contains non-ascii characters.
-     * 
+     *
      * @param rawHeader The raw header
      * @return The proper unicode string
      */
@@ -718,7 +719,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -733,7 +734,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Decodes a multi-mime-encoded header value using the algorithm specified in RFC 2047, Section 6.1 in a safe manner.
-     * 
+     *
      * @param headerValue The possibly encoded header value
      * @return The possibly decoded header value
      */
@@ -792,13 +793,13 @@ public final class MIMEMessageUtility {
     /**
      * Prepares specified encoded word, thus even corrupt headers are properly handled.<br>
      * Here is an example of such a corrupt header:
-     * 
+     *
      * <pre>
      * =?windows-1258?Q?foo_bar@mail.foobar.com, _Foo_B=E4r_=28fb@somewhere,
      *  =@unspecified-domain,  =?windows-1258?Q?de=29@mail.foobar.com,
      *  _Jane_Doe@mail.foobar.com, ?=
      * </pre>
-     * 
+     *
      * @param eword The possibly corrupt encoded word
      * @param charset The charset
      * @return The prepared encoded word which won't cause a {@link ParseException parse error} during decoding
@@ -876,7 +877,7 @@ public final class MIMEMessageUtility {
      * <p>
      * Returns the value of the "filename" parameter from the "Content-Disposition" header field. If its not available, returns the value of
      * the "name" parameter from the "Content-Type" header field. Returns <code>null</code> if both are absent.
-     * 
+     *
      * @param mailPart The mail part whose filename shall be returned
      * @return The mail part's decoded filename or <code>null</code>.
      */
@@ -901,7 +902,7 @@ public final class MIMEMessageUtility {
      * parsing address headers in mail messages.
      * <p>
      * Additionally the personal parts are MIME encoded using default MIME charset.
-     * 
+     *
      * @param addresslist - comma separated address strings
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return An array of <code>InternetAddress</code> objects
@@ -928,7 +929,7 @@ public final class MIMEMessageUtility {
      * parsing address headers in mail messages.
      * <p>
      * Additionally the personal parts are MIME encoded using default MIME charset.
-     * 
+     *
      * @param addresslist - comma separated address strings
      * @param strict - <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @param failOnError - <code>true</code> to fail if parsing fails; otherwise <code>false</code> to get a plain-text representation
@@ -998,19 +999,19 @@ public final class MIMEMessageUtility {
      * <p>
      * This method guarantees that the resulting string can be used to build an Internet address according to RFC 822 syntax so that the
      * <code>{@link InternetAddress#parse(String)}</code> constructor won't throw an instance of <code>{@link AddressException}</code>.
-     * 
+     *
      * <pre>
      * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
-     * 
+     *
      * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
      * System.out.println(buildAddr);
      * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
-     * 
+     *
      * final InternetAddress ia = new InternetAddress(buildAddr);
      * System.out.println(ia.toUnicodeString());
      * // Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
      * </pre>
-     * 
+     *
      * @param personal The personal's string representation
      * @return The properly quoted personal for building an Internet address according to RFC 822 syntax
      */
@@ -1020,7 +1021,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Quotes given phrase if needed.
-     * 
+     *
      * @param phrase The phrase
      * @param encode <code>true</code> to encode phrase according to RFC 822 syntax if needed; otherwise <code>false</code>
      * @return The quoted phrase
@@ -1060,7 +1061,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Folds specified <code>Content-Type</code> value.
-     * 
+     *
      * @param contentDisposition The <code>Content-Type</code> value
      * @return The folded <code>Content-Type</code> value
      */
@@ -1072,7 +1073,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Folds specified <code>Content-Disposition</code> value.
-     * 
+     *
      * @param contentDisposition The <code>Content-Disposition</code> value
      * @return The folded <code>Content-Disposition</code> value
      */
@@ -1086,7 +1087,7 @@ public final class MIMEMessageUtility {
      * <tt>used</tt> indicates how many characters have been used in the current line; it is usually the length of the header name.
      * <p>
      * Note that line breaks in the string aren't escaped; they probably should be.
-     * 
+     *
      * @param used The characters used in line so far
      * @param foldMe The string to fold
      * @return The folded string
@@ -1155,7 +1156,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Unfolds a folded header. Any line breaks that aren't escaped and are followed by whitespace are removed.
-     * 
+     *
      * @param headerLine The header line to unfold
      * @return The unfolded string
      */
@@ -1168,13 +1169,13 @@ public final class MIMEMessageUtility {
         if ((i = headerLine.indexOf('\r')) >= 0 || (i = headerLine.indexOf('\n')) >= 0) {
             /*-
              * Check folded encoded-words as per RFC 2047:
-             * 
+             *
              * An 'encoded-word' may not be more than 75 characters long, including
              * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
              * desirable to encode more text than will fit in an 'encoded-word' of
              * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
              * be used.
-             * 
+             *
              * In this case the SPACE character is not part of the header and should
              * be discarded.
              */
@@ -1256,17 +1257,17 @@ public final class MIMEMessageUtility {
      * desirable to encode more text than will fit in an 'encoded-word' of 75 characters, multiple 'encoded-word's (separated by CRLF SPACE)
      * may be used.&quot;
      * <p>
-     * 
+     *
      * <pre>
      * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?=\r\n =?UTF-8?Q?sliste?=
      * </pre>
-     * 
+     *
      * Should be unfolded to:
-     * 
+     *
      * <pre>
      * Subject: =?UTF-8?Q?Kombatibilit=C3=A4t?==?UTF-8?Q?sliste?=
      * </pre>
-     * 
+     *
      * @param encodedWords The possibly folded encoded-words
      * @return The unfolded encoded-words
      */
@@ -1278,7 +1279,7 @@ public final class MIMEMessageUtility {
 
     /**
      * Gets the matching header out of RFC 822 data input stream.
-     * 
+     *
      * @param headerName The header name
      * @param inputStream The input stream
      * @param closeStream <code>true</code> to close the stream on finish; otherwise <code>false</code>

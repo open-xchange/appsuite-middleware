@@ -70,17 +70,17 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * This Step logs into a website via a form requiring username and password. The form is specified by its action.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl, nameOfSubmit;
 
     private int numberOfForm;
-    
+
     private Page loginPage;
 
     public LoginPageByFormActionStep() {
@@ -100,7 +100,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         this.baseUrl = baseUrl;
         this.nameOfSubmit = "";
     }
-    
+
     public LoginPageByFormActionStep(final String description, final String url, final String username, final String password, final String actionOfLoginForm, final String nameOfUserField, final String nameOfPasswordField, final String linkAvailableAfterLogin, final int numberOfForm, final String baseUrl, final String nameOfSubmit) {
         this.description = description;
         this.url = url;
@@ -144,7 +144,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                     HtmlSubmitInput button = (HtmlSubmitInput) loginPage.getElementByName(nameOfSubmit);
                     pageAfterLogin = button.click();
                 }
-                
+
                 output = pageAfterLogin;
 
                 boolean linkAvailable = false;
@@ -154,7 +154,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                     }
                 }
                 if (!linkAvailable) {
-                    LOG.error("Login for url "+ url +" failed!");                    
+                    LOG.error("Login for url "+ url +" failed!");
                     LOG.info("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
@@ -258,21 +258,21 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
         this.baseUrl = baseUrl;
     }
 
-    
+
     public String getNameOfSubmit() {
         return nameOfSubmit;
     }
 
-    
+
     public void setNameOfSubmit(String nameOfSubmit) {
         this.nameOfSubmit = nameOfSubmit;
     }
 
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
-    
-    
+
+
 
 }

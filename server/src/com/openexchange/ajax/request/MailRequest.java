@@ -90,7 +90,7 @@ public final class MailRequest {
 
     /**
      * Constructor
-     * 
+     *
      * @param session - the session reference keeping user-specific data
      * @param writer - the instance of <code>{@link OXJSONWriter}</code> to whom response data is written
      */
@@ -102,7 +102,7 @@ public final class MailRequest {
 
     /**
      * Performs the action associated with given <code>action</code> parameter
-     * 
+     *
      * @param action - the action to perform
      * @param jsonObject - the instance of <code>{@link JSONObject}</code> keeping request's data
      * @param mailInterface - the instance of <code>{@link MailServletInterface}</code> to access mail module
@@ -211,7 +211,7 @@ public final class MailRequest {
 
     /**
      * Indicates if this {@link MailRequest mail request} is collecting contiguously
-     * 
+     *
      * @return <code>true</code> if this {@link MailRequest mail request} is collecting contiguously; otherwise <code>false</code>
      */
     public boolean isContiguousCollect() {
@@ -221,7 +221,7 @@ public final class MailRequest {
     /**
      * Executes gathered actions and writes their response to the instance of <code>{@link OXJSONWriter}</code> given through constructor
      * <code>{@link #MailRequest(Session, Context, OXJSONWriter)}</code>
-     * 
+     *
      * @param mailInterface The mail interface
      * @throws JSONException If writing JSON response fails
      */
@@ -281,7 +281,7 @@ public final class MailRequest {
 
         /**
          * Initializes a new {@link CollectObject}
-         * 
+         *
          * @param mailServlet The mail servlet
          */
         protected CollectObject(final Mail mailServlet) {
@@ -293,7 +293,7 @@ public final class MailRequest {
         /**
          * Checks if given collectable operation can be further added to previous collectable operation stored in this {@link CollectObject}
          * and thus needs no direct execution.
-         * 
+         *
          * @param dataObject The JSON object containing request's data and parameters
          * @param op The identified collectable operation
          * @return <code>true</code> f given collectable operation can be further collected; otherwise <code>false</code>
@@ -303,7 +303,7 @@ public final class MailRequest {
 
         /**
          * Performs the collected operations
-         * 
+         *
          * @param session The currently active user session
          * @param writer The JSON writer to write responses to
          * @param mailInterface The mail interface
@@ -313,14 +313,14 @@ public final class MailRequest {
 
         /**
          * Gets the collectable operation identifier
-         * 
+         *
          * @return The collectable operation identifier
          */
         public abstract CollectableOperation getOperation();
 
         /**
          * Adds a collectable operation which has previously been checked by {@link #collectable(JSONObject, CollectableOperation)}
-         * 
+         *
          * @param dataObject
          * @throws JSONException If a JSON error occurs
          */
@@ -330,7 +330,7 @@ public final class MailRequest {
 
         /**
          * Gets a newly created array of long containing this object's mail IDs.
-         * 
+         *
          * @return A newly created array of long containing this object's mail IDs.
          */
         protected final String[] getMailIDs() {

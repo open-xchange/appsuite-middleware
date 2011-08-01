@@ -59,7 +59,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**
  * {@link FileStorageActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */

@@ -65,7 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Insert} - SQL for inserting a virtual folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Insert {
@@ -88,7 +88,7 @@ public final class Insert {
 
     /**
      * Inserts specified folder.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -125,7 +125,7 @@ public final class Insert {
 
     /**
      * Inserts specified folder.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

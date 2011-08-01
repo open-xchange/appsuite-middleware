@@ -65,7 +65,7 @@ import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link SendTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SendTest extends AbstractMessagingActionTest {
@@ -81,18 +81,18 @@ public class SendTest extends AbstractMessagingActionTest {
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
 
         perform(req);
-        
+
         final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1", -1, -1).getAccountTransport(12, new SimServerSession(null, null, null));
-        
+
         final MessagingMessage message = transport.getMessage();
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
-        
+
         final Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertNotNull(recipients);
         assertEquals(1, recipients.size());
         assertEquals("clark.kent@dailyplanet.com", recipients.iterator().next().getAddress());
-        
+
     }
 
     public void testSendWithoutRecipients() throws OXException, JSONException {
@@ -103,13 +103,13 @@ public class SendTest extends AbstractMessagingActionTest {
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, body : 'Hello World'}"));
 
         perform(req);
-        
+
         final SimMessagingTransport transport = (SimMessagingTransport) registry.getMessagingService("com.openexchange.test1", -1, -1).getAccountTransport(12, new SimServerSession(null, null, null));
-        
+
         final MessagingMessage message = transport.getMessage();
         assertNotNull(message);
         assertEquals("Hello World", ((StringContent)message.getContent()).getData());
-        
+
         final Collection<MessagingAddressHeader> recipients = transport.getRecipients();
         assertTrue(recipients == null);
     }
@@ -133,7 +133,7 @@ public class SendTest extends AbstractMessagingActionTest {
 
         assertFails(req);
     }
-    
+
     public void testMissingMessagingServiceID() throws JSONException, OXException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("account", "12");
@@ -142,13 +142,13 @@ public class SendTest extends AbstractMessagingActionTest {
 
         assertFails(req);
     }
-    
+
     public void testMissingAccountID() throws OXException, JSONException {
         final AJAXRequestData req = new AJAXRequestData();
         req.putParameter("messagingService", "com.openexchange.test1");
 
         req.setData(new JSONObject("{'headers' : {'content-type' : 'text/plain'}, content : 'Hello World'}"));
-        
+
         assertFails(req);
     }
 

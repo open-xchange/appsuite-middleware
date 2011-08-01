@@ -87,7 +87,7 @@ import com.sun.mail.pop3.POP3Store;
 
 /**
  * {@link POP3Access} - Establishes a POP3 access and provides access to storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageStorage> {
@@ -175,7 +175,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
-     * 
+     *
      * @param session The session providing needed user data
      * @throws OXException If initialization fails
      */
@@ -187,7 +187,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      * @throws OXException If initialization fails
@@ -200,7 +200,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Applies the POP3 storage to given POP3 access.
-     * 
+     *
      * @param pop3Access The POP3 access
      * @throws OXException If POP3 storage initialization fails
      */
@@ -237,7 +237,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Initializes a new {@link POP3Access POP3 access} for default POP3 account.
-     * 
+     *
      * @param session The session providing needed user data
      */
     private POP3Access(final Session session) {
@@ -247,7 +247,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Initializes a new {@link POP3Access POP3 access}.
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
@@ -258,7 +258,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Gets this POP3 access' session.
-     * 
+     *
      * @return The session
      */
     @Override
@@ -268,7 +268,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Gets the POP3 storage.
-     * 
+     *
      * @return The POP3 storage
      */
     public POP3Storage getPOP3Storage() {
@@ -277,7 +277,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Since POP3 account's messages are kept in a separate storage, a {@link POP3Access POP3 access} is not supposed to be cached.
-     * 
+     *
      * @see com.openexchange.mail.api.MailAccess#isCacheable()
      */
     @Override
@@ -353,7 +353,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     /**
      * Gets the POP3 configuration.
-     * 
+     *
      * @return The POP3 configuration
      */
     public POP3Config getPOP3Config() {

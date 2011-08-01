@@ -60,7 +60,7 @@ import com.openexchange.messaging.generic.Utility;
 
 /**
  * {@link InternalUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InternalUtility {
@@ -74,7 +74,7 @@ public final class InternalUtility {
 
     /**
      * Converts specified flags bit mask to an instance of {@link Flags}.
-     * 
+     *
      * @param flags The flags bit mask
      * @return The corresponding instance of {@link Flags}
      */
@@ -130,7 +130,7 @@ public final class InternalUtility {
 
         /**
          * Gets the flags
-         * 
+         *
          * @return The flags
          */
         public int getFlags() {
@@ -139,7 +139,7 @@ public final class InternalUtility {
 
         /**
          * Gets the user flags
-         * 
+         *
          * @return The user flags
          */
         public Collection<String> getUserFlags() {
@@ -148,7 +148,7 @@ public final class InternalUtility {
 
         /**
          * Gets the color label.
-         * 
+         *
          * @return The color label
          */
         public int getColorLabel() {
@@ -159,7 +159,7 @@ public final class InternalUtility {
 
     /**
      * Parses specified {@link Flags flags}.
-     * 
+     *
      * @param flags The flags to parse
      * @return The parsed flags
      */
@@ -204,7 +204,7 @@ public final class InternalUtility {
 
     /**
      * Parses specified {@link Flags flags}.
-     * 
+     *
      * @param flags The flags to parse
      * @return The parsed flags
      * @throws OXException If a messaging error occurs
@@ -281,7 +281,7 @@ public final class InternalUtility {
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
      * <p>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX_OLD} &gt;&lt;color-label-int-value&gt; is also accepted.
-     * 
+     *
      * @param cl The color label's string representation
      * @return The color label's <code>int</code> value
      * @throws OXException If coor label cannot be parsed
@@ -299,7 +299,7 @@ public final class InternalUtility {
 
     /**
      * Tests if specified string matches a color label pattern.
-     * 
+     *
      * @param cl The string to check
      * @return <code>true</code> if specified string matches a color label pattern; otherwise <code>false</code>
      */
@@ -311,7 +311,7 @@ public final class InternalUtility {
      * Parses specified color label's string.
      * <p>
      * <b>Note</b> that this method assumes {@link #isColorLabel(String)} would return <code>true</code> for specified string.
-     * 
+     *
      * @param cl The color label's string
      * @param defaultValue The default value to return if parsing color label's <code>int</code> value fails
      * @return The color label's <code>int</code> value or <code>defaultValue</code> on failure.
@@ -333,7 +333,7 @@ public final class InternalUtility {
      * <p>
      * A color label's string representation matches the pattern:<br>
      * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
-     * 
+     *
      * @param cl The color label's <code>int</code> value
      * @return The color abel's string representation
      */

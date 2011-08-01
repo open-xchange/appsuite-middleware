@@ -63,7 +63,7 @@ import com.openexchange.user.json.services.ServiceRegistry;
 
 /**
  * {@link SetAttributeAction} - Maps the action to an <tt>update</tt> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SetAttributeAction extends AbstractUserAction {

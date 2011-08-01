@@ -73,6 +73,7 @@ public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final AuthorizationService auth = (AuthorizationService) context.getService(reference);
         if (null == Authorization.getService()) {
@@ -84,10 +85,12 @@ public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (Authorization.dropService((AuthorizationService) service)) {
             LOG.error("Removed authorization service was not active!");

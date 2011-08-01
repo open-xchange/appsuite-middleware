@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  *
  */
@@ -80,19 +80,19 @@ public interface CalendarCollectionService {
     public final int PRIVATE = 1;
     public final int PUBLIC = 2;
     public final int SHARED = 3;
-    
+
 
     /**
      * Gets the max. until date for given infinite recurring appointment for calculation purpose.
-     * 
+     *
      * @param cdao The infinite recurring appointment (neither until nor occurrence set)
      * @return The max. until date for given infinite recurring appointment
      */
     public Date getMaxUntilDate(final CalendarDataObject cdao);
-    
+
     /**
      * Adds a the given amount of years to the provided base time. The calculation is based on UTC time.
-     * 
+     *
      * @param base
      * @param years
      * @return
@@ -101,7 +101,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the name of specified field ID.
-     * 
+     *
      * @param fieldId The field ID.
      * @return The name of specified field ID or <code>null</code> if field ID is unknown.
      */
@@ -109,7 +109,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the names of specified field IDs.
-     * 
+     *
      * @param fieldIds The field IDs.
      * @return The names of specified field IDs, unknown IDs are set to <code>null</code>.
      */
@@ -117,7 +117,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the ID of specified field name.
-     * 
+     *
      * @param fieldName The field name.
      * @return The ID of specified field name or <code>-1</code> if field name
      *         is unknown.
@@ -131,7 +131,7 @@ public interface CalendarCollectionService {
     public boolean getWritePermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException;
 
     public boolean checkIfUserIsParticipant(final CalendarDataObject cdao, final UserParticipant up);
-    
+
     public void updateDefaultStatus(CalendarDataObject cdao, Context ctx, int uid, int inFolder) throws OXException;
 
     /**
@@ -148,7 +148,7 @@ public interface CalendarCollectionService {
 
     /**
      * If user or shared folder owner is missing in participants it is added.
-     * @throws OXException 
+     * @throws OXException
      */
     public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException;
 
@@ -175,7 +175,7 @@ public interface CalendarCollectionService {
      * {@link Appointment#DELETE_EXCEPTIONS}, and
      * {@link Appointment#RECURRENCE_CALCULATOR} are added to specified
      * columns if not already present.
-     * 
+     *
      * @param cols The columns to check
      * @return The possibly enhanced columns
      */
@@ -184,7 +184,7 @@ public interface CalendarCollectionService {
     /**
      * Creates a newly allocated array containing first given array enhanced by
      * specified number of elements from second array.
-     * 
+     *
      * @param cols The first array
      * @param ara The second array
      * @param i The number of elements to copy from second array
@@ -207,7 +207,7 @@ public interface CalendarCollectionService {
      * Checks if range specified by <code>check_start</code> and
      * <code>check_end</code> intersects/overlaps the range specified by
      * <code>range_start</code> and <code>range_end</code>.
-     * 
+     *
      * @param check_start
      *            The check start
      * @param check_end
@@ -226,7 +226,7 @@ public interface CalendarCollectionService {
     /**
      * Converts given string of comma-separated <i>long</i>s to an array of
      * {@link Date} objects
-     * 
+     *
      * @param s
      *            The string of comma-separated <i>long</i>s
      * @return An array of {@link Date} objects
@@ -236,7 +236,7 @@ public interface CalendarCollectionService {
     /**
      * Converts given array of {@link Date} objects to a string of
      * comma-separated <i>long</i>s
-     * 
+     *
      * @param d
      *            The array of {@link Date} objects
      * @return A string of comma-separated <i>long</i>s
@@ -245,7 +245,7 @@ public interface CalendarCollectionService {
 
     /**
      * Check if specified objects are different
-     * 
+     *
      * @param a The first object
      * @param b The second object
      * @return <code>true</code> if specified objects are different; otherwise <code>false</code>
@@ -256,7 +256,7 @@ public interface CalendarCollectionService {
      * Checks if the two participant arrays are diffrent.
      * Two participant arrays are not different, if the contain the same Participants according their id,
      * indepent of the participant status.
-     * 
+     *
      * @param newParticipants
      * @param oldParticipants
      * @return true if the participant arrays are different, false otherwise.
@@ -266,14 +266,14 @@ public interface CalendarCollectionService {
     public CalendarFolderObject getVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, SearchIteratorException, OXException;
 
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc) throws SQLException, SearchIteratorException, OXException;
-    
+
     public CalendarFolderObject getAllVisibleAndReadableFolderObject(final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection con) throws SQLException, SearchIteratorException, OXException;
-    
+
     public void getVisibleFolderSQLInString(final StringBuilder sb, final int uid, final int groups[], final Context c, final UserConfiguration uc, final Connection readcon) throws SQLException, OXException, OXException;
 
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
-     * 
+     *
      * @param dates The date array
      * @param d The date to check against
      * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
@@ -282,7 +282,7 @@ public interface CalendarCollectionService {
 
     /**
      * Returns a {@link Date} array with all occurrences of <code>d</code> deleted from given date array
-     * 
+     *
      * @param dates The date array
      * @param dateTime The date time to check against
      * @return A {@link Date} array with all occurrences of <code>d</code> deleted from given date array
@@ -292,7 +292,7 @@ public interface CalendarCollectionService {
     /**
      * Returns a {@link Date} array with <code>d</code> added to given date array
      * if not already contained.
-     * 
+     *
      * @param dates The date array
      * @param d The date to add
      * @return A {@link Date} array with <code>d</code> added to given date array
@@ -310,11 +310,11 @@ public interface CalendarCollectionService {
     /**
      * Checks if given time millis are less than today (normalized current time
      * millis):
-     * 
+     *
      * <pre>
      * return check &lt; (CalendarRecurringCollection.normalizeLong(System.currentTimeMillis()));
      * </pre>
-     * 
+     *
      * @param check
      *            The time millis to check against today's millis
      * @return <code>true</code> if given time millis are less than normalized
@@ -338,7 +338,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets an appointment by specified ID
-     * 
+     *
      * @param id The appointment ID
      * @param session The session providing needed user data
      * @return The appointment belonging to specified ID or <code>null</code>
@@ -348,7 +348,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the change exception of specified recurrence in given folder with given exception date.
-     * 
+     *
      * @param folderId The folder ID
      * @param recurrenceId The ID of parental recurrence
      * @param exDate The exception date
@@ -361,7 +361,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets dates of change exceptions belonging to specified recurrence.
-     * 
+     *
      * @param recurrenceId The recurrence's ID
      * @param session The session providing needed user data
      * @return The dates of change exceptions belonging to specified recurrence.
@@ -371,7 +371,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets all change exceptions belonging to specified recurrence.
-     * 
+     *
      * @param recurrenceId The recurrence's ID
      * @param fields The fields to fill in returned calendar objects
      * @param session The session providing needed user data
@@ -382,7 +382,7 @@ public interface CalendarCollectionService {
 
     /**
      * Loads calendar objects corresponding to specified IDs.
-     * 
+     *
      * @param folderId The folder ID
      * @param ids The IDs
      * @param fields The fields to fill in returned calendar objects
@@ -394,7 +394,7 @@ public interface CalendarCollectionService {
 
     /**
      * Determines appointment's valid folder ID for specified user
-     * 
+     *
      * @param oid The appointment ID
      * @param uid The suer ID
      * @param c The context
@@ -408,7 +408,7 @@ public interface CalendarCollectionService {
     /**
      * Gets the calendar data object from specified list whose ID matches given
      * ID.
-     * 
+     *
      * @param list
      *            The list of calendar data objects
      * @param oid
@@ -425,7 +425,7 @@ public interface CalendarCollectionService {
     /**
      * Adds the time zone offset to given date's time millis and determines
      * corresponding date based on resulting time millis
-     * 
+     *
      * @param date
      *            The date whose UTC-based date shall be calculated
      * @param timezone
@@ -438,7 +438,7 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if specified (exception) date occurs in given recurring appointment.
-     * 
+     *
      * @param date The normalized (exception) date
      * @param recurringAppointment The recurring appointment
      * @return <code>true</code> if date occurs in recurring appointment; otherwise <code>false</code>
@@ -448,7 +448,7 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if specified (exception) dates occur in given recurring appointment.
-     * 
+     *
      * @param dates The (exception) dates
      * @param recurringAppointment The recurring appointment
      * @return <code>true</code> if every date occurs in recurring appointment; otherwise <code>false</code>
@@ -460,7 +460,7 @@ public interface CalendarCollectionService {
      * Gets the corresponding positions of specified (exception) dates in given recurring appointment.
      * <p>
      * If a date does not occur in given recurring appointment, its position is set to <code>-1</code>.
-     * 
+     *
      * @param dates The (exception) dates
      * @param recurringAppointment The recurring appointment
      * @return The corresponding positions of specified (exception) dates in given recurring appointment.
@@ -470,7 +470,7 @@ public interface CalendarCollectionService {
 
     /**
      * Merges the specified (exception) dates
-     * 
+     *
      * @param ddates The first dates
      * @param cdates The second dates
      * @return The sorted and merged dates
@@ -482,7 +482,7 @@ public interface CalendarCollectionService {
     public String getString(final CalendarDataObject cdao, final int fieldID);
 
     public void recoverForInvalidPattern(final CalendarDataObject cdao);
-    
+
     // Stuff from CalendarRecurringCollection
     public final String NO_DS = null;
 
@@ -538,21 +538,21 @@ public interface CalendarCollectionService {
     /**
      * <code>getMAX_END_YEARS</code> returns NO_END_YEARS. NO_END_YEARS means if no end date is given we calculate the start date PLUS
      * NO_END_YEARS to have an end date ...
-     * 
+     *
      * @return an <code>int</code> value
      */
     public int getMAX_END_YEARS();
 
     /**
      * <code>setMAX_END_YEARS</code> sets the max number of years a sequence can run if no end date is given
-     * 
+     *
      * @return an <code>int</code> value
      */
     public void setMAX_END_YEARS(final int MAX_END_YEARS);
 
     /**
      * Checks if given calendar data object denotes a recurring master.
-     * 
+     *
      * @param edao The calendar data object to check
      * @return <code>true</code> if given calendar data object denotes a recurring master; otherwise <code>false</code>
      */
@@ -560,7 +560,7 @@ public interface CalendarCollectionService {
 
     /**
      * <code>getRecurringAppointmentDeleteAction</code> detects and returns the action type
-     * 
+     *
      * @param cdao a <code>CalendarDataObject</code> object (tranfered)
      * @param edao a <code>CalendarDataObject</code> object (loaded)
      * @return a <code>int</code> value
@@ -569,7 +569,7 @@ public interface CalendarCollectionService {
 
     /**
      * <code>getRecurringAppoiontmentUpdateAction</code> detects and returns the action type
-     * 
+     *
      * @param cdao a <code>CalendarDataObject</code> object (transfered)
      * @param edao a <code>CalendarDataObject</code> object (loaded)
      * @return a <code>int</code> value
@@ -579,7 +579,7 @@ public interface CalendarCollectionService {
     /**
      * <code>getLongByPosition</code> return the long value for the given CalendarDataObject and the given recurring position. The method
      * return 0 if the long can not be calculated.
-     * 
+     *
      * @param cdao a <code>CalendarDataObject</code>
      * @param pos a <code>int</code>
      * @return a <code>long</code> value
@@ -590,7 +590,7 @@ public interface CalendarCollectionService {
 
     /**
      * Removes hours and minutes for the given date.
-     * 
+     *
      * @param millis milliseconds since January 1, 1970, 00:00:00 GMT not to exceed the milliseconds representation for the year 8099. A
      *            negative number indicates the number of milliseconds before January 1, 1970, 00:00:00 GMT.
      * @return The normalized <code>long</code> value
@@ -599,7 +599,7 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if specified UTC date increases day in month if adding given time zone's offset.
-     * 
+     *
      * @param millis The time millis
      * @param timeZoneID The time zone ID
      * @return <code>true</code> if specified date in increases day in month if adding given time zone's offset; otherwise
@@ -609,7 +609,7 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if specified UTC date increases day in month if adding given time zone's offset.
-     * 
+     *
      * @param millis The time millis
      * @param zone The time zone
      * @return <code>true</code> if specified date in increases day in month if adding given time zone's offset; otherwise
@@ -620,7 +620,7 @@ public interface CalendarCollectionService {
     /**
      * Creates the recurring pattern for given (possibly recurring) appointment if needed and fills its recurring information according to
      * generated pattern.
-     * 
+     *
      * @param cdao The (possibly recurring) appointment
      * @return <code>true</code> if specified appointment denotes a proper recurring appointment whose recurring information could be
      *         successfully filled; otherwise <code>false</code> to indicate a failure
@@ -629,7 +629,7 @@ public interface CalendarCollectionService {
 
     /**
      * Creates the recurring string for specified recurring appointment
-     * 
+     *
      * @param cdao The recurring appointment whose recurring string shall be created
      * @return The recurring string for specified recurring appointment
      * @throws OXException If recurring appointment contains insufficient or invalid recurring information
@@ -638,7 +638,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the specified occurrence's end date within recurring appointment.
-     * 
+     *
      * @param cdao The recurring appointment
      * @return The first occurrence's end date
      * @throws OXException If calculating the first occurrence fails
@@ -647,7 +647,7 @@ public interface CalendarCollectionService {
 
     /**
      * Gets the given occurrence's end date within specified recurring appointment.
-     * 
+     *
      * @param cdao The recurring appointment
      * @param occurrence The occurrence
      * @return The first occurrence's end date
@@ -657,7 +657,7 @@ public interface CalendarCollectionService {
 
     /**
      * Checks if normalized date of given time millis is contained in either specified change exceptions or delete exceptions.
-     * 
+     *
      * @param t The time millis to check
      * @param ce The change exceptions
      * @param de The delete exceptions
@@ -670,7 +670,7 @@ public interface CalendarCollectionService {
      * <p>
      * This method is useful when creating a new change exception within specified recurring appointment and checking that change
      * exception's destination date is not already occupied by either a regular recurrence's occurrence. or an existing change exception
-     * 
+     *
      * @param date The date to check
      * @param ignoreDate The date to ignore
      * @param cdao The recurring appointment to check against
@@ -682,7 +682,7 @@ public interface CalendarCollectionService {
 
     /**
      * This method calculates the first occurrence and stores it within the returned {@link RecurringResultsInterface} collection.
-     * 
+     *
      * @param cdao The recurring appointment whose first occurrence shall be calculated
      * @return The calculated first occurrence kept in a {@link RecurringResultsInterface} collection
      * @throws OXException If calculating the first occurrence fails
@@ -697,7 +697,7 @@ public interface CalendarCollectionService {
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
      * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
-     * 
+     *
      * @param cdao The recurring appointment whose occurrences shall be calculated
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
@@ -715,7 +715,7 @@ public interface CalendarCollectionService {
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
      * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
-     * 
+     *
      * @param cdao The recurring appointment whose occurrences shall be calculated
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
@@ -731,7 +731,7 @@ public interface CalendarCollectionService {
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
      * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
-     * 
+     *
      * @param cdao The recurring appointment whose occurrences shall be calculated
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
@@ -750,7 +750,7 @@ public interface CalendarCollectionService {
      * A certain occurrence can be calculated by setting parameter {@code pos}.
      * <p>
      * A range query is performed when setting parameter {@code range_start} and {@code range_end}.
-     * 
+     *
      * @param cdao The recurring appointment whose occurrences shall be calculated
      * @param range_start The (optional) range start from which occurrences shall be calculated; leave to <code>0</code> to ignore
      * @param range_end The (optional) range end until occurrences shall be calculated; leave to <code>0</code> to ignore
@@ -837,7 +837,7 @@ public interface CalendarCollectionService {
      * <td align="center">x</td>
      * </tr>
      * </table>
-     * 
+     *
      * @param cdao The calendar object to check
      * @param ignoreUntilAndOccurrence <code>true</code> to ignore whether until or occurrence is contained in specified calendar object;
      *            otherwise <code>false</code>
@@ -849,7 +849,7 @@ public interface CalendarCollectionService {
 
     /**
      * Creates a cloned version from given calendar object ready for being used to create the denoted change exception
-     * 
+     *
      * @param cdao The current calendar object denoting the change exception
      * @param edao The calendar object's storage version
      * @param sessionUser The session user performing the operation
@@ -862,7 +862,7 @@ public interface CalendarCollectionService {
      * Replaces the start date and end date of specified recurring appointment with the start date and end date of its first occurrence.
      * <p>
      * <b>Note</b> that neither <i>recurrence position</i> nor <i>recurrence date position</i> is set.
-     * 
+     *
      * @param appointment The recurring appointment whose start date and end date shall be replaced
      * @throws OXException If calculating the first occurrence fails
      */
@@ -871,58 +871,58 @@ public interface CalendarCollectionService {
     /**
      * Sets the start/end date of specified recurring appointment to its first occurrence. A possible exception is swallowed and recurring
      * information is removed.
-     * 
+     *
      * @param cdao The recurring appointment whose start/end date shall be set to its first occurrence
      */
     public void safelySetStartAndEndDateForRecurringAppointment(final CalendarDataObject cdao);
-    
+
     // Stuff from Tools
     /**
      * Formats specified date's time millis into a date string.<br>
      * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
-     * 
+     *
      * @param timeMillis The date's time millis to format
      * @return The date string.
      */
     public String getUTCDateFormat(final long timeMillis);
-    
+
     /**
      * Formats specified date into a date string.<br>
      * e.g.: <code>&quot;Jan 13, 2009&quot;</code>
-     * 
+     *
      * @param date The date to format
      * @return The date string.
      */
     public String getUTCDateFormat(final Date date);
-    
+
     public Context getContext(final Session so) throws OXException;
-    
+
     public User getUser(final Session so, final Context ctx) throws OXException;
-    
+
     public UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException;
-    
+
     /**
      * Gets the <code>TimeZone</code> for the given ID.
-     * 
+     *
      * @param ID The ID for a <code>TimeZone</code>, either an abbreviation such as "PST", a full name such as "America/Los_Angeles", or a
      *            custom ID such as "GMT-8:00".
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
      */
     public TimeZone getTimeZone(final String ID);
-    
+
     /**
      * Gets the appointment's title associated with given object ID in given context.
-     * 
+     *
      * @param objectId The object ID
      * @param ctx The context
      * @return The appointment's title or <code>null</code>
      * @throws OXException If determining appointment's title fails
      */
     public String getAppointmentTitle(final int objectId, final Context ctx) throws OXException;
-    
+
     /**
      * Gets the appointment's folder associated with given object ID in given context.
-     * 
+     *
      * @param objectId The object ID
      * @param userId The session user
      * @param ctx The context

@@ -54,5 +54,5 @@ import com.openexchange.sql.builder.IStatementBuilder;
 public abstract class Element {
 
 	public abstract void build(IStatementBuilder builder);
-	
+
 }

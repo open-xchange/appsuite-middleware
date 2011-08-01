@@ -61,19 +61,19 @@ import com.openexchange.subscribe.crawler.internal.Step;
 public class CrawlerDescription {
 
     private String displayName, id, workflowString;
-    
+
     private int priority = 0;
-    
+
     // set the default API Version to 614 as all crawlers that do not need new functionality should work with 614
     private int crawlerApiVersion = 614;
-    
+
     // set the default module to CONTACT to be compatible with API-Version 614 where CONTACT is the only option
     private int module = FolderObject.CONTACT;
-    
+
     private boolean javascriptEnabled = false;
-    
+
     private boolean mobileUserAgentEnabled = false;
-    
+
     private boolean quirkyCookieQuotes;
 
     public CrawlerDescription() {
@@ -82,13 +82,19 @@ public class CrawlerDescription {
 
     public void finishUp (List<Step> steps){
         Workflow workflow = new Workflow(steps);
-        if (mobileUserAgentEnabled) workflow.setMobileUserAgent(true);  
-        if (javascriptEnabled) workflow.setEnableJavascript(true);
-        if (quirkyCookieQuotes) workflow.setQuirkyCookieQuotes(true);
+        if (mobileUserAgentEnabled) {
+            workflow.setMobileUserAgent(true);
+        }
+        if (javascriptEnabled) {
+            workflow.setEnableJavascript(true);
+        }
+        if (quirkyCookieQuotes) {
+            workflow.setQuirkyCookieQuotes(true);
+        }
         this.setWorkflowString(Yaml.dump(workflow));
     }
-    
-    
+
+
     public String getDisplayName() {
         return displayName;
     }
@@ -113,66 +119,66 @@ public class CrawlerDescription {
         this.workflowString = workflowString;
     }
 
-    
+
     public int getPriority() {
         return priority;
     }
 
-    
+
     public void setPriority(final int priority) {
         this.priority = priority;
     }
 
-    
+
     public int getCrawlerApiVersion() {
         return crawlerApiVersion;
     }
 
-    
+
     public void setCrawlerApiVersion(int crawlerApiVersion) {
         this.crawlerApiVersion = crawlerApiVersion;
     }
 
-    
+
     public int getModule() {
         return module;
     }
 
-    
+
     public void setModule(int module) {
         this.module = module;
     }
 
-    
+
     public boolean isJavascriptEnabled() {
         return javascriptEnabled;
     }
 
-    
+
     public void setJavascriptEnabled(boolean javascriptEnabled) {
         this.javascriptEnabled = javascriptEnabled;
     }
 
-    
+
     public boolean isMobileUserAgentEnabled() {
         return mobileUserAgentEnabled;
     }
 
-    
+
     public void setMobileUserAgentEnabled(boolean mobileUserAgentEnabled) {
         this.mobileUserAgentEnabled = mobileUserAgentEnabled;
     }
 
-    
+
     public boolean isQuirkyCookieQuotes() {
         return quirkyCookieQuotes;
     }
 
-    
+
     public void setQuirkyCookieQuotes(boolean quirkyCookieQuotes) {
         this.quirkyCookieQuotes = quirkyCookieQuotes;
     }
 
-    
-    
+
+
 }

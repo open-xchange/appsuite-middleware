@@ -67,23 +67,23 @@ import com.openexchange.java.Autoboxing;
 
 /**
  * {@link DeferredRegistryRegistration}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class DeferredRegistryRegistration<R, P> extends ServiceTracker {
 
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DeferredRegistryRegistration.class));
-     
+
     private R registry;
 
-    private Class<R> registryClass;
+    private final Class<R> registryClass;
 
     private final P item;
 
-    private List<Class<?>> expectedServices;
+    private final List<Class<?>> expectedServices;
 
-    private Map<Class<?>, PriorityQueue<ServiceEntry>> serviceMap = new ConcurrentHashMap<Class<?>, PriorityQueue<ServiceEntry>>();
+    private final Map<Class<?>, PriorityQueue<ServiceEntry>> serviceMap = new ConcurrentHashMap<Class<?>, PriorityQueue<ServiceEntry>>();
 
     public DeferredRegistryRegistration(final BundleContext context, final Class<R> registryClass, final P item, Class<?>... additionalServices) {
         super(context, buildFilter(context, registryClass, additionalServices), null);

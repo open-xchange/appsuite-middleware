@@ -2,7 +2,7 @@
  * This work is hereby released into the Public Domain.
  * To view a copy of the public domain dedication, visit http://creativecommons.org/licenses/publicdomain/ or
  * send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
- * 
+ *
  * Check HCard.java's top-level comment for more information.
  */
 package org.microformats.hCard;
@@ -66,46 +66,55 @@ enum HCardProperty {
 	MAILER(null, false, false),
 	UID(null, true, false),
 	REV(null, false, false);
-	
+
 	private final HCardProperty parent;
 	private final boolean singular;
 	private final boolean isUrl;
-	
+
 	HCardProperty(HCardProperty parent, boolean singular, boolean isUrl) {
 		this.parent = parent;
 		this.singular = singular;
 		this.isUrl = isUrl;
 	}
-	
+
 	static HCardProperty fromClassAttribute(Collection<HCardProperty> contexts, String hClass) {
-		if ( hClass == null ) return null;
+		if ( hClass == null ) {
+            return null;
+        }
 		List<String> enumNames = new ArrayList<String>(contexts == null ? 1 : contexts.size() + 1);
 		String baseName = hClass.toUpperCase(Locale.ENGLISH).replaceAll("-", "_");
 		enumNames.add(baseName);
-		if ( contexts != null ) for ( HCardProperty context : contexts )
-			enumNames.add(String.format("%s__%s", context.name(), baseName));
-		
+		if ( contexts != null ) {
+            for ( HCardProperty context : contexts ) {
+                enumNames.add(String.format("%s__%s", context.name(), baseName));
+            }
+        }
+
 		Collections.reverse(enumNames);
-		for ( String enumName : enumNames ) try {
-			HCardProperty p = HCardProperty.valueOf(enumName);
-			if ( p != null ) return p;
-		} catch ( Exception ignore ) {}
-		
+		for ( String enumName : enumNames ) {
+            try {
+            	HCardProperty p = HCardProperty.valueOf(enumName);
+            	if ( p != null ) {
+                    return p;
+                }
+            } catch ( Exception ignore ) {}
+        }
+
 		return null;
 	}
-	
+
 	boolean isSingular() {
 		return singular;
 	}
-	
+
 	boolean isUrl() {
 		return isUrl;
 	}
-	
+
 	boolean isTopLevel() {
 		return parent == null;
 	}
-	
+
 	HCardProperty parent() {
 		return parent;
 	}

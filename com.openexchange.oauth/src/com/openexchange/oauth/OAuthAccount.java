@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link OAuthAccount} - Represents an OAuth account.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -60,21 +60,21 @@ public interface OAuthAccount extends OAuthToken {
 
     /**
      * Gets this account's identifier.
-     * 
+     *
      * @return The identifier
      */
     int getId();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     String getDisplayName();
 
     /**
      * Gets the associated OAuth meta data.
-     * 
+     *
      * @return The OAuth meta data
      */
     OAuthServiceMetaData getMetaData();

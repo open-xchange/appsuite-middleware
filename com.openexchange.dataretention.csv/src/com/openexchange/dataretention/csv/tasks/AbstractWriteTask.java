@@ -71,7 +71,7 @@ import com.openexchange.dataretention.csv.CSVFile;
  * <p>
  * Moreover this class contains the mechanism to ensure that checking for CSV file's existence, creating the CSV file and finally writing
  * starting header line are performed as a single atomic operation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>, Runnable {
@@ -122,7 +122,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
 
     /**
      * Initializes a new {@link AbstractWriteTask}.
-     * 
+     *
      * @param retentionData The retention data to write as a CSV line
      * @param recordType The record type; e.g. <code>&quot;M&quot;</code>
      * @param versionNumber The version number
@@ -155,7 +155,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * Ensures existence of specified CSV file. As per contract of {@link File#createNewFile()} the check for existence and creation of the
      * file are performed in a single <b>atomic</b> operation. Therefore the file denoted by this writer task's file reference is only
      * created once.
-     * 
+     *
      * @throws OXException If an error occurs
      */
     private void ensureExistence() throws OXException {
@@ -228,7 +228,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
 
     /**
      * Gets the CSV line to write.
-     * 
+     *
      * @return The CSV line to write.
      * @throws OXException If a data retention exception occurs while generating the CSV line
      */
@@ -239,7 +239,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
      * <p>
      * This routine acts a central write method to easily change the way a CSV line is written to the CSV file. The default implementation
      * uses a newly created {@link FileOutputStream file output stream} for each write access. Overwrite it when needed.
-     * 
+     *
      * @param csvLine The CSV line to write
      * @throws IOException If an I/O error occurs
      */
@@ -264,7 +264,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
     /**
      * Escapes specified string. Any control characters (<code>,;"\</code>) are prefixed with <code>'\'</code> and characters &lt; <code>0x20</code> are
      * replaced with <code>'#'</code>.
-     * 
+     *
      * @param string The string to escape
      * @return The escaped string
      */
@@ -284,7 +284,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
 
     /**
      * Converts specified time millis to seconds.
-     * 
+     *
      * @param millis The time millis; the number of milliseconds since January 1, 1970, 00:00:00 GMT
      * @return The number of seconds since January 1, 1970, 00:00:00 GMT
      */

@@ -69,7 +69,7 @@ import com.openexchange.user.json.field.UserField;
 
 /**
  * {@link UserParser} - Parses a user from JSON data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserParser {
@@ -83,7 +83,7 @@ public final class UserParser {
 
     /**
      * Parses a user data from given JSON object.
-     * 
+     *
      * @param userJSONObject The JSON object containing user data
      * @param userId The user ID
      * @return The parsed user
@@ -107,7 +107,7 @@ public final class UserParser {
 
     /**
      * Parses a user contact from given JSON object.
-     * 
+     *
      * @param userJSONObject The JSON object containing user contact data
      * @param timeZone The time zone of requesting session's user
      * @return The parsed user contact
@@ -228,7 +228,7 @@ public final class UserParser {
 
     /**
      * Parses given locale string into an instance of {@link Locale}
-     * 
+     *
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale}
      * @throws OXException If locale string is invalid
@@ -1106,7 +1106,7 @@ public final class UserParser {
 
     /**
      * Parses optional field out of specified JSON object.
-     * 
+     *
      * @param jsonObj The JSON object to parse
      * @param name The optional field name
      * @return The optional field's value or <code>null</code> if there's no such field

@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountProperties} - Mail properties read from mail account with fallback to properties read from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountProperties implements IMailProperties {
@@ -66,7 +66,7 @@ public class MailAccountProperties implements IMailProperties {
 
     /**
      * Initializes a new {@link MailAccountProperties}.
-     * 
+     *
      * @param mailAccount The mail account
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
@@ -78,6 +78,7 @@ public class MailAccountProperties implements IMailProperties {
         properties = mailAccount.getProperties();
     }
 
+    @Override
     public int getAttachDisplaySize() {
         final String attachDisplaySizeStr = properties.get("com.openexchange.mail.attachmentDisplaySizeLimit");
         if (null == attachDisplaySizeStr) {
@@ -92,6 +93,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public char getDefaultSeparator() {
         final String defaultSepStr = properties.get("com.openexchange.mail.defaultSeparator");
         if (null == defaultSepStr) {
@@ -108,6 +110,7 @@ public class MailAccountProperties implements IMailProperties {
         return defaultSep;
     }
 
+    @Override
     public int getMailAccessCacheIdleSeconds() {
         final String tmp = properties.get("com.openexchange.mail.mailAccessCacheIdleSeconds");
         if (null == tmp) {
@@ -122,6 +125,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public int getMailAccessCacheShrinkerSeconds() {
         final String tmp = properties.get("com.openexchange.mail.mailAccessCacheShrinkerSeconds");
         if (null == tmp) {
@@ -136,6 +140,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public int getMailFetchLimit() {
         final String mailFetchLimitStr = properties.get("com.openexchange.mail.mailFetchLimit");
         if (null == mailFetchLimitStr) {
@@ -150,6 +155,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public int getWatcherFrequency() {
         final String watcherFreqStr = properties.get("com.openexchange.mail.watcherFrequency");
         if (null == watcherFreqStr) {
@@ -164,6 +170,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public int getWatcherTime() {
         final String watcherTimeStr = properties.get("com.openexchange.mail.watcherTime");
         if (null == watcherTimeStr) {
@@ -178,6 +185,7 @@ public class MailAccountProperties implements IMailProperties {
         }
     }
 
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         final String allowNestedStr = properties.get("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace");
         if (null == allowNestedStr) {
@@ -187,6 +195,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(allowNestedStr.trim());
     }
 
+    @Override
     public boolean isIgnoreSubscription() {
         final String ignoreSubsStr = properties.get("com.openexchange.mail.ignoreSubscription");
         if (null == ignoreSubsStr) {
@@ -196,6 +205,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(ignoreSubsStr.trim());
     }
 
+    @Override
     public boolean isSupportSubscription() {
         final String supportSubsStr = properties.get("com.openexchange.mail.supportSubscription");
         if (null == supportSubsStr) {
@@ -205,6 +215,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(supportSubsStr.trim());
     }
 
+    @Override
     public boolean isUserFlagsEnabled() {
         final String userFlagsStr = properties.get("com.openexchange.mail.userFlagsEnabled");
         if (null == userFlagsStr) {
@@ -214,6 +225,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(userFlagsStr.trim());
     }
 
+    @Override
     public boolean isWatcherEnabled() {
         final String watcherEnabledStr = properties.get("com.openexchange.mail.watcherEnabled");
         if (null == watcherEnabledStr) {
@@ -223,6 +235,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(watcherEnabledStr.trim());
     }
 
+    @Override
     public boolean isWatcherShallClose() {
         final String watcherShallCloseStr = properties.get("com.openexchange.mail.watcherShallClose");
         if (null == watcherShallCloseStr) {
@@ -232,6 +245,7 @@ public class MailAccountProperties implements IMailProperties {
         return Boolean.parseBoolean(watcherShallCloseStr.trim());
     }
 
+    @Override
     public void waitForLoading() throws InterruptedException {
         MailProperties.getInstance().waitForLoading();
     }

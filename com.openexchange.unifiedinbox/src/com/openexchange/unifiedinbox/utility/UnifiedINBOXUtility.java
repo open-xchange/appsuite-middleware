@@ -69,7 +69,7 @@ import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 
 /**
  * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXUtility {
@@ -83,7 +83,7 @@ public final class UnifiedINBOXUtility {
 
     /**
      * Gets the default max. running millis.
-     * 
+     *
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
@@ -96,7 +96,7 @@ public final class UnifiedINBOXUtility {
 
     /**
      * Parses specified Unified INBOX mail IDs.
-     * 
+     *
      * @param mailIDs The Unified INBOX mail IDs to parse
      * @return A map grouping referenced accounts and referenced fullnames and IDs.
      * @throws OXException If parsing mail IDs fails
@@ -127,7 +127,7 @@ public final class UnifiedINBOXUtility {
 
     /**
      * Generates a nested folder's fullname.
-     * 
+     *
      * @param uiAccountId The Unified INBOX's account ID
      * @param uiFullname The Unified INBOX's fullname
      * @param nestedAccountId The nested account's ID
@@ -143,7 +143,7 @@ public final class UnifiedINBOXUtility {
      * Parses nested fullname.
      * <p>
      * <code>"INBOX/default3/INBOX"</code> =&gt; <code>"default3/INBOX"</code>
-     * 
+     *
      * @param nestedFullname The nested fullname to parse
      * @return The parsed nested fullname argument
      * @throws OXException If specified nested fullname is invalid
@@ -169,7 +169,7 @@ public final class UnifiedINBOXUtility {
 
     /**
      * Gets the account's fullname.
-     * 
+     *
      * @param mailAccess The mail access to desired account
      * @param fullname The fullname to look-up
      * @return The account's fullname
@@ -196,7 +196,7 @@ public final class UnifiedINBOXUtility {
 
     /**
      * Prints specified {@link Throwable}'s stack trace to given string builder.
-     * 
+     *
      * @param t The {@link Throwable} instance
      * @param builder The string builder to append to
      */

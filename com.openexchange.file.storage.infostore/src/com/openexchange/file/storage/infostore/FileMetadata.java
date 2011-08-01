@@ -63,8 +63,8 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileMetadata implements DocumentMetadata {
-    
-    private File file;
+
+    private final File file;
     private String fileSpool;
 
     public FileMetadata(File document) {
@@ -260,6 +260,6 @@ public class FileMetadata implements DocumentMetadata {
     public void setFilestoreLocation(String string) {
         this.fileSpool = string;
     }
-    
-    
+
+
 }

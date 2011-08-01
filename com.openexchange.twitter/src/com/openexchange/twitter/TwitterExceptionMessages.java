@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link TwitterExceptionMessages} - Exception messages for {@link TwitterException} that must be translated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterExceptionMessages implements LocalizableStrings {

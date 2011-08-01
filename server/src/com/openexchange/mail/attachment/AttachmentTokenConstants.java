@@ -66,5 +66,5 @@ public interface AttachmentTokenConstants {
      * The cleaner frequency; every 5 minutes.
      */
     public static final int CLEANER_FREQUENCY = 300000;
-    
+
 }

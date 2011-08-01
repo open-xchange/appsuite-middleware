@@ -58,38 +58,38 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link SessionToImageRegistry} - This class provides the functionality to manage mappings between image id's and session id's.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SessionToImageRegistry {
-    
+
     private final Map<String, String> imageIds2sessionIds;
-    
+
     private final Map<String, Set<String>> sessionIds2imageIds;
-    
+
     private final Lock lock;
-    
+
     private static final SessionToImageRegistry INSTANCE = new SessionToImageRegistry();
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SessionToImageRegistry.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
-    
-    
+
+
     private SessionToImageRegistry() {
         super();
         imageIds2sessionIds = new HashMap<String, String>();
         sessionIds2imageIds = new HashMap<String, Set<String>>();
         lock = new ReentrantLock();
     }
-    
+
     public static SessionToImageRegistry getInstance() {
         return INSTANCE;
     }
-    
+
     /**
      * This method maps a session id to an image id.
-     * 
+     *
      * @param sessionId The session id.
      * @param imageId The unique image id.
      */
@@ -97,10 +97,10 @@ public class SessionToImageRegistry {
         if (DEBUG) {
             LOG.debug("Adding mapping for session " + sessionId + " to image " + imageId + ".");
         }
-        
-        lock.lock();        
+
+        lock.lock();
         imageIds2sessionIds.put(imageId, sessionId);
-        
+
         Set<String> imageIdList;
         if (sessionIds2imageIds.containsKey(sessionId)) {
             imageIdList = sessionIds2imageIds.get(sessionId);
@@ -108,10 +108,10 @@ public class SessionToImageRegistry {
             imageIdList = new TreeSet<String>();
             sessionIds2imageIds.put(sessionId, imageIdList);
         }
-        imageIdList.add(imageId);        
+        imageIdList.add(imageId);
         lock.unlock();
     }
-    
+
     /**
      * Returns the session id that is mapped to an image id.
      * @param imageId The image id.
@@ -120,7 +120,7 @@ public class SessionToImageRegistry {
     public String getSessionId(final String imageId) {
         return imageIds2sessionIds.get(imageId);
     }
-    
+
     /**
      * Returns a list of image id's that is mapped to a session id.
      * @param sessionId The session id.
@@ -129,7 +129,7 @@ public class SessionToImageRegistry {
     public Set<String> getImageIds(final String sessionId) {
         return sessionIds2imageIds.get(sessionId);
     }
-    
+
     /**
      * Removes all mappings of a session.
      * @param sessionId The session id.
@@ -138,26 +138,26 @@ public class SessionToImageRegistry {
         if (DEBUG) {
             LOG.debug("Removing mappings for session " + sessionId + ".");
         }
-        
+
         boolean error = false;
-        
-        lock.lock();        
+
+        lock.lock();
         final Set<String> imageIds = sessionIds2imageIds.remove(sessionId);
-        
+
         if (imageIds != null) {
             for (final String imageId : imageIds) {
                 final boolean removed = imageIds2sessionIds.remove(imageId) == null;
                 error |= removed;
-                
+
                 if (removed) {
                     LOG.debug("Successfully removed image " + imageId + "from SessionToImageRegistry for session " + sessionId);
                 } else {
                     LOG.debug("Failed to remove image " + imageId + "from SessionToImageRegistry for session " + sessionId);
                 }
             }
-        }        
+        }
         lock.unlock();
-        
+
         if (error) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Removed mapping for session ");
@@ -167,11 +167,11 @@ public class SessionToImageRegistry {
             for (final String imageId : imageIds) {
                 sb.append("\n" + imageId);
             }
-            
+
             LOG.error(sb.toString());
         }
     }
-    
+
     /**
      * Removes a mapping of an image.
      * @param imageId
@@ -180,22 +180,22 @@ public class SessionToImageRegistry {
         if (DEBUG) {
             LOG.debug("Removing mapping for image " + imageId + ".");
         }
-        
+
         boolean error = false;
-        
-        lock.lock();        
+
+        lock.lock();
         final String sessionId = imageIds2sessionIds.remove(imageId);
-        
+
         if (sessionId != null) {
             final Set<String> imageIdList = sessionIds2imageIds.get(sessionId);
             if (imageIdList == null) {
                 error = true;
             } else {
                 error = !imageIdList.remove(imageId);
-            }            
-        }        
+            }
+        }
         lock.unlock();
-        
+
         if (error) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Removed mapping for image ");

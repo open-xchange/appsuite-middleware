@@ -57,7 +57,7 @@ import com.openexchange.oauth.OAuthInteraction;
 
 /**
  * The OAuth account writer
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccountWriter {
@@ -71,7 +71,7 @@ public class AccountWriter {
 
     /**
      * Writes specified account as a JSON object.
-     * 
+     *
      * @param account The account
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
@@ -86,7 +86,7 @@ public class AccountWriter {
 
     /**
      * Writes specified interaction as a JSON object.
-     * 
+     *
      * @param interaction The interaction
      * @param uuid The UUID associated with request token secret
      * @return The JSON object

@@ -63,7 +63,7 @@ import com.openexchange.pop3.storage.POP3StorageProviderRegistry;
 
 /**
  * {@link POP3StorageProviderServiceTrackerCustomizer} - Service tracker customizer for POP3 storage provider.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -98,7 +98,7 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
 
     /**
      * Adds specified provider to registry.
-     * 
+     *
      * @param provider The provider to add to registry
      * @return <code>true</code> if provider is added; otherwise <code>false</code>
      */
@@ -144,7 +144,7 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     /**
      * Removes specified provider from registry and drops its previously registered delete listeners<br>
      * (if {@link POP3StorageProvider#unregisterDeleteListenersOnAbsence()} says so)
-     * 
+     *
      * @param provider The provider to remove from registry
      */
     public void removePOP3StorageProvider(final POP3StorageProvider provider) {

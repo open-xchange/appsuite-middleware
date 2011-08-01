@@ -56,9 +56,9 @@ import com.openexchange.tools.oxfolder.deletelistener.Permission;
 
 /**
  * {@link GroupPermissionMerger}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class GroupPermissionMerger {
 
@@ -75,7 +75,7 @@ public final class GroupPermissionMerger {
 	/**
 	 * Handles corrupt group permissions by re-assigning (merged permission)
 	 * them to special "<i>all-groups-and-users</i>" group
-	 * 
+	 *
 	 * @param corruptPermissions
 	 *            The corrupt group permissions
 	 * @param con

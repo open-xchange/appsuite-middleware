@@ -81,7 +81,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link UpdateTaskToolkit} - Toolkit for update tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskToolkit {
@@ -99,7 +99,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Force (re-)run of update task denoted by given class name
-     * 
+     *
      * @param className The update task's class name
      * @param schemaName A valid schema name
      * @throws OXException If update task cannot be performed
@@ -110,7 +110,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Force (re-)run of update task denoted by given class name
-     * 
+     *
      * @param className The update task's class name
      * @param contextId The context identifier
      * @throws OXException If update task cannot be performed
@@ -123,7 +123,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Force (re-)run of update task denoted by given class name. This method should only be called when holding <code>LOCK</code>.
-     * 
+     *
      * @param task The update task
      * @param contextId The context identifier
      * @throws OXException If update task cannot be performed
@@ -136,7 +136,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Force (re-)run of update task denoted by given class name on all schemas.
-     * 
+     *
      * @param className The update task's class name
      * @throws OXException If update task cannot be performed
      */
@@ -159,7 +159,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Gets all schemas with their versions.
-     * 
+     *
      * @return All schemas with their versions
      * @throws OXException If retrieving schemas and versions fails
      */
@@ -178,7 +178,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Gets schemas and their contexts as a map.
-     * 
+     *
      * @return A map containing schemas and their contexts.
      * @throws OXException If an error occurs
      */
@@ -226,7 +226,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Sets the schema's version number to given version number
-     * 
+     *
      * @param versionNumber The version number to set
      * @param schemaName A valid schema name
      * @throws OXException If changing version number fails
@@ -237,7 +237,7 @@ public final class UpdateTaskToolkit {
 
     /**
      * Sets the schema's version number to given version number
-     * 
+     *
      * @param versionNumber The version number to set
      * @param contextId A valid context identifier contained in target schema
      * @throws OXException If changing version number fails

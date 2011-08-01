@@ -81,92 +81,114 @@ public class SimServerSession implements ServerSession {
         this.user = new MockUser(uid);
     }
 
+    @Override
     public Context getContext() {
         return context;
     }
 
+    @Override
     public User getUser() {
         return user;
     }
 
+    @Override
     public UserConfiguration getUserConfiguration() {
         return userConfig;
     }
 
+    @Override
     public UserSettingMail getUserSettingMail() {
         return null;
     }
 
+    @Override
     public boolean containsParameter(String name) {
         return false;
     }
 
+    @Override
     public int getContextId() {
         return context.getContextId();
     }
 
+    @Override
     public String getLocalIp() {
         return null;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public String getLoginName() {
         return null;
     }
 
+    @Override
     public Object getParameter(String name) {
         return null;
     }
 
+    @Override
     public String getPassword() {
         return null;
     }
 
+    @Override
     public String getRandomToken() {
         return null;
     }
 
+    @Override
     public String getSecret() {
         return null;
     }
 
+    @Override
     public String getSessionID() {
         return null;
     }
 
+    @Override
     public int getUserId() {
         return user.getId();
     }
 
+    @Override
     public String getUserlogin() {
         return null;
     }
 
+    @Override
     public void removeRandomToken() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setParameter(String name, Object value) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getAuthId() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String getHash() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setLocalIp(String ip) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void setHash(String hash) {
         // TODO Auto-generated method stub
     }
@@ -182,16 +204,18 @@ public class SimServerSession implements ServerSession {
     public void setUserConfig(UserConfiguration userConfig) {
         this.userConfig = userConfig;
     }
-    
+
     public void setLogin(String login) {
         this.login = login;
     }
 
+    @Override
     public String getClient() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public void setClient(String client) {
         // TODO Auto-generated method stub
     }

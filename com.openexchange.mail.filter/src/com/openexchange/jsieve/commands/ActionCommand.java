@@ -63,21 +63,21 @@ public class ActionCommand extends ControlOrActionCommand {
      * An action command is an identifier followed by zero or more arguments,
      * terminated by a semicolon. Action commands do not take tests or blocks as
      * arguments.
-     * 
+     *
      * "keep", "discard", and "redirect" these require a require: "reject" and
      * "fileinto"
-     * 
+     *
      * reject <reason: string> fileinto <folder: string> redirect <address:
      * string> keep discard
      */
 
     public enum Commands {
-        KEEP("keep", 0, new Hashtable<String, Integer>(), null, "keep"), 
-        DISCARD("discard", 0, new Hashtable<String, Integer>(), null, "discard"), 
-        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), null, "redirect"), 
-        FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "fileinto", "move"), 
-        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", "reject"), 
-        STOP("stop", 0, new Hashtable<String, Integer>(), null , "stop"), 
+        KEEP("keep", 0, new Hashtable<String, Integer>(), null, "keep"),
+        DISCARD("discard", 0, new Hashtable<String, Integer>(), null, "discard"),
+        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), null, "redirect"),
+        FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "fileinto", "move"),
+        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", "reject"),
+        STOP("stop", 0, new Hashtable<String, Integer>(), null , "stop"),
         VACATION("vacation", 1, vacationtags(), "vacation", "vacation"),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "imapflags", "addflags");
 
@@ -113,7 +113,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * Defines what must be included for this command to run
          */
         private final String required;
-        
+
         /**
          * Stores the name of the parameter for the json object
          */
@@ -204,7 +204,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
     /**
      * Checks if this command has the right arguments
-     * 
+     *
      * @throws SieveException
      */
     private void checkCommand() throws SieveException {
@@ -237,7 +237,7 @@ public class ActionCommand extends ControlOrActionCommand {
 
     /**
      * This method count the arguments inside the tags
-     * 
+     *
      * @return
      */
     private int counttags() {
@@ -268,11 +268,11 @@ public class ActionCommand extends ControlOrActionCommand {
     /**
      * With this method you can get the argument to the given tag. E.g. for
      * <code>vacation :days 1 "Test"</code>
-     * 
+     *
      * The following <code>getArgumentToTag(":days");</code> returns
      * <code>["1"]</code>
-     * 
-     * 
+     *
+     *
      * @param tag
      * @return
      */

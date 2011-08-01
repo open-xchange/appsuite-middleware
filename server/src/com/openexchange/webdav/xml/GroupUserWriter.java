@@ -77,7 +77,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * AppointmentWriter
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class GroupUserWriter extends ContactWriter {
@@ -312,7 +312,7 @@ public class GroupUserWriter extends ContactWriter {
 
     /**
      * Tests if specified string is empty; either <code>null</code>, zero length, or only consists of white space characters.
-     * 
+     *
      * @param str The string to test
      * @return <code>true</code> if specified string is empty; otherwise <code>false</code>.
      */

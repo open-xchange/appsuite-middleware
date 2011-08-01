@@ -55,7 +55,7 @@ import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 
 /**
  * {@link MemoryFolderImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryFolderImpl implements MemoryFolder {
@@ -83,11 +83,12 @@ public final class MemoryFolderImpl implements MemoryFolder {
         super();
     }
 
+    @Override
     public Boolean getSubscribed() {
         return subscribed;
     }
 
-    
+
     /**
      * Sets the subscribed
      *
@@ -97,91 +98,98 @@ public final class MemoryFolderImpl implements MemoryFolder {
         this.subscribed = subscribed;
     }
 
+    @Override
     public String getTreeId() {
         return treeId;
     }
 
     /**
      * Sets the treeId
-     * 
+     *
      * @param treeId The treeId to set
      */
     public void setTreeId(String treeId) {
         this.treeId = treeId;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(String id) {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getParentId() {
         return parentId;
     }
 
     /**
      * Sets the parentId
-     * 
+     *
      * @param parentId The parentId to set
      */
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 
+    @Override
     public Permission[] getPermissions() {
         return permissions;
     }
 
     /**
      * Sets the permissions
-     * 
+     *
      * @param permissions The permissions to set
      */
     public void setPermissions(Permission[] permissions) {
         this.permissions = permissions;
     }
 
+    @Override
     public int getModifiedBy() {
         return modifiedBy;
     }
 
     /**
      * Sets the modifiedBy
-     * 
+     *
      * @param modifiedBy The modifiedBy to set
      */
     public void setModifiedBy(int modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
+    @Override
     public Date getLastModified() {
         return lastModified;
     }
 
     /**
      * Sets the lastModified
-     * 
+     *
      * @param lastModified The lastModified to set
      */
     public void setLastModified(Date lastModified) {

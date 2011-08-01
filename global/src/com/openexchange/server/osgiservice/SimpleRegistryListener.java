@@ -59,6 +59,6 @@ import org.osgi.framework.ServiceReference;
  */
 public interface SimpleRegistryListener<T> {
     public void added(ServiceReference ref, T thing);
-    
+
     public void removed(ServiceReference ref, T thing);
 }

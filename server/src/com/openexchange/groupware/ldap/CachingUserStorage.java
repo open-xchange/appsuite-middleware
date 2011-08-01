@@ -202,7 +202,7 @@ public class CachingUserStorage extends UserStorage {
             throw new OXException(e);
         }
     }
-    
+
     @Override
     public int getUserId(final String uid, final Context context) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);

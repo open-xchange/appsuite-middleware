@@ -60,20 +60,20 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CalendarCache} - Cache for calendar module.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CalendarCache {
-    
+
     private static volatile CalendarCache instance;
 
     private static final String CACHE_NAME = "CalendarCache";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCache.class));
-    
+
     private Cache jcs;
-    
+
     private CalendarCache() {
         try {
             try {
@@ -85,7 +85,7 @@ public final class CalendarCache {
             LOG.error("CalendarCache could not be initialized!", e);
         }
     }
-    
+
     public static CalendarCache getInstance() {
     	if (instance == null) {
         	synchronized (CalendarCache.class) {
@@ -96,25 +96,25 @@ public final class CalendarCache {
         }
         return instance;
     }
-    
+
     public void add(final Object key, final String groupKey, final Object o) throws OXException {
         jcs.putInGroup((Serializable) key, groupKey, (Serializable) o);
     }
-    
+
     public Object get(final Object key, final String groupKey) {
         return jcs.getFromGroup((Serializable) key, groupKey);
     }
-    
+
     public void clear() throws OXException {
         jcs.clear();
     }
-    
+
     public void invalidateGroup(final int cid) {
         jcs.invalidateGroup(CalendarFolderObject.createGroupKeyFromContextID(cid));
     }
-    
+
     public static boolean isInitialized() {
         return instance != null;
     }
-    
+
 }

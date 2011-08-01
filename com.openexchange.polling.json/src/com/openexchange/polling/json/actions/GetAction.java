@@ -15,7 +15,7 @@ public class GetAction extends PollAction {
 	@Override
 	protected AJAXRequestResult perform(PollRequest req) throws OXException {
 		PollService polls = getPollService();
-		
+
 		int cid = req.getContextId();
 		int id = req.getId();
 

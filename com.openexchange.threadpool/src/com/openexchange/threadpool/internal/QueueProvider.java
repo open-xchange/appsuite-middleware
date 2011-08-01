@@ -57,7 +57,7 @@ import java.util.concurrent.SynchronousQueue;
  * {@link QueueProvider} - Provider for appropriate queue instance dependent on JRE version.
  * <p>
  * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class QueueProvider {
@@ -73,7 +73,7 @@ public abstract class QueueProvider {
 
     /**
      * Initializes appropriate instance of synchronous queue provider.
-     * 
+     *
      * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
      *            {@link Java6SynchronousQueue}
      */
@@ -116,7 +116,7 @@ public abstract class QueueProvider {
 
     /**
      * Gets the {@link QueueProvider} instance.
-     * 
+     *
      * @return The {@link QueueProvider} instance
      */
     public static QueueProvider getInstance() {
@@ -125,7 +125,7 @@ public abstract class QueueProvider {
 
     /**
      * Gets a newly created synchronous queue.
-     * 
+     *
      * @param <V> The queue's type
      * @return A newly created synchronous queue
      */
@@ -133,7 +133,7 @@ public abstract class QueueProvider {
 
     /**
      * Gets a newly created synchronous queue.
-     * 
+     *
      * @param <V> The queue's type
      * @param clazz The queue's type class
      * @return A newly created synchronous queue
@@ -142,7 +142,7 @@ public abstract class QueueProvider {
 
     /**
      * Gets a newly created linked queue.
-     * 
+     *
      * @param <V> The queue's type
      * @param fixedCapacity The fixed capacity
      * @return A newly created linked queue
@@ -153,7 +153,7 @@ public abstract class QueueProvider {
 
     /**
      * Gets a newly created linked queue.
-     * 
+     *
      * @param <V> The queue's type
      * @param clazz The queue's type class
      * @param fixedCapacity The fixed capacity

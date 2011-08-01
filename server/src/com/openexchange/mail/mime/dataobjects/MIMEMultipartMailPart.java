@@ -78,7 +78,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * {@link MIMEMultipartMailPart} - An implementation of {@link MailPart} for mail parts of MIME type <code>multipart/*</code>.
  * <p>
  * Parsing of multipart data is based on <b>Knuth&#045;Morris&#045;Pratt (KMP)</b> algorithm.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MIMEMultipartMailPart extends MailPart {
@@ -106,7 +106,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
      */
@@ -116,7 +116,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param contentType The content type; may be <code>null</code>
      * @param dataSource The data source
      * @throws OXException If reading input stream fails
@@ -137,7 +137,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param inputData The input data
      * @throws OXException If reading input stream fails
      */
@@ -147,7 +147,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Initializes a new {@link MIMEMultipartMailPart}.
-     * 
+     *
      * @param contentType The content type; may be <code>null</code>
      * @param inputData The input data
      * @throws OXException If reading input stream fails
@@ -438,7 +438,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Gets the (starting) boundary bytes by determining the <i>boundary</i> parameter from Content-Type header and prepending <i>--</i>.
-     * 
+     *
      * @return The (starting) boundary bytes
      */
     private byte[] getBoundaryBytes() {
@@ -455,7 +455,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * The readObject method is responsible for reading from the stream and restoring the classes fields.
-     * 
+     *
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
@@ -470,7 +470,7 @@ public final class MIMEMultipartMailPart extends MailPart {
     /**
      * The writeObject method is responsible for writing the state of the object for its particular class so that the corresponding
      * readObject method can restore it.
-     * 
+     *
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
@@ -494,7 +494,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Copies given input stream into a newly created byte array.
-     * 
+     *
      * @param inputStream The input stream
      * @return The newly created byte array containing input stream's bytes
      * @throws IOException If reading input stream fails
@@ -519,7 +519,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Converts given string to a byte array.
-     * 
+     *
      * @param s The string
      * @return The converted string's byte array
      */
@@ -538,7 +538,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -587,7 +587,7 @@ public final class MIMEMultipartMailPart extends MailPart {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -634,7 +634,7 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern matches against itself.
-     * 
+     *
      * @param pattern The pattern
      * @return The failures
      */
@@ -683,32 +683,39 @@ public final class MIMEMultipartMailPart extends MailPart {
             this.data = data;
         }
 
+        @Override
         public byte[] full() {
             return data;
         }
 
+        @Override
         public int length() {
             return data.length;
         }
 
+        @Override
         public int read(final int index) {
             return (data[index] & 0xff); // As unsigned integer
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) {
             final byte[] ret = new byte[len];
             System.arraycopy(data, off, ret, 0, len);
             return ret;
         }
 
+        @Override
         public void load() throws IOException {
             // Nothing to do
         }
 
+        @Override
         public void prepareForCaching() {
             // Nothing to do
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             out.write(data, 0, data.length);
         }
@@ -729,6 +736,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             length = -1;
         }
 
+        @Override
         public byte[] full() throws IOException {
             final ByteBuffer roBuf = getByteBuffer();
             final int size = length();
@@ -745,6 +753,7 @@ public final class MIMEMultipartMailPart extends MailPart {
             return roBuf;
         }
 
+        @Override
         public int length() throws IOException {
             if (length < 0) {
                 length = (int) randomAccess.length();
@@ -752,25 +761,30 @@ public final class MIMEMultipartMailPart extends MailPart {
             return length;
         }
 
+        @Override
         public int read(final int index) throws IOException {
             return (getByteBuffer().get(index) & 0xff); // As unsigned integer
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) throws IOException {
             final byte[] ret = new byte[len];
             getByteBuffer().get(ret, off, len);
             return ret;
         }
 
+        @Override
         public void load() throws IOException {
             getByteBuffer();
         }
 
+        @Override
         public void prepareForCaching() {
             randomAccess = null;
             roBuf = null;
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             out.write(full());
         }
@@ -795,30 +809,37 @@ public final class MIMEMultipartMailPart extends MailPart {
             return delegate;
         }
 
+        @Override
         public byte[] full() throws IOException {
             return getDelegate().full();
         }
 
+        @Override
         public int length() throws IOException {
             return getDelegate().length();
         }
 
+        @Override
         public int read(final int index) throws IOException {
             return getDelegate().read(index);
         }
 
+        @Override
         public byte[] subarray(final int off, final int len) throws IOException {
             return getDelegate().subarray(off, len);
         }
 
+        @Override
         public void load() throws IOException {
             getDelegate();
         }
 
+        @Override
         public void prepareForCaching() {
             dataSource = null;
         }
 
+        @Override
         public void writeTo(final OutputStream out) throws IOException {
             final InputStream in = dataSource.getInputStream();
             if (null == in) {

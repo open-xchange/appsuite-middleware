@@ -57,9 +57,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link TaskStatusReplacement} - Replacement for task status.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class TaskStatusReplacement extends FormatLocalizedStringReplacement {
 
@@ -79,7 +79,7 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 
     /**
      * Gets an empty task status replacement
-     * 
+     *
      * @return An empty task status replacement
      */
     public static TaskStatusReplacement emptyTaskStatusReplacement() {
@@ -101,7 +101,7 @@ public final class TaskStatusReplacement extends FormatLocalizedStringReplacemen
 
     /**
      * Initializes a new {@link TaskStatusReplacement}
-     * 
+     *
      * @param taskStatus The task status; is supposed to be either
      *            {@link #STATUS_NOT_STARTED}, {@link #STATUS_IN_PROGRESS},
      *            {@link #STATUS_DONE}, {@link #STATUS_WAITING}, or

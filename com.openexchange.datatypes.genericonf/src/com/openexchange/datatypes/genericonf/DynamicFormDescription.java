@@ -60,14 +60,14 @@ import java.util.Set;
 
 /**
  * {@link DynamicFormDescription}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DynamicFormDescription implements Iterable<FormElement> {
 
-    private List<FormElement> formElements;
+    private final List<FormElement> formElements;
 
-    private Map<String, FormElement> namedElements = new HashMap<String, FormElement>();
+    private final Map<String, FormElement> namedElements = new HashMap<String, FormElement>();
 
     public DynamicFormDescription() {
         formElements = new ArrayList<FormElement>();

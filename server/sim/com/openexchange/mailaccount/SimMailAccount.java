@@ -80,6 +80,8 @@ public class SimMailAccount implements MailAccount {
 
     private String personal;
 
+    private String replyTo;
+
     private String password;
 
     private String name;
@@ -87,7 +89,7 @@ public class SimMailAccount implements MailAccount {
     private String mailServer;
 
     private Map<String, String> properties;
-    
+
     public void setProperties(final Map<String, String> properties) {
         this.properties = properties;
     }
@@ -140,6 +142,10 @@ public class SimMailAccount implements MailAccount {
         this.personal = personal;
     }
 
+    public void setReplyTo(final String replyTo) {
+        this.replyTo = replyTo;
+    }
+
     public void setPassword(final String password) {
         this.password = password;
     }
@@ -152,165 +158,206 @@ public class SimMailAccount implements MailAccount {
         this.mailServer = mailServer;
     }
 
+    @Override
     public void addProperty(final String name, final String value) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public String generateMailServerURL() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String generateTransportServerURL() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getConfirmedHam() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getConfirmedHamFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getConfirmedSpam() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getConfirmedSpamFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getDrafts() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getDraftsFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getId() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public String getLogin() {
         return login;
     }
 
+    @Override
     public int getMailPort() {
         return mailPort;
     }
 
+    @Override
     public String getMailProtocol() {
         return mailProtocol;
     }
 
+    @Override
     public String getMailServer() {
         return mailServer;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
 
+    @Override
     public String getPrimaryAddress() {
         return primaryAddress;
     }
 
+    @Override
     public String getPersonal() {
         return personal;
     }
 
+    @Override
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    @Override
     public Map<String, String> getProperties() {
         return properties;
     }
 
+    @Override
     public String getSent() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getSentFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getSpam() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getSpamFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getSpamHandler() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getTransportLogin() {
         return transportLogin;
     }
 
+    @Override
     public String getTransportPassword() {
         return transportPassword;
     }
 
+    @Override
     public int getTransportPort() {
         return transportPort;
     }
 
+    @Override
     public String getTransportProtocol() {
         return transportProtocol;
     }
 
+    @Override
     public String getTransportServer() {
         return transportServer;
     }
 
+    @Override
     public String getTrash() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public String getTrashFullname() {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public int getUserId() {
         // TODO Auto-generated method stub
         return 0;
     }
 
+    @Override
     public boolean isDefaultAccount() {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean isMailSecure() {
         return mailSecure;
     }
 
+    @Override
     public boolean isTransportSecure() {
         return transportSecure;
     }
 
+    @Override
     public boolean isUnifiedINBOXEnabled() {
         // TODO Auto-generated method stub
         return false;

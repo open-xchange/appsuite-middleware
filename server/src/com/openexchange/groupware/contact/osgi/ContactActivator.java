@@ -63,10 +63,12 @@ public final class ContactActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         // Nope
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         // Nope
     }

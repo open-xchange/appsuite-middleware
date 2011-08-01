@@ -55,7 +55,7 @@ import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 
 /**
  * {@link ContactSanitationTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContactSanitationTest extends TestCase {

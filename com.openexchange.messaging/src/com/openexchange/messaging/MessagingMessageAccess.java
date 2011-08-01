@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingMessageAccess} - Provides access to message storage.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -63,7 +63,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Gets the message associated with specified identifier.
-     * 
+     *
      * @param folder The folder identifier
      * @param id The identifier
      * @param peek <code>true</code> to peek message content (meaning any mechanisms to mark content as read disabled); otherwise
@@ -79,7 +79,7 @@ public interface MessagingMessageAccess {
      * The returned instances of {@link MailMessage} are pre-filled with specified fields through argument <code>fields</code>.
      * <p>
      * If any mail ID is invalid, <code>null</code> is returned for that entry.
-     * 
+     *
      * @param folder The folder identifier
      * @param messageIds The message identifiers
      * @param fields The fields to pre-fill in returned instances of {@link MessagingMessage}
@@ -96,7 +96,7 @@ public interface MessagingMessageAccess {
      * <p>
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
-     * 
+     *
      * @param folder The folder fullname
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
@@ -112,7 +112,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Gets the message's attachment identified through given section identifier.
-     * 
+     *
      * @param folder The folder fullname
      * @param messageId The message identifier
      * @param sectionId The attachment's section identifier
@@ -123,7 +123,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Updates specified fields of given message.
-     * 
+     *
      * @param message The message
      * @param fields The fields to update
      * @throws OXException If update operation fails
@@ -132,7 +132,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Appends specified messages to given folder.
-     * 
+     *
      * @param folder The folder to append to
      * @param messages The messages to append.
      * @throws OXException If appending messages fails
@@ -144,7 +144,7 @@ public interface MessagingMessageAccess {
      * <p>
      * If no mail could be found for a given message identifier, the corresponding value in returned array of <code>String</code> is
      * <code>null</code>.
-     * 
+     *
      * @param sourceFolder The source folder identifier
      * @param destFolder The destination folder identifier
      * @param messageIds The message identifiers
@@ -161,7 +161,7 @@ public interface MessagingMessageAccess {
      * <p>
      * If no mail could be found for a given message identifier, the corresponding value in returned array of <code>String</code> is
      * <code>null</code>.
-     * 
+     *
      * @param sourceFolder The source folder identifier
      * @param destFolder The destination folder identifier
      * @param messageIds The message identifiers
@@ -175,7 +175,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Deletes specified messages in folder.
-     * 
+     *
      * @param folder The folder to delete in
      * @param messageIds The message identifiers
      * @param hardDelete <code>true</code> to perform a hard-delete; otherwise <code>false</code> to backup in default location
@@ -187,7 +187,7 @@ public interface MessagingMessageAccess {
      * A convenience method to get all messages located in given folder.
      * <p>
      * If any messaging ID is invalid, <code>null</code> is returned for that entry.
-     * 
+     *
      * @param folder The folder identifier
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
@@ -203,7 +203,7 @@ public interface MessagingMessageAccess {
     /**
      * Performs specified action to the message identified by given arguments and either returns resulting message or <code>null</code> if
      * no further user interaction is required.
-     * 
+     *
      * @param folder The folder identifier
      * @param id The message identifier
      * @param action The action to perform
@@ -215,7 +215,7 @@ public interface MessagingMessageAccess {
 
     /**
      * Performs specified action and either returns resulting message or <code>null</code> if no further user interaction is required.
-     * 
+     *
      * @param action The action to perform
      * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
      *         interaction required)
@@ -226,7 +226,7 @@ public interface MessagingMessageAccess {
     /**
      * Performs specified action to given message and either returns resulting message or <code>null</code> if no further user interaction
      * is required.
-     * 
+     *
      * @param message The message to process
      * @param action The action to perform
      * @return The resulting message or <code>null</code> if requested action yields no resulting message (meaning no further user
@@ -237,7 +237,7 @@ public interface MessagingMessageAccess {
 
     /**
      * This method resolves a @see {@link ReferenceContent} id.
-     * 
+     *
      * @param folder The folder identifier
      * @param id The message identifier
      * @param referenceId the reference identifier

@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MessagingService} - The messaging service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -66,56 +66,56 @@ public interface MessagingService {
 
     /**
      * Gets the identifier of this messaging service.
-     * 
+     *
      * @return The identifier
      */
     public String getId();
 
     /**
      * Gets the list of message actions of this messaging service.
-     * 
+     *
      * @return The list of message actions
      */
     public List<MessagingAction> getMessageActions();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     public String getDisplayName();
 
     /**
      * Get the form description.
-     * 
+     *
      * @return The form description
      */
     public DynamicFormDescription getFormDescription();
 
     /**
      * Gets those properties from configuration which should be encrypted.
-     * 
+     *
      * @return Those properties from configuration which should be encrypted
      */
     public Set<String> getSecretProperties();
 
     /**
      * Gets the static root folder permissions.
-     * 
+     *
      * @return The static root folder permissions or <code>null</code>
      */
     public int[] getStaticRootPermissions();
 
     /**
      * Gets the account manager for this messaging service.
-     * 
+     *
      * @return The account manager
      */
     public MessagingAccountManager getAccountManager();
 
     /**
      * Gets the account access for specified account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account access for specified account identifier
@@ -125,7 +125,7 @@ public interface MessagingService {
 
     /**
      * Gets the account transport for specified account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing needed user data
      * @return The account transport for specified account identifier

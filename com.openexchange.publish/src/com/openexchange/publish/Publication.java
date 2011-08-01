@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link Publication}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Publication {
@@ -76,10 +76,10 @@ public class Publication {
     private Map<String, Object> configuration = new HashMap<String, Object>();
 
     private String displayName;
-    
+
     private Boolean enabled = null;
-    
-    
+
+
     public int getId() {
         return id;
     }
@@ -95,11 +95,11 @@ public class Publication {
     public void setEntityId(final String entityId) {
         this.entityId = entityId;
     }
-    
+
     public boolean containsEntityId() {
         return getEntityId() != null;
     }
-    
+
     public String getModule() {
         return module;
     }
@@ -107,7 +107,7 @@ public class Publication {
     public void setModule(final String module) {
         this.module = module;
     }
-    
+
     public boolean containsModule() {
         return getModule() != null;
     }
@@ -123,7 +123,7 @@ public class Publication {
     public boolean containsTarget() {
         return getTarget() != null;
     }
-    
+
     public Map<String, Object> getConfiguration() {
         return configuration;
     }
@@ -139,7 +139,7 @@ public class Publication {
     public void setUserId(final int userId) {
         this.userId = userId;
     }
-    
+
     public boolean containsUserId() {
         return this.getUserId() > 0;
     }
@@ -159,15 +159,15 @@ public class Publication {
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
-    
+
     public boolean isEnabled() {
         return enabled != null ? enabled : true;
     }
-    
+
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
-    
+
     public boolean containsEnabled() {
         return enabled != null;
     }

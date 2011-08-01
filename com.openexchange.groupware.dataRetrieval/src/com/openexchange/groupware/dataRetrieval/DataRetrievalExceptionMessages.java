@@ -53,17 +53,17 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link DataRetrievalExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author francisco.laguna@open-xchange.com
  */
 public final class DataRetrievalExceptionMessages implements LocalizableStrings {
 
     // An error occurred: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-    
+
     // Could not find data provider for id: %1$s
     public static final String UNKNOWN_DATA_PROVIDER_MSG = "Could not find data provider for id: %1$s";
-    
+
     // Missing parameter: %1$2
     public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$2";
 

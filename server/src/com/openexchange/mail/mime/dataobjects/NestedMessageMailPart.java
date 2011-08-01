@@ -60,7 +60,7 @@ import com.openexchange.mail.mime.MIMETypes;
 
 /**
  * {@link NestedMessageMailPart} - Represents a mail part holding a nested message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NestedMessageMailPart extends MailPart {
@@ -71,7 +71,7 @@ public final class NestedMessageMailPart extends MailPart {
 
     /**
      * Initializes a new {@link NestedMessageMailPart}.
-     * 
+     *
      * @param mailMessage The nested message
      * @throws OXException If initialization fails
      */

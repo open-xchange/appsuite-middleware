@@ -61,7 +61,7 @@ import com.openexchange.user.json.servlet.UserServlet;
 
 /**
  * {@link ServletRegisterer} - Registers the {@link UserServlet} if {@link HttpService} appears.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServletRegisterer implements ServiceTrackerCustomizer {
@@ -73,7 +73,7 @@ public final class ServletRegisterer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link ServletRegisterer}.
-     * 
+     *
      * @param context The bundle context
      */
     public ServletRegisterer(final BundleContext context) {

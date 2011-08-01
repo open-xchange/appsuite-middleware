@@ -58,7 +58,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSCommandProvider} - The {@link CommandProvider command provider} to output MDNS status.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSCommandProvider implements CommandProvider {
@@ -67,7 +67,7 @@ public final class MDNSCommandProvider implements CommandProvider {
 
     /**
      * Initializes a new {@link MDNSCommandProvider}.
-     * 
+     *
      * @param registry
      */
     public MDNSCommandProvider(final MDNSService mdnsService) {

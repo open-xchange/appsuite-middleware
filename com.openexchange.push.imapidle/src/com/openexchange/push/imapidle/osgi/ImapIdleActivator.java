@@ -173,14 +173,14 @@ public final class ImapIdleActivator extends DeferredActivator {
                 LOG.info("WARNING: " + modestr + " is an invalid setting for com.openexchange.push.imapidle.pushmode, using default");
                 pushmode = PushMode.ALWAYS;
             }
-            
+
             errordelay = configurationService.getIntProperty("com.openexchange.push.imapidle.errordelay", 1000);
 
             final boolean debug = configurationService.getBoolProperty("com.openexchange.push.imapidle.debug", true);
             ImapIdlePushListener.setFolder(folder);
             ImapIdlePushListener.setDebugEnabled(debug);
             ImapIdlePushListener.setPushmode(pushmode);
-            
+
             /*
              * Start-up
              */

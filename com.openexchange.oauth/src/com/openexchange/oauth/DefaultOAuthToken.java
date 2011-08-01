@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link DefaultOAuthToken}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultOAuthToken implements OAuthToken {
@@ -69,7 +69,7 @@ public class DefaultOAuthToken implements OAuthToken {
 
     /**
      * Initializes a new {@link DefaultOAuthToken}.
-     * 
+     *
      * @param token
      * @param secret
      */
@@ -89,7 +89,7 @@ public class DefaultOAuthToken implements OAuthToken {
 
     /**
      * Sets the token
-     * 
+     *
      * @param token The token to set
      */
     public void setToken(final String token) {
@@ -98,7 +98,7 @@ public class DefaultOAuthToken implements OAuthToken {
 
     /**
      * Sets the secret
-     * 
+     *
      * @param secret The secret to set
      */
     public void setSecret(final String secret) {

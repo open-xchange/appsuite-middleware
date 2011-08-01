@@ -92,13 +92,13 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * The {@link GroupwareCaldavFactory} holds access to all external groupware services and acts as the factory for CaldavResources and CaldavCollections
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupwareCaldavFactory extends AbstractWebdavFactory {
-    
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(GroupwareCaldavFactory.class));
-    
+
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
     public static final WebdavPath ROOT_URL = new WebdavPath();
@@ -215,7 +215,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     public CalendarCollectionService getCalendarUtilities() {
         return calendarUtils;
     }
-    
+
     public String getConfigValue(final String key, final String defaultValue) throws OXException {
         try {
             final ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
@@ -233,7 +233,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     public State getState() {
         return stateHolder.get();
     }
-    
+
     public boolean isInRange(final Appointment appointment) throws OXException {
         final Date start = start();
         final Date end = end();
@@ -244,7 +244,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         }
         return true;
     }
-    
+
     public Date end() throws OXException {
         final String value = getConfigValue("com.openexchange.caldav.interval.end", "one_year");
         int addYears = 2;
@@ -278,7 +278,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         }
 
         final Calendar instance = Calendar.getInstance();
-        
+
         if (value.equals("six_months")) {
             instance.add(Calendar.MONTH, -6);
         } else {
@@ -304,16 +304,16 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
     public static final class State {
-        
+
         private final static int[] FIELDS_FOR_ALL_REQUEST = {
             DataObject.OBJECT_ID
         };
-        
+
         private final static int[] APPOINTMENT_FIELDS = {
             DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
             FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION,
             CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
-            CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS, 
+            CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.PARTICIPANTS, CalendarObject.USERS,
             Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.UID,
             Appointment.SEQUENCE, Appointment.ORGANIZER, Appointment.CONFIRMATIONS };
 
@@ -328,13 +328,13 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
         private final Map<String, List<Appointment>> changeExceptionCache = new HashMap<String, List<Appointment>>();
 
         private final Map<Integer, List<Appointment>> folderCache = new HashMap<Integer, List<Appointment>>();
-        
-        private Set<Integer> patchGuard = new HashSet<Integer>();
-        
+
+        private final Set<Integer> patchGuard = new HashSet<Integer>();
+
         public void cacheFolder(final int folderId) {
             cacheFolderFast(folderId); // Switch this to the other method, once it loads participants
         }
-        
+
         public void cacheFolderSlow(final int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
@@ -372,7 +372,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 LOG.error(e.getMessage(), e);
             }
         }
-        
+
         public void cacheFolderFast(final int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
@@ -407,7 +407,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
                 folderCache.put(folderId, children);
             } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
-                
+
             }
         }
 
@@ -432,7 +432,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
             return exceptions;
         }
 
-        
+
 
         public List<Appointment> getFolder(final int id) {
             cacheFolder(id);
@@ -454,6 +454,6 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory {
     }
 
 
-    
+
 
 }

@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServlet;
 
 /**
  * {@link SingletonServletQueue} - A singleton servlet queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SingletonServletQueue implements ServletQueue {
@@ -64,7 +64,7 @@ public final class SingletonServletQueue implements ServletQueue {
 
     /**
      * Initializes a new {@link SingletonServletQueue}.
-     * 
+     *
      * @param singleton The singleton HTTP servlet
      * @param servletPath The servlet path
      */
@@ -74,6 +74,7 @@ public final class SingletonServletQueue implements ServletQueue {
         this.servletPath = servletPath;
     }
 
+    @Override
     public HttpServlet createServletInstance(final String servletKey) {
         /*
          * No multiple singleton servlets
@@ -81,34 +82,42 @@ public final class SingletonServletQueue implements ServletQueue {
         return null;
     }
 
+    @Override
     public HttpServlet dequeue() {
         throw new UnsupportedOperationException("SingletonServletQueue.dequeue()");
     }
 
+    @Override
     public void enqueue(final HttpServlet servlet) {
         // Nothing to do
     }
 
+    @Override
     public HttpServlet get() {
         return singleton;
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
 
+    @Override
     public boolean isEmpty() {
         return false;
     }
 
+    @Override
     public boolean isFull() {
         return true;
     }
 
+    @Override
     public boolean isSingleton() {
         return true;
     }
 
+    @Override
     public int size() {
         return 1;
     }

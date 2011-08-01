@@ -69,5 +69,5 @@ public interface ConfigView {
     <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
 
     Map<String, ComposedConfigProperty<String>> all() throws OXException;
-    
+
 }

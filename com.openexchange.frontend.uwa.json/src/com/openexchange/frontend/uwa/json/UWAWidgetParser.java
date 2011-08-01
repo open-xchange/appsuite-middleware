@@ -57,7 +57,7 @@ import com.openexchange.modules.model.AttributeHandler;
 
 /**
  * {@link UWAWidgetParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UWAWidgetParser extends ModelParser<UWAWidget> {

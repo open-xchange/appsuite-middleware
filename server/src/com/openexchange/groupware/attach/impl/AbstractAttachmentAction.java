@@ -60,9 +60,9 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractAttachmentAction extends AbstractDBAction
 		implements UndoableAction {
-	
+
 	private AttachmentQueryCatalog queryCatalog = null;
-	
+
 	protected int fillFields(final AttachmentMetadata attachment, final PreparedStatement stmt) throws SQLException {
 		final GetSwitch get = new GetSwitch(attachment);
 		int i = 1;
@@ -79,16 +79,16 @@ public abstract class AbstractAttachmentAction extends AbstractDBAction
 		stmt.setInt(i++,getContext().getContextId()); //System.out.println(stmt);
 		return i;
 	}
-	
+
 	private final boolean isDateField(final AttachmentField field) {
 		return field.equals(AttachmentField.CREATION_DATE_LITERAL);
 	}
-	
+
 
 	public void setQueryCatalog(final AttachmentQueryCatalog queryCatalog) {
 		this.queryCatalog = queryCatalog;
 	}
-	
+
 	public AttachmentQueryCatalog getQueryCatalog(){
 		return queryCatalog;
 	}

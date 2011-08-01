@@ -58,7 +58,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * {@link ConcurrentTIntHashSet}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentTIntHashSet extends TIntHashSet {
@@ -78,7 +78,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
      * @param strategy used to compute hash codes and to compare keys.
@@ -91,7 +91,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
      */
@@ -103,7 +103,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param strategy used to compute hash codes and to compare keys.
      */
@@ -115,7 +115,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      */
     public ConcurrentTIntHashSet(final int initialCapacity) {
@@ -126,7 +126,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param array an array of int primitives
      * @param strategy used to compute hash codes and to compare keys.
      */
@@ -138,7 +138,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param array an array of int primitives
      */
     public ConcurrentTIntHashSet(final int[] array) {
@@ -149,7 +149,7 @@ public final class ConcurrentTIntHashSet extends TIntHashSet {
 
     /**
      * Initializes a new {@link ConcurrentTIntHashSet}.
-     * 
+     *
      * @param strategy used to compute hash codes and to compare keys.
      */
     public ConcurrentTIntHashSet(final TIntHashingStrategy strategy) {

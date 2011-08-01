@@ -14,11 +14,11 @@ import com._4psa.extensionmessages_xsd._2_5.SetExtensionPLRequest;
 
 /**
  * Extension permissions and limits data
- * 
+ *
  * <p>Java class for ExtensionPLInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtensionPLInfo">
  *   &lt;complexContent>
@@ -126,8 +126,8 @@ import com._4psa.extensionmessages_xsd._2_5.SetExtensionPLRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtensionPLInfo", propOrder = {
@@ -209,11 +209,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -221,11 +221,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -233,11 +233,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -245,11 +245,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -257,11 +257,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the soundManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSoundManag() {
         return soundManag;
@@ -269,11 +269,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the soundManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSoundManag(Boolean value) {
         this.soundManag = value;
@@ -281,11 +281,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the sipManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSipManag() {
         return sipManag;
@@ -293,11 +293,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the sipManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSipManag(Boolean value) {
         this.sipManag = value;
@@ -305,11 +305,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the multiUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMultiUser() {
         return multiUser;
@@ -317,11 +317,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the multiUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMultiUser(Boolean value) {
         this.multiUser = value;
@@ -329,11 +329,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the callAPIManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallAPIManag() {
         return callAPIManag;
@@ -341,11 +341,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the callAPIManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallAPIManag(Boolean value) {
         this.callAPIManag = value;
@@ -353,11 +353,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the callerIDManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallerIDManag() {
         return callerIDManag;
@@ -365,11 +365,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the callerIDManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallerIDManag(Boolean value) {
         this.callerIDManag = value;
@@ -377,11 +377,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the provisionManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getProvisionManag() {
         return provisionManag;
@@ -389,11 +389,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the provisionManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setProvisionManag(BigInteger value) {
         this.provisionManag = value;
@@ -401,11 +401,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the imManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIMManag() {
         return imManag;
@@ -413,11 +413,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the imManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIMManag(Boolean value) {
         this.imManag = value;
@@ -425,11 +425,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the soundStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getSoundStorage() {
         return soundStorage;
@@ -437,11 +437,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the soundStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setSoundStorage(UnlimitedUInt value) {
         this.soundStorage = value;
@@ -449,11 +449,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the mohStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getMohStorage() {
         return mohStorage;
@@ -461,11 +461,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the mohStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setMohStorage(UnlimitedUInt value) {
         this.mohStorage = value;
@@ -473,11 +473,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the concurentCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getConcurentCalls() {
         return concurentCalls;
@@ -485,11 +485,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the concurentCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setConcurentCalls(UnlimitedUInt value) {
         this.concurentCalls = value;
@@ -497,11 +497,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the concurentInternalCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getConcurentInternalCalls() {
         return concurentInternalCalls;
@@ -509,11 +509,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the concurentInternalCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setConcurentInternalCalls(UnlimitedUInt value) {
         this.concurentInternalCalls = value;
@@ -521,11 +521,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the concurentText2Speech property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getConcurentText2Speech() {
         return concurentText2Speech;
@@ -533,11 +533,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the concurentText2Speech property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setConcurentText2Speech(UnlimitedUInt value) {
         this.concurentText2Speech = value;
@@ -545,11 +545,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the queueMembersMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getQueueMembersMax() {
         return queueMembersMax;
@@ -557,11 +557,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the queueMembersMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setQueueMembersMax(UnlimitedUInt value) {
         this.queueMembersMax = value;
@@ -569,11 +569,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the callCardCodesMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getCallCardCodesMax() {
         return callCardCodesMax;
@@ -581,11 +581,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the callCardCodesMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setCallCardCodesMax(UnlimitedUInt value) {
         this.callCardCodesMax = value;
@@ -593,11 +593,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the callbackCallerIDMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getCallbackCallerIDMax() {
         return callbackCallerIDMax;
@@ -605,11 +605,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the callbackCallerIDMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setCallbackCallerIDMax(UnlimitedUInt value) {
         this.callbackCallerIDMax = value;
@@ -617,11 +617,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the accountExpire property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public UnlimitedDate getAccountExpire() {
         return accountExpire;
@@ -629,11 +629,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the accountExpire property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public void setAccountExpire(UnlimitedDate value) {
         this.accountExpire = value;
@@ -641,11 +641,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the accountExpireDays property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getAccountExpireDays() {
         return accountExpireDays;
@@ -653,11 +653,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the accountExpireDays property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setAccountExpireDays(UnlimitedUInt value) {
         this.accountExpireDays = value;
@@ -665,11 +665,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the level property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLevel() {
         return level;
@@ -677,11 +677,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the level property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLevel(String value) {
         this.level = value;
@@ -689,11 +689,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the advertising property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAdvertising() {
         return advertising;
@@ -701,11 +701,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the advertising property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAdvertising(Boolean value) {
         this.advertising = value;
@@ -713,11 +713,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the browserChat property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isBrowserChat() {
         return browserChat;
@@ -725,11 +725,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the browserChat property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setBrowserChat(Boolean value) {
         this.browserChat = value;
@@ -737,11 +737,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the activeCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getActiveCalls() {
         return activeCalls;
@@ -749,11 +749,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the activeCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setActiveCalls(String value) {
         this.activeCalls = value;
@@ -761,11 +761,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the callOperations property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCallOperations() {
         return callOperations;
@@ -773,11 +773,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the callOperations property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCallOperations(String value) {
         this.callOperations = value;
@@ -785,11 +785,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the recordCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getRecordCalls() {
         return recordCalls;
@@ -797,11 +797,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the recordCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setRecordCalls(String value) {
         this.recordCalls = value;
@@ -809,11 +809,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the whisperOnCall property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getWhisperOnCall() {
         return whisperOnCall;
@@ -821,11 +821,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the whisperOnCall property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setWhisperOnCall(String value) {
         this.whisperOnCall = value;
@@ -833,11 +833,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the unparkCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUnparkCalls() {
         return unparkCalls;
@@ -845,11 +845,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the unparkCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUnparkCalls(String value) {
         this.unparkCalls = value;
@@ -857,11 +857,11 @@ public class ExtensionPLInfo {
 
     /**
      * Gets the value of the pickupCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPickupCalls() {
         return pickupCalls;
@@ -869,11 +869,11 @@ public class ExtensionPLInfo {
 
     /**
      * Sets the value of the pickupCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPickupCalls(String value) {
         this.pickupCalls = value;

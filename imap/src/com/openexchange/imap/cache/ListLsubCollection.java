@@ -85,7 +85,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
  * {@link ListLsubCollection}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ListLsubCollection {
@@ -114,7 +114,7 @@ final class ListLsubCollection {
 
     /**
      * Initializes a new {@link ListLsubCollection}.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param shared The shared namespaces
      * @param user The user namespaces
@@ -134,7 +134,7 @@ final class ListLsubCollection {
 
     /**
      * Initializes a new {@link ListLsubCollection}.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param shared The shared namespaces
      * @param user The user namespaces
@@ -160,7 +160,7 @@ final class ListLsubCollection {
 
     /**
      * Checks if specified full name starts with either shared or user namespace prefix.
-     * 
+     *
      * @param fullName The full name to check
      * @return <code>true</code> if full name starts with either shared or user namespace prefix; otherwise <code>false</code>
      */
@@ -194,7 +194,7 @@ final class ListLsubCollection {
 
     /**
      * Checks if associated mailbox is considered as MBox format.
-     * 
+     *
      * @return {@link Boolean#TRUE} for MBox format, {@link Boolean#FALSE} for no MBOX format or <code>null</code> for undetermined
      */
     public Boolean consideredAsMBox() {
@@ -203,7 +203,7 @@ final class ListLsubCollection {
 
     /**
      * Checks if this collection is marked as deprecated.
-     * 
+     *
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
     public boolean isDeprecated() {
@@ -223,7 +223,7 @@ final class ListLsubCollection {
 
     /**
      * Removes the associated entry.
-     * 
+     *
      * @param fullName The full name
      */
     public void remove(final String fullName) {
@@ -245,14 +245,24 @@ final class ListLsubCollection {
                 parent.removeChild(entry);
             }
             for (final ListLsubEntry child : entry.getChildrenSet()) {
-                removeFrom(child.getFullName(), map);
+                removeFromMap(child.getFullName(), map);
             }
+        }
+    }
+
+    private static void removeFromMap(final String fullName, final ConcurrentMap<String, ListLsubEntryImpl> map) {
+        final ListLsubEntryImpl entry = map.remove(fullName);
+        if (null == entry) {
+            return;
+        }
+        for (final ListLsubEntry child : entry.getChildrenSet()) {
+            removeFromMap(child.getFullName(), map);
         }
     }
 
     /**
      * Re-initializes this collection.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
@@ -265,7 +275,7 @@ final class ListLsubCollection {
 
     /**
      * Re-initializes this collection.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
@@ -502,7 +512,8 @@ final class ListLsubCollection {
     }
 
     private static void dropEntryFrom(final ListLsubEntryImpl lle, final ConcurrentMap<String, ListLsubEntryImpl> map) {
-        for (final ListLsubEntryImpl child : lle.getChildrenSet()) {
+        final Set<ListLsubEntryImpl> tmp = new HashSet<ListLsubEntryImpl>(lle.getChildrenSet());
+        for (final ListLsubEntryImpl child : tmp) {
             dropEntryFrom(child, map);
         }
         map.remove(lle.getFullName());
@@ -517,7 +528,7 @@ final class ListLsubCollection {
 
     /**
      * Gets current entry for specified full name.
-     * 
+     *
      * @param fullName The full name of the starting folder node
      * @param imapFolder The connected IMAP folder
      * @throws MailException If update fails
@@ -541,7 +552,7 @@ final class ListLsubCollection {
 
     /**
      * Updates a sub-tree starting at specified full name.
-     * 
+     *
      * @param fullName The full name of the starting folder node
      * @param imapStore The connected IMAP store
      * @param doStatus Whether STATUS command shall be performed
@@ -558,7 +569,7 @@ final class ListLsubCollection {
 
     /**
      * Updates a sub-tree starting at specified full name.
-     * 
+     *
      * @param fullName The full name of the starting folder node
      * @param imapFolder An IMAP folder providing connected protocol
      * @param doStatus Whether STATUS command shall be performed
@@ -578,7 +589,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a dummy LSUB "" "" which seems to reveal folders which got not displayed before... Please don't ask why.
-     * 
+     *
      * @param protocol The IMAP protocol
      */
     protected void doDummyLsub(final IMAPProtocol protocol) {
@@ -612,7 +623,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a LIST/LSUB command with specified IMAP protocol.
-     * 
+     *
      * @param protocol The IMAP protocol
      * @param lsub <code>true</code> to perform a LSUB command; otherwise <code>false</code> for LIST
      * @throws ProtocolException If a protocol error occurs
@@ -786,7 +797,7 @@ final class ListLsubCollection {
 
     /**
      * Handles specified parent map.
-     * 
+     *
      * @param parentMap The parent map
      * @param separator The separator character
      * @param rootEntry The root entry
@@ -864,7 +875,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a LIST command for root folder with specified IMAP protocol.
-     * 
+     *
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
@@ -912,7 +923,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a LIST command for a single folder with specified IMAP protocol.
-     * 
+     *
      * @param protocol The IMAP protocol
      * @param fullName The full name
      * @throws ProtocolException If a protocol error occurs
@@ -959,7 +970,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a check if denoted folder is subscribed.
-     * 
+     *
      * @param protocol The IMAP protocol
      * @param mbox The encoded full name
      * @return <code>true</code> if subscribed; otherwise <code>false</code>
@@ -999,7 +1010,7 @@ final class ListLsubCollection {
 
     /**
      * Adds single entry to collection.
-     * 
+     *
      * @param fullName The full name
      * @param imapStore The IMAP store
      * @param doStatus Whether to perform STATUS command
@@ -1016,7 +1027,7 @@ final class ListLsubCollection {
 
     /**
      * Adds single entry to collection.
-     * 
+     *
      * @param fullName The full name
      * @param imapFolder The IMAP folder
      * @param doStatus Whether to perform STATUS command
@@ -1051,7 +1062,7 @@ final class ListLsubCollection {
 
     /**
      * Performs a LIST/LSUB command for a single folder with specified IMAP protocol.
-     * 
+     *
      * @param fullName The full name
      * @param protocol The IMAP protocol
      * @throws ProtocolException If a protocol error occurs
@@ -1194,7 +1205,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the time stamp when last initialization was performed.
-     * 
+     *
      * @return The stamp of last initialization
      */
     public long getStamp() {
@@ -1203,7 +1214,7 @@ final class ListLsubCollection {
 
     /**
      * Checks for any subscribed subfolder in IMAP folder tree located below denoted folder.
-     * 
+     *
      * @param fullName The full name
      * @return <code>true</code> if a subscribed subfolder exists; otherwise <code>false</code>
      */
@@ -1224,7 +1235,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the LIST entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return The LIST entry for specified full name or <code>null</code>
      */
@@ -1235,7 +1246,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the LSUB entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return The LSUB entry for specified full name or <code>null</code>
      */
@@ -1334,7 +1345,7 @@ final class ListLsubCollection {
     private String parseEncodedFullName(final IMAPResponse listResponse) {
         /*-
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
-         * 
+         *
          * Consume attributes
          */
         listResponse.readSimpleList();
@@ -1362,7 +1373,7 @@ final class ListLsubCollection {
 
     /**
      * Creates an empty {@link ListLsubEntry} for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return An empty {@link ListLsubEntry}
      */
@@ -1564,7 +1575,7 @@ final class ListLsubCollection {
 
         /**
          * Sets this LIST/LSUB entry's parent.
-         * 
+         *
          * @param parent The parent
          */
         protected void setParent(final ListLsubEntryImpl parent) {
@@ -1577,7 +1588,7 @@ final class ListLsubCollection {
 
         /**
          * Gets the parent.
-         * 
+         *
          * @return The parent
          */
         protected ListLsubEntryImpl getParentImpl() {
@@ -1586,7 +1597,7 @@ final class ListLsubCollection {
 
         /**
          * Adds specified LIST/LSUB entry to this LIST/LSUB entry's children
-         * 
+         *
          * @param child The child LIST/LSUB entry
          */
         protected void addChild(final ListLsubEntryImpl child) {
@@ -1609,7 +1620,7 @@ final class ListLsubCollection {
 
         /**
          * Removes specified LIST/LSUB entry from this LIST/LSUB entry's children
-         * 
+         *
          * @param child The child LIST/LSUB entry
          */
         protected void removeChild(final ListLsubEntryImpl child) {
@@ -1624,7 +1635,7 @@ final class ListLsubCollection {
 
         /**
          * Adds (if absent) specified LIST/LSUB entry to this LIST/LSUB entry's children
-         * 
+         *
          * @param child The child LIST/LSUB entry
          */
         protected void addChildIfAbsent(final ListLsubEntryImpl child) {
@@ -1692,7 +1703,7 @@ final class ListLsubCollection {
 
         /**
          * Sets the status.
-         * 
+         *
          * @param status The status
          */
         protected void setStatus(final int[] status) {
@@ -1722,7 +1733,7 @@ final class ListLsubCollection {
 
         /**
          * Gets MYRIGHTS.
-         * 
+         *
          * @return MYRIGHTS or <code>null</code> if absent
          */
         public Rights getMyRights() {
@@ -1731,7 +1742,7 @@ final class ListLsubCollection {
 
         /**
          * Sets the ACLs.
-         * 
+         *
          * @param acls The ACL list
          */
         protected void setAcls(final List<ACL> acls) {
@@ -1818,7 +1829,7 @@ final class ListLsubCollection {
 
         /**
          * Sets the namespace flag
-         * 
+         *
          * @param namespace The namespace flag
          */
         protected ListLsubEntryImpl setNamespace(final boolean namespace) {

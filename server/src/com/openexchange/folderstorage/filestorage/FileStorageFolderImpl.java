@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link FileStorageFolderImpl} - A file storage folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStorageFolderImpl extends AbstractFolder {
@@ -88,7 +88,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * Initializes a new {@link FileStorageFolderImpl} from given messaging folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param fsFolder The underlying file storage folder
      * @param accountId The account identifier
      * @param serviceId The service identifier
@@ -154,6 +154,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         // Nothing to do
     }
 
+    @Override
     public boolean isGlobalID() {
         return false;
     }

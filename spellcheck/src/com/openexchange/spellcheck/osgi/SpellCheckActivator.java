@@ -62,9 +62,9 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SpellCheckActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SpellCheckActivator extends DeferredActivator {
 
@@ -83,7 +83,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
 	 */
 	@Override
@@ -112,7 +112,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
 	 */
 	@Override
@@ -153,7 +153,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
 	 */
 	@Override

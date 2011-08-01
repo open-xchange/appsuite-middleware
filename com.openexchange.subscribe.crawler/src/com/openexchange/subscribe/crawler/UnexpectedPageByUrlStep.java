@@ -61,7 +61,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 /**
  * This Step gets a page reachable via Url in the current context (WebClient).
  * The UnexpectedPage output-type is what is returned by HTMLUnit when a file is found at an URL, so this can be used to pass on files to the next Step.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class UnexpectedPageByUrlStep extends AbstractStep<UnexpectedPage, Object> {

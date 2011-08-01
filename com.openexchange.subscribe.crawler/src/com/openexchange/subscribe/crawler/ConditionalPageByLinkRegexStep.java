@@ -70,16 +70,16 @@ public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
      * Initializes a new {@link ConditionalPageByLinkRegexStep}.
      */
     public ConditionalPageByLinkRegexStep(){
-        
+
     }
-    
+
     /**
      * Initializes a new {@link ConditionalPageByLinkRegexStep}.
      */
     public ConditionalPageByLinkRegexStep(final String description, final String linkRegex) {
         super(description, linkRegex);
     }
-    
+
     @Override
     public void execute(final WebClient webClient) throws OXException {
         try {
@@ -95,7 +95,7 @@ public class ConditionalPageByLinkRegexStep extends PageByLinkRegexStep {
                     output = input;
                 }
             }
-                       
+
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);

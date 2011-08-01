@@ -56,7 +56,7 @@ import com.openexchange.sim.SimBuilder;
 
 /**
  * {@link FileTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileTest extends TestCase {
@@ -67,9 +67,9 @@ public class FileTest extends TestCase {
 
     public TestFriendlyInfostoreRequest request() {
         return request = new TestFriendlyInfostoreRequest() {
-            
+
             private IDBasedFileAccess files = null;
-            
+
             @Override
             public IDBasedFileAccess getFileAccess() {
                 if(files != null) {
@@ -82,7 +82,7 @@ public class FileTest extends TestCase {
                 }
                 return files;
             }
-            
+
         };
     }
 

@@ -60,27 +60,27 @@ import com.openexchange.file.storage.json.FileTest;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class FileActionTest extends FileTest {
-    
+
     protected AbstractFileAction action;
     protected AJAXRequestResult result;
-    
+
     protected CollectingFileWriter writer = new CollectingFileWriter();
-    
+
     @Override
     public void setUp() throws Exception {
         action = createAction();
     }
-    
+
     public AJAXRequestResult perform() throws OXException {
         return result = action.handle(request);
     }
-    
+
     public CollectingFileWriter writer() {
         return writer;
     }
-    
+
     public abstract AbstractFileAction createAction();
-    
-    
-    
+
+
+
  }

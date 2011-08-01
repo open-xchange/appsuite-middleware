@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Increase/decrease with limit for PL
- * 
+ *
  * <p>Java class for limit complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="limit">
  *   &lt;complexContent>
@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "limit", propOrder = {
@@ -47,11 +47,11 @@ public class Limit {
 
     /**
      * Gets the value of the value property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getValue() {
         return value;
@@ -59,11 +59,11 @@ public class Limit {
 
     /**
      * Sets the value of the value property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setValue(BigInteger value) {
         this.value = value;
@@ -71,11 +71,11 @@ public class Limit {
 
     /**
      * Gets the value of the increase property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIncrease() {
         return increase;
@@ -83,11 +83,11 @@ public class Limit {
 
     /**
      * Sets the value of the increase property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIncrease(String value) {
         this.increase = value;
@@ -95,11 +95,11 @@ public class Limit {
 
     /**
      * Gets the value of the decrease property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDecrease() {
         return decrease;
@@ -107,11 +107,11 @@ public class Limit {
 
     /**
      * Sets the value of the decrease property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDecrease(String value) {
         this.decrease = value;
@@ -119,11 +119,11 @@ public class Limit {
 
     /**
      * Gets the value of the unlimited property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isUnlimited() {
         return unlimited;
@@ -131,11 +131,11 @@ public class Limit {
 
     /**
      * Sets the value of the unlimited property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUnlimited(Boolean value) {
         this.unlimited = value;

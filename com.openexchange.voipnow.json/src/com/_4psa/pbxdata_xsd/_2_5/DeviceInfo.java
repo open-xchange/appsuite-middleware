@@ -14,11 +14,11 @@ import com._4psa.pbxmessages_xsd._2_5.EditDeviceRequest;
 
 /**
  * Phone provisioning data
- * 
+ *
  * <p>Java class for DeviceInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DeviceInfo">
  *   &lt;complexContent>
@@ -56,8 +56,8 @@ import com._4psa.pbxmessages_xsd._2_5.EditDeviceRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DeviceInfo", propOrder = {
@@ -114,11 +114,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Object }
-     *     
+     *
      */
     public Object getName() {
         return name;
@@ -126,11 +126,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Object }
-     *     
+     *
      */
     public void setName(Object value) {
         this.name = value;
@@ -138,11 +138,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the ip property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIP() {
         return ip;
@@ -150,11 +150,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the ip property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIP(String value) {
         this.ip = value;
@@ -162,11 +162,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the phoneModel property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneModel() {
         return phoneModel;
@@ -174,11 +174,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the phoneModel property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneModel(String value) {
         this.phoneModel = value;
@@ -186,11 +186,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the firmware property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFirmware() {
         return firmware;
@@ -198,11 +198,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the firmware property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFirmware(String value) {
         this.firmware = value;
@@ -210,11 +210,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the firmwareVersion property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFirmwareVersion() {
         return firmwareVersion;
@@ -222,11 +222,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the firmwareVersion property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFirmwareVersion(String value) {
         this.firmwareVersion = value;
@@ -234,11 +234,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the phoneMAC property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneMAC() {
         return phoneMAC;
@@ -246,11 +246,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the phoneMAC property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneMAC(String value) {
         this.phoneMAC = value;
@@ -258,11 +258,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the adminUsername property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAdminUsername() {
         return adminUsername;
@@ -270,11 +270,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the adminUsername property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAdminUsername(String value) {
         this.adminUsername = value;
@@ -282,11 +282,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the adminPass property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAdminPass() {
         return adminPass;
@@ -294,11 +294,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the adminPass property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAdminPass(String value) {
         this.adminPass = value;
@@ -306,11 +306,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the updateInterval property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUpdateInterval() {
         return updateInterval;
@@ -318,11 +318,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the updateInterval property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUpdateInterval(BigInteger value) {
         this.updateInterval = value;
@@ -330,11 +330,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the protocol property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getProtocol() {
         return protocol;
@@ -342,11 +342,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the protocol property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setProtocol(String value) {
         this.protocol = value;
@@ -354,11 +354,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the macBased property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMACBased() {
         return macBased;
@@ -366,11 +366,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the macBased property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMACBased(Boolean value) {
         this.macBased = value;
@@ -378,11 +378,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the tplID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTplID() {
         return tplID;
@@ -390,11 +390,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the tplID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTplID(BigInteger value) {
         this.tplID = value;
@@ -402,11 +402,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the passType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getPassType() {
         return passType;
@@ -414,11 +414,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the passType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setPassType(BigInteger value) {
         this.passType = value;
@@ -426,11 +426,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the notes property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotes() {
         return notes;
@@ -438,11 +438,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the notes property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotes(String value) {
         this.notes = value;
@@ -450,11 +450,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -462,11 +462,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -474,11 +474,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the connectionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getConnectionType() {
         return connectionType;
@@ -486,11 +486,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the connectionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setConnectionType(String value) {
         this.connectionType = value;
@@ -498,11 +498,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the connectionIP property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getConnectionIP() {
         return connectionIP;
@@ -510,11 +510,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the connectionIP property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setConnectionIP(String value) {
         this.connectionIP = value;
@@ -522,11 +522,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the mask property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMask() {
         return mask;
@@ -534,11 +534,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the mask property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMask(String value) {
         this.mask = value;
@@ -546,11 +546,11 @@ public class DeviceInfo {
 
     /**
      * Gets the value of the gateway property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getGateway() {
         return gateway;
@@ -558,11 +558,11 @@ public class DeviceInfo {
 
     /**
      * Sets the value of the gateway property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setGateway(String value) {
         this.gateway = value;

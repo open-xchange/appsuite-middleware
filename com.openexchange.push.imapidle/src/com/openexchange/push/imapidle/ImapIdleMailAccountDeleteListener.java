@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 
 /**
  * {@link ImapIdleMailAccountDeleteListener} - The {@link MailAccountDeleteListener} for IMAP IDLE bundle.
- * 
+ *
  */
 public final class ImapIdleMailAccountDeleteListener implements MailAccountDeleteListener {
 

@@ -19,11 +19,11 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailNotifyPushUdpSocketListener.class));
 
     private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
-    
+
     private static DatagramSocket datagramSocket = null;
-    
+
     private final String imapLoginDelimiter;
-    
+
     public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
         final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
@@ -39,7 +39,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get internet addres to given hostname " + udpListenHost);
         }
     }
-    
+
     private void start() {
         while (true) {
             final DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
@@ -63,16 +63,16 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private String getMailboxName(final DatagramPacket datagramPacket) {
         /* TODO: this currently works with cyrus notify must be configurable somehow later
-         * 
+         *
          * Format:
          *   notifyd/notifyd.c:
          *   method NUL class NUL priority NUL user NUL mailbox NUL
          *   nopt NUL N(option NUL) message NUL
-         *   
+         *
          * Example:
-         * 
+         *
          *  log\0MAIL\0\0postmaster\0INBOX\00\0From: root@oxsles11.example.com (root)
-         *  Subject: asdf To: postmaster@example.com 
+         *  Subject: asdf To: postmaster@example.com
          */
 
         String packetDataString = new String(datagramPacket.getData());

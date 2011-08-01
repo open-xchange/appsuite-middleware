@@ -478,7 +478,7 @@ public final class Names {
    public static final String INETORGPERSON_ATTRIBUTE_EMPLOYEETYPE_NAME =
       "inetOrgPersonAttributeemployeeTypeName";
 
-   public static final String INETORGPERSON_ATTRIBUTE_HOMEPHONE_NAME = 
+   public static final String INETORGPERSON_ATTRIBUTE_HOMEPHONE_NAME =
      "inetOrgPersonAttributehomePhoneName";
 
    public static final String INETORGPERSON_ATTRIBUTE_HOMEPOSTALADDRESS_NAME =
@@ -615,7 +615,7 @@ public final class Names {
    public static final String OXUSEROBJECT_ATTRIBUTE_STATE_NAME =
       "OXUserObjectAttributeStateName";
 
-   public static final String OXUSEROBJECT_ATTRIBUTE_TAXID_NAME = 
+   public static final String OXUSEROBJECT_ATTRIBUTE_TAXID_NAME =
      "OXUserObjectAttributeTaxIDName";
 
    public static final String OXUSEROBJECT_ATTRIBUTE_TELEASSISTANT_NAME =

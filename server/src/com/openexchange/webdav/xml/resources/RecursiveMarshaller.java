@@ -61,13 +61,14 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 
 	private final ResourceMarshaller delegate;
 	private final int depth;
-	
+
 	public RecursiveMarshaller(final ResourceMarshaller delegate, final int depth) {
 		this.delegate = delegate;
 		this.depth = depth;
 	}
 
-	public List<Element> marshal(final WebdavResource resource) throws OXException  {
+	@Override
+    public List<Element> marshal(final WebdavResource resource) throws OXException  {
 		final List<Element> list = new ArrayList<Element>();
 		final List<Element> delegateMarshal = delegate.marshal(resource);
 		list.addAll(delegateMarshal);
@@ -75,7 +76,8 @@ public class RecursiveMarshaller implements ResourceMarshaller {
 			try {
 				OXCollections.inject(list, resource.toCollection().toIterable(depth), new Injector<List<Element>, WebdavResource>(){
 
-					public List<Element> inject(final List<Element> list, final WebdavResource element) {
+					@Override
+                    public List<Element> inject(final List<Element> list, final WebdavResource element) {
 						try {
                             list.addAll(delegate.marshal(element));
                         } catch (OXException e) {
@@ -83,7 +85,7 @@ public class RecursiveMarshaller implements ResourceMarshaller {
                         }
 						return list;
 					}
-					
+
 				});
 			} catch (final OXException e) {
 				return list;

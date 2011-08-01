@@ -92,8 +92,9 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         assertEquals("Should contain two elements", 2, partitions.getAppointments().size());
         boolean monthbreakFound = false;
         for (CPFormattingInformation info : partitions.getFormattingInformation()) {
-            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK)
+            if (info.getPosition() == 1 && info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK) {
                 monthbreakFound = true;
+            }
         }
         assertTrue("Should contain a month break after the first element", monthbreakFound);
     }
@@ -196,9 +197,11 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
 
         List<CPFormattingInformation> infos = partitions.getFormattingInformation();
         List<Date> months = new LinkedList<Date>();
-        for (CPFormattingInformation info : infos)
-            if (info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK)
+        for (CPFormattingInformation info : infos) {
+            if (info.getType() == AbstractWeekPartitioningStrategy.MONTHBREAK) {
                 months.add((Date) info.getAdditionalInformation());
+            }
+        }
 
         assertEquals("Should contain twelve months per year", 12, months.size());
     }
@@ -254,13 +257,17 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         int daysBeforeWednesday = 0, daysAfterWednesday = 0;
         boolean startCounting = false;
         for (CPFormattingInformation info : infos) {
-            if (info.getPosition() == 2 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK)
+            if (info.getPosition() == 2 && info.getType() == AbstractWeekPartitioningStrategy.WEEKBREAK) {
                 startCounting = true;
-            if (startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK)
-                if (info.getPosition() == 2)
+            }
+            if (startCounting && info.getType() == AbstractWeekPartitioningStrategy.DAYBREAK) {
+                if (info.getPosition() == 2) {
                     daysBeforeWednesday++;
-            if (info.getPosition() == 3)
+                }
+            }
+            if (info.getPosition() == 3) {
                 daysAfterWednesday++;
+            }
         }
         assertEquals("Should find 3 daybreaks in week before Wednesday", 3, daysBeforeWednesday);
         assertEquals("Should find 2 daybreaks in week after Wednesday", 2, daysAfterWednesday);
@@ -293,14 +300,18 @@ public class MonthPartitioningTest extends AbstractPartitioningTest {
         int daysCounted = 0, fillersCounted = 0;
         boolean doCounting = false;
         for (CPFormattingInformation info : partition.getFormattingInformation()) {
-            if (info.getType() == MonthPartitioningStrategy.MONTHBREAK)
+            if (info.getType() == MonthPartitioningStrategy.MONTHBREAK) {
                 doCounting = true;
-            if (info.getType() == MonthPartitioningStrategy.WEEKBREAK)
+            }
+            if (info.getType() == MonthPartitioningStrategy.WEEKBREAK) {
                 doCounting = false;
-            if (doCounting && info.getType() == MonthPartitioningStrategy.FILLDAY)
+            }
+            if (doCounting && info.getType() == MonthPartitioningStrategy.FILLDAY) {
                 fillersCounted++;
-            if (doCounting && info.getType() == MonthPartitioningStrategy.DAYBREAK)
+            }
+            if (doCounting && info.getType() == MonthPartitioningStrategy.DAYBREAK) {
                 daysCounted++;
+            }
         }
         assertEquals("First week should have four normal days", 4, daysCounted);
         assertEquals("First week should have three filler markers", 3, fillersCounted);

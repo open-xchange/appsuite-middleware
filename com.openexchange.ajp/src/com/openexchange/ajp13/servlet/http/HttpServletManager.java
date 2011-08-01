@@ -61,7 +61,7 @@ import com.openexchange.ajp13.servlet.http.manager.NonBlockingHttpServletManager
 
 /**
  * {@link HttpServletManager} - The HTTP servlet manager
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpServletManager {
@@ -77,7 +77,7 @@ public class HttpServletManager {
 
     /**
      * Determines the instance of {@link HttpServlet} that corresponds to given path; e.g. <code>/servlet/path</code>.
-     * 
+     *
      * @param path The servlet path to lookup
      * @param pathStorage A container to keep the actual servlet path contained in servlet mapping for later servlet release
      * @return The instance of {@link HttpServlet} or <code>null</code> if no instance is bound to specified path
@@ -88,7 +88,7 @@ public class HttpServletManager {
 
     /**
      * Puts a servlet bound to given ID into this servlet manager's pool.
-     * 
+     *
      * @param path The servlet's path
      * @param servletObj The servlet instance
      */
@@ -98,7 +98,7 @@ public class HttpServletManager {
 
     /**
      * Registers a servlet if not already contained.
-     * 
+     *
      * @param id The servlet's ID or alias (e.g. <code>/my/servlet</code>)
      * @param servlet The servlet instance
      * @param initParams The servlet's init parameters
@@ -110,7 +110,7 @@ public class HttpServletManager {
 
     /**
      * Unregisters the servlet bound to given ID from mapping.
-     * 
+     *
      * @param id The servlet ID or alias
      */
     public static final void unregisterServlet(final String id) {
@@ -119,7 +119,7 @@ public class HttpServletManager {
 
     /**
      * Destroys the servlet that is bound to given ID.
-     * 
+     *
      * @param id The servlet ID
      * @param servletObj The servlet instance
      */
@@ -129,7 +129,7 @@ public class HttpServletManager {
 
     /**
      * Initializes HTTP servlet manager with specified initial servlet constructor map.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map
      * @param nonBlocking <code>true</code> to use a non-blocking {@link IHttpServletManager servlet manager}; otherwise <code>false</code>
      *            to use a concurrent {@link IHttpServletManager servlet manager}

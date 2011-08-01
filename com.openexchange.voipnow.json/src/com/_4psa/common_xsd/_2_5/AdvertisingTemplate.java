@@ -10,11 +10,11 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  * Advertisig template used for client accounts.
- * 
+ *
  * <p>Java class for advertisingTemplate complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="advertisingTemplate">
  *   &lt;simpleContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "advertisingTemplate", propOrder = {
@@ -43,11 +43,11 @@ public class AdvertisingTemplate {
 
     /**
      * Gets the value of the value property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getValue() {
         return value;
@@ -55,11 +55,11 @@ public class AdvertisingTemplate {
 
     /**
      * Sets the value of the value property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setValue(String value) {
         this.value = value;
@@ -67,11 +67,11 @@ public class AdvertisingTemplate {
 
     /**
      * Gets the value of the globalDefault property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isGlobalDefault() {
         if (globalDefault == null) {
@@ -83,11 +83,11 @@ public class AdvertisingTemplate {
 
     /**
      * Sets the value of the globalDefault property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setGlobalDefault(Boolean value) {
         this.globalDefault = value;
@@ -95,11 +95,11 @@ public class AdvertisingTemplate {
 
     /**
      * Gets the value of the resellerDefault property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isResellerDefault() {
         if (resellerDefault == null) {
@@ -111,11 +111,11 @@ public class AdvertisingTemplate {
 
     /**
      * Sets the value of the resellerDefault property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setResellerDefault(Boolean value) {
         this.resellerDefault = value;

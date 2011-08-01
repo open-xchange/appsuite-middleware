@@ -95,11 +95,11 @@ public class OSGiSubscriptionSourceCollector extends SubscriptionSourceCollector
             // IGNORE, we didn't specify a filter, so won't happen
         }
     }
-    
+
     public void close() {
         this.tracker.close();
     }
-    
+
     public Object addingService(final ServiceReference reference) {
         final SubscribeService subscribeService = (SubscribeService) context.getService(reference);
         addSubscribeService(subscribeService);

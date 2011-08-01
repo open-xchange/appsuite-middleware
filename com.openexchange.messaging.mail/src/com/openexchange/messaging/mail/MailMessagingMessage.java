@@ -60,7 +60,7 @@ import com.openexchange.messaging.MessagingMessage;
 
 /**
  * {@link MailMessagingMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -77,7 +77,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Initializes a new {@link MailMessagingMessage}.
-     * 
+     *
      * @param mailMessage The mail message
      */
     public MailMessagingMessage(final MailMessage mailMessage) {
@@ -91,7 +91,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the color label.
-     * 
+     *
      * @param colorLabel The color label
      */
     public void setColorLabel(final int colorLabel) {
@@ -104,7 +104,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the flags.
-     * 
+     *
      * @param flags The flags
      */
     public void setFlags(final int flags) {
@@ -118,7 +118,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets specified user flags.
-     * 
+     *
      * @param userFlags The user flags to set
      */
     public void setUserFlags(final Collection<String> userFlags) {
@@ -135,7 +135,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the folder fullname.
-     * 
+     *
      * @param folder The folder fullname to set
      */
     public void setFolder(final String folder) {
@@ -149,7 +149,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the received date.
-     * 
+     *
      * @param receivedDate The received date
      */
     public void setReceivedDate(final long receivedDate) {
@@ -162,7 +162,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the thread level.
-     * 
+     *
      * @param threadLevel The thread level
      */
     public void setThreadLevel(final int threadLevel) {
@@ -175,7 +175,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the message identifier.
-     * 
+     *
      * @param id The message identifier
      */
     public void setId(final String id) {
@@ -188,7 +188,7 @@ public class MailMessagingMessage extends MailMessagingBodyPart implements Messa
 
     /**
      * Sets the picture URL.
-     * 
+     *
      * @param picture The picture URL
      */
     public void setPicture(final String picture) {

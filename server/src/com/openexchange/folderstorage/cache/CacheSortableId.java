@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.SortableId;
 
 /**
  * {@link CacheSortableId}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheSortableId implements SortableId {
@@ -66,7 +66,7 @@ public final class CacheSortableId implements SortableId {
 
     /**
      * Initializes a new {@link CacheSortableId}.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      * @param name The name
@@ -80,7 +80,7 @@ public final class CacheSortableId implements SortableId {
 
     /**
      * Initializes a new {@link CacheSortableId}.
-     * 
+     *
      * @param folderId The folder identifier
      * @param ordinal The ordinal
      */
@@ -91,18 +91,22 @@ public final class CacheSortableId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         return Priority.NORMAL;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         if (o instanceof CacheSortableId) {
             final int thisVal = ordinal;

@@ -81,7 +81,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link OXFolderAccess} - Provides access to OX folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXFolderAccess {
@@ -101,7 +101,7 @@ public class OXFolderAccess {
      * <p>
      * Since the access is created with a connection with "read-only" capability, an appropriate connection is going to be fetched from DB
      * pool every time when needed.
-     * 
+     *
      * @param ctx The context
      */
     public OXFolderAccess(final Context ctx) {
@@ -110,7 +110,7 @@ public class OXFolderAccess {
 
     /**
      * Initializes a new {@link OXFolderAccess}.
-     * 
+     *
      * @param readCon A connection with "read-only" capability or <code>null</code> to let the access fetch an appropriate connection from
      *            DB pool every time when needed
      * @param ctx The context
@@ -123,7 +123,7 @@ public class OXFolderAccess {
 
     /**
      * Tests if the folder associated with specified folder ID exists.
-     * 
+     *
      * @param folderId The folder ID
      * @return <code>true</code> if the folder associated with specified folder ID exists; otherwise <code>false</code>
      * @throws OXException If an error occurs while checking existence
@@ -143,7 +143,7 @@ public class OXFolderAccess {
     /**
      * Loads matching <code>com.openexchange.groupware.container.FolderObject</code> instance either from cache (if enabled) or from
      * underlying storage.
-     * 
+     *
      * @param folderId - the folder ID
      * @return matching <code>com.openexchange.groupware.container.FolderObject</code> instance
      * @throws OXException
@@ -160,7 +160,7 @@ public class OXFolderAccess {
 
     /**
      * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances which match given folder IDs.
-     * 
+     *
      * @param folderIDs - the folder IDs as an <code>int</code> array
      * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
      * @throws OXException
@@ -182,7 +182,7 @@ public class OXFolderAccess {
 
     /**
      * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances fills which match given folder IDs.
-     * 
+     *
      * @param folderIDs - the folder IDs backed by a <code>java.util.Collection</code>
      * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
      * @throws OXException
@@ -207,7 +207,7 @@ public class OXFolderAccess {
     /**
      * Determines folder type. The returned value is either <code>FolderObject.PRIVATE</code>, <code>FolderObject.PUBLIC</code> or
      * <code>FolderObject.SHARED</code>. <b>NOTE:</b> This method assumes that given user has read access!
-     * 
+     *
      * @param folderId - the folder ID
      * @param userId - the user ID
      * @return the folder type
@@ -221,7 +221,7 @@ public class OXFolderAccess {
      * Determines the <b>plain</b> folder type meaning the returned value is either <code>FolderObject.PRIVATE</code> or
      * <code>FolderObject.PUBLIC</code>. <b>NOTE:</b> Do not use this method to check if folder is shared (<code>FolderObject.SHARED</code>
      * ), use {@link #getFolderType(int, int)} instead.
-     * 
+     *
      * @param folderId - the folder ID
      * @return the folder type
      * @throws OXException
@@ -233,7 +233,7 @@ public class OXFolderAccess {
 
     /**
      * Determines folder module.
-     * 
+     *
      * @param folderId - the folder ID
      * @return folder module
      * @throws OXException
@@ -244,7 +244,7 @@ public class OXFolderAccess {
 
     /**
      * Determines folder owner.
-     * 
+     *
      * @param folderId - the folder ID
      * @return folder owner
      * @throws OXException
@@ -255,7 +255,7 @@ public class OXFolderAccess {
 
     /**
      * Determines if folder is shared. <b>NOTE:</b> This method assumes that given user has read access!
-     * 
+     *
      * @param folderId - the folder ID
      * @param userId - the user ID
      * @return <code>true</code> if folder is shared, otherwise <code>false</code>
@@ -267,7 +267,7 @@ public class OXFolderAccess {
 
     /**
      * Determines if folder is an user's default folder.
-     * 
+     *
      * @param folderId - the folder ID
      * @return <code>true</code> if folder is marked as a default folder, otherwise <code>false</code>
      * @throws OXException
@@ -278,7 +278,7 @@ public class OXFolderAccess {
 
     /**
      * Determines given folder's name.
-     * 
+     *
      * @param folderId - the folder ID
      * @return folder name
      * @throws OXException
@@ -289,7 +289,7 @@ public class OXFolderAccess {
 
     /**
      * Determines given folder's parent ID.
-     * 
+     *
      * @param folderId - the folder ID
      * @return folder parent ID
      * @throws OXException
@@ -300,7 +300,7 @@ public class OXFolderAccess {
 
     /**
      * Determines given folder's last modifies date.
-     * 
+     *
      * @param folderId
      * @return folder's last modifies date
      * @throws OXException
@@ -311,7 +311,7 @@ public class OXFolderAccess {
 
     /**
      * Determines user's effective permission on the folder matching given folder ID.
-     * 
+     *
      * @param folderId - the folder ID
      * @param userId - the user ID
      * @param userConfig - the user configuration
@@ -331,7 +331,7 @@ public class OXFolderAccess {
 
     /**
      * Determines user's default folder of given module.
-     * 
+     *
      * @param userId - the user ID
      * @param module - the module
      * @return user's default folder of given module
@@ -360,7 +360,7 @@ public class OXFolderAccess {
      * <p>
      * <b>Note</b>: This method checks only by contained items and does <small><b>NOT</b></small> check by the user's effective folder
      * permission itself. Thus the user is supposed to hold sufficient folder permissions on specified folder.
-     * 
+     *
      * @param fo - the folder object
      * @param session - current user session
      * @param ctx - the context
@@ -408,7 +408,7 @@ public class OXFolderAccess {
 
     /**
      * Checks if given folder contains session-user-foreign objects.
-     * 
+     *
      * @param fo The folder to check
      * @param session The session
      * @param ctx The context
@@ -468,7 +468,7 @@ public class OXFolderAccess {
 
     /**
      * Checks if given folder is empty.
-     * 
+     *
      * @param fo The folder to check
      * @param session The session
      * @param ctx The context

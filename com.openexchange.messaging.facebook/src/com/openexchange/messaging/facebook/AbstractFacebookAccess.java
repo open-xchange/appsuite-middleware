@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractFacebookAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFacebookAccess {
@@ -138,7 +138,7 @@ public abstract class AbstractFacebookAccess {
 
     /**
      * URL-encodes specified string.
-     * 
+     *
      * @param string The string
      * @return The URL-encoded string
      */
@@ -154,7 +154,7 @@ public abstract class AbstractFacebookAccess {
 
     /**
      * Performs specified FQL query and returns its result as a JSON object.
-     * 
+     *
      * @param fqlQuery The FQL query
      * @return The queried JSON object
      * @throws OXException If FQL query fails
@@ -187,7 +187,7 @@ public abstract class AbstractFacebookAccess {
 
     /**
      * Performs specified FQL query and returns its result as a JSON result.
-     * 
+     *
      * @param fqlQuery The FQL query
      * @return The queried JSON result
      * @throws OXException If FQL query fails

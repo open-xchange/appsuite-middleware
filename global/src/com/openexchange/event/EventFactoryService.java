@@ -55,14 +55,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EventFactoryService} - Factory for events, e.g instances of {@link CommonEvent}, {@link RemoteEvent}, etc.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface EventFactoryService {
 
     /**
      * Creates a new common event from specified arguments.
-     * 
+     *
      * @param contextId The context ID
      * @param userId The user ID
      * @param affectedUsersWithFolder a map containing the affected users as keys and a set of folders to refresh as values.
@@ -79,7 +79,7 @@ public interface EventFactoryService {
 
     /**
      * Creates a new remote event from specified arguments.
-     * 
+     *
      * @param folderId The folder ID
      * @param userId The user ID
      * @param contextId The context ID

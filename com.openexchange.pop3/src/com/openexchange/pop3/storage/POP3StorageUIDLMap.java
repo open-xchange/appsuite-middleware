@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link POP3StorageUIDLMap} - Maps POP3 UIDL to a fullname-UID-pair.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface POP3StorageUIDLMap {
 
     /**
      * Gets the fullname-UID-pairs to specified POP3 UIDLs.
-     * 
+     *
      * @param uidls The POP3 UIDLs
      * @return The fullname-UID-pairs to specified POP3 UIDLs. If no mapping could be found the corresponding entry is <code>null</code>
      * @throws OXException If mapping retrieval fails
@@ -70,7 +70,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Gets the fullname-UID-pair to specified POP3 UIDL.
-     * 
+     *
      * @param uidls The POP3 UIDL
      * @return The fullname-UID-pair to specified POP3 UIDL or <code>null</code> if no such mapping exists
      * @throws OXException If mapping retrieval fails
@@ -79,7 +79,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Gets the POP3 UIDLs to specified fullname-UID-pairs.
-     * 
+     *
      * @param fullnameUIDPairs The fullname-UID-pairs
      * @return The POP3 UIDLs to specified fullname-UID-pairs
      * @throws OXException If mapping retrieval fails
@@ -88,7 +88,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Gets the POP3 UIDL to specified fullname-UID-pair.
-     * 
+     *
      * @param fullnameUIDPairs The fullname-UID-pair
      * @return The POP3 UIDL to specified fullname-UID-pair or <code>null</code> if no such mapping exists
      * @throws OXException If mapping retrieval fails
@@ -97,7 +97,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Adds specified mappings to this map.
-     * 
+     *
      * @param uidls The POP3 UIDLs
      * @param fullnameUIDPairs The fullname-UID-pairs. If no mapping could be found the corresponding entry is <code>null</code>
      * @throws OXException If adding mappings fails
@@ -106,7 +106,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Gets all mappings known by this UIDL map.
-     * 
+     *
      * @return All mappings known by this UIDL map
      * @throws OXException If mapping retrieval fails
      */
@@ -114,7 +114,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Deletes the mappings for specified UIDLs.
-     * 
+     *
      * @param uidls The UIDLs to clean from this map
      * @throws OXException If mapping deletion fails
      */
@@ -122,7 +122,7 @@ public interface POP3StorageUIDLMap {
 
     /**
      * Deletes the mappings for specified fullname-UID-pairs.
-     * 
+     *
      * @param fullnameUIDPairs The fullname-UID-pairs to clean from this map
      * @throws OXException If mapping deletion fails
      */

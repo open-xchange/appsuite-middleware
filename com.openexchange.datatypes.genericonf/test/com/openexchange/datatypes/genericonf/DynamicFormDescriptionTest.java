@@ -65,10 +65,10 @@ public class DynamicFormDescriptionTest extends TestCase {
     public void testMissingMandatories() {
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "Blupp");
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("login", "Login Name", true, null)).add(FormElement.password("password", "Password", true, null)).add(FormElement.input("other", "Other", true, null));
-        
+
         Set<String> missing = form.getMissingMandatoryFields(content);
         assertEquals(2, missing.size());
         assertTrue(missing.contains("password"));

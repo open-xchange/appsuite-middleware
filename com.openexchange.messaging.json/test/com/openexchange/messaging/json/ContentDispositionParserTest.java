@@ -69,57 +69,57 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 public class ContentDispositionParserTest extends TestCase {
     public void testParseComplex() throws JSONException, OXException {
         final ContentDispositionParser parser = new ContentDispositionParser();
-        
+
         assertTrue(parser.handles("content-disposition", null));
-        
+
         final JSONObject jsonCDisp = new JSONObject();
         jsonCDisp.put("type", "attachment");
-        
+
         final JSONObject params = new JSONObject();
         params.put("filename", "foo.dat");
-        
+
         jsonCDisp.put("params", params);
-        
+
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-    
+
         parser.parseAndAdd(headers, "content-disposition", jsonCDisp);
-        
+
         assertTrue(!headers.isEmpty());
-        
+
         final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
-        
+
         final ContentDisposition cDisp = (ContentDisposition) collection.iterator().next();
-        
+
         assertEquals("attachment", cDisp.getDisposition());
-    
+
         assertEquals("foo.dat", cDisp.getFilenameParameter());
     }
-    
-    
+
+
     public void testParseBasic() throws OXException, JSONException {
         final ContentDispositionParser parser = new ContentDispositionParser();
-        
+
         final String stringCDisp = "attachment;filename=foo.dat";
 
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-        
+
         parser.parseAndAdd(headers, "content-disposition", stringCDisp);
-        
+
         assertTrue(!headers.isEmpty());
-        
+
         final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
-        
+
         final ContentDisposition cDisp = (ContentDisposition) collection.iterator().next();
-        
+
         assertEquals("attachment", cDisp.getDisposition());
-    
+
         assertEquals("foo.dat", cDisp.getFilenameParameter());
 
     }
-    
-    
+
+
 }

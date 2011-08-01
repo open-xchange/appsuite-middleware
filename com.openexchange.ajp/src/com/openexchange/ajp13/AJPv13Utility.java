@@ -51,7 +51,7 @@ package com.openexchange.ajp13;
 
 /**
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Utility {
@@ -65,7 +65,7 @@ public final class AJPv13Utility {
 
     /**
      * Dumps given AJP package's bytes
-     * 
+     *
      * @param bytes The AJP package's bytes
      * @return A string representing formatted AJP package's bytes for logging purpose
      */
@@ -103,7 +103,7 @@ public final class AJPv13Utility {
 
     /**
      * Dumps given AJP package's bytes
-     * 
+     *
      * @param magic1 The first magic byte
      * @param magic2 The second magic byte
      * @param bytes The remaining AJP package's bytes
@@ -145,7 +145,7 @@ public final class AJPv13Utility {
 
     /**
      * Dumps specified byte.
-     * 
+     *
      * @param b The byte
      * @return A string representing the byte
      */
@@ -161,7 +161,7 @@ public final class AJPv13Utility {
 
     /**
      * Parses specified bytes' <code>int</code> value.
-     * 
+     *
      * @return The <code>int</code> value
      */
     public static int parseInt(final byte higher, final byte lower) {

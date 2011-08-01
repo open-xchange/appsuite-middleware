@@ -54,8 +54,8 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * This interface is used to abstract all LDAP specific operations. Through 
- * this interface several implementations to communicate with LDAP are 
+ * This interface is used to abstract all LDAP specific operations. Through
+ * this interface several implementations to communicate with LDAP are
  * possible and without many code changes
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
  */
 public interface LdapInterface {
 
-    
+
     public interface FillClosure {
 
         public void execute(LdapGetter ldapGetter) throws OXException;

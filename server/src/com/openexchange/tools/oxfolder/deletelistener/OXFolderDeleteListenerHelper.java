@@ -61,7 +61,7 @@ import com.openexchange.tools.oxfolder.deletelistener.sql.UserPermissionMerger;
 
 /**
  * {@link OXFolderDeleteListenerHelper} - Offers helper method related to {@link OXFolderDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderDeleteListenerHelper {
@@ -77,7 +77,7 @@ public final class OXFolderDeleteListenerHelper {
 
     /**
      * Ensures folder data consistency after user/group delete operation
-     * 
+     *
      * @param ctx The context
      * @throws OXException If checking folder data consistency fails
      */

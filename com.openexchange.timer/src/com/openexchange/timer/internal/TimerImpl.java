@@ -58,7 +58,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link TimerImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimerImpl implements TimerService {

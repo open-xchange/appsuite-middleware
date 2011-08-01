@@ -107,7 +107,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         component.getAlarms().add(alarm);
 
-        
+
     }
 
     private void emitTaskAlarm(final Task task, final VToDo component, final List<ConversionWarning> warnings) {
@@ -189,7 +189,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         final int size = alarms.size();
         for(int i = 0; i < size; i++) {
             final VAlarm alarm = (VAlarm) alarms.get(0);
-            
+
             if(null != alarm.getTrigger() && "DISPLAY".equalsIgnoreCase(alarm.getAction().getValue())) {
                 return alarm;
             }
@@ -198,5 +198,5 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
         return null;
     }
-    
+
 }

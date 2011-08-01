@@ -89,7 +89,7 @@ import com.openexchange.sessiond.SessiondService;
  * {@link SingletonMailAccessCache}).
  * <p>
  * Moreover it provides access to either message storage, folder storage and logic tools.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable {
@@ -186,7 +186,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Signal a closed {@link MailAccess} instance.
-     * 
+     *
      * @param mailAccess The mail access which has been closed
      */
     private static void signalClosed(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
@@ -208,7 +208,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Signals that specified {@link MailAccess} which shall be connected. Waiting if capacity bounds specified for a closed
      * {@link MailAccess} instance.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @param provider The mail provider
@@ -250,7 +250,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
         /*-
          * Wasn't possible to immediately add to queue:
-         * 
+         *
          * Perform blocking enqueue (waiting if necessary for space to become available).
          */
         try {
@@ -294,7 +294,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Initializes a new {@link MailAccess} for session user's default mail account.
-     * 
+     *
      * @param session The session
      */
     protected MailAccess(final Session session) {
@@ -303,7 +303,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Initializes a new {@link MailAccess}.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      */
@@ -317,7 +317,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the session associated with this {@link MailAccess} instance.
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -326,7 +326,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Sets the associated {@link MailProvider} instance.
-     * 
+     *
      * @param provider The mail provider
      * @return This instance with mail provider applied
      */
@@ -337,7 +337,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the associated {@link MailProvider} instance.
-     * 
+     *
      * @return The mail provider
      */
     public MailProvider getProvider() {
@@ -346,7 +346,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Adds given warnings.
-     * 
+     *
      * @param warnings The warnings to add
      */
     public void addWarnings(final Collection<OXException> warnings) {
@@ -355,7 +355,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets possible warnings.
-     * 
+     *
      * @return Possible warnings.
      */
     public Collection<OXException> getWarnings() {
@@ -373,7 +373,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Triggers all implementation-specific startup actions.
-     * 
+     *
      * @param mailAccess An instance of {@link MailAccess}
      * @throws OXException If implementation-specific startup fails
      */
@@ -383,7 +383,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Triggers all implementation-specific shutdown actions.
-     * 
+     *
      * @param mailAccess An instance of {@link MailAccess}
      * @throws OXException If implementation-specific shutdown fails
      */
@@ -398,7 +398,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the appropriate {@link IMailAccessCache mail access cache} instance.
-     * 
+     *
      * @return The mail access cache
      * @throws OXException If cache cannot be initialized
      */
@@ -411,7 +411,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session);
      * mailAccess.connect();
@@ -421,7 +421,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *  mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @return A proper instance of {@link MailAccess}
      * @throws OXException If instantiation fails or a caching error occurs
@@ -435,7 +435,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
      * mailAccess.connect();
@@ -445,7 +445,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * 	mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return A proper instance of {@link MailAccess}
@@ -486,7 +486,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         }
         /*-
          * Blocking enqueue performed:
-         * 
+         *
          * Re-check cache
          */
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
@@ -499,7 +499,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
      * mailAccess.connect();
@@ -509,7 +509,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *  mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return An appropriate {@link MailAccess mail access}
@@ -524,7 +524,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link #connect()} method is supposed to be invoked.
      * On finished work the final {@link #close(boolean)} must be called:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session, accountID);
      * mailAccess.connect();
@@ -534,7 +534,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *  mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param accountId The account identifier
@@ -582,7 +582,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the optional properties used on connect.
-     * 
+     *
      * @return the mailProperties
      */
     public Properties getMailProperties() {
@@ -591,7 +591,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Sets optional properties used on connect. Herewith additional properties can be applied and checked later on.
-     * 
+     *
      * @param mailProperties The properties
      */
     public void setMailProperties(final Properties mailProperties) {
@@ -602,7 +602,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Checks if all necessary fields are set in this access object.
      * <p>
      * This routine is implicitly invoked by {@link #connect()}.
-     * 
+     *
      * @throws OXException If a necessary field is missing
      * @see #connect()
      */
@@ -635,7 +635,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * Default implementation just delegates to {@link #connect()} but may be overridden in implementing subclass if not appropriate or a
      * faster way can be achieved.
-     * 
+     *
      * @return <code>true</code> if a connection can be established; otherwise <code>false</code>
      * @throws OXException If the ping fails
      */
@@ -651,7 +651,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Opens this access. May be invoked on an already opened access.
-     * 
+     *
      * @throws OXException If the connection could not be established for various reasons
      */
     public final void connect() throws OXException {
@@ -660,7 +660,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Opens this access. May be invoked on an already opened access.
-     * 
+     *
      * @param checkDefaultFolders <code>true</code> to check existence of default folders; otherwise <code>false</code> to omit check
      * @throws OXException If the connection could not be established for various reasons
      */
@@ -676,7 +676,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
      * afterwards:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session);
      * final MailFolder rootFolder = mailAccess.getRootFolder();
@@ -686,7 +686,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *  mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @throws OXException If returning the root folder fails
      */
     public MailFolder getRootFolder() throws OXException {
@@ -704,7 +704,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * <p>
      * Since this mail access instance is connected if not already done before, the {@link #close(boolean)} operation should be invoked
      * afterwards:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = MailAccess.getInstance(session);
      * final int unreadCount = mailAccess.getNumberOfUnreadMessages();
@@ -714,7 +714,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *  mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @throws OXException If returning the unread count fails
      */
     public int getUnreadMessagesCount(final String fullname) throws OXException {
@@ -763,7 +763,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Internal connect method to establish a mail connection.
-     * 
+     *
      * @param mailConfig The mail configuration providing connect and login data
      * @throws OXException If connection could not be established
      */
@@ -780,7 +780,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Closes this access.
      * <p>
      * An already closed access is not going to be put into cache and is treated as a no-op.
-     * 
+     *
      * @param put2Cache <code>true</code> to try to put this mail connection into cache; otherwise <code>false</code>
      */
     public final void close(final boolean put2Cache) {
@@ -839,7 +839,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Gets the trace of the thread that lastly obtained this access.
      * <p>
      * This is useful to detect certain threads which uses an access for a long time
-     * 
+     *
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
@@ -883,7 +883,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Returns the mail configuration appropriate for current user. It provides needed connection and login information.
-     * 
+     *
      * @return The mail configuration
      */
     public MailConfig getMailConfig() throws OXException {
@@ -895,7 +895,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets this mail access' account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -904,7 +904,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Creates a new user-specific mail configuration.
-     * 
+     *
      * @return A new user-specific mail configuration
      * @throws OXException If creating a new mail configuration fails
      */
@@ -927,7 +927,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Checks if session's user denotes the context admin user and whether admin user's try to login to mail system is permitted or not.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @throws OXException If session's user denotes the context admin user and admin user's try to login to mail system is not permitted
@@ -952,7 +952,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Gets the number of seconds this mail access is allowed to remain idle in {@link SingletonMailAccessCache cache} before being removed
      * and closed. If the default value shall be used for this mail access, return <code>-1</code>.
-     * 
+     *
      * @return The number of allowed idle seconds or <code>-1</code> to signal using default value.
      */
     public int getCacheIdleSeconds() {
@@ -961,7 +961,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Indicates if this mail access is cacheable.
-     * 
+     *
      * @return <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
      */
     public boolean isCacheable() {
@@ -970,7 +970,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Sets whether this mail access is cacheable or not.
-     * 
+     *
      * @param cacheable <code>true</code> if this mail access is cacheable; otherwise <code>false</code>
      */
     public void setCacheable(final boolean cacheable) {
@@ -979,7 +979,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Indicates if this mail access is currently cached in {@link IMailAccessCache}.
-     * 
+     *
      * @return <code>true</code> if this mail access is cached; otherwise <code>false</code>
      */
     public boolean isCached() {
@@ -988,7 +988,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Sets whether this mail access is currently cached or not.
-     * 
+     *
      * @param cacheable <code>true</code> if this mail access is cached; otherwise <code>false</code>
      */
     public void setCached(final boolean cached) {
@@ -997,7 +997,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Indicates if this mail access is currently waiting for any server notifications (idle mode).
-     * 
+     *
      * @return <code>true</code> if this mail access is waiting; otherwise <code>false</code>
      */
     public boolean isWaiting() {
@@ -1006,7 +1006,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Sets whether this mail access is currently waiting for any mail server notifications or not.
-     * 
+     *
      * @param cacheable <code>true</code> if this mail access is waiting; otherwise <code>false</code>
      */
     public void setWaiting(final boolean waiting) {
@@ -1015,7 +1015,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets an implementation-specific new instance of {@link MailConfig}.
-     * 
+     *
      * @return An implementation-specific new instance of {@link MailConfig}
      */
     protected abstract MailConfig createNewMailConfig();
@@ -1029,7 +1029,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets an implementation-specific new instance of {@link IMailProperties}.
-     * 
+     *
      * @return An implementation-specific new instance of {@link IMailProperties}
      * @throws OXException If creating a new instance of {@link IMailProperties} fails
      */
@@ -1044,7 +1044,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Defines if mail server port has to be present in provided mail configuration before establishing any connection.
-     * 
+     *
      * @return <code>true</code> if mail server port has to be set before establishing any connection; otherwise <code>false</code>
      */
     protected abstract boolean checkMailServerPort();
@@ -1082,7 +1082,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the appropriate {@link IMailFolderStorage} implementation that is considered as the main entry point to a user's mailbox.
-     * 
+     *
      * @return The appropriate {@link IMailFolderStorage} implementation
      * @throws OXException If connection is not established
      */
@@ -1090,7 +1090,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Gets the appropriate {@link IMailMessageStorage} implementation that provides necessary message-related operations/methods.
-     * 
+     *
      * @return The appropriate {@link IMailMessageStorage} implementation
      * @throws OXException If connection is not established
      */
@@ -1099,7 +1099,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     /**
      * Gets the appropriate {@link MailLogicTools} implementation that provides operations/methods to create a reply/forward message from a
      * referenced message.
-     * 
+     *
      * @return The appropriate {@link MailLogicTools} implementation
      * @throws OXException If connection is not established
      */
@@ -1107,7 +1107,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Checks if this connection is currently connected.
-     * 
+     *
      * @return <code>true</code> if connected; otherwise <code>false</code>
      * @see #isConnectedUnsafe()
      */
@@ -1115,7 +1115,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Checks if this connection is currently connected in an unsafe, but faster manner than {@link #isConnected()}.
-     * 
+     *
      * @return <code>true</code> if connected; otherwise <code>false</code>
      * @see #isConnected()
      */
@@ -1123,14 +1123,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Triggers all necessary startup actions.
-     * 
+     *
      * @throws OXException If startup actions fail
      */
     protected abstract void startup() throws OXException;
 
     /**
      * Triggers all necessary shutdown actions.
-     * 
+     *
      * @throws OXException If shutdown actions fail
      */
     protected abstract void shutdown() throws OXException;

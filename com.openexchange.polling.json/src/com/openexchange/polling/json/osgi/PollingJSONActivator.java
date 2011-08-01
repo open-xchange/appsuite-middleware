@@ -14,7 +14,7 @@ public class PollingJSONActivator extends AJAXModuleActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		
+
 		registerModule(new PollActionFactory(this), "poll");
 		registerService(ResultConverter.class, new PollResultConverter());
 	}

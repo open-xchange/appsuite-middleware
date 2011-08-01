@@ -54,14 +54,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SecretConsistencyCheck}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretConsistencyCheck {
 
     /**
      * Find out if a secret is valid for decrypting all data
-     * 
+     *
      * @param session The session
      * @param secret The secret
      * @return <code>null</code> if everything could be decrypted, if not return a pointer to something that could not be decrypted (for

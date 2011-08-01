@@ -13,11 +13,11 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetConferenceSettingsResponseTyp
 
 /**
  * Phone terminal conference function data
- * 
+ *
  * <p>Java class for Conference complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Conference">
  *   &lt;complexContent>
@@ -40,8 +40,8 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetConferenceSettingsResponseTyp
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Conference", propOrder = {
@@ -77,11 +77,11 @@ public class Conference {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -89,11 +89,11 @@ public class Conference {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -101,11 +101,11 @@ public class Conference {
 
     /**
      * Gets the value of the size property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSize() {
         return size;
@@ -113,11 +113,11 @@ public class Conference {
 
     /**
      * Sets the value of the size property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSize(BigInteger value) {
         this.size = value;
@@ -125,11 +125,11 @@ public class Conference {
 
     /**
      * Gets the value of the timeout property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimeout() {
         return timeout;
@@ -137,11 +137,11 @@ public class Conference {
 
     /**
      * Sets the value of the timeout property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimeout(BigInteger value) {
         this.timeout = value;
@@ -149,11 +149,11 @@ public class Conference {
 
     /**
      * Gets the value of the mohActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMohActive() {
         return mohActive;
@@ -161,11 +161,11 @@ public class Conference {
 
     /**
      * Sets the value of the mohActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMohActive(Boolean value) {
         this.mohActive = value;
@@ -173,11 +173,11 @@ public class Conference {
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPIN() {
         return pin;
@@ -185,11 +185,11 @@ public class Conference {
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPIN(Boolean value) {
         this.pin = value;
@@ -197,11 +197,11 @@ public class Conference {
 
     /**
      * Gets the value of the close property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isClose() {
         return close;
@@ -209,11 +209,11 @@ public class Conference {
 
     /**
      * Sets the value of the close property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setClose(Boolean value) {
         this.close = value;
@@ -221,11 +221,11 @@ public class Conference {
 
     /**
      * Gets the value of the announceUserCount property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnounceUserCount() {
         return announceUserCount;
@@ -233,11 +233,11 @@ public class Conference {
 
     /**
      * Sets the value of the announceUserCount property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnounceUserCount(Boolean value) {
         this.announceUserCount = value;
@@ -245,11 +245,11 @@ public class Conference {
 
     /**
      * Gets the value of the announceUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnounceUser() {
         return announceUser;
@@ -257,11 +257,11 @@ public class Conference {
 
     /**
      * Sets the value of the announceUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnounceUser(Boolean value) {
         this.announceUser = value;
@@ -269,11 +269,11 @@ public class Conference {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -281,11 +281,11 @@ public class Conference {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -293,11 +293,11 @@ public class Conference {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -305,11 +305,11 @@ public class Conference {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

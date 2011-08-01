@@ -89,5 +89,5 @@ public class TaskLastModifiedTest extends TestCase {
         new TaskParser(true, UTC).parse(parsed, json);
         assertTrue("lastModified has not been set but should.", parsed.containsLastModified());
         assertNotNull("lastModified is null but should not.", parsed.getLastModified());
-    }    
+    }
 }

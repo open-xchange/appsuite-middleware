@@ -73,7 +73,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @return The appropriate server session
      * @throws OXException If context cannot be resolved
@@ -166,66 +166,82 @@ public class ServerSessionAdapter implements ServerSession {
         }
     }
 
+    @Override
     public int getContextId() {
         return session().getContextId();
     }
 
+    @Override
     public String getLocalIp() {
         return session().getLocalIp();
     }
 
+    @Override
     public void setLocalIp(final String ip) {
         session().setLocalIp(ip);
     }
 
+    @Override
     public String getLoginName() {
         return session().getLoginName();
     }
 
+    @Override
     public boolean containsParameter(final String name) {
         return session().containsParameter(name);
     }
 
+    @Override
     public Object getParameter(final String name) {
         return session().getParameter(name);
     }
 
+    @Override
     public String getPassword() {
         return session().getPassword();
     }
 
+    @Override
     public String getRandomToken() {
         return session().getRandomToken();
     }
 
+    @Override
     public String getSecret() {
         return session().getSecret();
     }
 
+    @Override
     public String getSessionID() {
         return session().getSessionID();
     }
 
+    @Override
     public int getUserId() {
         return session().getUserId();
     }
 
+    @Override
     public String getUserlogin() {
         return session().getUserlogin();
     }
 
+    @Override
     public void setParameter(final String name, final Object value) {
         session().setParameter(name, value);
     }
 
+    @Override
     public void removeRandomToken() {
         session().removeRandomToken();
     }
 
+    @Override
     public String getAuthId() {
         return session().getAuthId();
     }
 
+    @Override
     public Context getContext() {
         if (serverSession != null) {
             return serverSession.getContext();
@@ -233,22 +249,27 @@ public class ServerSessionAdapter implements ServerSession {
         return ctx;
     }
 
+    @Override
     public String getLogin() {
         return session().getLogin();
     }
 
+    @Override
     public String getHash() {
         return session().getHash();
     }
 
+    @Override
     public String getClient() {
         return session.getClient();
     }
 
+    @Override
     public void setClient(final String client) {
         session.setClient(client);
     }
 
+    @Override
     public User getUser() {
         if (serverSession != null) {
             return serverSession.getUser();
@@ -265,6 +286,7 @@ public class ServerSessionAdapter implements ServerSession {
         return tmp;
     }
 
+    @Override
     public UserConfiguration getUserConfiguration() {
         if (serverSession != null) {
             return serverSession.getUserConfiguration();
@@ -285,6 +307,7 @@ public class ServerSessionAdapter implements ServerSession {
         return tmp;
     }
 
+    @Override
     public UserSettingMail getUserSettingMail() {
         if (serverSession != null) {
             return serverSession.getUserSettingMail();
@@ -308,6 +331,7 @@ public class ServerSessionAdapter implements ServerSession {
         return session;
     }
 
+    @Override
     public void setHash(final String hash) {
         session().setHash(hash);
     }

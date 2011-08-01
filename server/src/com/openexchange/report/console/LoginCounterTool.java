@@ -94,14 +94,14 @@ public final class LoginCounterTool {
         CommandLineParser parser = new PosixParser();
         Date startDate = null;
         Date endDate = null;
-        
+
         try {
             CommandLine cmd = parser.parse(countingOptions, args);
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
             }
-            
+
             if (!cmd.hasOption('s') || !cmd.hasOption('e')) {
                 System.out.println("Parameters 'start' and 'end' are required.");
                 printHelp();
@@ -116,9 +116,9 @@ public final class LoginCounterTool {
                     System.out.println("Wrong format for parameter 'start' or 'end'.");
                     printHelp();
                     System.exit(0);
-                }                
+                }
             }
-            
+
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
             try {
@@ -127,7 +127,7 @@ public final class LoginCounterTool {
                 if (cmd.hasOption('r')) {
                     regex = cmd.getOptionValue('r');
                 }
-                
+
                 writeNumberOfLogins(mbsc, startDate, endDate, regex);
             } finally {
                 jmxConnector.close();
@@ -149,15 +149,15 @@ public final class LoginCounterTool {
             System.err.println("Problem with reflective type handling: " + e.getMessage());
         } catch (InvalidAttributeValueException e) {
             System.err.println("Problem with JMX attribute: " + e.getMessage());
-        } 
+        }
     }
-    
+
     private static void writeNumberOfLogins(MBeanServerConnection mbsc, Date startDate, Date endDate, String regex) throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException, IOException {
         String withRegex = "";
-        if (regex != null) {            
+        if (regex != null) {
             withRegex += "\nfor expression\n    '" + regex + "'";
         }
-        
+
         int count = 0;
         boolean err = false;
         String errMsg = null;
@@ -168,14 +168,14 @@ public final class LoginCounterTool {
         	err = true;
         	errMsg = e.getMessage();
         }
-        
+
         String output;
         if (err) {
         	output = errMsg != null ? errMsg : "An error occurred.";
         } else {
         	output= "Number of logins between\n    " + startDate.toString() + "\nand\n    " + endDate.toString() + withRegex + "\n\n    :    " + count;
         }
-        
+
         System.out.println(output);
     }
 

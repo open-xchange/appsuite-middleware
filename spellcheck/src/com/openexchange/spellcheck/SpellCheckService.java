@@ -55,14 +55,14 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link SpellCheckService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SpellCheckService {
 
     /**
      * Gets a spell checker with only the user dictionary added
-     * 
+     *
      * @param userId The user ID
      * @param ctx The context
      * @return An appropriate spell checker
@@ -72,7 +72,7 @@ public interface SpellCheckService {
 
     /**
      * Gets a spell checker
-     * 
+     *
      * @param userId The user ID
      * @param localeStr The desired locale's string representation (determines the locale-specific dictionary)
      * @param ctx The context
@@ -83,7 +83,7 @@ public interface SpellCheckService {
 
     /**
      * Gets a spell checker
-     * 
+     *
      * @param userId The user ID
      * @param locale The desired locale (determines the locale-specific dictionary)
      * @param ctx The context

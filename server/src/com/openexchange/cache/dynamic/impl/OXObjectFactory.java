@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * This interface must be implemented to reload objects that have been removed from the cache cause of object life timeout.
- * 
+ *
  * @param <T> Type that is loaded by this object factory.
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

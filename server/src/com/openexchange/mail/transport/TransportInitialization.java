@@ -58,7 +58,7 @@ import com.openexchange.server.Initialization;
 /**
  * {@link TransportInitialization} - Initializes whole transport implementation and therefore provides a central point for starting/stopping
  * transport implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportInitialization implements Initialization {
@@ -84,6 +84,7 @@ public final class TransportInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.warn("Duplicate initialization of transport module aborted.");
@@ -99,6 +100,7 @@ public final class TransportInitialization implements Initialization {
         // TransportProvider.initTransportProvider();
     }
 
+    @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.warn("Duplicate shut-down of transport module aborted.");

@@ -54,7 +54,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link ConfigObjectsExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public final class ConfigObjectsExceptionMessages implements LocalizableStrings {

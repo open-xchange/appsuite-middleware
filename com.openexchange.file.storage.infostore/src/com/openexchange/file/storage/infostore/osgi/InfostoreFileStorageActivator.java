@@ -64,7 +64,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public class InfostoreFileStorageActivator extends DeferredActivator {
 
-    private Class<?>[] NEEDED_CLASSES = new Class[]{InfostoreFacade.class, InfostoreSearchEngine.class};
+    private final Class<?>[] NEEDED_CLASSES = new Class[]{InfostoreFacade.class, InfostoreSearchEngine.class};
     private ServiceRegistration registration;
 
     @Override
@@ -89,7 +89,7 @@ public class InfostoreFileStorageActivator extends DeferredActivator {
             public InfostoreFacade getInfostore() {
                 return getService(InfostoreFacade.class);
             }
-            
+
             @Override
             public InfostoreSearchEngine getSearch() {
                 return getService(InfostoreSearchEngine.class);

@@ -59,11 +59,13 @@ public class NOTEXISTS extends Predicate {
 		this.subSelect = subSelect;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildNOTEXISTS(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "NOT EXISTS";
 	}
 

@@ -80,6 +80,7 @@ class FilterTask<I, O> extends AbstractTask<Void> {
         threadRenamer.renamePrefix("Pipes&Filters " + filter.getClass().getName());
     }
 
+    @Override
     public Void call() {
         List<I> inputBlock = new ArrayList<I>();
         try {

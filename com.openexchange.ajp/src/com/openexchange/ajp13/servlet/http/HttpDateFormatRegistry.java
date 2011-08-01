@@ -59,7 +59,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link HttpDateFormatRegistry} - The registry for {@link DateFormat}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpDateFormatRegistry {
@@ -68,7 +68,7 @@ public final class HttpDateFormatRegistry {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static HttpDateFormatRegistry getInstance() {
@@ -125,14 +125,14 @@ public final class HttpDateFormatRegistry {
      * Gets the default date format as specified in RFC 822: <code>"EEE',' dd MMMM yyyy HH:mm:ss z"</code>
      * <p>
      * <b>Note</b>: Don't forget to exclusively lock returned {@link DateFormat} instance:
-     * 
+     *
      * <pre>
      * DateFormat df = HttpDateFormatRegistry.getInstance().getDefaultDateFormat();
      * synchronized (df) {
      *     // Use the DateFormat instance...
      * }
      * </pre>
-     * 
+     *
      * @return The default date format
      */
     public DateFormat getDefaultDateFormat() {
@@ -141,7 +141,7 @@ public final class HttpDateFormatRegistry {
 
     /**
      * Appends specified max-age attribute to given string builder dependent on given user agent.
-     * 
+     *
      * @param maxAgeSecs The max-age seconds
      * @param userAgent The user agent
      * @param composer The string builder to append to
@@ -158,7 +158,7 @@ public final class HttpDateFormatRegistry {
 
     /**
      * Appends expiry according to Netscape specification; e.g. <code>"expires=Thu, 26-Apr-2012 18:35:06 GMT"</code>.
-     * 
+     *
      * @param maxAgeSecs The max-age seconds
      * @param composer The composing string builder
      */
@@ -174,7 +174,7 @@ public final class HttpDateFormatRegistry {
 
     /**
      * Appends expiry according to RFC 2109/RFC 2965. The "Expires" attribute is replaced with "Max-Age" attribute.
-     * 
+     *
      * @param maxAgeSecs The max-age seconds
      * @param composer The composing string builder
      */

@@ -54,6 +54,6 @@ package com.openexchange.webdav.xml.fields;
 public interface FolderChildFields extends DataFields {
 
 	public static final String FOLDER_ID = "folder_id";
-	
+
 	public static final String FOLDER = "folder";
 }

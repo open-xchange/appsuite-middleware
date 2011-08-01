@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ContentDisposition} - The Content-Disposition header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -72,14 +72,14 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
      * Applies given content disposition to this content disposition
-     * 
+     *
      * @param contentDisposition The content disposition to apply
      */
     public void setContentDispositio(final ContentDisposition contentDisposition);
 
     /**
      * Gets the disposition.
-     * 
+     *
      * @return The disposition
      * @see #INLINE
      * @see #ATTACHMENT
@@ -88,7 +88,7 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      * @see #INLINE
      * @see #ATTACHMENT
@@ -97,28 +97,28 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
      * Sets <code>"filename"</code> parameter.
-     * 
+     *
      * @param filename The file name; e.g. "sometext.txt"
      */
     public void setFilenameParameter(final String filename);
 
     /**
      * Gets <code>"filename"</code> parameter.
-     * 
+     *
      * @return The <code>"filename"</code> parameter value or <code>null</code> if not present
      */
     public String getFilenameParameter();
 
     /**
      * Checks if <code>"filename"</code> parameter is present.
-     * 
+     *
      * @return <code>true</code> if <code>"filename"</code> parameter is present, <code>false</code> otherwise if absent
      */
     public boolean containsFilenameParameter();
 
     /**
      * Sets the Content-Disposition.
-     * 
+     *
      * @param contentDisposition The Content-Disposition as a string
      * @throws OXException If applying Content-Disposition fails
      */
@@ -126,7 +126,7 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
      * Checks if disposition is inline
-     * 
+     *
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      * @see #INLINE
      */
@@ -134,7 +134,7 @@ public interface ContentDisposition extends ParameterizedMessagingHeader {
 
     /**
      * Checks if disposition is attachment
-     * 
+     *
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      * @see #ATTACHMENT
      */

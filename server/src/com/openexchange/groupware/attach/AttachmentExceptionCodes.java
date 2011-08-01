@@ -111,14 +111,17 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
         this.number = number;
     }
 
+    @Override
     public String getPrefix() {
         return EnumComponent.ATTACHMENT.getAbbreviation();
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
@@ -128,17 +131,19 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -147,7 +152,7 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -157,7 +162,7 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

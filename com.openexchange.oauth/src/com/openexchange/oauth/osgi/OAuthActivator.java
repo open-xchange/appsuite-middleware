@@ -72,7 +72,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link OAuthActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OAuthActivator extends DeferredActivator {
@@ -168,7 +168,7 @@ public final class OAuthActivator extends DeferredActivator {
             registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
             registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), oauthService, null));
             registrations.add(context.registerService(SecretMigrator.class.getName(), oauthService, null));
-            
+
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
             throw e;

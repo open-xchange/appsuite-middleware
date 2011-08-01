@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PushManagerService} - Manages push listeners.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PushManagerService {
@@ -63,7 +63,7 @@ public interface PushManagerService {
      * Starts a new listener for specified session.
      * <p>
      * The push manager is supposed to keep track of started listeners; e.g. only one listener per session or per user-context-pair exists.
-     * 
+     *
      * @param session The session
      * @return A newly started listener or <code>null</code> if a listener could not be started
      * @throws OXException If listener cannot be started due to an error
@@ -72,7 +72,7 @@ public interface PushManagerService {
 
     /**
      * Stops the listener for specified session.
-     * 
+     *
      * @param session The session
      * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
      * @throws OXException If listener cannot be stopped due to an error

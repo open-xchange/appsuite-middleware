@@ -64,9 +64,9 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FieldMapping {
-    
+
     private static final Map<File.Field, Metadata> field2metadata = new EnumMap<File.Field, Metadata>(File.Field.class);
-    
+
     static {
         field2metadata.put(File.Field.LAST_MODIFIED, Metadata.LAST_MODIFIED_LITERAL);
         field2metadata.put(File.Field.CREATED, Metadata.CREATION_DATE_LITERAL);
@@ -92,11 +92,11 @@ public class FieldMapping {
         field2metadata.put(File.Field.LAST_MODIFIED_UTC, Metadata.LAST_MODIFIED_UTC_LITERAL);
         field2metadata.put(File.Field.NUMBER_OF_VERSIONS, Metadata.NUMBER_OF_VERSIONS_LITERAL);
     }
-    
+
     public static Metadata getMatching(File.Field field) {
         return field2metadata.get(field);
     }
-    
+
     public static Metadata[] getMatching(List<File.Field> fields) {
         Metadata[] retval = new Metadata[fields.size()];
         for(int i = 0; i < retval.length; i++) {
@@ -111,5 +111,5 @@ public class FieldMapping {
         default: return InfostoreFacade.ASC;
         }
     }
-    
+
 }

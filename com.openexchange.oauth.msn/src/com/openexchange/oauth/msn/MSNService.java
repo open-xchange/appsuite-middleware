@@ -59,8 +59,8 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public interface MSNService {
-    
+
     public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
-    
+
     public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
 }

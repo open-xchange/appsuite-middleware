@@ -57,7 +57,7 @@ import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 
 /**
  * {@link FolderStorageTracker} - The tracker for folder storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderStorageTracker implements ServiceTrackerCustomizer {
@@ -74,6 +74,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object addedService = context.getService(reference);
         // Get tree identifier
@@ -100,10 +101,12 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

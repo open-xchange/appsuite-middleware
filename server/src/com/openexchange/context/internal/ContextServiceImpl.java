@@ -57,9 +57,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
  * {@link ContextServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class ContextServiceImpl implements ContextService {
 
@@ -70,26 +70,32 @@ public final class ContextServiceImpl implements ContextService {
         super();
     }
 
+    @Override
     public List<Integer> getAllContextIds() throws OXException {
         return ContextStorage.getInstance().getAllContextIds();
     }
 
+    @Override
     public Context getContext(final int contextId) throws OXException {
         return ContextStorage.getInstance().getContext(contextId);
     }
 
+    @Override
     public Context loadContext(int contextId) throws OXException {
         return ContextStorage.getInstance().loadContext(contextId);
     }
 
+    @Override
     public int getContextId(final String loginContextInfo) throws OXException {
         return ContextStorage.getInstance().getContextId(loginContextInfo);
     }
 
+    @Override
     public void invalidateContext(final int contextId) throws OXException {
         ContextStorage.getInstance().invalidateContext(contextId);
     }
 
+    @Override
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
         ContextStorage.getInstance().invalidateLoginInfo(loginContextInfo);
     }

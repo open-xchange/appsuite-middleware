@@ -86,7 +86,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MicroformatServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - HTML whitelisting, same-origin-policy stuff
  */
@@ -127,7 +127,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final DateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s.S z");
 
-	
+
     static {
         TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
@@ -148,7 +148,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     public static void setStringTranslator(final StringTranslator trans) {
         translator = trans;
     }
-    
+
     public static void setConfigService(final ConfigurationService confService) {
         configService = confService;
     }
@@ -161,7 +161,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
         contacts = service;
     }
-    
+
     public static void setHtmlService(final HTMLService htmlService2) {
         htmlService = htmlService2;
     }
@@ -190,7 +190,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
-            
+
             if (!checkPublicationPermission(publication, resp)) {
                 return;
             }
@@ -201,7 +201,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final HashMap<String, Object> variables = new HashMap<String, Object>();
             final User user = getUser(publication);
             final Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
-            
+
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             variables.put("request", req);
@@ -217,12 +217,12 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 user,
                 new Date());
             variables.put("privacy", privacyText ); //TODO Use lastmodified once someone implements this.
-            variables.put("userContact", userContact); 
+            variables.put("userContact", userContact);
 
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));
             }
-            
+
             final OXTemplate template = publisher.loadTemplate(publication);
             final StringWriter htmlWriter = new StringWriter();
             template.process(variables, htmlWriter);
@@ -232,11 +232,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             	html = htmlService.filterWhitelist(html, "microformatWhitelist");
             }
             resp.getWriter().write(html);
-            
+
         } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
             resp.getWriter().println("Publishing failed. Please try again later. Exception ID: "+x.getExceptionId());
-            
+
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             resp.getWriter().println("Publishing failed. Please try again later.");
@@ -244,19 +244,19 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     private boolean isUsingWhitelisting(final TemplateLevel templateLevel) {
-    	final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false"); 
-    	
+    	final String globalWhitelisting = configService.getProperty(USE_WHITELISTING_PROPERTY_NAME, "false");
+
     	if (Boolean.parseBoolean(globalWhitelisting)) {
     	    return true;
     	}
-    	
+
     	final String[] strings = globalWhitelisting.split("\\s*,\\s*");
     	for (final String string : strings) {
             if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
                 return true;
             }
         }
-    	
+
     	return false;
 	}
 
@@ -302,7 +302,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         final User user = userService.getUser(uid, context);
         return user;
     }
-    
+
     private String getPrivacyText(final User user){
         return translator.translate(user.getLocale(), MicroformatStrings.DISCLAIMER_PRIVACY);
     }

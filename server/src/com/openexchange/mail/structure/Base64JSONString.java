@@ -62,7 +62,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Base64JSONString} - A {@link JSONString JSON string} for one-time-retrieval of an input stream's base64-encoded bytes.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Base64JSONString implements JSONString {
@@ -73,7 +73,7 @@ public final class Base64JSONString implements JSONString {
 
     /**
      * Initializes a new {@link Base64JSONString}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public Base64JSONString(final InputStream in) throws OXException {
@@ -110,6 +110,7 @@ public final class Base64JSONString implements JSONString {
         }
     }
 
+    @Override
     public String toJSONString() {
         return value;
     }

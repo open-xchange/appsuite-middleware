@@ -70,7 +70,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * This step takes HtmlPages that each contain contact information and converts them to ContactObjects for OX
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends AbstractStep<Contact[], List<HtmlAnchor>> {
@@ -78,11 +78,11 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
     private PagePartSequence pageParts;
-    
+
     private String titleExceptionsRegex, linkToTargetPage;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
-    
+
     private boolean addPagesTogether;
 
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts) {
@@ -91,14 +91,14 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         titleExceptionsRegex = "";
         linkToTargetPage = "";
     }
-    
+
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, final String titleExceptionsRegex, final String linkToTargetPage) {
         this.description = description;
         this.pageParts = pageParts;
         this.titleExceptionsRegex = titleExceptionsRegex;
         this.linkToTargetPage = linkToTargetPage;
     }
-    
+
     public ContactObjectsByHTMLAnchorsAndPagePartSequenceStep(final String description, final PagePartSequence pageParts, final String titleExceptionsRegex, final String linkToTargetPage, boolean addPagesTogether) {
         this.description = description;
         this.pageParts = pageParts;
@@ -139,25 +139,25 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                 final String titleText = page.getTitleText();
                 if (null != titleText && !titleText.matches(titleExceptionsRegex)){
                     String pageAsString = page.getWebResponse().getContentAsString() + additionalPageString;
-                    final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);                
+                    final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);
                     pageParts.setPage(pageString);
                     LOG.debug("Page evaluated is : "+pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
-    
+
                     final Contact contact = Mappings.translateMapToContact(map);
-    
+
                     SANITIZER.sanitize(contact);
                     contactObjects.add(contact);
                 }
 
             } catch (final VersitException e) {
                 exception = e;
-            } catch (final ConverterException e) {                
-                LOG.error(e.getMessage() 
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId() 
+            } catch (final ConverterException e) {
+                LOG.error(e.getMessage()
+                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
                     + ", User : " + workflow.getSubscription().getUserId()
                     + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
-                
+
                 exception = e;
             } catch (final IOException e) {
                 exception = e;
@@ -168,7 +168,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         if (input == null || input.isEmpty()){
             executedSuccessfully = true;
         }
-        
+
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
     }
@@ -185,36 +185,36 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
         this.pageParts = pageParts;
     }
 
-    
+
     public String getTitleExceptionsRegex() {
         return titleExceptionsRegex;
     }
 
-    
+
     public void setTitleExceptionsRegex(final String titleExceptionsRegex) {
         this.titleExceptionsRegex = titleExceptionsRegex;
     }
 
-    
+
     public String getLinkToTargetPage() {
         return linkToTargetPage;
     }
 
-    
+
     public void setLinkToTargetPage(final String linkToTargetPage) {
         this.linkToTargetPage = linkToTargetPage;
     }
 
-    
+
     public boolean isAddPagesTogether() {
         return addPagesTogether;
     }
 
-    
+
     public void setAddPagesTogether(boolean addPagesTogether) {
         this.addPagesTogether = addPagesTogether;
     }
 
-    
-    
+
+
 }

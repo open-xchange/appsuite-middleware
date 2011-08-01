@@ -90,6 +90,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
     /**
      * TODO eliminate duplicate columns
      */
+    @Override
     public SearchIterator<Task> getTaskList(final int folderId, final int from,
         final int until, final int orderBy, final Order order,
         final int[] columns) throws OXException {
@@ -121,6 +122,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    @Override
     public Task getTaskById(final int taskId, final int folderId) throws OXException {
         final Context ctx;
         final int userId = session.getUserId();
@@ -165,14 +167,17 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    @Override
     public SearchIterator<Task> getModifiedTasksInFolder(final int folderId, final int[] columns, final Date since) throws OXException {
         return getModifiedTasksInFolder(folderId, columns, since, StorageType.ACTIVE);
     }
 
+    @Override
     public SearchIterator<Task> getDeletedTasksInFolder(final int folderId, final int[] columns, final Date since) throws OXException {
         return getModifiedTasksInFolder(folderId, columns, since, StorageType.DELETED);
     }
 
+    @Override
     public void insertTaskObject(final Task task) throws OXException {
         final Context ctx;
         final Set<TaskParticipant> parts;
@@ -225,6 +230,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    @Override
     public void updateTaskObject(final Task task, final int folderId,
         final Date lastRead) throws OXException {
         final Context ctx;
@@ -253,6 +259,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    @Override
     public void deleteTaskObject(final int taskId, final int folderId,
         final Date lastModified) throws OXException {
         final FolderStorage foldStor = FolderStorage.getInstance();
@@ -287,6 +294,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         }
     }
 
+    @Override
     public Date setUserConfirmation(final int taskId, final int userId, final int confirm, final String message) throws OXException {
         final Context ctx;
         try {
@@ -307,6 +315,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return lastModified;
     }
 
+    @Override
     public SearchIterator<Task> getObjectsById(final int[][] ids,
         final int[] columns) throws OXException {
         final Context ctx;
@@ -334,6 +343,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
     }
 
+    @Override
     public SearchIterator<Task> getTasksByExtendedSearch(final TaskSearchObject searchData, final int orderBy, final Order order, final int[] columns) throws OXException {
         final Context ctx;
         final User user;

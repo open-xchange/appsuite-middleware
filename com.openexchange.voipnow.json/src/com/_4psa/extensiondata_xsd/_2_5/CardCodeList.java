@@ -13,11 +13,11 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
 
 /**
  * Calling card code list data
- * 
+ *
  * <p>Java class for CardCodeList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CardCodeList">
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CardCodeList", propOrder = {
@@ -58,11 +58,11 @@ public class CardCodeList
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -70,11 +70,11 @@ public class CardCodeList
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -82,7 +82,7 @@ public class CardCodeList
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      */
     public boolean isStatus() {
         return status;
@@ -90,7 +90,7 @@ public class CardCodeList
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      */
     public void setStatus(boolean value) {
         this.status = value;
@@ -98,11 +98,11 @@ public class CardCodeList
 
     /**
      * Gets the value of the recharges property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRecharges() {
         return recharges;
@@ -110,11 +110,11 @@ public class CardCodeList
 
     /**
      * Sets the value of the recharges property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRecharges(BigInteger value) {
         this.recharges = value;
@@ -122,11 +122,11 @@ public class CardCodeList
 
     /**
      * Gets the value of the availableCredit property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getAvailableCredit() {
         return availableCredit;
@@ -134,11 +134,11 @@ public class CardCodeList
 
     /**
      * Sets the value of the availableCredit property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setAvailableCredit(UnlimitedUFloat value) {
         this.availableCredit = value;
@@ -146,11 +146,11 @@ public class CardCodeList
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -158,11 +158,11 @@ public class CardCodeList
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

@@ -65,7 +65,7 @@ import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
  * {@link AbstractVoipNowAction} - An abstract VoipNow action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractVoipNowAction implements AJAXActionService {
@@ -86,7 +86,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Gets the (internal) phone number of given session user's main extension.
-     * 
+     *
      * @param sessionUser The session user
      * @param contextId The context identifier
      * @return The (internal) phone number of given session user's main extension
@@ -112,7 +112,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Gets the numeric identifier of given session user's main extension.
-     * 
+     *
      * @param sessionUser The session user
      * @param contextId The context identifier
      * @return The numeric identifier of given session user's main extension
@@ -142,7 +142,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Gets the VoipNow setting for specified session.
-     * 
+     *
      * @param session The session
      * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting
@@ -154,7 +154,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Gets the VoipNow setting for specified session.
-     * 
+     *
      * @param session The session
      * @param httpApi <code>true</code> to authenticate against HTTP-API interface; otherwise <code>false</code>
      * @return The VoipNow setting
@@ -183,7 +183,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>Long</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>Long</code> value or <code>null</code> if not present
@@ -204,7 +204,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>long</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>long</code> value
@@ -225,7 +225,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @param defaultValue The default value to return if parameter is missing
@@ -239,7 +239,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>int</code> value or <code>-1</code> if not present
@@ -260,7 +260,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>int</code> value
@@ -281,7 +281,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>String</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>String</code> value
@@ -297,7 +297,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Gets either of provided parameters.
-     * 
+     *
      * @param request The request
      * @param parameterNames The parameter names
      * @return The parameter value at the same position as its name; others are <code>null</code>
@@ -327,7 +327,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>String</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed <code>String</code> value
@@ -343,7 +343,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed array of <code>int</code>
@@ -364,7 +364,7 @@ public abstract class AbstractVoipNowAction implements AJAXActionService {
 
     /**
      * Parses specified optional parameter into an array of <code>int</code>.
-     * 
+     *
      * @param request The request
      * @param parameterName The parameter name
      * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing

@@ -63,7 +63,7 @@ import com.openexchange.voipnow.json.services.ServiceRegistry;
 
 /**
  * {@link VoipNowFaxAddress} - The setting to deliver mail-2-fax address.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class VoipNowFaxAddress implements PreferencesItemService {

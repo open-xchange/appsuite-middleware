@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * {@link Capabilities} - The capabilities provided on connect to sieve server.
- * 
+ *
  * <pre>
  * &quot;IMPLEMENTATION&quot; &quot;Sieve server name and version&quot;
  * &quot;SASL&quot; &quot;PLAIN&quot;
@@ -62,7 +62,7 @@ import java.util.List;
  * &quot;STARTTLS&quot;
  * OK
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Capabilities {

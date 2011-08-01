@@ -71,14 +71,14 @@ public class DeleteTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException, JSONException {
         request().param("timestamp", "1337").body(new JSONArray("[{ folder: 'folder', id: 'id1'}, {folder: 'folder', id: 'id2'}]"));
-        
-        fileAccess().expectCall("removeDocument", Arrays.asList("id1", "id2"), 1337l).andReturn(Collections.emptyList()); 
-        
+
+        fileAccess().expectCall("removeDocument", Arrays.asList("id1", "id2"), 1337l).andReturn(Collections.emptyList());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

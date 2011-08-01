@@ -75,7 +75,7 @@ public class AbstractSimSessiondService implements SessiondService{
      */
     public void changeSessionPassword(String sessionId, String newPassword) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)

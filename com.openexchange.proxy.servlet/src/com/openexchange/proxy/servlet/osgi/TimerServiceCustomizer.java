@@ -64,7 +64,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link TimerServiceCustomizer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
@@ -75,7 +75,7 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link TimerServiceCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     public TimerServiceCustomizer(final BundleContext context) {

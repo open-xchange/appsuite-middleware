@@ -72,7 +72,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet{
     protected boolean hasModulePermission(final ServerSession session) {
         return session.getUserConfiguration().isPublication();
     }
-    
+
     protected void writeOXException(final OXException x, final HttpServletRequest req, final HttpServletResponse resp) {
         x.log(com.openexchange.exception.Log.valueOf(getLog()));
         final Response response = new Response(getSessionObject(req));
@@ -97,6 +97,6 @@ public abstract class AbstractPublicationServlet extends PermissionServlet{
             getLog().error(e.getMessage(), e);
         }
     }
-    
+
     protected abstract Log getLog();
 }

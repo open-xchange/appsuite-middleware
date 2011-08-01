@@ -72,19 +72,19 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
         this.whiteboard = whiteboard;
         this.service = configure(service);
     }
-    
+
     public ServiceDependentRegistration(final BundleContext context, final String serviceName, final T service, final Whiteboard whiteboard) {
         this(context, serviceName, service, null, whiteboard);
     }
-    
+
     public ServiceDependentRegistration(final BundleContext context, final String serviceName, final Whiteboard whiteboard) {
         this(context, serviceName, (T) null, whiteboard);
     }
-    
+
     public ServiceDependentRegistration(final BundleContext context, final String serviceName, final Dictionary dict, final Whiteboard whiteboard) {
         this(context, serviceName, null, dict, whiteboard);
     }
-    
+
     /**
      * Override to configure the service
      * @param service
@@ -96,17 +96,17 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
     public void addDependency(final Object...services) {
         this.services.addAll(Arrays.asList(services));
     }
-    
+
     public <T> T get(final Class<T> clazz) {
         return getAndDependOn(clazz);
     }
-    
+
     public <T> T getAndDependOn(final Class<T> clazz) {
         final T service = whiteboard.getService(clazz, this);
         addDependency(service);
         return service;
     }
-    
+
     @Override
     protected boolean mustRegister() {
         for(final Object service : services) {
@@ -122,7 +122,7 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
         }
         return false;
     }
-    
+
     /**
      * Override to add additional constraint requirements to the service
      * @return
@@ -134,6 +134,6 @@ public class ServiceDependentRegistration<T> extends ConditionalRegistration imp
     public void stateChanged() {
         check();
     }
-    
-   
+
+
 }

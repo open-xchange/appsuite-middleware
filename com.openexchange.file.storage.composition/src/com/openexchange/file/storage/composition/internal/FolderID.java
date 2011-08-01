@@ -62,14 +62,14 @@ public class FolderID {
     private String service;
     private String accountId;
     private String folderId;
-    
+
     public FolderID(String service, String accountId, String folderId) {
         super();
         this.service = service;
         this.accountId = accountId;
         this.folderId = folderId;
     }
-    
+
     public FolderID(String uniqueID) {
         List<String> unmangled = IDMangler.unmangle(uniqueID);
         if(unmangled.size() == 1) {
@@ -86,21 +86,21 @@ public class FolderID {
             }
         }
     }
-    
-    
+
+
     public String getService() {
         return service;
     }
-    
+
     public void setService(String service) {
         this.service = service;
     }
-    
+
     public String getAccountId() {
         return accountId;
     }
 
-    
+
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
@@ -108,17 +108,17 @@ public class FolderID {
     public String getFolderId() {
         return folderId;
     }
-    
+
     public void setFolderId(String folderId) {
         this.folderId = folderId;
     }
-    
+
     public String toUniqueID() {
         if(service.equals("com.openexchange.infostore") && accountId.equals("infostore")) {
             return folderId;
         }
         return IDMangler.mangle(service, accountId, folderId);
     }
-    
-    
+
+
 }

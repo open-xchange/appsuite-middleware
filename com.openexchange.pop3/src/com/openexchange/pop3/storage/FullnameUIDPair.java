@@ -51,7 +51,7 @@ package com.openexchange.pop3.storage;
 
 /**
  * {@link FullnameUIDPair} - Represents a fullname-mailId-pair.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
@@ -60,7 +60,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     /**
      * Creates a new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID.
-     * 
+     *
      * @param mailId The mail ID
      * @return A new {@link FullnameUIDPair} with fullname set to <code>&quot;INBOX&quot;</code> and mail ID set to given mail ID
      */
@@ -74,7 +74,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     /**
      * Initializes a new {@link FullnameUIDPair}.
-     * 
+     *
      * @param fullname The folder fullname
      * @param mailId The mail ID
      */
@@ -86,7 +86,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     /**
      * Gets the fullname.
-     * 
+     *
      * @return The fullname
      */
     public String getFullname() {
@@ -95,7 +95,7 @@ public final class FullnameUIDPair implements Comparable<FullnameUIDPair> {
 
     /**
      * Gets the mail ID.
-     * 
+     *
      * @return The mail ID
      */
     public String getMailId() {

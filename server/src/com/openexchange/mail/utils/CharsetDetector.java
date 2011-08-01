@@ -64,7 +64,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
  * {@link CharsetDetector} - A charset detector based on <a href="http://jchardet.sourceforge.net/">jchardet</a> library.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CharsetDetector {
@@ -85,7 +85,7 @@ public final class CharsetDetector {
     /**
      * Convenience method to check if given name is valid; meaning not <code>null</code>, a legal charset name and supported as indicated by
      * {@link Charset#isSupported(String)}.
-     * 
+     *
      * @param charset The charset name whose validity shall be checked
      * @return <code>true</code> if given name is valid; otherwise <code>false</code>
      */
@@ -95,7 +95,7 @@ public final class CharsetDetector {
 
     /**
      * Checks that the given string is a legal charset name.
-     * 
+     *
      * @param s The charset name
      * @throws NullPointerException If given name is <code>null</code>
      * @return <code>true</code> if the given name is a legal charset name; otherwise <code>false</code>
@@ -139,7 +139,7 @@ public final class CharsetDetector {
 
     /**
      * Detects the charset of specified part.
-     * 
+     *
      * @param p The part whose charset shall be detected
      * @return The detected part's charset
      * @throws MessagingException If an error occurs in part's getter methods
@@ -171,7 +171,7 @@ public final class CharsetDetector {
      * Detects the charset of specified byte array input stream's data.
      * <p>
      * <b>Note</b>: Specified input stream is going to be closed in this method.
-     * 
+     *
      * @param in The byte array input stream to examine
      * @throws NullPointerException If input stream is <code>null</code>
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
@@ -248,7 +248,7 @@ public final class CharsetDetector {
      * Detects the charset of specified input stream's data.
      * <p>
      * <b>Note</b>: Specified input stream is going to be closed in this method.
-     * 
+     *
      * @param in The input stream to examine
      * @throws NullPointerException If input stream is <code>null</code>
      * @return The detected charset or <i>US-ASCII</i> if no matching/supported charset could be found
@@ -345,7 +345,7 @@ public final class CharsetDetector {
     /**
      * {@link CharsetDetectionObserver} - A charset detection observer according to <a href="http://jchardet.sourceforge.net/">jcharset</a>
      * API
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class CharsetDetectionObserver implements nsICharsetDetectionObserver {
@@ -363,6 +363,7 @@ public final class CharsetDetector {
          * (non-Javadoc)
          * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java. lang.String)
          */
+        @Override
         public void Notify(final String charset) {
             this.charset = charset;
         }

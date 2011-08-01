@@ -68,24 +68,27 @@ import com.openexchange.groupware.update.UpdateTask;
 public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRenamePersonalInfostoreFolders.class));
-    
+
+    @Override
     public int addedWithVersion() {
         return 8;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId)
             throws OXException {
         try {
             final List<NameCollision> collisions = NameCollision.getCollisions(contextId, getParentFolder());
-            
+
             for(final NameCollision collision : collisions) {
                 collision.resolve();
             }
-            
+
         } catch (final SQLException e) {
             LOG.error("Error resolving name collisions: ",e);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -100,34 +103,34 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
     private static final class NameCollision {
         private final String name;
         private final int contextId;
-        
+
         private int nameCount = 1;
-        
+
         public NameCollision(final String name, final int contextId) {
             this.name = name;
             this.contextId = contextId;
         }
-        
+
         public void resolve() throws SQLException, OXException {
             LOG.info(String.format("Resolving name collisions for folders named %s in context %d", name, contextId));
-            
+
             Connection writeCon = null;
             PreparedStatement stmt = null;
             PreparedStatement checkAvailable = null;
             ResultSet rs = null;
-            
+
             try {
                 writeCon = Database.get(contextId, true);
                 writeCon.setAutoCommit(false);
                 stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ? WHERE cid = ? and fuid = ?");
                 stmt.setInt(2, contextId);
-                
+
                 checkAvailable = writeCon.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fname = ?");
                 checkAvailable.setInt(1, contextId);
-                
-                
+
+
                 final List<Integer> rename = discoverIds(writeCon);
-            
+
                 for(final int id : rename) {
                     String newName = String.format("%s (%d)", name, nameCount++);
                     boolean free = false;
@@ -145,7 +148,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                     stmt.setInt(3, id);
                     stmt.executeUpdate();
                 }
-                
+
                 writeCon.commit();
             } catch (final SQLException x) {
                 try {
@@ -169,7 +172,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                         LOG.warn("Couldn't close statement", x);
                     }
                 }
-                
+
                 if(null != rs) {
                     try {
                         rs.close();
@@ -177,22 +180,22 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                         LOG.warn("Couldn't close result set", x);
                     }
                 }
-                
+
                 if(writeCon != null) {
                     try {
                         writeCon.setAutoCommit(true);
                     } catch (final SQLException x){
                         LOG.warn("Can't reset auto commit", x);
                     }
-                    
+
                     if(writeCon != null) {
                         Database.back(contextId, true, writeCon);
                     }
                 }
             }
         }
-        
-        
+
+
         private List<Integer> discoverIds(final Connection writeCon) throws SQLException {
             PreparedStatement stmt = null;
             ResultSet rs = null;
@@ -201,11 +204,11 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                 stmt = writeCon.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid = ? and fname = ?");
                 stmt.setInt(1, contextId);
                 stmt.setString(2,name);
-                
+
                 rs = stmt.executeQuery();
                 while(rs.next()) { ids.add(rs.getInt(1)); }
-                
-                
+
+
             } finally {
                 if(null != stmt) {
                     try {
@@ -222,7 +225,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                     }
                 }
             }
-            
+
             Collections.sort(ids);
             ids.remove(ids.size()-1);
             return ids;
@@ -231,13 +234,13 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
         public String getName(){
             return name;
         }
-        
+
         public int getContextId(){
             return contextId;
         }
-        
-        
-        
+
+
+
         public static List<NameCollision> getCollisions(final int contextId, final int parentFolder) throws SQLException, OXException {
             final List<NameCollision> c = new ArrayList<NameCollision>();
             Connection writeCon = null;
@@ -255,18 +258,18 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                 }
 
                 rs = stmt.executeQuery();
-                
+
                 while(rs.next()) {
                     final NameCollision nc = new NameCollision(rs.getString(1), rs.getInt(2));
                     c.add(nc);
                 }
-                
+
                 rs.close();
                 rs = null;
-                
+
                 return c;
             } finally {
-                
+
                 if(null != stmt) {
                     try {
                         stmt.close();
@@ -281,7 +284,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                         LOG.warn("Couldn't close result set", x);
                     }
                 }
-                
+
                 if(null != writeCon) {
                     Database.back(contextId, true, writeCon);
                 }

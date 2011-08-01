@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Module}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum Module {
@@ -74,7 +74,7 @@ public enum Module {
             folderConstant2Module.put(module.folderConstant, module);
         }
     }
-    
+
     private String name;
     private int folderConstant;
 
@@ -82,23 +82,23 @@ public enum Module {
         this.name = name;
         this.folderConstant = folderConstant;
     }
-    
-    
+
+
     public static Module getForFolderConstant(int constant) {
         return folderConstant2Module.get(constant);
     }
-    
+
     public String getName() {
         return name;
     }
-    
-    
+
+
     public int getFolderConstant() {
         return folderConstant;
     }
-    
-    
-    
+
+
+
     public static final String getModuleString(final int module, final int objectId) {
         String moduleStr = null;
         switch (module) {

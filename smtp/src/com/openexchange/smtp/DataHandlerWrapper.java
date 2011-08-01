@@ -61,7 +61,7 @@ import javax.activation.DataSource;
 
 /**
  * {@link DataHandlerWrapper} - A simple wrapper for a {@link DataHandler data handler} to apply a custom content type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataHandlerWrapper extends DataHandler {
@@ -73,7 +73,7 @@ public final class DataHandlerWrapper extends DataHandler {
     /**
      * Initializes a new {@link DataHandlerWrapper}. The content type argument may be <code>null</code> to return delagatee's content type
      * on {@link #getContentType()}.
-     * 
+     *
      * @param dataHandler The delegatee data handler
      * @param contentType The (optional) content type
      */

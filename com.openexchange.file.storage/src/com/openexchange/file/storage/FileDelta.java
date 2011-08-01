@@ -64,7 +64,7 @@ public class FileDelta extends DeltaImpl<File> {
 
     /**
      * Initializes a new {@link FileDelta}.
-     * 
+     *
      * @param newFiles The new files
      * @param modifiedFiles The modified files
      * @param deletedFiles The deleted files
@@ -76,7 +76,7 @@ public class FileDelta extends DeltaImpl<File> {
 
     /**
      * Initializes a new {@link FileDelta}.
-     * 
+     *
      * @param newFiles The iterator for new files
      * @param modifiedFiles The iterator for modified files
      * @param deletedFiles The iterator for deleted files

@@ -65,14 +65,14 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FeedAdapter {
-    
+
     private final SyndFeed feed;
-    
+
     private final Map<String, SyndMessage> messages = new LinkedHashMap<String, SyndMessage>();
-    
+
     public FeedAdapter(final SyndFeed feed, final String folder, final Session session) throws OXException {
         this.feed = feed;
-    
+
         final List<SyndEntry> entries = feed.getEntries();
         for (final SyndEntry syndEntry : entries) {
             remember(new SyndMessage(feed, syndEntry, folder, session));
@@ -82,14 +82,14 @@ public class FeedAdapter {
     private void remember(final SyndMessage syndMessage) {
         messages.put(syndMessage.getId(), syndMessage);
     }
-    
+
     public SyndMessage get(final String id) {
         return messages.get(id);
     }
-    
+
     public List<SyndMessage> getMessages() {
         return new ArrayList<SyndMessage>(messages.values());
     }
-    
-    
+
+
 }

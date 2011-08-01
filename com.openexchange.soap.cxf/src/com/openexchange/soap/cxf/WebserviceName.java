@@ -59,6 +59,6 @@ import java.lang.annotation.RetentionPolicy;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface WebserviceName {  
+public @interface WebserviceName {
     String value();
 }

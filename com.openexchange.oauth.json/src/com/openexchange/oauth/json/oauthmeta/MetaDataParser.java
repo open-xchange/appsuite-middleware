@@ -54,7 +54,7 @@ import org.json.JSONObject;
 
 /**
  * Parses the JSON representation of an OAuth service meta data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MetaDataParser {
@@ -65,7 +65,7 @@ public class MetaDataParser {
 
     /**
      * Parses JSON to an {@link ParsedOAuthServiceMetaData} instance.
-     * 
+     *
      * @param metaDataJSON The JSON to parse
      * @return The parsed {@link ParsedOAuthServiceMetaData} instance
      * @throws JSONException If a JSON error occurs

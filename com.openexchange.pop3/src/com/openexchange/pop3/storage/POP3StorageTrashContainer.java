@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link POP3StorageTrashContainer} - Container for permanently deleted POP3 messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface POP3StorageTrashContainer {
 
     /**
      * Adds specified UIDL to this trash container.
-     * 
+     *
      * @param uidl The UIDL of the permanently deleted POP3 message
      * @throws OXException If adding UIDL fails
      */
@@ -70,7 +70,7 @@ public interface POP3StorageTrashContainer {
 
     /**
      * Adds all specified UIDLs to this trash container.
-     * 
+     *
      * @param uidl The UIDLs of the permanently deleted POP3 messages
      * @throws OXException If adding UIDLs fails
      */
@@ -78,7 +78,7 @@ public interface POP3StorageTrashContainer {
 
     /**
      * Removes specified UIDL from this trash container.
-     * 
+     *
      * @param uidl The UIDL to remove
      * @throws OXException If removing UIDL fails
      */
@@ -86,7 +86,7 @@ public interface POP3StorageTrashContainer {
 
     /**
      * Gets all UIDLs kept in this container.
-     * 
+     *
      * @return All UIDLs kept in this container
      * @throws OXException If retrieving UIDLs fails
      */
@@ -94,7 +94,7 @@ public interface POP3StorageTrashContainer {
 
     /**
      * Clears this container.
-     * 
+     *
      * @throws OXException If clearing fails
      */
     public void clear() throws OXException;

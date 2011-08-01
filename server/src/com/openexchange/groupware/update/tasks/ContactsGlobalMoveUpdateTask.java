@@ -83,18 +83,20 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTask#addedWithVersion()
      */
+    @Override
     public int addedWithVersion() {
         return 16;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTask#getPriority()
      */
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -108,15 +110,16 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
      *      int)
      */
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        correctTable("prg_contacts", contextId);   
+        correctTable("prg_contacts", contextId);
     }
-    
+
     private static final String SQL_QUERY = "SELECT created_from,cid,intfield01 FROM prg_contacts WHERE fid = "+FolderObject.SYSTEM_LDAP_FOLDER_ID+" AND userid is NULL";
 
 
@@ -125,14 +128,14 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
         if (LOG.isInfoEnabled()) {
             LOG.info(STR_INFO);
         }
-        
+
         Connection writeCon = null;
         final PreparedStatement stmt = null;
         Statement st = null;
         ResultSet resultSet = null;
         FolderObject des = null;
         try {
-            
+
             writeCon = Database.get(contextId, true);
             try {
                 st = writeCon.createStatement();
@@ -140,44 +143,44 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                 Context ct = null;
                 OXFolderAccess oxa = null;
                 resultSet = st.executeQuery(SQL_QUERY);
-                
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
                 }
-                    
+
                 while (resultSet.next()) {
                     final int creator  = resultSet.getInt(1);
                     final int cid = resultSet.getInt(2);
                     final int id  = resultSet.getInt(3);
-                    
-                    
-                    ct = ContextStorage.getInstance().loadContext(cid);                    
+
+
+                    ct = ContextStorage.getInstance().loadContext(cid);
                     oxa = new OXFolderAccess(writeCon, ct);
                     des = oxa.getDefaultFolder(creator, FolderObject.CONTACT);
-                
+
                     if (LOG.isWarnEnabled()) {
                         LOG.warn("UPDATING OPBJECT "+id+" IN CONTEXT "+cid+" MOVING TO "+des.getObjectID());
                     }
-                        
+
                     final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
                     sb.append(des.getObjectID());
                     sb.append(" , changing_date = ");
-                    sb.append(System.currentTimeMillis());    
-                    
+                    sb.append(System.currentTimeMillis());
+
                     sb.append(" , changed_from = ");
-                    sb.append(ct.getMailadmin()); 
-                    
+                    sb.append(ct.getMailadmin());
+
                     sb.append(" WHERE cid = ");
                     sb.append(cid);
                     sb.append(" AND intfield01 = ");
                     sb.append(id);
                     st.addBatch(sb.toString());
                 }
-                            
-                
+
+
                 st.executeBatch();
                 st.close();
-                
+
             } catch (final SQLException e) {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
@@ -189,5 +192,5 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
             }
         }
     }
-    
+
 }

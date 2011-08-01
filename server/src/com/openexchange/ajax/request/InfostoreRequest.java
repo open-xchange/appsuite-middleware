@@ -399,25 +399,25 @@ public class InfostoreRequest extends CommonRequest {
             final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
 
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            
+
             final String stringLeftHandLimit = req.getParameter(AJAXServlet.LEFT_HAND_LIMIT);
             final String stringRightHandLimit = req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT);
 
             final int leftHandLimit;
             final int rightHandLimit;
-            
+
             if (stringLeftHandLimit == null) {
                 leftHandLimit = 0;
             } else {
                 leftHandLimit = Integer.parseInt(AJAXServlet.LEFT_HAND_LIMIT);
             }
-            
+
             if (stringRightHandLimit == null) {
                 rightHandLimit = 0;
             } else {
                 rightHandLimit = Integer.parseInt(AJAXServlet.RIGHT_HAND_LIMIT);
             }
-            
+
             all(folderId, cols, sortedBy, dir, timeZoneId, leftHandLimit, rightHandLimit);
         } else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
             if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
@@ -675,18 +675,22 @@ public class InfostoreRequest extends CommonRequest {
             private SearchIteratorException se;
             private OXException oxe;
 
+            @Override
             public void addWarning(final OXException warning) {
                 iter.addWarning(warning);
             }
 
+            @Override
             public void close() throws OXException {
                 iter.close();
             }
 
+            @Override
             public OXException[] getWarnings() {
                 return iter.getWarnings();
             }
 
+            @Override
             public boolean hasNext() throws OXException{
                 try {
                     scrollToNext();
@@ -697,10 +701,12 @@ public class InfostoreRequest extends CommonRequest {
             }
 
 
+            @Override
             public boolean hasWarnings() {
                 return iter.hasWarnings();
             }
 
+            @Override
             public DocumentMetadata next() throws OXException {
                 if(se != null) {
                     throw se;
@@ -727,10 +733,11 @@ public class InfostoreRequest extends CommonRequest {
                 }
             }
 
+            @Override
             public int size() {
                 return -1;
             }
-            
+
         };
     }
 

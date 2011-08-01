@@ -76,7 +76,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link VersitUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VersitUtility {
@@ -93,7 +93,7 @@ public final class VersitUtility {
     /**
      * Saves specified <code>VCard</code> mail part into corresponding default folder. The resulting instance of {@link CommonObject} is
      * added to given list.
-     * 
+     *
      * @param vcardInputStream The VCard input stream
      * @param baseContentType The VCard's base content type (e.g. <i>text/vcard</i>)
      * @param charset The charset encoding of provided input stream's data
@@ -145,7 +145,7 @@ public final class VersitUtility {
     /**
      * Saves specified <code>ICalendar</code> mail part into corresponding default folders. The resulting instances of {@link CommonObject}
      * are added to given list.
-     * 
+     *
      * @param icalInputStream The ICal input stream
      * @param baseContentType The ICal's base content type (e.g. <i>text/calendar</i>)
      * @param charset The charset encoding of provided input stream's data

@@ -67,7 +67,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 public class SecretRecoveryJSONActivator extends DeferredActivator{
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryJSONActivator.class));
-    
+
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class};
     private ServiceRegistration registration;
     private ServiceRegistration enabledReg;
@@ -81,30 +81,30 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        
+
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        
+
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
             final Whiteboard whiteboard = new Whiteboard(context);
-            
+
             final SecretService secretService = whiteboard.getService(SecretService.class);
             final SecretMigrator migrator = whiteboard.getService(SecretMigrator.class);
             final SecretInconsistencyDetector detector = whiteboard.getService(SecretInconsistencyDetector.class);
-            
+
             SecretRecoveryServlet.detector = detector;
             SecretRecoveryServlet.migrator = migrator;
             SecretRecoveryServlet.secretService = secretService;
-            
+
             servletRegistration = new SessionServletRegistration(context, new SecretRecoveryServlet(), "ajax/recovery/secret");
             servletRegistration.open();
-            
+
             registration = context.registerService(MultipleHandlerFactoryService.class.getName(), new MultipleHandlerFactoryService() {
 
                 public MultipleHandler createMultipleHandler() {
@@ -114,14 +114,14 @@ public class SecretRecoveryJSONActivator extends DeferredActivator{
                 public String getSupportedModule() {
                     return "recovery/secret";
                 }
-                
+
             }, null);
             enabledReg = context.registerService(PreferencesItemService.class.getName(), new Enabled(), null);
-            
+
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
         }
-    
+
     }
 
     @Override

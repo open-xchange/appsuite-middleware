@@ -55,7 +55,7 @@ import java.util.Map;
 /**
  * {@link TemplateToken} - An enumeration of possible occurring tokens in a
  * template which are supposed to be replaced with user/object information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum TemplateToken {
@@ -174,7 +174,7 @@ public enum TemplateToken {
 
     /**
      * Gets the tokens
-     * 
+     *
      * @return The token
      */
     public String getToken() {
@@ -194,7 +194,7 @@ public enum TemplateToken {
     /**
      * Gets the template token for specified string or <code>null</code> if
      * there's no corresponding template token.
-     * 
+     *
      * @param tokenString The token string
      * @return The template token for specified string or <code>null</code> if
      *         there's no corresponding template token.

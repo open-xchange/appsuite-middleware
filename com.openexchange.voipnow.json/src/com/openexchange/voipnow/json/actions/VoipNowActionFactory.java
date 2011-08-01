@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link VoipNowActionFactory} - Factory for VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VoipNowActionFactory implements AJAXActionServiceFactory {
@@ -71,7 +71,7 @@ public final class VoipNowActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Gets the {@link VoipNowActionFactory factory} instance.
-     * 
+     *
      * @return The {@link VoipNowActionFactory factory} instance.
      */
     public static final VoipNowActionFactory getInstance() {
@@ -108,7 +108,7 @@ public final class VoipNowActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes the unmodifiable map to stored actions.
-     * 
+     *
      * @return The unmodifiable map with actions stored
      */
     private Map<String, AJAXActionService> initActions() {

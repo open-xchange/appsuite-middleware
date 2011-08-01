@@ -53,7 +53,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 
 /**
  * {@link Constants} for the HTTP JSON interface of the folder component.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -83,7 +83,7 @@ public final class Constants {
 
     /**
      * Gets the module string.
-     * 
+     *
      * @return The module string
      */
     public static String getModule() {
@@ -92,7 +92,7 @@ public final class Constants {
 
     /**
      * Sets the module string.
-     * 
+     *
      * @param module The module string
      */
     public static void setModule(final String module) {
@@ -102,7 +102,7 @@ public final class Constants {
 
     /**
      * Gets the servlet path.
-     * 
+     *
      * @return The servlet path
      */
     public static String getServletPath() {
@@ -111,7 +111,7 @@ public final class Constants {
 
     /**
      * Sets the servlet path.
-     * 
+     *
      * @param servletPath The servlet path
      */
     public static void setServletPath(final String servletPath) {

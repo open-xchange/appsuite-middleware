@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServlet;
 
 /**
  * {@link ServletQueue} - A servlet queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ServletQueue {
@@ -61,7 +61,7 @@ public interface ServletQueue {
     /**
      * Checks whether passed servlet instance is a singleton; meaning it does not implement marker interface
      * <code>javax.servlet.SingleThreadModel</code>.
-     * 
+     *
      * @return <code>true</code> if servlet instance does not implement <code>javax.servlet.SingleThreadModel</code>; otherwise
      *         <code>false</code>
      */
@@ -69,7 +69,7 @@ public interface ServletQueue {
 
     /**
      * Gets the servlet path.
-     * 
+     *
      * @return The servlet path
      */
     String getServletPath();
@@ -77,7 +77,7 @@ public interface ServletQueue {
     /**
      * Creates a new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
      * <code>servletKey</code> argument.
-     * 
+     *
      * @param servletKey The servlet key
      * @return A new instance of <code>javax.servlet.http.HttpServlet</code> initialized with servlet config obtained by given
      *         <code>servletKey</code> argument; or <code>null</code> if no servlet is bound to given servlet key or initialization fails
@@ -86,42 +86,42 @@ public interface ServletQueue {
 
     /**
      * Checks if this queue is empty.
-     * 
+     *
      * @return <code>true</code> if queue is empty; otherwise <code>false</code>
      */
     boolean isEmpty();
 
     /**
      * Checks if this queue is full.
-     * 
+     *
      * @return <code>true</code> if queue is full; otherwise <code>false</code>
      */
     boolean isFull();
 
     /**
      * Gets the number of contained objects in queue.
-     * 
+     *
      * @return The number of contained objects
      */
     int size();
 
     /**
      * Enqueues given servlet to queue's tail.
-     * 
+     *
      * @param servlet The servlet to enqueue
      */
     void enqueue(final HttpServlet servlet);
 
     /**
      * Dequeues the first servlet (head) in queue.
-     * 
+     *
      * @return The dequeued object
      */
     public HttpServlet dequeue();
 
     /**
      * Peeks (and does not remove) the first servlet (head) in queue
-     * 
+     *
      * @return The first servlet
      */
     public HttpServlet get();

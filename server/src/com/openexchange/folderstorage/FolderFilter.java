@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link FolderFilter} - A filter for folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderFilter {
@@ -60,19 +60,19 @@ public interface FolderFilter {
      * Tests whether or not the specified folder should be included.
      * <p>
      * For example filter folders of a certain content type:
-     * 
+     *
      * <pre>
-     * 
-     * 
-     * 
+     *
+     *
+     *
      * FolderFilter myFilter = new FolderFilter() {
-     * 
+     *
      *     public boolean accept(Folder folder) {
      *         return XYZContentType.getInstance().equals(folder.getContenType());
      *     }
      * };
      * </pre>
-     * 
+     *
      * @param folder The folder to be tested
      * @return <code>true</code> if and only if <code>folder</code> should be included
      */

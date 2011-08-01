@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link ACLExtensionInit} - Initialization for ACL extension.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ACLExtensionInit implements Initialization {
@@ -66,7 +66,7 @@ public final class ACLExtensionInit implements Initialization {
 
     /**
      * Gets the initialization for ACL extension.
-     * 
+     *
      * @return The initialization for ACL extension.
      */
     public static ACLExtensionInit getInstance() {
@@ -94,7 +94,7 @@ public final class ACLExtensionInit implements Initialization {
         // ACLExtensionAutoDetector.initACLExtensionMappings();
         // TODO: Uncomment subsequent code to enable configured instance rather than auto-detection
         /*-
-         * 
+         *
         synchronized(this) {
             if (null == implementingClass) {
                 final String classNameProp = IMAPConfig.getEntity2AclImpl();

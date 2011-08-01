@@ -50,8 +50,6 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +58,6 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
@@ -74,15 +71,15 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalDAV extends OXServlet {
 
     private static final transient Log LOG = LogFactory.getLog(CalDAV.class);
-    
+
     private static ServiceLookup services;
-    
+
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -227,13 +224,13 @@ public class CalDAV extends OXServlet {
     protected void incrementRequests() {
         // TODO Auto-generated method stub
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
     }
 
-   
+
 }

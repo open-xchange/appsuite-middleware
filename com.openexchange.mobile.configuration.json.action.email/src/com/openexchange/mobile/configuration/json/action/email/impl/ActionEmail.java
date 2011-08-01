@@ -62,18 +62,18 @@ import com.openexchange.mobile.configuration.json.container.ProvisioningResponse
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ActionEmail implements ActionService {
 
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MobilityProvisioningServlet.class));
-	
+
     public ProvisioningResponse handleAction(final ProvisioningInformation provisioningInformation){
     	final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
-    	
-    	try {		
+
+    	try {
 			InternetAddress fromAddress = new InternetAddress(provisioningInformation.getUser().getMail(), true);
 			if (!provisioningInformation.getMailFrom().trim().toUpperCase().equals("USER")) {
 				fromAddress = new InternetAddress(provisioningInformation.getMailFrom(), true);
@@ -85,17 +85,17 @@ public class ActionEmail implements ActionService {
 			final ComposedMailMessage msg = provider.getNewComposedMailMessage(provisioningInformation.getSession(), provisioningInformation.getCtx());
 			msg.addFrom(fromAddress);
 			msg.addTo(new InternetAddress(provisioningInformation.getTarget()));
-			
+
 			if (provisioningInformation.containsProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString())) {
 				msg.setSubject(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getSubject());
-				
+
 				final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getProvisioningEmailMessage(provisioningInformation.getUser().getLocale().toString()).getMessage());
 				msg.setBodyPart(textPart);
 			} else {
 				final TextBodyMailPart textPart = provider.getNewTextBodyPart(provisioningInformation.getUrl());
 				msg.setBodyPart(textPart);
 			}
-						
+
 			msg.setContentType("text/plain");
 
 			final MailTransport transport = MailTransport.getInstance(provisioningInformation.getSession());
@@ -104,7 +104,7 @@ public class ActionEmail implements ActionService {
 			} finally {
 				transport.close();
 			}
-			
+
 			provisioningResponse.setMessage("Provisioning mail has been send to " + provisioningInformation.getTarget());
 			provisioningResponse.setSuccess(true);
 		} catch (final OXException e) {
@@ -116,14 +116,14 @@ public class ActionEmail implements ActionService {
 			provisioningResponse.setMessage("Target Spam email address cannot be parsed");
 			provisioningResponse.setSuccess(false);
 		}
-    	
+
     	return provisioningResponse;
     }
-    
+
     private void logError(final String message, final Exception e, final ProvisioningResponse provisioningResponse) {
     	LOG.error(message, e);
     	provisioningResponse.setMessage(message);
     	provisioningResponse.setSuccess(false);
     }
-	
+
 }

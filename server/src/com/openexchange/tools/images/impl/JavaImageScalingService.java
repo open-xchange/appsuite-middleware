@@ -67,24 +67,25 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class JavaImageScalingService implements ImageScalingService {
 
+    @Override
     public InputStream scale(InputStream pictureData, int maxWidth, int maxHeight) throws IOException {
         BufferedImage image = ImageIO.read(pictureData);
-        
+
         ResampleOp op = new ResampleOp(DimensionConstrain.createMaxDimension(maxWidth, maxHeight));
-        
+
         BufferedImage scaled = op.filter(image, null);
-        
+
         UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
-        
+
         if (!ImageIO.write(scaled, "jpeg", baos)) {
             throw new IOException("Couldn't scale image");
         }
-            
-        
-        
+
+
+
         return new ByteArrayInputStream(baos.toByteArray());
     }
-    
-    
+
+
 
 }

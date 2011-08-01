@@ -8,11 +8,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Queue center login extension data
- * 
+ *
  * <p>Java class for QueueCenterInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="QueueCenterInfo">
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "QueueCenterInfo", propOrder = {
@@ -42,11 +42,11 @@ public class QueueCenterInfo
 
     /**
      * Gets the value of the connectionSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getConnectionSnd() {
         return connectionSnd;
@@ -54,11 +54,11 @@ public class QueueCenterInfo
 
     /**
      * Sets the value of the connectionSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setConnectionSnd(String value) {
         this.connectionSnd = value;
@@ -66,11 +66,11 @@ public class QueueCenterInfo
 
     /**
      * Gets the value of the connectionSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isConnectionSndActive() {
         return connectionSndActive;
@@ -78,11 +78,11 @@ public class QueueCenterInfo
 
     /**
      * Sets the value of the connectionSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setConnectionSndActive(Boolean value) {
         this.connectionSndActive = value;

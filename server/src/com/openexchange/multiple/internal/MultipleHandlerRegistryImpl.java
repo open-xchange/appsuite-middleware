@@ -56,7 +56,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link MultipleHandlerRegistryImpl} - Implementation backed by a {@link ConcurrentMap concurrent map}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MultipleHandlerRegistryImpl implements com.openexchange.multiple.internal.MultipleHandlerRegistry {
@@ -75,10 +75,12 @@ public final class MultipleHandlerRegistryImpl implements com.openexchange.multi
         registry = new ConcurrentHashMap<String, MultipleHandlerFactoryService>();
     }
 
+    @Override
     public boolean addFactoryService(final MultipleHandlerFactoryService factoryService) {
         return (null == registry.putIfAbsent(factoryService.getSupportedModule(), factoryService));
     }
 
+    @Override
     public MultipleHandlerFactoryService getFactoryService(final String module) {
         MultipleHandlerFactoryService candidate = registry.get(module);
         if(candidate == null) {
@@ -92,6 +94,7 @@ public final class MultipleHandlerRegistryImpl implements com.openexchange.multi
         return candidate;
     }
 
+    @Override
     public void removeFactoryService(final String module) {
         registry.remove(module);
     }

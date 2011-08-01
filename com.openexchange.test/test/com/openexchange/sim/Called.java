@@ -64,7 +64,7 @@ public class Called implements Expectation {
 
     private String methodName = null;
     private Object[] args = null;
-    
+
     public Called(String methodName, Object[] args) {
         super();
         this.methodName = methodName;
@@ -76,7 +76,7 @@ public class Called implements Expectation {
     }
 
     public Object getArgument(int i) {
-        return args[i];    
+        return args[i];
     }
 
     public String getMethodName() {
@@ -86,13 +86,13 @@ public class Called implements Expectation {
     public void verify(Method method, Object[] args) {
         String methodName = method.getName();
         assertEquals(getMethodName(), methodName);
-        
+
         if(args == null) {
             args = new Object[0];
         }
-        
+
         assertEquals("Argument list size is not equal. Wrong method called? Method: "+methodName, getArgumentLength(), args.length);
-        
+
         int index = 0;
         for (Object object : args) {
             if(int[].class.isInstance(this.args[index])) {
@@ -102,20 +102,21 @@ public class Called implements Expectation {
                 }
                 int[] expected = (int[]) this.args[index++];
                 int[] provided = (int[]) object;
-                
+
                 assertEquals("Argument mismatch at "+index+". Different Array sizes.", expected.length, provided.length);
-                
+
                 for(int i = 0; i < expected.length; i++){
                     assertEquals("Argument mismatch at "+index+". Different values in array at index "+i, expected[i], provided[i]);
                 }
-                
+
             } else {
                 assertEquals("Argument mismatch at "+index, this.args[index++],object);
             }
         }
-                    
+
     }
-    
+
+    @Override
     public String toString() {
         return methodName;
     }

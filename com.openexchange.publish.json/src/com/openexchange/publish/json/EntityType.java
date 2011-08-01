@@ -74,7 +74,7 @@ public interface EntityType {
      */
     String toEntityID(HttpServletRequest entityDefinition) throws JSONException;
 
-    
+
     /**
      * @param entityId
      * @return

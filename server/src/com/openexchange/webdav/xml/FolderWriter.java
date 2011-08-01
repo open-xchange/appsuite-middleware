@@ -79,7 +79,7 @@ import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link FolderWriter}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -331,6 +331,7 @@ public class FolderWriter extends FolderChildWriter {
             this.userConf = userConf;
         }
 
+        @Override
         public void enqueue(final FolderObject fo) throws OXException {
             try {
                 if (fo.isVisible(userId, userConf)) {

@@ -77,7 +77,7 @@ public class DeleteExceptions extends AbstractVerifyingAttributeConverter<VEvent
     public DeleteExceptions() {
         super();
     }
-    
+
     public boolean isSet(final Appointment appointment) {
         return appointment.isMaster() && appointment.containsDeleteExceptions();
     }

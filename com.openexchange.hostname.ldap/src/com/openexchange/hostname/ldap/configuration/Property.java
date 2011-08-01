@@ -59,18 +59,18 @@ public enum Property implements PropertyInterface {
     bind_dn(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(bind, Boolean.TRUE)}), "com.openexchange.hostname.ldap.bind_dn"),
     bind_password(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(bind, Boolean.TRUE)}), "com.openexchange.hostname.ldap.bind_password"),
     cache_config_file(String.class, Required.TRUE, "com.openexchange.hostname.ldap.cache_config_file");
-    
-    
+
+
     private final Class<?> clazz;
-    
+
     private final Required required;
-    
+
     private final String name;
-    
+
     /**
-     * Properties which must 
+     * Properties which must
      */
-    
+
     private Property(final Class<?> clazz, final Required required, final String name) {
         this.clazz = clazz;
         this.required = required;

@@ -57,8 +57,8 @@ package com.openexchange.modules.model;
  */
 public interface Model<T extends Model<T>> {
     public Metadata<T> getMetadata();
-    
+
     public Object get(Attribute<T> attribute);
     public void set(Attribute<T> attribute, Object value);
-    
+
 }

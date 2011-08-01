@@ -62,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
 public class Services {
     public static ServiceLookup SERVICE_LOOKUP = null;
     private static Configuration configuration;
-    
+
     public static Configuration getConfiguration() {
         if(configuration != null) {
             return configuration;

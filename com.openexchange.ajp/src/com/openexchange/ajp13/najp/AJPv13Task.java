@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Connection;
 import com.openexchange.ajp13.AJPv13Request;
@@ -66,6 +67,8 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.exception.AJPv13TimeoutException;
+import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -78,16 +81,24 @@ import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * {@link AJPv13Task} - Processes an accepted client socket until either executing thread is interrupted or assigned socket is closed.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Task implements Task<Object> {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+    /**
+     * The logger constant.
+     */
+    protected static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Task.class));
+
+    /**
+     * Whether debug log level is enabled.
+     */
+    protected static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
     /**
      * Creates a new {@link AJPv13Task} instance.
-     * 
+     *
      * @param client The client socket to process
      * @param listenerMonitor The listener monitor
      * @param watcher The task watcher
@@ -180,7 +191,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Sets the control for this AJP task.
-     * 
+     *
      * @param control The control
      */
     public void setControl(final Future<Object> control) {
@@ -189,7 +200,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the sequential task number.
-     * 
+     *
      * @return The sequential task number
      */
     public Long getNum() {
@@ -217,7 +228,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the client socket bound to this task.
-     * 
+     *
      * @return The client socket bound to this task.
      */
     public Socket getSocket() {
@@ -282,7 +293,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Checks if this task is long-running.
-     * 
+     *
      * @return <code>true</code> if this task is long-running; otherwise <code>false</code>
      */
     boolean isLongRunning() {
@@ -291,7 +302,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Sets if this task is long-running.
-     * 
+     *
      * @param longRunning <code>true</code> if this task is long-running; otherwise <code>false</code>
      */
     void setLongRunning(final boolean longRunning) {
@@ -300,7 +311,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets currently executing thread's stack trace.
-     * 
+     *
      * @return The currently executing thread's stack trace or an empty stack trace if no thread processes this task.
      */
     StackTraceElement[] getStackTrace() {
@@ -312,7 +323,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets currently executing thread's name.
-     * 
+     *
      * @return The currently executing thread's name or an empty string if no threads processes this task.
      */
     String getThreadName() {
@@ -324,7 +335,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Gets the currently used AJP connection.
-     * 
+     *
      * @return The currently used AJP connection or <code>null</code> if none in use.
      */
     AJPv13ConnectionImpl getAJPConnection() {
@@ -337,6 +348,7 @@ public final class AJPv13Task implements Task<Object> {
      * <p>
      * The client socket is closed, when executing thread leaves this <code>run()</code> method.
      */
+    @Override
     public Object call() {
         final Thread t = thread = Thread.currentThread();
         if (!t.isInterrupted() && client != null && !client.isClosed()) {
@@ -349,9 +361,10 @@ public final class AJPv13Task implements Task<Object> {
                 ajpCon = new AJPv13ConnectionImpl(this);
             } catch (final AJPv13Exception e) {
                 LOG.error(e.getMessage(), e);
-                terminateAndClose(null);
+                terminateAndClose(false, null);
                 return null;
             }
+            boolean closeOrderly = true;
             ajpConnection = ajpCon;
             final AJPv13TaskMonitor monitor = listenerMonitor;
             try {
@@ -387,6 +400,11 @@ public final class AJPv13Task implements Task<Object> {
                     } catch (final ServletException e) {
                         LOG.error(e.getMessage(), e);
                         closeAndKeepAlive(ajpCon);
+                    } catch (final AJPv13TimeoutException e) {
+                        /*
+                         * Read on socket input stream timed out
+                         */
+                        throw e;
                     } catch (final AJPv13Exception e) {
                         if (e.keepAlive()) {
                             LOG.error(e.getMessage(), e);
@@ -421,16 +439,31 @@ public final class AJPv13Task implements Task<Object> {
                     monitor.incrementNumRequests();
                     processing = false;
                     flush();
-                } while (!t.isInterrupted() && client != null && !client.isClosed()); // End of loop processing an AJP socket's data
+                } while (!t.isInterrupted() && client != null && !client.isClosed());
+                /*-
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ------------------------------------ End of loop processing AJP socket's data ---------------------------------------
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 */
             } catch (final AJPv13SocketClosedException e) {
                 /*
                  * Just as debug info
                  */
-                if (LOG.isDebugEnabled()) {
+                if (DEBUG_ENABLED) {
                     LOG.debug(e.getMessage(), e);
                 }
+            } catch (final AJPv13UnknownPrefixCodeException e) {
+                final String dump = e.getDump();
+                LOG.error(e.getMessage() + (dump == null ? "" : "\nCorresponding AJP package:\n" + dump));
             } catch (final AJPv13Exception e) {
                 LOG.error(e.getMessage(), e);
+            } catch (final AJPv13TimeoutException e) {
+                if (DEBUG_ENABLED) {
+                    LOG.debug("AJP read timed out");
+                }
+                closeOrderly = false;
             } catch (final Throwable e) {
                 /*
                  * Catch Throwable to catch every throwable object.
@@ -438,7 +471,7 @@ public final class AJPv13Task implements Task<Object> {
                 final AJPv13Exception wrapper = new AJPv13Exception(e);
                 LOG.error(wrapper.getMessage(), wrapper);
             } finally {
-                terminateAndClose(ajpCon);
+                terminateAndClose(closeOrderly, ajpCon);
                 waitingOnAJPSocket = false;
                 thread = null;
                 if (processing) {
@@ -457,7 +490,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Checks if this task was canceled before it completed normally.
-     * 
+     *
      * @return <code>true</code> if this task was canceled before it completed normally; otherwise <code>false</code>
      */
     public boolean isCancelled() {
@@ -467,13 +500,14 @@ public final class AJPv13Task implements Task<Object> {
     /**
      * Checks if this task completed. Completion may be due to normal termination, an exception, or cancellation -- in all of these cases,
      * this method will return <code>true</code>.
-     * 
+     *
      * @return <code>true</code> if this task completed; otherwise <code>false</code>
      */
     public boolean isDone() {
         return control.isDone();
     }
 
+    @Override
     public void afterExecute(final Throwable t) {
         watcher.removeTask(this);
         if (null != scheduledKeepAliveTask) {
@@ -487,29 +521,27 @@ public final class AJPv13Task implements Task<Object> {
         listenerMonitor.decrementNumActive();
     }
 
+    @Override
     public void beforeExecute(final Thread t) {
         watcher.addTask(this);
         final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
         if (null != timer) {
             final int max = AJPv13Config.getAJPWatcherMaxRunningTime();
             scheduledKeepAliveTask =
-                timer.scheduleWithFixedDelay(
-                    new KeepAliveRunnable(this, max, LOG),
-                    max,
-                    (long) max/2,
-                    TimeUnit.MILLISECONDS);
+                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, (long) max / 2, TimeUnit.MILLISECONDS);
         }
         changeNumberOfRunningAJPTasks(true);
         listenerMonitor.incrementNumActive();
     }
 
+    @Override
     public void setThreadName(final ThreadRenamer threadRenamer) {
         threadRenamer.renamePrefix("AJPListener");
     }
 
     /**
      * Increments/decrements the number of running AJP tasks.
-     * 
+     *
      * @param increment whether to increment or to decrement
      */
     private static void changeNumberOfRunningAJPTasks(final boolean increment) {
@@ -518,7 +550,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Writes pending data to client and closes current AJP cycle (End-Response package) but keeps socket connection alive.
-     * 
+     *
      * @param resp The HTTP response for writing possibly outstanding header package
      * @param data The pending data
      * @param ajpCon The AJP connection
@@ -557,7 +589,7 @@ public final class AJPv13Task implements Task<Object> {
 
     /**
      * Closes current AJP cycle (End-Response package) but keeps socket connection alive.
-     * 
+     *
      * @param ajpCon The AJP connection
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
@@ -574,22 +606,11 @@ public final class AJPv13Task implements Task<Object> {
     }
 
     /**
-     * Writes connection-terminating AJP END_RESPONSE package to web server, closes the AJP connection and accepted client socket as well.
+     * Closes the accepted client socket.
+     * 
+     * @param closeOrderly Whether to write connection-terminating AJP END_RESPONSE package to web server
      */
-    private void terminateAndClose(final AJPv13ConnectionImpl ajpCon) {
-        /*-
-         * 
-        try {
-            // Release AJP connection
-            if (ajpCon != null) {
-                ajpCon.close();
-            }
-        } catch (final Exception e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
-            }
-        }
-        */
+    private void terminateAndClose(final boolean closeOrderly, final AJPv13ConnectionImpl ajpCon) {
         try {
             /*
              * Terminate AJP cycle and close socket
@@ -597,11 +618,32 @@ public final class AJPv13Task implements Task<Object> {
             final Socket s = client;
             if (s != null) {
                 try {
-                    if (!s.isClosed()) {
-                        writeEndResponse(s, true);
+                    if (closeOrderly && !s.isClosed()) {
+                        final AJPv13RequestHandler requestHandler = ajpCon.getAjpRequestHandler();
+                        if (!requestHandler.isHeadersSent()) {
+                            final OutputStream out = s.getOutputStream();
+                            final HttpServletResponseWrapper response = new HttpServletResponseWrapper(null);
+                            final byte[] errMsg = response.composeAndSetError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, null);
+                            // Write headers
+                            out.write(AJPv13Response.getSendHeadersBytes(response));
+                            out.flush();
+                            // Write error message
+                            out.write(AJPv13Response.getSendBodyChunkBytes(errMsg));
+                            out.flush();
+                            // Write end-response
+                            out.write(AJPv13Response.getEndResponseBytes(true));
+                            out.flush();
+                        } else if (!requestHandler.isEndResponseSent()) {
+                            final OutputStream out = s.getOutputStream();
+                            /*
+                             * Send end-response
+                             */
+                            out.write(AJPv13Response.getEndResponseBytes(true));
+                            out.flush();
+                        }
                     }
                 } catch (final Exception e) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG_ENABLED) {
                         LOG.debug("Writing END_RESPONSE package failed.", e);
                     }
                 } finally {
@@ -614,8 +656,8 @@ public final class AJPv13Task implements Task<Object> {
                 control = null;
             }
         } catch (final Exception e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(e.getMessage(), e);
+            if (DEBUG_ENABLED) {
+                LOG.debug(e.getMessage(), e);
             }
         }
     }
@@ -624,8 +666,8 @@ public final class AJPv13Task implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
+            if (DEBUG_ENABLED) {
+                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
             }
         }
     }
@@ -652,27 +694,24 @@ public final class AJPv13Task implements Task<Object> {
 
         private final AJPv13Task task;
 
-        private final org.apache.commons.logging.Log log;
-
         private final boolean info;
 
         private final int max;
 
         /**
          * Initializes a new {@link KeepAliveRunnable} to only perform keep-alive on given AJP task.
-         * 
+         *
          * @param task The AJP task
          * @param max The max. processing time when a AJP task is considered as exceeded an keep-alive takes place
-         * @param log The logger
          */
-        public KeepAliveRunnable(final AJPv13Task task, final int max, final org.apache.commons.logging.Log log) {
+        public KeepAliveRunnable(final AJPv13Task task, final int max) {
             super();
             this.task = task;
-            this.log = log;
-            info = log.isInfoEnabled();
             this.max = max;
+            info = LOG.isInfoEnabled();
         }
 
+        @Override
         public void run() {
             try {
                 if (task.isProcessing() && ((System.currentTimeMillis() - task.getAJPConnection().getLastWriteAccess()) > max)) {
@@ -682,17 +721,23 @@ public final class AJPv13Task implements Task<Object> {
                     keepAlive();
                 }
             } catch (final AJPv13Exception e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                if (DEBUG_ENABLED) {
+                    LOG.error("AJP KEEP-ALIVE failed.", e);
+                }
             } catch (final IOException e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                if (DEBUG_ENABLED) {
+                    LOG.error("AJP KEEP-ALIVE failed.", e);
+                }
             } catch (final Exception e) {
-                log.error("AJP KEEP-ALIVE failed.", e);
+                if (DEBUG_ENABLED) {
+                    LOG.error("AJP KEEP-ALIVE failed.", e);
+                }
             }
         }
 
         /**
          * Performs AJP-style keep-alive poll to web server to avoid connection timeout.
-         * 
+         *
          * @throws IOException If an I/O error occurs
          * @throws AJPv13Exception If an AJP error occurs
          */
@@ -738,16 +783,16 @@ public final class AJPv13Task implements Task<Object> {
 
         private void keepAliveSendAvailableData(final String remoteAddress, final BlockableBufferedOutputStream out, final byte[] remainingData) throws IOException, AJPv13Exception {
             AJPv13Request.writeChunked(remainingData, out);
-            if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
+            if (DEBUG_ENABLED) {
+                LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed available data to socket \"").append(remoteAddress).append(
                     "\" to initiate a KEEP-ALIVE poll."));
             }
         }
 
         private void keepAliveSendEmptyBody(final String remoteAddress, final BlockableBufferedOutputStream out) throws IOException, AJPv13Exception {
             AJPv13Request.writeEmpty(out);
-            if (log.isDebugEnabled()) {
-                log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
+            if (DEBUG_ENABLED) {
+                LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty SEND-BODY-CHUNK response to socket \"").append(
                     remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
             }
         }
@@ -757,19 +802,19 @@ public final class AJPv13Task implements Task<Object> {
             try {
                 out.write(AJPv13Response.getGetBodyChunkBytes(0));
                 out.flush();
-                if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(remoteAddress).append(
-                        "\" to initiate a KEEP-ALIVE poll."));
+                if (DEBUG_ENABLED) {
+                    LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Flushed empty GET-BODY request to socket \"").append(
+                        remoteAddress).append("\" to initiate a KEEP-ALIVE poll."));
                 }
                 /*
                  * Swallow expected empty body chunk
                  */
                 final int bodyRequestDataLength = ajpConnection.readInitialBytes(true, false);
                 if (bodyRequestDataLength > 0 && parseInt(ajpConnection.getPayloadData(bodyRequestDataLength, true)) > 0) {
-                    log.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
-                } else if (log.isDebugEnabled()) {
-                    log.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(remoteAddress).append(
-                        "\" initiated by former KEEP-ALIVE poll."));
+                    LOG.warn("AJP KEEP-ALIVE: Got a non-empty data chunk from web server although an empty one was requested");
+                } else if (DEBUG_ENABLED) {
+                    LOG.debug(new StringBuilder().append("AJP KEEP-ALIVE: Swallowed empty REQUEST-BODY from socket \"").append(
+                        remoteAddress).append("\" initiated by former KEEP-ALIVE poll."));
                 }
             } finally {
                 ajpConnection.blockInputStream(false);

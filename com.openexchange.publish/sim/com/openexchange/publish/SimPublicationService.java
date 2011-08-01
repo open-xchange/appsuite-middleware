@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link SimPublicationService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimPublicationService implements PublicationService {

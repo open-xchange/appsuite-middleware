@@ -58,7 +58,7 @@ import com.openexchange.messaging.MessagingHeader.KnownHeader;
 
 /**
  * {@link MessagingField}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -220,7 +220,7 @@ public enum MessagingField {
      * Creates an array of {@link MessagingField} corresponding to given names.
      * <p>
      * This is just a convenience method that invokes {@link #getField(String)} for every name.
-     * 
+     *
      * @see #getField(String)
      * @param names The names
      * @return The array of {@link MessagingField} corresponding to given names
@@ -238,14 +238,14 @@ public enum MessagingField {
 
     /**
      * Maps specified name to a field.
-     * 
+     *
      * @param name The field name
      * @return The mapped {@link MessagingField} or <code>null</code> if no corresponding mail field could be found
      */
     public static MessagingField getField(final String name) {
         return FIELDS_MAP.get(name);
     }
-    
+
     public Object doSwitch(final MessagingMessageSwitcher switcher, final Object...args) throws OXException {
         switch(this) {
         case ID : return switcher.id(args);
@@ -273,10 +273,10 @@ public enum MessagingField {
         }
         throw new IllegalArgumentException("Don't know how to handle "+this);
     }
-    
+
     private static final Map<MessagingField, KnownHeader> equivalentHeaders = new EnumMap<MessagingField, KnownHeader>(MessagingField.class);
-    
-    
+
+
     /**
      * Maps a MessagingField to a MessagingHeader
      * @return the MessagingHeader this field is associated with

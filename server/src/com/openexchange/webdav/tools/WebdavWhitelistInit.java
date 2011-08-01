@@ -57,12 +57,14 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class WebdavWhitelistInit implements Initialization {
+    @Override
     public void start() throws OXException {
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(
 				ConfigurationService.class);
         WebdavWhiteList.getInstance().init(configuration);
     }
 
+    @Override
     public void stop() throws OXException {
         // IGNORE
     }

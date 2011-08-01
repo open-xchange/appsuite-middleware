@@ -87,7 +87,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * groupuser
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class groupuser extends PermissionServlet {

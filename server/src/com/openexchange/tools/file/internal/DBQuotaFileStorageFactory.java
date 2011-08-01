@@ -69,6 +69,7 @@ public class DBQuotaFileStorageFactory implements QuotaFileStorageFactory {
         this.dbs = dbs;
     }
 
+    @Override
     public QuotaFileStorage getQuotaFileStorage(final Context ctx, final URI uri) throws OXException {
         if (fss == null || dbs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();

@@ -56,7 +56,7 @@ import com.openexchange.publish.json.EntityType;
 
 /**
  * {@link IDType}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IDType implements EntityType {

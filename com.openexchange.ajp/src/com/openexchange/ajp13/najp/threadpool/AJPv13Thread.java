@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link AJPv13Thread} - An AJP thread providing additional debug information about created/alive threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Thread extends Thread {
@@ -68,7 +68,7 @@ public final class AJPv13Thread extends Thread {
 
     /**
      * Initializes a new {@link AJPv13Thread} with default name prefix <code>&quot;AJPThread-&quot;</code>.
-     * 
+     *
      * @param target The object whose <code>run</code> method is called.
      */
     public AJPv13Thread(final Runnable target) {
@@ -77,7 +77,7 @@ public final class AJPv13Thread extends Thread {
 
     /**
      * Initializes a new {@link AJPv13Thread}.
-     * 
+     *
      * @param target The object whose <code>run</code> method is called.
      * @param name The name prefix; e.g. <code>&quot;MyAJPThread-&quot;</code>
      */
@@ -101,7 +101,7 @@ public final class AJPv13Thread extends Thread {
 
     /**
      * Gets the number of created threads so far.
-     * 
+     *
      * @return The number of created threads
      */
     public static int getThreadsCreated() {
@@ -110,7 +110,7 @@ public final class AJPv13Thread extends Thread {
 
     /**
      * Gets the current number of alive threads.
-     * 
+     *
      * @return The current number of alive threads.
      */
     public static int getThreadsAlive() {
@@ -119,7 +119,7 @@ public final class AJPv13Thread extends Thread {
 
     /**
      * Composes a thread name using specified string builder.
-     * 
+     *
      * @param threadNumber The thread number to prepend
      * @param sb The string builder to use
      * @return The composed thread name

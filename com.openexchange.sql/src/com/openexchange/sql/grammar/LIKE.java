@@ -65,15 +65,18 @@ public class LIKE extends TernaryPredicate {
 		super(column, new Constant(value), new Constant(escape));
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildLIKE(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "LIKE";
 	}
 
-	public String getSecondSqlKeyword() {
+	@Override
+    public String getSecondSqlKeyword() {
 		return "ESCAPE";
 	}
 }

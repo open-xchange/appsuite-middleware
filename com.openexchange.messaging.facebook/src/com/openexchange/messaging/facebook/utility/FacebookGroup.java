@@ -51,7 +51,7 @@ package com.openexchange.messaging.facebook.utility;
 
 /**
  * {@link FacebookGroup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -72,7 +72,7 @@ public final class FacebookGroup {
 
     /**
      * Checks if this facebook group is empty.
-     * 
+     *
      * @return <code>true</code> if this facebook group is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -83,7 +83,7 @@ public final class FacebookGroup {
      * Gets the URL to the small-sized profile picture.
      * <p>
      * The image can have a maximum width of 50px and a maximum height of 150px.
-     * 
+     *
      * @return The URL to the small-sized profile picture
      */
     public String getPicSmall() {
@@ -94,7 +94,7 @@ public final class FacebookGroup {
      * Sets the URL to the small-sized profile picture.
      * <p>
      * The image can have a maximum width of 50px and a maximum height of 150px.
-     * 
+     *
      * @param picSmall The URL to the small-sized profile picture
      */
     public void setPicSmall(final String picSmall) {
@@ -103,7 +103,7 @@ public final class FacebookGroup {
 
     /**
      * Gets the full name.
-     * 
+     *
      * @return The full name
      */
     public String getName() {
@@ -112,7 +112,7 @@ public final class FacebookGroup {
 
     /**
      * Sets the full name.
-     * 
+     *
      * @param name The full name to set
      */
     public void setName(final String name) {
@@ -121,7 +121,7 @@ public final class FacebookGroup {
 
     /**
      * Gets the GID.
-     * 
+     *
      * @return The GID
      */
     public long getGid() {
@@ -130,7 +130,7 @@ public final class FacebookGroup {
 
     /**
      * Sets the GID.
-     * 
+     *
      * @param gid The GID to set
      */
     public void setGid(final long gid) {

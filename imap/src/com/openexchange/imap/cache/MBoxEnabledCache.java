@@ -67,7 +67,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link MBoxEnabledCache} - A cache to check for MBox feature for a certain IMAP server.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MBoxEnabledCache {
@@ -117,7 +117,7 @@ public final class MBoxEnabledCache {
 
     /**
      * Checks if MBox feature is enabled for given IMAP server.
-     * 
+     *
      * @param imapConfig The IMAP configuration
      * @param imapFolder The IMAP folder to test with
      * @param prefix The full name prefix to use
@@ -193,7 +193,7 @@ public final class MBoxEnabledCache {
         public void set(final V v) {
             super.set(v);
         }
-        
+
     }
 
 }

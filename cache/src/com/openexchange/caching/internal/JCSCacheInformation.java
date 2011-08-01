@@ -64,7 +64,7 @@ import com.openexchange.caching.CacheInformationMBean;
 /**
  * {@link JCSCacheInformation} - The {@link CacheInformationMBean} implementation of <a href="http://jakarta.apache.org/jcs/">JCS</a>
  * caching system.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JCSCacheInformation extends StandardMBean implements CacheInformationMBean {
@@ -75,7 +75,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
 
     /**
      * Initializes a new {@link JCSCacheInformation}.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public JCSCacheInformation() throws NotCompliantMBeanException {

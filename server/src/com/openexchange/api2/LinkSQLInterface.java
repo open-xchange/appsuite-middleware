@@ -62,7 +62,7 @@ public interface LinkSQLInterface {
 
 	/**
 	 * Retrieves all available links by linked object's ID only
-	 * 
+	 *
 	 * @param objectId The linked object's ID
 	 * @param type The linked object's type
 	 * @param folder The linked object's folder
@@ -76,7 +76,7 @@ public interface LinkSQLInterface {
 
 	/**
 	 * Retrieves all available links by linked object's ID only
-	 * 
+	 *
 	 * @param objectId The linked object's ID
 	 * @param type The linked object's type
 	 * @param user The session user's ID
@@ -86,9 +86,9 @@ public interface LinkSQLInterface {
 	 * @throws OXException If retrieval of links fails
 	 */
 	public LinkObject[] getLinksByObjectID(int objectId, int type, int user, int[] group, Session so) throws OXException;
-	
+
 	public void saveLink(LinkObject l, int user, int[] group, Session so) throws OXException;
-	
+
 	public int[][] deleteLinks(int id, int type, int folder, int[][] del,int user, int[] group,Session so) throws OXException;
-	
+
 }

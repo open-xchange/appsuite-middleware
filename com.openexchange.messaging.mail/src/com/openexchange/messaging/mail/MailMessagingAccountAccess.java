@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailMessagingAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -77,7 +77,7 @@ public final class MailMessagingAccountAccess extends MailMessagingResource impl
 
     /**
      * Initializes a new {@link MailMessagingAccountAccess}.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      * @throws OXException If initialization fails

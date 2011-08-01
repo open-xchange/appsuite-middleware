@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.FolderObject;
 /**
  * {@link MailListField} - An enumeration of mail list fields as defined in <a href=
  * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22" >HTTP API's mail section</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
@@ -198,7 +198,7 @@ public enum MailListField {
 
     /**
      * Creates an array of {@link MailListField} corresponding to given <code>int</code> values
-     * 
+     *
      * @param fields The <code>int</code> values
      * @return The array of {@link MailListField} corresponding to given <code>int</code> values
      */
@@ -215,7 +215,7 @@ public enum MailListField {
 
     /**
      * Determines the corresponding {@link MailListField} constant to given <code>int</code> value
-     * 
+     *
      * @param field The <code>int</code> value
      * @return The corresponding {@link MailListField} constant
      */
@@ -225,7 +225,7 @@ public enum MailListField {
 
     /**
      * Returns all field values as an array of integers.
-     * 
+     *
      * @return
      */
     public static final int[] getAllFields() {
@@ -239,7 +239,7 @@ public enum MailListField {
 
     /**
      * Gets a field by the JSON name
-     * 
+     *
      * @param jsonName identifier
      * @return MailListField identified by jsonName, null if not found
      */

@@ -60,7 +60,7 @@ public abstract class TernaryPredicate extends Predicate {
 		this.middleExpression = middle;
 		this.rightExpression = right;
 	}
-	
+
 	public TernaryPredicate(String column, Expression middle, Expression right) {
 		this(new Column(column), middle, right);
 	}
@@ -76,6 +76,6 @@ public abstract class TernaryPredicate extends Predicate {
 	public Expression getRightExpression() {
 		return rightExpression;
 	}
-	
+
 	public abstract String getSecondSqlKeyword();
 }

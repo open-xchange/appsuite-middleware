@@ -135,7 +135,7 @@ public class Metadata {
         NUMBER_OF_VERSIONS_LITERAL
 
     };
-    
+
     public static final Metadata[] HTTPAPI_VALUES_ARRAY = new Metadata[]{
         LAST_MODIFIED_LITERAL,
         CREATION_DATE_LITERAL,
@@ -160,27 +160,27 @@ public class Metadata {
         LAST_MODIFIED_UTC_LITERAL,
         NUMBER_OF_VERSIONS_LITERAL
     };
-    
+
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
     public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
-    
-    
+
+
     private final String name;
     private final int id;
-    
+
     private Metadata(final int id,final String name){
         this.name = name;
         this.id = id;
     }
-    
+
     public String getName(){
         return name;
     }
-    
+
     public int getId(){
         return id;
     }
-    
+
     public static Metadata get(final int id){
         switch(id){
         case LAST_MODIFIED : return LAST_MODIFIED_LITERAL;
@@ -210,7 +210,7 @@ public class Metadata {
         default : return null;
         }
     }
-    
+
     public static Metadata get(final String s){
         for(final Metadata metadata : VALUES){
             if(metadata.getName().equals(s)) {
@@ -219,7 +219,7 @@ public class Metadata {
         }
         return null;
     }
-    
+
     public Object doSwitch(final MetadataSwitcher switcher){
         switch(id){
         case LAST_MODIFIED : return switcher.lastModified();
@@ -260,5 +260,5 @@ public class Metadata {
         default : return null;
         }
     }
-    
+
 }

@@ -86,47 +86,47 @@ public class AppointmentParser extends CalendarParser {
             throw new OXException(exc);
         }
     }
-    
+
     protected void parseElementAppointment(final Appointment appointmentobject, final JSONObject jsonobject) throws JSONException, OXException {
         boolean isFullTime = false;
-        
+
         if (jsonobject.has(AppointmentFields.FULL_TIME)) {
             isFullTime = parseBoolean(jsonobject, AppointmentFields.FULL_TIME);
             appointmentobject.setFullTime(isFullTime);
-        } 
-        
+        }
+
         if (jsonobject.has(CalendarFields.START_DATE)) {
             if (isFullTime) {
                 appointmentobject.setStartDate(parseDate(jsonobject, CalendarFields.START_DATE));
             } else {
                 appointmentobject.setStartDate(parseTime(jsonobject, CalendarFields.START_DATE, timeZone));
-            } 
+            }
         }
-        
+
         if (jsonobject.has(CalendarFields.END_DATE)) {
             if (isFullTime) {
                 appointmentobject.setEndDate(parseDate(jsonobject, CalendarFields.END_DATE));
             } else {
                 appointmentobject.setEndDate(parseTime(jsonobject, CalendarFields.END_DATE, timeZone));
-            } 
+            }
         }
-        
+
         if (jsonobject.has(AppointmentFields.SHOW_AS)) {
             appointmentobject.setShownAs(parseInt(jsonobject, AppointmentFields.SHOW_AS));
-        } 
-        
+        }
+
         if (jsonobject.has(AppointmentFields.LOCATION)) {
             appointmentobject.setLocation(parseString(jsonobject, AppointmentFields.LOCATION));
-        } 
+        }
 
         if (jsonobject.has(AppointmentFields.COLORLABEL)) {
             appointmentobject.setLabel(parseInt(jsonobject, AppointmentFields.COLORLABEL));
-        } 
-        
+        }
+
         if (jsonobject.has(CalendarFields.ALARM)) {
             appointmentobject.setAlarm(parseInt(jsonobject, CalendarFields.ALARM));
         }
-        
+
         if (jsonobject.has(AppointmentFields.IGNORE_CONFLICTS)) {
             appointmentobject.setIgnoreConflicts(parseBoolean(jsonobject, AppointmentFields.IGNORE_CONFLICTS));
         }

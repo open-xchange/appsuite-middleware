@@ -59,7 +59,7 @@ import java.util.concurrent.FutureTask;
 
 /**
  * {@link UniversalCache} - A universal cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UniversalCache<K, V> {
@@ -71,7 +71,7 @@ public class UniversalCache<K, V> {
 
         /**
          * Yields the value from specified argument.
-         * 
+         *
          * @param arg The argument
          * @return The value yielded from specified argument.
          */
@@ -93,7 +93,7 @@ public class UniversalCache<K, V> {
 
     /**
      * Gets the result when passing specified input to yielder.
-     * 
+     *
      * @param k The input.
      * @return The (cached) result.
      * @throws InterruptedException If current thread is interrupted while waiting for result being yielded.
@@ -149,6 +149,7 @@ public class UniversalCache<K, V> {
             this.yielder = yielder;
         }
 
+        @Override
         public V call() throws Exception {
             return yielder.yieldValue(input);
         }

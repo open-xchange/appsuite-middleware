@@ -56,7 +56,7 @@ import java.util.Map;
 
 /**
  * {@link DataArguments} - A container for data conversion arguments.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataArguments {
@@ -79,13 +79,13 @@ public final class DataArguments {
 
     /**
      * Initializes a new {@link DataArguments}
-     * 
+     *
      * @param initialCapacity The initial capacity
      */
     public DataArguments(final int initialCapacity) {
         this(false, initialCapacity);
     }
-    
+
     /**
      * Construct DataArguments out of an existing Map.
      *
@@ -106,7 +106,7 @@ public final class DataArguments {
 
     /**
      * Returns <code>true</code> if these data arguments contain a mapping for the specified key.
-     * 
+     *
      * @param key The key whose presence in these data arguments is to be tested.
      * @return <code>true</code> if this data arguments contain a mapping for the specified key; otherwise <code>false</code>
      */
@@ -119,7 +119,7 @@ public final class DataArguments {
      * value of <code>null</code> does not necessarily indicate that the data arguments contain no mapping for the key; it's also possible
      * that the data arguments explicitly map the key to <code>null</code>. The {@link #containsKey(String)} operation may be used to
      * distinguish these two cases.
-     * 
+     *
      * @param key The key whose associated value is to be returned.
      * @return The value to for the specified key, or <code>null</code> if the data arguments contain no mapping for this key.
      */
@@ -130,7 +130,7 @@ public final class DataArguments {
     /**
      * Associates the specified value with the specified key. If the data arguments previously contained a mapping for this key, the old
      * value is replaced by the specified value. A <code>null</code> value removes the key from mapping.
-     * 
+     *
      * @param key The key with which the specified value is to be associated.
      * @param value The value to be associated with the specified key.
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
@@ -145,7 +145,7 @@ public final class DataArguments {
 
     /**
      * Removes the mapping for this key from these data arguments if it is present.
-     * 
+     *
      * @param key The key whose mapping is to be removed from the data arguments.
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
      */
@@ -158,7 +158,7 @@ public final class DataArguments {
      * Gets the ID for this data properties.
      * <p>
      * The ID is identical for equal instances of {@link DataArguments}.
-     * 
+     *
      * @return The ID for this data properties
      */
     public String getID() {

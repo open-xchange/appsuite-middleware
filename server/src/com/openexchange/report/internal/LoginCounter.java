@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link LoginCounter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -88,6 +88,7 @@ public class LoginCounter implements LoginCounterMBean {
         logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
     }
 
+    @Override
     public int getNumberOfLogins(final Date startDate, final Date endDate) throws MBeanException {
         /*
          * Compile pattern
@@ -179,17 +180,19 @@ public class LoginCounter implements LoginCounterMBean {
         return counter;
     }
 
+    @Override
     public void setDeviceWildcard(final String wildcard) {
         this.wildcard = wildcard;
     }
 
+    @Override
     public String getDeviceWildcard() {
         return wildcard;
     }
 
     /**
      * Converts specified wildcard string to a regular expression
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

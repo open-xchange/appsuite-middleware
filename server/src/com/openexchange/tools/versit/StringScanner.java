@@ -63,12 +63,12 @@ public class StringScanner extends Scanner {
     private String UpcaseText;
 
     private int pos;
-    
-    private Scanner scanner;
+
+    private final Scanner scanner;
 
     /**
      * Creates a scanner for a string.
-     * 
+     *
      * @param text is the string to scan.
      */
     public StringScanner(final Scanner s, final String text) {
@@ -78,7 +78,7 @@ public class StringScanner extends Scanner {
         Text = text;
         peek = readImpl();
     }
-    
+
     public Scanner getScanner() {
         return scanner;
     }
@@ -158,7 +158,7 @@ public class StringScanner extends Scanner {
 
     /**
      * Gets this string scanner's text length
-     * 
+     *
      * @return The text length
      */
     public int length() {

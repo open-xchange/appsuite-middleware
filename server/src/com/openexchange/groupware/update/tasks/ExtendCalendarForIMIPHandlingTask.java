@@ -75,8 +75,8 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class));
 
-    private String[] TABLES = { "prg_dates", "del_dates" };
-    private Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
+    private final String[] TABLES = { "prg_dates", "del_dates" };
+    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
     private static final String DATES_EXTERNAL_CREATE =
         "CREATE TABLE dateExternal (" +
@@ -102,10 +102,12 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
         "FOREIGN KEY (cid,objectId) REFERENCES del_dates(cid,intfield01)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.AddAppointmentParticipantsIndexTask" };
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = Database.getNoTimeout(params.getContextId(), true);
         try {

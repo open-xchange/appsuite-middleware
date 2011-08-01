@@ -63,7 +63,7 @@ import com.sun.mail.imap.Rights.Right;
  * <li><b><code>e</code></b> - perform EXPUNGE and expunge as a part of CLOSE</li>
  * <ul>
  * <br>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RFC4314Rights {

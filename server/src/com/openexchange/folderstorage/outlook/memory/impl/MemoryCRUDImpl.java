@@ -72,10 +72,12 @@ final class MemoryCRUDImpl implements MemoryCRUD {
         this.parentMap = parentMap;
     }
 
+    @Override
     public MemoryFolder putIfAbsent(final MemoryFolder folder) {
         return putIfAbsent(folder.getId(), folder);
     }
 
+    @Override
     public MemoryFolder putIfAbsent(final String folderId, final MemoryFolder folder) {
         final MemoryFolder prev = folderMap.putIfAbsent(folderId, folder);
         if (null == prev) {
@@ -94,18 +96,22 @@ final class MemoryCRUDImpl implements MemoryCRUD {
         return prev;
     }
 
+    @Override
     public boolean containsFolder(final String folderId) {
         return folderMap.containsKey(folderId);
     }
 
+    @Override
     public MemoryFolder get(final String folderId) {
         return folderMap.get(folderId);
     }
 
+    @Override
     public MemoryFolder put(final MemoryFolder folder) {
         return put(folder.getId(), folder);
     }
 
+    @Override
     public MemoryFolder put(final String folderId, final MemoryFolder folder) {
         final MemoryFolder ret = folderMap.put(folderId, folder);
         final String parentId = folder.getParentId();
@@ -121,6 +127,7 @@ final class MemoryCRUDImpl implements MemoryCRUD {
         return ret;
     }
 
+    @Override
     public MemoryFolder remove(final String folderId) {
         final MemoryFolder ret = folderMap.remove(folderId);
         if (ret != null) {

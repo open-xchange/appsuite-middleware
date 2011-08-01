@@ -63,7 +63,6 @@ import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
@@ -74,7 +73,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends DeferredActivator {
@@ -166,11 +165,13 @@ public final class AJPv13Activator extends DeferredActivator {
             }
             inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
             inits.add(new Initialization() {
-                
+
+                @Override
                 public void stop() {
                     AJPv13Request.setEchoHeaderName(null);
                 }
-                
+
+                @Override
                 public void start() {
                     final ConfigurationService service = getService(ConfigurationService.class);
                     AJPv13Request.setEchoHeaderName(null == service ? null : service.getProperty("com.openexchange.servlet.echoHeaderName"));
@@ -204,10 +205,10 @@ public final class AJPv13Activator extends DeferredActivator {
 
             /*-
              * Alternative approach for HttpService:
-             * 
+             *
              * http://www.eclipse.org/equinox/server/
              * http://www.eclipse.org/equinox/server/http_in_equinox.php
-             * 
+             *
              * http://docs.codehaus.org/display/JETTY/OSGi+Tips
              */
 
@@ -258,6 +259,7 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
+        @Override
         public void start() throws OXException {
             AJPv13Server.setInstance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
             AJPv13Config.getInstance().start();
@@ -265,6 +267,7 @@ public final class AJPv13Activator extends DeferredActivator {
             AJPv13Server.startAJPServer();
         }
 
+        @Override
         public void stop() throws OXException {
             AJPv13Server.stopAJPServer();
             AJPv13Monitors.releaseListenerMonitor();
@@ -279,6 +282,7 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
+        @Override
         public void start() throws OXException {
             /*
              * Proper synchronous queue
@@ -302,6 +306,7 @@ public final class AJPv13Activator extends DeferredActivator {
             AJPv13Server.startAJPServer();
         }
 
+        @Override
         public void stop() throws OXException {
             com.openexchange.ajp13.najp.AJPv13ServerImpl.stopAJPServer();
             AJPv13Config.getInstance().stop();
@@ -316,11 +321,13 @@ public final class AJPv13Activator extends DeferredActivator {
             super();
         }
 
+        @Override
         public void start() throws OXException {
             AJPv13Config.getInstance().start();
             XAJPv13Server.getInstance().start();
         }
 
+        @Override
         public void stop() throws OXException {
             AJPv13Config.getInstance().stop();
             XAJPv13Server.getInstance().close();

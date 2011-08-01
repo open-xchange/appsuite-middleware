@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class I18nTranslator implements Translator {
@@ -65,7 +65,7 @@ public class I18nTranslator implements Translator {
 
     /**
      * Initializes a new {@link I18nTranslator}.
-     * 
+     *
      * @param service The i18n service
      */
     public I18nTranslator(final I18nService service) {

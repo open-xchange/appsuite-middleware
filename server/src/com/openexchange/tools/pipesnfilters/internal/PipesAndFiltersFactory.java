@@ -68,6 +68,7 @@ public class PipesAndFiltersFactory implements PipesAndFiltersService {
         this.threadPool = threadPool;
     }
 
+    @Override
     public <T> DataSource<T> create(Collection<T> input) {
         return new CollectionDataSource<T>(threadPool, input);
     }

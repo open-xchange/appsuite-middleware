@@ -71,7 +71,7 @@ public final class LoginWriter {
 
     /**
      * Writes JSON login response.
-     * 
+     *
      * @param session The session
      * @param json The JSON object to write to
      * @throws JSONException If writing to JSON object fails
@@ -82,7 +82,7 @@ public final class LoginWriter {
 
     /**
      * Writes JSON login response.
-     * 
+     *
      * @param session The session
      * @param json The JSON object to write to
      * @throws JSONException If writing to JSON object fails

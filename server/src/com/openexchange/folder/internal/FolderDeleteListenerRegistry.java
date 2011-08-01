@@ -56,7 +56,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 
 /**
  * {@link FolderDeleteListenerRegistry} - A registry for {@link FolderDeleteListenerService folder delete listeners}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderDeleteListenerRegistry {
@@ -81,7 +81,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static FolderDeleteListenerRegistry getInstance() {
@@ -104,7 +104,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Checks if a delete listener of given class is contained in this registry.
-     * 
+     *
      * @param clazz The name of the delete listener's type
      * @return <code>true</code> if delete listener is contained; otherwise <code>false</code>
      */
@@ -119,7 +119,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Checks if specified delete listener is contained in this registry.
-     * 
+     *
      * @param deleteListenerService The delete listener to check
      * @return <code>true</code> if delete listener is contained; otherwise <code>false</code>
      */
@@ -129,7 +129,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Adds specified delete listener to this registry.
-     * 
+     *
      * @param deleteListenerService The delete listener to add
      * @return <code>true</code> if delete listener is successfully added to registry; otherwise <code>false</code>
      */
@@ -139,7 +139,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Removes specified delete listener from this registry.
-     * 
+     *
      * @param deleteListenerService The delete listener to remove
      */
     public void removeDeleteListenerService(final FolderDeleteListenerService deleteListenerService) {
@@ -148,7 +148,7 @@ public final class FolderDeleteListenerRegistry {
 
     /**
      * Gets an unmodifiable {@link Iterator iterator} for the delete listeners contained in this registry.
-     * 
+     *
      * @return An unmodifiable {@link Iterator iterator}.
      */
     public Iterator<FolderDeleteListenerService> getDeleteListenerServices() {
@@ -160,7 +160,7 @@ public final class FolderDeleteListenerRegistry {
      * <p>
      * Wraps the supplied iterator into a new one that will always throw an <tt>UnsupportedOperationException</tt> if its <tt>remove()</tt>
      * method is called.
-     * 
+     *
      * @param iterator The iterator to turn into an unmodifiable iterator.
      * @return An iterator with no remove functionality.
      */
@@ -171,14 +171,17 @@ public final class FolderDeleteListenerRegistry {
 
         return new Iterator<T>() {
 
+            @Override
             public boolean hasNext() {
                 return iterator.hasNext();
             }
 
+            @Override
             public T next() {
                 return iterator.next();
             }
 
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

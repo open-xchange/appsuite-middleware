@@ -52,7 +52,7 @@ package com.openexchange.groupware.search;
 import java.util.Date;
 
 public class AppointmentSearchObject extends CalendarSearchObject {
-	
+
 	private Date[] range = null;
 
 	public AppointmentSearchObject() {

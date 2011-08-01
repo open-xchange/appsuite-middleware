@@ -55,7 +55,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * {@link RegistryCustomizer} - Registers/unregisters a certain service in/from {@link PushServiceRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
@@ -66,7 +66,7 @@ public class RegistryCustomizer<T> implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link RegistryCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param clazz The class of the service to register
      */

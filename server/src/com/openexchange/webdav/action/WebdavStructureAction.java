@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public abstract class WebdavStructureAction extends AbstractAction {
 
 	private final WebdavFactory factory;
-	
+
 	public WebdavStructureAction(final WebdavFactory factory) {
 		this.factory = factory;
 	}
@@ -74,19 +74,19 @@ public abstract class WebdavStructureAction extends AbstractAction {
 			loadingHints.setDepth(WebdavCollection.INFINITY);
 			loadingHints.setProps(LoadingHints.Property.NONE);
 			preLoad(loadingHints);
-			
+
 			final WebdavResource dest = req.getDestination();
-			
+
 			if(!dest.exists()) {
 				return;
 			}
-			
+
 			if(dest.isCollection()) {
 				final int depth = req.getDepth(WebdavCollection.INFINITY);
-				
+
 				final int sourceUrlLength = req.getUrl().size();
 				final WebdavPath destUrl = req.getDestinationUrl();
-				
+
 				for(final WebdavResource res : req.getCollection().toIterable(depth)) {
 					WebdavPath url = res.getUrl();
 					url = destUrl.dup().append(url.subpath(sourceUrlLength));
@@ -95,19 +95,19 @@ public abstract class WebdavStructureAction extends AbstractAction {
 						throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 					}
 				}
-				
+
 			} else {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
-			
+
 		}
 		return;
 	}
-	
+
 	protected int chooseReturnCode(final WebdavRequest req) throws OXException {
 		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
-	
+
 	protected void checkSame(final WebdavRequest req) throws OXException {
 		if(req.getUrl().equals(req.getDestinationUrl())) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);

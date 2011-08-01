@@ -62,7 +62,7 @@ import com.openexchange.session.SessionSpecificContainerRetrievalService.Lifecyc
 
 /**
  * {@link SessionScopedContainerImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> {
@@ -73,11 +73,11 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
 
     protected CleanUp<T> cleanUp;
 
-    private SessiondSessionSpecificRetrievalService manager;
+    private final SessiondSessionSpecificRetrievalService manager;
 
-    private String name;
+    private final String name;
 
-    private Lifecycle lifecycle;
+    private final Lifecycle lifecycle;
 
     public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp, SessiondSessionSpecificRetrievalService manager) {
         this.initial = initial;
@@ -213,7 +213,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
         @Override
         public boolean equals(Object obj) {
             if (String.class.isInstance(obj)) {
-                return session.getSessionID().equals((String) obj);
+                return session.getSessionID().equals(obj);
             }
             return session.getSessionID().equals(((SessionKey) obj).session.getSessionID());
         }

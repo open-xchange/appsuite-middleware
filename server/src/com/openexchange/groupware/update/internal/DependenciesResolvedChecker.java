@@ -64,6 +64,7 @@ public class DependenciesResolvedChecker implements DependencyChecker {
         super();
     }
 
+    @Override
     public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
         if (Schema.NO_VERSION != task.addedWithVersion()) {
             // Task has a version defined and must be sorted by the {@link LowestVersionChecker}.

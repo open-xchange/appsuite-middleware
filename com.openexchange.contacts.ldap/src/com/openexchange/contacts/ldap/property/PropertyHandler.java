@@ -69,15 +69,15 @@ import com.openexchange.exception.OXException;
 public class PropertyHandler {
 
     public static final String bundlename = "com.openexchange.contacts.ldap.";
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class));
-    
+
     private static PropertyHandler singleton = new PropertyHandler();
-    
+
     private final Map<Integer, ContextProperties> contextdetails = new ConcurrentHashMap<Integer, ContextProperties>();
-    
+
     private final AtomicBoolean loaded = new AtomicBoolean();
-    
+
     public static PropertyHandler getInstance() {
         return singleton;
     }
@@ -85,7 +85,7 @@ public class PropertyHandler {
     public final Map<Integer, ContextProperties> getContextdetails() {
         return contextdetails;
     }
-    
+
     public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
 
@@ -100,7 +100,7 @@ public class PropertyHandler {
         }
 
         final ConfigurationService configuration = LDAPServiceRegistry.getInstance().getService(ConfigurationService.class);
-        
+
         logBuilder.append("\nLoading Contacts-LDAP properties...\n");
         for (final File dir : dirs) {
             // First check if the foldername is a valid context id, so containing of an integer value
@@ -114,7 +114,7 @@ public class PropertyHandler {
             final ContextProperties contextprops = ContextProperties.getContextPropertiesFromDir(configuration, dir, contextid, logBuilder);
             this.contextdetails.put(contextid, contextprops);
         }
-        
+
 //        for (final Integer ctx : this.contexts) {
 //            final String stringctx = String.valueOf(ctx);
 //            final Properties file = configuration.getFile(stringctx + ".properties");
@@ -132,13 +132,13 @@ public class PropertyHandler {
             public boolean accept(final File pathname) {
                 return pathname.isDirectory();
             }
-            
+
         });
         return listFiles;
     }
 
     public void reloadProperties() {
-        
+
     }
 
     /**
@@ -154,7 +154,7 @@ public class PropertyHandler {
             return null;
         }
     }
-    
+
 //    private List<Integer> getContexts(String name) throws OXException {
 //        final String property = this.properties.getProperty(name);
 //        if (null != property) {

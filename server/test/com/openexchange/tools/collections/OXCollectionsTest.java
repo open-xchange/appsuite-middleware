@@ -67,6 +67,7 @@ public class OXCollectionsTest extends TestCase {
     public void testInject() {
         OXCollections.inject(new ArrayList<String>(), new ArrayList<String>(), new Injector<List<String>, String>() {
 
+            @Override
             public List<String> inject(final List<String> list, final String element) {
                 list.add(new StringBuilder(element).reverse().toString());
                 return list;

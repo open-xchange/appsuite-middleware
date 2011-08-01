@@ -66,14 +66,14 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class Reminder extends DataServlet {
-	
+
 	/**
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = 7117849531568676025L;
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Reminder.class));
-	
+
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 	    final ServerSession session = getSessionObject(httpServletRequest);
@@ -81,7 +81,7 @@ public class Reminder extends DataServlet {
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			JSONObject jsonObj;
-			
+
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
@@ -103,20 +103,20 @@ public class Reminder extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 	    final ServerSession session = getSessionObject(httpServletRequest);
 		final Response response = new Response(session);
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			
+
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
-			
+
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
@@ -132,13 +132,13 @@ public class Reminder extends DataServlet {
 				final JSONArray jData = new JSONArray(data);
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				
+
 				final JSONValue responseObj = reminderRequest.action(action, jsonObj);
 				response.setData(responseObj);
 			} else {
 				final JSONObject jData = new JSONObject(data);
 				jsonObj.put(PARAMETER_DATA, jData);
-				
+
 				final Object responseObj = reminderRequest.action(action, jsonObj);
 				response.setData(responseObj);
 			}
@@ -150,10 +150,10 @@ public class Reminder extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final ServerSession session) {
 		return true;

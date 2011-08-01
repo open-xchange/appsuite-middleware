@@ -93,7 +93,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link DuplicateContactCollectFolderRemoverTask} - Removes duplicate contact collector folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAdapter {
@@ -114,10 +114,12 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         return UpdateTaskPriority.HIGH.priority;
     }
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         /*
          * Logger
@@ -138,7 +140,8 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
          */
         final Map<Locale, String> names = new HashMap<Locale, String>(4);
         m.forEachEntry(new TIntObjectProcedure<List<Integer>>() {
-            
+
+            @Override
             public boolean execute(final int currentContextId, final List<Integer> list) {
                 try {
                     iterateUsersPerContext(list, names, currentContextId, status, log);
@@ -294,7 +297,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
                 }
                 /*-
                  * For each duplicate folder:
-                 * 
+                 *
                  * 1. If it contains contacts: Move all contacts to contact collect folder
                  * 2. Delete folder
                  */

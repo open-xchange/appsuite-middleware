@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ComposedMailMessage} - Subclass of {@link MailMessage} designed for composing a mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ComposedMailMessage extends MailMessage {
@@ -110,7 +110,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * fields. The method does not need to concern itself with the state belonging to its super classes or subclasses. State is saved by
      * writing the individual fields to the ObjectOutputStream using the writeObject method or by using the methods for primitive data types
      * supported by {@link DataOutput}.
-     * 
+     *
      * @param in The object input stream
      * @throws IOException If an I/O error occurs
      * @throws ClassNotFoundException If a casting fails
@@ -125,7 +125,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * {@link ObjectOutputStream#defaultWriteObject()}. The method does not need to concern itself with the state belonging to its super
      * classes or subclasses. State is saved by writing the individual fields to the ObjectOutputStream using the writeObject method or by
      * using the methods for primitive data types supported by {@link DataOutput}.
-     * 
+     *
      * @param out The object output stream
      * @throws IOException If an I/O error occurs
      */
@@ -135,7 +135,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Checks if this composed mail has dedicated recipients.
-     * 
+     *
      * @return <code>true</code> if this composed mail has dedicated recipients; otherwise <code>false</code>
      */
     public boolean hasRecipients() {
@@ -144,7 +144,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Gets the composed mail's dedicated recipients.
-     * 
+     *
      * @return The dedicated recipients
      */
     public InternetAddress[] getRecipients() {
@@ -153,7 +153,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Adds a dedicated recipient to this composed mail.
-     * 
+     *
      * @param recipient The recipient to add
      */
     public void addRecipient(final InternetAddress recipient) {
@@ -162,7 +162,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Adds dedicated recipients to this composed mail.
-     * 
+     *
      * @param recipients The recipients to add
      */
     public void addRecipients(final InternetAddress[] recipients) {
@@ -171,7 +171,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Gets the session
-     * 
+     *
      * @return the session
      */
     public Session getSession() {
@@ -180,7 +180,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Gets the context
-     * 
+     *
      * @return the context
      */
     public Context getContext() {
@@ -189,7 +189,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Sets the mail filler
-     * 
+     *
      * @param filler The mail filler
      */
     public void setFiller(final MIMEMessageFiller filler) {
@@ -256,11 +256,11 @@ public abstract class ComposedMailMessage extends MailMessage {
      * <p>
      * <b>Note</b>: The returned number does not include the text body part applied with {@link #setBodyPart(TextBodyMailPart)}. To check
      * for contained parts:
-     * 
+     *
      * <pre>
      * composedMail.getEnclosedCount() &gt; 0
      * </pre>
-     * 
+     *
      * @see #NO_ENCLOSED_PARTS
      * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS} if not applicable
      */
@@ -271,7 +271,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * Gets this composed mail's part located at given index.
      * <p>
      * <b>Note</b>: This method does not include the text body part applied with {@link #setBodyPart(TextBodyMailPart)}.
-     * 
+     *
      * @param index The index of desired mail part or <code>null</code> if not applicable
      * @return The mail part
      */
@@ -282,7 +282,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * Sets this composed message's body part.
      * <p>
      * The body part's content is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
-     * 
+     *
      * @param mailPart The body part
      */
     public abstract void setBodyPart(TextBodyMailPart mailPart);
@@ -291,7 +291,7 @@ public abstract class ComposedMailMessage extends MailMessage {
      * Gets this composed message's body part.
      * <p>
      * The body part's content is supposed to be HTML content which is ought to be converted to appropriate MIME type on transport.
-     * 
+     *
      * @return The body part
      */
     public abstract TextBodyMailPart getBodyPart();
@@ -299,7 +299,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     /**
      * Removes the enclosed part at the specified position. Shifts any subsequent parts to the left (subtracts one from their indices).
      * Returns the part that was removed.
-     * 
+     *
      * @param index The index position
      * @return The removed part
      */
@@ -307,7 +307,7 @@ public abstract class ComposedMailMessage extends MailMessage {
 
     /**
      * Adds an instance of {@link MailPart} to enclosed parts
-     * 
+     *
      * @param part The instance of {@link MailPart} to add
      */
     public abstract void addEnclosedPart(MailPart part);

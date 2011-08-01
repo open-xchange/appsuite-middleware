@@ -79,14 +79,14 @@ public class IOTools {
     public static final void copy(InputStream in, OutputStream out) throws IOException {
         BufferedInputStream inputStream = new BufferedInputStream(in);
         BufferedOutputStream outputStream = new BufferedOutputStream(out);
-        
+
         int i = -1;
         int count = 0;
         while((i = inputStream.read()) != -1) {
             count++;
             outputStream.write(i);
         }
-        
+
         outputStream.flush();
     }
 
@@ -98,12 +98,12 @@ public class IOTools {
             while((i = in.read()) != -1) {
                 out.write(i);
             }
-            
+
             return out.toByteArray();
         } finally {
             in.close();
         }
-        
+
     }
 
     public static final String getFileContents(File file) throws FileNotFoundException {

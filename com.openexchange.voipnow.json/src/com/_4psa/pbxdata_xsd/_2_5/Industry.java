@@ -10,11 +10,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Industry data
- * 
+ *
  * <p>Java class for Industry complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Industry">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Industry", propOrder = {
@@ -59,11 +59,11 @@ public class Industry {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -71,11 +71,11 @@ public class Industry {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -83,11 +83,11 @@ public class Industry {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -95,11 +95,11 @@ public class Industry {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -107,11 +107,11 @@ public class Industry {
 
     /**
      * Gets the value of the standardZoneCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getStandardZoneCode() {
         return standardZoneCode;
@@ -119,11 +119,11 @@ public class Industry {
 
     /**
      * Sets the value of the standardZoneCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setStandardZoneCode(String value) {
         this.standardZoneCode = value;
@@ -131,11 +131,11 @@ public class Industry {
 
     /**
      * Gets the value of the standardZoneHeight property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getStandardZoneHeight() {
         return standardZoneHeight;
@@ -143,11 +143,11 @@ public class Industry {
 
     /**
      * Sets the value of the standardZoneHeight property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setStandardZoneHeight(BigInteger value) {
         this.standardZoneHeight = value;
@@ -155,11 +155,11 @@ public class Industry {
 
     /**
      * Gets the value of the extendedZoneCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtendedZoneCode() {
         return extendedZoneCode;
@@ -167,11 +167,11 @@ public class Industry {
 
     /**
      * Sets the value of the extendedZoneCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtendedZoneCode(String value) {
         this.extendedZoneCode = value;
@@ -179,11 +179,11 @@ public class Industry {
 
     /**
      * Gets the value of the extendedZoneHeight property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtendedZoneHeight() {
         return extendedZoneHeight;
@@ -191,11 +191,11 @@ public class Industry {
 
     /**
      * Sets the value of the extendedZoneHeight property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtendedZoneHeight(BigInteger value) {
         this.extendedZoneHeight = value;

@@ -63,7 +63,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeBinaryContent} - A MIME {@link BinaryContent binary content}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -81,7 +81,7 @@ public class MimeBinaryContent implements BinaryContent {
 
     /**
      * Initializes a new {@link MimeBinaryContent}.
-     * 
+     *
      * @param inputStream The binary content as an input stream; gets closed
      * @throws OXException If an I/O error occurs
      */
@@ -107,10 +107,10 @@ public class MimeBinaryContent implements BinaryContent {
         }
     }
 
-    
+
     /**
      * Initializes a new {@link MimeBinaryContent}.
-     * 
+     *
      * @param content The binary content
      */
     public MimeBinaryContent(final byte[] content) {
@@ -122,7 +122,7 @@ public class MimeBinaryContent implements BinaryContent {
 
     /**
      * Initializes a new {@link MimeBinaryContent}.
-     * 
+     *
      * @param part The MIME part
      */
     protected MimeBinaryContent(final Part part) {
@@ -138,7 +138,7 @@ public class MimeBinaryContent implements BinaryContent {
     /**
      * Gets MIME part's input stream in a safe manner: If {@link Part#getInputStream()} fails, the {@link MimeBodyPart#getRawInputStream()}
      * is invoked.
-     * 
+     *
      * @return The either decoded or raw input stream
      * @throws OXException If neither input stream nor raw input stream can be returned
      */

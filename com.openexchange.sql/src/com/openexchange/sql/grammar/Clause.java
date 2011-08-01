@@ -50,7 +50,7 @@
 package com.openexchange.sql.grammar;
 
 public abstract class Clause extends Element {
-	private Predicate predicate;
+	private final Predicate predicate;
 
 	public Clause(Predicate predicate) {
 		super();

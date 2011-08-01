@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link FolderExceptionMessages} - Locale-sensitive strings for folder exceptions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderExceptionMessages implements LocalizableStrings {

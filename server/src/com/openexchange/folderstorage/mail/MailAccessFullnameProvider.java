@@ -55,7 +55,7 @@ import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link MailAccessFullnameProvider} - TODO Short description of this class' purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessFullnameProvider implements DefaultFolderFullnameProvider {
@@ -72,7 +72,7 @@ public final class MailAccessFullnameProvider implements DefaultFolderFullnamePr
 
     /**
      * Initializes a new {@link MailAccessFullnameProvider}.
-     * 
+     *
      * @param mailAccess The connected mail access instance
      */
     public MailAccessFullnameProvider(final MailAccess<?, ?> mailAccess) {
@@ -87,30 +87,37 @@ public final class MailAccessFullnameProvider implements DefaultFolderFullnamePr
         return folderStorage;
     }
 
+    @Override
     public String getConfirmedHamFolder() throws OXException {
         return getFolderStorage().getConfirmedHamFolder();
     }
 
+    @Override
     public String getConfirmedSpamFolder() throws OXException {
         return getFolderStorage().getConfirmedSpamFolder();
     }
 
+    @Override
     public String getDraftsFolder() throws OXException {
         return getFolderStorage().getDraftsFolder();
     }
 
+    @Override
     public String getINBOXFolder() throws OXException {
         return "INBOX";
     }
 
+    @Override
     public String getSentFolder() throws OXException {
         return getFolderStorage().getSentFolder();
     }
 
+    @Override
     public String getSpamFolder() throws OXException {
         return getFolderStorage().getSpamFolder();
     }
 
+    @Override
     public String getTrashFolder() throws OXException {
         return getFolderStorage().getTrashFolder();
     }

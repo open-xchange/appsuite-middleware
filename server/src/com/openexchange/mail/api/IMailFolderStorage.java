@@ -57,7 +57,7 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 
 /**
  * {@link IMailFolderStorage} - Offers basic access methods to mail folder(s).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface IMailFolderStorage {
@@ -69,7 +69,7 @@ public interface IMailFolderStorage {
 
     /**
      * Checks if a folder exists whose fullname matches given <code>fullname</code>
-     * 
+     *
      * @param fullname The fullname
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      * @throws OXException If existence cannot be checked
@@ -78,7 +78,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the folder identified through given fullname
-     * 
+     *
      * @param fullname The fullname
      * @return The corresponding instance of {@link MailFolder}
      * @throws OXException If either folder does not exist or could not be fetched
@@ -89,7 +89,7 @@ public interface IMailFolderStorage {
      * Gets the first level subfolders located below the folder whose fullname matches given parameter <code>parentFullname</code>.
      * <p>
      * If no subfolders exist below identified folder the constant {@link #EMPTY_PATH} should be returned.
-     * 
+     *
      * @param parentFullname The parent fullname
      * @param all Whether all or only subscribed subfolders shall be returned. If underlying mailing system does not support folder
      *            subscription, this argument should always be treated as <code>true</code>.
@@ -100,7 +100,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the mailbox's root folder.
-     * 
+     *
      * @return The mailbox's root folder
      * @throws OXException If mailbox's default folder cannot be delivered
      */
@@ -108,7 +108,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the prefix (incl. separator character) for default folders.
-     * 
+     *
      * @return The prefix
      * @throws OXException If a mail error occurs
      */
@@ -120,14 +120,14 @@ public interface IMailFolderStorage {
      * See also {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedSpam() createConfirmedSpam()},
      * {@link com.openexchange.spamhandler.SpamHandler#isCreateConfirmedHam() createConfirmedHam()}, and
      * {@link com.openexchange.spamhandler.SpamHandler#isUnsubscribeSpamFolders() unsubscribeSpamFolders()}.
-     * 
+     *
      * @throws OXException If user's default folder could not be checked
      */
     public void checkDefaultFolders() throws OXException;
 
     /**
      * Creates a new mail folder with attributes taken from given mail folder description
-     * 
+     *
      * @param toCreate The mail folder to create
      * @return The fullname of the created mail folder
      * @throws OXException If creation fails
@@ -150,7 +150,7 @@ public interface IMailFolderStorage {
      * <b>Note</b>: If underlying mailing system does not support the corresponding capability, the update is treated as a no-op. For
      * example if both {@link MailCapabilities#hasPermissions()} and {@link MailCapabilities#hasSubscription()} indicate <code>false</code>,
      * the associated update operations are not going to be performed.
-     * 
+     *
      * @param fullname The fullname of the mail folder to update
      * @param toUpdate The mail folder to update containing only the modified fields
      * @return The fullname of the updated mail folder
@@ -163,11 +163,11 @@ public interface IMailFolderStorage {
      * be implicitly performed.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.newpath.to.folder
      * </pre>
-     * 
+     *
      * @param fullname The folder fullname
      * @param newFullname The new fullname to move to
      * @return The new fullname where the folder has been moved
@@ -179,11 +179,11 @@ public interface IMailFolderStorage {
      * Renames the folder identified through given fullname to the specified new name.
      * <p>
      * E.g.:
-     * 
+     *
      * <pre>
      * my.path.to.folder -&gt; my.path.to.newfolder
      * </pre>
-     * 
+     *
      * @param fullname The folder fullname
      * @param newName The new name
      * @return The new fullname
@@ -196,7 +196,7 @@ public interface IMailFolderStorage {
      * <p>
      * This is a convenience method that invokes {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set to
      * <code>false</code>.
-     * 
+     *
      * @param fullname The fullname of the mail folder to delete
      * @return The fullname of the deleted mail folder
      * @throws OXException If either folder does not exist or cannot be deleted
@@ -215,7 +215,7 @@ public interface IMailFolderStorage {
      * the next name would be "DeleteMe3", and so no.
      * <p>
      * If default trash folder cannot hold subfolders, the folder is either deleted permanently or an appropriate exception may be thrown.
-     * 
+     *
      * @param fullname The fullname of the mail folder to delete
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @return The fullname of the deleted mail folder
@@ -225,7 +225,7 @@ public interface IMailFolderStorage {
 
     /**
      * Deletes the content of the folder identified through given fullname.
-     * 
+     *
      * @param fullname The fullname of the mail folder whose content should be cleared
      * @throws OXException If either folder does not exist or its content cannot be cleared
      */
@@ -233,7 +233,7 @@ public interface IMailFolderStorage {
 
     /**
      * Deletes the content of the folder identified through given fullname.
-     * 
+     *
      * @param fullname The fullname of the mail folder whose content should be cleared
      * @param hardDelete Whether to delete permanently or to backup into trash folder
      * @throws OXException If either folder does not exist or its content cannot be cleared
@@ -243,7 +243,7 @@ public interface IMailFolderStorage {
     /**
      * Gets the reverse path from the folder identified through given fullname to parental default folder. All occurring folders on that
      * path are contained in reverse order in returned array of {@link MailFolder} instances.
-     * 
+     *
      * @param fullname The folder fullname
      * @return All occurring folders in reverse order as an array of {@link MailFolder} instances.
      * @throws OXException If either folder does not exist or path cannot be determined
@@ -256,7 +256,7 @@ public interface IMailFolderStorage {
      * available (limit) and allocated (usage) storage size.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} is in 1024 octets.
-     * 
+     *
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of STORAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -267,7 +267,7 @@ public interface IMailFolderStorage {
      * Detects both quota limit and quota usage of MESSAGE resource on given mailbox folder's quota-root. If the folder denoted by passed
      * mailbox folder's quota-root is the INBOX itself, the whole mailbox's MESSAGE quota is going to be returned; meaning the sum of all
      * available (limit) and allocated (usage) message amount.
-     * 
+     *
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @return The quota of MESSAGE resource
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
@@ -283,7 +283,7 @@ public interface IMailFolderStorage {
      * to indicate no limitations on that resource type.
      * <p>
      * Note that the {@link Quota#getLimit()} and {@link Quota#getUsage()} returned for {@link Quota.Type#STORAGE} quota is in 1024 octets.
-     * 
+     *
      * @param folder The folder fullname (if <code>null</code> <i>"INBOX"</i> is used)
      * @param types The desired quota resource types
      * @return The quotas for specified resource types
@@ -293,7 +293,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default confirmed ham folder
-     * 
+     *
      * @return The fullname of default confirmed ham folder
      * @throws OXException If confirmed ham folder's fullname cannot be returned
      */
@@ -301,7 +301,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default confirmed spam folder
-     * 
+     *
      * @return The fullname of default confirmed spam folder
      * @throws OXException If confirmed spam folder's fullname cannot be returned
      */
@@ -309,7 +309,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default drafts folder
-     * 
+     *
      * @return The fullname of default drafts folder
      * @throws OXException If draft folder's fullname cannot be returned
      */
@@ -317,7 +317,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default spam folder
-     * 
+     *
      * @return The fullname of default spam folder
      * @throws OXException If spam folder's fullname cannot be returned
      */
@@ -325,7 +325,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default sent folder
-     * 
+     *
      * @return The fullname of default sent folder
      * @throws OXException If sent folder's fullname cannot be returned
      */
@@ -333,7 +333,7 @@ public interface IMailFolderStorage {
 
     /**
      * Gets the fullname of default trash folder
-     * 
+     *
      * @return The fullname of default trash folder
      * @throws OXException If trash folder's fullname cannot be returned
      */
@@ -341,7 +341,7 @@ public interface IMailFolderStorage {
 
     /**
      * Releases all used resources when closing parental {@link MailAccess}
-     * 
+     *
      * @throws OXException If resources cannot be released
      */
     public void releaseResources() throws OXException;

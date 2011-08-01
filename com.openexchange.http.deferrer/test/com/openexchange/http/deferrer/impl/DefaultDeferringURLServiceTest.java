@@ -60,51 +60,51 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDeferringURLServiceTest extends TestCase {
-    
+
     TestDeferringURLService service = new TestDeferringURLService();
-    
+
     public void testBasic() throws UnsupportedEncodingException {
         String url = "http://mydomain.de/ajax/someModule";
         String encodedUrl = URLEncoder.encode(url, "UTF-8");
         assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
     }
-    
+
     public void testEncoding() throws UnsupportedEncodingException {
         String url = "http://mydomain.de/ajax/someModule?arg1=value1&arg2=value2";
         String encodedUrl = URLEncoder.encode(url, "UTF-8");
         assertTransformed(url, "https://www.open-xchange.com/ajax/defer?redirect="+encodedUrl);
-        
+
     }
-    
+
     public void testNoDeferrer() {
         service.setUrl(null);
         String url = "http://mydomain.de/ajax/someModule";
         assertTransformed(url, url);
     }
-    
+
     public void testNull() {
         assertTrue(null == service.getDeferredURL(null));
     }
-    
+
     public void assertTransformed(String url, String expectedTransformation) {
         String deferredURL = service.getDeferredURL(url);
         assertNotNull("URL was null: ", deferredURL);
         assertEquals(expectedTransformation, deferredURL);
     }
-    
+
     private static class TestDeferringURLService extends DefaultDeferringURLService {
 
         private String url = "https://www.open-xchange.com";
-        
+
         public void setUrl(String url) {
             this.url = url;
         }
-        
+
         @Override
         public String getDeferrerURL() {
             return url;
         }
-        
+
     }
-    
+
 }

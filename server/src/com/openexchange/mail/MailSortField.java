@@ -53,7 +53,7 @@ import gnu.trove.TIntObjectHashMap;
 
 /**
  * {@link MailSortField} - An enumeration of sortable mail list fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MailSortField {
@@ -136,7 +136,7 @@ public enum MailSortField {
 
     /**
      * Creates an array of {@link MailSortField} corresponding to given <code>int</code> values
-     * 
+     *
      * @param fields The <code>int</code> values
      * @return The array of {@link MailSortField} corresponding to given <code>int</code> values
      */
@@ -162,7 +162,7 @@ public enum MailSortField {
 
     /**
      * Determines the corresponding {@link MailSortField} constant to given <code>int</code> value
-     * 
+     *
      * @param field The <code>int</code> value
      * @return The corresponding {@link MailSortField} constant
      */

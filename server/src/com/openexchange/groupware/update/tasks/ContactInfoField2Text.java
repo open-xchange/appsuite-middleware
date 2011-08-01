@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link ContactInfoField2Text}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ContactInfoField2Text extends UpdateTaskAdapter {
@@ -70,10 +70,12 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
     private static final String UPDATE = "ALTER TABLE prg_contacts CHANGE COLUMN field34 field34 TEXT";
     private static final String UPDATE_DEL = "ALTER TABLE del_contacts CHANGE COLUMN field34 field34 TEXT";
 
+    @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         Connection con = null;
@@ -102,7 +104,7 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private void execute(Connection con, String update) throws SQLException {
         Statement stmt = null;
         try {

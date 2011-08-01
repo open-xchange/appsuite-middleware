@@ -67,7 +67,7 @@ public class PropertyDrivenMapper extends AbstractOutlookMapper {
             ContactField field = ContactField.getByAjaxName((String) key);
             store(field, (String) props.get(key));
         }
-            
+
     }
 
 }

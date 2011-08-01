@@ -74,7 +74,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator implements BundleActivator {
@@ -95,7 +95,7 @@ public class Activator implements BundleActivator {
 
     private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    private Map<String, ServiceRegistration> activeServices = new HashMap<String, ServiceRegistration>();
+    private final Map<String, ServiceRegistration> activeServices = new HashMap<String, ServiceRegistration>();
 
     public static final int CRAWLER_API_VERSION = 616;
 

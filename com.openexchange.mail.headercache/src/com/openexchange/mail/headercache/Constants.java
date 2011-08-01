@@ -56,7 +56,7 @@ import com.openexchange.mail.MailFields;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {
@@ -104,7 +104,7 @@ public final class Constants {
 
     /**
      * Gets covered mail fields as a {@link Set}.
-     * 
+     *
      * @return The covered mail fields as a {@link Set}
      */
     public static Set<MailField> getCoveredMailFieldsAsSet() {
@@ -113,7 +113,7 @@ public final class Constants {
 
     /**
      * Gets covered mail fields.
-     * 
+     *
      * @return The covered mail fields
      */
     public static MailFields getCoveredMailFields() {
@@ -122,7 +122,7 @@ public final class Constants {
 
     /**
      * Gets header mail fields as a {@link Set}.
-     * 
+     *
      * @return The header mail fields as a {@link Set}
      */
     public static Set<MailField> getHeaderMailFieldsAsSet() {
@@ -131,7 +131,7 @@ public final class Constants {
 
     /**
      * Gets header mail fields.
-     * 
+     *
      * @return The header mail fields
      */
     public static MailFields getHeaderMailFields() {

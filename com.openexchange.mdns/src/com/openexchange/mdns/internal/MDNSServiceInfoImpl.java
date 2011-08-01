@@ -54,7 +54,7 @@ import com.openexchange.mdns.MDNSServiceInfo;
 
 /**
  * {@link MDNSServiceInfoImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSServiceInfoImpl implements MDNSServiceInfo {
@@ -71,7 +71,7 @@ public final class MDNSServiceInfoImpl implements MDNSServiceInfo {
 
     /**
      * Initializes a new {@link MDNSServiceInfoImpl}.
-     * 
+     *
      * @param id The identifier
      * @param serviceId The service identifier
      * @param port The port

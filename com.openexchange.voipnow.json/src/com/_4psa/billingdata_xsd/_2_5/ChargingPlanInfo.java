@@ -16,11 +16,11 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
 
 /**
  * Charging plan data
- * 
+ *
  * <p>Java class for ChargingPlanInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ChargingPlanInfo">
  *   &lt;complexContent>
@@ -164,8 +164,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUFloat;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ChargingPlanInfo", propOrder = {
@@ -236,11 +236,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -248,11 +248,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -260,11 +260,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the default property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDefault() {
         return _default;
@@ -272,11 +272,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the default property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDefault(Boolean value) {
         this._default = value;
@@ -284,11 +284,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the channelRuleID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChannelRuleID() {
         return channelRuleID;
@@ -296,11 +296,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the channelRuleID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChannelRuleID(BigInteger value) {
         this.channelRuleID = value;
@@ -308,11 +308,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the channelRule property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChannelRule() {
         return channelRule;
@@ -320,11 +320,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the channelRule property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChannelRule(String value) {
         this.channelRule = value;
@@ -332,11 +332,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the allowIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAllowIn() {
         return allowIn;
@@ -344,11 +344,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the allowIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAllowIn(Boolean value) {
         this.allowIn = value;
@@ -356,11 +356,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the allowOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAllowOut() {
         return allowOut;
@@ -368,11 +368,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the allowOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAllowOut(Boolean value) {
         this.allowOut = value;
@@ -380,11 +380,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the allowLocal property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAllowLocal() {
         return allowLocal;
@@ -392,11 +392,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the allowLocal property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAllowLocal(Boolean value) {
         this.allowLocal = value;
@@ -404,11 +404,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the allowExtended property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAllowExtended() {
         return allowExtended;
@@ -416,11 +416,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the allowExtended property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAllowExtended(Boolean value) {
         this.allowExtended = value;
@@ -428,11 +428,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the planType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPlanType() {
         return planType;
@@ -440,11 +440,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the planType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPlanType(String value) {
         this.planType = value;
@@ -452,11 +452,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the includedCreditOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getIncludedCreditOut() {
         return includedCreditOut;
@@ -464,11 +464,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the includedCreditOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setIncludedCreditOut(UnlimitedUFloat value) {
         this.includedCreditOut = value;
@@ -476,11 +476,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the includedCreditIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getIncludedCreditIn() {
         return includedCreditIn;
@@ -488,11 +488,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the includedCreditIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setIncludedCreditIn(UnlimitedUFloat value) {
         this.includedCreditIn = value;
@@ -500,25 +500,25 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the externalMin property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the externalMin property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExternalMin().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ChargingPlanInfo.ExternalMin }
-     * 
-     * 
+     *
+     *
      */
     public List<ChargingPlanInfo.ExternalMin> getExternalMin() {
         if (externalMin == null) {
@@ -529,11 +529,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the initialCreditOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getInitialCreditOut() {
         return initialCreditOut;
@@ -541,11 +541,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the initialCreditOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setInitialCreditOut(UnlimitedUFloat value) {
         this.initialCreditOut = value;
@@ -553,11 +553,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the initialCreditIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public UnlimitedUFloat getInitialCreditIn() {
         return initialCreditIn;
@@ -565,11 +565,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the initialCreditIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUFloat }
-     *     
+     *
      */
     public void setInitialCreditIn(UnlimitedUFloat value) {
         this.initialCreditIn = value;
@@ -577,11 +577,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the chargeOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargeOut() {
         return chargeOut;
@@ -589,11 +589,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the chargeOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargeOut(BigInteger value) {
         this.chargeOut = value;
@@ -601,11 +601,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the thenChargeOut property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getThenChargeOut() {
         return thenChargeOut;
@@ -613,11 +613,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the thenChargeOut property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setThenChargeOut(BigInteger value) {
         this.thenChargeOut = value;
@@ -625,11 +625,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the chargeIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargeIn() {
         return chargeIn;
@@ -637,11 +637,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the chargeIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargeIn(BigInteger value) {
         this.chargeIn = value;
@@ -649,11 +649,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the thenChargeIn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getThenChargeIn() {
         return thenChargeIn;
@@ -661,11 +661,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the thenChargeIn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setThenChargeIn(BigInteger value) {
         this.thenChargeIn = value;
@@ -673,11 +673,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the chargeMethod property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargeMethod() {
         return chargeMethod;
@@ -685,11 +685,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the chargeMethod property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargeMethod(String value) {
         this.chargeMethod = value;
@@ -697,11 +697,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the fixedCharge property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ChargingPlanInfo.FixedCharge }
-     *     
+     *
      */
     public ChargingPlanInfo.FixedCharge getFixedCharge() {
         return fixedCharge;
@@ -709,11 +709,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the fixedCharge property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ChargingPlanInfo.FixedCharge }
-     *     
+     *
      */
     public void setFixedCharge(ChargingPlanInfo.FixedCharge value) {
         this.fixedCharge = value;
@@ -721,11 +721,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the inheritedCharge property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ChargingPlanInfo.InheritedCharge }
-     *     
+     *
      */
     public ChargingPlanInfo.InheritedCharge getInheritedCharge() {
         return inheritedCharge;
@@ -733,11 +733,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the inheritedCharge property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ChargingPlanInfo.InheritedCharge }
-     *     
+     *
      */
     public void setInheritedCharge(ChargingPlanInfo.InheritedCharge value) {
         this.inheritedCharge = value;
@@ -745,11 +745,11 @@ public class ChargingPlanInfo {
 
     /**
      * Gets the value of the soundID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSoundID() {
         return soundID;
@@ -757,11 +757,11 @@ public class ChargingPlanInfo {
 
     /**
      * Sets the value of the soundID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSoundID(BigInteger value) {
         this.soundID = value;
@@ -770,9 +770,9 @@ public class ChargingPlanInfo {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -785,8 +785,8 @@ public class ChargingPlanInfo {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -801,11 +801,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the minutes property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getMinutes() {
             return minutes;
@@ -813,11 +813,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the minutes property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setMinutes(BigInteger value) {
             this.minutes = value;
@@ -825,11 +825,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the intervalID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getIntervalID() {
             return intervalID;
@@ -837,11 +837,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the intervalID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setIntervalID(BigInteger value) {
             this.intervalID = value;
@@ -852,9 +852,9 @@ public class ChargingPlanInfo {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -880,8 +880,8 @@ public class ChargingPlanInfo {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -899,11 +899,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the externalIncoming property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getExternalIncoming() {
             return externalIncoming;
@@ -911,11 +911,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the externalIncoming property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setExternalIncoming(Float value) {
             this.externalIncoming = value;
@@ -923,25 +923,25 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the external property.
-         * 
+         *
          * <p>
          * This accessor method returns a reference to the live list,
          * not a snapshot. Therefore any modification you make to the
          * returned list will be present inside the JAXB object.
          * This is why there is not a <CODE>set</CODE> method for the external property.
-         * 
+         *
          * <p>
          * For example, to add a new item, do as follows:
          * <pre>
          *    getExternal().add(newItem);
          * </pre>
-         * 
-         * 
+         *
+         *
          * <p>
          * Objects of the following type(s) are allowed in the list
          * {@link ChargingPlanInfo.FixedCharge.External }
-         * 
-         * 
+         *
+         *
          */
         public List<ChargingPlanInfo.FixedCharge.External> getExternal() {
             if (external == null) {
@@ -952,11 +952,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the local property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getLocal() {
             return local;
@@ -964,11 +964,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the local property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setLocal(Float value) {
             this.local = value;
@@ -976,11 +976,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the extended property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getExtended() {
             return extended;
@@ -988,11 +988,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the extended property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setExtended(Float value) {
             this.extended = value;
@@ -1001,9 +1001,9 @@ public class ChargingPlanInfo {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1016,8 +1016,8 @@ public class ChargingPlanInfo {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -1031,7 +1031,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the charge property.
-             * 
+             *
              */
             public float getCharge() {
                 return charge;
@@ -1039,7 +1039,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the charge property.
-             * 
+             *
              */
             public void setCharge(float value) {
                 this.charge = value;
@@ -1047,11 +1047,11 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the intervalID property.
-             * 
+             *
              * @return
              *     possible object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public BigInteger getIntervalID() {
                 return intervalID;
@@ -1059,11 +1059,11 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the intervalID property.
-             * 
+             *
              * @param value
              *     allowed object is
              *     {@link BigInteger }
-             *     
+             *
              */
             public void setIntervalID(BigInteger value) {
                 this.intervalID = value;
@@ -1076,9 +1076,9 @@ public class ChargingPlanInfo {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -1137,8 +1137,8 @@ public class ChargingPlanInfo {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -1156,11 +1156,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the externalIncoming property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link ChargingPlanInfo.InheritedCharge.ExternalIncoming }
-         *     
+         *
          */
         public ChargingPlanInfo.InheritedCharge.ExternalIncoming getExternalIncoming() {
             return externalIncoming;
@@ -1168,11 +1168,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the externalIncoming property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link ChargingPlanInfo.InheritedCharge.ExternalIncoming }
-         *     
+         *
          */
         public void setExternalIncoming(ChargingPlanInfo.InheritedCharge.ExternalIncoming value) {
             this.externalIncoming = value;
@@ -1180,11 +1180,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the external property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link ChargingPlanInfo.InheritedCharge.External }
-         *     
+         *
          */
         public ChargingPlanInfo.InheritedCharge.External getExternal() {
             return external;
@@ -1192,11 +1192,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the external property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link ChargingPlanInfo.InheritedCharge.External }
-         *     
+         *
          */
         public void setExternal(ChargingPlanInfo.InheritedCharge.External value) {
             this.external = value;
@@ -1204,11 +1204,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the local property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link ChargingPlanInfo.InheritedCharge.Local }
-         *     
+         *
          */
         public ChargingPlanInfo.InheritedCharge.Local getLocal() {
             return local;
@@ -1216,11 +1216,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the local property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link ChargingPlanInfo.InheritedCharge.Local }
-         *     
+         *
          */
         public void setLocal(ChargingPlanInfo.InheritedCharge.Local value) {
             this.local = value;
@@ -1228,11 +1228,11 @@ public class ChargingPlanInfo {
 
         /**
          * Gets the value of the extended property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link ChargingPlanInfo.InheritedCharge.Extended }
-         *     
+         *
          */
         public ChargingPlanInfo.InheritedCharge.Extended getExtended() {
             return extended;
@@ -1240,11 +1240,11 @@ public class ChargingPlanInfo {
 
         /**
          * Sets the value of the extended property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link ChargingPlanInfo.InheritedCharge.Extended }
-         *     
+         *
          */
         public void setExtended(ChargingPlanInfo.InheritedCharge.Extended value) {
             this.extended = value;
@@ -1253,9 +1253,9 @@ public class ChargingPlanInfo {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1268,8 +1268,8 @@ public class ChargingPlanInfo {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -1283,7 +1283,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the mulFactor property.
-             * 
+             *
              */
             public float getMulFactor() {
                 return mulFactor;
@@ -1291,7 +1291,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the mulFactor property.
-             * 
+             *
              */
             public void setMulFactor(float value) {
                 this.mulFactor = value;
@@ -1299,7 +1299,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the adjustment property.
-             * 
+             *
              */
             public float getAdjustment() {
                 return adjustment;
@@ -1307,7 +1307,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the adjustment property.
-             * 
+             *
              */
             public void setAdjustment(float value) {
                 this.adjustment = value;
@@ -1318,9 +1318,9 @@ public class ChargingPlanInfo {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1333,8 +1333,8 @@ public class ChargingPlanInfo {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -1348,7 +1348,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the mulFactor property.
-             * 
+             *
              */
             public float getMulFactor() {
                 return mulFactor;
@@ -1356,7 +1356,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the mulFactor property.
-             * 
+             *
              */
             public void setMulFactor(float value) {
                 this.mulFactor = value;
@@ -1364,7 +1364,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the adjustment property.
-             * 
+             *
              */
             public float getAdjustment() {
                 return adjustment;
@@ -1372,7 +1372,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the adjustment property.
-             * 
+             *
              */
             public void setAdjustment(float value) {
                 this.adjustment = value;
@@ -1383,9 +1383,9 @@ public class ChargingPlanInfo {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1398,8 +1398,8 @@ public class ChargingPlanInfo {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -1413,7 +1413,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the mulFactor property.
-             * 
+             *
              */
             public float getMulFactor() {
                 return mulFactor;
@@ -1421,7 +1421,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the mulFactor property.
-             * 
+             *
              */
             public void setMulFactor(float value) {
                 this.mulFactor = value;
@@ -1429,7 +1429,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the adjustment property.
-             * 
+             *
              */
             public float getAdjustment() {
                 return adjustment;
@@ -1437,7 +1437,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the adjustment property.
-             * 
+             *
              */
             public void setAdjustment(float value) {
                 this.adjustment = value;
@@ -1448,9 +1448,9 @@ public class ChargingPlanInfo {
 
         /**
          * <p>Java class for anonymous complex type.
-         * 
+         *
          * <p>The following schema fragment specifies the expected content contained within this class.
-         * 
+         *
          * <pre>
          * &lt;complexType>
          *   &lt;complexContent>
@@ -1463,8 +1463,8 @@ public class ChargingPlanInfo {
          *   &lt;/complexContent>
          * &lt;/complexType>
          * </pre>
-         * 
-         * 
+         *
+         *
          */
         @XmlAccessorType(XmlAccessType.FIELD)
         @XmlType(name = "", propOrder = {
@@ -1478,7 +1478,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the mulFactor property.
-             * 
+             *
              */
             public float getMulFactor() {
                 return mulFactor;
@@ -1486,7 +1486,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the mulFactor property.
-             * 
+             *
              */
             public void setMulFactor(float value) {
                 this.mulFactor = value;
@@ -1494,7 +1494,7 @@ public class ChargingPlanInfo {
 
             /**
              * Gets the value of the adjustment property.
-             * 
+             *
              */
             public float getAdjustment() {
                 return adjustment;
@@ -1502,7 +1502,7 @@ public class ChargingPlanInfo {
 
             /**
              * Sets the value of the adjustment property.
-             * 
+             *
              */
             public void setAdjustment(float value) {
                 this.adjustment = value;

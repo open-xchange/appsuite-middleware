@@ -55,7 +55,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * {@link ConcurrentBlocker} - A concurrent blocker.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentBlocker implements Blocker {
@@ -74,18 +74,22 @@ public final class ConcurrentBlocker implements Blocker {
         wl = rwl.writeLock();
     }
 
+    @Override
     public void acquire() {
         rl.lock();
     }
 
+    @Override
     public void release() {
         rl.unlock();
     }
 
+    @Override
     public void block() {
         wl.lock();
     }
 
+    @Override
     public void unblock() {
         wl.unlock();
     }

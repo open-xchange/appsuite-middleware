@@ -58,16 +58,16 @@ import java.io.InputStream;
  * returning a HTTP-response - else the whole connection might be cancelled
  * either too early (resulting in corrupt data) or to late (resulting in
  * a lot of waiting).
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class SizedInputStream extends InputStream{
-	
+
 	private final InputStream in;
 	private final long size;
-	private final Format format; 
-	
+	private final Format format;
+
 	public SizedInputStream(final InputStream in, final long size, final Format format){
 		this.size = size;
 		this.in = in;
@@ -77,7 +77,7 @@ public class SizedInputStream extends InputStream{
 	public long getSize() {
 		return this.size;
 	}
-	
+
 	public Format getFormat(){
 		return this.format;
 	}
@@ -121,7 +121,7 @@ public class SizedInputStream extends InputStream{
 
 	@Override
 	public void reset() throws IOException {
-		synchronized (this) {	
+		synchronized (this) {
 			in.reset();
 		}
 	}
@@ -130,5 +130,5 @@ public class SizedInputStream extends InputStream{
 	public long skip(final long n) throws IOException {
 		return in.skip(n);
 	}
-	
+
 }

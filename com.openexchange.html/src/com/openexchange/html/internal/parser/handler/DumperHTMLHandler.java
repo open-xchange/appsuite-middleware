@@ -56,7 +56,7 @@ import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
  * {@link DumperHTMLHandler} - Used to debug HTML parsing behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DumperHTMLHandler implements HTMLHandler {
@@ -148,7 +148,7 @@ public final class DumperHTMLHandler implements HTMLHandler {
 
     /**
      * Gets the string
-     * 
+     *
      * @return The string
      */
     public String getString() {

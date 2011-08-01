@@ -61,7 +61,7 @@ import com.openexchange.pop3.POP3ExceptionCode;
 
 /**
  * {@link POP3Config} - The POP3 configuration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3Config extends MailConfig {
@@ -98,7 +98,7 @@ public final class POP3Config extends MailConfig {
 
     /**
      * Gets the POP3 port
-     * 
+     *
      * @return the POP3 port
      */
     @Override
@@ -113,7 +113,7 @@ public final class POP3Config extends MailConfig {
 
     /**
      * Gets the POP3 server
-     * 
+     *
      * @return the POP3 server
      */
     @Override
@@ -163,7 +163,7 @@ public final class POP3Config extends MailConfig {
 
     /**
      * Gets the internet address of the POP3 server.
-     * 
+     *
      * @return The internet address of the POP3 server.
      * @throws OXException If POP3 server cannot be resolved
      */
@@ -180,7 +180,7 @@ public final class POP3Config extends MailConfig {
 
     /**
      * Gets the socket address (internet address + port) of the POP3 server.
-     * 
+     *
      * @return The socket address (internet address + port) of the POP3 server.
      * @throws IMAPException If POP3 server cannot be resolved
      */

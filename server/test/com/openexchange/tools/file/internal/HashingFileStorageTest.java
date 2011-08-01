@@ -63,25 +63,25 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
-  
-    
+
+
     public void testLifecycle() throws Exception {
         String data = "I am nice data";
         String fileId = fs.saveNewFile( IS(data) );
-        
+
         InputStream file = fs.getFile(fileId);
         InputStream compare = IS(data);
-        
+
         int i = 0;
         while((i = file.read()) != -1) {
             assertEquals(i, compare.read());
         }
         assertEquals(-1, compare.read());
-        
+
         file.close();
         compare.close();
     }
-    
+
     public void testListFiles() throws Exception{
         Map<String, Integer> files = new HashMap<String, Integer>();
         for(int i = 0; i < 10; i++) {
@@ -89,11 +89,11 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
             String fileId = fs.saveNewFile( IS(data) );
             files.put(fileId, i);
         }
-        
+
         SortedSet<String> fileList = fs.getFileList();
-        
+
         assertEquals(files.size(), fileList.size());
-        
+
         for(Map.Entry<String, Integer> entry : files.entrySet()) {
             assertTrue(entry.getKey()+" missing in: "+fileList, fileList.contains(entry.getKey()));
         }
@@ -106,15 +106,15 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
             String fileId = fs.saveNewFile( IS(data) );
             files.put(fileId, i);
         }
-        
+
         fs.remove();
-        
+
         String[] list = tmpFile.list();
         assertTrue(list == null || list.length == 0);
     }
-    
+
     // Error Cases
-    
+
     public void testReadUnknownID() {
         try {
             fs.getFile("fantasyName");
@@ -122,7 +122,7 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         } catch (OXException e) {
         }
     }
-    
+
     public void testDeleteUnknownID() throws Exception {
         assertFalse(fs.deleteFile("fantasyName"));
     }
@@ -130,15 +130,15 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
     public void testDeleteUnknownIDs() throws Exception {
         String data = "I am nice data";
         String fileId = fs.saveNewFile( IS(data) );
-        
+
         Set<String> notDeleted = fs.deleteFiles(new String[]{"file1", fileId, "file2", "file3"});
-        
+
         assertEquals(3, notDeleted.size());
         assertTrue(notDeleted.contains("file1"));
         assertTrue(notDeleted.contains("file2"));
         assertTrue(notDeleted.contains("file3"));
-        
+
     }
- 
-    
+
+
 }

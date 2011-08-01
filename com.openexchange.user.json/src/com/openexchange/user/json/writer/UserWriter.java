@@ -73,7 +73,7 @@ import com.openexchange.user.json.field.UserField;
 
 /**
  * {@link UserWriter} - The user writer.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserWriter {
@@ -175,7 +175,7 @@ public final class UserWriter {
             }
             return values.iterator().next();
         }
-        
+
     }
 
     private static final class WildcardAttributeUserFieldWriter implements UserFieldWriter {
@@ -285,9 +285,9 @@ public final class UserWriter {
                 jsonPutter.put(UserField.FOLDER_ID.getName(), pid <= 0 ? JSONObject.NULL : Integer.valueOf(pid));
             }
         });
-        
+
         // ######################### COMMON ATTRIBUTES ###########################################
-        
+
         m.put(UserField.CATEGORIES.getColumn(), new UserFieldWriter() {
 
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
@@ -313,7 +313,7 @@ public final class UserWriter {
                 jsonPutter.put(UserField.NUMBER_OF_ATTACHMENTS.getName(), Integer.valueOf(contact.getNumberOfAttachments()));
             }
         });
-        
+
         // ######################### CONTACT ATTRIBUTES ###########################################
 
         m.put(UserField.DISPLAY_NAME.getColumn(), new UserFieldWriter() {
@@ -1007,7 +1007,7 @@ public final class UserWriter {
                             jsonDListObj.put(UserField.DISPLAY_NAME.getName(), s);
                         }
                         jsonDListObj.put(DistributionListField.MAIL_FIELD.getName(), emailField);
-                        
+
                         jsonArray.put(jsonDListObj);
                     }
                     jsonPutter.put(UserField.DISTRIBUTIONLIST.getName(), jsonArray);
@@ -1038,13 +1038,13 @@ public final class UserWriter {
             }
         });
         m.put(UserField.NUMBER_OF_LINKS.getColumn(), new UserFieldWriter() {
-            
+
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.NUMBER_OF_LINKS.getName(), Integer.valueOf(contact.getNumberOfLinks()));
             }
         });
         m.put(UserField.NUMBER_OF_DISTRIBUTIONLIST.getColumn(), new UserFieldWriter() {
-            
+
             public void writeField(final JSONValuePutter jsonPutter, final User user, final Contact contact) throws JSONException {
                 jsonPutter.put(UserField.NUMBER_OF_DISTRIBUTIONLIST.getName(), Integer.valueOf(contact.getNumberOfDistributionLists()));
             }
@@ -1189,7 +1189,7 @@ public final class UserWriter {
 
     /**
      * Writes requested fields of given user into a JSON array.
-     * 
+     *
      * @param fields The fields to write or <code>null</code> to write all
      * @param attributeParameters The user attributes to write
      * @param user The user
@@ -1226,7 +1226,7 @@ public final class UserWriter {
 
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
-     * 
+     *
      * @param fields The fields to write to each JSON array or <code>null</code> to write all
      * @param attributeParameters The user attributes to write
      * @param users The users
@@ -1268,7 +1268,7 @@ public final class UserWriter {
 
     /**
      * Writes requested fields of given user into a JSON object.
-     * 
+     *
      * @param fields The fields to write or <code>null</code> to write all
      * @param attributeParameters The user attributes to write
      * @param user The user
@@ -1305,7 +1305,7 @@ public final class UserWriter {
 
     /**
      * Writes requested fields of given folders into a JSON array consisting of JSON objects.
-     * 
+     *
      * @param fields The fields to write to each JSON object or <code>null</code> to write all
      * @param attributeParameters The user attributes to write
      * @param users The users

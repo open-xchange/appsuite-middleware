@@ -74,7 +74,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link TwitterMessagingMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingMessage implements MessagingMessage {
@@ -102,7 +102,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     /**
      * Initializes a new {@link TwitterMessagingMessage}.
-     * 
+     *
      * @param status The twitter status
      */
     public TwitterMessagingMessage(final Status status, final Session session) {
@@ -141,7 +141,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingMessage.class)).error(e.getMessage(), e);
         }
         size = sz;
-        
+
         picture = status.getUser().getProfileImageURL().toString();
     }
 
@@ -222,7 +222,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
     public String getId() {
         return String.valueOf(status.getId());
     }
-    
+
     public String getPicture() {
         return picture;
     }

@@ -66,7 +66,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link ProxyRegistryImpl} - The servlet implementation of {@link ProxyRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyRegistryImpl implements ProxyRegistry {
@@ -75,7 +75,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static ProxyRegistryImpl getInstance() {
@@ -136,7 +136,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
 
     /**
      * Gets the registration for specified session identifier and UUID.
-     * 
+     *
      * @param sessionId The session identifier
      * @param uuid The UUID
      * @return The registration or <code>null</code>
@@ -152,7 +152,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
 
     /**
      * Gets the values contained in this registry.
-     * 
+     *
      * @return The values contained in this registry
      */
     public Collection<ConcurrentMap<UUID, ProxyRegistrationEntry>> values() {
@@ -161,7 +161,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
 
     /**
      * Gets an iterator for contained session identifiers.
-     * 
+     *
      * @return An iterator for contained session identifiers
      */
     public Iterator<String> sessionIds() {
@@ -170,7 +170,7 @@ public final class ProxyRegistryImpl implements ProxyRegistry {
 
     /**
      * Drops all registrations associated with specified session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      */
     public void dropRegistrationsFor(final String sessionId) {

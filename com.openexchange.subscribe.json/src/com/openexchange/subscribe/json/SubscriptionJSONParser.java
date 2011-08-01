@@ -59,18 +59,18 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 
 /**
  * {@link SubscriptionJSONParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionJSONParser {
 
     private static final FormContentParser formParser = new FormContentParser();
 
-    private SubscriptionSourceDiscoveryService discovery;
+    private final SubscriptionSourceDiscoveryService discovery;
 
     /**
      * Initializes a new {@link SubscriptionJSONParser}.
-     * 
+     *
      * @param discovery
      */
     public SubscriptionJSONParser(SubscriptionSourceDiscoveryService discovery) {

@@ -71,30 +71,31 @@ public class SubscriptionJSONParserTest extends TestCase {
     private JSONObject object;
     private SimSubscriptionSourceDiscoveryService discovery;
     private DynamicFormDescription form = null;
-    
+
+    @Override
     public void setUp() throws Exception{
         object = new JSONObject();
         object.put("id", 2);
         object.put("folder" , 12);
         object.put("enabled", false);
         object.put("source", SOURCE_NAME);
-        
+
         JSONObject config = new JSONObject();
         config.put("username", "My Username");
         config.put("password", "My Password");
-    
+
         form = new DynamicFormDescription();
         form.add(FormElement.input("username", "Username")).add(FormElement.password("password", "Password"));
-        
+
         object.put(SOURCE_NAME, config);
-    
+
         discovery = new SimSubscriptionSourceDiscoveryService();
         SubscriptionSource source = new SubscriptionSource();
         source.setId(SOURCE_NAME);
         source.setFormDescription(form);
         discovery.addSource(source);
     }
-    
+
     public void testParsing() throws JSONException {
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
         assertNotNull("Subscription may not be null", subscription);
@@ -103,15 +104,15 @@ public class SubscriptionJSONParserTest extends TestCase {
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
         assertEquals("Got wrong enablement", false, subscription.isEnabled());
-        
+
         Map<String, Object> configuration = subscription.getConfiguration();
-    
+
         assertNotNull("Configuration should not be null", configuration);
         assertEquals("Expected username", "My Username", configuration.get("username"));
         assertEquals("Expected password", "My Password", configuration.get("password"));
-        
+
     }
-    
+
     public void testShouldNotRequireId() throws JSONException {
         object.remove("id");
         Subscription subscription = new SubscriptionJSONParser(discovery).parse(object);
@@ -120,12 +121,12 @@ public class SubscriptionJSONParserTest extends TestCase {
         assertEquals("Got wrong folder", "12", subscription.getFolderId());
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
-        
+
         Map<String, Object> configuration = subscription.getConfiguration();
-    
+
         assertNotNull("Configuration should not be null", configuration);
         assertEquals("Expected username", "My Username", configuration.get("username"));
         assertEquals("Expected password", "My Password", configuration.get("password"));
-    
+
     }
 }

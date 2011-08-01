@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link UnifiedINBOXThreadFactory} - A thread factory for Unified INBOX threads taking a custom name prefix for created threads.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXThreadFactory implements java.util.concurrent.ThreadFactory {
@@ -75,7 +75,7 @@ public final class UnifiedINBOXThreadFactory implements java.util.concurrent.Thr
 
     /**
      * Initializes a new {@link UnifiedINBOXThreadFactory} with specified prefix applied to each created thread.
-     * 
+     *
      * @param namePrefix The name prefix
      */
     public UnifiedINBOXThreadFactory(final String namePrefix) {

@@ -15,11 +15,11 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetFaxCenterSettingsResponseType
 
 /**
  * Phone terminal fax center function data
- * 
+ *
  * <p>Java class for FaxCenter complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="FaxCenter">
  *   &lt;complexContent>
@@ -51,8 +51,8 @@ import com._4psa.extensionmessagesinfo_xsd._2_5.GetFaxCenterSettingsResponseType
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "FaxCenter", propOrder = {
@@ -92,11 +92,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isStatus() {
         return status;
@@ -104,11 +104,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setStatus(Boolean value) {
         this.status = value;
@@ -116,11 +116,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the storage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getStorage() {
         return storage;
@@ -128,11 +128,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the storage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setStorage(UnlimitedUInt value) {
         this.storage = value;
@@ -140,11 +140,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the autoDelDays property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAutoDelDays() {
         return autoDelDays;
@@ -152,11 +152,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the autoDelDays property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAutoDelDays(BigInteger value) {
         this.autoDelDays = value;
@@ -164,11 +164,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the notify property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotify() {
         return notify;
@@ -176,11 +176,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the notify property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotify(String value) {
         this.notify = value;
@@ -188,11 +188,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the autoAnswer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAutoAnswer() {
         return autoAnswer;
@@ -200,11 +200,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the autoAnswer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAutoAnswer(Boolean value) {
         this.autoAnswer = value;
@@ -212,11 +212,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the autoAnswerSeconds property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getAutoAnswerSeconds() {
         return autoAnswerSeconds;
@@ -224,11 +224,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the autoAnswerSeconds property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setAutoAnswerSeconds(BigInteger value) {
         this.autoAnswerSeconds = value;
@@ -236,11 +236,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the fax2Voicemail property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isFax2Voicemail() {
         return fax2Voicemail;
@@ -248,11 +248,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the fax2Voicemail property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setFax2Voicemail(Boolean value) {
         this.fax2Voicemail = value;
@@ -260,25 +260,25 @@ public class FaxCenter {
 
     /**
      * Gets the value of the faxFromEmail property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the faxFromEmail property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getFaxFromEmail().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getFaxFromEmail() {
         if (faxFromEmail == null) {
@@ -289,11 +289,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the faxSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isFaxSndActive() {
         return faxSndActive;
@@ -301,11 +301,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the faxSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setFaxSndActive(Boolean value) {
         this.faxSndActive = value;
@@ -313,11 +313,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the faxSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFaxSnd() {
         return faxSnd;
@@ -325,11 +325,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the faxSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFaxSnd(String value) {
         this.faxSnd = value;
@@ -337,11 +337,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -349,11 +349,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -361,11 +361,11 @@ public class FaxCenter {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -373,11 +373,11 @@ public class FaxCenter {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;

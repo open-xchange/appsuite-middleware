@@ -71,23 +71,26 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
         super(null, "user_attribute", "value", "TEXT");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return Priority.NORMAL.ordinal();
     }
-    
+
     @Override
     protected Column modifyColumn(Column c) {
         return new Column("value", "TEXT CHARACTER SET utf8 collate utf8_unicode_ci NOT NULL");
     }
-    
+
     @Override
     protected void before(Connection con) throws SQLException {
         PreparedStatement stmt = null;
@@ -98,7 +101,7 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     @Override
     public DatabaseService getDatabaseService() {
         return ServerServiceRegistry.getInstance().getService(DatabaseService.class);

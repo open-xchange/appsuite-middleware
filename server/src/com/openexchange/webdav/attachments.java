@@ -84,7 +84,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link attachments} - The WebDAV/XML servlet for attachments.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class attachments extends OXServlet {

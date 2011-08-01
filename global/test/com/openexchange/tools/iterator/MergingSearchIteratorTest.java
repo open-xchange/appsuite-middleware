@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MergingSearchIteratorTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MergingSearchIteratorTest extends TestCase {
@@ -66,40 +66,40 @@ public class MergingSearchIteratorTest extends TestCase {
         final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
 
         final Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
-        
+
         final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b),
             new ArrayIterator<Integer>(c)
         );
-        
+
         for(int i = 0; i < complete.size(); i++) {
             assertTrue(complete.hasNext());
             assertEquals(expected[i], complete.next());
         }
-        
+
         assertFalse(complete.hasNext());
     }
-    
+
     public void testMergeEmptyWithFull() throws OXException {
         final Integer[] a = new Integer[0];
         final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
-        
+
         final Integer[] expected = b;
-        
-        
+
+
         final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b)
         );
-    
+
         for(int i = 0; i < complete.size(); i++) {
             assertTrue(complete.hasNext());
             assertEquals(expected[i], complete.next());
         }
-        
+
         assertFalse(complete.hasNext());
     }
 

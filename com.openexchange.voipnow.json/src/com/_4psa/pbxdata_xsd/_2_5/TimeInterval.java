@@ -14,11 +14,11 @@ import com._4psa.pbxmessages_xsd._2_5.EditTimeIntervalRequest;
 
 /**
  * Time interval data
- * 
+ *
  * <p>Java class for TimeInterval complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="TimeInterval">
  *   &lt;complexContent>
@@ -36,8 +36,8 @@ import com._4psa.pbxmessages_xsd._2_5.EditTimeIntervalRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "TimeInterval", propOrder = {
@@ -75,11 +75,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the startTime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getStartTime() {
         return startTime;
@@ -87,11 +87,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the startTime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setStartTime(XMLGregorianCalendar value) {
         this.startTime = value;
@@ -99,11 +99,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the endTime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getEndTime() {
         return endTime;
@@ -111,11 +111,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the endTime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setEndTime(XMLGregorianCalendar value) {
         this.endTime = value;
@@ -123,11 +123,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the startDay property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getStartDay() {
         return startDay;
@@ -135,11 +135,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the startDay property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setStartDay(Long value) {
         this.startDay = value;
@@ -147,11 +147,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the endDay property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getEndDay() {
         return endDay;
@@ -159,11 +159,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the endDay property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setEndDay(Long value) {
         this.endDay = value;
@@ -171,11 +171,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the startWkday property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getStartWkday() {
         return startWkday;
@@ -183,11 +183,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the startWkday property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setStartWkday(Long value) {
         this.startWkday = value;
@@ -195,11 +195,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the endWkday property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Long }
-     *     
+     *
      */
     public Long getEndWkday() {
         return endWkday;
@@ -207,11 +207,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the endWkday property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Long }
-     *     
+     *
      */
     public void setEndWkday(Long value) {
         this.endWkday = value;
@@ -219,11 +219,11 @@ public class TimeInterval {
 
     /**
      * Gets the value of the month property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMonth() {
         return month;
@@ -231,11 +231,11 @@ public class TimeInterval {
 
     /**
      * Sets the value of the month property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMonth(BigInteger value) {
         this.month = value;

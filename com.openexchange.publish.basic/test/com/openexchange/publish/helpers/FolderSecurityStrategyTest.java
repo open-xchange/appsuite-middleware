@@ -66,23 +66,23 @@ public class FolderSecurityStrategyTest extends TestCase {
         adminPermission.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
         final TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
-        
+
         assertTrue(strategy.mayCreate(null));
         assertTrue(strategy.mayUpdate(null));
         assertTrue(strategy.mayDelete(null));
-        
-        
+
+
     }
-    
+
     public void testDenyForNonAdmin() throws OXException {
         final OCLPermission adminPermission = new OCLPermission();
         adminPermission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 
         final TestableFolderSecurityStrategy strategy = new TestableFolderSecurityStrategy(adminPermission);
-        
+
         assertFalse(strategy.mayCreate(null));
         assertFalse(strategy.mayUpdate(null));
         assertFalse(strategy.mayDelete(null));
-        
+
     }
 }

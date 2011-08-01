@@ -78,7 +78,7 @@ public class ContextOnlyUWAService implements UWAWidgetService {
         this.contextWidgets = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         this.ctxId = ctxId;
     }
-    
+
     public List<UWAWidget> all() throws OXException {
         try {
             return contextWidgets.load();

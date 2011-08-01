@@ -75,7 +75,7 @@ import com.openexchange.timer.TimerService;
  * {@link EnqueueingMailAccessCache} - A very volatile cache for already connected instances of {@link MailAccess}.
  * <p>
  * A bounded {@link Queue} is used to store {@link MailAccess} instances to improve subsequent mail requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EnqueueingMailAccessCache implements IMailAccessCache {
@@ -99,7 +99,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @queueCapacity The max. queue capacity
      * @return The singleton instance
      * @throws OXException If instance initialization fails
@@ -149,7 +149,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     /**
      * Prevent instantiation.
      * @queueCapacity The max. queue capacity
-     * 
+     *
      * @throws OXException If an error occurs
      */
     private EnqueueingMailAccessCache(final int queueCapacity) throws OXException {
@@ -173,11 +173,12 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Removes and returns a mail access from cache.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return An active instance of {@link MailAccess} or <code>null</code>
      */
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
         final Key key = keyFor(accountId, session);
         final MailAccessQueue accessQueue = map.get(key);
@@ -203,12 +204,13 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Puts given mail access into cache if none user-bound connection is already contained in cache.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @param mailAccess The mail access to put into cache
      * @return <code>true</code> if mail access could be successfully cached; otherwise <code>false</code>
      */
+    @Override
     public boolean putMailAccess(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
         int idleSeconds = mailAccess.getCacheIdleSeconds();
         if (idleSeconds <= 0) {
@@ -255,11 +257,12 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Checks if cache already holds a user-bound mail access for specified account.
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return <code>true</code> if a user-bound mail access is already present in cache; otherwise <code>false</code>
      */
+    @Override
     public boolean containsMailAccess(final Session session, final int accountId) {
         final MailAccessQueue accessQueue = map.get(keyFor(accountId, session));
         if (null == accessQueue) {
@@ -282,7 +285,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Clears specified queue orderly.
-     * 
+     *
      * @param key The key associated with the queue
      */
     protected void orderlyClearQueue(final Key key) {
@@ -306,10 +309,11 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
 
     /**
      * Clears the cache entries kept for specified user.
-     * 
+     *
      * @param session The session
      * @throws OXException If clearing user entries fails
      */
+    @Override
     public void clearUserEntries(final Session session) throws OXException {
         /*
          * Check if last...
@@ -340,6 +344,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             this.map = map;
         }
 
+        @Override
         public void run() {
             try {
                 /*

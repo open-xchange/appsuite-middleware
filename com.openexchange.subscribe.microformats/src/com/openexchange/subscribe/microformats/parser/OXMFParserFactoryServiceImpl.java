@@ -54,7 +54,7 @@ import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
 
 /**
  * {@link OXMFParserFactoryServiceImpl} - Implementation of {@link OXMFParserFactoryService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXMFParserFactoryServiceImpl implements OXMFParserFactoryService {

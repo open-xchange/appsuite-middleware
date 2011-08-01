@@ -112,13 +112,13 @@ public class Activator implements BundleActivator {
                 linkedInSubscribeService,
                 null);
             services.add(serviceRegistration);
-            
+
             try {
-                services.add(bundleContext.registerService(OAuthAccountDeleteListener.class.getName(), new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService), null)); 
+                services.add(bundleContext.registerService(OAuthAccountDeleteListener.class.getName(), new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService), null));
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-            
+
             LOG.info("LinkedInSubscribeService was started.");
         }
     }
@@ -146,7 +146,7 @@ public class Activator implements BundleActivator {
     public void setLinkedInService(LinkedInService linkedInService) {
         this.linkedInService = linkedInService;
     }
-    
+
     public void setContextService(ContextService contexts) {
         this.contextService = contexts;
     }

@@ -54,14 +54,14 @@ import java.util.Collection;
 /**
  * {@link UpdateTaskProviderService} - Provides a collection of {@link UpdateTask update tasks} which should be added to update task
  * framework.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface UpdateTaskProviderService {
 
     /**
      * Gets a collection view of this provider's update tasks.
-     * 
+     *
      * @return A collection view of this provider's update tasks.
      */
     @SuppressWarnings("deprecation")

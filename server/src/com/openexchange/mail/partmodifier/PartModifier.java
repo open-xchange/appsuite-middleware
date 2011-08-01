@@ -56,7 +56,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 
 /**
  * {@link PartModifier} - Abstract class to modify a mail part prior to parsing it by {@link MailMessageParser}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class PartModifier {
@@ -65,7 +65,7 @@ public abstract class PartModifier {
 
     /**
      * Performs possible modifications on specified mail part
-     * 
+     *
      * @param mailPart The mail part to modify
      * @return The modified mail part
      * @throws OXException If a mail error occurs
@@ -74,7 +74,7 @@ public abstract class PartModifier {
 
     /**
      * Initializes part modifier
-     * 
+     *
      * @param className The class name of part modifier implementation
      * @throws OXException If part modifier cannot be initialized
      */

@@ -83,10 +83,10 @@ public class InsertExample {
 						new Constant(3))));
 		System.out.println(new StatementBuilder().buildCommand(insert));
 	}
-	
+
 	/**
      * This INSERT-Statement contains several OX-Modifications with sub-selects and other stuff.
-     * 
+     *
      * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
      */
 	public static void extendedInsert() {
@@ -96,32 +96,32 @@ public class InsertExample {
             FROM(dates).
             WHERE(new EQUALS(dates.getColumn("intfield01"), new Constant(1000)))
         );
-    
+
 	    System.out.println(new StatementBuilder().buildCommand(insert));
 	}
-	
+
 	public static void insertWithPlaceholder() throws Exception {
         List<Object> values = new ArrayList<Object>();
-        
+
 	    INSERT insert = new INSERT().INTO(dates);
-	    
+
 	    insert.SET("field01", new Constant("field01_a"), new Constant("field01_b"));
-	    
+
 	    insert.SET("timestampfield01", PLACEHOLDER, PLACEHOLDER);
         values.add(new Date(0));
         values.add(new Date(3600000));
-        
+
 	    insert.SET("timestampfield02", PLACEHOLDER, PLACEHOLDER);
         values.add(new Date(3600000));
         values.add(new Date(7200000));
-        
+
         Connection con = getConnection();
         PreparedStatement stmt = new StatementBuilder().prepareStatement(con, insert, values);
         System.out.println(stmt.toString());
         stmt.close();
         con.close();
 	}
-	
+
 	private static Connection getConnection() throws Exception {
 	    Class.forName("com.mysql.jdbc.Driver");
         return DriverManager.getConnection("jdbc:mysql://localhost/ox_sandbox", "openexchange", "secret");

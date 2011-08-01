@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * HttpErrorServlet
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

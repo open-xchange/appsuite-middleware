@@ -54,14 +54,14 @@ import org.osgi.service.event.EventHandler;
 
 /**
  * {@link EventHandlerRegistration} - Extends {@link EventHandler} interface by methods for registration/unregistration of event handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface EventHandlerRegistration extends EventHandler {
 
     /**
      * Registers this event handler to specified bundle context.
-     * 
+     *
      * @param context The bundle context
      */
     public void registerService(BundleContext context);

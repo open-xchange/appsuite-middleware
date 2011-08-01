@@ -65,16 +65,16 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataYahooImpl.class));
 
-    private DeferringURLService deferrer;
+    private final DeferringURLService deferrer;
 
     public OAuthServiceMetaDataYahooImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
         setId("com.openexchange.oauth.yahoo");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
-        setDisplayName("Yahoo");        
+        setDisplayName("Yahoo");
         this.deferrer = deferrer;
-    }   
-    
+    }
+
     @Override
     public String modifyCallbackURL(String callbackUrl) {
         if (deferrer == null) {

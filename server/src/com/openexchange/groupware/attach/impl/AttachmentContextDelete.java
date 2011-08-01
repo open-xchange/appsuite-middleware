@@ -57,6 +57,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 
 public class AttachmentContextDelete extends ContextDelete {
 
+    @Override
     public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws OXException {
         if (!isContextDelete(deleteEvent)) {
             return;

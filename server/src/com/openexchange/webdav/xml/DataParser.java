@@ -61,7 +61,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link DataParser} - The WebDAV/XML data parser.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class DataParser {

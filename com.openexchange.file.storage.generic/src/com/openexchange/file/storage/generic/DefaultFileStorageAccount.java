@@ -55,7 +55,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * {@link DefaultFileStorageAccount} - The default {@link FileStorageAccount} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -96,7 +96,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the configuration.
-     * 
+     *
      * @param configuration The configuration to set
      */
     public void setConfiguration(final Map<String, Object> configuration) {
@@ -105,7 +105,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the display name.
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -114,7 +114,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the ID.
-     * 
+     *
      * @param id The ID to set
      */
     public void setId(final String id) {
@@ -123,7 +123,7 @@ public class DefaultFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the file storage service.
-     * 
+     *
      * @param fsService The file storage service to set
      */
     public void setFileStorageService(final FileStorageService fsService) {

@@ -61,7 +61,7 @@ public abstract class AbstractAction implements WebdavAction {
 	public void yield(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		next.perform(req, res);
 	}
-	
+
 	public WebdavAction getNext() {
 		return next;
 	}
@@ -69,27 +69,27 @@ public abstract class AbstractAction implements WebdavAction {
 	public void setNext(final WebdavAction next) {
 		this.next = next;
 	}
-	
+
 	public void setBuldLoader(final BulkLoader loader) {
 		this.bulkLoader = loader;
 	}
-	
+
 	public BulkLoader getBulkLoader(){
 		return this.bulkLoader;
 	}
-	
+
 	protected final void preLoad(final LoadingHints loading) {
 		if(bulkLoader != null) {
 			bulkLoader.load(loading);
 		}
 	}
-	
+
 	protected final void preLoad(final List<LoadingHints> hints) {
 		if(bulkLoader != null) {
 			bulkLoader.load(hints);
 		}
 	}
-	
+
 	@Override
 	public String toString(){
 		if(null != next) {

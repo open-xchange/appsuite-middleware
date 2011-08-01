@@ -26,7 +26,7 @@ import org.apache.jsieve.parser.generated.Token;
 
 /**
  * Class SieveNode defines aspects all jjTree parse nodes may require.
- * 
+ *
  * Creation Date: 27-Jan-04
  */
 public class SieveNode
@@ -42,16 +42,16 @@ public class SieveNode
 
     private Token firstToken;
     private Token lastToken;
-    
+
     /**
-     * The name associated to this node or null 
-     */     
+     * The name associated to this node or null
+     */
     private String fieldName;
-    
+
     /**
-     * The value associated to this node or null 
-     */    
-    private Object fieldValue;    
+     * The value associated to this node or null
+     */
+    private Object fieldValue;
     /**
      * Returns the name.
      * @return String
@@ -95,7 +95,7 @@ public class SieveNode
     public Token getFirstToken() {
         return firstToken;
     }
-    
+
     /**
      * Sets the first token comprising this node.
      * @param firstToken <code>Token</code>, not null
@@ -119,10 +119,10 @@ public class SieveNode
     public void setLastToken(Token lastToken) {
         this.lastToken = lastToken;
     }
-    
+
     /**
      * Gets the position of this node in the script.
-     * @return <code>ScriptCoordinate</code> containing the position of this node, 
+     * @return <code>ScriptCoordinate</code> containing the position of this node,
      * not null
      */
     public ScriptCoordinate getCoordinate() {

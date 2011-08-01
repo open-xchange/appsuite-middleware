@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class SimPublicationTargetDiscoveryService implements PublicationTargetDiscoveryService {
 
-    private Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
+    private final Map<String, PublicationTarget> targets = new HashMap<String, PublicationTarget>();
 
     public void addTarget(PublicationTarget target) {
         targets.put(target.getId(), target);

@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link LoginResult} - Offers information about a performed login.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginResult {
@@ -67,21 +67,21 @@ public interface LoginResult {
 
     /**
      * Gets the {@link Session session} associated with this login.
-     * 
+     *
      * @return The session associated with this login.
      */
     Session getSession();
 
     /**
      * Gets the resolved {@link Context context}.
-     * 
+     *
      * @return The resolved context.
      */
     Context getContext();
 
     /**
      * Gets the resolved {@link User user}.
-     * 
+     *
      * @return The resolved user.
      */
     User getUser();

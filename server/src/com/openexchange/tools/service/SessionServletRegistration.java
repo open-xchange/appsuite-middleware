@@ -77,16 +77,16 @@ public class SessionServletRegistration extends ServletRegistration {
         allKeys.add(Property.COOKIE_HASH.getPropertyName());
         return allKeys;
     }
-    
+
     @Override
     protected void customizeInitParams(Dictionary<String, String> initParams) {
         ConfigurationService configurationService = getService(ConfigurationService.class);
         final String text = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
         if(text != null) {
-            initParams.put(SessionServlet.SESSION_WHITELIST_FILE, text);    
+            initParams.put(SessionServlet.SESSION_WHITELIST_FILE, text);
         }
     }
-    
-    
-    
+
+
+
 }

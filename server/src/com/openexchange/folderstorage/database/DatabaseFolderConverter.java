@@ -75,7 +75,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader;
 
 /**
  * {@link DatabaseFolderConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseFolderConverter {
@@ -93,18 +93,21 @@ public final class DatabaseFolderConverter {
         TIntObjectHashMap<FolderConverter> m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemPublicFolder.getSystemPublicFolder(fo);
             }
         });
         m.put(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemInfostoreFolder.getSystemInfostoreFolder(fo);
             }
         });
         m.put(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 return SystemPrivateFolder.getSystemPrivateFolder(fo);
             }
@@ -114,6 +117,7 @@ public final class DatabaseFolderConverter {
         m = new TIntObjectHashMap<FolderConverter>(4);
         m.put(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
@@ -122,6 +126,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
@@ -130,6 +135,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_LDAP_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
@@ -139,6 +145,7 @@ public final class DatabaseFolderConverter {
         });
         m.put(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, new FolderConverter() {
 
+            @Override
             public DatabaseFolder convert(final FolderObject fo) throws OXException {
                 final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
@@ -158,7 +165,7 @@ public final class DatabaseFolderConverter {
 
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
-     * 
+     *
      * @param fo The {@link FolderObject} instance
      * @param user The user
      * @param userConfiguration The user configuration
@@ -302,7 +309,8 @@ public final class DatabaseFolderConverter {
                         } else {
                             final List<String> tmp = new ArrayList<String>(subfolderIds.size());
                             subfolderIds.forEach(new TIntProcedure() {
-                                
+
+                                @Override
                                 public boolean execute(final int id) {
                                     tmp.add(String.valueOf(id));
                                     return true;

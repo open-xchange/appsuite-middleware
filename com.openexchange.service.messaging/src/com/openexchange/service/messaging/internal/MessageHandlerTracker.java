@@ -62,7 +62,7 @@ import com.openexchange.service.messaging.MessageHandler;
 
 /**
  * {@link MessageHandlerTracker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageHandlerTracker extends ServiceTracker {
@@ -130,7 +130,7 @@ public final class MessageHandlerTracker extends ServiceTracker {
 
     /**
      * Place the wrapper into the appropriate buckets. This is a performance optimization for message delivery.
-     * 
+     *
      * @param wrapper The wrapper to place in buckets.
      */
     private void bucket(final MessageHandlerWrapper wrapper) {
@@ -174,7 +174,7 @@ public final class MessageHandlerTracker extends ServiceTracker {
 
     /**
      * Remove the wrapper from the buckets.
-     * 
+     *
      * @param wrapper The wrapper to remove from the buckets.
      */
     private void unbucket(final MessageHandlerWrapper wrapper) {
@@ -221,7 +221,7 @@ public final class MessageHandlerTracker extends ServiceTracker {
     /**
      * Return the set of handlers which subscribe to the event topic. A set is used to ensure a handler is not called for an event more than
      * once.
-     * 
+     *
      * @param topic The topic
      * @return A set of handlers
      */

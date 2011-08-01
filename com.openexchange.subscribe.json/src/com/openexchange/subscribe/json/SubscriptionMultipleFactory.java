@@ -64,10 +64,10 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  */
 public class SubscriptionMultipleFactory implements MultipleHandlerFactoryService {
 
-    private SubscriptionExecutionService executor;
-    private SubscriptionSourceDiscoveryService discovery;
-    private SecretService secretService;
-    
+    private final SubscriptionExecutionService executor;
+    private final SubscriptionSourceDiscoveryService discovery;
+    private final SecretService secretService;
+
     public SubscriptionMultipleFactory(SubscriptionSourceDiscoveryService discovery, SubscriptionExecutionService executor, SecretService secretService) {
         this.executor = executor;
         this.discovery = discovery;

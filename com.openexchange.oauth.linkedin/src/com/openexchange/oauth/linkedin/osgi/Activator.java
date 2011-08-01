@@ -75,7 +75,7 @@ public class Activator implements BundleActivator {
     private ArrayList<ServiceRegistration> services;
 
     private OAuthService oauthService;
-    
+
     private ConfigurationService configurationService;
 
     public Activator() {
@@ -92,7 +92,7 @@ public class Activator implements BundleActivator {
 
         // react dynamically to the appearance/disappearance of ConfigurationService
         trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationServiceRegisterer(context, this)));
-        
+
         // react dynamically to the appearance/disappearance of OauthService
         trackers.push(new ServiceTracker(context, OAuthService.class.getName(), new OAuthServiceRegisterer(context, this)));
 
@@ -112,7 +112,7 @@ public class Activator implements BundleActivator {
     }
 
     public void registerServices() {
-        if (null != oauthService && null != configurationService) {            
+        if (null != oauthService && null != configurationService) {
             final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
             final ServiceRegistration serviceRegistration = bundleContext.registerService(
                 OAuthServiceMetaData.class.getName(),
@@ -120,7 +120,7 @@ public class Activator implements BundleActivator {
                 null);
             services.add(serviceRegistration);
             LOG.info("OAuthServiceMetaData for LinkedIn was started");
-            
+
             final LinkedInService linkedInService = new LinkedInServiceImpl(this);
             final ServiceRegistration serviceRegistration2 = bundleContext.registerService(
                 LinkedInService.class.getName(),
@@ -153,10 +153,10 @@ public class Activator implements BundleActivator {
         this.configurationService = configurationService;
     }
 
-    
+
     public ConfigurationService getConfigurationService() {
         return configurationService;
     }
-    
-    
+
+
 }

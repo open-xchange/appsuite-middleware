@@ -73,7 +73,8 @@ public class LeftOuterJoin extends Join {
 		super(leftTable, rightTable, onCondition);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildLeftOuterJoin(this);
 	}
 }

@@ -70,13 +70,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractFileAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractFileAction.class));
-    
-    
+
+
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
 
     public static enum Param {
@@ -88,10 +88,10 @@ public abstract class AbstractFileAction implements AJAXActionService {
         ORDER("order"),
         TIMEZONE("timezone"),
         TIMESTAMP("timestamp"),
-        IGNORE("ignore"), 
-        DIFF("diff"), 
-        ATTACHED_ID("attached"), 
-        MODULE("module"), 
+        IGNORE("ignore"),
+        DIFF("diff"),
+        ATTACHED_ID("attached"),
+        MODULE("module"),
         ATTACHMENT("attachment");
 
         String name;
@@ -122,7 +122,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
         } finally {
             results.close();
         }
-    
+
     }
 
     public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
@@ -165,21 +165,21 @@ public abstract class AbstractFileAction implements AJAXActionService {
 
         return new AJAXRequestResult(array);
     }
-    
-    
+
+
     public AJAXRequestResult result(final int[] versions, final long sequenceNumber, final InfostoreRequest request) throws OXException {
         final JSONArray array = new JSONArray();
         for (final int i : versions) {
             array.put(i);
         }
-        
+
         return new AJAXRequestResult(array, new Date(sequenceNumber));
     }
-    
+
     public AJAXRequestResult success(final long sequenceNumber) {
         return new AJAXRequestResult(true, new Date(sequenceNumber));
     }
-    
+
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
         try {
@@ -196,7 +196,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
             throw AjaxExceptionCodes.UnexpectedError.create( t.getMessage());
         } finally {
             after(req);
-            
+
             // Delete tmp files
             if (request.hasUploads()) {
                 request.getUploadEvent().cleanUp();
@@ -208,19 +208,19 @@ public abstract class AbstractFileAction implements AJAXActionService {
         req.getFileAccess().finish();
     }
 
-   
+
     protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException{
-        
+
     }
 
-    
+
     protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException{
-        
+
     }
 
-   
+
     protected void before(final AJAXInfostoreRequest req) throws OXException {
-        
+
     }
 
 

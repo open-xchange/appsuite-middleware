@@ -14,11 +14,11 @@ import com._4psa.reportmessagesinfo_xsd._2_5.CallReportResponseType;
 
 /**
  * Call report data
- * 
+ *
  * <p>Java class for CallReport complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallReport">
  *   &lt;complexContent>
@@ -110,8 +110,8 @@ import com._4psa.reportmessagesinfo_xsd._2_5.CallReportResponseType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallReport", propOrder = {
@@ -130,11 +130,11 @@ public class CallReport {
 
     /**
      * Gets the value of the incomingCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallReport.IncomingCalls }
-     *     
+     *
      */
     public CallReport.IncomingCalls getIncomingCalls() {
         return incomingCalls;
@@ -142,11 +142,11 @@ public class CallReport {
 
     /**
      * Sets the value of the incomingCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallReport.IncomingCalls }
-     *     
+     *
      */
     public void setIncomingCalls(CallReport.IncomingCalls value) {
         this.incomingCalls = value;
@@ -154,11 +154,11 @@ public class CallReport {
 
     /**
      * Gets the value of the outgoingCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link CallReport.OutgoingCalls }
-     *     
+     *
      */
     public CallReport.OutgoingCalls getOutgoingCalls() {
         return outgoingCalls;
@@ -166,11 +166,11 @@ public class CallReport {
 
     /**
      * Sets the value of the outgoingCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link CallReport.OutgoingCalls }
-     *     
+     *
      */
     public void setOutgoingCalls(CallReport.OutgoingCalls value) {
         this.outgoingCalls = value;
@@ -178,25 +178,25 @@ public class CallReport {
 
     /**
      * Gets the value of the call property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the call property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCall().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link CallReport.Call }
-     * 
-     * 
+     *
+     *
      */
     public List<CallReport.Call> getCall() {
         if (call == null) {
@@ -208,9 +208,9 @@ public class CallReport {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -258,8 +258,8 @@ public class CallReport {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -291,11 +291,11 @@ public class CallReport {
 
         /**
          * Gets the value of the source property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getSource() {
             return source;
@@ -303,11 +303,11 @@ public class CallReport {
 
         /**
          * Sets the value of the source property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setSource(String value) {
             this.source = value;
@@ -315,11 +315,11 @@ public class CallReport {
 
         /**
          * Gets the value of the destination property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDestination() {
             return destination;
@@ -327,11 +327,11 @@ public class CallReport {
 
         /**
          * Sets the value of the destination property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDestination(String value) {
             this.destination = value;
@@ -339,11 +339,11 @@ public class CallReport {
 
         /**
          * Gets the value of the initiated property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getInitiated() {
             return initiated;
@@ -351,11 +351,11 @@ public class CallReport {
 
         /**
          * Sets the value of the initiated property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setInitiated(XMLGregorianCalendar value) {
             this.initiated = value;
@@ -363,11 +363,11 @@ public class CallReport {
 
         /**
          * Gets the value of the startDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getStartDate() {
             return startDate;
@@ -375,11 +375,11 @@ public class CallReport {
 
         /**
          * Sets the value of the startDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setStartDate(XMLGregorianCalendar value) {
             this.startDate = value;
@@ -387,11 +387,11 @@ public class CallReport {
 
         /**
          * Gets the value of the duration property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDuration() {
             return duration;
@@ -399,11 +399,11 @@ public class CallReport {
 
         /**
          * Sets the value of the duration property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDuration(String value) {
             this.duration = value;
@@ -411,11 +411,11 @@ public class CallReport {
 
         /**
          * Gets the value of the answerDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getAnswerDate() {
             return answerDate;
@@ -423,11 +423,11 @@ public class CallReport {
 
         /**
          * Sets the value of the answerDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setAnswerDate(XMLGregorianCalendar value) {
             this.answerDate = value;
@@ -435,11 +435,11 @@ public class CallReport {
 
         /**
          * Gets the value of the flow property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getFlow() {
             return flow;
@@ -447,11 +447,11 @@ public class CallReport {
 
         /**
          * Sets the value of the flow property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setFlow(String value) {
             this.flow = value;
@@ -459,11 +459,11 @@ public class CallReport {
 
         /**
          * Gets the value of the type property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getType() {
             return type;
@@ -471,11 +471,11 @@ public class CallReport {
 
         /**
          * Sets the value of the type property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setType(String value) {
             this.type = value;
@@ -483,11 +483,11 @@ public class CallReport {
 
         /**
          * Gets the value of the disposition property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDisposition() {
             return disposition;
@@ -495,11 +495,11 @@ public class CallReport {
 
         /**
          * Sets the value of the disposition property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDisposition(String value) {
             this.disposition = value;
@@ -507,11 +507,11 @@ public class CallReport {
 
         /**
          * Gets the value of the hangupCause property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getHangupCause() {
             return hangupCause;
@@ -519,11 +519,11 @@ public class CallReport {
 
         /**
          * Sets the value of the hangupCause property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setHangupCause(BigInteger value) {
             this.hangupCause = value;
@@ -531,11 +531,11 @@ public class CallReport {
 
         /**
          * Gets the value of the networkCode property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getNetworkCode() {
             return networkCode;
@@ -543,11 +543,11 @@ public class CallReport {
 
         /**
          * Sets the value of the networkCode property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setNetworkCode(String value) {
             this.networkCode = value;
@@ -558,9 +558,9 @@ public class CallReport {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -578,8 +578,8 @@ public class CallReport {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -603,11 +603,11 @@ public class CallReport {
 
         /**
          * Gets the value of the total property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getTotal() {
             return total;
@@ -615,11 +615,11 @@ public class CallReport {
 
         /**
          * Sets the value of the total property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setTotal(BigInteger value) {
             this.total = value;
@@ -627,11 +627,11 @@ public class CallReport {
 
         /**
          * Gets the value of the answered property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getAnswered() {
             return answered;
@@ -639,11 +639,11 @@ public class CallReport {
 
         /**
          * Sets the value of the answered property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setAnswered(BigInteger value) {
             this.answered = value;
@@ -651,11 +651,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unanswered property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnanswered() {
             return unanswered;
@@ -663,11 +663,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unanswered property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnanswered(BigInteger value) {
             this.unanswered = value;
@@ -675,11 +675,11 @@ public class CallReport {
 
         /**
          * Gets the value of the busy property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getBusy() {
             return busy;
@@ -687,11 +687,11 @@ public class CallReport {
 
         /**
          * Sets the value of the busy property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setBusy(BigInteger value) {
             this.busy = value;
@@ -699,11 +699,11 @@ public class CallReport {
 
         /**
          * Gets the value of the failed property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getFailed() {
             return failed;
@@ -711,11 +711,11 @@ public class CallReport {
 
         /**
          * Sets the value of the failed property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setFailed(BigInteger value) {
             this.failed = value;
@@ -723,11 +723,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unknown property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnknown() {
             return unknown;
@@ -735,11 +735,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unknown property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnknown(BigInteger value) {
             this.unknown = value;
@@ -747,11 +747,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unallowed property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnallowed() {
             return unallowed;
@@ -759,11 +759,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unallowed property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnallowed(BigInteger value) {
             this.unallowed = value;
@@ -774,9 +774,9 @@ public class CallReport {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -794,8 +794,8 @@ public class CallReport {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -819,11 +819,11 @@ public class CallReport {
 
         /**
          * Gets the value of the total property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getTotal() {
             return total;
@@ -831,11 +831,11 @@ public class CallReport {
 
         /**
          * Sets the value of the total property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setTotal(BigInteger value) {
             this.total = value;
@@ -843,11 +843,11 @@ public class CallReport {
 
         /**
          * Gets the value of the answered property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getAnswered() {
             return answered;
@@ -855,11 +855,11 @@ public class CallReport {
 
         /**
          * Sets the value of the answered property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setAnswered(BigInteger value) {
             this.answered = value;
@@ -867,11 +867,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unanswered property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnanswered() {
             return unanswered;
@@ -879,11 +879,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unanswered property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnanswered(BigInteger value) {
             this.unanswered = value;
@@ -891,11 +891,11 @@ public class CallReport {
 
         /**
          * Gets the value of the busy property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getBusy() {
             return busy;
@@ -903,11 +903,11 @@ public class CallReport {
 
         /**
          * Sets the value of the busy property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setBusy(BigInteger value) {
             this.busy = value;
@@ -915,11 +915,11 @@ public class CallReport {
 
         /**
          * Gets the value of the failed property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getFailed() {
             return failed;
@@ -927,11 +927,11 @@ public class CallReport {
 
         /**
          * Sets the value of the failed property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setFailed(BigInteger value) {
             this.failed = value;
@@ -939,11 +939,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unknown property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnknown() {
             return unknown;
@@ -951,11 +951,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unknown property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnknown(BigInteger value) {
             this.unknown = value;
@@ -963,11 +963,11 @@ public class CallReport {
 
         /**
          * Gets the value of the unallowed property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUnallowed() {
             return unallowed;
@@ -975,11 +975,11 @@ public class CallReport {
 
         /**
          * Sets the value of the unallowed property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUnallowed(BigInteger value) {
             this.unallowed = value;

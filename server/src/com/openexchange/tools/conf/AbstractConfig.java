@@ -63,7 +63,7 @@ import com.openexchange.tools.io.IOUtils;
 
 /**
  * Class holding configuration options loaded from property files can extend this class to inherit usefull methods.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @deprecated use {@link ConfigurationService}.
  */
@@ -84,7 +84,7 @@ public abstract class AbstractConfig {
 
     /**
      * Checks if the properties contain a given key.
-     * 
+     *
      * @param key key to check for existance.
      * @return <code>true</code> only if the properties are loaded and the key exists.
      */
@@ -94,7 +94,7 @@ public abstract class AbstractConfig {
 
     /**
      * Returns the value of the property with the specified key. This method returns <code>null</code> if the property is not found.
-     * 
+     *
      * @param key the property key.
      * @return the value of the property or <code>null</code> if the property is not found.
      */
@@ -104,7 +104,7 @@ public abstract class AbstractConfig {
 
     /**
      * Returns the value of the property with the specified key. This method returns the def argument if the property is not defined.
-     * 
+     *
      * @param key the property name.
      * @param def default value if the property is not defined.
      * @return the property value or the default value if the property is not defined.
@@ -118,7 +118,7 @@ public abstract class AbstractConfig {
      * The test of this string is case insensitive.
      * <p>
      * If there is no property with the specified name, or if the specified name is empty or null, then <code>false</code> is returned.
-     * 
+     *
      * @param key the property name.
      * @return the <code>boolean</code> value of the property.
      */
@@ -128,7 +128,7 @@ public abstract class AbstractConfig {
 
     /**
      * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
-     * 
+     *
      * @param key the property name.
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
@@ -139,7 +139,7 @@ public abstract class AbstractConfig {
 
     /**
      * Returns the boolean value of the property. If the propery isn't set the def arguments is returned.
-     * 
+     *
      * @param key the property name.
      * @param def default value to return if the property isn't set.
      * @return the boolean value of the property.
@@ -159,14 +159,17 @@ public abstract class AbstractConfig {
         final Iterator<Object> iter = props.keySet().iterator();
         return new Iterator<String>() {
 
+            @Override
             public boolean hasNext() {
                 return iter.hasNext();
             }
 
+            @Override
             public String next() {
                 return (String) iter.next();
             }
 
+            @Override
             public void remove() {
                 iter.remove();
             }
@@ -195,7 +198,7 @@ public abstract class AbstractConfig {
 
     /**
      * Loads the system.properties configuration file from the specified file.
-     * 
+     *
      * @param propFileName name of the file containing the system.properties.
      */
     protected final void loadPropertiesInternal(final String propFileName) throws OXException {
@@ -214,7 +217,7 @@ public abstract class AbstractConfig {
 
     /**
      * Loads the system.properties configuration file from the specified file.
-     * 
+     *
      * @param propFile file containing the system.properties.
      */
     protected final void loadProperties(final File propFile) throws OXException {

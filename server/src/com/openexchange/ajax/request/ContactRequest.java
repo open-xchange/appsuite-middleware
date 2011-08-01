@@ -133,7 +133,7 @@ public class ContactRequest {
 
     /**
      * Gets the time stamp.
-     * 
+     *
      * @return The time stamp
      */
     public Date getTimestamp() {
@@ -142,7 +142,7 @@ public class ContactRequest {
 
     /**
      * Initializes a new {@link ContactRequest}.
-     * 
+     *
      * @param session The session
      */
     public ContactRequest(final ServerSession session) {
@@ -205,13 +205,13 @@ public class ContactRequest {
 
 	public JSONValue actionGetByUuid(final JSONObject jsonObj) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
-        
+
         final Contact contactObj = getFinalContact(contactInterface, jsonObj);
-        
+
         final TimeZone tz;
         final String timeZoneId = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_TIMEZONE);
         tz = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        
+
         final ContactWriter contactwriter = new ContactWriter(tz);
 
         final JSONObject jsonResponseObject = new JSONObject();
@@ -225,7 +225,7 @@ public class ContactRequest {
     public JSONValue actionGetAssociation(final JSONObject jsonObject) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
-        
+
         final ContactUnificationState association = contactInterface.getAssociationBetween(twoContacts[0], twoContacts[1]);
         final JSONObject ret = new JSONObject().put("state", association.getNumber());
         return ret;
@@ -234,37 +234,37 @@ public class ContactRequest {
     private JSONValue actionGetAssociated(final JSONObject jsonObject) throws JSONException, OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         final Contact contact  = getFinalContact(contactInterface, jsonObject);
-        
+
         final TimeZone tz;
         final String timeZoneId = DataParser.parseString(jsonObject, AJAXServlet.PARAMETER_TIMEZONE);
         tz = null == timeZoneId ? this.timeZone : getTimeZone(timeZoneId);
-        
+
         final List<UUID> associatedContacts = contactInterface.getAssociatedContacts(contact);
-        
+
         final JSONArray ret = new JSONArray();
-        
+
         for(final UUID associate: associatedContacts){
             ret.put(associate.toString());
         }
-        
+
         return ret;
     }
 
     private JSONValue actionDissociate(final JSONObject jsonObject) throws OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
-        
+
         contactInterface.separateTwoContacts(twoContacts[0], twoContacts[1]);
-        
+
         return null;
     }
 
     private JSONValue actionAssociate(final JSONObject jsonObject) throws OXException {
         final FinalContactInterface contactInterface = getFinalContactInterface();
         final Contact[] twoContacts = getTwoFinalContacts(contactInterface, jsonObject);
-        
+
         contactInterface.associateTwoContacts(twoContacts[0], twoContacts[1]);
-        
+
         return null;
     }
 
@@ -614,7 +614,7 @@ public class ContactRequest {
             } else {
                 helper.add(col);
             }
-            
+
         }
         return helper.toNativeArray();
     }
@@ -684,14 +684,14 @@ public class ContactRequest {
         final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
         final Order order = OrderFields.parse(DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER));
         final String collation = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_COLLATION);
-        
+
         final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
         final JSONArray filterContent = jData.getJSONArray("filter");
         final SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
-        
+
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
         final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchTerm, orderBy, order, collation, internalColumns);
-        
+
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
@@ -712,9 +712,9 @@ public class ContactRequest {
                 it.close();
             }
         }
-        return jsonResponseArray;    
+        return jsonResponseArray;
     }
-    
+
     public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(" *, *");
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -787,7 +787,7 @@ public class ContactRequest {
 
         final ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class));
         final SearchIterator<Contact> it = multiplexer.extendedSearch(session, searchObj, orderBy, order, collation, internalColumns);
-        
+
         final JSONArray jsonResponseArray = new JSONArray();
         try {
             final ContactWriter contactwriter = new ContactWriter(timeZone);
@@ -854,7 +854,7 @@ public class ContactRequest {
         timestamp = contactObj.getLastModified();
         return jsonResponseObject;
     }
-    
+
 
 
     private static void copyLinks(final int folderId, final Session session, final Context ctx, final Contact contactObj, final int origObjectId, final int origFolderId, final User user) throws OXException {
@@ -964,7 +964,7 @@ public class ContactRequest {
 
     /**
      * Ensure last-modified field {@link DataObject#LAST_MODIFIED} is contained in specified columns.
-     * 
+     *
      * @param columns The columns to check
      * @return Either specified columns if last-modified field is already contained or specified columns extended by last-modified field
      */
@@ -981,8 +981,8 @@ public class ContactRequest {
         internalColumns[columns.length] = DataObject.LAST_MODIFIED;
         return internalColumns;
     }
-    
-    
+
+
     protected FinalContactInterface getFinalContactInterface() throws OXException, OXException {
         final ContactInterface contactInterfaceTemp = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(
             FolderObject.SYSTEM_LDAP_FOLDER_ID,
@@ -992,7 +992,7 @@ public class ContactRequest {
         }
         return (FinalContactInterface) contactInterfaceTemp;
     }
-    
+
     protected Contact[] getTwoFinalContacts(final FinalContactInterface contactInterface, final JSONObject jsonObject) throws OXException, OXException, OXException{
         final UUID uuid1 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID1.getName());
         final UUID uuid2 = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID2.getName());
@@ -1004,7 +1004,7 @@ public class ContactRequest {
 
         } else {
             c1 = contactInterface.getContactByUUID(uuid1);
-        } 
+        }
         if( uuid2 == null){
             final int fid2 = DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_FOLDER_ID2.getName());
             final int id2 =  DataParser.checkInt(jsonObject, FinalContactConstants.PARAMETER_CONTACT_ID2.getName());
@@ -1014,7 +1014,7 @@ public class ContactRequest {
         }
         return new Contact[]{c1,c2};
     }
-    
+
     protected Contact getFinalContact(final FinalContactInterface contactInterface, final JSONObject jsonObject) throws OXException, OXException, OXException{
         final UUID uuid = DataParser.parseUUID(jsonObject, FinalContactConstants.PARAMETER_UUID.getName());
         Contact c;
@@ -1025,7 +1025,7 @@ public class ContactRequest {
 
         } else {
             c = contactInterface.getContactByUUID(uuid);
-        } 
+        }
         return c;
     }
 }

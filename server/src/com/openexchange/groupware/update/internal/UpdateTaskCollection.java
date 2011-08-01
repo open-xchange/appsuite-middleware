@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
 
 /**
  * {@link UpdateTaskCollection} - Collection for update tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 class UpdateTaskCollection {
@@ -77,7 +77,7 @@ class UpdateTaskCollection {
 
     private int version;
 
-    private AtomicBoolean versionDirty = new AtomicBoolean(true);
+    private final AtomicBoolean versionDirty = new AtomicBoolean(true);
 
     private UpdateTaskCollection() {
         super();
@@ -129,16 +129,18 @@ class UpdateTaskCollection {
                 default:
                     OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
                     LOG.error(e.getMessage(), e);
-                    blocking.add(toExecuteV2); 
+                    blocking.add(toExecuteV2);
                 }
             } else {
                 blocking.add(toExecute);
             }
         }
         return new SeparatedTasks() {
+            @Override
             public List<UpdateTask> getBlocking() {
                 return blocking;
             }
+            @Override
             public List<UpdateTaskV2> getBackground() {
                 return background;
             }
@@ -182,7 +184,7 @@ class UpdateTaskCollection {
     /**
      * Iterates all implementations of <code>UpdateTask</code> and determines the highest version number indicated through method
      * <code>UpdateTask.addedWithVersion()</code>.
-     * 
+     *
      * @return The highest version number
      */
     final int getHighestVersion() {

@@ -80,7 +80,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link DataMailPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class DataMailPart extends MailPart implements ComposedMailPart {
@@ -105,7 +105,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     /**
      * Initializes a new {@link DataMailPart}
-     * 
+     *
      * @param data The data (from a data source)
      * @param dataProperties The data properties
      * @param session The session
@@ -261,6 +261,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                     final String fileName = getFileName();
                     final InputStreamProvider isp = new InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return managedFile.getInputStream();
@@ -271,6 +272,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return fileName;
                         }
@@ -311,6 +313,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
         }
     }
 
+    @Override
     public ComposedPartType getType() {
         return ComposedPartType.DATA;
     }
@@ -348,7 +351,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     /**
      * Gets this data part's file ID if its content has been written to disc.
-     * 
+     *
      * @return The file ID or <code>null</code> if content is kept inside rather than on disc.
      */
     public String getFileID() {

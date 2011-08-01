@@ -53,8 +53,8 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * {@link UnsynchronizedStringReader} - An unsynchronized string {@link Reader reader}. 
- * 
+ * {@link UnsynchronizedStringReader} - An unsynchronized string {@link Reader reader}.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UnsynchronizedStringReader extends Reader {
@@ -69,7 +69,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Create a new string reader.
-     * 
+     *
      * @param s String providing the character stream.
      */
     public UnsynchronizedStringReader(final String s) {
@@ -79,7 +79,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Read a single character.
-     * 
+     *
      * @return The character read, or -1 if the end of the stream has been reached
      * @exception IOException If an I/O error occurs
      */
@@ -93,7 +93,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Read characters into a portion of an array.
-     * 
+     *
      * @param cbuf Destination buffer
      * @param off Offset at which to start writing characters
      * @param len Maximum number of characters to read
@@ -124,7 +124,7 @@ public class UnsynchronizedStringReader extends Reader {
      * backwards. It is not possible to skip backwards past the beginning of the string.
      * <p>
      * If the entire string has been read or skipped, then this method has no effect and always returns 0.
-     * 
+     *
      * @exception IOException If an I/O error occurs
      */
     @Override
@@ -141,7 +141,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Tell whether this stream is ready to be read.
-     * 
+     *
      * @return True if the next read() is guaranteed not to block for input
      * @exception IOException If the stream is closed
      */
@@ -160,7 +160,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Mark the present position in the stream. Subsequent calls to reset() will reposition the stream to this point.
-     * 
+     *
      * @param readAheadLimit Limit on the number of characters that may be read while still preserving the mark. Because the stream's input
      *            comes from a string, there is no actual limit, so this argument must not be negative, but is otherwise ignored.
      * @exception IllegalArgumentException If readAheadLimit is < 0
@@ -176,7 +176,7 @@ public class UnsynchronizedStringReader extends Reader {
 
     /**
      * Reset the stream to the most recent mark, or to the beginning of the string if it has never been marked.
-     * 
+     *
      * @exception IOException If an I/O error occurs
      */
     @Override

@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetTreeAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetTreeAction extends AbstractMailAccountTreeAction {
@@ -80,6 +80,7 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, request);
 
@@ -98,7 +99,7 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
             }
 
             if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw 
+                throw
                     MailAccountExceptionCodes.NOT_ENABLED.create(
                     Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));

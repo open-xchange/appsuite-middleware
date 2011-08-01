@@ -66,6 +66,7 @@ public final class MailIdleCounterImpl implements MailIdleCounter {
         super();
     }
 
+    @Override
     public int getCount() {
         return MailAccessWatcher.getNumberOfIdlingMailAccesses();
     }

@@ -51,7 +51,7 @@ package com.openexchange.resource.json;
 
 /**
  * {@link ResourceFields}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceFields {
@@ -87,7 +87,7 @@ public final class ResourceFields {
     public static final String AVAILABILITY = "availability";
 
     public static final String LAST_MODIFIED = "last_modified";
-    
+
     public static final String LAST_MODIFIED_UTC = "last_modified_utc";
 
 }

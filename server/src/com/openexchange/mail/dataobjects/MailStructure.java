@@ -57,7 +57,7 @@ import com.openexchange.mail.mime.MIMETypes;
 
 /**
  * {@link MailStructure} - Represents a mail structure
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailStructure {
@@ -77,7 +77,7 @@ public final class MailStructure {
 
     /**
      * Initializes a new {@link MailStructure}
-     * 
+     *
      * @param contentType The content type
      */
     public MailStructure(final ContentType contentType) {
@@ -89,7 +89,7 @@ public final class MailStructure {
 
     /**
      * Gets the content type
-     * 
+     *
      * @return The content type
      */
     public ContentType getContentType() {
@@ -98,7 +98,7 @@ public final class MailStructure {
 
     /**
      * Sets the content type
-     * 
+     *
      * @param contentType The content type
      */
     public void setContentType(final ContentType contentType) {
@@ -107,7 +107,7 @@ public final class MailStructure {
 
     /**
      * Adds a sub-structure
-     * 
+     *
      * @param mailStructure The sub-structure to add
      */
     public void addSubStructure(final MailStructure mailStructure) {
@@ -116,7 +116,7 @@ public final class MailStructure {
 
     /**
      * Gets this mail structure's sub-structures
-     * 
+     *
      * @return The sub-structures
      */
     public MailStructure[] getSubStructures() {
@@ -125,7 +125,7 @@ public final class MailStructure {
 
     /**
      * Generates the corresponding mail structure for specified mail message.
-     * 
+     *
      * @param mail The mail message
      * @return The corresponding mail structure
      * @throws OXException If a mail error occurs

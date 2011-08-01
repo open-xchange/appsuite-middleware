@@ -203,7 +203,7 @@ public class CalendarParser extends CommonParser {
         for (int i = 0; i < jparticipants.length(); i++) {
             final JSONObject jparticipant = jparticipants.getJSONObject(i);
             final int type = jparticipant.getInt(ParticipantsFields.TYPE);
-            
+
             int id;
             try {
                 id = jparticipant.getInt(ParticipantsFields.ID);
@@ -316,6 +316,7 @@ public class CalendarParser extends CommonParser {
     }
 
     private static final FieldParser<CalendarObject> CONFIRMATIONS_PARSER = new FieldParser<CalendarObject>() {
+        @Override
         public void parse(final boolean parseAll, final CalendarObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             if (!parseAll) {
                 return;

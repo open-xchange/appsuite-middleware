@@ -64,9 +64,9 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Resource} - The servlet handling requests to "/ajax/resource"
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class Resource extends DataServlet {
 

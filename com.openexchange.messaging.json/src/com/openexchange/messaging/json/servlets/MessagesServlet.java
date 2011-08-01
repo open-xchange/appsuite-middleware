@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 public class MessagesServlet extends MultipleAdapterServletNew {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 2342329232570692011L;
 
@@ -90,36 +90,36 @@ public class MessagesServlet extends MultipleAdapterServletNew {
     public MessagesServlet() {
         super(MessagingActionFactory.INSTANCE);
     }
-    
+
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
-        return true; 
+        return true;
     }
-    
+
     @Override
     protected boolean handleIndividually(final String action, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException, OXException {
         if(RESOLVE.equals(action)) {
             final ServerSession session = getSessionObject(req);
             final AJAXRequestData requestData = parseRequest(req, false, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
             final MessagingRequestData request = MessagingActionFactory.INSTANCE.wrapRequest(requestData, session);
-            
+
             try {
                 final MessagingMessageAccess messageAccess = request.getMessageAccess(session.getUserId(), session.getContextId());
-                
+
                 final MessagingContent content = messageAccess.resolveContent(request.getFolderId(), request.getId(), request.getReferenceId());
-                
+
                 //TODO: Set Content-Type Header
                 for(final MessagingContentDumper dumper : dumpers) {
                     if(dumper.handles(content)) {
                         dumper.dump(content, resp.getOutputStream());
                     }
                 }
-                
-                
+
+
             } catch (final OXException e) {
                 throw new ServletException(e);
             }
-            
+
             return true;
         }
         return super.handleIndividually(action, req, resp);

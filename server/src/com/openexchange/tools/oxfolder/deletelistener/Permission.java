@@ -51,7 +51,7 @@ package com.openexchange.tools.oxfolder.deletelistener;
 
 /**
  * {@link Permission} - Simple container for a permission.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Permission {
@@ -72,7 +72,7 @@ public final class Permission {
 
     /**
      * Initializes a new {@link Permission}
-     * 
+     *
      * @param entity The entity ID
      * @param fuid The folder ID
      * @param fp The folder permission

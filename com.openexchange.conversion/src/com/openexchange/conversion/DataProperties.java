@@ -55,7 +55,7 @@ import java.util.Map;
 
 /**
  * {@link DataProperties} - Container for data properties like content type, version, character set, name , size, etc.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataProperties implements Cloneable {
@@ -106,7 +106,7 @@ public final class DataProperties implements Cloneable {
 
     /**
      * Initializes a new {@link DataProperties}
-     * 
+     *
      * @param initialCapacity The initial capacity
      */
     public DataProperties(final int initialCapacity) {
@@ -124,7 +124,7 @@ public final class DataProperties implements Cloneable {
 
     /**
      * Returns <code>true</code> if these data properties contain a mapping for the specified key.
-     * 
+     *
      * @param key The key whose presence in these data properties is to be tested.
      * @return <code>true</code> if this data properties contain a mapping for the specified key; otherwise <code>false</code>
      */
@@ -137,7 +137,7 @@ public final class DataProperties implements Cloneable {
      * value of <code>null</code> does not necessarily indicate that the data properties contain no mapping for the key; it's also possible
      * that the data properties explicitly map the key to <code>null</code>. The {@link #containsKey(String)} operation may be used to
      * distinguish these two cases.
-     * 
+     *
      * @param key The key whose associated value is to be returned.
      * @return The value to for the specified key, or <code>null</code> if the data properties contain no mapping for this key.
      */
@@ -148,7 +148,7 @@ public final class DataProperties implements Cloneable {
     /**
      * Associates the specified value with the specified key. If the data properties previously contained a mapping for this key, the old
      * value is replaced by the specified value.
-     * 
+     *
      * @param key The key with which the specified value is to be associated.
      * @param value The value to be associated with the specified key.
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key. A <code>null</code>
@@ -166,7 +166,7 @@ public final class DataProperties implements Cloneable {
 
     /**
      * Removes the mapping for this key from these data properties if it is present.
-     * 
+     *
      * @param key The key whose mapping is to be removed from the data properties.
      * @return The previous value associated with specified key, or <code>null</code> if there was no mapping for key.
      */
@@ -176,7 +176,7 @@ public final class DataProperties implements Cloneable {
 
     /**
      * Gets this data properties as a {@link Map java.util.Map}
-     * 
+     *
      * @return This data properties as a {@link Map java.util.Map}
      */
     public Map<String, String> toMap() {

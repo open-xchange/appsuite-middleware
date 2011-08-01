@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link StorageType} - Denotes the storage type.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum StorageType {

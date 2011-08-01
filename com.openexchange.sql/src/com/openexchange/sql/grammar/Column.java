@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class Column extends Value {
-	private String name;
+	private final String name;
 
 	public Column(String name) {
 		super();
@@ -63,7 +63,8 @@ public class Column extends Value {
 		return new Assignment(this, expression);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildColumn(this);
 	}
 

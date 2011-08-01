@@ -70,10 +70,10 @@ public class SQLTools {
             thing.set(attribute, (overridden != null) ? overridden : object);
         }
     }
-    
+
     public static <T extends Model<T>> void fillObject(ResultSet rs, T thing, List<Attribute<T>> attributes) throws SQLException {
         fillObject(rs, thing, attributes, AttributeHandler.DO_NOTHING);
     }
-    
-    
+
+
 }

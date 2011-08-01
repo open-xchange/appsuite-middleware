@@ -55,7 +55,7 @@ import java.util.List;
 
 /**
  * {@link ValueParser} - Parses passed command-line arguments.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ValueParser {
@@ -66,7 +66,7 @@ public final class ValueParser {
 
     /**
      * Initializes a new {@link ValueParser}.
-     * 
+     *
      * @param args The command-line arguments.
      * @param parameter The names of those parameters which should be considered as name-value-pairs in specified command-line arguments.
      * @throws ConsoleException If parsing the passed arguments fails.
@@ -102,7 +102,7 @@ public final class ValueParser {
 
     /**
      * Gets the name-value-pair arguments.
-     * 
+     *
      * @return The name-value-pair arguments.
      */
     public ValuePairObject[] getValuePairObjects() {
@@ -111,7 +111,7 @@ public final class ValueParser {
 
     /**
      * Gets the sole values without an associated name.
-     * 
+     *
      * @return The sole values without an associated name.
      */
     public ValueObject[] getValueObjects() {

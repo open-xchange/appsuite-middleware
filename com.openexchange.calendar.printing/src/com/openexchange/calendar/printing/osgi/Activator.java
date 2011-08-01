@@ -68,7 +68,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link Activator} - The activator for calendar printing.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

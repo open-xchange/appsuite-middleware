@@ -71,7 +71,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailProperties implements IMailProperties {
@@ -82,7 +82,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the singleton instance of {@link MailProperties}.
-     * 
+     *
      * @return The singleton instance of {@link MailProperties}
      */
     public static MailProperties getInstance() {
@@ -192,7 +192,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Exclusively loads the global mail properties
-     * 
+     *
      * @throws OXException If loading of global mail properties fails
      */
     public void loadProperties() throws OXException {
@@ -223,10 +223,11 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Waits for loading this properties.
-     * 
+     *
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
      *             loading the properties.
      */
+    @Override
     public void waitForLoading() throws InterruptedException {
         if (!loaded.get()) {
             synchronized (loaded) {
@@ -633,7 +634,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Reads the properties from specified property file and returns an appropriate instance of {@link Properties}
-     * 
+     *
      * @param propFile The property file
      * @return The appropriate instance of {@link Properties}
      * @throws OXException If reading property file fails
@@ -665,17 +666,19 @@ public final class MailProperties implements IMailProperties {
         }
     }
 
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return allowNestedDefaultFolderOnAltNamespace;
     }
 
+    @Override
     public int getAttachDisplaySize() {
         return attachDisplaySize;
     }
 
     /**
      * Gets the default MIME charset.
-     * 
+     *
      * @return The default MIME charset
      */
     public String getDefaultMimeCharset() {
@@ -684,7 +687,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the default mail provider.
-     * 
+     *
      * @return The default mail provider
      */
     public String getDefaultMailProvider() {
@@ -693,17 +696,19 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Indicates if admin mail login is enabled; meaning whether admin user's try to login to mail system is permitted or not.
-     * 
+     *
      * @return <code>true</code> if admin mail login is enabled; otherwise <code>false</code>
      */
     public boolean isAdminMailLoginEnabled() {
         return adminMailLoginEnabled;
     }
 
+    @Override
     public char getDefaultSeparator() {
         return defaultSeparator;
     }
 
+    @Override
     public boolean isIgnoreSubscription() {
         return ignoreSubscription;
     }
@@ -712,13 +717,14 @@ public final class MailProperties implements IMailProperties {
         return hidePOP3StorageFolders;
     }
 
+    @Override
     public boolean isSupportSubscription() {
         return supportSubscription;
     }
 
     /**
      * Checks if client's IP address should be added to mail headers on delivery as custom header <code>"X-Originating-IP"</code>.
-     * 
+     *
      * @return <code>true</code> if client's IP address should be added otherwise <code>false</code>
      */
     public boolean isAddClientIPAddress() {
@@ -727,7 +733,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the JavaMail properties.
-     * 
+     *
      * @return The JavaMail properties
      */
     public Properties getJavaMailProperties() {
@@ -736,7 +742,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the login source.
-     * 
+     *
      * @return The login source
      */
     public LoginSource getLoginSource() {
@@ -745,7 +751,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the password source.
-     * 
+     *
      * @return The password source
      */
     public PasswordSource getPasswordSource() {
@@ -754,7 +760,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the mail server source.
-     * 
+     *
      * @return The mail server source
      */
     public ServerSource getMailServerSource() {
@@ -763,20 +769,21 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the transport server source.
-     * 
+     *
      * @return The transport server source
      */
     public ServerSource getTransportServerSource() {
         return transportServerSource;
     }
 
+    @Override
     public int getMailFetchLimit() {
         return mailFetchLimit;
     }
 
     /**
      * Gets the global mail server.
-     * 
+     *
      * @return The global mail server
      */
     public String getMailServer() {
@@ -785,7 +792,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the master password.
-     * 
+     *
      * @return The master password
      */
     public String getMasterPassword() {
@@ -794,7 +801,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the sent mail rate limit (how many mails can be sent in
-     * 
+     *
      * @return
      */
     public int getMaxToCcBcc() {
@@ -803,7 +810,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the quote line colors.
-     * 
+     *
      * @return The quote line colors
      */
     public String[] getQuoteLineColors() {
@@ -812,7 +819,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the sent mail rate limit (how many mails can be sent in
-     * 
+     *
      * @return
      */
     public int getRateLimit() {
@@ -821,7 +828,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the setting if the rate limit should only affect the primary account or all accounts
-     * 
+     *
      * @return
      */
     public boolean getRateLimitPrimaryOnly() {
@@ -830,36 +837,41 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the global transport server
-     * 
+     *
      * @return The global transport server
      */
     public String getTransportServer() {
         return transportServer;
     }
 
+    @Override
     public boolean isUserFlagsEnabled() {
         return userFlagsEnabled;
     }
 
+    @Override
     public boolean isWatcherEnabled() {
         return watcherEnabled;
     }
 
+    @Override
     public int getWatcherFrequency() {
         return watcherFrequency;
     }
 
+    @Override
     public boolean isWatcherShallClose() {
         return watcherShallClose;
     }
 
+    @Override
     public int getWatcherTime() {
         return watcherTime;
     }
 
     /**
      * Gets the phishing headers.
-     * 
+     *
      * @return The phishing headers or <code>null</code> if none defined
      */
     public String[] getPhishingHeaders() {
@@ -871,10 +883,12 @@ public final class MailProperties implements IMailProperties {
         return retval;
     }
 
+    @Override
     public int getMailAccessCacheShrinkerSeconds() {
         return mailAccessCacheShrinkerSeconds;
     }
 
+    @Override
     public int getMailAccessCacheIdleSeconds() {
         return mailAccessCacheIdleSeconds;
     }

@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MetaDataMultipleHandler} - The multiple handler for OAuth service meta data module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MetaDataMultipleHandler implements MultipleHandler {

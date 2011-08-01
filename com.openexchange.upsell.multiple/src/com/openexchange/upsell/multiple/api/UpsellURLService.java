@@ -7,8 +7,8 @@ import com.openexchange.session.Session;
 
 
 public interface UpsellURLService {
-	
-	
+
+
 
 	/**
 	 * Map contains all parameters which are available in users session and already contain the needed values.

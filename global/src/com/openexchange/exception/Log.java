@@ -52,14 +52,14 @@ package com.openexchange.exception;
 /**
  * {@link Log} - A simple wrapper for {@link org.apache.commons.logging.Log} which checks with {@link OXException#isLoggable(LogLevel)} if
  * an {@link OXException} is passed to one of its log methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Gets the appropriate {@link Log} for specified {@link org.apache.commons.logging.Log} instance.
-     * 
+     *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance
      */

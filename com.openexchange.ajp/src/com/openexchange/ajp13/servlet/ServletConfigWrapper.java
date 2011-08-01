@@ -79,7 +79,7 @@ public class ServletConfigWrapper implements ServletConfig {
 
     /**
      * Sets the servlet name.
-     * 
+     *
      * @param servletName The servlet name
      */
     public void setServletName(final String servletName) {
@@ -88,7 +88,7 @@ public class ServletConfigWrapper implements ServletConfig {
 
     /**
      * Sets the init parameters
-     * 
+     *
      * @param initParameters The init parameters
      */
     public void setInitParameters(final Map<String, String> initParameters) {
@@ -97,7 +97,7 @@ public class ServletConfigWrapper implements ServletConfig {
 
     /**
      * Gets the servlet config wrapper.
-     * 
+     *
      * @return The servlet config wrapper
      */
     public ServletContextWrapper getServletContextWrapper() {
@@ -106,32 +106,36 @@ public class ServletConfigWrapper implements ServletConfig {
 
     /**
      * Sets the servlet config wrapper.
-     * 
+     *
      * @param servletContextWrapper The servlet config wrapper
      */
     public void setServletContextWrapper(final ServletContextWrapper servletContextWrapper) {
         this.servletContextWrapper = servletContextWrapper;
     }
 
+    @Override
     public String getInitParameter(final String name) {
         return initParameters.get(name);
     }
 
+    @Override
     public String getServletName() {
         return servletName;
     }
 
+    @Override
     public ServletContext getServletContext() {
         return servletContextWrapper;
     }
 
+    @Override
     public Enumeration<String> getInitParameterNames() {
         return new IteratorEnumeration<String>(initParameters.keySet().iterator());
     }
 
     /**
      * IteratorEnumeration
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static class IteratorEnumeration<E> implements Enumeration<E> {
@@ -142,10 +146,12 @@ public class ServletConfigWrapper implements ServletConfig {
             this.iter = iter;
         }
 
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
+        @Override
         public E nextElement() {
             return iter.next();
         }

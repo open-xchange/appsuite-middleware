@@ -70,12 +70,12 @@ public interface IDBasedFileAccess extends TransactionAware {
      * Find out whether the file with a given ID exists or not.
      * @param id The ID to check for
      * @param version The version to check for
-     * 
+     *
      * @return true when the file exists and is readable, false otherwise.
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean exists(String id, int version) throws OXException;
-    
+
     /**
      * Load the metadata about a file
      * @param id The id of the file
@@ -84,7 +84,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public File getFileMetadata(String id, int version) throws OXException;
-    
+
     /**
      * Save the file metadata.
      * @param document The metadata to save
@@ -101,7 +101,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
-    
+
     /**
      * Copy a file from the source to the destination.
      * @param sourceId The file to copy
@@ -112,7 +112,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public String copy(String sourceId, String destFolderId, File update, InputStream newData, List<File.Field> modifiedFields) throws OXException;
-    
+
     /**
      * Load the documents content
      * @param id The id of the document
@@ -140,7 +140,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
-    
+
     /**
      * Remove all documents in the given folder.
      * @param folderId The folder to clear
@@ -157,7 +157,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public List<String> removeDocument(List<String> ids, long sequenceNumber) throws OXException;
- 
+
     /**
      * Remove a certain version of a file
      * @param id The file id whose version is to be removed
@@ -173,7 +173,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public void unlock(String id) throws OXException;
-    
+
     /**
      * Locks a given file for the given duration (in milliseconds)
      * @param id The file to lock
@@ -216,7 +216,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public TimedResult<File> getDocuments(String folderId, List<File.Field> columns, File.Field sort, SortDirection order) throws OXException;
-    
+
     /**
      * List all versions of a document
      * @param id The documents id
@@ -251,7 +251,7 @@ public interface IDBasedFileAccess extends TransactionAware {
      * @throws OXException
      */
     public TimedResult<File> getDocuments(List<String> ids, List<File.Field> columns) throws OXException;
-    
+
     /**
      * Get changes in a given folder since a certain sequence number
      * @param folderId The folder to examine
@@ -278,8 +278,8 @@ public interface IDBasedFileAccess extends TransactionAware {
 
     /**
      * Search for a given file.
-     * 
-     * @param query The search query 
+     *
+     * @param query The search query
      * @param cols Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
      * @param sort Which field to sort by. May be null.

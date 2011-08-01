@@ -198,6 +198,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
             this.name = name;
         }
 
+        @Override
         public boolean accept(final File arg0, final String arg1) {
             return arg1.startsWith(name);
         }

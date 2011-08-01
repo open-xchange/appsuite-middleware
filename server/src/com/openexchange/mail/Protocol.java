@@ -58,7 +58,7 @@ import com.openexchange.groupware.Component;
 
 /**
  * {@link Protocol} - Represents both a mail and transport protocol
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Protocol implements Component, Serializable {
@@ -93,7 +93,7 @@ public class Protocol implements Component, Serializable {
      * Parses specified protocol string whose syntax match pattern:<br>
      * <i>([a-z]+)(?:((?:_[a-z]+)*))?</i><br>
      * E.g.: <code>http</code> or <code>http_https</code>.
-     * 
+     *
      * @param protocol The protocol string to parse
      * @return Corresponding instance of {@link Protocol}
      * @throws OXException If parsing the specified protocol string fails
@@ -130,7 +130,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Initializes a new {@link Protocol}
-     * 
+     *
      * @param name The protocol's name in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
      */
@@ -146,7 +146,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Initializes a new {@link Protocol}
-     * 
+     *
      * @param name The protocol's name in lower case
      * @param secureName The protocol's secure name in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
@@ -167,7 +167,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Initializes a new {@link Protocol}
-     * 
+     *
      * @param name The protocol's name in lower case
      * @param aliases The protocol's aliases in lower case
      * @throws IllegalArgumentException If name is <code>null</code>
@@ -192,7 +192,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Gets the max. number of concurrent mail accesses for specified mail system host.
-     * 
+     *
      * @param host The mail system's host name
      * @return The max count or a value equal to or less than zero for no restrictions
      * @throws OXException If max-count setting could not be returned for specified host name
@@ -222,7 +222,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Gets the aliases
-     * 
+     *
      * @return the aliases
      */
     public String[] getAliases() {
@@ -236,7 +236,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Gets the name
-     * 
+     *
      * @return the name
      */
     public String getName() {
@@ -250,7 +250,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Checks if given protocol name is supported by this protocol
-     * 
+     *
      * @param protocolName The protocol name to check
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
@@ -280,6 +280,7 @@ public class Protocol implements Component, Serializable {
         return sb.toString();
     }
 
+    @Override
     public String getAbbreviation() {
         if (null == abbr) {
             abbr = name.toUpperCase(Locale.ENGLISH);

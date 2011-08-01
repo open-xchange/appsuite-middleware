@@ -59,13 +59,13 @@ import com.openexchange.subscribe.crawler.internal.Step;
 
 /**
  * {@link GenericSubscribeServiceForYahooComTest}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServiceTestHelpers {
-    
-    public void testGenericSubscribeServiceForYahooCom() {        
-        
+
+    public void testGenericSubscribeServiceForYahooCom() {
+
         // insert valid credentials here
         String username = "";
         String password = "";
@@ -77,7 +77,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         crawler.setCrawlerApiVersion(616);
         crawler.setPriority(8);
         List<Step> steps = new LinkedList<Step>();
-        
+
         String crapBefore = "[^0-9\\+\\(\\)]*";
 
         steps.add(new LoginPageByFormActionStep(
@@ -96,7 +96,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         steps.add(new AnchorsByLinkRegexStep("Get the links to all contact detail pages", "", ".*detailed_contact.*", true));
         ArrayList<PagePart> pageParts = new ArrayList<PagePart>();
         pageParts.add(new PagePart("(<h1>\\s)"+VALID_NAME+"(</h1>)","display_name"));
-        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));        
+        pageParts.add(new PagePart("(qa_compose1[^>]*>)"+VALID_EMAIL_REGEX+"(<)","email1"));
         // add a filler to be sure we are in the phone numbers part
         pageParts.add(new PagePart("(<h2>(Phone|Telefon)</h2>)"));
         pageParts.add(new PagePart("(Home|Privat):"+crapBefore+VALID_PHONE_REGEX+"()","telephone_home1"));
@@ -105,12 +105,12 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
         // add a filler to be sure we are in the work part
         pageParts.add(new PagePart("(<h2>(Work|Gesch.ftlich)</h2>)"));
         pageParts.add(new PagePart("<dt>[\\s]*(Company|Firma):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","company"));
-        pageParts.add(new PagePart("<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","title"));//       
+        pageParts.add(new PagePart("<dt>[\\s]*(Title|Titel):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","title"));//
         pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){3}\\s*("+VALID_ADDRESS_PART+")(<br \\/>)", "street_business", true));
         pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*([0-9]*)()", "postal_code_business", true));
         pageParts.add(new PagePart("(?s)(Address|Adresse):(?:[^>]*>){5}\\s*[0-9]*\\s*([^0-9<]*)(<)", "city_business"));
         // add a filler to be sure we are in the instant messenger part
-        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)")); 
+        pageParts.add(new PagePart("(<h2>Instant Messenger</h2>)"));
         pageParts.add(new PagePart("(AIM|Google Talk|Skype|Windows Live|Yahoo):[\\s]*<\\/dt>[\\s]*<dd>[\\s]*<div>[\\s]*([^<]*)(<\\/div>)","instant_messenger1",1));
         // add a filler to be sure we are in the personal address
         pageParts.add(new PagePart("(<h2>(Personal|Pers.nliche Daten)</h2>)"));

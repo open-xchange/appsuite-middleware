@@ -61,7 +61,7 @@ public enum WorkingLevel {
      * level.
      */
     SCHEMA,
-    
+
     /**
      * Update task works on context level. This can only be tasks that modify the data of a context. This level is currently not supported.
      * It is only introduced to prevent interface changes in the future. ATTENTION: Do not use this level, it will break the update process.

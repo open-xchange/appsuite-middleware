@@ -84,7 +84,7 @@ public final class Constants {
         }
         return retval;
     }
-    
+
     private static final ObjectName initOxtenderMonitorName() {
         ObjectName retval = null;
         try {

@@ -62,11 +62,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 public abstract class FilteringTimedResult<T> implements TimedResult<T> {
 
     private final TimedResult<T> delegate;
-    
+
     public FilteringTimedResult(final TimedResult<T> delegate) {
         this.delegate = delegate;
     }
-    
+
     public SearchIterator<T> results() throws OXException {
         return new FilteringSearchIterator<T>(delegate.results()){
 
@@ -74,7 +74,7 @@ public abstract class FilteringTimedResult<T> implements TimedResult<T> {
             public boolean accept(final T thing) throws OXException {
                 return FilteringTimedResult.this.accept(thing);
             }
-            
+
         };
     }
 

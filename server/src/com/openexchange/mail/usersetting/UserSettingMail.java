@@ -57,14 +57,14 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
  * {@link UserSettingMail} - User's mail settings.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * {@link Signature} - The mail signature.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static final class Signature implements Cloneable, Serializable {
@@ -331,7 +331,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Initializes a new {@link UserSettingMail}.
-     * 
+     *
      * @param userId The user ID
      * @param cid The context ID
      */
@@ -366,7 +366,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the character count after which a line break is added in <code>text/plain</code> messages
-     * 
+     *
      * @return The character count after which a line break is added
      */
     public int getAutoLinebreak() {
@@ -375,7 +375,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Generates a bit pattern from this settings
-     * 
+     *
      * @return a bit pattern from this settings
      */
     public int getBitsValue() {
@@ -411,7 +411,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the confirmed ham folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the confirmed ham folder
      */
     public String getConfirmedHam() {
@@ -422,7 +422,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the confirmed spam folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the confirmed spam folder
      */
     public String getConfirmedSpam() {
@@ -431,7 +431,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Define an array of message headers which shall be displayed for this user in mail's detail view.
-     * 
+     *
      * @return An array of message headers which shall be displayed
      */
     public String[] getDisplayMsgHeaders() {
@@ -448,7 +448,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * <p>
      * The returned <code>int</code> value is one of {@link #MSG_FORMAT_TEXT_ONLY}, {@link #MSG_FORMAT_HTML_ONLY}, and
      * {@link #MSG_FORMAT_BOTH}.
-     * 
+     *
      * @return The desired message format
      */
     public int getMsgFormat() {
@@ -459,7 +459,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * The desired address that shall be set as <code>Reply-To</code> header when sending messages.
      * <p>
      * If returned value is <code>null</code> or empty, the message's <code>From</code> header is used as fallback.
-     * 
+     *
      * @return The desired <code>Reply-To</code> address
      */
     public String getReplyToAddr() {
@@ -468,7 +468,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * The default send address. This address is used to set the <code>From</code> header and the <code>Sender</code> header as well.
-     * 
+     *
      * @return The default send address
      */
     public String getSendAddr() {
@@ -477,7 +477,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the user-defined signatures that are either prepended or appended to a message's body.
-     * 
+     *
      * @return The user-defined signatures
      */
     public Signature[] getSignatures() {
@@ -493,7 +493,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the draft folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the draft folder
      */
     public String getStdDraftsName() {
@@ -504,7 +504,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the sent folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the sent folder
      */
     public String getStdSentName() {
@@ -515,7 +515,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the spam folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the spam folder
      */
     public String getStdSpamName() {
@@ -526,7 +526,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * Gets the name of the trash folder.
      * <p>
      * <b>Note</b>: This is only the name, not its fullname.
-     * 
+     *
      * @return The name of the trash folder
      */
     public String getStdTrashName() {
@@ -535,7 +535,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the overall upload quota limit when uploading several file attachments.
-     * 
+     *
      * @return The overall upload quota limit.
      */
     public long getUploadQuota() {
@@ -544,7 +544,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the upload quota limit per file when uploading several file attachments.
-     * 
+     *
      * @return The upload quota limit per file.
      */
     public long getUploadQuotaPerFile() {
@@ -553,7 +553,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if user's VCard shall be attached to a message on transport
-     * 
+     *
      * @return <code>true</code> if user's VCard shall be attached to a message on transport; otherwise <code>false</code>
      */
     public boolean isAppendVCard() {
@@ -562,7 +562,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if user allows to display inline HTML content of a message.
-     * 
+     *
      * @return <code>true</code> if user allows to display inline HTML content of a message; otherwise <code>false</code>
      */
     public boolean isDisplayHtmlInlineContent() {
@@ -571,7 +571,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if a forwarded message is supposed to be added as an attachment; otherwise it is added inline.
-     * 
+     *
      * @return <code>true</code> if a forwarded message is supposed to be added as an attachment; otherwise <code>false</code> if it is
      *         added inline.
      */
@@ -581,7 +581,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if messages are supposed to be deleted permanently or backuped into trash folder.
-     * 
+     *
      * @return <code>true</code> if messages are supposed to be deleted permanently; otherwise <code>false</code> to backup in trash folder
      */
     public boolean isHardDeleteMsgs() {
@@ -590,7 +590,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if original message's content shall be ignored in reply version to the message
-     * 
+     *
      * @return <code>true</code> if original message's content shall be ignored; otherwise <code>false</code> to include.
      */
     public boolean isIgnoreOriginalMailTextOnReply() {
@@ -599,7 +599,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Internal flag to track this mail setting's modified status.
-     * 
+     *
      * @return <code>true</code> if modified during session (and to force a reload); otherwise <code>false</code>
      */
     public boolean isModifiedDuringSession() {
@@ -615,7 +615,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if a sent message shall be copied into sent folder
-     * 
+     *
      * @return <code>true</code> if a sent message shall be copied into sent folder; otherwise <code>false</code>
      */
     public boolean isNoCopyIntoStandardSentFolder() {
@@ -624,7 +624,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if the user will receive notification messages on appointment events (creation, deletion & change).
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on appointment events (creation, deletion & change);
      *         otherwise <code>false</code>
      */
@@ -635,7 +635,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as the
      * appointment's owner.
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on appointment events (accept, decline & tentatively
      *         accepted) as the appointment's owner; otherwise <code>false</code>.
      */
@@ -646,7 +646,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if the user will receive notification messages on appointment events (accept, decline & tentatively accepted) as an
      * appointment's participant.
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on appointment events (accept, decline & tentatively
      *         accepted) as an appointment's participant; otherwise <code>false</code>.
      */
@@ -656,7 +656,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if the user will receive notification messages on task events (accept, decline & tentatively accepted) as the task's owner.
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on task events (accept, decline & tentatively accepted) as
      *         the task's owner; otherwise <code>false</code>.
      */
@@ -667,7 +667,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if the user will receive notification messages on task events (accept, decline & tentatively accepted) as a task's
      * participant.
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on task events (accept, decline & tentatively accepted) as a
      *         task's participant; otherwise <code>false</code>.
      */
@@ -684,7 +684,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if the user will receive notification messages on task events (creation, deletion & change).
-     * 
+     *
      * @return <code>true</code> if the user will receive notification messages on task events (creation, deletion & change); otherwise
      *         <code>false</code>
      */
@@ -694,7 +694,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Indicates if user wants to see graphical emoticons rather than corresponding textual representation
-     * 
+     *
      * @return <code>true</code> if user wants to see graphical emoticons rather than corresponding textual representation; otherwise
      *         <code>false</code>
      */
@@ -705,7 +705,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Checks if user has spam enabled. Spam is enabled if both an appropriate spam handler is defined by user's mail provider
      * <small><b>AND</b></small> its mail settings enable spam.
-     * 
+     *
      * @return <code>true</code> if user has spam enabled; otherwise <code>false</code>
      */
     public boolean isSpamEnabled() {
@@ -728,7 +728,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      * <p>
      * <b>Note</b>: This method does not check if an appropriate spam handler is defined by user's mail provider. To reliably check full
      * spam support call {@link #isSpamEnabled()}.
-     * 
+     *
      * @return <code>true</code> if user has spam enabled; otherwise <code>false</code>
      */
     public boolean isSpamOptionEnabled() {
@@ -744,7 +744,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Indicates if user allows to display images which appear in HTML content of a message.
-     * 
+     *
      * @return <code>true</code> if user allows to display images; otherwise <code>false</code>
      */
     public boolean isAllowHTMLImages() {
@@ -754,7 +754,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Indicates if the reply-all method will put all recipients except the original sender in the Cc list. Normally, recipients in the To
      * header of the original message will also appear in the To list.
-     * 
+     *
      * @return <code>true</code> if the reply-all method will put all recipients except the original sender in the Cc list; otherwise
      *         <code>false</code>.
      */
@@ -764,7 +764,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Indicates if user wants to see reply quotes inside a message's content indented in a color dependent on quote level.
-     * 
+     *
      * @return <code>true</code> to indent in color; otherwise <code>false</code>
      */
     public boolean isUseColorQuote() {
@@ -773,7 +773,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Checks if this instance of {@link UserSettingMail} is allowed to being saved to storage
-     * 
+     *
      * @return <code>true</code> if this instance of {@link UserSettingMail} is allowed to being saved to storage; otherwise
      *         <code>false</code>
      */
@@ -783,7 +783,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Parses given bit pattern and applies it to this settings
-     * 
+     *
      * @param onOffOptions The bit pattern
      */
     public void parseBits(final int onOffOptions) {
@@ -960,7 +960,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets whether the reply-all method will put all recipients except the original sender in the Cc list. Normally, recipients in the To
      * header of the original message will also appear in the To list.
-     * 
+     *
      * @param replyAllCc <code>true</code> if the reply-all method will put all recipients except the original sender in the Cc list;
      *            otherwise <code>false</code>.
      */
@@ -985,7 +985,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Sets the notifyAppointmentsConfirmOwner
-     * 
+     *
      * @param notifyAppointmentsConfirmOwner the notifyAppointmentsConfirmOwner to set
      */
     public void setNotifyAppointmentsConfirmOwner(final boolean notifyAppointmentsConfirmOwner) {
@@ -995,7 +995,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Sets the notifyAppointmentsConfirmParticipant
-     * 
+     *
      * @param notifyAppointmentsConfirmParticipant the notifyAppointmentsConfirmParticipant to set
      */
     public void setNotifyAppointmentsConfirmParticipant(final boolean notifyAppointmentsConfirmParticipant) {
@@ -1005,7 +1005,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Sets the notifyTasksConfirmOwner
-     * 
+     *
      * @param notifyTasksConfirmOwner the notifyTasksConfirmOwner to set
      */
     public void setNotifyTasksConfirmOwner(final boolean notifyTasksConfirmOwner) {
@@ -1015,7 +1015,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Sets the notifyTasksConfirmParticipant
-     * 
+     *
      * @param notifyTasksConfirmParticipant the notifyTasksConfirmParticipant to set
      */
     public void setNotifyTasksConfirmParticipant(final boolean notifyTasksConfirmParticipant) {
@@ -1026,7 +1026,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Sets the <code>no-save</code> attribute. If set to <code>true</code> this instance of {@link UserSettingMail} cannot be saved to
      * storage.
-     * 
+     *
      * @param noSave <code>true</code> to deny saving this instance of {@link UserSettingMail} to storage; otherwise <code>false</code>
      */
     public void setNoSave(final boolean noSave) {
@@ -1035,7 +1035,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the user ID.
-     * 
+     *
      * @return The user ID
      */
     public int getUserId() {
@@ -1044,7 +1044,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Gets the context ID.
-     * 
+     *
      * @return The context ID
      */
     public int getCid() {

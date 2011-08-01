@@ -72,16 +72,17 @@ import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 public class WebdavLockAction extends AbstractAction {
 
 	private static final Namespace DAV_NS = Namespace.getNamespace("DAV:");
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLockAction.class));
-	
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		final WebdavLock lock = new WebdavLock();
-		
+
 		lock.setTimeout(getTimeout(req.getHeader("Timeout")));
 		lock.setDepth(getDepth(req.getHeader("Depth")));
-		
+
 		try {
 		    if(req.hasBody()) {
 		        configureLock(req, lock);
@@ -94,39 +95,39 @@ public class WebdavLockAction extends AbstractAction {
 		            lock.setToken(mentionedLocks.get(0));
 		        }
 		    }
-		    
+
 			WebdavResource resource = req.getResource();
-		       
+
             if(null != lock.getToken()) {
                 final WebdavLock originalLock = resource.getLock(lock.getToken());
                 copyOldValues(originalLock, lock);
             }
-    
+
             final int status = HttpServletResponse.SC_OK;
-			 
-			
+
+
 			resource.lock(lock);
-			
+
 			// Reload, because it might have been switched to a lock null resource
 			resource = req.getFactory().resolveResource(req.getUrl());
-			
+
 			res.setStatus(status);
 			res.setHeader("Lock-Token",lock.getToken());
 			res.setHeader("content-type", "application/xml");
 			final WebdavProperty lockdiscovery = resource.getProperty("DAV:", "lockdiscovery");
-			
+
 			final Element lockDiscoveryElement = new PropertiesMarshaller(req.getCharset()).marshalProperty(lockdiscovery, resource.getProtocol());
-			
+
 			final Document responseDoc = new Document();
 			final Element rootElement = new Element("prop",DAV_NS);
-			
+
 			rootElement.addContent(lockDiscoveryElement);
-			
+
 			responseDoc.setContent(rootElement);
-			
+
 	        final XMLOutputter outputter = new XMLOutputter();
 			outputter.output(responseDoc, res.getOutputStream());
-			
+
 		} catch (final JDOMException e) {
 			LOG.error("JDOM Exception",e);
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -152,7 +153,7 @@ public class WebdavLockAction extends AbstractAction {
     private void configureLock(final WebdavRequest req, final WebdavLock lock) throws JDOMException, IOException {
         final Element root = req.getBodyAsDocument().getRootElement();
         final Element lockscope = (Element) root.getChild("lockscope",DAV_NS).getChildren().get(0);
-        
+
         if(lockscope.getNamespace().equals(DAV_NS)) {
         	if(lockscope.getName().equalsIgnoreCase("shared")) {
         		lock.setScope(Scope.SHARED_LITERAL);
@@ -160,11 +161,11 @@ public class WebdavLockAction extends AbstractAction {
         		lock.setScope(Scope.EXCLUSIVE_LITERAL);
         	}
         }
-        
+
         lock.setType(Type.WRITE_LITERAL);
-        
+
         final Element owner = root.getChild("owner",DAV_NS);
-        
+
         final XMLOutputter outputter = new XMLOutputter();
 
         if(owner != null) {
@@ -179,7 +180,7 @@ public class WebdavLockAction extends AbstractAction {
 		if(header.equalsIgnoreCase("infinity")) {
 			return WebdavCollection.INFINITY;
 		}
-		
+
 		return Integer.parseInt(header);
 	}
 
@@ -193,7 +194,7 @@ public class WebdavLockAction extends AbstractAction {
 		if(header.equalsIgnoreCase("infinite")) {
 			return WebdavLock.NEVER;
 		}
-		
+
 		return Long.parseLong(header.substring(7)) * 1000;
 	}
 

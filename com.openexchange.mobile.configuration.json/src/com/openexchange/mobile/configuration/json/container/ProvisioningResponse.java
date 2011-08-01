@@ -50,15 +50,15 @@
 package com.openexchange.mobile.configuration.json.container;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public class ProvisioningResponse {
 
 	private boolean success;
 	private String message;
-	
+
 	public ProvisioningResponse() {
 		this.success = false;
 		this.message = "";
@@ -83,6 +83,6 @@ public class ProvisioningResponse {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}	
-	
+	}
+
 }

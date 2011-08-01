@@ -118,22 +118,22 @@ public class OXMFPublicationService extends AbstractPublicationService {
     private PublicationTarget buildTarget() {
         final DynamicFormDescription form = new DynamicFormDescription();
         final DynamicFormDescription withoutInfostore = new DynamicFormDescription();
-        
+
         form.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
         withoutInfostore.add(FormElement.input(SITE, FORM_LABEL_SITE, true, null));
 
         templateChooser = FormElement.custom("com.openexchange.templating.templateChooser",TEMPLATE, FORM_LABEL_TEMPLATE);
         form.add(templateChooser);
-        
+
         // No templating without infostore
-        
+
         form.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
         withoutInfostore.add(FormElement.checkbox(PROTECTED, FORM_LABEL_PROTECTED, true, Boolean.TRUE));
-        
+
         form.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
         withoutInfostore.add(FormElement.link(URL, FORM_LABEL_LINK, false, null));
 
-        
+
         final PublicationTarget target = new OptionalTemplatingTarget(withoutInfostore);
 
         target.setFormDescription(form);
@@ -300,7 +300,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     protected SecurityStrategy getSecurityStrategy() {
         return FOLDER_ADMIN_ONLY;
     }
-    
+
     private static final class OptionalTemplatingTarget extends PublicationTarget implements UserSpecificPublicationTarget {
 
         private final DynamicFormDescription withoutInfostore;
@@ -308,7 +308,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         public OptionalTemplatingTarget(final DynamicFormDescription withoutInfostore) {
             this.withoutInfostore = withoutInfostore;
         }
-        
+
         public DynamicFormDescription getUserSpecificDescription(final User user, final UserConfiguration configuration) {
             if (configuration.hasInfostore()) {
                 return getFormDescription();

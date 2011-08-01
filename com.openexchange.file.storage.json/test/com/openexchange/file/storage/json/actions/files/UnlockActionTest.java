@@ -71,18 +71,18 @@ public class UnlockActionTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request().param("id", "12");
-        
+
         File document = new DefaultFile();
         document.setLastModified(new Date());
-        
+
         fileAccess().expectCall("unlock", "12");
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(document);
-        
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

@@ -59,13 +59,14 @@ import java.sql.SQLException;
  */
 public class JDBC4ArrayWrapper extends JDBC3ArrayWrapper {
 
-    private Array delegate;
+    private final Array delegate;
 
     public JDBC4ArrayWrapper(Array delegate, JDBC3ResultSetWrapper result) {
         super(delegate, result);
         this.delegate = delegate;
     }
 
+    @Override
     public void free() throws SQLException {
         delegate.free();
     }

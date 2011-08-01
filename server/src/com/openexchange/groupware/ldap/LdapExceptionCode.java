@@ -92,7 +92,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
     GROUP_NOT_FOUND(
         "Cannot find group with identifier %1$s in context %2$d.",
         Category.CATEGORY_ERROR, 17),
-    /**    
+    /**
      * Unexpected error: %1$s
      */
     UNEXPECTED_ERROR(
@@ -127,29 +127,34 @@ public enum LdapExceptionCode implements OXExceptionCode {
         this.detailNumber = detailNumber;
     }
 
+    @Override
     public String getPrefix() {
         return null;
     }
 
-	public Category getCategory() {
+	@Override
+    public Category getCategory() {
 		return category;
 	}
 
-	public int getNumber() {
+	@Override
+    public int getNumber() {
 		return detailNumber;
 	}
 
-	public String getMessage() {
+	@Override
+    public String getMessage() {
 		return message;
 	}
-	
-	public boolean equals(final OXException e) {
+
+	@Override
+    public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -158,7 +163,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -168,7 +173,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

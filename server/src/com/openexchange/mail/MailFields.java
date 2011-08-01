@@ -58,7 +58,7 @@ import java.util.Set;
 
 /**
  * {@link MailFields} - Container for instances of {@link MailField} providing common set-specific methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFields {
@@ -78,7 +78,7 @@ public final class MailFields {
 
     /**
      * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
-     * 
+     *
      * @param mailField The mail field to add
      * @param mailFields Further mail fields to add
      */
@@ -92,7 +92,7 @@ public final class MailFields {
 
     /**
      * Initializes a new instance of {@link MailFields} pre-filled with specified array of {@link MailField} constants.
-     * 
+     *
      * @param mailFields The mail fields to add
      */
     public MailFields(final MailField[] mailFields) {
@@ -104,7 +104,7 @@ public final class MailFields {
 
     /**
      * Initializes a new instance of {@link MailFields} pre-filled with specified collection of {@link MailField} constants.
-     * 
+     *
      * @param mailFields The collection of mail fields to add
      */
     public MailFields(final Collection<MailField> mailFields) {
@@ -116,7 +116,7 @@ public final class MailFields {
 
     /**
      * Copy constructor: Initializes a new {@link MailFields} from specified mail fields.
-     * 
+     *
      * @param mailFields The mail fields
      */
     public MailFields(final MailFields mailFields) {
@@ -127,7 +127,7 @@ public final class MailFields {
 
     /**
      * Adds specified {@link MailField} constant.
-     * 
+     *
      * @param mailField The mail field to add
      * @return This instance with mail field added
      */
@@ -138,7 +138,7 @@ public final class MailFields {
 
     /**
      * Adds specified {@link MailField} constants.
-     * 
+     *
      * @param mailFields The mail fields to add
      */
     public void addAll(final MailField[] mailFields) {
@@ -149,7 +149,7 @@ public final class MailFields {
 
     /**
      * Adds specified collection of {@link MailField} constants.
-     * 
+     *
      * @param mailFields The collection of {@link MailField} constants to add
      */
     public void addAll(final Collection<MailField> mailFields) {
@@ -160,7 +160,7 @@ public final class MailFields {
 
     /**
      * Removes specified {@link MailField} constant.
-     * 
+     *
      * @param mailField The mail field to remove
      */
     public void removeMailField(final MailField mailField) {
@@ -169,7 +169,7 @@ public final class MailFields {
 
     /**
      * Removes specified {@link MailField} constants.
-     * 
+     *
      * @param mailFields The mail fields to remove
      */
     public void removeMailFields(final MailField[] mailFields) {
@@ -180,7 +180,7 @@ public final class MailFields {
 
     /**
      * Checks if specified {@link MailField} constant is contained.
-     * 
+     *
      * @param mailField The mail field to check
      * @return <code>true</code> if specified {@link MailField} constant is contained; otherwise <code>false</code>.
      */
@@ -190,7 +190,7 @@ public final class MailFields {
 
     /**
      * Checks if any of specified mail field constants is contained.
-     * 
+     *
      * @param mailFields The mail fields to check
      * @return <code>true</code> if any of specified mail field constants is contained; otherwise <code>false</code>.
      */
@@ -206,7 +206,7 @@ public final class MailFields {
 
     /**
      * Checks if all of specified mail field constants is contained.
-     * 
+     *
      * @param mailFields The mail fields to check
      * @return <code>true</code> if all of specified mail field constants is contained; otherwise <code>false</code>.
      */
@@ -222,7 +222,7 @@ public final class MailFields {
 
     /**
      * Removes from this instance all of its fields that are contained in the specified mail fields.
-     * 
+     *
      * @param otherFields The mail fields which will be removed from this instance
      * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
      */
@@ -240,7 +240,7 @@ public final class MailFields {
 
     /**
      * Retains only the fields in this instance that are contained in the specified mail fields.
-     * 
+     *
      * @param otherFields The mail fields which this instance will retain
      * @return <code>true</code> if this instance changed as a result of the call; otherwise <code>false</code>
      */
@@ -258,7 +258,7 @@ public final class MailFields {
 
     /**
      * Checks if this instance contains no fields.
-     * 
+     *
      * @return <code>true</code> if this instance contains no fields; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -271,7 +271,7 @@ public final class MailFields {
 
     /**
      * Returns a newly created array of {@link MailField} constants
-     * 
+     *
      * @return A newly created array of {@link MailField} constants
      */
     public MailField[] toArray() {
@@ -286,7 +286,7 @@ public final class MailFields {
 
     /**
      * Returns a newly created {@link Set set} of {@link MailField} constants.
-     * 
+     *
      * @return A newly created {@link Set set} of {@link MailField} constants
      */
     public Set<MailField> toSet() {

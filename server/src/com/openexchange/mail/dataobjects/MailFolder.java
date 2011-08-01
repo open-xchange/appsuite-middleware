@@ -60,7 +60,7 @@ import com.openexchange.mail.permission.MailPermission;
 
 /**
  * {@link MailFolder} - a data container object for a mail folder
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailFolder implements Serializable, Cloneable {
@@ -175,14 +175,14 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Virtual name of mailbox's root folder
-     * 
+     *
      * @value "E-Mail"
      */
     public static final String DEFAULT_FOLDER_NAME = "E-Mail";
 
     /**
      * Virtual fullname of mailbox's root folder
-     * 
+     *
      * @value "default"
      */
     public static final String DEFAULT_FOLDER_ID = "default";
@@ -223,7 +223,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the fullname.
-     * 
+     *
      * @return The fullname ({@link #DEFAULT_FOLDER_ID} if this mail folder denotes the root folder)
      */
     public String getFullname() {
@@ -232,7 +232,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if fullname is set through {@link #setFullname(String)}.
-     * 
+     *
      * @return <code>true</code> if fullname is set; otherwise <code>false</code>
      */
     public boolean containsFullname() {
@@ -251,7 +251,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets this mail folder's fullname.
      * <p>
      * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_ID} is supposed to be set as fullname.
-     * 
+     *
      * @param fullname the fullname to set
      */
     public void setFullname(final String fullname) {
@@ -261,7 +261,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder has subfolders.
-     * 
+     *
      * @return <code>true</code> if this mail folder has subfolders; otherwise <code>false</code>
      */
     public boolean hasSubfolders() {
@@ -270,7 +270,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if has-subfolders flag was set through {@link #setSubfolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if has-subfolders flag is set; otherwise <code>false</code>
      */
     public boolean containsSubfolders() {
@@ -287,7 +287,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets if this mail folder has subfolders.
-     * 
+     *
      * @param hasSubfolders the has-subfolders flag to set
      */
     public void setSubfolders(final boolean hasSubfolders) {
@@ -297,7 +297,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder has subscribed subfolders.
-     * 
+     *
      * @return <code>true</code> if this mail folder has subscribed subfolders; otherwise <code>false</code>
      */
     public boolean hasSubscribedSubfolders() {
@@ -306,7 +306,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the has-subscribed-subfolders flag was set through {@link #setSubscribedSubfolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if the has-subscribed-subfolders flag was set; otherwise <code>false</code>
      */
     public boolean containsSubscribedSubfolders() {
@@ -323,7 +323,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets if this mail folder has subscribed subfolders.
-     * 
+     *
      * @param hasSubscribedSubfolders the has-subscribed-subfolders flag to set
      */
     public void setSubscribedSubfolders(final boolean hasSubscribedSubfolders) {
@@ -333,7 +333,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the default folder type.
-     * 
+     *
      * @return The default folder type
      */
     public DefaultFolderType getDefaultFolderType() {
@@ -342,7 +342,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the INBOX folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the INBOX folder; otherwise <code>false</code>
      */
     public boolean isInbox() {
@@ -351,7 +351,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the DRAFTS folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the DRAFTS folder; otherwise <code>false</code>
      */
     public boolean isDrafts() {
@@ -360,7 +360,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the SENT folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the SENT folder; otherwise <code>false</code>
      */
     public boolean isSent() {
@@ -369,7 +369,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the SPAM folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the SPAM folder; otherwise <code>false</code>
      */
     public boolean isSpam() {
@@ -378,7 +378,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the TRASH folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the TRASH folder; otherwise <code>false</code>
      */
     public boolean isTrash() {
@@ -387,7 +387,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the CONFIRMED_SPAM folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the CONFIRMED_SPAM folder; otherwise <code>false</code>
      */
     public boolean isConfirmedSpam() {
@@ -396,7 +396,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this mail folder denotes the CONFIRMED_HAM folder.
-     * 
+     *
      * @return <code>true</code> if this mail folder denotes the CONFIRMED_HAM folder; otherwise <code>false</code>
      */
     public boolean isConfirmedHam() {
@@ -405,7 +405,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if default folder type was set through {@link #setDefaultFolderType(DefaultFolderType)}.
-     * 
+     *
      * @return <code>true</code> if default folder type is set; otherwise <code>false</code>
      */
     public boolean containsDefaultFolderType() {
@@ -422,7 +422,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets default folder type.
-     * 
+     *
      * @param name the name to set
      */
     public void setDefaultFolderType(final DefaultFolderType defaulFolderType) {
@@ -432,7 +432,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -441,7 +441,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if name was set through {@link #setName(String)}.
-     * 
+     *
      * @return <code>true</code> if name is set; otherwise <code>false</code>
      */
     public boolean containsName() {
@@ -460,7 +460,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets this mail folder's name.
      * <p>
      * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_NAME} is supposed to be set as name.
-     * 
+     *
      * @param name the name to set
      */
     public void setName(final String name) {
@@ -472,7 +472,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Returns whether the denoted mail folder is subscribed or not.
      * <p>
      * If mailing system does not support subscription, <code>true</code> is supposed to be returned.
-     * 
+     *
      * @return Whether the denoted mail folder is subscribed or not
      */
     public boolean isSubscribed() {
@@ -481,7 +481,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if subscribed status was set through {@link #setSubscribed(boolean)}.
-     * 
+     *
      * @return <code>true</code> if subscribed is set; otherwise <code>false</code>
      */
     public boolean containsSubscribed() {
@@ -500,7 +500,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets the subscription status for this mail folder.
      * <p>
      * If mailing system does not support subscription, <code>true</code> is supposed to be set as subscription status.
-     * 
+     *
      * @param subscribed the subscription status to set
      */
     public void setSubscribed(final boolean subscribed) {
@@ -510,7 +510,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the number of messages marked for deletion in this folder
-     * 
+     *
      * @return The number of messages marked for deletion in this folder or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -520,7 +520,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the number of messages was set through {@link #setDeletedMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if deletedMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsDeletedMessageCount() {
@@ -537,7 +537,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the number of messages marked for deletion in this folder.
-     * 
+     *
      * @param deletedMessageCount The number of messages marked for deletion or <code>-1</code> if this mail folder does not hold messages
      */
     public void setDeletedMessageCount(final int deletedMessageCount) {
@@ -547,7 +547,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder exists.
-     * 
+     *
      * @return <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
     public boolean exists() {
@@ -556,7 +556,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if folder existence status was set through {@link #setExists(boolean)}.
-     * 
+     *
      * @return <code>true</code> if exists status is set; otherwise <code>false</code>
      */
     public boolean containsExists() {
@@ -573,7 +573,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the exists status.
-     * 
+     *
      * @param exists <code>true</code> if folder exists in mailbox; otherwise <code>false</code>
      */
     public void setExists(final boolean exists) {
@@ -583,7 +583,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the number of messages.
-     * 
+     *
      * @return The number of messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -593,7 +593,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if number of messages was set through {@link #setMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if messageCount is set; otherwise <code>false</code>
      */
     public boolean containsMessageCount() {
@@ -610,7 +610,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the number of messages.
-     * 
+     *
      * @param messageCount The number of messages or <code>-1</code> if this mail folder does not hold messages
      */
     public void setMessageCount(final int messageCount) {
@@ -620,7 +620,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the number of new messages (since last time this folder was accessed).
-     * 
+     *
      * @return The number of new messages or <code>-1</code> if this mail folder does not hold messages.
      * @see #isHoldsMessages()
      */
@@ -630,7 +630,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the number of new messages was set through {@link #setNewMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if newMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsNewMessageCount() {
@@ -647,7 +647,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the number of new messages.
-     * 
+     *
      * @param newMessageCount The number of new messages or <code>-1</code> if this mail folder does not hold messages
      */
     public void setNewMessageCount(final int newMessageCount) {
@@ -657,7 +657,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the number of unread messages.
-     * 
+     *
      * @return The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -667,7 +667,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the number of unread messages was set through {@link #setUnreadMessageCount(int)}.
-     * 
+     *
      * @return <code>true</code> if unreadMessageCount is set; otherwise <code>false</code>
      */
     public boolean containsUnreadMessageCount() {
@@ -684,7 +684,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the number of unread messages.
-     * 
+     *
      * @param unreadMessageCount The number of unread messages or <code>-1</code> if this mail folder does not hold messages
      */
     public void setUnreadMessageCount(final int unreadMessageCount) {
@@ -694,7 +694,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the separator character.
-     * 
+     *
      * @see MailConfig#getDefaultSeparator()
      * @return The separator character.
      */
@@ -704,7 +704,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if seperator character was set through {@link #setSeparator(char)}.
-     * 
+     *
      * @return <code>true</code> if separator is set; otherwise <code>false</code>
      */
     public boolean containsSeparator() {
@@ -723,7 +723,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets the separator character.
      * <p>
      * If mailing system does not support a separator character, {@link MailConfig#getDefaultSeparator()} should to be used.
-     * 
+     *
      * @param separator the separator to set
      */
     public void setSeparator(final char separator) {
@@ -733,7 +733,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets the parent fullname.
-     * 
+     *
      * @return The parent fullname or <code>null</code> if this mail folder denotes the root folder
      */
     public String getParentFullname() {
@@ -742,7 +742,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if parent fullname was set through {@link #setParentFullname(String)}.
-     * 
+     *
      * @return <code>true</code> if parentFullname is set; otherwise <code>false</code>
      */
     public boolean containsParentFullname() {
@@ -761,7 +761,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets the parent fullname.
      * <p>
      * If this mail folder denotes the root folder, <code>null</code> is supposed to be set.
-     * 
+     *
      * @param parentFullname the parent fullname to set
      */
     public void setParentFullname(final String parentFullname) {
@@ -771,7 +771,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder is able to hold messages.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold messages; otherwise <code>false</code>
      */
     public boolean isHoldsMessages() {
@@ -780,7 +780,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if he holds-messages flag was set through {@link #setHoldsMessages(boolean)}.
-     * 
+     *
      * @return <code>true</code> if the holds-messages flag is set; otherwise <code>false</code>
      */
     public boolean containsHoldsMessages() {
@@ -797,7 +797,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets if this folder holds messages.
-     * 
+     *
      * @param holdsMessages <code>true</code> if folder holds messages; otherwise <code>false</code>
      */
     public void setHoldsMessages(final boolean holdsMessages) {
@@ -807,7 +807,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder is able to hold folders.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
     public boolean isHoldsFolders() {
@@ -816,7 +816,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the holds-folder flag was set through {@link #setHoldsFolders(boolean)}.
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-folder flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsFolders() {
@@ -833,7 +833,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets if this folder holds folders.
-     * 
+     *
      * @param holdsFolders <code>true</code> if folder holds folders; otherwise <code>false</code>
      */
     public void setHoldsFolders(final boolean holdsFolders) {
@@ -848,7 +848,7 @@ public class MailFolder implements Serializable, Cloneable {
      * {@link DefaultMailPermission} is supposed to be returned on missing permissions support except for the root folder. The root folder
      * should indicate no object permissions in any case, but the folder permission varies if mailing system allows subfolder creation below
      * root folder or not. The returned permission must reflect the allowed behavior.
-     * 
+     *
      * @return The own permission
      */
     public MailPermission getOwnPermission() {
@@ -857,7 +857,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if own permission was set through {@link #setOwnPermission(MailPermission)}.
-     * 
+     *
      * @return <code>true</code> if own permission is set; otherwise <code>false</code>
      */
     public boolean containsOwnPermission() {
@@ -881,7 +881,7 @@ public class MailFolder implements Serializable, Cloneable {
      * <p>
      * Please note that even if the mail system does not support permissions the entity must be set on the {@link DefaultMailPermission}
      * object. Please use {@link DefaultMailPermission#setEntity(int)} for this.
-     * 
+     *
      * @param ownPermission The own permission to set
      */
     public void setOwnPermission(final MailPermission ownPermission) {
@@ -891,7 +891,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder denotes the root folder
-     * 
+     *
      * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
      */
     public boolean isRootFolder() {
@@ -900,7 +900,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if root-folder flag was set through {@link #setRootFolder(boolean)}.
-     * 
+     *
      * @return <code>true</code> if root-folder flag is set; otherwise <code>false</code>
      */
     public boolean containsRootFolder() {
@@ -917,7 +917,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the root folder flag.
-     * 
+     *
      * @param rootFolder the root folder flag to set
      */
     public void setRootFolder(final boolean rootFolder) {
@@ -927,7 +927,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder denotes a default folder (Drafts, Sent, Trash, etc.)
-     * 
+     *
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder() {
@@ -936,7 +936,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if default-folder flag was set through {@link #setDefaultFolder(boolean)}.
-     * 
+     *
      * @return <code>true</code> if default-folder flag is set; otherwise <code>false</code>
      */
     public boolean containsDefaultFolder() {
@@ -953,7 +953,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the default folder flag.
-     * 
+     *
      * @param defaultFolder the default folder flag to set
      */
     public void setDefaultFolder(final boolean defaultFolder) {
@@ -963,7 +963,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Adds a permission.
-     * 
+     *
      * @param permission The permission to add
      */
     public void addPermission(final MailPermission permission) {
@@ -978,7 +978,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Adds an array of permissions.
-     * 
+     *
      * @param permissions The array of permissions to add
      */
     public void addPermissions(final MailPermission[] permissions) {
@@ -993,7 +993,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Adds a collection of permissions.
-     * 
+     *
      * @param permissions The collection of permissions to add
      */
     public void addPermissions(final Collection<? extends MailPermission> permissions) {
@@ -1009,7 +1009,7 @@ public class MailFolder implements Serializable, Cloneable {
     /**
      * Checks if permissions were set through {@link #addPermission(MailPermission)}, {@link #addPermissions(Collection)}, or
      * {@link #addPermissions(MailPermission[])}.
-     * 
+     *
      * @return <code>true</code> if permissions are set; otherwise <code>false</code>
      */
     public boolean containsPermissions() {
@@ -1043,7 +1043,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder supports user flags.
-     * 
+     *
      * @return <code>true</code> if this folder supports user flags; otherwise <code>false</code>
      */
     public boolean isSupportsUserFlags() {
@@ -1052,7 +1052,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the supports-user-flags flag was set through {@link #setSupportsUserFlags(boolean)}.
-     * 
+     *
      * @return <code>true</code> if supportsUserFlags is set; otherwise <code>false</code>
      */
     public boolean containsSupportsUserFlags() {
@@ -1069,7 +1069,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the supports-user-flags flag.
-     * 
+     *
      * @param supportsUserFlags the supports-user-flags flag to set
      */
     public void setSupportsUserFlags(final boolean supportsUserFlags) {
@@ -1079,7 +1079,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if this folder is shared.
-     * 
+     *
      * @return <code>true</code> if this folder is shared; otherwise <code>false</code>
      */
     public boolean isShared() {
@@ -1088,7 +1088,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks if the shared flag was set.
-     * 
+     *
      * @return <code>true</code> if shared flag is set; otherwise <code>false</code>
      */
     public boolean containsShared() {
@@ -1105,7 +1105,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the shared flag.
-     * 
+     *
      * @param shared The shared flag to set
      */
     public void setShared(final boolean shared) {

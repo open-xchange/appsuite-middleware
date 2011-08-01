@@ -222,7 +222,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
     /**
      * This method is used to create a JSON object from a TestCommand. It is done this way because a separate converter class would have to
      * do the check for the right TestCommand for each id.
-     * 
+     *
      * @param tmp the JSONObject into which the values are written
      * @param actionCommand the TestCommand itself
      * @throws JSONException

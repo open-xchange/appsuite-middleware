@@ -65,7 +65,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link UUEncodedPart} - UUEncode part containing all needed information about the attachment.
- * 
+ *
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -99,7 +99,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Return the filename attribute of the UUEncodedPart object
-     * 
+     *
      * @return filename - The filename
      */
     public String getFileName() {
@@ -109,7 +109,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
     /**
      * Return the file size attribute of the UUEncodedPart object. Note: This value may be different from the saved file. This is normal
      * because this is the size of the raw (not encoded) object.
-     * 
+     *
      * @return The file size
      */
     public int getFileSize() {
@@ -122,7 +122,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Return the start position of the attachment within the content.
-     * 
+     *
      * @return beginIndex - The start position
      */
     public int getIndexStart() {
@@ -131,7 +131,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Return the end position of the attachment within the content.
-     * 
+     *
      * @return beginIndex - The start position
      */
     public int getIndexEnd() {
@@ -140,7 +140,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Gets the inputStream attribute of the UUEncodedPart object
-     * 
+     *
      * @return inStreamPart - The inputStream
      */
     public InputStream getInputStream() {
@@ -156,7 +156,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Creates a data handler for this uuencoded part.
-     * 
+     *
      * @param contentType The content type to apply to data handler
      * @return A data handler for this uuencoded part
      */
@@ -164,6 +164,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         final byte[] data = bodyPart;
         final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+            @Override
             public InputStream getInputStream() throws IOException {
                 try {
                     return MimeUtility.decode(new UnsynchronizedByteArrayInputStream(data), "uuencode");
@@ -174,6 +175,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 }
             }
 
+            @Override
             public String getName() {
                 return null;
             }
@@ -183,7 +185,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Gets the encoded part as StringBuffer
-     * 
+     *
      * @return The part
      */
     public StringBuilder getPart() {
@@ -209,7 +211,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 
     /**
      * Output an appropriately encoded byte stream to the given OutputStream.
-     * 
+     *
      * @param out - The inputStream
      * @throws java.io.IOException if an error occurs writing to the stream
      */

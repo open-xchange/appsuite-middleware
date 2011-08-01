@@ -97,6 +97,7 @@ public class DispatcherServlet extends SessionServlet {
             this.req = req;
         }
 
+        @Override
         public InputStream getInputStream() throws IOException {
             return req.getInputStream();
         }
@@ -109,7 +110,7 @@ public class DispatcherServlet extends SessionServlet {
     private static Dispatcher dispatcher;
 
     private static String prefix;
-    
+
     private static List<ResponseOutputter> responseRenderers = new CopyOnWriteArrayList<ResponseOutputter>();
 
     public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
@@ -120,7 +121,7 @@ public class DispatcherServlet extends SessionServlet {
         DispatcherServlet.dispatcher = dispatcher;
         DispatcherServlet.prefix = prefix;
     }
-    
+
     public static void registerRenderer(final ResponseOutputter renderer) {
         responseRenderers.add(renderer);
     }
@@ -146,7 +147,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
-     * 
+     *
      * @param req The HTTP request to handle
      * @param resp The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
@@ -160,9 +161,10 @@ public class DispatcherServlet extends SessionServlet {
 
         final String action = req.getParameter(PARAMETER_ACTION);
         final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
-        
+
         AJAXRequestResult result = null;
-        AJAXRequestData request = null; 
+        AJAXRequestData request = null;
+        AJAXState state = null;
         try {
             if (action == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
@@ -171,16 +173,20 @@ public class DispatcherServlet extends SessionServlet {
 
             request = parseRequest(req, preferStream, isFileUpload, session);
 
-            result = dispatcher.perform(request, session);
-            
+            state = dispatcher.begin();
 
-            
+            result = dispatcher.perform(request, state, session);
+
+
+
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            final Response response = new Response();
-            response.setException(e);
-            JSONResponseOutputter.writeResponse(response, action, req, resp);
+            JSONResponseOutputter.writeResponse(new Response().setException(e), action, req, resp);
             return;
+        } finally {
+            if (null != state) {
+                dispatcher.end(state);
+            }
         }
         sendResponse(request, result, req, resp);
 
@@ -195,7 +201,7 @@ public class DispatcherServlet extends SessionServlet {
                 chosen = renderer;
             }
         }
-        
+
         chosen.write(request, result, hReq, hResp);
     }
 
@@ -218,7 +224,7 @@ public class DispatcherServlet extends SessionServlet {
         final String pathInfo = req.getRequestURI();
         retval.setModule(pathInfo.substring(prefix.length()));
         /*
-         * Set the action 
+         * Set the action
          */
         retval.setAction(req.getParameter("action"));
         /*

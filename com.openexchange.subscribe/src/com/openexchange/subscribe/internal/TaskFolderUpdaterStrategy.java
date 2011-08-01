@@ -66,7 +66,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link TaskFolderUpdaterStrategy}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
@@ -123,7 +123,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         SearchIterator<Task> tasksInFolder;
         final List<Task> retval = new ArrayList<Task>();
         int[] columns = Task.ALL_COLUMNS;
-        
+
         // filter out LAST_MODIFIED_UTC as it is a virtual column and will not work
         final ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
         for (int i = 0; i<columns.length; i++){
@@ -137,7 +137,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
             columns[counter] = integer;
             counter++;
         }
-        
+
         tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, Order.ASCENDING, columns);
         while (tasksInFolder.hasNext()) {
             retval.add(tasksInFolder.next());

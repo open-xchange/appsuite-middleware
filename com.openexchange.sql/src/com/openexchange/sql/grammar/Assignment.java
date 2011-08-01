@@ -52,8 +52,8 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class Assignment extends Expression {
-	private Expression leftExpression;
-	private Expression rightExpression;
+	private final Expression leftExpression;
+	private final Expression rightExpression;
 
 	public Assignment(Expression left, Expression right) {
 		super();
@@ -69,14 +69,16 @@ public class Assignment extends Expression {
 		this(new Column(column), right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildAssignment(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "=";
 	}
-	
+
 	public Expression getLeftExpression() {
 		return leftExpression;
 	}

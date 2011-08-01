@@ -71,11 +71,12 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class TasksByICalFileStep extends AbstractStep<Task[], Page> {
 private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksByICalFileStep.class));
-    
+
     public TasksByICalFileStep(){
-        
+
     }
-    
+
+    @Override
     public void execute(WebClient webClient) {
         ArrayList<Task> tempTasks = new ArrayList<Task>();
         ArrayList<Task> tasks = new ArrayList<Task>();
@@ -84,8 +85,8 @@ private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLo
             LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
             String iCalFile = input.getWebResponse().getContentAsString();
             ICalParser iCalParser = workflow.getActivator().getICalParser();
-                                                                
-            if (iCalParser != null) {                
+
+            if (iCalParser != null) {
                 tempTasks = (ArrayList<Task>) iCalParser.parseTasks(
                     iCalFile,
                     TimeZone.getDefault(),
@@ -96,7 +97,7 @@ private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLo
                 LOG.error("No iCal-Parser found!");
             }
             tasks.addAll(tempTasks);
-            
+
         } catch (ConversionError e) {
             LOG.error(e.getMessage(), e);
         } catch (FailingHttpStatusCodeException e) {

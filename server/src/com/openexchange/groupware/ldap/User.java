@@ -141,7 +141,7 @@ public interface User extends Serializable {
      * Gets the user attributes as an unmodifiable map.
      * <p>
      * Each attribute may point to multiple values.
-     * 
+     *
      * @return user attributes
      */
     Map<String, Set<String>> getAttributes();
@@ -162,14 +162,14 @@ public interface User extends Serializable {
      * Getter for preferredLanguage. The preferred language of the user.
      * According to RFC 2798 and 2068 it should be something like de-de, en-gb
      * or en.
-     * 
+     *
      * @return Preferred Language.
      */
     String getPreferredLanguage();
 
     /**
      * Getter for locale constructed from set preferred language.
-     * 
+     *
      * @see #getPreferredLanguage()
      * @return Locale
      */
@@ -177,7 +177,7 @@ public interface User extends Serializable {
 
     /**
      * Getter for groups.
-     * 
+     *
      * @return the groups this user is member of.
      */
     int[] getGroups();

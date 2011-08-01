@@ -61,7 +61,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of their run time.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13Watcher {
@@ -137,7 +137,7 @@ final class AJPv13Watcher {
 
         /**
          * Initializes a new {@link Task}
-         * 
+         *
          * @param listeners The map to iterate
          * @param log The logger instance to use
          */
@@ -147,6 +147,7 @@ final class AJPv13Watcher {
             this.log = log;
         }
 
+        @Override
         public void run() {
             try {
                 int countWaiting = 0;

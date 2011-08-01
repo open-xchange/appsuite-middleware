@@ -84,7 +84,7 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
     protected Refresher(final OXObjectFactory<T> factory, final String regionName) {
@@ -115,7 +115,7 @@ public abstract class Refresher<T extends Serializable> {
     public static <T extends Serializable> T cache(final T obj, final Cache cache, final OXObjectFactory<T> factory) throws OXException {
         T retval = null;
         final Lock lock = factory.getCacheLock();
-        final Serializable key = factory.getKey(); 
+        final Serializable key = factory.getKey();
         lock.lock();
         try {
             final Object tmp = cache.get(key);
@@ -147,7 +147,7 @@ public abstract class Refresher<T extends Serializable> {
         }
         T retval = null;
         final Lock lock = factory.getCacheLock();
-        final Serializable key = factory.getKey(); 
+        final Serializable key = factory.getKey();
         Condition cond = null;
         lock.lock();
         try {

@@ -183,14 +183,14 @@ import com.openexchange.threadpool.ThreadRenamer;
  * <p>
  * <b>Extension example</b>. Most extensions of this class override one or more of the protected hook methods. For example, here is a
  * subclass that adds a simple pause/resume feature:
- * 
+ *
  * <pre>
  * class PausableThreadPoolExecutor extends CustomThreadPoolExecutor {
  *   private boolean isPaused;
  *   private ReentrantLock pauseLock = new ReentrantLock();
  *   private Condition unpaused = pauseLock.newCondition();
  *   public PausableThreadPoolExecutor(...) { super(...); }
- * 
+ *
  *   protected void beforeExecute(Thread t, Runnable r) {
  *     super.beforeExecute(t, r);
  *     pauseLock.lock();
@@ -202,7 +202,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  *       pauseLock.unlock();
  *     }
  *   }
- * 
+ *
  *   public void pause() {
  *     pauseLock.lock();
  *     try {
@@ -211,7 +211,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  *       pauseLock.unlock();
  *     }
  *   }
- * 
+ *
  *   public void resume() {
  *     pauseLock.lock();
  *     try {
@@ -222,7 +222,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  *     }
  *   }
  * }
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
@@ -373,7 +373,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Sequence number to break scheduling ties, and in turn to guarantee FIFO order among tied entries.
-     * 
+     *
      * @return The sequencer
      */
     AtomicLong getSequencer() {
@@ -382,7 +382,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Create and return a new thread running firstTask as its first task. Call only while holding mainLock
-     * 
+     *
      * @param firstTask the task the new thread should run first (or <code>null</code> if none)
      * @return the new thread, or <code>null</code> if threadFactory fails to create thread
      */
@@ -402,7 +402,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Create and start a new thread running firstTask as its first task, only if fewer than corePoolSize threads are running.
-     * 
+     *
      * @param firstTask the task the new thread should run first (or <code>null</code> if none)
      * @return true if successful.
      */
@@ -427,7 +427,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Create and start a new thread only if fewer than maximumPoolSize threads are running. The new thread runs as its first task the next
      * task in queue, or if there is none, the given task.
-     * 
+     *
      * @param firstTask the task the new thread should run first (or <code>null</code> if none)
      * @return <code>null</code> on failure, else the first task to be run by new thread.
      */
@@ -462,7 +462,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Get the next task for a worker thread to run.
-     * 
+     *
      * @return the task
      * @throws InterruptedException if interrupted while waiting for task
      */
@@ -545,7 +545,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Perform bookkeeping for a terminated worker thread.
-     * 
+     *
      * @param w the worker
      */
     void workerDone(final Worker w) {
@@ -855,7 +855,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Returns true if this is a periodic (not a one-shot) action.
-         * 
+         *
          * @return true if periodic
          */
         boolean isPeriodic() {
@@ -1108,7 +1108,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters and default thread factory and handler. It may be
      * more convenient to use one of the {@link Executors} factory methods instead of this general purpose constructor.
-     * 
+     *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
@@ -1126,7 +1126,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
-     * 
+     *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
@@ -1145,7 +1145,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
-     * 
+     *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
@@ -1164,7 +1164,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Creates a new <tt>CustomThreadPoolExecutor</tt> with the given initial parameters.
-     * 
+     *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
@@ -1327,7 +1327,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Executes the given task sometime in the future. The task may execute in a new thread or in an existing pooled thread. If the task
      * cannot be submitted for execution, either because this executor has been shutdown or because its capacity has been reached, the task
      * is handled by the current <tt>RejectedExecutionHandler</tt>.
-     * 
+     *
      * @param command the task to execute
      * @throws RejectedExecutionException at discretion of <tt>RejectedExecutionHandler</tt>, if task cannot be accepted for execution
      * @throws NullPointerException if command is <code>null</code>
@@ -1390,7 +1390,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Initiates an orderly shutdown in which previously submitted tasks are executed, but no new tasks will be accepted. Invocation has no
      * additional effect if already shut down.
-     * 
+     *
      * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate threads that the caller
      *             is not permitted to modify because it does not hold {@link java.lang.RuntimePermission}<tt>("modifyThread")</tt>, or the
      *             security manager's <tt>checkAccess</tt> method denies access.
@@ -1461,7 +1461,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * <p>
      * This implementation cancels tasks via {@link Thread#interrupt}, so if any tasks mask or fail to respond to interrupts, they may never
      * terminate.
-     * 
+     *
      * @return list of tasks that never commenced execution
      * @throws SecurityException if a security manager exists and shutting down this ExecutorService may manipulate threads that the caller
      *             is not permitted to modify because it does not hold {@link java.lang.RuntimePermission}<tt>("modifyThread")</tt>, or the
@@ -1522,7 +1522,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Returns true if this executor is in the process of terminating after <tt>shutdown</tt> or <tt>shutdownNow</tt> but has not completely
      * terminated. This method may be useful for debugging. A return of <tt>true</tt> reported a sufficient period after shutdown may
      * indicate that submitted tasks have ignored or suppressed interruption, causing this executor not to properly terminate.
-     * 
+     *
      * @return true if terminating but not yet terminated.
      */
     @Override
@@ -1566,7 +1566,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Sets the thread factory used to create new threads.
-     * 
+     *
      * @param threadFactory the new thread factory
      * @throws NullPointerException if threadFactory is <code>null</code>
      * @see #getThreadFactory
@@ -1581,7 +1581,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the thread factory used to create new threads.
-     * 
+     *
      * @return the current thread factory
      * @see #setThreadFactory
      */
@@ -1593,7 +1593,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Sets whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working queue.
      * Otherwise {@link RejectedExecutionException} are be thrown in capacity bounds are reached.
-     * 
+     *
      * @param blocking <code>true</code> if blocking; otherwise <code>false</code>
      */
     public void setBlocking(boolean blocking) {
@@ -1603,7 +1603,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Checks whether this executor has a blocking behavior. Meaning caller is blocked until space becomes available in working queue.
      * Otherwise {@link RejectedExecutionException} are be thrown in capacity bounds are reached.
-     * 
+     *
      * @return <code>true</code> if blocking; otherwise <code>false</code>
      */
     public boolean isBlocking() {
@@ -1612,7 +1612,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Sets a new handler for unexecutable tasks.
-     * 
+     *
      * @param handler the new handler
      * @throws NullPointerException if handler is <code>null</code>
      * @see #getRejectedExecutionHandler
@@ -1627,7 +1627,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the current handler for unexecutable tasks.
-     * 
+     *
      * @return the current handler
      * @see #setRejectedExecutionHandler
      */
@@ -1639,7 +1639,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Returns the task queue used by this executor. Access to the task queue is intended primarily for debugging and monitoring. This queue
      * may be in active use. Retrieving the task queue does not prevent queued tasks from executing.
-     * 
+     *
      * @return the task queue
      */
     @Override
@@ -1649,7 +1649,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Gets the delayed work queue.
-     * 
+     *
      * @return The delayed work queue
      */
     DelayedWorkQueue getDelayedWorkQueue() {
@@ -1663,7 +1663,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * before being placed on the internal queue. For example, a task entered using <tt>submit</tt> might be converted into a form that
      * maintains <tt>Future</tt> status. However, in such cases, method {@link CustomThreadPoolExecutor#purge} may be used to remove those
      * Futures that have been canceled.
-     * 
+     *
      * @param task the task to remove
      * @return true if the task was removed
      */
@@ -1712,7 +1712,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Sets the core number of threads. This overrides any value set in the constructor. If the new value is smaller than the current value,
      * excess existing threads will be terminated when they next become idle. If larger, new threads will, if needed, be started to execute
      * any queued tasks.
-     * 
+     *
      * @param corePoolSize the new core size
      * @throws IllegalArgumentException if <tt>corePoolSize</tt> less than zero
      * @see #getCorePoolSize
@@ -1753,7 +1753,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the core number of threads.
-     * 
+     *
      * @return the core number of threads
      * @see #setCorePoolSize
      */
@@ -1765,7 +1765,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Starts a core thread, causing it to idly wait for work. This overrides the default policy of starting core threads only when new
      * tasks are executed. This method will return <tt>false</tt> if all core threads have already been started.
-     * 
+     *
      * @return true if a thread was started
      */
     @Override
@@ -1776,7 +1776,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Starts all core threads, causing them to idly wait for work. This overrides the default policy of starting core threads only when new
      * tasks are executed.
-     * 
+     *
      * @return the number of threads started.
      */
     @Override
@@ -1791,7 +1791,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Sets the maximum allowed number of threads. This overrides any value set in the constructor. If the new value is smaller than the
      * current value, excess existing threads will be terminated when they next become idle.
-     * 
+     *
      * @param maximumPoolSize the new maximum
      * @throws IllegalArgumentException if maximumPoolSize less than zero or the {@link #getCorePoolSize core pool size}
      * @see #getMaximumPoolSize
@@ -1820,7 +1820,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the maximum allowed number of threads.
-     * 
+     *
      * @return the maximum allowed number of threads
      * @see #setMaximumPoolSize
      */
@@ -1833,7 +1833,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Sets the time limit for which threads may remain idle before being terminated. If there are more than the core number of threads
      * currently in the pool, after waiting this amount of time without processing a task, excess threads will be terminated. This overrides
      * any value set in the constructor.
-     * 
+     *
      * @param time the time to wait. A time value of zero will cause excess threads to terminate immediately after executing tasks.
      * @param unit the time unit of the time argument
      * @throws IllegalArgumentException if time less than zero
@@ -1850,7 +1850,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Returns the thread keep-alive time, which is the amount of time which threads in excess of the core pool size may remain idle before
      * being terminated.
-     * 
+     *
      * @param unit the desired time unit of the result
      * @return the time limit
      * @see #setKeepAliveTime
@@ -1864,7 +1864,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Set policy on whether to continue executing existing periodic tasks even when this executor has been <tt>shutdown</tt>. In this case,
      * these tasks will only terminate upon <tt>shutdownNow</tt>, or after setting the policy to <tt>false</tt> when already shutdown. This
      * value is by default false.
-     * 
+     *
      * @param value if true, continue after shutdown, else don't.
      * @see #getExecuteExistingDelayedTasksAfterShutdownPolicy
      */
@@ -1879,7 +1879,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Get the policy on whether to continue executing existing periodic tasks even when this executor has been <tt>shutdown</tt>. In this
      * case, these tasks will only terminate upon <tt>shutdownNow</tt> or after setting the policy to <tt>false</tt> when already shutdown.
      * This value is by default false.
-     * 
+     *
      * @return true if will continue after shutdown.
      * @see #setContinueExistingPeriodicTasksAfterShutdownPolicy
      */
@@ -1891,7 +1891,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Set policy on whether to execute existing delayed tasks even when this executor has been <tt>shutdown</tt>. In this case, these tasks
      * will only terminate upon <tt>shutdownNow</tt>, or after setting the policy to <tt>false</tt> when already shutdown. This value is by
      * default true.
-     * 
+     *
      * @param value if true, execute after shutdown, else don't.
      * @see #getExecuteExistingDelayedTasksAfterShutdownPolicy
      */
@@ -1906,7 +1906,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Get policy on whether to execute existing delayed tasks even when this executor has been <tt>shutdown</tt>. In this case, these tasks
      * will only terminate upon <tt>shutdownNow</tt>, or after setting the policy to <tt>false</tt> when already shutdown. This value is by
      * default true.
-     * 
+     *
      * @return true if will execute after shutdown.
      * @see #setExecuteExistingDelayedTasksAfterShutdownPolicy
      */
@@ -1918,7 +1918,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the current number of threads in the pool.
-     * 
+     *
      * @return the number of threads
      */
     @Override
@@ -1928,7 +1928,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the approximate number of threads that are actively executing tasks.
-     * 
+     *
      * @return the number of threads
      */
     @Override
@@ -1950,7 +1950,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
     /**
      * Returns the largest number of threads that have ever simultaneously been in the pool.
-     * 
+     *
      * @return the number of threads
      */
     @Override
@@ -1968,7 +1968,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Returns the approximate total number of tasks that have been scheduled for execution. Because the states of tasks and threads may
      * change dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across
      * successive calls.
-     * 
+     *
      * @return the number of tasks
      */
     @Override
@@ -1993,7 +1993,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Returns the approximate total number of tasks that have completed execution. Because the states of tasks and threads may change
      * dynamically during computation, the returned value is only an approximation, but one that does not ever decrease across successive
      * calls.
-     * 
+     *
      * @return the number of tasks
      */
     @Override
@@ -2035,7 +2035,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Executes task r in the caller's thread, unless the executor has been shut down, in which case the task is discarded.
-         * 
+         *
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
@@ -2060,7 +2060,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Always throws RejectedExecutionException.
-         * 
+         *
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          * @throws RejectedExecutionException always.
@@ -2084,7 +2084,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Does nothing, which has the effect of discarding task r.
-         * 
+         *
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
@@ -2109,7 +2109,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         /**
          * Obtains and ignores the next task that the executor would otherwise execute, if one is immediately available, and then retries
          * execution of task r, unless the executor is shut down, in which case task r is instead discarded.
-         * 
+         *
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */

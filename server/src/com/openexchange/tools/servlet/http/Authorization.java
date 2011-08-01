@@ -68,7 +68,7 @@ public final class Authorization {
 
     /**
      * Checks if the client sends a correct basic authorization header.
-     * 
+     *
      * @param auth Authorization header.
      * @return <code>true</code> if the client sent a correct authorization header.
      */
@@ -93,11 +93,11 @@ public final class Authorization {
             this.login = login;
             this.password = password;
         }
-        
+
         public String getLogin() {
             return login;
         }
-        
+
         public String getPassword() {
             return password;
         }
@@ -118,7 +118,7 @@ public final class Authorization {
 
     /**
      * Checks if the login contains only valid values.
-     * 
+     *
      * @param pass password of the user
      * @return false if the login contains illegal values.
      */

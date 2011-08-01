@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 public class TemplatingServlet extends MultipleAdapterServlet {
 
     private static final MultipleHandler HANDLER = new TemplateMultipleHandler();
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return HANDLER;

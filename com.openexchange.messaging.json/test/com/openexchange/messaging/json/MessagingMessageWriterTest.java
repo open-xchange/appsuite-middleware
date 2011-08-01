@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MessagingMessageWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagingMessageWriterTest extends TestCase {
@@ -124,11 +124,11 @@ public class MessagingMessageWriterTest extends TestCase {
 
         assertValidates(assertion, messageJSON);
     }
-    
+
     public void testMirrorHeadersInAttributesIfTheyAreMessagingFields() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-        
+
         headers.put("Content-Type", header("Content-Type", "text/plain"));
         headers.put("From", header("From", "from.clark.kent@dailyplanet.com"));
         headers.put("To", header("To", "to.clark.kent@dailyplanet.com"));
@@ -138,13 +138,13 @@ public class MessagingMessageWriterTest extends TestCase {
         headers.put("Date", header("Date", "Date-Value"));
         headers.put("Disposition-Notification-To", header("Disposition-Notification-To", "disp.notification.to.clark.kent@dailyplanet.com"));
         headers.put("X-Priority", header("X-Priority", "12"));
-        
+
         message.setHeaders(headers);
-        
+
         final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
-        
+
         // Where happy if they are all included. Concrete header writing is tested elsewhere
-        
+
         for (final MessagingField field : MessagingField.values()) {
             if(field.getEquivalentHeader() != null) {
                 assertTrue("Missing field: "+field.toString()+" in ", messageJSON.has(field.toString()));
@@ -204,7 +204,7 @@ public class MessagingMessageWriterTest extends TestCase {
         assertValidates(assertion, messageJSON);
 
     }
-    
+
     public void testReferenceContent() throws OXException, JSONException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setContentReference("coolReferenceId");
@@ -306,7 +306,7 @@ public class MessagingMessageWriterTest extends TestCase {
             MessagingField.ID, MessagingField.FOLDER_ID, MessagingField.SUBJECT, MessagingField.SIZE, MessagingField.RECEIVED_DATE,
             MessagingField.FLAGS, MessagingField.THREAD_LEVEL, MessagingField.COLOR_LABEL, MessagingField.BODY, MessagingField.PICTURE, MessagingField.URL};
 
-        
+
         //TODO AccountName ? What is that?
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setId("msg123");
@@ -319,7 +319,7 @@ public class MessagingMessageWriterTest extends TestCase {
         message.setContent("Supercontent!");
         message.setPicture("pic");
         message.setUrl("http://url.tld");
-        
+
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
@@ -330,20 +330,20 @@ public class MessagingMessageWriterTest extends TestCase {
 
         assertValidates(assertion, fieldsJSON);
     }
-    
+
     public void testWritePostiveNumbersAsNullIfNegative() throws OXException, JSONException {
      // Test with one header equivalent field and all non-header fields
         final MessagingField[] fields = new MessagingField[] {
            MessagingField.SIZE, MessagingField.RECEIVED_DATE, MessagingField.THREAD_LEVEL};
 
-        
+
         //TODO AccountName ? What is that?
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
         message.setSize(-1);
         message.setReceivedDate(-1);
         message.setThreadLevel(-1);
         message.setColorLabel(-1);
-        
+
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
@@ -351,20 +351,20 @@ public class MessagingMessageWriterTest extends TestCase {
         final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, "com.openexchange.test1://account12", null, null);
 
         assertEquals(3, fieldsJSON.length());
-        
+
         assertNull(fieldsJSON.opt(0));
         assertNull(fieldsJSON.opt(1));
         assertNull(fieldsJSON.opt(2));
-        
+
     }
-    
+
     public void testWriteHeaderArrayField() throws OXException, JSONException {
         final MessagingField[] fields = new MessagingField[] {
             MessagingField.HEADERS};
 
-        
+
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
-        
+
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>(    );
         headers.put("Subject", header("Subject", "the subject"));
         message.setHeaders(headers);
@@ -372,14 +372,14 @@ public class MessagingMessageWriterTest extends TestCase {
         final JSONArray fieldsJSON = new MessagingMessageWriter().writeFields(message, fields, null, null, null);
 
         assertEquals(1, fieldsJSON.length());
-        
+
         final JSONObject headersJSON = fieldsJSON.getJSONObject(0);
-    
+
         final JSONAssertion assertion = new JSONAssertion().isObject().hasKey("Subject").withValue("the subject");
-        
+
         assertValidates(assertion, headersJSON);
     }
-    
+
 
     private Collection<MessagingHeader> header(final String name, final String... values) {
         final List<MessagingHeader> header = new ArrayList<MessagingHeader>();

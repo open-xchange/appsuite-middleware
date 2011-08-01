@@ -73,11 +73,13 @@ public class SMALLEROREQUAL extends BinaryPredicate {
 		super(left, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildSMALLEROREQUAL(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "<=";
 	}
 }

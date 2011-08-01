@@ -70,15 +70,15 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * This Step logs into a website via a form requiring username and password.
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage {
 
     private String url, username, password, nameOfLoginForm, nameOfUserField, nameOfPasswordField, linkAvailableAfterLogin, baseUrl;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageStep.class));
-    
+
     private Page loginPage;
 
     public LoginPageStep() {
@@ -99,7 +99,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
     @Override
     public void execute(final WebClient webClient) throws OXException {
         HtmlPage loginPage = null;;
-        try { 
+        try {
             // Get the page, fill in the credentials and submit the login form
             loginPage = webClient.getPage(url);
             this.loginPage = loginPage;
@@ -128,7 +128,7 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final IOException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
-        } catch (ElementNotFoundException e){            
+        } catch (ElementNotFoundException e){
             LOG.error("The page that does not contain the needed form : \n" + loginPage.getWebResponse().getContentAsString());
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
@@ -206,10 +206,10 @@ public class LoginPageStep extends AbstractStep<HtmlPage, Object> implements Log
         this.baseUrl = baseUrl;
     }
 
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
 
-    
+
 }

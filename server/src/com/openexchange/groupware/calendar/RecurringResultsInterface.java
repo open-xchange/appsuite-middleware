@@ -54,14 +54,14 @@ public interface RecurringResultsInterface {
 
     /**
      * Adds specified recurring result to this recurring results collection
-     * 
+     *
      * @param rr The recurring result to add
      */
     public abstract void add(final RecurringResultInterface rr);
 
     /**
      * Gets the corresponding result by specified one-based recurrence position
-     * 
+     *
      * @param recurrencePosition The one-based recurrence position
      * @return The corresponding result by specified one-based recurrence
      *         position or <code>null</code>
@@ -70,7 +70,7 @@ public interface RecurringResultsInterface {
 
     /**
      * Gets the corresponding result by specified zero-based internal position
-     * 
+     *
      * @param position The zero-based internal position
      * @return The corresponding result by specified zero-based internal
      *         position or <code>null</code>
@@ -79,7 +79,7 @@ public interface RecurringResultsInterface {
 
     /**
      * Gets this recurring results collection's size
-     * 
+     *
      * @return The recurring results collection's size
      */
     public abstract int size();
@@ -87,7 +87,7 @@ public interface RecurringResultsInterface {
     /**
      * Gets the one-based internal position in recurring results by specified
      * normalized time milliseconds
-     * 
+     *
      * @param normalizedTime The normalized time milliseconds whose position
      *            shall be determined
      * @return The time's zero-based internal position in recurring results or

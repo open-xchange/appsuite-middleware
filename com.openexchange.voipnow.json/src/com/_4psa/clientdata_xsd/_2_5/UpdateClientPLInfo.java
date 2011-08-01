@@ -16,11 +16,11 @@ import com._4psa.resellerdata_xsd._2_5.UpdateResellerPLInfo;
 
 /**
  * Client permissions and limits data used when updateding the client limits and permissions
- * 
+ *
  * <p>Java class for UpdateClientPLInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="UpdateClientPLInfo">
  *   &lt;complexContent>
@@ -84,8 +84,8 @@ import com._4psa.resellerdata_xsd._2_5.UpdateResellerPLInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UpdateClientPLInfo", propOrder = {
@@ -172,11 +172,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the permsManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPermsManag() {
         return permsManag;
@@ -184,11 +184,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the permsManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPermsManag(Boolean value) {
         this.permsManag = value;
@@ -196,11 +196,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the extensionManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isExtensionManag() {
         return extensionManag;
@@ -208,11 +208,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the extensionManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setExtensionManag(Boolean value) {
         this.extensionManag = value;
@@ -220,11 +220,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the extFeatureManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isExtFeatureManag() {
         return extFeatureManag;
@@ -232,11 +232,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the extFeatureManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setExtFeatureManag(Boolean value) {
         this.extFeatureManag = value;
@@ -244,11 +244,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the sipManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSipManag() {
         return sipManag;
@@ -256,11 +256,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the sipManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSipManag(Boolean value) {
         this.sipManag = value;
@@ -268,11 +268,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the imManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIMManag() {
         return imManag;
@@ -280,11 +280,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the imManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIMManag(Boolean value) {
         this.imManag = value;
@@ -292,11 +292,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the chargingPlanManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isChargingPlanManag() {
         return chargingPlanManag;
@@ -304,11 +304,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the chargingPlanManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setChargingPlanManag(Boolean value) {
         this.chargingPlanManag = value;
@@ -316,11 +316,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the soundManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isSoundManag() {
         return soundManag;
@@ -328,11 +328,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the soundManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setSoundManag(Boolean value) {
         this.soundManag = value;
@@ -340,11 +340,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the numberManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isNumberManag() {
         return numberManag;
@@ -352,11 +352,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the numberManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setNumberManag(Boolean value) {
         this.numberManag = value;
@@ -364,11 +364,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callAPIManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallAPIManag() {
         return callAPIManag;
@@ -376,11 +376,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callAPIManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallAPIManag(Boolean value) {
         this.callAPIManag = value;
@@ -388,11 +388,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callerIDManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallerIDManag() {
         return callerIDManag;
@@ -400,11 +400,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callerIDManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallerIDManag(Boolean value) {
         this.callerIDManag = value;
@@ -412,11 +412,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the myVoipNowManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getMyVoipNowManag() {
         return myVoipNowManag;
@@ -424,11 +424,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the myVoipNowManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setMyVoipNowManag(String value) {
         this.myVoipNowManag = value;
@@ -436,11 +436,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the provisionManag property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getProvisionManag() {
         return provisionManag;
@@ -448,11 +448,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the provisionManag property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setProvisionManag(BigInteger value) {
         this.provisionManag = value;
@@ -460,11 +460,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the phoneExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getPhoneExtMax() {
         return phoneExtMax;
@@ -472,11 +472,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the phoneExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setPhoneExtMax(Limit value) {
         this.phoneExtMax = value;
@@ -484,11 +484,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the queueExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getQueueExtMax() {
         return queueExtMax;
@@ -496,11 +496,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the queueExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setQueueExtMax(Limit value) {
         this.queueExtMax = value;
@@ -508,11 +508,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the ivrExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getIvrExtMax() {
         return ivrExtMax;
@@ -520,11 +520,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the ivrExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setIvrExtMax(Limit value) {
         this.ivrExtMax = value;
@@ -532,11 +532,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the voicemailExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getVoicemailExtMax() {
         return voicemailExtMax;
@@ -544,11 +544,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the voicemailExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setVoicemailExtMax(Limit value) {
         this.voicemailExtMax = value;
@@ -556,11 +556,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the queuecenterExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getQueuecenterExtMax() {
         return queuecenterExtMax;
@@ -568,11 +568,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the queuecenterExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setQueuecenterExtMax(Limit value) {
         this.queuecenterExtMax = value;
@@ -580,11 +580,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the confExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getConfExtMax() {
         return confExtMax;
@@ -592,11 +592,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the confExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setConfExtMax(Limit value) {
         this.confExtMax = value;
@@ -604,11 +604,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callbackExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getCallbackExtMax() {
         return callbackExtMax;
@@ -616,11 +616,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callbackExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setCallbackExtMax(Limit value) {
         this.callbackExtMax = value;
@@ -628,11 +628,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callbackCallerIDMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getCallbackCallerIDMax() {
         return callbackCallerIDMax;
@@ -640,11 +640,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callbackCallerIDMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setCallbackCallerIDMax(Limit value) {
         this.callbackCallerIDMax = value;
@@ -652,11 +652,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callCardExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getCallCardExtMax() {
         return callCardExtMax;
@@ -664,11 +664,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callCardExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setCallCardExtMax(Limit value) {
         this.callCardExtMax = value;
@@ -676,11 +676,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the callCardCodesMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getCallCardCodesMax() {
         return callCardCodesMax;
@@ -688,11 +688,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the callCardCodesMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setCallCardCodesMax(Limit value) {
         this.callCardCodesMax = value;
@@ -700,11 +700,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the intercomExtMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getIntercomExtMax() {
         return intercomExtMax;
@@ -712,11 +712,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the intercomExtMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setIntercomExtMax(Limit value) {
         this.intercomExtMax = value;
@@ -724,11 +724,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the concurentCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getConcurentCalls() {
         return concurentCalls;
@@ -736,11 +736,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the concurentCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setConcurentCalls(Limit value) {
         this.concurentCalls = value;
@@ -748,11 +748,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the concurentInternalCalls property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getConcurentInternalCalls() {
         return concurentInternalCalls;
@@ -760,11 +760,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the concurentInternalCalls property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setConcurentInternalCalls(Limit value) {
         this.concurentInternalCalls = value;
@@ -772,11 +772,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the queueMembersMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getQueueMembersMax() {
         return queueMembersMax;
@@ -784,11 +784,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the queueMembersMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setQueueMembersMax(Limit value) {
         this.queueMembersMax = value;
@@ -796,11 +796,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the concurentText2Speech property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getConcurentText2Speech() {
         return concurentText2Speech;
@@ -808,11 +808,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the concurentText2Speech property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setConcurentText2Speech(Limit value) {
         this.concurentText2Speech = value;
@@ -820,11 +820,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the mailboxMax property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getMailboxMax() {
         return mailboxMax;
@@ -832,11 +832,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the mailboxMax property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setMailboxMax(Limit value) {
         this.mailboxMax = value;
@@ -844,11 +844,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the mailboxSize property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getMailboxSize() {
         return mailboxSize;
@@ -856,11 +856,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the mailboxSize property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setMailboxSize(Limit value) {
         this.mailboxSize = value;
@@ -868,11 +868,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the recordStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getRecordStorage() {
         return recordStorage;
@@ -880,11 +880,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the recordStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setRecordStorage(Limit value) {
         this.recordStorage = value;
@@ -892,11 +892,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the soundStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getSoundStorage() {
         return soundStorage;
@@ -904,11 +904,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the soundStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setSoundStorage(Limit value) {
         this.soundStorage = value;
@@ -916,11 +916,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the mohStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getMohStorage() {
         return mohStorage;
@@ -928,11 +928,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the mohStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setMohStorage(Limit value) {
         this.mohStorage = value;
@@ -940,11 +940,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the faxStorage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Limit }
-     *     
+     *
      */
     public Limit getFaxStorage() {
         return faxStorage;
@@ -952,11 +952,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the faxStorage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Limit }
-     *     
+     *
      */
     public void setFaxStorage(Limit value) {
         this.faxStorage = value;
@@ -964,11 +964,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the accountExpire property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public UnlimitedDate getAccountExpire() {
         return accountExpire;
@@ -976,11 +976,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the accountExpire property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedDate }
-     *     
+     *
      */
     public void setAccountExpire(UnlimitedDate value) {
         this.accountExpire = value;
@@ -988,11 +988,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Gets the value of the accountExpireDays property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getAccountExpireDays() {
         return accountExpireDays;
@@ -1000,11 +1000,11 @@ public class UpdateClientPLInfo {
 
     /**
      * Sets the value of the accountExpireDays property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setAccountExpireDays(UnlimitedUInt value) {
         this.accountExpireDays = value;

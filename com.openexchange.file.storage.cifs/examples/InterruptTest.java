@@ -10,6 +10,7 @@ public class InterruptTest extends Thread {
     public InterruptTest(String url) {
         this.url = url;
     }
+    @Override
     public void run() {
         for (int i = 0; i < 100; i++) {
             try {

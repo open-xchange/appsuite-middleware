@@ -54,7 +54,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * {@link SessionIdGenerator} - The session ID generator
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 
@@ -76,7 +76,7 @@ public abstract class SessionIdGenerator {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @param context Context.
      * @return an instance implementing the group storage interface.
      * @throws OXException if the instance can't be created.
@@ -91,7 +91,7 @@ public abstract class SessionIdGenerator {
 
     /**
      * Proxy method to get the implementing class.
-     * 
+     *
      * @return the class implementing this interface.
      * @throws ClassNotFoundException if the class can't be loaded.
      */

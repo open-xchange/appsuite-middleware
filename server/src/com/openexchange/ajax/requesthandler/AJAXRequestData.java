@@ -60,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.parser.DataParser;
@@ -72,7 +73,7 @@ import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link AJAXRequestData} contains the parameters and the payload of the request.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,7 +83,7 @@ public class AJAXRequestData {
 
         /**
          * Gets this provider's input stream.
-         * 
+         *
          * @return The input stream
          * @throws IOException If an I/O error occurs
          */
@@ -98,9 +99,9 @@ public class AJAXRequestData {
     private Object data;
 
     private String module;
-    
+
     private String action;
-    
+
     private InputStreamProvider uploadStreamProvider;
 
     private final List<UploadFile> files = new ArrayList<UploadFile>(5);
@@ -110,12 +111,14 @@ public class AJAXRequestData {
     private String route;
 
     private UploadEvent uploadEvent;
-    
+
     private String format;
+
+    private AJAXState state;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
-     * 
+     *
      * @param json The JSON data
      * @throws OXException If an AJAX error occurs
      */
@@ -123,10 +126,10 @@ public class AJAXRequestData {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
     }
-    
+
     /**
      * Initializes a new {@link AJAXRequestData}.
-     * 
+     *
      * @param data The payload to use data
      * @throws OXException If an AJAX error occurs
      */
@@ -148,7 +151,7 @@ public class AJAXRequestData {
      * Puts given name-value-pair into this data's parameters.
      * <p>
      * A <code>null</code> value removes the mapping.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @throws NullPointerException If name is <code>null</code>
@@ -166,16 +169,35 @@ public class AJAXRequestData {
 
     /**
      * Gets this request's parameters as a {@link Map map}
-     * 
+     *
      * @return The parameters as a {@link Map map}
      */
     public Map<String, String> getParameters() {
         return new HashMap<String, String>(params);
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
+     * Gets the comma-sperated value.
+     *
+     * @param name The parameter name
+     * @return The values as an array
+     */
+    public String[] getParameterValues(final String name) {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (null == value) {
+            return null;
+        }
+        return SPLIT.split(value, 0);
+    }
+
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name or <code>null</code> if not present
      * @throws NullPointerException If name is <code>null</code>
@@ -186,7 +208,26 @@ public class AJAXRequestData {
         }
         return params.get(name);
     }
-    
+
+    /**
+     * Gets the value mapped to given parameter name.
+     *
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists
+     */
+    public String checkParameter(final String name) throws OXException {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return value;
+    }
+
     /**
      * Tries to get a parameter value as parsed as a certain type
      * @param name The parameter name
@@ -199,7 +240,7 @@ public class AJAXRequestData {
 
     /**
      * Gets all available parameter names wrapped by an {@link Iterator iterator}.
-     * 
+     *
      * @return The {@link Iterator iterator} for available parameter names
      */
     public Iterator<String> getParameterNames() {
@@ -208,7 +249,7 @@ public class AJAXRequestData {
 
     /**
      * Gets an {@link Iterator iterator} for those parameters not matching given parameter names.
-     * 
+     *
      * @param nonMatchingParameterNames The non-matching parameter names
      * @return An {@link Iterator iterator} for non-matching parameters
      */
@@ -220,7 +261,7 @@ public class AJAXRequestData {
 
     /**
      * Gets an {@link Iterator iterator} for those parameters matching given parameter names.
-     * 
+     *
      * @param matchingParameterNames The matching parameter names
      * @return An {@link Iterator iterator} for matching parameters
      */
@@ -232,7 +273,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if not available
      */
     public Object getData() {
@@ -241,14 +282,14 @@ public class AJAXRequestData {
 
     /**
      * Sets the data object.
-     * 
+     *
      * @param data The data object to set
      */
     public void setData(final Object data) {
         this.data = data;
     }
 
-    
+
     /**
      * Gets the format
      *
@@ -257,8 +298,8 @@ public class AJAXRequestData {
     public String getFormat() {
         return format;
     }
-    
-    
+
+
     /**
      * Sets the format
      *
@@ -267,11 +308,11 @@ public class AJAXRequestData {
     public void setFormat(final String format) {
         this.format = format;
     }
-    
-    
+
+
     /**
      * Whether this request has a secure connection.
-     * 
+     *
      * @return <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
     public boolean isSecure() {
@@ -280,7 +321,7 @@ public class AJAXRequestData {
 
     /**
      * Sets whether this request has a secure connection.
-     * 
+     *
      * @param secure <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
     public void setSecure(final boolean secure) {
@@ -289,7 +330,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the upload stream. Retrieves the body of the request as binary data as an {@link InputStream}.
-     * 
+     *
      * @return The upload stream or <code>null</code> if not available
      * @throws IOException If an I/O error occurs
      */
@@ -299,7 +340,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the upload stream provider
-     * 
+     *
      * @param uploadStream The upload stream provider to set
      */
     public void setUploadStreamProvider(final InputStreamProvider uploadStreamProvider) {
@@ -308,7 +349,7 @@ public class AJAXRequestData {
 
     /**
      * Computes a list of missing parameters from a list of mandatory parameters. Or use {@link #require(String...)} to check for the presence of certain parameters
-     * 
+     *
      * @param mandatoryParameters The mandatory parameters expected.
      * @return A list of missing parameter names
      */
@@ -321,7 +362,7 @@ public class AJAXRequestData {
         }
         return missing;
     }
-    
+
     /**
      * Require a set of mandatory parameters, throw an exception, if a parameter is missing otherwise.
      */
@@ -331,14 +372,14 @@ public class AJAXRequestData {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
         }
     }
-    
+
     /**
      * Finds out if a parameter is set
      */
     public boolean isSet(final String paramName) {
         return params.containsKey(paramName);
     }
-    
+
     /**
      * Sets a header value
      */
@@ -352,14 +393,14 @@ public class AJAXRequestData {
     public String getHeader(final String header) {
         return headers.get(header);
     }
-    
+
     /**
      * Gets a header value
      */
     public <T> T getHeader(final String header, final Class<T> coerceTo) {
         return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getHeader(header), coerceTo);
     }
-    
+
     /**
      * Gets the headers
      *
@@ -368,11 +409,11 @@ public class AJAXRequestData {
     public Map<String, String> getHeaders() {
         return new HashMap<String,String>(headers);
     }
-    
+
     /**
      * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
      * multiple module.
-     * 
+     *
      * @return true if one or more files were uploaded, false otherwise.
      */
     public boolean hasUploads() {
@@ -381,7 +422,7 @@ public class AJAXRequestData {
 
     /**
      * Retrieve file uploads.
-     * 
+     *
      * @return A list of file uploads.
      */
     public List<UploadFile> getFiles() {
@@ -390,7 +431,7 @@ public class AJAXRequestData {
 
     /**
      * Retrieve a file with a given form name.
-     * 
+     *
      * @param name The name of the form field that include the file
      * @return The file, or null if no file field of this name was found
      */
@@ -409,7 +450,7 @@ public class AJAXRequestData {
 
     /**
      * Constructs a URL to this server, injecting the hostname and optionally the jvm route.
-     * 
+     *
      * @param protocol The protocol to use (http or https). If <code>null</code>, defaults to the protocol used for this request.
      * @param path The path on the server. If <code>null</code> no path is inserted
      * @param withRoute Whether to include the jvm route in the server URL or not
@@ -448,7 +489,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the host name either fetched from HTTP request or from host name service
-     * 
+     *
      * @return The host name
      */
     public String getHostname() {
@@ -457,7 +498,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the host name either fetched from HTTP request or from host name service
-     * 
+     *
      * @param hostname The host name
      */
     public void setHostname(final String hostname) {
@@ -466,7 +507,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the AJP route.
-     * 
+     *
      * @return The AJP route
      */
     public String getRoute() {
@@ -475,7 +516,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the AJP route.
-     * 
+     *
      * @param route The AJP route
      */
     public void setRoute(final String route) {
@@ -484,7 +525,7 @@ public class AJAXRequestData {
 
     /**
      * Sets the associated upload event.
-     * 
+     *
      * @param upload The upload event
      */
     public void setUploadEvent(final UploadEvent upload) {
@@ -493,29 +534,29 @@ public class AJAXRequestData {
 
     /**
      * Gets the associated upload event.
-     * 
+     *
      * @return The upload event
      */
     public UploadEvent getUploadEvent() {
         return uploadEvent;
     }
 
-    
+
     public String getModule() {
         return module;
     }
 
-    
+
     public void setModule(final String module) {
         this.module = module;
     }
 
-    
+
     public String getAction() {
         return action;
     }
 
-    
+
     public void setAction(final String action) {
         this.action = action;
     }
@@ -524,4 +565,13 @@ public class AJAXRequestData {
         setData(object);
         setFormat(format);
     }
+
+    public void setState(final AJAXState state) {
+        this.state = state;
+    }
+
+    public AJAXState getState() {
+        return state;
+    }
+
 }

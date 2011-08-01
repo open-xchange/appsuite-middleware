@@ -65,32 +65,32 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
  *
  */
 public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> {
-    
-    private Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
-    
+
+    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StrategyFolderUpdaterService.class));
+
     private final FolderUpdaterStrategy<T> strategy;
-    
+
     // a normal updater overwrites existing objects
     private boolean usesMultipleStrategy = false;
 
     public StrategyFolderUpdaterService(final FolderUpdaterStrategy<T> strategy) {
         this.strategy = strategy;
     }
-    
+
     public StrategyFolderUpdaterService(final FolderUpdaterStrategy<T> strategy, final boolean usesMultipleStrategy) {
         this.strategy = strategy;
         this.usesMultipleStrategy = usesMultipleStrategy;
     }
- 
+
     public boolean handles(final FolderObject folder) {
         return strategy.handles(folder);
     }
 
     public void save(final Collection<T> data, final TargetFolderDefinition target) throws OXException {
         final Object session = strategy.startSession(target);
-        
+
         final Collection<T> dataInFolder = strategy.getData(target, session);
-        
+
         for(final T element : data) {
             try {
                 final T bestMatch = findBestMatch(element, dataInFolder, session);
@@ -103,7 +103,7 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
                 LOG.error(x.getMessage(), x);
             }
         }
-        
+
         strategy.closeSession(session);
     }
 
@@ -127,9 +127,9 @@ public class StrategyFolderUpdaterService<T> implements FolderUpdaterService<T> 
     /**
      * This attribute defines whether the Updater should:
      * - overwrite existing objects, deleting fields not given by the update (the classic update: one subscription on one folder)
-     * - only touch fields given in the updated object (the aggregating update: multiple subscriptions on one folder) 
+     * - only touch fields given in the updated object (the aggregating update: multiple subscriptions on one folder)
      */
-    public boolean usesMultipleStrategy() {       
+    public boolean usesMultipleStrategy() {
         return usesMultipleStrategy;
     }
 

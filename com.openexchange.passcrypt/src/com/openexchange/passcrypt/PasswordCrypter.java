@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PasswordCrypter} - Crypts password to support digest authentication mechanisms.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCheck, SecretMigrator {

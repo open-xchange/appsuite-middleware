@@ -67,10 +67,10 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
     public User censor(final User user) {
         return new FilteredUser(user);
     }
-    
+
     private static final class FilteredUser implements User {
         private User delegate = null;
-        
+
         private FilteredUser(final User delegate) {
             super();
             this.delegate = delegate;
@@ -189,8 +189,8 @@ public class NoGlobalAdressBookUserCensorship implements UserCensorship {
         public boolean isMailEnabled() {
             return false;
         }
-        
-        
+
+
     }
 
 }

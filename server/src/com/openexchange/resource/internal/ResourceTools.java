@@ -55,7 +55,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
  * {@link ResourceTools} - Utility methods for resource module
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceTools {
@@ -67,14 +67,14 @@ public final class ResourceTools {
         super();
     }
 
-    private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[ $@%\\.+a-zA-Z0-9_-]+");
+    private static final Pattern PATTERN_ALLOWED_CHARS = Pattern.compile("[\\S ]+");
 
     /**
      * Checks if specified resource identifier contains invalid characters.
      * <p>
      * Valid characters are:<br>
      * &quot;<i>&nbsp; abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ -+.%$@<i>&quot;
-     * 
+     *
      * @param identifier The resource identifier to check
      * @return <code>true</code> if specified resource identifier only consists of valid characters; otherwise <code>false</code>
      */
@@ -90,7 +90,7 @@ public final class ResourceTools {
 
     /**
      * Checks if specified resource email address' notation is valid
-     * 
+     *
      * @param emailAddress The resource email address to check
      * @return <code>true</code> if specified resource email address is valid; otherwise <code>false</code>
      */

@@ -55,7 +55,7 @@ import com.openexchange.twitter.User;
 
 /**
  * {@link DirectMessageImpl} - The direct message implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DirectMessageImpl implements DirectMessage {
@@ -68,7 +68,7 @@ public final class DirectMessageImpl implements DirectMessage {
 
     /**
      * Initializes a new {@link DirectMessageImpl}.
-     * 
+     *
      * @param twitter4jDirectMessage The twitter4j direct message
      */
     public DirectMessageImpl(final twitter4j.DirectMessage twitter4jDirectMessage) {

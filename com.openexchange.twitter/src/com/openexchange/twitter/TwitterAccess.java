@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 /**
  * {@link TwitterAccess} - The <a href="http://twitter.com/">twitter</a> access offering <a
  * href="http://apiwiki.twitter.com/Twitter-API-Documentation">twitter API</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TwitterAccess {
 
     /**
      * Gets authenticating user.
-     * 
+     *
      * @return The authenticating user
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
      */
@@ -73,7 +73,7 @@ public interface TwitterAccess {
      * third party developers can theme their widgets according to a given user's preferences.
      * <p>
      * This method calls <a href="http://twitter.com/users/show">http://twitter.com/users/show</a>
-     * 
+     *
      * @param id The identifier or screen name of the user
      * @return The twitter user
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -85,7 +85,7 @@ public interface TwitterAccess {
      * to request another user's friends_timeline via the id parameter below.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/friends_timeline">http://twitter.com/statuses/friends_timeline</a>
-     * 
+     *
      * @return A list of the friends' time line
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
      */
@@ -95,7 +95,7 @@ public interface TwitterAccess {
      * Returns the 20 most recent statuses posted in the last 24 hours from the specified user id.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/friends_timeline">http://twitter.com/statuses/friends_timeline</a>
-     * 
+     *
      * @param paging The controls pagination
      * @return A list of the friends' time line
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -107,7 +107,7 @@ public interface TwitterAccess {
      * equivalent of /timeline/home on the Web.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/home_timeline">http://twitter.com/statuses/home_timeline</a>
-     * 
+     *
      * @return A list of the home time line
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
      */
@@ -118,7 +118,7 @@ public interface TwitterAccess {
      * equivalent of /timeline/home on the Web.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/home_timeline">http://twitter.com/statuses/home_timeline</a>
-     * 
+     *
      * @param paging The controls pagination
      * @return A list of the home time line
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -129,7 +129,7 @@ public interface TwitterAccess {
      * Gets a list of the direct messages sent to the authenticating user.
      * <p>
      * This method calls <a href="http://twitter.com/direct_messages">http://twitter.com/direct_messages</a>
-     * 
+     *
      * @return A list of direct messages
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
      */
@@ -139,7 +139,7 @@ public interface TwitterAccess {
      * Gets a list of the direct messages sent to the authenticating user.
      * <p>
      * This method calls <a href="http://twitter.com/direct_messages">http://twitter.com/direct_messages</a>
-     * 
+     *
      * @param paging The controls pagination
      * @return A list of direct messages
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -150,7 +150,7 @@ public interface TwitterAccess {
      * Destroys the status specified by the required ID parameter. The authenticating user must be the author of the specified status.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/destroy">http://twitter.com/statuses/destroy</a>
-     * 
+     *
      * @param statusId The ID of the status to destroy.
      * @return The deleted status
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -161,7 +161,7 @@ public interface TwitterAccess {
      * Retweets a tweet. Requires the id parameter of the tweet being retweeted. Returns the original tweet with retweet details embedded.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/retweet">http://twitter.com/statuses/retweet</a>
-     * 
+     *
      * @param statusId The ID of the status to retweet.
      * @return The retweeted status
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -172,7 +172,7 @@ public interface TwitterAccess {
      * Gets a single status, specified by the id parameter. The status's author will be returned inline.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/show">http://twitter.com/statuses/show</a>
-     * 
+     *
      * @param id The numerical ID of the status
      * @return The single status
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -184,7 +184,7 @@ public interface TwitterAccess {
      * text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>
      * This method calls <a href="http://twitter.com/direct_messages/new">http://twitter.com/direct_messages/new</a>
-     * 
+     *
      * @param id The ID or screen name of the user to whom send the direct message
      * @param text The text of the message to send
      * @return The direct message sent to recipient
@@ -196,7 +196,7 @@ public interface TwitterAccess {
      * Updates the user's status. The text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
-     * 
+     *
      * @param status The text of your status update
      * @return The latest status
      * @throws OXException If <a href="http://twitter.com/">twitter</a> service or network is unavailable
@@ -207,7 +207,7 @@ public interface TwitterAccess {
      * Updates the user's status. The text will be trimmed if the length of the text is exceeding 140 characters.
      * <p>
      * This method calls <a href="http://twitter.com/statuses/update">http://twitter.com/statuses/update</a>
-     * 
+     *
      * @param status The text of your status update
      * @param inReplyToStatusId The ID of the status to retweet
      * @return The latest status

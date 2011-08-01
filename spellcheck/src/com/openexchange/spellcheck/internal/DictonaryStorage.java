@@ -82,7 +82,7 @@ import com.swabunga.spell.engine.SpellDictionaryHashMap;
 
 /**
  * {@link DictonaryStorage} - Storage for global locale-specific spell check dictionaries
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DictonaryStorage {
@@ -122,7 +122,7 @@ public final class DictonaryStorage {
 
     /**
      * Gets the locale-specific dictionary specified through given locale string
-     * 
+     *
      * @param localeStr The locale string (e.g. <code>en_EN</code>)
      * @return The locale-specific dictionary or <code>null</code>
      * @throws OXException If locale string is invalid
@@ -137,7 +137,7 @@ public final class DictonaryStorage {
 
     /**
      * Gets the locale-specific dictionary specified through given locale
-     * 
+     *
      * @param locale The locale
      * @return The locale-specific dictionary or <code>null</code>
      */
@@ -174,7 +174,7 @@ public final class DictonaryStorage {
 
     /**
      * Returns an {@link Iterator} for available instances of {@link Locale} for which a dictionary has been added to this storage.
-     * 
+     *
      * @return An {@link Iterator} for available instances of {@link Locale}
      */
     public static Iterator<Locale> getAvailableLocales() {
@@ -183,7 +183,7 @@ public final class DictonaryStorage {
 
     /**
      * Puts a spell directory
-     * 
+     *
      * @param localeStr The dictionary's locale string
      * @param spellDictionary The spell directory
      */
@@ -198,7 +198,7 @@ public final class DictonaryStorage {
 
     /**
      * Puts a spell directory
-     * 
+     *
      * @param locale The dictionary's locale
      * @param spellDictionary The spell directory
      */
@@ -222,7 +222,7 @@ public final class DictonaryStorage {
 
     /**
      * Loads the global locale-specific dictionaries
-     * 
+     *
      * @throws OXException If loading of dictionaries fails
      */
     public static void loadDictionaries() throws OXException {

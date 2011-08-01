@@ -12,14 +12,14 @@ import com.openexchange.tools.service.ServletRegistration;
 public class Activator implements BundleActivator {
 
 	private static final String ALIAS = "/publications/crawler";
-    
+
     private Whiteboard whiteboard;
 
     private ServletRegistration servletRegistration;
 
     public void start(BundleContext context) throws Exception {
 	    whiteboard = new Whiteboard(context);
-	
+
 	    CrawlerOfferingServlet.setSources(whiteboard.getService(SubscriptionSourceDiscoveryService.class));
         CrawlerOfferingServlet.setTemplateService(whiteboard.getService(TemplateService.class));
         CrawlerOfferingServlet.setConfigService(whiteboard.getService(ConfigurationService.class));

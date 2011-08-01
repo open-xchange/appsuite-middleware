@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 /**
  * {@link UUEncodedMultiPart} - Find possible uuencoded attachments in "normal" text (like Outlook does) and converts them to
  * {@link UUEncodedPart} objects.
- * 
+ *
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,7 +80,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Initializes a new {@link UUEncodedMultiPart}
-     * 
+     *
      * @param content The text content which is possibly uuencoded
      */
     public UUEncodedMultiPart(final String content) {
@@ -90,7 +90,7 @@ public class UUEncodedMultiPart {
 
     /**
      * A convenience method for setting this part's content.
-     * 
+     *
      * @param content Set the content of this UUEncodeMultiPart.
      */
     private final void setContent(final String content) {
@@ -107,7 +107,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Checks if content fed into this {@link UUEncodedMultiPart} instance is uuencoded.
-     * 
+     *
      * @return <code>true</code> if content is uuencoded, <code>false</code> otherwise
      */
     public boolean isUUEncoded() {
@@ -120,7 +120,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Try to find attachments recursive. Must containing the "begin" and "end" parameter, and specified tokens as well. Usually looks like:
-     * 
+     *
      * <pre>
      * begin 600 filename.doc
      * ...many data...
@@ -156,7 +156,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Return the "cleaned" text, without the content of the uuencoded attachments
-     * 
+     *
      * @return The "cleaned" text
      */
     public String getCleanText() {
@@ -165,7 +165,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Return the number of enclosed parts.
-     * 
+     *
      * @return number of parts
      */
     public int getCount() {
@@ -174,7 +174,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Get the specified part. Parts are numbered starting at 0.
-     * 
+     *
      * @param index The index of the desired part
      * @return The part
      */
@@ -184,7 +184,7 @@ public class UUEncodedMultiPart {
 
     /**
      * Remove the part at specified location (starting from 0). Shifts all the parts after the removed part down one.
-     * 
+     *
      * @param index The index of the part to remove
      */
     public void removeBodyPart(final int index) {

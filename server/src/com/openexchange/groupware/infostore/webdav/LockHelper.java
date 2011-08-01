@@ -73,7 +73,7 @@ public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
 	private final WebdavPath url;
 	protected int id;
-	
+
 	private final Set<String> removedLocks = new HashSet<String>();
 	private final Set<Integer> removedLockIDs = new HashSet<Integer>();
 	private final SessionHolder sessionHolder;
@@ -93,7 +93,7 @@ public abstract class LockHelper {
 	public void setId(final int id){
 		this.id = id;
 	}
-	
+
 	public WebdavLock getLock(final String token) throws OXException {
 		loadLocks();
 		return locks.get(token);
@@ -111,7 +111,7 @@ public abstract class LockHelper {
 				removeLock(lock.getToken());
 			}
 		}
-		
+
 		return notExpired;
 	}
 
@@ -123,7 +123,7 @@ public abstract class LockHelper {
                 locks.put(lock.getToken(), lock);
                 return;
 			}
-			
+
 			final int lockId = saveLock(lock);
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
@@ -132,7 +132,7 @@ public abstract class LockHelper {
 		}
 	}
 
-	protected abstract void relock(WebdavLock lock) throws OXException; 
+	protected abstract void relock(WebdavLock lock) throws OXException;
 
 	protected abstract int saveLock(WebdavLock lock) throws OXException ;
 
@@ -140,14 +140,14 @@ public abstract class LockHelper {
 		locks.remove(token);
 		markRemovedLock(token);
 	}
-	
+
 	public void setLocks(final List<Lock> locks) {
 		for(final Lock lock : locks) {
 			final WebdavLock l = toWebdavLock(lock);
 			this.locks.put(l.getToken(), l);
 		}
 	}
-	
+
 	protected abstract WebdavLock toWebdavLock(Lock lock);
 	protected abstract Lock toLock(WebdavLock lock);
 
@@ -173,13 +173,13 @@ public abstract class LockHelper {
 		    throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	private void markRemovedLock(final String token) {
 		removedLocks.add(token);
 		final int lockId = Integer.parseInt(token.substring(41));
 		removedLockIDs.add(Integer.valueOf(lockId));
 	}
-	
+
 	public void dumpLocksToDB() throws OXException {
 		if(removedLocks.isEmpty()) {
 			return;
@@ -194,7 +194,7 @@ public abstract class LockHelper {
 		removedLocks.clear();
 		removedLockIDs.clear();
 	}
-	
+
 	public void deleteLocks() throws OXException {
 		final ServerSession session = getSession();
 		lockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));

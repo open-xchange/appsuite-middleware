@@ -64,7 +64,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 
 /**
  * Interface for accessing configuration settings.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,14 +72,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contact_collect_enabled";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (null == value) {
                 pstmt.setNull(1, Types.BOOLEAN);
@@ -92,15 +95,18 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             final int retval = rs.getInt(getColumnName());
             return rs.wasNull() ? null : I(retval);
         }
 
+        @Override
         public String getColumnName() {
             return "contact_collect_folder";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (null == value) {
                 pstmt.setNull(1, Types.INTEGER);
@@ -113,14 +119,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_ACCESS = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contactCollectOnMailAccess";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
@@ -133,14 +142,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ON_MAIL_TRANSPORT = new Attribute<Boolean>() {
 
+        @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
             return Boolean.valueOf(rs.getBoolean(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "contactCollectOnMailTransport";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
             if (value == null) {
                 pstmt.setBoolean(1, true);
@@ -153,14 +165,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> DEFAULT_STATUS_PRIVATE = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             return I(rs.getInt(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "defaultStatusPrivate";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
@@ -173,14 +188,17 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> DEFAULT_STATUS_PUBLIC = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             return I(rs.getInt(getColumnName()));
         }
 
+        @Override
         public String getColumnName() {
             return "defaultStatusPublic";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
@@ -193,6 +211,7 @@ public class ServerUserSetting {
 
     private static final Attribute<Integer> FOLDER_TREE = new Attribute<Integer>() {
 
+        @Override
         public Integer getAttribute(final ResultSet rs) throws SQLException {
             final int tmp = rs.getInt(getColumnName());
             final Integer retval;
@@ -204,24 +223,26 @@ public class ServerUserSetting {
             return retval;
         }
 
+        @Override
         public String getColumnName() {
             return "folderTree";
         }
 
+        @Override
         public void setAttribute(final PreparedStatement pstmt, final Integer value) throws SQLException {
             if (value == null) {
                 pstmt.setInt(1, 0);
             } else {
                 pstmt.setInt(1, value.intValue());
             }
-        }        
+        }
     };
 
     private static final ServerUserSetting defaultInstance = new ServerUserSetting();
 
     /**
      * Gets the default instance.
-     * 
+     *
      * @return The default instance.
      */
     public static ServerUserSetting getInstance() {
@@ -230,7 +251,7 @@ public class ServerUserSetting {
 
     /**
      * Gets the instance using specified connection.
-     * 
+     *
      * @param connection The connection to use.
      * @return The instance using specified connection.
      */
@@ -253,7 +274,7 @@ public class ServerUserSetting {
 
     /**
      * Initializes a new {@link ServerUserSetting}.
-     * 
+     *
      * @param connection The connection to use.
      */
     private ServerUserSetting(final Connection connection) {
@@ -263,7 +284,7 @@ public class ServerUserSetting {
 
     /**
      * Complete feature is enabled if one of its sub switches is enabled.
-     * 
+     *
      * @param cid context id
      * @param user user id
      * @return The value or <code>false</code> if no entry is found.
@@ -274,7 +295,7 @@ public class ServerUserSetting {
 
     /**
      * Sets the folder used to store collected contacts.
-     * 
+     *
      * @param cid context id
      * @param user user id
      * @param folder folder id
@@ -285,7 +306,7 @@ public class ServerUserSetting {
 
     /**
      * Returns the folder used to store collected contacts.
-     * 
+     *
      * @param cid The context id
      * @param user The user id
      * @return folder id or <code>null</code> if no entry found.
@@ -296,7 +317,7 @@ public class ServerUserSetting {
 
     /**
      * Sets the flag for contact collection on incoming mails.
-     * 
+     *
      * @param cid The context id
      * @param user The user id
      * @param value The flag to set
@@ -308,7 +329,7 @@ public class ServerUserSetting {
 
     /**
      * Gets the flag for contact collection on incoming mails. If <code>null</code> default if <code>false</code>.
-     * 
+     *
      * @param cid The context id
      * @param user The user id
      * @return The flag for contact collection on incoming mails or <code>false</code>
@@ -321,7 +342,7 @@ public class ServerUserSetting {
 
     /**
      * Sets the flag for contact collection on outgoing mails.
-     * 
+     *
      * @param cid The context id
      * @param user The user id
      * @param value The flag to set
@@ -333,7 +354,7 @@ public class ServerUserSetting {
 
     /**
      * Gets the flag for contact collection on outgoing mails. If <code>null</code> default if <code>false</code>.
-     * 
+     *
      * @param cid The context id
      * @param user The user id
      * @return The flag for contact collection on outgoing mails or <code>false</code>
@@ -346,7 +367,7 @@ public class ServerUserSetting {
 
     /**
      * Returns the default confirmation status for private folders. If no value is set this parameter defaults to 0.
-     * 
+     *
      * @param cid
      * @param user
      * @return
@@ -362,7 +383,7 @@ public class ServerUserSetting {
 
     /**
      * Sets the default confirmation status for private folders. <code>null</code> will default to 0.
-     * 
+     *
      * @param cid
      * @param user
      * @param status
@@ -374,7 +395,7 @@ public class ServerUserSetting {
 
     /**
      * Returns the default confirmation status for public folders. If no value is set this parameter defaults to 0.
-     * 
+     *
      * @param cid
      * @param user
      * @return
@@ -390,7 +411,7 @@ public class ServerUserSetting {
 
     /**
      * Sets the default confirmation status for public folders. <code>null</code> will default to 0.
-     * 
+     *
      * @param cid
      * @param user
      * @param status

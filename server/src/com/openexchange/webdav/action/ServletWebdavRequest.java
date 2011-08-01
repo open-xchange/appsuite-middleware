@@ -71,10 +71,10 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
-	private ApacheURLDecoder decoder = new ApacheURLDecoder();
-	
+	private final ApacheURLDecoder decoder = new ApacheURLDecoder();
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletWebdavRequest.class));
-	
+
 	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
 		super(factory);
 		this.req = req;
@@ -86,15 +86,18 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         this.url = toWebdavURL(req.getRequestURI());
 	}
 
-	public InputStream getBody() throws IOException {
+	@Override
+    public InputStream getBody() throws IOException {
 		return req.getInputStream();
 	}
 
-	public String getHeader(final String header) {
+	@Override
+    public String getHeader(final String header) {
 		return req.getHeader(header);
 	}
 
-	public List<String> getHeaderNames() {
+	@Override
+    public List<String> getHeaderNames() {
 		final List<String> headers = new ArrayList<String>();
 		final Enumeration enumeration = req.getHeaderNames();
 		while(enumeration.hasMoreElements()) {
@@ -103,38 +106,41 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return headers;
 	}
 
-	public String getURLPrefix() {
+	@Override
+    public String getURLPrefix() {
 		return urlPrefix;
 	}
-	
+
     public void setUrlPrefix(String urlPrefix) {
         this.urlPrefix = urlPrefix;
     }
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return url;
 	}
 
-	public WebdavPath getDestinationUrl() {
+	@Override
+    public WebdavPath getDestinationUrl() {
 		if(destUrl != null) {
 			return destUrl;
 		}
-		
+
 		return destUrl = toWebdavURL(req.getHeader("destination"));
 	}
-	
+
 	protected WebdavPath toWebdavURL(String url) {
 		if(url == null) {
 			return null;
 		}
-		
+
 		try {
 			final URL urlO = new URL(url);
 			url = urlO.getPath();
 		} catch (final MalformedURLException x ){
 			LOG.debug("",x);
 		}
-		
+
 		if(url.startsWith(req.getServletPath())) {
 			url =  url.substring(req.getServletPath().length());
 		}
@@ -158,6 +164,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         return decoder.decode(component, encoding);
     }
 
+    @Override
     public String getCharset() {
 		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}

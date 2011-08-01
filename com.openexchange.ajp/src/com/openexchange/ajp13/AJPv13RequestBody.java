@@ -55,7 +55,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
 /**
  * {@link AJPv13RequestBody} - Processes an incoming AJP request body.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13RequestBody extends AJPv13Request {
@@ -114,7 +114,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 
     /**
      * Initializes a new {@link AJPv13RequestBody}
-     * 
+     *
      * @param payloadData The body's payload data
      */
     public AJPv13RequestBody(final byte[] payloadData) {

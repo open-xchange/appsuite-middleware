@@ -53,7 +53,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link PublicType} - The public type for a database folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PublicType implements Type {
@@ -62,7 +62,7 @@ public final class PublicType implements Type {
 
     /**
      * Gets the {@link PublicType} instance.
-     * 
+     *
      * @return The {@link PublicType} instance
      */
     public static PublicType getInstance() {
@@ -76,6 +76,7 @@ public final class PublicType implements Type {
         super();
     }
 
+    @Override
     public int getType() {
         // Taken from FolderObject.PUBLIC
         return 2;

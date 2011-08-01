@@ -62,17 +62,17 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
-    public void registerModule(AJAXActionServiceFactory factory, String module) {
+    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
     }
-    
-    public void registerModuleWithoutMultipleAccess(AJAXActionServiceFactory factory, String module) {
+
+    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, false);
     }
 
-    private void registerInternal(AJAXActionServiceFactory factory, String module, boolean multiple) {
-        Dictionary properties = new Hashtable();
-        
+    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
+
         properties.put("module", module);
         properties.put("multiple", new Boolean(multiple).toString());
         registerService(AJAXActionServiceFactory.class, factory, properties);

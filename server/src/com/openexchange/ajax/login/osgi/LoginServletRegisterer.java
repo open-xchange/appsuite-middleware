@@ -75,7 +75,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
     private static final String SERVLET_PATH = "/ajax/login";
-    
+
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
@@ -88,6 +88,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
@@ -149,10 +150,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer {
         }
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         HttpService unregister = null;
         lock.lock();

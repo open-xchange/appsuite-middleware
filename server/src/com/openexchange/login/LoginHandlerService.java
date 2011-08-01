@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link LoginHandlerService} - Handles a performed login.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginHandlerService {
 
     /**
      * Handles the specified performed login.
-     * 
+     *
      * @param login The performed login.
      * @throws OXException If an error occurs while handling the login
      */
@@ -68,7 +68,7 @@ public interface LoginHandlerService {
 
     /**
      * Handles the specified performed logout.
-     * 
+     *
      * @param logout The performed logout.
      * @throws OXException If an error occurs while handling the logout
      */

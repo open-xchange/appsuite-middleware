@@ -51,14 +51,14 @@ package com.openexchange.folderstorage.outlook.memory;
 
 /**
  * {@link MemoryCRUD} - Provides CRUD (<b>CR</b>eate, <b>U</b>pdate, and <b>D</b>elete) operations.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MemoryCRUD {
 
     /**
      * Puts specified folder if no such a folder is already contained.
-     * 
+     *
      * @param folder The folder
      * @return The folder already contained or <code>null</code> for successful put operation
      */
@@ -66,7 +66,7 @@ public interface MemoryCRUD {
 
     /**
      * Puts specified folder if no such a folder is already contained.
-     * 
+     *
      * @param folderId The folder identifier
      * @param folder The folder
      * @return The folder already contained or <code>null</code> for successful put operation
@@ -75,7 +75,7 @@ public interface MemoryCRUD {
 
     /**
      * Checks if specified folder is contained.
-     * 
+     *
      * @param folderId The folder identifier
      * @return <code>true</code> if specified folder is contained; otherwise <code>false</code>
      */
@@ -83,7 +83,7 @@ public interface MemoryCRUD {
 
     /**
      * Gets the specified folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @return The folder or <code>null</code> if there was no mapping
      */
@@ -91,7 +91,7 @@ public interface MemoryCRUD {
 
     /**
      * Puts specified folder
-     * 
+     *
      * @param folder The folder
      * @return The previous folder or <code>null</code> if there was no mapping
      */
@@ -99,7 +99,7 @@ public interface MemoryCRUD {
 
     /**
      * Puts specified folder
-     * 
+     *
      * @param folderId The folder identifier
      * @param folder The folder
      * @return The previous folder or <code>null</code> if there was no mapping
@@ -108,7 +108,7 @@ public interface MemoryCRUD {
 
     /**
      * Removes the specified folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @return The removed folder or <code>null</code> if there was no mapping
      */

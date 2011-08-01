@@ -54,7 +54,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link Utils} - Utility class for CIFS/SMB resources.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utils {
@@ -68,7 +68,7 @@ public final class Utils {
 
     /**
      * Checks if specified folder identifier ends with a <code>'/'</code> character.
-     * 
+     *
      * @param folderId The folder identifier to check
      * @param rootUri The root URI of the connected WebDAV server
      * @return The checked folder identifier
@@ -82,7 +82,7 @@ public final class Utils {
 
     /**
      * Checks if specified folder identifier ends with a <code>'/'</code> character.
-     * 
+     *
      * @param folderId The folder identifier to check
      * @return The checked folder identifier
      */
@@ -98,7 +98,7 @@ public final class Utils {
 
     /**
      * Checks the href provided by a multi-status response.
-     * 
+     *
      * @param href The multi-status response's href
      * @param isDirectory <code>true</code> if href denotes a directory; otherwise <code>false</code>
      * @return The checked href
@@ -109,7 +109,7 @@ public final class Utils {
 
     /**
      * Checks specified file identifier.
-     * 
+     *
      * @param fileId The file identifier
      * @return The checked file identifier
      */

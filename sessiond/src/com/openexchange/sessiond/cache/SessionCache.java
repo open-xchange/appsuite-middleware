@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceExceptionCode;
  * <p>
  * <b>Note</b>: The appropriate instance of {@link CacheService} is obtained on every request thus there's no need to to release/re-init any
  * references.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionCache {
@@ -83,7 +83,7 @@ public final class SessionCache {
         readWriteLock = new ReentrantReadWriteLock();
         /**
          * Uncomment this to enable default element event handler
-         * 
+         *
          * <pre>
          * final Cache cache;
          * try {
@@ -133,7 +133,7 @@ public final class SessionCache {
 
     /**
      * Removes and returns a cached session from cache
-     * 
+     *
      * @param sessionId The session identifier (which is sent as <i>"session=..."</i> in every request)
      * @param contextId The context ID
      * @return A cached session or <code>null</code>
@@ -187,7 +187,7 @@ public final class SessionCache {
      * Puts given cache-able session into cache if none user-bound session is already contained in cache.
      * <p>
      * The secret cookie identifier obtained by {@link CachedSession#getSecret()} is used as key.
-     * 
+     *
      * @param cachedSession The cache-able session to put into cache
      * @return <code>true</code> if cache-able session could be successfully cached; otherwise <code>false</code>
      * @throws OXException If caching service is not available
@@ -238,7 +238,7 @@ public final class SessionCache {
 
     /**
      * Puts given cache-able session into cache to distribute a remove for associated session among auxiliary caches.
-     * 
+     *
      * @param cachedSession The cached session which shall be removed in auxiliary caches
      * @throws OXException If caching service is not available
      */
@@ -263,7 +263,7 @@ public final class SessionCache {
 
     /**
      * Checks if cache already holds a user-bound cached session
-     * 
+     *
      * @param sessionId The secret cookie identifier (which is sent as <i>"session=..."</i> in every request)
      * @return <code>true</code> if a user-bound cached session is already present in cache; otherwise <code>false</code>
      * @throws OXException If caching service is not available
@@ -281,7 +281,7 @@ public final class SessionCache {
 
     /**
      * Gets the first encountered cached session for given user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The first encountered cached session for given user in specified context or <code>null</code> if none found
@@ -304,7 +304,7 @@ public final class SessionCache {
 
     /**
      * This method removes the dummy integer from the session cache. This triggers a remote remove and a broken connection is detected.
-     * 
+     *
      * @throws OXException
      */
     public void testConnection() throws OXException {

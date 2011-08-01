@@ -51,7 +51,7 @@ package com.openexchange.messaging.twitter;
 
 /**
  * {@link TwitterConstants} - Provides useful constants for twitter.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterConstants {

@@ -55,7 +55,7 @@ import java.util.EmptyStackException;
 
 /**
  * ArrayStack - an array-based stack
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ArrayStack<T> implements Stack<T> {
@@ -70,7 +70,7 @@ public final class ArrayStack<T> implements Stack<T> {
 
     /**
      * Construct the stack with default capacity of 10
-     * 
+     *
      * @param clazz - the class of the objects kept in this stack
      */
     public ArrayStack(final Class<T> clazz) {
@@ -79,7 +79,7 @@ public final class ArrayStack<T> implements Stack<T> {
 
     /**
      * Construct the stack.
-     * 
+     *
      * @param clazz - the class of the objects kept in this stack
      * @param capacity - the initial capacity
      */
@@ -97,6 +97,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#isEmpty()
      */
+    @Override
     public boolean isEmpty() {
         return top == -1;
     }
@@ -105,6 +106,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#makeEmpty()
      */
+    @Override
     public void clear() {
         Arrays.fill(arr, null);
         top = -1;
@@ -114,6 +116,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#top()
      */
+    @Override
     public T top() {
         if (isEmpty()) {
             throw new EmptyStackException();
@@ -125,6 +128,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#pop()
      */
+    @Override
     public void pop() {
         if (isEmpty()) {
             throw new EmptyStackException();
@@ -136,6 +140,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#topAndPop()
      */
+    @Override
     public T topAndPop() {
         if (isEmpty()) {
             throw new EmptyStackException();
@@ -149,6 +154,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#push(java.lang.Object)
      */
+    @Override
     public void push(final T x) {
         if (top + 1 == arr.length) {
             doubleArray();
@@ -160,6 +166,7 @@ public final class ArrayStack<T> implements Stack<T> {
      * (non-Javadoc)
      * @see com.openexchange.tools.stack.Stack#size()
      */
+    @Override
     public int size() {
         return top + 1;
     }

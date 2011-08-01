@@ -50,8 +50,8 @@
 package com.openexchange.sql.grammar;
 
 public abstract class Condition extends Predicate {
-	private Expression leftPredicate;
-	private Expression rightPredicate;
+	private final Expression leftPredicate;
+	private final Expression rightPredicate;
 
 	public Condition(Expression left, Expression right) {
 		super();

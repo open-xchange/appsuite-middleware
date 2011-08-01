@@ -59,11 +59,11 @@ import java.util.regex.Pattern;
 
 /**
  * {@link MimeTypeFileLineParser} - Parses entries in MIME type files like:
- * 
+ *
  * <pre>
  * type=magnus-internal/cgi	exts=cgi,exe,bat
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeTypeFileLineParser {
@@ -76,7 +76,7 @@ public final class MimeTypeFileLineParser {
 
     /**
      * Initializes a new MIME type file's line parser
-     * 
+     *
      * @param entry The MIME type file entry; e.g. <code>type=magnus-internal/cgi&nbsp;&nbsp;&nbsp;&nbsp;exts=cgi,exe,bat</code>
      */
     public MimeTypeFileLineParser(final String entry) {
@@ -116,7 +116,7 @@ public final class MimeTypeFileLineParser {
 
     /**
      * Gets the extensions
-     * 
+     *
      * @return the extensions
      */
     public List<String> getExtensions() {
@@ -125,7 +125,7 @@ public final class MimeTypeFileLineParser {
 
     /**
      * Gets the type
-     * 
+     *
      * @return the type
      */
     public String getType() {

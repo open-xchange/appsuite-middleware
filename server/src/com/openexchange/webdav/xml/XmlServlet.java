@@ -90,7 +90,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * {@link XmlServlet} - The XML servlet.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class XmlServlet<I> extends PermissionServlet {
@@ -138,7 +138,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     public static final String SERVER_ERROR_EXCEPTION = "[%s] Server Error - ";
 
     public static final String OK = "[" + OK_STATUS + "] OK";
-    
+
     public static final String INDIVIDUAL_ERROR = "[%s] [%s]";
 
     public static final String _contentType = "text/xml; charset=UTF-8";
@@ -387,7 +387,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             LOG.error("doError", exc);
         }
     }
-    
+
     private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int httpErrorCode, final String description, final XmlPullParser parser) throws ServletException {
         final DataObject dataObject = new DataObject() {
             @Override
@@ -397,7 +397,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         };
         try {
             String clientId = "not found";
-            
+
             while (!(parser.getEventType() == XmlPullParser.END_DOCUMENT)) {
                 if (isTag(parser, "client_id", "ox")) {
                     clientId = parser.nextText();
@@ -406,12 +406,12 @@ public abstract class XmlServlet<I> extends PermissionServlet {
                     parser.next();
                 }
             }
-            
+
             final OutputStream os = resp.getOutputStream();
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
             os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
             os.flush();
-            
+
             writeResponse(dataObject, httpErrorCode, description, clientId, resp.getOutputStream(), new XMLOutputter());
 
             os.write(("</D:multistatus>").getBytes());
@@ -423,11 +423,11 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             doError(req, resp, httpErrorCode, description);
         }
     }
-    
+
     private void doOXError(final HttpServletRequest req, final HttpServletResponse resp, final int httpErrorCode, final Exception exception, final XmlPullParser parser) throws ServletException {
         doOXError(req, resp, httpErrorCode, createResponseErrorMessage(exception), parser);
     }
-    
+
     private String createResponseErrorMessage(final Exception e) {
         final int descriptionCode;
         final String message;
@@ -444,7 +444,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             descriptionCode = 1400;
             message = e.getMessage();
         }
-        
+
         return String.format(INDIVIDUAL_ERROR, descriptionCode, message);
     }
 
@@ -598,7 +598,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     /**
      * This method is invoked when XML input could be successfully parsed and
      * pending actions are supposed to be performed
-     * 
+     *
      * @param os
      *            The output stream to write response to
      * @param session
@@ -620,7 +620,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     /**
      * Performs pending actions gathered through parsing XML input
-     * 
+     *
      * @param os
      *            The output stream to write response to
      * @param session

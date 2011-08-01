@@ -70,7 +70,7 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractMessagingActionTest extends TestCase {
-    
+
     protected MessagingServiceRegistry registry = TestRegistryBuilder.buildTestRegistry();
 
     protected AJAXRequestResult perform(final AJAXRequestData req) throws OXException {
@@ -90,14 +90,14 @@ public abstract class AbstractMessagingActionTest extends TestCase {
 
 
     }
-    
+
     protected abstract AbstractMessagingAction getAction();
-    
+
     protected void assertEqualFields(final Object object, final MessagingField...messagingFields) {
         assertNotNull(object);
         assertEquals(Arrays.asList(messagingFields), Arrays.asList((MessagingField[]) object));
     }
-    
+
     protected void assertIDs(final Object object, final String...ids) {
         assertNotNull(object);
         assertEquals(Arrays.asList((String[]) object), Arrays.asList(ids));

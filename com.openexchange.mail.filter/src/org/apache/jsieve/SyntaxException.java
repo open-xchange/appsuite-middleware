@@ -22,7 +22,7 @@ package org.apache.jsieve;
 
 /**
  * Class <code>SyntaxException</code> indicates an exceptional condition encountered
- * while evaluating the operands of a Sieve operation, such as a Command, Test or 
+ * while evaluating the operands of a Sieve operation, such as a Command, Test or
  * Comparator.
  */
 public class SyntaxException extends SieveException

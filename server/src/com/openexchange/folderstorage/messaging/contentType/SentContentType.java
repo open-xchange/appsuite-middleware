@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.messaging.contentType;
 
 /**
  * {@link SentContentType} - The folder storage content type for sent messaging folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SentContentType extends MessagingContentType {
@@ -60,7 +60,7 @@ public final class SentContentType extends MessagingContentType {
 
     /**
      * Gets the {@link SentContentType} instance.
-     * 
+     *
      * @return The {@link SentContentType} instance
      */
     public static SentContentType getInstance() {

@@ -53,7 +53,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
@@ -69,7 +69,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains common HTML tags.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
      */
@@ -94,7 +94,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains specified HTML tag.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param tag The HTML tag; e.g. <code>"body"</code>
      * @return <code>true</code> if given byte sequence contains specified HTML tag; otherwise <code>false</code>
@@ -131,7 +131,7 @@ public final class HTMLDetector {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -183,7 +183,7 @@ public final class HTMLDetector {
 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern matches against itself.
-     * 
+     *
      * @param pattern The pattern
      * @return The failures
      */

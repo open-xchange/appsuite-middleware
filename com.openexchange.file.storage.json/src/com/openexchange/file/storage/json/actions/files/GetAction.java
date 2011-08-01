@@ -65,11 +65,11 @@ public class GetAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-        
+
         return result(fileMetadata, request);
     }
 

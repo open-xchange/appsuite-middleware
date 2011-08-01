@@ -65,7 +65,7 @@ import com.openexchange.concurrent.Synchronizer;
  * <p>
  * This servlet output stream supports to work in both modes: synchronized and unsynchronized. To switch between these two modes the
  * {@link Synchronizable} interface is implemented. By default the unsynchronized mode is active.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XAJPv13ServletOutputStream extends ServletOutputStream implements Synchronizable {
@@ -86,7 +86,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Initializes a new {@link XAJPv13ServletOutputStream}.
-     * 
+     *
      * @param ajpCon The associated AJP connection
      */
     public XAJPv13ServletOutputStream(final INonBlockingConnection ajpCon) {
@@ -153,7 +153,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Checks if this output stream currently holds any data outstanding for being written to Web Server.
-     * 
+     *
      * @return <code>true</code> if this output stream currently holds any data; otherwise <code>false</code>.
      * @throws IOException If stream is already closed
      */
@@ -168,7 +168,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Gets current data held in this output stream outstanding for being written to Web Server.
-     * 
+     *
      * @return Current data held in this output stream
      * @throws IOException If stream is already closed
      */
@@ -246,7 +246,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
     /**
      * Sends response headers to web server if not done before, writes all buffered bytes cut into AJP SEND_BODY_CHUNK packages to web
      * server, and resets byte buffer.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void responseToWebServer() throws IOException {
@@ -257,7 +257,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
     /**
      * Sends response headers to web server if not done before and writes specified bytes cut into AJP SEND_BODY_CHUNK packages to web
      * server.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void responseToWebServer(final byte[] data, final int off, final int len) throws IOException {
@@ -302,7 +302,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Sends response headers to web server if not done before and writes specified chunk which must not exceed MAX_SEND_BODY_CHUNK_SIZE.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void responseChunkToWebServer(final byte[] data, final int off, final int len) throws IOException {
@@ -340,7 +340,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Flushes the byte buffer into stream.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void flushByteBuffer() throws IOException {
@@ -349,7 +349,7 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
 
     /**
      * Clears the byte buffer.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     public void clearByteBuffer() throws IOException {
@@ -361,10 +361,12 @@ public final class XAJPv13ServletOutputStream extends ServletOutputStream implem
         }
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }

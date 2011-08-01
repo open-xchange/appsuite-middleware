@@ -72,7 +72,7 @@ import com.openexchange.twitter.TwitterService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractTwitterMessagingAccess {
-    
+
     protected final MessagingAccount account;
 
     protected final TwitterService twitterService;
@@ -82,12 +82,12 @@ public abstract class AbstractTwitterMessagingAccess {
     protected final Session session;
 
     protected final String secret;
-    
+
     protected boolean connected;
 
     /**
      * Initializes a new {@link AbstractTwitterMessagingAccess}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     protected AbstractTwitterMessagingAccess(final MessagingAccount account, final Session session) throws OXException {
@@ -192,7 +192,7 @@ public abstract class AbstractTwitterMessagingAccess {
 
     /**
      * Pings twitter access.
-     * 
+     *
      * @return <code>true</code> if ping was successful; otherwise <code>false</code>
      */
     public boolean ping() {

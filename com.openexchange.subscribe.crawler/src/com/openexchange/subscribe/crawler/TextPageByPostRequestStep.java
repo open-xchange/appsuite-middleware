@@ -72,20 +72,20 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 public class TextPageByPostRequestStep extends AbstractStep<TextPage, String> {
 
     private String url, specialParameterName;
-    
+
     private ArrayList<NameValuePair> parameters;
-    
+
     public TextPageByPostRequestStep(){
-        
+
     }
-    
+
     public TextPageByPostRequestStep(String description, String url, ArrayList<NameValuePair> parameters, String specialParameterName ){
         this.description = description;
         this.url = url;
         this.parameters = parameters;
         this.specialParameterName = specialParameterName;
     }
-    
+
     @Override
     public void execute(final WebClient webClient) throws OXException {
         try {
@@ -95,9 +95,9 @@ public class TextPageByPostRequestStep extends AbstractStep<TextPage, String> {
             if (!specialParameterName.equals("")){
                 requestSettings.getRequestParameters().add(new NameValuePair(specialParameterName, input));
             }
-            
+
             TextPage page = webClient.getPage(requestSettings);
-            
+
             output = page;
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {
@@ -109,35 +109,35 @@ public class TextPageByPostRequestStep extends AbstractStep<TextPage, String> {
         }
     }
 
-    
+
     public String getUrl() {
         return url;
     }
 
-    
+
     public void setUrl(String url) {
         this.url = url;
     }
 
-    
+
     public String getSpecialParameterName() {
         return specialParameterName;
     }
 
-    
+
     public void setSpecialParameterName(String specialParameterName) {
         this.specialParameterName = specialParameterName;
     }
 
-    
+
     public ArrayList<NameValuePair> getParameters() {
         return parameters;
     }
 
-    
+
     public void setParameters(ArrayList<NameValuePair> parameters) {
         this.parameters = parameters;
     }
 
-    
+
 }

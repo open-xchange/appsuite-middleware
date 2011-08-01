@@ -66,7 +66,7 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link LoaderActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class LoaderActivator implements BundleActivator {

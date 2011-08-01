@@ -53,7 +53,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link ReadOnlyRights} - A {@link Rights} object providing read-only access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ReadOnlyRights extends Rights {
@@ -62,7 +62,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Initializes a new {@link ReadOnlyRights}.
-     * 
+     *
      * @param rights The rights for initialization
      */
     ReadOnlyRights(final Rights rights) {
@@ -72,7 +72,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Initializes a new {@link ReadOnlyRights}.
-     * 
+     *
      * @param rights The rights for initialization
      */
     ReadOnlyRights(final String rights) {
@@ -82,7 +82,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Initializes a new {@link ReadOnlyRights}.
-     * 
+     *
      * @param right The right for initialization
      */
     ReadOnlyRights(final Right right) {
@@ -92,7 +92,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Adds the specified right to this rights.
-     * 
+     *
      * @param right The right to add
      */
     @Override
@@ -105,7 +105,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Adds all the rights in the given rights to this rights.
-     * 
+     *
      * @param rights The rights to add
      */
     @Override
@@ -118,7 +118,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Removes the specified right from this rights.
-     * 
+     *
      * @param right The right to be removed
      */
     @Override
@@ -128,7 +128,7 @@ final class ReadOnlyRights extends Rights {
 
     /**
      * Removes all rights in the given rights from this rights.
-     * 
+     *
      * @param rights The rights to be removed
      */
     @Override

@@ -71,7 +71,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link GlobalActivator} - Activator for global (aka kernel) bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GlobalActivator implements BundleActivator {
@@ -125,9 +125,9 @@ public final class GlobalActivator implements BundleActivator {
             protected Collection<StringParser> getParsers() {
                 return standardParsers;
             }
-            
+
         };
-        
+
         final StringParser allParsers = new CompositeParser() {
 
             @Override
@@ -137,7 +137,7 @@ public final class GlobalActivator implements BundleActivator {
                     return Arrays.asList(standardParsersComposite);
                 }
                 final List<StringParser> parsers = new ArrayList<StringParser>(services.length);
-                
+
                 for (final Object object : services) {
                     if (object != this) {
                         parsers.add((StringParser) object);
@@ -146,20 +146,20 @@ public final class GlobalActivator implements BundleActivator {
                 parsers.add(standardParsersComposite);
                 return parsers;
             }
-            
+
         };
-        
+
         standardParsers.add(new BasicTypesStringParser());
         standardParsers.add(new DateStringParser(allParsers));
         standardParsers.add(new TimeSpanParser());
-        
+
         final Hashtable<String, Object> properties = new Hashtable<String, Object>();
         properties.put(Constants.SERVICE_RANKING, 100);
-        
+
         parserTracker.open();
-        
+
         parserRegistration = context.registerService(StringParser.class.getName(), allParsers, properties);
-        
+
     }
 
     public void stop(final BundleContext context) throws Exception {

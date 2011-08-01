@@ -68,14 +68,17 @@ public class SimpleTruncatedAttribute implements OXException.Truncated {
         this.length = length;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public int getMaxSize() {
         return maxSize;
     }
 
+    @Override
     public int getLength() {
         return length;
     }

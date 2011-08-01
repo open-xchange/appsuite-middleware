@@ -54,7 +54,7 @@ import java.lang.reflect.Field;
 
 /**
  * {@link IMAPTracer} - Utility methods to enable and restore IMAP protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPTracer {
@@ -68,7 +68,7 @@ public final class IMAPTracer {
 
     /**
      * Enables the {@link com.sun.mail.util.TraceInputStream TraceInputStream} of specified protocol.
-     * 
+     *
      * @param protocol The protocol
      * @param outputStream The output stream to apply to protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
      * @return The previous state of protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}
@@ -119,7 +119,7 @@ public final class IMAPTracer {
 
     /**
      * Restores specified trace state for given protocol's {@link com.sun.mail.util.TraceInputStream TraceInputStream}.
-     * 
+     *
      * @param protocol The protocol whose {@link com.sun.mail.util.TraceInputStream TraceInputStream} shall be restored
      * @param tracerState The trace state to restore
      * @throws SecurityException If a security error occurs
@@ -157,14 +157,14 @@ public final class IMAPTracer {
 
         /**
          * Gets the trace flag.
-         * 
+         *
          * @return The trace flag
          */
         public boolean isTrace();
 
         /**
          * Gets the tracer's output stream.
-         * 
+         *
          * @return The tracer's output stream
          */
         public OutputStream getOut();

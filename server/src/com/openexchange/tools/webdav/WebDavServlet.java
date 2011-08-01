@@ -58,7 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link WebDavServlet} - An abstract class for servlets serving WebDAV requests
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class WebDavServlet extends HttpServlet {
@@ -148,7 +148,7 @@ public abstract class WebDavServlet extends HttpServlet {
     protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"UNLOCK\" is not supported by this servlet");
     }
-    
+
     protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"REPORT\" is not supported by this servlet");
     }

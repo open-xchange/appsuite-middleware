@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * PushDelayedObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

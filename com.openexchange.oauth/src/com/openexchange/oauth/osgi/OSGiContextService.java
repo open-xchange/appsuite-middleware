@@ -56,7 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link OSGiContextService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiContextService extends AbstractOSGiDelegateService<ContextService> implements ContextService {

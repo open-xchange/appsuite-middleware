@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * This writer's main objective is to wrap ImportResults into JSON, which then
  * is fed to the AJAX GUI of the OX. TODO remove JSONWriter
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.org">Tobias Prinz</a>
  *         (Refactoring comment and errorhandling workaround)
@@ -85,7 +85,7 @@ public class ImportExportWriter extends DataWriter {
 
 	/**
 	 * Initializes a new {@link ImportExportWriter}
-	 * 
+	 *
 	 * @param jsonwriter
 	 *            The JSON writer to write to
 	 */
@@ -101,7 +101,7 @@ public class ImportExportWriter extends DataWriter {
             ResponseWriter.addException(jsonObject, exception, session.getUser().getLocale());
 
             jsonwriter.object();
-            writeDepth1(jsonObject);        
+            writeDepth1(jsonObject);
 
             final List<ConversionWarning> warnings = importResult.getWarnings();
             if(warnings != null && warnings.size() > 0) {
@@ -112,7 +112,7 @@ public class ImportExportWriter extends DataWriter {
                     final JSONObject jsonWarning = new JSONObject();
                     ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
                     writeDepth1(jsonWarning);
-                    jsonwriter.endObject();                    
+                    jsonwriter.endObject();
                 }
                 jsonwriter.endArray();
 
@@ -120,7 +120,7 @@ public class ImportExportWriter extends DataWriter {
                 writeParameter(DataFields.LAST_MODIFIED, importResult.getDate());
                 writeParameter(CommonFields.FOLDER_ID, importResult.getFolder());
             }
-            jsonwriter.endObject();     
+            jsonwriter.endObject();
         } else {
     		jsonwriter.object();
     		writeParameter(DataFields.ID, importResult.getObjectId());

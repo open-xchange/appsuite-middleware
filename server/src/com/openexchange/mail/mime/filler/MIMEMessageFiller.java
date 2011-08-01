@@ -145,7 +145,7 @@ import com.openexchange.user.UserService;
 /**
  * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
  * instance of {@link ComposedMailMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MIMEMessageFiller {
@@ -193,7 +193,7 @@ public class MIMEMessageFiller {
 
     /**
      * Initializes a new {@link MIMEMessageFiller}
-     * 
+     *
      * @param session The session providing user data
      * @param ctx The context
      */
@@ -203,7 +203,7 @@ public class MIMEMessageFiller {
 
     /**
      * Initializes a new {@link MIMEMessageFiller}
-     * 
+     *
      * @param session The session providing user data
      * @param ctx The context
      * @param usm The user's mail settings
@@ -244,7 +244,7 @@ public class MIMEMessageFiller {
 
     /**
      * Sets common headers in given MIME message: <code>X-Mailer</code> and <code>Organization</code>.
-     * 
+     *
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
      */
@@ -286,7 +286,7 @@ public class MIMEMessageFiller {
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
      * <code>Bcc</code>, <code>Reply-To</code>, <code>Subject</code>, etc.
-     * 
+     *
      * @param mail The composed mail
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
@@ -491,7 +491,7 @@ public class MIMEMessageFiller {
      * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
      * <p>
      * Moreover the <code>Reply-To</code> header is set.
-     * 
+     *
      * @param referencedMail The referenced mail
      * @param mimeMessage The MIME message
      * @throws MessagingException If setting the reply headers fails
@@ -544,7 +544,7 @@ public class MIMEMessageFiller {
 
     /**
      * Sets the appropriate headers before message's transport: <code>Reply-To</code>, <code>Date</code>, and <code>Subject</code>
-     * 
+     *
      * @param mail The source mail
      * @param mimeMessage The MIME message
      * @throws OXException If a mail error occurs
@@ -587,7 +587,7 @@ public class MIMEMessageFiller {
     /**
      * Fills the body of given instance of {@link MimeMessage} with the contents specified through given instance of
      * {@link ComposedMailMessage}.
-     * 
+     *
      * @param mail The source composed mail
      * @param mimeMessage The MIME message to fill
      * @param type The compose type
@@ -707,7 +707,7 @@ public class MIMEMessageFiller {
                     if (null == plainText) {
                         /*-
                          * Expect HTML content
-                         * 
+                         *
                          * Well-formed HTML
                          */
                         final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
@@ -718,7 +718,7 @@ public class MIMEMessageFiller {
                 } else {
                     /*-
                      * Append HTML content
-                     * 
+                     *
                      * Well-formed HTML
                      */
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
@@ -911,7 +911,7 @@ public class MIMEMessageFiller {
 
     /**
      * Gets session user's VCard as a string.
-     * 
+     *
      * @param charset The charset to use for returned string
      * @return The session user's VCard as a string
      * @throws OXException If a mail error occurs
@@ -962,7 +962,7 @@ public class MIMEMessageFiller {
 
     /**
      * Creates a "multipart/alternative" object.
-     * 
+     *
      * @param mail The source composed mail
      * @param mailBody The composed mail's HTML content
      * @param embeddedImages <code>true</code> if specified HTML content contains inline images (an appropriate "multipart/related" object
@@ -1026,7 +1026,7 @@ public class MIMEMessageFiller {
     /**
      * Creates a "multipart/related" object. All inline images are going to be added to returned "multipart/related" object and
      * corresponding HTML content is altered to reference these images through "Content-Id".
-     * 
+     *
      * @param mail The source composed mail
      * @param mailBody The composed mail's HTML content
      * @param images The list of with-source images
@@ -1082,7 +1082,13 @@ public class MIMEMessageFiller {
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
-                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData()), image.getContentType());
+                    try {
+                        dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes("US-ASCII")), image.getContentType());
+                    } catch (final UnsupportedEncodingException e) {
+                        // Cannot occur
+                        LOG.warn("Unknwon encoding: " + e.getMessage(), e);
+                        continue NextImg;
+                    }
                 } else {
                     /*
                      * Expect quoted-printable instead
@@ -1263,7 +1269,7 @@ public class MIMEMessageFiller {
 
     /**
      * Creates a body part of type <code>text/plain</code> from given HTML content
-     * 
+     *
      * @param content The content
      * @param charset The character encoding
      * @param appendHref <code>true</code> to append URLs contained in <i>href</i>s and <i>src</i>s; otherwise <code>false</code>
@@ -1300,7 +1306,7 @@ public class MIMEMessageFiller {
 
     /**
      * Creates a body part of type <code>text/html</code> from given HTML content
-     * 
+     *
      * @param wellFormedHTMLContent The well-formed HTML content
      * @param charset The charset
      * @return A body part of type <code>text/html</code> from given HTML content
@@ -1322,7 +1328,7 @@ public class MIMEMessageFiller {
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
-     * 
+     *
      * @param htmlContent The html content whose &lt;img&gt; tags must be replaced with real content IDs
      * @param mp The parental instance of <code>{@link Multipart}</code>
      * @param msgFiller The message filler
@@ -1427,7 +1433,7 @@ public class MIMEMessageFiller {
 
     /**
      * Processes a local image and returns its content id
-     * 
+     *
      * @param imageProvider The uploaded file
      * @param id uploaded file's ID
      * @param appendBodyPart
@@ -1497,7 +1503,7 @@ public class MIMEMessageFiller {
 
     /**
      * Gets and removes the image attachment from specified mail whose <code>Content-Id</code> matches given <code>cid</code> argument
-     * 
+     *
      * @param cid The <code>Content-Id</code> of the image attachment
      * @param mail The mail containing the image attachment
      * @return The removed image attachment
@@ -1542,14 +1548,17 @@ public class MIMEMessageFiller {
             this.managedFile = managedFile;
         }
 
+        @Override
         public String getContentType() {
             return managedFile.getContentType();
         }
 
+        @Override
         public DataSource getDataSource() throws OXException {
             return new FileDataSource(managedFile.getFile());
         }
 
+        @Override
         public String getFileName() {
             return managedFile.getFileName();
         }
@@ -1575,10 +1584,12 @@ public class MIMEMessageFiller {
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
+        @Override
         public String getContentType() {
             return contentType;
         }
 
+        @Override
         public DataSource getDataSource() throws OXException {
             try {
                 return new MessageDataSource(data.getData(), contentType);
@@ -1587,6 +1598,7 @@ public class MIMEMessageFiller {
             }
         }
 
+        @Override
         public String getFileName() {
             return fileName;
         }

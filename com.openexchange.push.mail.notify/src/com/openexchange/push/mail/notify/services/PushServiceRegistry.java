@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link PushServiceRegistry} - A registry for services needed by push bundle
- * 
+ *
  */
 public final class PushServiceRegistry {
 
@@ -61,7 +61,7 @@ public final class PushServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

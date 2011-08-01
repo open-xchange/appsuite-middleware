@@ -15,11 +15,11 @@ import com._4psa.extensionmessages_xsd._2_5.GetCardCodeRechargesResponse;
 
 /**
  * Get calling card recharges history: response type
- * 
+ *
  * <p>Java class for GetCardCodeCreditResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCardCodeCreditResponseType">
  *   &lt;complexContent>
@@ -32,8 +32,8 @@ import com._4psa.extensionmessages_xsd._2_5.GetCardCodeRechargesResponse;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCardCodeCreditResponseType", propOrder = {
@@ -51,11 +51,11 @@ public class GetCardCodeCreditResponseType {
 
     /**
      * Gets the value of the codeID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCodeID() {
         return codeID;
@@ -63,11 +63,11 @@ public class GetCardCodeCreditResponseType {
 
     /**
      * Sets the value of the codeID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCodeID(BigInteger value) {
         this.codeID = value;
@@ -75,25 +75,25 @@ public class GetCardCodeCreditResponseType {
 
     /**
      * Gets the value of the recharge property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the recharge property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRecharge().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link RechargeInfo }
-     * 
-     * 
+     *
+     *
      */
     public List<RechargeInfo> getRecharge() {
         if (recharge == null) {

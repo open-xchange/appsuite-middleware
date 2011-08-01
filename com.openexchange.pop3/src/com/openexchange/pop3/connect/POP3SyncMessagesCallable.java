@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link POP3SyncMessagesCallable} - {@link Callable} to connect to POP3 account and synchronize its messages with POP3 storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class POP3SyncMessagesCallable implements Callable<Object> {
@@ -83,7 +83,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     /**
      * Initializes a new {@link POP3SyncMessagesCallable}.
-     * 
+     *
      * @param pop3Access The POP3 access
      * @param pop3Storage The POP3 storage
      * @param pop3StorageProperties The POP3 storage properties

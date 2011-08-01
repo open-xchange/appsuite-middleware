@@ -85,14 +85,17 @@ public class CreatePublicationTablesTask implements UpdateTask {
 
     private final String INSERT_IN_SEQUENCE = "INSERT INTO sequence_publications (cid,id) VALUES (?,0)";
 
+    @Override
     public int addedWithVersion() {
         return 48;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

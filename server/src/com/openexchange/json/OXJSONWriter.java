@@ -67,24 +67,24 @@ import com.openexchange.tools.stack.Stack;
  * <p>
  * Check the <code>{@link #isJSONArray()}</code> and <code>{@link #isJSONObject()}</code> methods which indicate whether an instance of
  * <code>{@link JSONArray}</code> or <code>{@link JSONObject}</code> is the root object. <blockquote>
- * 
+ *
  * <pre>
  * final OXJSONWriter w = new OXJSONWriter();
  * ...
- * 
+ *
  * if (w.isJSONArray()) {
  *     final JSONArray jsonArr = (JSONArray) w.getObject();
  *     ...
- *     
+ *
  * } else if (w.isJSONObject()) { //what else?!
  *     final JSONObject jsonObj = (JSONObject) w.getObject();
  *     ...
- *     
+ *
  * }
  * </pre>
- * 
+ *
  * </blockquote>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXJSONWriter extends JSONWriter {
@@ -121,7 +121,7 @@ public final class OXJSONWriter extends JSONWriter {
      * <p>
      * <b>NOTE</b>: To get this writer into a complete state the <code>{@link #endObject()}</code> method must be invoked since this
      * constructor implicitly puts the writer into the same state as <code>{@link #object()}</code> does.
-     * 
+     *
      * @param jsonObject - the JSON object to write to
      * @throws JSONException - if unbalanced
      */
@@ -138,7 +138,7 @@ public final class OXJSONWriter extends JSONWriter {
      * <p>
      * <b>NOTE</b>: To get this writer into a complete state the <code>{@link #endArray()}</code> method must be invoked since this
      * constructor implicitly puts the writer into the same state as <code>{@link #array()}</code> does.
-     * 
+     *
      * @param jsonArray - the JSON array to write to
      * @throws JSONException - if unbalanced
      */
@@ -268,7 +268,7 @@ public final class OXJSONWriter extends JSONWriter {
     /**
      * Checks if this writer is left in an complete state; meaning all opened objects - either JSONArrays or JSONObjects - were properly
      * closed through corresponding <code>{@link #endArray()}</code> or <code>{@link #endObject()}</code> routine.
-     * 
+     *
      * @return <code>true</code> if JSON object is complete; otherwise <code>false</code>
      */
     public boolean isComplete() {
@@ -277,7 +277,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Checks if initial JSON object is an instance of <code>JSONArray</code>
-     * 
+     *
      * @return <code>true</code> if initial JSON object is an instance of <code>JSONArray</code>; otherwise <code>false</code>
      */
     public boolean isJSONArray() {
@@ -286,7 +286,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Checks if initial JSON object is an instance of <code>JSONObject</code>
-     * 
+     *
      * @return <code>true</code> if initial JSON object is an instance of <code>JSONObject</code>; otherwise <code>false</code>
      */
     public boolean isJSONObject() {
@@ -295,7 +295,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Getter for initial JSON object created through this writer
-     * 
+     *
      * @return The JSON object; either <code>JSONArray</code> or <code>JSONObject</code>
      */
     public JSONValue getObject() {
@@ -304,7 +304,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Checks if nothing has been written to this writer, yet
-     * 
+     *
      * @return <code>true</code> if nothing has been written to this writer; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -314,7 +314,7 @@ public final class OXJSONWriter extends JSONWriter {
     /**
      * Checks if next action should be any of the <code>{@link #value(X)}</code> methods. Within JSON object it's really expected and no
      * other action is allowed, but within JSON array <code>{@link #endArray()}</code> is also allowed
-     * 
+     *
      * @return <code>true</code> if a value is expected; otherwise <code>false</code>
      */
     public boolean isExpectingValue() {
@@ -323,7 +323,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Checks if next action can be the <code>{@link #key(String)}</code> method.
-     * 
+     *
      * @return <code>true</code> if a key is expected; otherwise <code>false</code>
      */
     public boolean isExpectingKey() {
@@ -352,7 +352,7 @@ public final class OXJSONWriter extends JSONWriter {
 
     /**
      * Append a value.
-     * 
+     *
      * @param value A value.
      * @return this
      * @throws JSONException If the value is out of sequence.

@@ -61,15 +61,18 @@ public class BETWEEN extends TernaryPredicate {
 		super(column, middle, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildBETWEEN(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "BETWEEN";
 	}
 
-	public String getSecondSqlKeyword() {
+	@Override
+    public String getSecondSqlKeyword() {
 		return "AND";
 	}
 }

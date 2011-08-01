@@ -51,7 +51,7 @@ package com.openexchange.groupware.tasks;
 
 /**
  * This class lists different names used for fields of a Task. TODO: Remove this enumeration and use the {@link Mapper}.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
 public enum TaskField {

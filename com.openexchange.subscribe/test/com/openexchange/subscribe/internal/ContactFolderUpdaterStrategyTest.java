@@ -63,111 +63,111 @@ import com.openexchange.groupware.container.FolderObject;
  *
  */
 public class ContactFolderUpdaterStrategyTest extends TestCase {
-    
+
     private FolderUpdaterStrategy<Contact> strategy;
-    
+
     @Override
     public void setUp() {
         this.strategy = new ContactFolderUpdaterStrategy();
     }
-    
+
     public void testHandles() {
         final FolderObject contactFolder = new FolderObject();
         contactFolder.setModule(FolderObject.CONTACT);
-        
+
         final FolderObject infostoreFolder = new FolderObject();
         infostoreFolder.setModule(FolderObject.INFOSTORE);
-        
+
         assertTrue("Should handle contact folders", strategy.handles(contactFolder));
         assertFalse("Should not handle infostore folders", strategy.handles(infostoreFolder));
     }
-    
+
     public void testScoring() throws OXException {
         // First name is not enough
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
-        
+
         final Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
 
         int score = strategy.calculateSimilarityScore(contact, contact2, null);
-        
+
         assertTrue("First name should not be enough", score < strategy.getThreshold(null));
 
         // First Name and Last Name is enough
         contact2.setSurName("Dampf");
-        
+
         score = strategy.calculateSimilarityScore(contact, contact2, null);
         assertTrue("First name and last name is not enough", score > strategy.getThreshold(null));
-        
+
         // Prefer first name, last name and birth date
         contact.setBirthday(new Date(2));
         contact2.setBirthday(new Date(2));
-        
+
         final int newScore = strategy.calculateSimilarityScore(contact, contact2, null);
         assertTrue("Similarity score for matching birthdays should be bigger", newScore > score);
-        
+
     }
-    
+
     public void testTwoCompaniesDiffer() throws OXException {
         final Contact contact = new Contact();
         contact.setGivenName("");
         contact.setSurName("");
-        
+
         contact.setCompany("Wunderwerk GmbH");
-        
+
         final Contact contact2 = new Contact();
         contact2.setGivenName("");
         contact2.setSurName("");
         contact2.setCompany("Schokoladenfabrik Inc.");
-        
+
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
-        
+
         assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(null));
     }
-    
+
     public void testNameChangedButMailAdressStayedTheSame() throws OXException {
         // First name is not enough
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setSurName("Dampf");
         contact.setEmail1("hans@example.com");
-        
+
         final Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setSurName("Wurst");
         contact2.setEmail1("hans@example.com");
 
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
-        
+
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(null));
 
-        
+
     }
-    
+
     public void testNullValuesShouldNotChangeResult() throws OXException {
         final Contact contact = new Contact();
         contact.setGivenName("Hans");
         contact.setEmail1(null);
-        
+
         final Contact contact2 = new Contact();
         contact2.setGivenName("Hans");
         contact2.setEmail1(null);
-        
+
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
-        
+
         assertTrue("Two objects with similar content should match", score > strategy.getThreshold(null));
     }
-    
-    
+
+
     public void testTwoEmptyContactsAreTheSame() throws OXException {
         final Contact contact = new Contact();
-        final Contact contact2 = new Contact();        
+        final Contact contact2 = new Contact();
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
-        
+
         assertTrue("Two completely empty objects should match, too", score > strategy.getThreshold(null));
     }
-    
+
 }

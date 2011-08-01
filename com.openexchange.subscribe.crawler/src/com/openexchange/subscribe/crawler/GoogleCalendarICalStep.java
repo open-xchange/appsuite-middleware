@@ -73,7 +73,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * {@link GoogleCalendarICalStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], UnexpectedPage> {
@@ -104,7 +104,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
             ZipInputStream zis = new ZipInputStream(new BufferedInputStream(bis));
             ZipEntry entry;
-            ICalParser iCalParser = workflow.getActivator().getICalParser();            
+            ICalParser iCalParser = workflow.getActivator().getICalParser();
             while ((entry = zis.getNextEntry()) != null) {
                 LOG.info("Extracting: " + entry);
                 int count;
@@ -117,9 +117,9 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
                 }
                 dest.flush();
                 dest.close();
-                String iCalFile = dest.toString("UTF-8");                                
-                
-                if (iCalParser != null) {                
+                String iCalFile = dest.toString("UTF-8");
+
+                if (iCalParser != null) {
                     tempEvents = (ArrayList<CalendarDataObject>) iCalParser.parseAppointments(
                         iCalFile,
                         TimeZone.getDefault(),
@@ -132,7 +132,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
                 events.addAll(tempEvents);
             }
             zis.close();
-            
+
 
         } catch (ConversionError e) {
             LOG.error(e.getMessage(), e);
@@ -153,7 +153,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     public String getBaseUrl() {
         return "";
-    }    
+    }
 
     public String getUrl() {
         return url;

@@ -142,7 +142,7 @@ public interface CalendarSqlImp {
     PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir) throws SQLException;
 
     PreparedStatement getSharedFolderRangeSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date d1, Date d2, String select, boolean readall, Connection readcon, int orderBy, Order orderDir, boolean includePrivateAppointments) throws SQLException;
-    
+
     PreparedStatement getSharedFolderModifiedSinceSQL(Context c, int uid, int shared_folder_owner, int groups[], int fid, Date since, String select, boolean readall, Connection readcon, Date d1, Date d2, boolean includePrivateFlag) throws SQLException;
 
     PreparedStatement getSharedFolderDeletedSinceSQL(Context c, int uid, int shared_folder_owner, int fid, Date d1, String select, Connection readcon) throws SQLException;
@@ -150,15 +150,15 @@ public interface CalendarSqlImp {
     long attachmentAction(int folderId, int oid, int uid, Session session, Context c, int numberOfAttachments) throws OXException;
 
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException;
-    
+
     PreparedStatement getSearchQuery(String select,  int uid, int groups[], UserConfiguration uc, int orderBy, Order orderDir, AppointmentSearchObject searchobject, Context c, Connection readcon, CalendarFolderObject cfo, boolean isShared) throws SQLException, OXException;
 
     PreparedStatement getActiveAppointments(Context c, int uid, Date d1, Date d2, String select, Connection readcon) throws SQLException;
-    
+
     public int resolveUid(Session session, String uid) throws OXException;
 
     int getFolder(Session session, int objectId) throws OXException;
-    
+
     public Date setExternalConfirmation(int oid, int folderId, String mail, int confirm, String message, Session so, Context ctx) throws OXException;
 
 }

@@ -82,6 +82,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 25;
     }
@@ -89,10 +90,12 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException {
         final String find = "SELECT pd.cid,pd.object_id,pd.member_uid "

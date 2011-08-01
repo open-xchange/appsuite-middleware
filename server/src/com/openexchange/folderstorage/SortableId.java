@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link SortableId} - A sortable identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SortableId extends Comparable<SortableId> {
@@ -62,21 +62,21 @@ public interface SortableId extends Comparable<SortableId> {
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     String getId();
 
     /**
      * Gets the name of the denoted folder
-     * 
+     *
      * @return The name
      */
     String getName();
 
     /**
      * Gets the priority.
-     * 
+     *
      * @return The priority
      */
     Priority getPriority();

@@ -140,6 +140,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return lifecycle;
     }
 
+    @Override
     public void back(final T pooled) throws PoolingException {
         if (null == pooled) {
             throw new PoolingException("A null reference was returned to pool.");
@@ -223,6 +224,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return !destroy;
     }
 
+    @Override
     public T get() throws PoolingException {
         final long startTime = System.currentTimeMillis();
         while (running) {
@@ -369,10 +371,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return System.currentTimeMillis() - startTime;
     }
 
+    @Override
     public void destroy() {
         running = false;
     }
 
+    @Override
     public boolean isEmpty() {
         lock.lock();
         try {
@@ -382,6 +386,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
+    @Override
     public int getNumIdle() {
         lock.lock();
         try {
@@ -391,6 +396,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
+    @Override
     public int getNumActive() {
         lock.lock();
         try {
@@ -400,6 +406,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
+    @Override
     public int getPoolSize() {
         lock.lock();
         try {
@@ -418,22 +425,27 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         }
     }
 
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
 
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
 
+    @Override
     public int getNumBroken() {
         return numBroken;
     }
 
+    @Override
     public void resetMaxUseTime() {
         maxUseTime = 0;
     }
 
+    @Override
     public void resetMinUseTime() {
         minUseTime = Long.MAX_VALUE;
     }
@@ -447,6 +459,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     private final Runnable cleaner = new Runnable() {
+        @Override
         public void run() {
             try {
                 final Thread thread = Thread.currentThread();
@@ -509,6 +522,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         return back(pooled, false);
     }
 
+    @Override
     public void run() {
         final long startTime = System.currentTimeMillis();
         if (LOG.isTraceEnabled()) {

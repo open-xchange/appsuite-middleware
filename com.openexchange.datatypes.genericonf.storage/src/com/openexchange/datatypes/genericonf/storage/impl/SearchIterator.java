@@ -65,33 +65,33 @@ import com.openexchange.datatypes.genericonf.IterationBreak;
  *
  */
 public class SearchIterator implements MapIterator<String, Object> {
-    
-    
+
+
     private final StringBuilder from = new StringBuilder();
     private final StringBuilder where = new StringBuilder();
     private final List<Object> queryReplacements = new ArrayList<Object>();
     private final Map<Class, String> aliases = new HashMap<Class, String>();
-    
-    
+
+
     private boolean firstTable = true;
     private boolean stringsIncluded = false;
     private boolean boolsIncluded = false;
-    
-    
+
+
     private static final ToSQLType toSQL = new ToSQLType();
 
-    
+
     public void handle(String key, Object object) throws IterationBreak {
-        
+
         if(!stringsIncluded && object.getClass() == String.class) {
             stringTable();
         } else if (!boolsIncluded && object.getClass() == Boolean.class) {
             boolTable();
         }
-        
-        
+
+
         String prefix = getAlias(object.getClass());
-        
+
         where.append("( ").append(prefix).append(".name = ? AND ").append(prefix).append(".value = ? ) AND ");
         queryReplacements.add(key);
         queryReplacements.add(object);
@@ -105,12 +105,12 @@ public class SearchIterator implements MapIterator<String, Object> {
         where.setLength(where.length()-4);
         return where.toString();
     }
-    
+
     public String getFrom() {
         return from.toString();
     }
 
-    
+
     public void setReplacements(PreparedStatement stmt) throws SQLException {
         for(int i = 0, size = queryReplacements.size(); i < size; i++) {
             stmt.setObject(i+1, queryReplacements.get(i));
@@ -136,7 +136,7 @@ public class SearchIterator implements MapIterator<String, Object> {
         }
         stringsIncluded = true;
     }
-    
+
     private void boolTable() {
         if(boolsIncluded) {
             return;
@@ -155,7 +155,7 @@ public class SearchIterator implements MapIterator<String, Object> {
     private void registerAlias(Class type, String alias) {
         aliases.put(type, alias);
     }
-    
+
     private String getAlias(Class type) {
         return aliases.get(type);
     }

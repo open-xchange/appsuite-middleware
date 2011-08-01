@@ -64,9 +64,9 @@ import com.openexchange.config.ConfigurationService;
  */
 @Deprecated
 public abstract class AbstractConfigWrapper {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractConfigWrapper.class));
-	
+
 	public static String parseProperty(final Properties prop, final String name, final String value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
@@ -74,7 +74,7 @@ public abstract class AbstractConfigWrapper {
 		}
 		return value;
 	}
-	
+
 	public static int parseProperty(final Properties prop, final String name, final int value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
@@ -86,7 +86,7 @@ public abstract class AbstractConfigWrapper {
 		}
 		return value;
 	}
-	
+
 	public static boolean parseProperty(final Properties prop, final String name, final boolean value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
@@ -94,13 +94,13 @@ public abstract class AbstractConfigWrapper {
 		}
 		return value;
 	}
-	
+
 	public static int[] parseProperty(final Properties prop, final String name, final int[] value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {
 			final String s[] = tmp.split(",");
 			final int ports[] = new int[s.length];
-			
+
 			for (int a = 0; a < ports.length; a++) {
 				try {
 					ports[a] = Integer.parseInt(s[a]);
@@ -108,13 +108,13 @@ public abstract class AbstractConfigWrapper {
 					LOG.warn("port in port range no parsable: " + s[a]);
 				}
 			}
-			
+
 			return ports;
 		}
 
 		return value;
 	}
-	
+
 	public static String[] parseProperty(final Properties prop, final String name, final String[] value) {
 		String tmp = null;
 		if ((prop.containsKey(name)) && ((tmp = prop.get(name).toString().trim()).length() > 0)) {

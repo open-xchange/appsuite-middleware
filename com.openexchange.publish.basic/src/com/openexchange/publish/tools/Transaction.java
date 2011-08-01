@@ -77,7 +77,7 @@ public class Transaction {
 
     public List<Integer> executeStatement(final String sql, final Object... objects) throws OXException, SQLException {
         PreparedStatement statement = null;
-        ResultSet keys = null;        
+        ResultSet keys = null;
         final List<Integer> retval = new ArrayList<Integer>();
         try {
             if (connection == null) {
@@ -192,8 +192,8 @@ public class Transaction {
             }
         }
     }
-    
-    
+
+
     // Utilities
     /**
      * Tries to turn everything into an int

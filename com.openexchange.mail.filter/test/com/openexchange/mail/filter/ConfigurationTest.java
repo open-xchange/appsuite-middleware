@@ -35,7 +35,7 @@ public class ConfigurationTest extends Activator {
         Common.prepare("session", "");
         checkConfigfile();
     }
-    
+
     @Test
     public void testPasswordSourceGlobalAndNoMasterPassword() throws Exception {
         Common.prepare("global", "");
@@ -46,11 +46,11 @@ public class ConfigurationTest extends Activator {
             Assert.assertTrue(OXMailfilterExceptionCode.NO_MASTERPASSWORD_SET.getMessage().equals(e));
         }
     }
-    
+
     @Test
     public void testPasswordSourceGlobalAndMasterPassword() throws Exception {
         Common.prepare("global", "secret");
         checkConfigfile();
     }
-    
+
 }

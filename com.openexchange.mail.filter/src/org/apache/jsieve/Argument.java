@@ -23,7 +23,7 @@ package org.apache.jsieve;
 
 /**
  * A simple Interface for Arguments.
- * 
+ *
  * Creation Date: 24-Nov-03
  */
 public interface Argument

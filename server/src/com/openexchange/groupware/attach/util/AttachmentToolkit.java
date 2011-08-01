@@ -55,12 +55,12 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 public final class AttachmentToolkit {
 	private AttachmentToolkit() {
 	}
-	
+
 	public static void copy(final AttachmentMetadata source, final AttachmentMetadata dest) {
-		
+
 		final GetSwitch get = new GetSwitch(source);
 		final SetSwitch set = new SetSwitch(dest);
-		
+
 		for(final AttachmentField field : AttachmentField.VALUES) {
 			set.setValue(field.doSwitch(get));
 			field.doSwitch(set);

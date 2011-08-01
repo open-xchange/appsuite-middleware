@@ -62,6 +62,7 @@ public class PublicFolders extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "folder", "public_folders" };
     }

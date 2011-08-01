@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigProviderServiceImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfigProviderServiceImpl implements ConfigProviderService {
@@ -83,15 +83,15 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     private static final String TRUE = "true";
 
     private ConfigurationService configService;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigProviderService.class));
-    
+
     private final ConcurrentMap<String, ServerProperty> properties = new ConcurrentHashMap<String, ServerProperty>();
 
     public ConfigProviderServiceImpl(final ConfigurationService configService) throws OXException {
         setConfigService(configService);
     }
-    
+
     public ServerProperty get(final String property, final int context, final int user) throws OXException {
         final ServerProperty basicProperty = properties.get(property);
         if (basicProperty != null) {
@@ -101,7 +101,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         final String value = configService.getProperty(property);
         retval.setDefined(value != null);
         retval.set(value);
-        
+
         final ServerProperty alreadyDefined = properties.putIfAbsent(property, retval);
         if(alreadyDefined != null) {
             return alreadyDefined;
@@ -133,9 +133,9 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             if(serverProperty.get(PROTECTED) == null) {
                 serverProperty.set(PROTECTED, TRUE);
             }
-            
+
         }
-        
+
     }
 
     private void initMetadata(final ConfigurationService config) throws OXException {
@@ -158,13 +158,13 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
                         basicProperty.set(metadataProp.getKey(), metadataProp.getValue().toString());
                     }
                 }
-                
+
                 String value = basicProperty.get(VALUE);
                 if (value == null) {
                     value = config.getProperty(propertyName);
                 }
                 basicProperty.set(value);
-                basicProperty.setDefined(value != null);    
+                basicProperty.setDefined(value != null);
             }
         }
     }

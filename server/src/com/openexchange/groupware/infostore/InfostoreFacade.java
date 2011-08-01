@@ -68,24 +68,24 @@ public interface InfostoreFacade extends TransactionAware{
 	 */
 	public static int CURRENT_VERSION = -1;
 	public static int NEW = -1;
-	
+
 	public static final int ASC = 1;
 	public static final int DESC = -1;
-	
+
 	public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
+
 	public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException ; // No modifiedColumns means all columns
 	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException ;
-	
+
 	public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException ;
 	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException ;
-	
+
 	public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException;
 	public int[] removeDocument(int id[], long date, ServerSession sessionObj) throws OXException;
 	public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException;
-	
+
 	public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
@@ -99,14 +99,14 @@ public interface InfostoreFacade extends TransactionAware{
 	public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
-	
+
 	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	// order is either ASC or DESC
 	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
+
 	public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	
+
 	public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 	public boolean isFolderEmpty(long folderId, Context ctx) throws OXException;
 
@@ -118,7 +118,7 @@ public interface InfostoreFacade extends TransactionAware{
 
     public void touch(int id, ServerSession session) throws OXException;
 
-    
+
     public void setSessionHolder(SessionHolder sessionHolder);
 
 }

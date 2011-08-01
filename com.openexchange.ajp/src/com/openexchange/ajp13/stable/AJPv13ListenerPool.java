@@ -59,7 +59,7 @@ import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * {@link AJPv13ListenerPool} - The AJP listener pool.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13ListenerPool {
@@ -138,7 +138,7 @@ final class AJPv13ListenerPool {
 
     /**
      * Removes the listener from pool whose number equals specified number
-     * 
+     *
      * @param num The number of the listener to remove
      */
     static void removeListener(final int num) {
@@ -158,7 +158,7 @@ final class AJPv13ListenerPool {
 
     /**
      * Checks if listener pool has been initialized
-     * 
+     *
      * @return <code>true</code> if listener pool has been initialized; otherwise <code>false</code>
      */
     static boolean isInitialized() {
@@ -167,7 +167,7 @@ final class AJPv13ListenerPool {
 
     /**
      * Fetches a listener from pool if available, otherwise a new listener is created
-     * 
+     *
      * @return A pooled or newly created listener
      */
     static AJPv13Listener getListener() {
@@ -199,7 +199,7 @@ final class AJPv13ListenerPool {
     /**
      * Puts back the given listener into pool if pool is not full, yet. If <code>enforcedPut</code> is <code>true</code> the listener is
      * going to be put in any case.
-     * 
+     *
      * @param listener The AJP listener which shall be put back into pool
      * @return <code>true</code> if given listener can be put into pool, <code>false</code> otherwise
      */
@@ -219,7 +219,7 @@ final class AJPv13ListenerPool {
 
     /**
      * Gets the current pool size
-     * 
+     *
      * @return The current pool size
      */
     static int getPoolSize() {

@@ -51,7 +51,7 @@ package com.openexchange.search;
 
 /**
  * {@link Operand} - Represents a operand within a search term.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Operand<V> {
@@ -77,7 +77,7 @@ public interface Operand<V> {
 
         /**
          * Gets this type's string representation.
-         * 
+         *
          * @return The type's string representation.
          */
         public String getType() {
@@ -86,7 +86,7 @@ public interface Operand<V> {
 
         /**
          * Checks if specified string equals this type's string representation.
-         * 
+         *
          * @param other The other string to check
          * @return <code>true</code> if specified string equals this type's string representation; otherwise <code>false</code>.
          */
@@ -97,14 +97,14 @@ public interface Operand<V> {
 
     /**
      * Gets this operand's type.
-     * 
+     *
      * @return The operand's type.
      */
     public Type getType();
 
     /**
      * Gets this operand's value.
-     * 
+     *
      * @return The operand's value.
      */
     public V getValue();

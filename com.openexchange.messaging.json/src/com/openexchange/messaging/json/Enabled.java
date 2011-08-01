@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
 public class Enabled implements PreferencesItemService {
 
     private static final String ENABLED = "com.openexchange.messaging.enabled";
-    
+
     final ConfigViewFactory configViews;
 
     public Enabled(final ConfigViewFactory configViews) {

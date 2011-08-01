@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link DoubleKeyMap} - A double-key map.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class DoubleKeyMap<K1, K2, V> implements Serializable {
@@ -71,7 +71,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Initializes a new {@link DoubleKeyMap}.
-     * 
+     *
      * @param clazz he class of the values
      */
     public DoubleKeyMap(final Class<V> clazz) {
@@ -81,7 +81,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Detects if first key is contained in this map.
-     * 
+     *
      * @param k1 The first key
      * @return <code>true</code> if first key is contained in this map; otherwise <code>false</code>
      */
@@ -91,7 +91,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Detects if key pair is contained in this map.
-     * 
+     *
      * @param k1 The first key
      * @param k2 The second key
      * @return <code>true</code> if key pair is contained in this map; otherwise <code>false</code>
@@ -106,7 +106,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Gets all values associated with given first key.
-     * 
+     *
      * @param k1 The first key
      * @return All values associated with given first key or <code>null</code> if none found
      */
@@ -121,7 +121,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Gets the values associated with given first key and given second keys.
-     * 
+     *
      * @param k1 The first key
      * @param keys The second keys
      * @return The values associated with given first key and given second keys
@@ -141,7 +141,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Gets the single value associated with given key pair.
-     * 
+     *
      * @param k1 The first key
      * @param k2 The second key
      * @return The single value associated with given key pair or <code>null</code> if not present
@@ -156,7 +156,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Puts given values into map.
-     * 
+     *
      * @param k1 The first key
      * @param keys The second keys
      * @param values The values to insert
@@ -179,7 +179,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Puts a single value into map.
-     * 
+     *
      * @param k1 The first key
      * @param k2 The second key
      * @param value The value to insert
@@ -199,7 +199,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Removes all values associated with given first key.
-     * 
+     *
      * @param k1 The first key
      */
     public void removeValues(final K1 k1) {
@@ -208,7 +208,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Removes the values associated with given first key and is in list of second keys.
-     * 
+     *
      * @param k1 The first key
      * @param keys The second keys
      */
@@ -230,7 +230,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Removes the single value associated with given key pair.
-     * 
+     *
      * @param k1 The first key
      * @param k2 The second key
      * @return The removed value or <code>null</code> if not present
@@ -252,7 +252,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Checks if no values are bound to given first key.
-     * 
+     *
      * @param k1 The first key
      * @return <code>true</code> if no values are bound to given first key; otherwise <code>false</code>
      */
@@ -269,7 +269,7 @@ final class DoubleKeyMap<K1, K2, V> implements Serializable {
 
     /**
      * Checks if whole map is empty.
-     * 
+     *
      * @return <code>true</code> if whole map is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {

@@ -91,30 +91,30 @@ public class ModuleSpecificServiceTracker<T> extends ServiceTracker {
         Object property = reference.getProperty(Constants.OX_MODULE);
         int module = atoi(property);
         removedService(module, tracked, reference);
-        context.ungetService(reference); 
+        context.ungetService(reference);
     }
-    
+
     protected int atoi(Object property) {
         if(Integer.class.isInstance(property)) {
             return (Integer) property;
-        } 
+        }
         return Integer.parseInt(property.toString());
     }
-    
+
     public void removedService(int module, T tracked, ServiceReference reference) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void addingService(int module, T tracked, ServiceReference reference) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public void modifiedService(int module, T tracked, ServiceReference reference) {
         // TODO Auto-generated method stub
-        
+
     }
-    
+
 
 }

@@ -57,7 +57,7 @@ import java.util.Collection;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface PipesAndFiltersService {
-    
+
     <T> DataSource<T> create(Collection<T> input);
 
 }

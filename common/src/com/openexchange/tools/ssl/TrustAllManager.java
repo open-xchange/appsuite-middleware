@@ -55,7 +55,7 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * This trust manager simply trusts all certificates.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TrustAllManager implements X509TrustManager {

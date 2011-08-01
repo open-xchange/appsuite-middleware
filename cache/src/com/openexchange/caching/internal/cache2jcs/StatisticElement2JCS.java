@@ -55,7 +55,7 @@ import com.openexchange.caching.StatisticElement;
 /**
  * {@link StatisticElement2JCS} - The {@link StatisticElement} implementation backed by a {@link IStatElement} object; meaning all
  * invocations are delegated to specified {@link IStatElement} object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StatisticElement2JCS implements StatisticElement {
@@ -66,7 +66,7 @@ public final class StatisticElement2JCS implements StatisticElement {
 
     /**
      * Initializes a new {@link StatisticElement2JCS}
-     * 
+     *
      * @param statElement The {@link IStatElement} object to delegate to
      */
     public StatisticElement2JCS(final IStatElement statElement) {

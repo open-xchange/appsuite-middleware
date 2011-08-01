@@ -223,18 +223,18 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			    if ((cdao.fillParticipants() || cdao.fillUserParticipants() || cdao.fillFolderID() || cdao.fillConfirmations())) {
 			        readcon = DBPool.pickup(c);
 			    }
-			
+
 			    int mn = MAX_PRE_FETCH;
 			    if (mn+pre_fetch > list.size()) {
 			        mn = list.size()%MAX_PRE_FETCH;
 			    }
 			    final int arr[] = new int[mn];
-			
+
 			    for (int a = 0; a < mn; a++) {
 			        final CalendarDataObject temp = list.get(pre_fetch++);
 			        arr[a] = temp.getObjectID();
 			    }
-			
+
 			    final String sqlin = StringCollection.getSqlInString(arr);
 			    if  (cdao.fillUserParticipants() || cdao.fillFolderID()) {
 			        try {
@@ -243,7 +243,7 @@ public class CachedCalendarIterator implements SearchIterator<CalendarDataObject
 			            throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(ex, I(202));
 			        }
 			    }
-			
+
 			    if (cdao.fillParticipants()) {
 			        try {
 			            new CalendarMySQL().getParticipantsSQLIn(list, readcon, cdao.getContextID(), sqlin);

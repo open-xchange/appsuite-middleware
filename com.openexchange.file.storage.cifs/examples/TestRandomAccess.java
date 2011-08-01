@@ -36,6 +36,7 @@ public class TestRandomAccess {
             this.f11 = f11;
         }
 
+        @Override
         public void encode( SmbTableFile tf ) throws SmbException {
             tf.writeBoolean( f1 );
             tf.writeByte( f2 );
@@ -49,6 +50,7 @@ public class TestRandomAccess {
             tf.writeDouble( f10 );
             tf.writeUTF( f11 );
         }
+        @Override
         public void decode( SmbTableFile tf ) throws SmbException {
             f1 = tf.readBoolean();
             f2 = tf.readByte();
@@ -62,6 +64,7 @@ public class TestRandomAccess {
             f10 = tf.readDouble();
             f11 = tf.readUTF();
         }
+        @Override
         public boolean equals( Object obj ) {
             if( obj instanceof TestRecord ) {
                 TestRecord r = (TestRecord)obj;

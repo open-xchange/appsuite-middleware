@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FileStorageAccountAccess} - Provides access to a file storage account.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -62,14 +62,14 @@ public interface FileStorageAccountAccess extends FileStorageResource {
 
     /**
      * Gets the account identifier of this access.
-     * 
+     *
      * @return The account identifier
      */
     public String getAccountId();
 
     /**
      * Gets the file access for associated account.
-     * 
+     *
      * @return The file access
      * @throws OXException If file access cannot be returned
      */
@@ -77,7 +77,7 @@ public interface FileStorageAccountAccess extends FileStorageResource {
 
     /**
      * Gets the folder access for associated account.
-     * 
+     *
      * @return The folder access
      * @throws OXException If folder access cannot be returned
      */
@@ -89,11 +89,11 @@ public interface FileStorageAccountAccess extends FileStorageResource {
      * <p>
      * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
      * {@link FileStorageFolderAccess}.
-     * 
+     *
      * @throws OXException If returning the root folder fails
      */
     public FileStorageFolder getRootFolder() throws OXException;
-    
+
     /**
      * Retrieve the parent file storage service
      * @return

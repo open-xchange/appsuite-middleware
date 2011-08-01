@@ -69,16 +69,16 @@ public class DocumentAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-        
+
         final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
-        
+
         final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-        
-        
+
+
         return new AJAXRequestResult(fileHolder, "file");
     }
 }

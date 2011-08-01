@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 public class AccountServlet extends MultipleAdapterServletNew {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4462465729436674844L;
 

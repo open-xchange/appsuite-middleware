@@ -56,8 +56,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 public interface AttachmentAuthorization {
 	public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
-	
+
 	public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
-	
+
 	public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException;
 }

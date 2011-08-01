@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SearchIterator} - An extended iterator over a collection or a (releasable) resource.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchIterator<T> {
@@ -61,7 +61,7 @@ public interface SearchIterator<T> {
     /**
      * Returns <code>true</code> if the iteration has more elements. (In other words, returns <code>true</code> if {@link #next()} would
      * return an element.)
-     * 
+     *
      * @return <code>true</code> if the iterator has more elements; otherwise <code>false</code>
      * @throws OXException If check for further elements fails
      */
@@ -70,7 +70,7 @@ public interface SearchIterator<T> {
     /**
      * Returns the next element in the iteration. Calling this method repeatedly until the {@link #hasNext()} method returns
      * <code>false</code> will return each element in the underlying collection exactly once.
-     * 
+     *
      * @return The next element in the iteration.
      * @throws OXException If next element cannot be returned
      */
@@ -78,35 +78,35 @@ public interface SearchIterator<T> {
 
     /**
      * Closes the search iterator
-     * 
+     *
      * @throws OXException If closing fails
      */
     void close() throws OXException;
 
     /**
      * This iterator's size
-     * 
+     *
      * @return The size
      */
     int size();
 
     /**
      * Indicates if this iterator has warnings
-     * 
+     *
      * @return <code>true</code> if this iterator has warnings; otherwise <code>false</code>
      */
     boolean hasWarnings();
 
     /**
      * Adds specified warning to this iterator's warnings
-     * 
+     *
      * @param warning The warning to add
      */
     void addWarning(OXException warning);
 
     /**
      * Gets the iterator's warnings as an array
-     * 
+     *
      * @return The iterator's warnings as an array or <code>null</code>
      */
     OXException[] getWarnings();

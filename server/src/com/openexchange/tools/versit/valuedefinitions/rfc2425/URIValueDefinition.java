@@ -76,10 +76,10 @@ public class URIValueDefinition extends ValueDefinition {
             // Return null on empty URL
             return null;
         }
-        
+
         StringScanner scanner = deescapeColons(s);
         //StringScanner scanner = s;
-        
+
         final String value = scanner.regex(URIPattern);
         if (value == null) {
             throw new VersitException(scanner, "URI expected");
@@ -92,12 +92,12 @@ public class URIValueDefinition extends ValueDefinition {
             throw ve;
         }
     }
-    
+
     private StringScanner deescapeColons(StringScanner s) {
         String str = s.getRest();
         StringBuilder strBuilder = new StringBuilder();
         StringScanner result;
-        
+
         if (str.contains("\\:")) {
             StringCharacterIterator it = new StringCharacterIterator(str);
             char c = it.current();
@@ -113,13 +113,13 @@ public class URIValueDefinition extends ValueDefinition {
                             strBuilder.append('\\');
                             strBuilder.append(c);
                             c = it.next();
-                        }                        
+                        }
                     }
                 } else {
                     strBuilder.append(c);
                     c = it.next();
                 }
-                		
+
             }
             str = strBuilder.toString();
         }

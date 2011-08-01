@@ -57,7 +57,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link FolderMultipleHandlerFactory}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class FolderMultipleHandlerFactory implements MultipleHandlerFactoryService {

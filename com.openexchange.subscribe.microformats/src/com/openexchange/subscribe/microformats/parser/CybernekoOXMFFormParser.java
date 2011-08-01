@@ -66,7 +66,7 @@ import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
 
 /**
  * {@link CybernekoOXMFFormParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CybernekoOXMFFormParser implements OXMFFormParser {
@@ -93,15 +93,15 @@ public class CybernekoOXMFFormParser implements OXMFFormParser {
             form.setAction(formElement.getAttribute("action"));
             NodeList labels = formElement.getElementsByTagName("label");
             Map<String, String> displayNames = new HashMap<String, String>();
-            
+
             for(int i = 0, length = labels.getLength(); i < length; i++) {
                 Element labelElement = (Element) labels.item(i);
                 displayNames.put(labelElement.getAttribute("for"), labelElement.getTextContent());
             }
-            
-            
+
+
             NodeList inputFields = formElement.getElementsByTagName("input");
-            
+
             for(int i = 0, length = inputFields.getLength(); i < length; i++) {
                 Element inputElement = (Element) inputFields.item(i);
                 FormElement element = new FormElement();
@@ -111,7 +111,7 @@ public class CybernekoOXMFFormParser implements OXMFFormParser {
                 }
                 element.setWidget(widget);
                 element.setName(inputElement.getAttribute("name"));
-                
+
                 String id = inputElement.getAttribute("id");
                 if(id != null) {
                     element.setDisplayName(displayNames.get(inputElement.getAttribute("id")));
@@ -125,9 +125,9 @@ public class CybernekoOXMFFormParser implements OXMFFormParser {
                     form.setDisplayNameField(element);
                 }
             }
-            
-            
-            
+
+
+
         } catch (SAXException e) {
             OXMFSubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         } catch (IOException e) {
@@ -149,7 +149,7 @@ public class CybernekoOXMFFormParser implements OXMFFormParser {
 
     private void extractMetaInfo(OXMFForm form, Document document) {
         NodeList metaTags = document.getElementsByTagName("meta");
-        
+
         for(int i = 0, length = metaTags.getLength(); i < length; i++) {
             Element element = (Element) metaTags.item(i);
             String key = element.getAttribute("name");

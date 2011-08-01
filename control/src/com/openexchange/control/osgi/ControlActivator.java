@@ -63,7 +63,7 @@ import com.openexchange.management.ManagementService;
 
 /**
  * {@link ControlActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ControlActivator implements BundleActivator {
@@ -198,7 +198,7 @@ public final class ControlActivator implements BundleActivator {
 
     /**
      * {@link ControlShutdownHookThread} - The shutdown hook thread of control bundle.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     private static final class ControlShutdownHookThread extends Thread {
@@ -207,7 +207,7 @@ public final class ControlActivator implements BundleActivator {
 
         /**
          * Initializes a new {@link ControlShutdownHookThread}
-         * 
+         *
          * @param bundleContext The bundle context
          */
         public ControlShutdownHookThread(final BundleContext bundleContext) {

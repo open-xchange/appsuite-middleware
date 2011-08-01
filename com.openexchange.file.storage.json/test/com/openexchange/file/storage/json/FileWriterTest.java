@@ -62,7 +62,7 @@ import com.openexchange.json.JSONAssertion;
 
 /**
  * {@link FileWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileWriterTest extends FileTest {
@@ -71,7 +71,7 @@ public class FileWriterTest extends FileTest {
 
     public void testWriteFileAsArray() throws JSONException {
         DefaultFile f = createFile();
-        
+
         JSONArray array = writer.writeArray(f, Arrays.asList(
             CATEGORIES,
             COLOR_LABEL,
@@ -151,7 +151,7 @@ public class FileWriterTest extends FileTest {
         f.setCreated(D("Today at 10:00"));
         f.setLastModified(D("Today at 12:00"));
         f.setLockedUntil(D("Today at 20:00"));
-        
+
         JSONArray array = writer.writeArray(f, Arrays.asList(
             CREATED,
             LAST_MODIFIED,
@@ -159,19 +159,19 @@ public class FileWriterTest extends FileTest {
             LOCKED_UNTIL), tz);
 
         assertNotNull(array);
-        
+
         assertEquals(D("Today at 08:00").getTime(), array.getLong(0));
         assertEquals(D("Today at 10:00").getTime(), array.getLong(1));
         assertEquals(D("Today at 12:00").getTime(), array.getLong(2)); // Last modified UTC doesn't get the timezone offset
         //assertEquals(D("Today at 18:00").getTime(), array.getLong(3));
     }
-    
+
     public void testWriteAsObject() {
         DefaultFile file = createFile();
-        
+
         JSONObject object = writer.write(file, null);
-        
-        
+
+
         /*assertValidates(new JSONAssertion().isObject()
             .hasKey("categories").withValueArray().withValues("cat1", "cat2", "cat3").inStrictOrder()
             .hasKey("color_label").withValue(12)
@@ -192,6 +192,6 @@ public class FileWriterTest extends FileTest {
             .hasKey("url").withValue("url")
             .hasKey("version").withValue(2)
             .hasKey("version_comment").withValue("version comment"), object); */
-        
+
     }
 }

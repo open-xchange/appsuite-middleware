@@ -131,7 +131,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         final Map<String, Object> config1 = new HashMap<String, Object>();
         config1.put("key1.1", 123);
         config1.put("key1.2", "Hello World!");
-        
+
         pub1 = new Publication();
         pub1.setContext(ctx);
         pub1.setEntityId(entityId1);
@@ -140,7 +140,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub1.setTarget(target1);
         pub1.setConfiguration(config1);
         pub1.setEnabled(true);
-        
+
         // Second
         final FormElement formElementLogin2 = new FormElement();
         formElementLogin2.setName("login2");
@@ -171,7 +171,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         pub2.setModule(module2);
         pub2.setUserId(userId);
         pub2.setTarget(target1);
-        
+
         final SimPublicationTargetDiscoveryService discoveryService = new SimPublicationTargetDiscoveryService();
         discoveryService.addTarget(target1);
         discoveryService.addTarget(target1);
@@ -184,15 +184,15 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             final List<Expression> placeholder = new ArrayList<Expression>();
             for (final int delId : publicationsToDelete) {
                 placeholder.add(PLACEHOLDER);
-                
+
                 final Publication publicationToDelete = new Publication();
                 publicationToDelete.setId(delId);
                 publicationToDelete.setContext(ctx);
                 storage.forgetPublication(publicationToDelete);
             }
-            
+
             final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new IN("id", new LIST(placeholder))));
-            
+
             final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
             final List<Integer> values = new ArrayList<Integer>();
             values.add(ctx.getContextId());
@@ -200,11 +200,11 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             new StatementBuilder().executeStatement(writeConnection, delete, values);
             getDBProvider().releaseWriteConnection(ctx, writeConnection);
         }
-        
+
         super.tearDown();
     }
-    
-    
+
+
     protected void assertEquals(final Publication expected, final Publication actual) {
         assertEquals(expected.getEntityId(), actual.getEntityId());
         assertEquals(expected.getId(), actual.getId());
@@ -213,7 +213,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getTarget(), actual.getTarget());
         assertEquals(expected.isEnabled(), actual.isEnabled());
     }
-    
+
     protected void assertEquals(final PublicationTarget expected, final PublicationTarget actual) {
         assertEquals(expected.getDisplayName(), actual.getDisplayName());
         assertEquals(expected.getIcon(), actual.getIcon());
@@ -221,7 +221,7 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
         assertEquals(expected.getModule(), actual.getModule());
         assertEquals(expected.getFormDescription(), actual.getFormDescription());
     }
-    
+
     protected void assertEquals(final DynamicFormDescription expected, final DynamicFormDescription actual) {
         assertEquals("Form Element size does notg match", expected.getFormElements().size(), actual.getFormElements().size());
         for (final FormElement formElementExpected : expected.getFormElements()) {
@@ -237,27 +237,27 @@ public class AbstractPublicationSQLStorageTest extends SQLTestCase {
             }
         }
     }
-    
+
     protected void removePublicationsForTarget(final String targetId) throws Exception {
         final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
+
         final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("target_id", PLACEHOLDER));
         final List<Object> values = new ArrayList<Object>();
         values.add(targetId);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
+
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
-    
+
     protected void removePublicationsForEntity(final String entity, final String module) throws Exception {
         final Connection writeConnection = getDBProvider().getWriteConnection(ctx);
-        
+
         final DELETE delete = new DELETE().FROM(publications).WHERE(new EQUALS("entity", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)));
         final List<Object> values = new ArrayList<Object>();
         values.add(entity);
         values.add(module);
         new StatementBuilder().executeStatement(writeConnection, delete, values);
-        
+
         getDBProvider().releaseWriteConnection(ctx, writeConnection);
     }
 }

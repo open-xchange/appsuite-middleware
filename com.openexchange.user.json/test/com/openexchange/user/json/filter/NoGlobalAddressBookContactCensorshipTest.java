@@ -69,15 +69,15 @@ import com.openexchange.user.json.field.UserField;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
-    
-    
+
+
     public void testCensorsData() throws Exception {
         final Contact contact = getFilledContact();
-        
+
         final ContactCensorship censorship = new NoGlobalAdressBookContactCensorship();
-        
+
         censorship.censor(contact);
-        
+
         for(final UserField field : UserField.ALL_FIELDS) {
             if(UserField.isUserOnlyField(field.getColumn())){
                 continue;
@@ -88,13 +88,13 @@ public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
                 assertFalse("Should have been hidden: "+field, contact.contains(field.getColumn()));
             }
         }
-        
+
     }
 
     private Contact getFilledContact() throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         final Contact contact = new Contact();
         final BeanInfo beanInfo = Introspector.getBeanInfo(Contact.class);
-        
+
         final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
         for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             final Method writeMethod = propertyDescriptor.getWriteMethod();
@@ -107,10 +107,10 @@ public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
                 }
             }
         }
-        
+
         return contact;
     }
-    
+
     private static final Map <Class, Object> DEFAULT_VALUES = new HashMap<Class, Object>() {{
         put(String.class, "Some String");
         put(Date.class, new Date());
@@ -120,5 +120,5 @@ public class NoGlobalAddressBookContactCensorshipTest extends TestCase{
         put(Boolean.class, true);
         put(boolean.class, true);
     }};
-    
+
 }

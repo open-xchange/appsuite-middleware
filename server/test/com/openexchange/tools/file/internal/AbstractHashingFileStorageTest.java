@@ -62,24 +62,24 @@ import junit.framework.TestCase;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AbstractHashingFileStorageTest extends TestCase {
-    
+
     protected File tmpFile;
     protected HashingFileStorage fs;
-    
+
     @Override
     protected void setUp() throws Exception {
         tmpFile = new File("/tmp/"+getName()+"_"+System.currentTimeMillis());
         tmpFile.mkdirs();
         fs = new HashingFileStorage(tmpFile);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         fs.remove();
         tmpFile.delete();
     }
-    
-    
+
+
     protected InputStream IS(String data) throws UnsupportedEncodingException {
         return new ByteArrayInputStream(data.getBytes("UTF-8"));
     }

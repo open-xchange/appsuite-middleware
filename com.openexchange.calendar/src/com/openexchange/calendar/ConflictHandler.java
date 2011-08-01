@@ -93,8 +93,8 @@ public class ConflictHandler {
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
-    private CalendarDataObject edao;
-    private CalendarCollection recColl;
+    private final CalendarDataObject edao;
+    private final CalendarCollection recColl;
 
     public ConflictHandler(final CalendarDataObject cdao,final CalendarDataObject edao, final Session so, final boolean create) {
         this.cdao = cdao;

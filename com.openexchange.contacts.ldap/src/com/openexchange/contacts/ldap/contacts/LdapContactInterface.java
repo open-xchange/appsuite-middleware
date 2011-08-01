@@ -89,11 +89,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class LdapContactInterface implements ContactInterface {
 
     private class ContactLoaderTask implements Runnable {
-        
+
         private final LdapContactInterfaceProvider _contactIFace;
-        
+
         private final Set<Integer> columns;
-        
+
         private final int folderId;
 
         public ContactLoaderTask(final LdapContactInterfaceProvider contactIFace, final int folderId, final Set<Integer> columns) {
@@ -127,7 +127,7 @@ public class LdapContactInterface implements ContactInterface {
         private final int field;
 
         private final Order sort;
-        
+
         /**
          * Initializes a new {@link SortInfo}.
          * @param field
@@ -138,38 +138,38 @@ public class LdapContactInterface implements ContactInterface {
             this.sort = sort;
         }
 
-        
+
         public final int getField() {
             return field;
         }
 
-        
+
         public final Order getSort() {
             return sort;
         }
-        
+
     }
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapContactInterface.class));
-    
+
     private static final String MAPPING_TABLE_KEYS = "CONTACT_LDAP_MAPPING_TABLE_KEYS";
 
     private static final String MAPPING_TABLE_VALUES = "CONTACT_LDAP_MAPPING_TABLE_VALUES";
-    
+
     private final int admin_id;
-    
+
     private final String[] attributes;
-    
+
     private final int context;
-    
+
     private final int folderid;
-    
+
     private final FolderProperties folderprop;
-    
+
     private final LdapContactInterfaceProvider contactIFace;
-    
+
     private Session session;
-    
+
     public LdapContactInterface(final int context, final int admin_id, final FolderProperties folderprop, final int folderid, final LdapContactInterfaceProvider contactIFace) {
         this.context = context;
         this.admin_id = admin_id;
@@ -206,8 +206,8 @@ public class LdapContactInterface implements ContactInterface {
                 case ')':
                     sb.append("\\29");
                     break;
-                case '\u0000': 
-                    sb.append("\\00"); 
+                case '\u0000':
+                    sb.append("\\00");
                     break;
                 case '?':
                     sb.append('*');
@@ -251,7 +251,7 @@ public class LdapContactInterface implements ContactInterface {
 
         final Mappings mappings = folderprop.getMappings();
         final ContactTypes contacttype = folderprop.getContacttypes();
-        
+
         final boolean both = ContactTypes.both.equals(contacttype);
         if (searchobject.isStartLetter()) {
             String userfilter = null;
@@ -285,7 +285,7 @@ public class LdapContactInterface implements ContactInterface {
             }
             arrayList = getLDAPContacts(folderId, columns, getStringFromStringBuilder(user), getStringFromStringBuilder(distri), null, false);
         }
-        
+
         sorting(orderBy, order, arrayList);
         return new ArrayIterator<Contact>(arrayList.toArray(new Contact[arrayList.size()]));
     }
@@ -293,7 +293,7 @@ public class LdapContactInterface implements ContactInterface {
 
     // The all request...
     public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
-        
+
         final Set<Integer> columns = getColumnSet(cols);
         if (0 == orderBy) {
             columns.add(Integer.valueOf(Contact.SUR_NAME));
@@ -305,7 +305,7 @@ public class LdapContactInterface implements ContactInterface {
         if (0 != orderBy) {
             columns.addAll(getColumnSet(new int[]{orderBy}));
         }
-        
+
         final List<Contact> arrayList;
         // If a AdminDN is used, all users see the same contacts, so we can cache them...
         if (contentTheSameForAll()) {
@@ -335,12 +335,12 @@ public class LdapContactInterface implements ContactInterface {
             }
         } else {
             arrayList = getLDAPContacts(folderId, columns, null, null, null, false);
-            
+
         }
-        
+
         // Get only the needed parts...
         final List<Contact> subList = getSubList(from, to, arrayList);
-        
+
         sorting(orderBy, order, subList);
         final SearchIterator<Contact> searchIterator = new ArrayIterator<Contact>(subList.toArray(new Contact[subList.size()]));
         return searchIterator;
@@ -352,12 +352,12 @@ public class LdapContactInterface implements ContactInterface {
             // Here we start to do some dirty tricks only possible with an AD which stores deleted objects in a special structure
             // this is done for a lifetime of 60 days for forests initially built using W2k and Server 2k3, and 180 days
             // for forests that were initially built with Server 2k3 SP1
-            
+
             // TODO: Check the cols, because not all cols are available on deleted objects
             final Set<Integer> columns = getColumnSet(cols);
             final ArrayList<Contact> contacts = getLDAPContacts(folderId, columns, null, null, null, true);
             removeOlder(since, contacts);
-            
+
             return new ArrayIterator<Contact>(contacts.toArray(new Contact[contacts.size()]));
         } else {
             return EMPTY_ARRAY_ITERATOR;
@@ -402,7 +402,7 @@ public class LdapContactInterface implements ContactInterface {
         for (final int[] object : objectIdAndInFolder) {
             final int object_id = object[0];
             final int folder_id = object[1];
-            
+
             String userfilter = null;
             String distrifilter = null;
             final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
@@ -446,7 +446,7 @@ public class LdapContactInterface implements ContactInterface {
         session = s;
         initMappingTable();
     }
-    
+
     public void updateContactObject(final Contact co, final int fid, final Date d) throws OXException {
         LOG.info("Called updateContactObject");
     }
@@ -530,7 +530,7 @@ public class LdapContactInterface implements ContactInterface {
         final boolean both = ContactTypes.both.equals(folderprop.getContacttypes());
         final boolean distributionlist = both || ContactTypes.distributionlists.equals(folderprop.getContacttypes());
         final LdapInterface iface = new LdapJNDIImpl(getLogin(), session.getPassword(), folderprop, deleted, distributionlist, sortField);
-    
+
         try {
             if (both || ContactTypes.users.equals(folderprop.getContacttypes())) {
                 final String filter;
@@ -733,9 +733,9 @@ public class LdapContactInterface implements ContactInterface {
                     arrayList.add(contact);
                 }
             }
-            
+
         });
-        
+
     }
 
     private void sorting(final int orderBy, final Order order, final List<Contact> subList) {

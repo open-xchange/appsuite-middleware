@@ -68,27 +68,27 @@ public class AbstractSubscribeServiceTest extends TestCase {
         map.put("p1","password1");
         map.put("p2","password2");
         map.put("something else", "something else");
-        
+
         AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
         AbstractSubscribeService.encrypt("secret", map, "p1", "p2");
-        
+
         assertEquals("encrypted", map.get("p1"));
         assertEquals("encrypted", map.get("p2"));
-        
+
     }
-    
+
     public void testDecryptPasswords() throws OXException {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("p1","password1");
         map.put("p2","password2");
         map.put("something else", "something else");
         map.put("com.openexchange.crypto.secret", "secret");
-        
+
         AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
         AbstractSubscribeService.decrypt("secret", map, "p1", "p2");
-        
+
         assertEquals("decrypted", map.get("p1"));
         assertEquals("decrypted", map.get("p2"));
-      
+
     }
 }

@@ -96,50 +96,50 @@ public class InfostorePublicationServlet extends HttpServlet {
     private static final String SELF_DESTRUCT = "selfDestruct";
 
     private static final String DESTROY_DOCUMENT = "destroyDocument";
-    
+
     private static PublicationDataLoaderService loader = null;
     private static InfostoreDocumentPublicationService publisher = null;
     private static ContextService contexts = null;
     private static UserService users = null;
     private static UserConfigurationService userConfigs = null;
-    
+
     private static InfostoreFacade infostore = null;
-    
+
     public static void setUserService(final UserService service) {
         users = service;
     }
-    
+
     public static void setUserConfigService(final UserConfigurationService service) {
         userConfigs = service;
     }
-    
+
     public static void setInfostoreFacade(final InfostoreFacade service) {
         infostore = service;
     }
-    
+
     public static void setPublicationDataLoaderService(final PublicationDataLoaderService service) {
         loader = service;
     }
-    
+
     public static void setInfostoreDocumentPublicationService(final InfostoreDocumentPublicationService service) {
         publisher = service;
     }
-    
+
     public static void setContextService(final ContextService service) {
         contexts  = service;
     }
-    
-    
+
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
-    
+
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
-    
+
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
@@ -169,7 +169,7 @@ public class InfostorePublicationServlet extends HttpServlet {
                     destroy(session, document);
                 }
             }
-            
+
         } catch (final Exception x) {
             resp.getWriter().print(x.toString());
             LOG.error(x.getMessage(), x);
@@ -195,7 +195,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     private boolean mustSelfDestruct(final Publication publication) {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
-    
+
     private static final boolean isIE(final HttpServletRequest req) {
         final String userAgent = req.getHeader("User-Agent");
         return null != userAgent && userAgent.contains("MSIE");
@@ -211,13 +211,13 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {
-        
+
         final int id = Integer.parseInt(publication.getEntityId());
         final int version = InfostoreFacade.CURRENT_VERSION;
         final Context ctx = publication.getContext();
         final User user = loadUser(publication);
         final UserConfiguration userConfig = loadUserConfig(publication);
-        
+
         final DocumentMetadata document = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
         return document;
     }
@@ -280,6 +280,6 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
         return contexts.getContext(cid);
     }
-    
+
 
 }
