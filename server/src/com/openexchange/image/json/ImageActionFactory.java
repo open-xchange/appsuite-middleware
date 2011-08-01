@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseOutputters;
+package com.openexchange.image.json;
 
-import java.io.IOException;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link StringResponseOutputter}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ImageActionFactory}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StringResponseOutputter implements ResponseOutputter {
+public class ImageActionFactory implements AJAXActionServiceFactory {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseOutputter.class));
+    private final Map<String, AJAXActionService> actions;
 
-    @Override
-    public int getPriority() {
-        return Integer.MIN_VALUE;
+    /**
+     * Initializes a new {@link ImageActionFactory}.
+     *
+     * @param services The service look-up
+     */
+    public ImageActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AJAXActionService>(5);
     }
 
     @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return true;
-    }
-
-    @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        final String output;
-        {
-            final Object resultObject = result.getResultObject();
-            if (resultObject == null) {
-                output = "";
-            } else {
-                output = resultObject.toString();
-            }
-        }
-        /*
-         * Write headers
-         */
-        final Map<String, String> headers = result.getHeaders();
-        for (final Map.Entry<String, String> entry : headers.entrySet()) {
-            resp.setHeader(entry.getKey(), entry.getValue());
-        }
-        /*
-         * Write output to OutputStream
-         */
-        try {
-            resp.getWriter().write(output);
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-        }
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseOutputters;
+package com.openexchange.image.json.actions;
 
-import java.io.IOException;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.exception.OXException;
+import com.openexchange.image.json.ImageAJAXRequest;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link StringResponseOutputter}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link GETAction}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class StringResponseOutputter implements ResponseOutputter {
+public final class GETAction extends AbstractImageAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseOutputter.class));
-
-    @Override
-    public int getPriority() {
-        return Integer.MIN_VALUE;
+    /**
+     * Initializes a new {@link GETAction}.
+     * @param services
+     */
+    public GETAction(ServiceLookup services) {
+        super();
+        // TODO Auto-generated constructor stub
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.image.json.actions.AbstractImageAction#perform(com.openexchange.image.json.ImageAJAXRequest)
+     */
     @Override
-    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return true;
-    }
-
-    @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        final String output;
-        {
-            final Object resultObject = result.getResultObject();
-            if (resultObject == null) {
-                output = "";
-            } else {
-                output = resultObject.toString();
-            }
-        }
-        /*
-         * Write headers
-         */
-        final Map<String, String> headers = result.getHeaders();
-        for (final Map.Entry<String, String> entry : headers.entrySet()) {
-            resp.setHeader(entry.getKey(), entry.getValue());
-        }
-        /*
-         * Write output to OutputStream
-         */
-        try {
-            resp.getWriter().write(output);
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
-        }
+    protected AJAXRequestResult perform(ImageAJAXRequest req) throws OXException, JSONException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
