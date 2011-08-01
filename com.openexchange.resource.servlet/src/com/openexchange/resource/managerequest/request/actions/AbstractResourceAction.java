@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.resource.json.actions;
+package com.openexchange.resource.managerequest.request.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import org.json.JSONException;
@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.json.ResourceAJAXRequest;
+import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;

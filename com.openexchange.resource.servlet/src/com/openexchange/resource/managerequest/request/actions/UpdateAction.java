@@ -47,56 +47,59 @@
  *
  */
 
-package com.openexchange.resource.json.actions;
+package com.openexchange.resource.managerequest.request.actions;
 
 import java.util.Date;
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.internal.ResourceServiceImpl;
-import com.openexchange.resource.json.ResourceAJAXRequest;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AllAction}
+ * {@link UpdateAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractResourceAction {
+public final class UpdateAction extends AbstractResourceAction {
 
     /**
-     * Initializes a new {@link AllAction}.
+     * Initializes a new {@link UpdateAction}.
      * @param services
      */
-    public AllAction(final ServiceLookup services) {
+    public UpdateAction(final ServiceLookup services) {
         super(services);
     }
 
-    private static final String STR_ALL = "*";
-
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final JSONArray jsonResponseArray = new JSONArray();
-
-        final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
-                STR_ALL, req.getSession().getContext());
-        final Date timestamp;
-        if (resources.length > 0) {
-            long lastModified = Long.MIN_VALUE;
-            for (final com.openexchange.resource.Resource resource : resources) {
-                if (lastModified < resource.getLastModified().getTime()) {
-                    lastModified = resource.getLastModified().getTime();
-                }
-                jsonResponseArray.put(resource.getIdentifier());
-            }
-            timestamp = new Date(lastModified);
-        } else {
-            timestamp = new Date(0);
+        final ResourceService resourceService = getService(ResourceService.class);
+        if (null == resourceService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
         }
-
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+        /*
+         * Check for "data"
+         */
+        final int identifier = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final JSONObject jData = req.getData();
+        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+        resource.setIdentifier(identifier);
+        final Date clientLastModified = req.getDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        /*
+         * Update resource
+         */
+        final ServerSession session = req.getSession();
+        resourceService.update(session.getUser(), session.getContext(), resource, clientLastModified);
+        /*
+         * Write empty JSON object
+         */
+        return new AJAXRequestResult(new JSONObject(), resource.getLastModified(), "json");
     }
 
 }

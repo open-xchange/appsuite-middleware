@@ -54,10 +54,10 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,7 +81,7 @@ public final class GetAction extends AbstractResourceAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
         final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
         final ServerSession session = req.getSession();
         com.openexchange.resource.Resource r = null;

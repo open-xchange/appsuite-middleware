@@ -56,9 +56,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -82,7 +82,7 @@ public final class SearchAction extends AbstractResourceAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
         final ResourceService resourceService = ResourceServiceImpl.getInstance();
         if (null == resourceService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());

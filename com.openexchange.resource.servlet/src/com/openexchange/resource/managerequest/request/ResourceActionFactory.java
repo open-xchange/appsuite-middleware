@@ -47,56 +47,43 @@
  *
  */
 
-package com.openexchange.resource.json.actions;
+package com.openexchange.resource.managerequest.request;
 
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.internal.ResourceServiceImpl;
-import com.openexchange.resource.json.ResourceAJAXRequest;
+import com.openexchange.resource.managerequest.request.actions.AbstractResourceAction;
 import com.openexchange.server.ServiceLookup;
 
-
 /**
- * {@link AllAction}
- *
+ * {@link ResourceActionFactory}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractResourceAction {
+@Module(actions = { "new", "update", "delete" })
+public class ResourceActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AbstractResourceAction> actions;
 
     /**
-     * Initializes a new {@link AllAction}.
-     * @param services
+     * Initializes a new {@link ResourceActionFactory}.
+     * 
+     * @param services The service look-up
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public ResourceActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AbstractResourceAction>(5);
+        actions.put("new", new com.openexchange.resource.managerequest.request.actions.NewAction(services));
+        actions.put("update", new com.openexchange.resource.managerequest.request.actions.UpdateAction(services));
+        actions.put("delete", new com.openexchange.resource.managerequest.request.actions.DeleteAction(services));
     }
 
-    private static final String STR_ALL = "*";
-
     @Override
-    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final JSONArray jsonResponseArray = new JSONArray();
-
-        final com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(
-                STR_ALL, req.getSession().getContext());
-        final Date timestamp;
-        if (resources.length > 0) {
-            long lastModified = Long.MIN_VALUE;
-            for (final com.openexchange.resource.Resource resource : resources) {
-                if (lastModified < resource.getLastModified().getTime()) {
-                    lastModified = resource.getLastModified().getTime();
-                }
-                jsonResponseArray.put(resource.getIdentifier());
-            }
-            timestamp = new Date(lastModified);
-        } else {
-            timestamp = new Date(0);
-        }
-
-        return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
 }

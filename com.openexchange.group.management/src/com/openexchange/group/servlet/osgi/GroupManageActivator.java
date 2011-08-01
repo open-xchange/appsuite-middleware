@@ -120,6 +120,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregisterService();
+        super.stopBundle();
     }
 
     private void registerService() {

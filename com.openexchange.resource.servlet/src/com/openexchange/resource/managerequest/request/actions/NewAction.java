@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,60 @@
  *
  */
 
-package com.openexchange.resource.managerequest.services;
+package com.openexchange.resource.managerequest.request.actions;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.json.ResourceFields;
+import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ResourceRequestServiceRegistry} - The service registry for resource-manage request
+ * {@link NewAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ResourceRequestServiceRegistry {
-
-    private static final ServiceRegistry INSTANCE = new ServiceRegistry(2);
+public final class NewAction extends AbstractResourceAction {
 
     /**
-     * Gets the singleton instance
-     *
-     * @return The singleton instance
+     * Initializes a new {@link NewAction}.
+     * @param services
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return INSTANCE;
+    public NewAction(final ServiceLookup services) {
+        super(services);
     }
 
-    /**
-     * Initializes a new {@link ResourceRequestServiceRegistry}
-     */
-    private ResourceRequestServiceRegistry() {
-        super();
+    @Override
+    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
+        /*
+         * Check for "data"
+         */
+        final JSONObject jData = req.getData();
+        /*
+         * Parse resource out of JSON object
+         */
+        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
+        /*
+         * Create new resource
+         */
+        final ResourceService resourceService = getService(ResourceService.class);
+        if (null == resourceService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
+        }
+        final ServerSession session = req.getSession();
+        resourceService.create(session.getUser(), session.getContext(), resource);
+        /*
+         * Return its ID wrapped by a JSON object
+         */
+        final JSONObject resultObject = new JSONObject();
+        resultObject.put(ResourceFields.ID, resource.getIdentifier());
+        return new AJAXRequestResult(resultObject, resource.getLastModified(), "json");
     }
 
 }
