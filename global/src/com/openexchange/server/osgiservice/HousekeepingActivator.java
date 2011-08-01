@@ -70,6 +70,9 @@ public abstract class HousekeepingActivator extends DeferredActivator {
 
     private final List<ServiceRegistration<?>> serviceRegistrations;
 
+    /**
+     * Initializes a new {@link HousekeepingActivator}.
+     */
     public HousekeepingActivator() {
         super();
         serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();

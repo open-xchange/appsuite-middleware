@@ -77,6 +77,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
+
+    /**
+     * The empty class array.
+     */
+    protected static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
     private <S> DeferredSTC<S> newDeferredSTC(final Class<? extends S> clazz, final int index, final Map<Class<?>, Object> services) {
         return new DeferredSTC<S>(clazz, index, services);
     }
@@ -96,6 +103,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             stcServices = services;
         }
 
+        @Override
         public S addingService(final ServiceReference<S> reference) {
             final Object addedService = context.getService(reference);
             if (clazz.isInstance(addedService)) {
@@ -110,10 +118,12 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             return null;
         }
 
+        @Override
         public void modifiedService(final ServiceReference<S> reference, final S service) {
             // Nothing to do
         }
 
+        @Override
         public void removedService(final ServiceReference<S> reference, final S service) {
             if (null != service) {
                 try {
@@ -135,8 +145,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
         }
     }
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
 
     /**
      * An atomic boolean to keep track of started/stopped status.
@@ -305,6 +313,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                          */
                         new Thread(new Runnable() {
 
+                            @Override
                             public void run() {
                                 shutDownBundle(bundle, errorBuilder);
                             }
@@ -355,6 +364,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
+    @Override
     public final void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
@@ -377,6 +387,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     protected abstract void startBundle() throws Exception;
 
+    @Override
     public final void stop(final BundleContext context) throws Exception {
         try {
             stopBundle();
@@ -408,6 +419,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param clazz The service's class
      * @return The service obtained by service tracker or <code>null</code>
      */
+    @Override
     public final <S extends Object> S getService(final Class<? extends S> clazz) {
         if (null == services) {
             /*
