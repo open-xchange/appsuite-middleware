@@ -67,6 +67,13 @@ public class StringResponseOutputter implements ResponseOutputter {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseOutputter.class));
 
+    /**
+     * Initializes a new {@link StringResponseOutputter}.
+     */
+    public StringResponseOutputter() {
+        super();
+    }
+
     @Override
     public int getPriority() {
         return Integer.MIN_VALUE;
