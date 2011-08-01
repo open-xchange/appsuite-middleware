@@ -50,11 +50,11 @@
 package com.openexchange.group.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-
+import com.openexchange.group.json.GroupActionFactory;
 
 /**
  * {@link GroupJSONActivator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GroupJSONActivator extends AJAXModuleActivator {
@@ -73,8 +73,7 @@ public final class GroupJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        s
-        
+        registerModule(new GroupActionFactory(this), "group");
     }
 
 }
