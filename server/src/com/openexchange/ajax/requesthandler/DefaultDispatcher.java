@@ -64,14 +64,26 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultDispatcher}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultDispatcher.class));
 
-    private final Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+    private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
+
+    private final Queue<AJAXActionCustomizerFactory> customizerFactories;
+
+    /**
+     * Initializes a new {@link DefaultDispatcher}.
+     */
+    public DefaultDispatcher() {
+        super();
+        actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+        customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+    }
 
     @Override
     public AJAXState begin() throws OXException {
@@ -95,14 +107,14 @@ public class DefaultDispatcher implements Dispatcher {
 
         for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
             final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
-            if(customizer != null) {
+            if (customizer != null) {
                 todo.add(customizer);
             }
         }
 
-        while(!todo.isEmpty()) {
+        while (!todo.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
                     final AJAXRequestData modified = customizer.incoming(request, session);
@@ -121,11 +133,11 @@ public class DefaultDispatcher implements Dispatcher {
         final AJAXActionServiceFactory factory = lookupFactory(request.getModule());
 
         if (factory == null) {
-            throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(request.getModule());
         }
         final AJAXActionService action = factory.createActionService(request.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
+            throw AjaxExceptionCodes.UnknownAction.create(request.getAction());
         }
         final Action actionMetadata = getActionMetadata(action);
 
@@ -149,13 +161,11 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
         request.setState(state);
-        AJAXRequestResult result = action.perform(
-            request,
-            session);
+        AJAXRequestResult result = action.perform(request, session);
 
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
-        while(!outgoing.isEmpty()) {
+        while (!outgoing.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
 
             while (iterator.hasNext()) {
@@ -192,16 +202,20 @@ public class DefaultDispatcher implements Dispatcher {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
             if (null != current) {
-                current = actionFactories.get(module);
-                final CombinedActionFactory combinedFactory;
-                if (current instanceof CombinedActionFactory) {
-                    combinedFactory = (CombinedActionFactory) current;
-                } else {
-                    combinedFactory = new CombinedActionFactory();
-                    combinedFactory.add(current);
-                    actionFactories.put(module, combinedFactory);
+                try {
+                    current = actionFactories.get(module);
+                    final CombinedActionFactory combinedFactory;
+                    if (current instanceof CombinedActionFactory) {
+                        combinedFactory = (CombinedActionFactory) current;
+                    } else {
+                        combinedFactory = new CombinedActionFactory();
+                        combinedFactory.add(current);
+                        actionFactories.put(module, combinedFactory);
+                    }
+                    combinedFactory.add(factory);
+                } catch (final IllegalArgumentException e) {
+                    LOG.error(e.getMessage());
                 }
-                combinedFactory.add(factory);
             }
         }
     }

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
@@ -64,12 +67,15 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
 
     private final ConcurrentMap<AJAXActionServiceFactory, Object> facs;
 
+    private final ConcurrentMap<String, Object> actions;
+
     /**
      * Initializes a new {@link CombinedActionFactory}.
      */
     public CombinedActionFactory() {
         super();
         facs = new ConcurrentHashMap<AJAXActionServiceFactory, Object>(2);
+        actions = new ConcurrentHashMap<String, Object>(6);
     }
 
     /**
@@ -85,9 +91,27 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
      * Adds specified factory (if not already contained).
      * 
      * @param factory The factory to add
+     * @throws IllegalArgumentException If factory has no {@link Module} annotation or an action-conflict is detected
      */
     public void add(final AJAXActionServiceFactory factory) {
-        facs.put(factory, PRESENT);
+        if (null == facs.put(factory, PRESENT)) {
+            final Set<String> actions = getActionsFrom(factory);
+            for (final AJAXActionServiceFactory cur : facs.keySet()) {
+                final Set<String> curActions = getActionsFrom(cur);
+                if (curActions.retainAll(actions)) {
+                    throw new IllegalArgumentException(
+                        "Conflicting actions. " + curActions + ". Factory \"" + factory.getClass() + "\" conflicts with \"" + cur.getClass() + "\".");
+                }
+            }
+        }
+    }
+
+    private static Set<String> getActionsFrom(final AJAXActionServiceFactory factory) {
+        final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
+        if (null == moduleAnnotation) {
+            throw new IllegalArgumentException("Specified factory has no Module annotation: " + factory.getClass());
+        }
+        return new HashSet<String>(Arrays.asList(moduleAnnotation.actions()));
     }
 
     /**
