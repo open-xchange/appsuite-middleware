@@ -87,6 +87,8 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.filemanagement.json.osgi.ManagedfFileJSONActivator(),
         new com.openexchange.group.json.osgi.GroupJSONActivator(),
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
+        new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
+        new com.openexchange.config.json.osgi.ConfigJSONActivator(),
     };
 
     public Activator() {

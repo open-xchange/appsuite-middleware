@@ -108,6 +108,8 @@ public class AJAXRequestData {
 
     private String hostname;
 
+    private String servletRequestUri;
+
     private String route;
 
     private UploadEvent uploadEvent;
@@ -131,9 +133,8 @@ public class AJAXRequestData {
      * Initializes a new {@link AJAXRequestData}.
      *
      * @param data The payload to use data
-     * @throws OXException If an AJAX error occurs
      */
-    public AJAXRequestData(final Object data) throws OXException {
+    public AJAXRequestData(final Object data) {
         this();
         this.data = data;
     }
@@ -145,6 +146,25 @@ public class AJAXRequestData {
         super();
         params = new LinkedHashMap<String, String>();
         headers = new LinkedHashMap<String, String>();
+    }
+
+    
+    /**
+     * Sets the URI part after path to the Servlet.
+     * 
+     * @param servletRequestUri The URI part
+     */
+    public void setServletRequestURI(final String servletRequestUri) {
+        this.servletRequestUri = servletRequestUri;
+    }
+
+    /**
+     * Gets the URI part after path to the Servlet.
+     * 
+     * @return The URI part or <code>null</code> if not applicable
+     */
+    public String getSerlvetRequestURI() {
+        return servletRequestUri;
     }
 
     /**

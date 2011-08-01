@@ -224,6 +224,10 @@ public class DispatcherServlet extends SessionServlet {
         final String pathInfo = req.getRequestURI();
         retval.setModule(pathInfo.substring(prefix.length()));
         /*
+         * Set request URI
+         */
+        retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        /*
          * Set the action
          */
         retval.setAction(req.getParameter("action"));
