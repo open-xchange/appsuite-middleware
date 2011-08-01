@@ -50,7 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseOutputters;
 
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -65,15 +65,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseOutputter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-
 
 /**
  * {@link JSONResponseOutputter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JSONResponseOutputter implements ResponseOutputter {
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
 
     @Override
@@ -82,26 +83,25 @@ public class JSONResponseOutputter implements ResponseOutputter {
     }
 
     @Override
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
-        Object resultObject = result.getResultObject();
-        return Response.class.isAssignableFrom(resultObject.getClass());
+    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
+        return Response.class.isAssignableFrom(result.getResultObject().getClass());
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
-        final Response response = (Response) result.getResultObject();
-        writeResponse(response, request.getAction(), req, resp);
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
     }
 
-    public static void writeResponse(Response response, String action, HttpServletRequest req, HttpServletResponse resp) {
+    public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true")) || req.getParameter("callback") != null ) {
+            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (req.getParameter("respondWithHTML") != null && req.getParameter(
+                "respondWithHTML").equalsIgnoreCase("true")) || req.getParameter("callback") != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter("callback");
-                if(callback == null) {
+                if (callback == null) {
                     callback = action;
                 }
-                final StringWriter w = new StringWriter();
+                final Writer w = new UnsynchronizedStringWriter();
                 ResponseWriter.write(response, w);
 
                 resp.getWriter().print(substituteJS(w.toString(), callback));
@@ -113,16 +113,16 @@ public class JSONResponseOutputter implements ResponseOutputter {
             LOG.error(e1.getMessage(), e1);
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (IOException e2) {
-                LOG.error(e2.getMessage(),e);
+            } catch (final IOException e2) {
+                LOG.error(e2.getMessage(), e);
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(),e);
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    private static String substituteJS(String json, String action) {
-        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**",
-            action);    }
+    private static String substituteJS(final String json, final String action) {
+        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**", action);
+    }
 
 }
