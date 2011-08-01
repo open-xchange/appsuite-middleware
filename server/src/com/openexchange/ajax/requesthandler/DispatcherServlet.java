@@ -227,6 +227,9 @@ public class DispatcherServlet extends SessionServlet {
          * Set the action
          */
         retval.setAction(req.getParameter("action"));
+        if (retval.getAction() == null) {
+        	retval.setAction(req.getMethod().toUpperCase());
+        }
         /*
          * Set the format
          */
