@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseOutputters;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -103,7 +104,6 @@ public class JSONResponseOutputter implements ResponseOutputter {
                 }
                 final Writer w = new UnsynchronizedStringWriter();
                 ResponseWriter.write(response, w);
-
                 resp.getWriter().print(substituteJS(w.toString(), callback));
             } else {
                 ResponseWriter.write(response, resp.getWriter());
@@ -121,8 +121,12 @@ public class JSONResponseOutputter implements ResponseOutputter {
         }
     }
 
+    private static final Pattern PATTERN_JSON = Pattern.compile("**json**", Pattern.LITERAL);
+
+    private static final Pattern PATTERN_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
+
     private static String substituteJS(final String json, final String action) {
-        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**", action);
+        return PATTERN_JSON.matcher(PATTERN_ACTION.matcher(AJAXServlet.JS_FRAGMENT).replaceAll(action)).replaceFirst(json);
     }
 
 }
