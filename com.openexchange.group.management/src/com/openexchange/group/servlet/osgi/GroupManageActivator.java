@@ -49,26 +49,21 @@
 
 package com.openexchange.group.servlet.osgi;
 
-import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;
 import com.openexchange.group.servlet.request.GroupManageActionFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
  * Activator for the group management requests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class GroupManageActivator extends AJAXModuleActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
-
-    private final Lock lock = new ReentrantLock();
 
     private GroupManageActionFactory factory;
 
@@ -84,33 +79,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
      * {@inheritDoc}
      */
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        getServiceRegistry().addService(clazz, getService(clazz));
-        registerService();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        getServiceRegistry().removeService(clazz);
-        unregisterService();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected void startBundle() throws Exception {
-        final ServiceRegistry registry = getServiceRegistry();
-        registry.clearRegistry();
-        for (final Class<?> tmp : getNeededServices()) {
-            final Object service = getService(tmp);
-            if (null != service) {
-                registry.addService(tmp, service);
-            }
-        }
         registerService();
     }
 
@@ -124,15 +93,7 @@ public class GroupManageActivator extends AJAXModuleActivator {
     }
 
     private void registerService() {
-        final boolean needsRegistration;
-        lock.lock();
-        try {
-            // Registration must only be done if all needed services are available
-            needsRegistration = NEEDED_SERVICES.length == getServiceRegistry().size();
-        } finally {
-            lock.unlock();
-        }
-        if (needsRegistration && factory == null) {
+        if (factory == null) {
             factory = new GroupManageActionFactory(this);
             registerModule(factory, "group");
             registerService(PreferencesItemService.class, new Module());
@@ -140,14 +101,9 @@ public class GroupManageActivator extends AJAXModuleActivator {
     }
 
     private void unregisterService() {
-        lock.lock();
-        try {
-            if (null != factory) {
-                unregisterServices();
-                factory = null;
-            }
-        } finally {
-            lock.unlock();
+        if (null != factory) {
+            unregisterServices();
+            factory = null;
         }
     }
 }
