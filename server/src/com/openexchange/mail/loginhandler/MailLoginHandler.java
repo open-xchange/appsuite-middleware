@@ -58,7 +58,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -108,7 +107,7 @@ public final class MailLoginHandler implements LoginHandlerService {
 		// Time-out mail access cache
 		final Session session = logout.getSession();
 		MailAccess.getMailAccessCache().clearUserEntries(session);
-		AttachmentTokenRegistry.getInstance().dropFor(session);
+		// AttachmentTokenRegistry.getInstance().dropFor(session);
 
 	}
 }
