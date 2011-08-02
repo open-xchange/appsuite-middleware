@@ -89,7 +89,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DispatcherServlet extends SessionServlet {
+public final class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
@@ -172,7 +172,7 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException, ServletException {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(resp);
