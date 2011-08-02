@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.osgiservice;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.Module;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
@@ -95,6 +92,8 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("module", module);
         properties.put("multiple", multiple ? "true" : "false");
+        /*-
+         * 
         final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
         if (null != moduleAnnotation) {
             final String[] actions = moduleAnnotation.actions();
@@ -109,6 +108,8 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
                 properties.put("actions", list);
             }
         }
+         * 
+         */
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }
 }
