@@ -51,13 +51,15 @@ package com.openexchange.ajax.requesthandler.osgiservice;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
- * {@link AJAXModuleActivator}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link AJAXModuleActivator} - The {@link BundleActivator activator} to register a module.
+ *
+ *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
