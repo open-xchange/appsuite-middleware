@@ -49,10 +49,7 @@
 
 package com.openexchange.contactcollector.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
@@ -65,7 +62,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -75,9 +72,7 @@ import com.openexchange.userconf.UserConfigurationService;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator extends DeferredActivator {
-
-    private List<ServiceRegistration> serviceRegistrations;
+public class Activator extends HousekeepingActivator {
 
     private ContactCollectorServiceImpl collectorInstance;
 
@@ -112,13 +107,12 @@ public class Activator extends DeferredActivator {
         /*
          * Register all
          */
-        serviceRegistrations = new ArrayList<ServiceRegistration>(6);
-        serviceRegistrations.add(context.registerService(LoginHandlerService.class.getName(), new ContactCollectorFolderCreator(), null));
-        serviceRegistrations.add(context.registerService(ContactCollectorService.class.getName(), collectorInstance, null));
-        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectFolder(), null));
-        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectEnabled(), null));
-        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectOnMailAccess(), null));
-        serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new ContactCollectOnMailTransport(), null));
+        registerService(LoginHandlerService.class, new ContactCollectorFolderCreator());
+        registerService(ContactCollectorService.class, collectorInstance);
+        registerService(PreferencesItemService.class, new ContactCollectFolder());
+        registerService(PreferencesItemService.class, new ContactCollectEnabled());
+        registerService(PreferencesItemService.class, new ContactCollectOnMailAccess());
+        registerService(PreferencesItemService.class, new ContactCollectOnMailTransport());
     }
 
     @Override
@@ -126,13 +120,7 @@ public class Activator extends DeferredActivator {
         /*
          * Unregister all
          */
-        if (null != serviceRegistrations) {
-            for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
-                serviceRegistration.unregister();
-            }
-            serviceRegistrations.clear();
-            serviceRegistrations = null;
-        }
+        cleanUp();
         /*
          * Stop service
          */
