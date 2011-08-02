@@ -199,6 +199,12 @@ public class DefaultDispatcher implements Dispatcher {
         return action.getClass().getAnnotation(Action.class);
     }
 
+    /**
+     * Registers specified factory under given module.
+     * 
+     * @param module The module
+     * @param factory The factory (possibly annotated with {@link Module})
+     */
     public void register(final String module, final AJAXActionServiceFactory factory) {
         synchronized (actionFactories) {
             AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
@@ -221,10 +227,21 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
+    /**
+     * Adds specified customizer factory.
+     * 
+     * @param factory The customizer factory
+     */
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
 
+    /**
+     * Releases specified factory from given module.
+     * 
+     * @param module The module
+     * @param factory The factory (possibly annotated with {@link Module})
+     */
     public void remove(final String module, final AJAXActionServiceFactory factory) {
         synchronized (actionFactories) {
             final AJAXActionServiceFactory removed = actionFactories.remove(module);
