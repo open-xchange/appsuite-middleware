@@ -174,7 +174,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsAlarm()) {
             writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm(), jsonObj);
-        } else if (null != session && isPublicFolder(appointmentObject) && appointmentObject.containsUserParticipants()) {
+        } else if (appointmentObject.containsUserParticipants() && null != session && isPublicFolder(appointmentObject)) {
             final int userId  = session.getUserId();
             /*
              * Check for alarm for requesting user in user participants
