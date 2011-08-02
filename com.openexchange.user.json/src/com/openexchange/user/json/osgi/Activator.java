@@ -49,31 +49,21 @@
 
 package com.openexchange.user.json.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
-import com.openexchange.user.json.multiple.UserMultipleHandlerFactory;
+import com.openexchange.user.json.Constants;
+import com.openexchange.user.json.actions.UserActionFactory;
 import com.openexchange.user.json.services.ServiceRegistry;
-import com.openexchange.user.json.servlet.UserServlet;
 
 /**
  * {@link Activator} - Activator for user component.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration userMultipleService;
-
-    private Stack<ServiceTracker> trackers;
+public class Activator extends AJAXModuleActivator {
 
     /**
      * Initializes a new {@link Activator}.
@@ -82,64 +72,36 @@ public class Activator implements BundleActivator {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         try {
             /*
              * Register user multiple service
              */
-            userMultipleService =
-                context.registerService(MultipleHandlerFactoryService.class.getName(), new UserMultipleHandlerFactory(), null);
+            registerModule(UserActionFactory.getInstance(), Constants.MODULE);
             /*
              * User service tracker
              */
-            trackers = new Stack<ServiceTracker>();
-            trackers.push(new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
+            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(
                 context,
                 ServiceRegistry.getInstance(),
-                UserService.class)));
+                UserService.class));
             /*
              * Contact interface factory tracker
              */
-            trackers.push(new ServiceTracker(
+            track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
                 context,
-                ContactInterfaceFactory.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
-                    context,
-                    ServiceRegistry.getInstance(),
-                    ContactInterfaceFactory.class)));
-            /*
-             * HTTP service tracker
-             */
-            trackers.push(new SessionServletRegistration(context, new UserServlet(), com.openexchange.user.json.Constants.SERVLET_PATH));
-            trackers.push(new ServiceTracker(
+                ServiceRegistry.getInstance(),
+                ContactInterfaceFactory.class));
+            track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
                 context,
-                ContactInterfaceDiscoveryService.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
-                    context,
-                    ServiceRegistry.getInstance(),
-                    ContactInterfaceDiscoveryService.class)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
-        } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    public void stop(final BundleContext context) throws Exception {
-        try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.pop().close();
-                }
-                trackers = null;
-            }
-            if (null != userMultipleService) {
-                userMultipleService.unregister();
-                userMultipleService = null;
-            }
+                ServiceRegistry.getInstance(),
+                ContactInterfaceDiscoveryService.class));
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
             LOG.error(e.getMessage(), e);
