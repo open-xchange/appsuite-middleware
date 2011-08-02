@@ -60,29 +60,29 @@ import com.openexchange.groupware.update.internal.ExcludedList;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+public class ConfigurationCustomizer implements ServiceTrackerCustomizer<ConfigurationService,ConfigurationService> {
 
     private final BundleContext context;
 
-    public ConfigurationCustomizer(BundleContext context) {
+    public ConfigurationCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService configService = (ConfigurationService) context.getService(reference);
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService configService = context.getService(reference);
         ExcludedList.getInstance().configure(configService);
         return configService;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         context.ungetService(reference);
     }
 }
