@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -138,6 +139,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        if (!session.getUserConfiguration().hasWebMail()) {
+            throw AjaxExceptionCodes.NoPermissionForModule.create("mail");
+        }
         return perform(new MailRequest(request, session));
     }
 
