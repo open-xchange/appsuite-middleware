@@ -101,7 +101,7 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
 
@@ -112,14 +112,15 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
 
+        AJAXRequestData modifiedRequest = request;
         while (!todo.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
             while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    final AJAXRequestData modified = customizer.incoming(request, session);
+                    final AJAXRequestData modified = customizer.incoming(modifiedRequest, session);
                     if (modified != null) {
-                        request = modified;
+                        modifiedRequest = modified;
                     }
 
                     outgoing.add(customizer);
@@ -130,24 +131,24 @@ public class DefaultDispatcher implements Dispatcher {
             }
         }
 
-        final AJAXActionServiceFactory factory = lookupFactory(request.getModule());
+        final AJAXActionServiceFactory factory = lookupFactory(modifiedRequest.getModule());
 
         if (factory == null) {
-            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(request.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequest.getModule());
         }
-        final AJAXActionService action = factory.createActionService(request.getAction());
+        final AJAXActionService action = factory.createActionService(modifiedRequest.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UnknownAction.create(request.getAction());
+            throw AjaxExceptionCodes.UnknownAction.create(modifiedRequest.getAction());
         }
         final Action actionMetadata = getActionMetadata(action);
 
         if (actionMetadata != null) {
-            if (request.getFormat() == null) {
-                request.setFormat(actionMetadata.defaultFormat());
+            if (modifiedRequest.getFormat() == null) {
+                modifiedRequest.setFormat(actionMetadata.defaultFormat());
             }
         } else {
-            if (request.getFormat() == null) {
-                request.setFormat("apiResponse");
+            if (modifiedRequest.getFormat() == null) {
+                modifiedRequest.setFormat("apiResponse");
             }
         }
 
@@ -156,12 +157,12 @@ public class DefaultDispatcher implements Dispatcher {
          */
         if (factory instanceof AJAXStateHandler) {
             final AJAXStateHandler handler = (AJAXStateHandler) factory;
-            if (state.addInitializer(request.getModule(), handler)) {
+            if (state.addInitializer(modifiedRequest.getModule(), handler)) {
                 handler.begin(state);
             }
         }
-        request.setState(state);
-        AJAXRequestResult result = action.perform(request, session);
+        modifiedRequest.setState(state);
+        AJAXRequestResult result = action.perform(modifiedRequest, session);
 
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
@@ -171,7 +172,7 @@ public class DefaultDispatcher implements Dispatcher {
             while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    final AJAXRequestResult modified = customizer.outgoing(request, result, session);
+                    final AJAXRequestResult modified = customizer.outgoing(modifiedRequest, result, session);
                     if (modified != null) {
                         result = modified;
                     }
