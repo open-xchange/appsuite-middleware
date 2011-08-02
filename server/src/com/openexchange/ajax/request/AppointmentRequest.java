@@ -902,6 +902,7 @@ public class AppointmentRequest extends CalendarRequest {
             }
 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+            appointmentwriter.setSession(session);
 
             final JSONObject jsonResponseObj = new JSONObject();
 
