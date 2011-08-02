@@ -193,11 +193,11 @@ public class FileResponseOutputter implements ResponseOutputter {
         int width = -1, height = -1;
 
         if (request.isSet("width")) {
-            width = request.getParameter("width", int.class);
+            width = request.getParameter("width", int.class).intValue();
         }
 
         if (request.isSet("height")) {
-            height = request.getParameter("height", int.class);
+            height = request.getParameter("height", int.class).intValue();
         }
 
         if (width == -1 && height == -1) {
