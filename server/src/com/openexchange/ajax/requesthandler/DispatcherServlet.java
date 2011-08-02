@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,14 +82,19 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DispatcherServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DispatcherServlet extends SessionServlet {
+
+    private static final long serialVersionUID = -8060034833311074781L;
+
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
+
     private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
 
         private final HttpServletRequest req;
@@ -103,23 +109,25 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private static final long serialVersionUID = -8060034833311074781L;
+    private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
-
-    private static Dispatcher dispatcher;
-
-    private static String prefix;
+    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();;
 
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
+    /**
+     * Initializes a new {@link DispatcherServlet}.
+     * 
+     * @param dispatcher The dispatcher
+     * @param prefix The prefix
+     */
     public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
         if (null == dispatcher) {
             throw new NullPointerException("Dispatcher is null.");
         }
         // These must be static for our servlet container to work properly.
-        DispatcherServlet.dispatcher = dispatcher;
-        DispatcherServlet.prefix = prefix;
+        DispatcherServlet.DISPATCHER.set(dispatcher);
+        DispatcherServlet.PREFIX.set(prefix);
     }
 
     /**
@@ -157,7 +165,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
-     *
+     * 
      * @param req The HTTP request to handle
      * @param resp The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
@@ -175,9 +183,10 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestResult result = null;
         AJAXRequestData request = null;
         AJAXState state = null;
+        final Dispatcher dispatcher = DISPATCHER.get();
         try {
             if (action == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 
@@ -186,8 +195,6 @@ public class DispatcherServlet extends SessionServlet {
             state = dispatcher.begin();
 
             result = dispatcher.perform(request, state, session);
-
-
 
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
@@ -202,10 +209,10 @@ public class DispatcherServlet extends SessionServlet {
 
     }
 
-    private void sendResponse( final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
         ResponseRenderer candidate = null;
-        for(final ResponseRenderer renderer : RESPONSE_RENDERERS) {
+        for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
             if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
                 highest = renderer.getRanking();
                 candidate = renderer;
@@ -229,12 +236,13 @@ public class DispatcherServlet extends SessionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name service
+        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name
+                                                                                                                  // service
         /*
          * Set the module
          */
         final String pathInfo = req.getRequestURI();
-        retval.setModule(pathInfo.substring(prefix.length()));
+        retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
          * Set request URI
          */
@@ -244,7 +252,7 @@ public class DispatcherServlet extends SessionServlet {
          */
         retval.setAction(req.getParameter("action"));
         if (retval.getAction() == null) {
-        	retval.setAction(req.getMethod().toUpperCase());
+            retval.setAction(req.getMethod().toUpperCase());
         }
         /*
          * Set the format
@@ -262,11 +270,11 @@ public class DispatcherServlet extends SessionServlet {
         if (isFileUpload) {
             final UploadEvent upload = processUpload(req);
             final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 retval.addFile(iterator.next());
             }
             final Iterator<String> names = upload.getFormFieldNames();
-            while(names.hasNext()) {
+            while (names.hasNext()) {
                 final String name = names.next();
                 retval.putParameter(name, upload.getFormField(name));
             }
@@ -328,6 +336,5 @@ public class DispatcherServlet extends SessionServlet {
         }
         return startingChar == toCheck.charAt(i);
     }
-
 
 }
