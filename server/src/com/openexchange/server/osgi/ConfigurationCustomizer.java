@@ -62,7 +62,7 @@ import com.openexchange.groupware.contact.ContactConfig;
  * classes.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
+final class ConfigurationCustomizer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private final BundleContext context;
 
@@ -78,8 +78,8 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public Object addingService(ServiceReference reference) {
-        ConfigurationService confService = (ConfigurationService) context.getService(reference);
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService confService = context.getService(reference);
         ServerConfig.getInstance().initialize(confService);
         ParticipantConfig.getInstance().initialize(confService);
         ContactConfig.getInstance().initialize(confService);
@@ -90,7 +90,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
 
@@ -98,7 +98,7 @@ final class ConfigurationCustomizer implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void removedService(ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // ConfigurationService is not referenced in ContactConfig.
         // ConfigurationService is not referenced in ParticipantConfig.
         ServerConfig.getInstance().shutdown();
