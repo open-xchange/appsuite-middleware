@@ -63,7 +63,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.UnsynchronizedStringWriter;
@@ -74,7 +74,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JSONResponseOutputter implements ResponseOutputter {
+public class JSONResponseOutputter implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
 

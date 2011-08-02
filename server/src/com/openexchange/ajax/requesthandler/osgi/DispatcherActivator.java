@@ -59,7 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.JSONResponseConverter;
@@ -117,15 +117,15 @@ public class DispatcherActivator extends HousekeepingActivator {
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseOutputter());
 
-        track(ResponseOutputter.class, new SimpleRegistryListener<ResponseOutputter>() {
+        track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 
             @Override
-            public void added(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
+            public void added(final ServiceReference<ResponseRenderer> ref, final ResponseRenderer thing) {
                 DispatcherServlet.registerRenderer(thing);
             }
 
             @Override
-            public void removed(final ServiceReference<ResponseOutputter> ref, final ResponseOutputter thing) {
+            public void removed(final ServiceReference<ResponseRenderer> ref, final ResponseRenderer thing) {
                 DispatcherServlet.unregisterRenderer(thing);
             }
 

@@ -53,14 +53,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * {@link ResponseOutputter} - Writes a certain request data and result pair to HTTP request/response.
+ * {@link ResponseRenderer} - Writes a certain request data and result pair to HTTP request/response.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ResponseOutputter {
+public interface ResponseRenderer {
 
     /**
-     * Checks if this outputter handles specified request data and result pair.
+     * Checks if this renderer handles specified request data and result pair.
      * 
      * @param request The request data
      * @param result The result

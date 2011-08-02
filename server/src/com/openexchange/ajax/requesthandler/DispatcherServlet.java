@@ -111,7 +111,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static String prefix;
 
-    private static List<ResponseOutputter> responseRenderers = new CopyOnWriteArrayList<ResponseOutputter>();
+    private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
         if (null == dispatcher) {
@@ -122,12 +122,22 @@ public class DispatcherServlet extends SessionServlet {
         DispatcherServlet.prefix = prefix;
     }
 
-    public static void registerRenderer(final ResponseOutputter renderer) {
-        responseRenderers.add(renderer);
+    /**
+     * Adds specified renderer.
+     * 
+     * @param renderer The renderer
+     */
+    public static void registerRenderer(final ResponseRenderer renderer) {
+        RESPONSE_RENDERERS.add(renderer);
     }
 
-    public static void unregisterRenderer(final ResponseOutputter renderer) {
-        responseRenderers.remove(renderer);
+    /**
+     * Removes specified renderer.
+     * 
+     * @param renderer The renderer
+     */
+    public static void unregisterRenderer(final ResponseRenderer renderer) {
+        RESPONSE_RENDERERS.remove(renderer);
     }
 
     @Override
@@ -194,15 +204,17 @@ public class DispatcherServlet extends SessionServlet {
 
     private void sendResponse( final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
-        ResponseOutputter chosen = null;
-        for(final ResponseOutputter renderer : responseRenderers) {
+        ResponseRenderer candidate = null;
+        for(final ResponseRenderer renderer : RESPONSE_RENDERERS) {
             if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
                 highest = renderer.getRanking();
-                chosen = renderer;
+                candidate = renderer;
             }
         }
-
-        chosen.write(request, result, hReq, hResp);
+        if (null == candidate) {
+            throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
+        }
+        candidate.write(request, result, hReq, hResp);
     }
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {

@@ -64,7 +64,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -75,7 +75,7 @@ import com.openexchange.tools.servlet.http.Tools;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileResponseOutputter implements ResponseOutputter {
+public class FileResponseOutputter implements ResponseRenderer {
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseOutputter.class));
 

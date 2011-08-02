@@ -55,14 +55,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseOutputter;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
  * {@link StringResponseOutputter}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StringResponseOutputter implements ResponseOutputter {
+public class StringResponseOutputter implements ResponseRenderer {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseOutputter.class));
