@@ -62,7 +62,9 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentWriter} - Writer for appointments
@@ -78,6 +80,8 @@ public class AppointmentWriter extends CalendarWriter {
 
     private final boolean forTesting;
 
+    private ServerSession session;
+
     /**
      * Initializes a new {@link AppointmentWriter}
      *
@@ -88,9 +92,18 @@ public class AppointmentWriter extends CalendarWriter {
         this(timeZone, false);
     }
 
-    public AppointmentWriter(TimeZone timeZone, boolean forTesting) {
+    public AppointmentWriter(final TimeZone timeZone, final boolean forTesting) {
         super(timeZone, null);
         this.forTesting = forTesting;
+    }
+
+    /**
+     * Applies specified session to this writer.
+     * 
+     * @param session The session to set
+     */
+    public void setSession(final ServerSession session) {
+        this.session = session;
     }
 
     public CalendarCollectionService getCalendarCollectionService(){
@@ -158,6 +171,20 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsAlarm()) {
             writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm(), jsonObj);
+        } else if (null != session && appointmentObject.containsUserParticipants()) {
+            final int userId  = session.getUserId();
+            /*
+             * Check for alarm for requesting user in user participants
+             */
+            NextUser: for (final UserParticipant userParticipant : appointmentObject.getUsers()) {
+                if (userId == userParticipant.getIdentifier() && userParticipant.getAlarmMinutes() > 0) {
+                    /*
+                     * Set appropriate alarm in appointment
+                     */
+                    writeParameter(AppointmentFields.ALARM, userParticipant.getAlarmMinutes(), jsonObj);
+                    break NextUser;
+                }
+            }
         }
         if (appointmentObject.containsRecurrenceType()) {
             writeRecurrenceParameter(appointmentObject, jsonObj);
@@ -456,4 +483,5 @@ public class AppointmentWriter extends CalendarWriter {
         });
         WRITER_MAP = m;
     }
+
 }
