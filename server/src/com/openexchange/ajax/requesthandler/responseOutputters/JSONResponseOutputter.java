@@ -95,8 +95,7 @@ public class JSONResponseOutputter implements ResponseOutputter {
 
     public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (req.getParameter("respondWithHTML") != null && req.getParameter(
-                "respondWithHTML").equalsIgnoreCase("true")) || req.getParameter("callback") != null) {
+            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (isRespondWithHTML(req)) || req.getParameter("callback") != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter("callback");
                 if (callback == null) {
@@ -119,6 +118,10 @@ public class JSONResponseOutputter implements ResponseOutputter {
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    private static boolean isRespondWithHTML(final HttpServletRequest req) {
+        return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
     }
 
     private static final Pattern PATTERN_JSON = Pattern.compile("**json**", Pattern.LITERAL);
