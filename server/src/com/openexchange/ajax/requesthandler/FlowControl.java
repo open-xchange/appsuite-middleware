@@ -49,13 +49,17 @@
 
 package com.openexchange.ajax.requesthandler;
 
-
 /**
  * {@link FlowControl}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FlowControl {
-    public static class Later extends RuntimeException {};
+
+    /**
+     * The flow control indicating "later" policy.
+     */
+    public static final class Later extends RuntimeException {
+    };
 
 }
