@@ -59,11 +59,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -171,7 +174,7 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject.containsAlarm()) {
             writeParameter(AppointmentFields.ALARM, appointmentObject.getAlarm(), jsonObj);
-        } else if (null != session && appointmentObject.containsUserParticipants()) {
+        } else if (null != session && isPublicFolder(appointmentObject) && appointmentObject.containsUserParticipants()) {
             final int userId  = session.getUserId();
             /*
              * Check for alarm for requesting user in user participants
@@ -218,6 +221,15 @@ public class AppointmentWriter extends CalendarWriter {
         }
         if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject) appointmentObject).isHardConflict()) {
             writeParameter(AppointmentFields.HARD_CONFLICT, true, jsonObj);
+        }
+    }
+
+    private boolean isPublicFolder(final Appointment appointmentObject) {
+        try {
+            final int folderID = appointmentObject.getParentFolderID();
+            return folderID > 0 && new OXFolderAccess(session.getContext()).getFolderType(folderID) == FolderObject.PUBLIC;
+        } catch (final OXException e) {
+            return false;
         }
     }
 
