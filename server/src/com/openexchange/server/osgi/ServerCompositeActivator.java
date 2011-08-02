@@ -53,12 +53,12 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.server.osgiservice.CompositeBundleActivator;
 
 /**
- * {@link Activator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
+ * {@link ServerCompositeActivator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
  * bundles. Currently this is not done to keep number of packages low.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator extends CompositeBundleActivator {
+public class ServerCompositeActivator extends CompositeBundleActivator {
 
     private final BundleActivator[] activators = {
         new com.openexchange.tools.pipesnfilters.osgi.PipesAndFiltersActivator(),
@@ -92,7 +92,7 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.groupware.calendar.json.osgi.AppointmentJSONActivator(),
     };
 
-    public Activator() {
+    public ServerCompositeActivator() {
         super();
     }
 
