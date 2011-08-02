@@ -99,7 +99,7 @@ public class DispatcherServlet extends SessionServlet {
 
         private final HttpServletRequest req;
 
-        HTTPRequestInputStreamProvider(final HttpServletRequest req) {
+        protected HTTPRequestInputStreamProvider(final HttpServletRequest req) {
             this.req = req;
         }
 
