@@ -89,6 +89,7 @@ public class Activator extends CompositeBundleActivator {
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
         new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
+        new com.openexchange.groupware.calendar.json.osgi.AppointmentJSONActivator(),
     };
 
     public Activator() {

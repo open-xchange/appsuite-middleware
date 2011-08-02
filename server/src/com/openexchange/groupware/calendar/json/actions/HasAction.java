@@ -47,51 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json;
+package com.openexchange.groupware.calendar.json.actions;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.Date;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
+
 /**
- * {@link AppointmentActionFactory}
+ * {@link HasAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AppointmentActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public final class HasAction extends AbstractAppointmentAction {
 
     /**
-     * Initializes a new {@link AppointmentActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link HasAction}.
+     * @param services
      */
-    public AppointmentActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15);
-        actions.put("new", new com.openexchange.groupware.calendar.json.actions.NewAction(services));
-        actions.put("update", new com.openexchange.groupware.calendar.json.actions.UpdateAction(services));
-        actions.put("updates", new com.openexchange.groupware.calendar.json.actions.UpdatesAction(services));
-        actions.put("confirm", new com.openexchange.groupware.calendar.json.actions.ConfirmAction(services));
-        actions.put("delete", new com.openexchange.groupware.calendar.json.actions.DeleteAction(services));
-        actions.put("all", new com.openexchange.groupware.calendar.json.actions.AllAction(services));
-        actions.put("list", new com.openexchange.groupware.calendar.json.actions.ListAction(services));
-        actions.put("get", new com.openexchange.groupware.calendar.json.actions.GetAction(services));
-        actions.put("search", new com.openexchange.groupware.calendar.json.actions.SearchAction(services));
-        actions.put("newappointments", new com.openexchange.groupware.calendar.json.actions.NewAppointmentsSearchAction(services));
-        actions.put("has", new com.openexchange.groupware.calendar.json.actions.HasAction(services));
-        actions.put("freebusy", new com.openexchange.groupware.calendar.json.actions.FreeBusyAction(services));
-        actions.put("copy", new com.openexchange.groupware.calendar.json.actions.CopyAction(services));
-        actions.put("resolveuid", new com.openexchange.groupware.calendar.json.actions.ResolveUIDAction(services));
+    public HasAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
+        final TimeZone timeZone;
+        {
+            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
+        }
+        final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
+        final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
+
+        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(req.getSession());
+        final boolean[] bHas = appointmentsql.hasAppointmentsBetween(start, end);
+
+        final JSONArray jsonResponseArray = new JSONArray();
+        for (int a = 0; a < bHas.length; a++) {
+            jsonResponseArray.put(bHas[a]);
+        }
+
+        return new AJAXRequestResult(jsonResponseArray, "json");
     }
 
 }

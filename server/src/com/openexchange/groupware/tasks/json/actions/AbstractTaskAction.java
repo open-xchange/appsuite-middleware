@@ -103,6 +103,9 @@ public abstract class AbstractTaskAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        if (!session.getUserConfiguration().hasTask()) {
+            throw OXException.noPermissionForModule("task");
+        }
         try {
             final TaskRequest taskRequest = new TaskRequest(request, session);
             final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);

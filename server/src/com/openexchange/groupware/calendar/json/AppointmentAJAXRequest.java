@@ -56,11 +56,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentAJAXRequest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AppointmentAJAXRequest {
@@ -78,7 +79,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Initializes a new {@link AppointmentAJAXRequest}.
-     *
+     * 
      * @param session The session
      * @param request The request
      */
@@ -169,9 +170,9 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     *
+     * 
      * @param name The parameter name
-     * @return The <code>int</code>
+     * @return The <code>int</code> or {@link #NOT_FOUND} (<code>-9999</code>)
      * @throws OXException If parameter is an invalid number value
      */
     public int optInt(final String name) throws OXException {
@@ -193,7 +194,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     *
+     * 
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -217,7 +218,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     *
+     * 
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -232,7 +233,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     *
+     * 
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -246,7 +247,7 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the request.
-     *
+     * 
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -255,10 +256,63 @@ public final class AppointmentAJAXRequest {
 
     /**
      * Gets the session.
-     *
+     * 
      * @return The session
      */
     public ServerSession getSession() {
         return session;
     }
+
+    /**
+     * Creates a new <code>java.util.Date</code> instance with this request's time zone offset subtracted from specified UTC time.
+     * 
+     * @param utcTime The UTC time
+     * @return A new <code>java.util.Date</code> with time zone offset applied
+     */
+    public Date applyTimeZone2Date(final long utcTime) {
+        return new Date(utcTime - timeZone.getOffset(utcTime));
+    }
+
+    /**
+     * Parses specified <code>boolean</code> parameter
+     * 
+     * @param name The parameter name
+     * @return <code>true</code> if the string argument is not <code>null</code> and is equal, ignoring case, to the string
+     *         <code>"true"</code>; otherwise <code>false</code>
+     */
+    public boolean parseBoolean(final String name) {
+        return Boolean.parseBoolean(getParameter(name));
+    }
+
+    /**
+     * Checks specified <code>boolean</code> parameter
+     * 
+     * @param name The parameter name
+     * @return <code>true</code> if the string argument is equal, ignoring case, to the string <code>"true"</code>; otherwise
+     *         <code>false</code>
+     * @throws OXException If parameter is absent
+     */
+    public boolean checkBoolean(final String name) throws OXException {
+        final String value = getParameter(name);
+        if (null == value) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return Boolean.parseBoolean(value);
+    }
+
+    public Date checkTime(final String name, final TimeZone timeZone) throws OXException, OXException {
+        final String tmp = getParameter(name);
+        if (tmp == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        try {
+            final Date d = new Date(Long.parseLong(tmp));
+            final int offset = timeZone.getOffset(d.getTime());
+            d.setTime(d.getTime() - offset);
+            return d;
+        } catch (final NumberFormatException exc) {
+            throw OXJSONExceptionCodes.INVALID_VALUE.create(exc, name, tmp);
+        }
+    }
+
 }

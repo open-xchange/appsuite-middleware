@@ -47,51 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json;
+package com.openexchange.groupware.calendar.json.actions;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AppointmentActionFactory}
- *
+ * {@link ResolveUIDAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AppointmentActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public final class ResolveUIDAction extends AbstractAppointmentAction {
 
     /**
-     * Initializes a new {@link AppointmentActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link ResolveUIDAction}.
+     * 
+     * @param services
      */
-    public AppointmentActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15);
-        actions.put("new", new com.openexchange.groupware.calendar.json.actions.NewAction(services));
-        actions.put("update", new com.openexchange.groupware.calendar.json.actions.UpdateAction(services));
-        actions.put("updates", new com.openexchange.groupware.calendar.json.actions.UpdatesAction(services));
-        actions.put("confirm", new com.openexchange.groupware.calendar.json.actions.ConfirmAction(services));
-        actions.put("delete", new com.openexchange.groupware.calendar.json.actions.DeleteAction(services));
-        actions.put("all", new com.openexchange.groupware.calendar.json.actions.AllAction(services));
-        actions.put("list", new com.openexchange.groupware.calendar.json.actions.ListAction(services));
-        actions.put("get", new com.openexchange.groupware.calendar.json.actions.GetAction(services));
-        actions.put("search", new com.openexchange.groupware.calendar.json.actions.SearchAction(services));
-        actions.put("newappointments", new com.openexchange.groupware.calendar.json.actions.NewAppointmentsSearchAction(services));
-        actions.put("has", new com.openexchange.groupware.calendar.json.actions.HasAction(services));
-        actions.put("freebusy", new com.openexchange.groupware.calendar.json.actions.FreeBusyAction(services));
-        actions.put("copy", new com.openexchange.groupware.calendar.json.actions.CopyAction(services));
-        actions.put("resolveuid", new com.openexchange.groupware.calendar.json.actions.ResolveUIDAction(services));
+    public ResolveUIDAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
+        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(req.getSession());
+        final JSONObject json = new JSONObject();
+        final String uid = req.getParameter(AJAXServlet.PARAMETER_UID);
+        final int id = appointmentSql.resolveUid(uid);
+        if (id == 0) {
+            throw OXException.notFound("");
+        }
+        json.put("id", id);
+        return new AJAXRequestResult(json, "json");
     }
 
 }

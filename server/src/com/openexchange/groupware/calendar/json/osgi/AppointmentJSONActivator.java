@@ -47,51 +47,34 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json;
+package com.openexchange.groupware.calendar.json.osgi;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.calendar.json.AppointmentActionFactory;
+
 
 /**
- * {@link AppointmentActionFactory}
+ * {@link AppointmentJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AppointmentActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link AppointmentActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link AppointmentJSONActivator}.
      */
-    public AppointmentActionFactory(final ServiceLookup services) {
+    public AppointmentJSONActivator() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15);
-        actions.put("new", new com.openexchange.groupware.calendar.json.actions.NewAction(services));
-        actions.put("update", new com.openexchange.groupware.calendar.json.actions.UpdateAction(services));
-        actions.put("updates", new com.openexchange.groupware.calendar.json.actions.UpdatesAction(services));
-        actions.put("confirm", new com.openexchange.groupware.calendar.json.actions.ConfirmAction(services));
-        actions.put("delete", new com.openexchange.groupware.calendar.json.actions.DeleteAction(services));
-        actions.put("all", new com.openexchange.groupware.calendar.json.actions.AllAction(services));
-        actions.put("list", new com.openexchange.groupware.calendar.json.actions.ListAction(services));
-        actions.put("get", new com.openexchange.groupware.calendar.json.actions.GetAction(services));
-        actions.put("search", new com.openexchange.groupware.calendar.json.actions.SearchAction(services));
-        actions.put("newappointments", new com.openexchange.groupware.calendar.json.actions.NewAppointmentsSearchAction(services));
-        actions.put("has", new com.openexchange.groupware.calendar.json.actions.HasAction(services));
-        actions.put("freebusy", new com.openexchange.groupware.calendar.json.actions.FreeBusyAction(services));
-        actions.put("copy", new com.openexchange.groupware.calendar.json.actions.CopyAction(services));
-        actions.put("resolveuid", new com.openexchange.groupware.calendar.json.actions.ResolveUIDAction(services));
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new AppointmentActionFactory(this), "calendar");
     }
 
 }

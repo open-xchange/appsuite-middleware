@@ -92,15 +92,21 @@ public abstract class AbstractReminderAction implements AJAXActionService {
 
     private final ServiceLookup services;
 
-    private final AppointmentSqlFactoryService appointmentFactory;
-
     /**
      * Initializes a new {@link AbstractReminderAction}.
      */
     protected AbstractReminderAction(final ServiceLookup services) {
         super();
-        appointmentFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
         this.services = services;
+    }
+
+    /**
+     * Gets the {@link AppointmentSqlFactoryService} instance.
+     * 
+     * @return The service
+     */
+    protected AppointmentSqlFactoryService getService() {
+        return services.getService(AppointmentSqlFactoryService.class);
     }
 
     /**
@@ -165,7 +171,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
      * @return <code>true</code> if a latest reminder was found.
      */
     protected boolean getLatestRecurringReminder(final Session sessionObj, final TimeZone tz, final Date endRange, final ReminderObject reminder) throws OXException {
-        final AppointmentSQLInterface calendarSql = appointmentFactory.createAppointmentSql(sessionObj);
+        final AppointmentSQLInterface calendarSql = getService().createAppointmentSql(sessionObj);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         final Appointment calendarDataObject;
         try {
