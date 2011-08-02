@@ -113,6 +113,7 @@ public final class GetAction extends AbstractAppointmentAction {
             }
 
             final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+            appointmentwriter.setSession(session);
 
             final JSONObject jsonResponseObj = new JSONObject();
 
