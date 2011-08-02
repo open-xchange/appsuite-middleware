@@ -111,7 +111,7 @@ public abstract class AbstractGroupAction implements AJAXActionService {
      * @param req The group request
      * @return The result
      * @throws OXException If an error occurs
-     * @throws JSONException IF a JSON error occurs
+     * @throws JSONException If a JSON error occurs
      */
     protected abstract AJAXRequestResult perform(GroupAJAXRequest req) throws OXException, JSONException;
 

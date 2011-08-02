@@ -121,7 +121,7 @@ public abstract class AbstractTaskAction implements AJAXActionService {
      * @param req The task request
      * @return The result
      * @throws OXException If an error occurs
-     * @throws JSONException IF a JSON error occurs
+     * @throws JSONException If a JSON error occurs
      */
     protected abstract AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.reminder.json.actions;
+package com.openexchange.groupware.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
@@ -69,9 +69,9 @@ import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -79,14 +79,14 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractReminderAction}
+ * {@link AbstractAppointmentAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractReminderAction implements AJAXActionService {
+public abstract class AbstractAppointmentAction implements AJAXActionService {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractReminderAction.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AbstractAppointmentAction.class));
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -95,9 +95,9 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     private final AppointmentSqlFactoryService appointmentFactory;
 
     /**
-     * Initializes a new {@link AbstractReminderAction}.
+     * Initializes a new {@link AbstractAppointmentAction}.
      */
-    protected AbstractReminderAction(final ServiceLookup services) {
+    protected AbstractAppointmentAction(final ServiceLookup services) {
         super();
         appointmentFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
         this.services = services;
@@ -116,26 +116,26 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
-            final ReminderAJAXRequest reminderRequest = new ReminderAJAXRequest(request, session);
+            final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
             final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
-                reminderRequest.setTimeZone(getTimeZone(sTimeZone));
+                ar.setTimeZone(getTimeZone(sTimeZone));
             }
-            return perform(reminderRequest);
+            return perform(ar);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSONError.create(e, e.getMessage());
         }
     }
 
     /**
-     * Performs specified reminder request.
+     * Performs specified appointment request.
      *
-     * @param req The reminder request
+     * @param req The appointment request
      * @return The result
      * @throws OXException If an error occurs
      * @throws JSONException If a JSON error occurs
      */
-    protected abstract AJAXRequestResult perform(ReminderAJAXRequest req) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform(AppointmentAJAXRequest req) throws OXException, JSONException;
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.

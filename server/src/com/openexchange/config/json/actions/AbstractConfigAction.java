@@ -118,7 +118,7 @@ public abstract class AbstractConfigAction implements AJAXActionService {
      * @param req The config request
      * @return The result
      * @throws OXException If an error occurs
-     * @throws JSONException IF a JSON error occurs
+     * @throws JSONException If a JSON error occurs
      */
     protected abstract AJAXRequestResult perform(ConfigAJAXRequest req) throws OXException, JSONException;
 
