@@ -60,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
  * this bundles service.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConfigurationTracker implements ServiceTrackerCustomizer {
+public class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private final BundleContext context;
 
@@ -81,8 +81,8 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final ConfigurationService configuration = (ConfigurationService) context
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService configuration = context
             .getService(reference);
         final Properties props = configuration.getFile("configjump.properties");
         // TODO put URL somewhere
@@ -95,8 +95,8 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    public void modifiedService(final ServiceReference<ConfigurationService> reference,
+        final ConfigurationService service) {
         // Nothing to do.
     }
 
@@ -104,8 +104,8 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
      * {@inheritDoc}
      */
     @Override
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    public void removedService(final ServiceReference<ConfigurationService> reference,
+        final ConfigurationService service) {
         // Nothing to do.
     }
 }
