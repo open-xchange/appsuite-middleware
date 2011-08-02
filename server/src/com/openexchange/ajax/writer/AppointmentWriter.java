@@ -227,7 +227,7 @@ public class AppointmentWriter extends CalendarWriter {
     private boolean isPublicFolder(final Appointment appointmentObject) {
         try {
             final int folderID = appointmentObject.getParentFolderID();
-            return folderID > 0 && new OXFolderAccess(session.getContext()).getFolderType(folderID) == FolderObject.PUBLIC;
+            return folderID > 0 && FolderObject.PUBLIC == new OXFolderAccess(session.getContext()).getFolderType(folderID);
         } catch (final OXException e) {
             return false;
         }
