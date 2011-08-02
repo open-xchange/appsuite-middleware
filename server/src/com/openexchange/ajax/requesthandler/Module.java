@@ -54,10 +54,16 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * {@link Module}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Module {
+
+    /**
+     * Gets the supported action strings
+     * 
+     * @return The action strings or <code>null</code>
+     */
     String[] actions();
 }
