@@ -196,8 +196,8 @@ public class DispatcherServlet extends SessionServlet {
         int highest = Integer.MIN_VALUE;
         ResponseOutputter chosen = null;
         for(final ResponseOutputter renderer : responseRenderers) {
-            if (renderer.handles(request, result) && highest <= renderer.getPriority()) {
-                highest = renderer.getPriority();
+            if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
+                highest = renderer.getRanking();
                 chosen = renderer;
             }
         }
