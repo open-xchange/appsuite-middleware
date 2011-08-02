@@ -75,7 +75,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
      * Registers specified factory with given module identifier.
      * 
      * @param factory The factory to register
-     * @param module The module identifier; <code>"/ajax/"</code> + &lt;module&gt;
+     * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
      */
     public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
@@ -85,7 +85,7 @@ public abstract class AJAXModuleActivator extends HousekeepingActivator {
      * Registers specified factory with given module identifier which is not accessible by multiple module.
      * 
      * @param factory The factory to register
-     * @param module The module identifier; <code>"/ajax/"</code> + &lt;module&gt;
+     * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
      */
     public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, false);
