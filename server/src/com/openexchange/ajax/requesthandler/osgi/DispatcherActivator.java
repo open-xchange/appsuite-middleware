@@ -64,9 +64,9 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.JSONResponseConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
-import com.openexchange.ajax.requesthandler.responseOutputters.FileResponseOutputter;
-import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseOutputter;
-import com.openexchange.ajax.requesthandler.responseOutputters.StringResponseOutputter;
+import com.openexchange.ajax.requesthandler.responseOutputters.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseOutputters.StringResponseRenderer;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.tools.images.ImageScalingService;
@@ -112,10 +112,10 @@ public class DispatcherActivator extends HousekeepingActivator {
         final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
         Multiple.setDispatcher(dispatcher);
 
-        DispatcherServlet.registerRenderer(new JSONResponseOutputter());
-        final FileResponseOutputter fileRenderer = new FileResponseOutputter();
+        DispatcherServlet.registerRenderer(new JSONResponseRenderer());
+        final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
-        DispatcherServlet.registerRenderer(new StringResponseOutputter());
+        DispatcherServlet.registerRenderer(new StringResponseRenderer());
 
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 

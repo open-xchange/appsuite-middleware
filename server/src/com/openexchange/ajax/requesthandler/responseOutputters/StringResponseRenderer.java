@@ -58,24 +58,24 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 
 /**
- * {@link StringResponseOutputter}
+ * {@link StringResponseRenderer}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StringResponseOutputter implements ResponseRenderer {
+public class StringResponseRenderer implements ResponseRenderer {
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseOutputter.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseRenderer.class));
 
     /**
-     * Initializes a new {@link StringResponseOutputter}.
+     * Initializes a new {@link StringResponseRenderer}.
      */
-    public StringResponseOutputter() {
+    public StringResponseRenderer() {
         super();
     }
 
     @Override
-    public int getPriority() {
+    public int getRanking() {
         return Integer.MIN_VALUE;
     }
 

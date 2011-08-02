@@ -71,13 +71,13 @@ import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
- * {@link FileResponseOutputter}
+ * {@link FileResponseRenderer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileResponseOutputter implements ResponseRenderer {
+public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseOutputter.class));
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
 
     private static final String PARAMETER_CONTENT_DISPOSITION = "content_disposition";
     private static final String PARAMETER_CONTENT_TYPE = "content_type";
@@ -86,7 +86,7 @@ public class FileResponseOutputter implements ResponseRenderer {
     private ImageScalingService scaler = null;
 
     @Override
-    public int getPriority() {
+    public int getRanking() {
         return 0;
     }
 

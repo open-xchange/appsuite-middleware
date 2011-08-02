@@ -70,16 +70,16 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link JSONResponseOutputter}
+ * {@link JSONResponseRenderer}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JSONResponseOutputter implements ResponseRenderer {
+public class JSONResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseOutputter.class));
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseRenderer.class));
 
     @Override
-    public int getPriority() {
+    public int getRanking() {
         return 0;
     }
 
