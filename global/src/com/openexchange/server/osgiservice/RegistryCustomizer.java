@@ -58,7 +58,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RegistryCustomizer<S> implements ServiceTrackerCustomizer {
+public class RegistryCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
 
     private final BundleContext context;
 
@@ -73,22 +73,20 @@ public class RegistryCustomizer<S> implements ServiceTrackerCustomizer {
         this.registry = registry;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final Object tmp = context.getService(reference);
-        if (!clazz.isAssignableFrom(tmp.getClass())) {
-            context.ungetService(reference);
-            return null;
-        }
-        final S service = (S) tmp;
+    @Override
+    public S addingService(final ServiceReference<S> reference) {
+        final S service = context.getService(reference);
         registry.addService(clazz, service);
         return service;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<S> reference, final S service) {
         // Nothing to do.
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<S> reference, final S service) {
         registry.removeService(clazz);
         context.ungetService(reference);
     }

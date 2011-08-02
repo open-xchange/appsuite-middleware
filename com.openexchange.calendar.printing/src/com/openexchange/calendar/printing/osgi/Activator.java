@@ -50,9 +50,6 @@
 package com.openexchange.calendar.printing.osgi;
 
 import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
-import java.util.Stack;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.group.GroupService;
@@ -60,7 +57,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.RegistryCustomizer;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.SessionServletRegistration;
@@ -72,7 +69,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     /**
      * The servlet path.
@@ -80,10 +77,6 @@ public class Activator extends DeferredActivator {
     public static final String ALIAS = "/ajax/printCalendar";
 
     private SessionServletRegistration registration;
-
-    private ServiceRegistration preferenceItemRegistration;
-
-    private Stack<ServiceTracker> trackers;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -102,30 +95,18 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        trackers = new Stack<ServiceTracker>();
-        trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-        trackers.add(new ServiceTracker(context, UserService.class.getName(), new RegistryCustomizer<UserService>(context, UserService.class, getInstance())));
-        trackers.add(new ServiceTracker(context, GroupService.class.getName(), new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance())));
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
+        track(I18nService.class, new I18nCustomizer(context));
+        track(UserService.class, new RegistryCustomizer<UserService>(context, UserService.class, getInstance()));
+        track(GroupService.class, new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance()));
+        openTrackers();
         register();
-        preferenceItemRegistration = context.registerService(PreferencesItemService.class.getName(), new CalendarPrintingEnabled(), null);
+        registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (null != preferenceItemRegistration) {
-            preferenceItemRegistration.unregister();
-            preferenceItemRegistration = null;
-        }
         unregister();
-        if (null != trackers) {
-            while (!trackers.isEmpty()) {
-                trackers.pop().close();
-            }
-            trackers = null;
-        }
+        cleanUp();
     }
 
     private void register() {
