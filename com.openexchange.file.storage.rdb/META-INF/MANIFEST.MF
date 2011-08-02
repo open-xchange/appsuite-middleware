@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange File Storage RDB Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.rdb
 Bundle-Version: 6.18.2.0
 Bundle-Vendor: Open-Xchange Inc
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
  com.openexchange.caching,
  com.openexchange.context,

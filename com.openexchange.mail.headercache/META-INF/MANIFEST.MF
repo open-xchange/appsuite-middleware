@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Mail Header Cache
 Bundle-SymbolicName: com.openexchange.mail.headercache
 Bundle-Version: 6.15.0.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.database,
  com.openexchange.exception,

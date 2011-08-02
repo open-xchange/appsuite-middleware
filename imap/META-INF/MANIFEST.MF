@@ -68,4 +68,4 @@ Export-Package: com.openexchange.imap,
  com.openexchange.imap.config,
  com.openexchange.imap.notify
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
