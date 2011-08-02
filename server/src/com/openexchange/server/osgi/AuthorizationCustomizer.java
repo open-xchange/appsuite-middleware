@@ -62,7 +62,7 @@ import com.openexchange.authorization.AuthorizationService;
  *
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
-public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
+public class AuthorizationCustomizer implements ServiceTrackerCustomizer<AuthorizationService, AuthorizationService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationCustomizer.class));
 
@@ -74,8 +74,8 @@ public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final AuthorizationService auth = (AuthorizationService) context.getService(reference);
+    public AuthorizationService addingService(final ServiceReference<AuthorizationService> reference) {
+        final AuthorizationService auth = context.getService(reference);
         if (null == Authorization.getService()) {
             Authorization.setService(auth);
             return auth;
@@ -86,13 +86,13 @@ public class AuthorizationCustomizer implements ServiceTrackerCustomizer {
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<AuthorizationService> reference, final AuthorizationService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
-        if (Authorization.dropService((AuthorizationService) service)) {
+    public void removedService(final ServiceReference<AuthorizationService> reference, final AuthorizationService service) {
+        if (Authorization.dropService(service)) {
             LOG.error("Removed authorization service was not active!");
         } else {
             context.ungetService(reference);
