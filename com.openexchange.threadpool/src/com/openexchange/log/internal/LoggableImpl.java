@@ -102,7 +102,9 @@ public final class LoggableImpl implements Loggable {
      * @param properties The properties
      */
     public LoggableImpl putProperties(final Map<String, Object> properties) {
-        this.properties.putAll(properties);
+        if (null != properties) {
+            this.properties.putAll(properties);
+        }
         return this;
     }
 
