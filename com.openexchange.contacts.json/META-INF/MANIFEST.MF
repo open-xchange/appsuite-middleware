@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.contacts.json
 Bundle-Version: 7.0.0
 Bundle-Activator: com.openexchange.contact.json.osgi.ContactJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.fields,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
