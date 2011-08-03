@@ -49,40 +49,89 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link ListAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends ContactAction {
+public class ListAction extends ContactAction {
 
-    public GetAction(ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link ListAction}.
+     * @param serviceLookup
+     */
+    public ListAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        int id = req.getId();
-        int folder = req.getFolder();
         ServerSession session = req.getSession();
+        int[] columns = checkOrInsertLastModified(req.getColumns());
+        int[][] objectIdsAndFolderIds = req.getListRequestData();
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        Contact contact = contactInterface.getObjectById(id, folder);     
-        Date lastModified = contact.getLastModified();
+        boolean allInSameFolder = true;
+        int lastFolder = -1;
+        for (int[] objectIdAndFolderId : objectIdsAndFolderIds) {
+            int folder = objectIdAndFolderId[1];
+            if (lastFolder != -1 && folder != lastFolder) {
+                allInSameFolder = false;
+            }
+            lastFolder = folder;
+        }
         
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
+        Date timestamp = new Date(0);
+        Date lastModified = null;
+        SearchIterator<Contact> it = null;
+        List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            if (allInSameFolder) {
+                ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(lastFolder, session);
+                it = contactInterface.getObjectsById(objectIdsAndFolderIds, columns);
+                
+                while (it.hasNext()) {
+                    Contact contact = it.next();
+                    contacts.add(contact);
+                    lastModified = contact.getLastModified();
+                    if (lastModified != null && timestamp.before(lastModified)) {
+                        timestamp = lastModified;
+                    }
+                }
+            } else {
+                for (int[] objectIdAndFolderId : objectIdsAndFolderIds) {
+                    int folder = objectIdAndFolderId[1];
+                    ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+                    it = contactInterface.getObjectsById(new int[][] { objectIdAndFolderId }, columns);
+                    
+                    while (it.hasNext()) {
+                        Contact contact = it.next();
+                        contacts.add(contact);
+                        lastModified = contact.getLastModified();
+                    }
+                    
+                    if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                        timestamp = lastModified;
+                    }
+                }            
+            }
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
         
-        return new AJAXRequestResult(contact, lastModified, "contact");
+        return new AJAXRequestResult(contacts, timestamp, "contacts");
     }
 }

@@ -49,40 +49,71 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link AllAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends ContactAction {
+public class AllAction extends ContactAction {
 
-    public GetAction(ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link AllAction}.
+     * @param serviceLookup
+     */
+    public AllAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        int id = req.getId();
-        int folder = req.getFolder();
         ServerSession session = req.getSession();
+        int folder = req.getFolder();
+        int[] columns = checkOrInsertLastModified(req.getColumns());
+        int sort = req.getSort();
+        Order order = OrderFields.parse(req.getOrder());
+        String collation = req.getCollation();
+        int leftHandLimit = req.getLeftHandLimit();
+        int rightHandLimit = req.getRightHandLimit();
+        if (rightHandLimit == 0) {
+            rightHandLimit = 50000;
+        }
         
+        Date timestamp = new Date(0);
         ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        Contact contact = contactInterface.getObjectById(id, folder);     
-        Date lastModified = contact.getLastModified();
+        SearchIterator<Contact> it = null;
+        List<Contact> contacts = new ArrayList<Contact>();
+        try {
+            it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
+            
+            while (it.hasNext()) {
+                Contact contact = it.next();
+                contacts.add(contact);
+                Date lastModified = contact.getLastModified();
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
+                }
+            }
+        } finally {
+            if (it != null) {
+                it.close();
+            }
+        }
         
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
-        
-        return new AJAXRequestResult(contact, lastModified, "contact");
+        return new AJAXRequestResult(contacts, timestamp, "contacts");
     }
+
 }

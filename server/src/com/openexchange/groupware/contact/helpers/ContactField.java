@@ -196,7 +196,9 @@ public enum ContactField{
     YOMI_COMPANY(612, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY),
     NUMBER_OF_IMAGES(596, "number_of_images", "NUMBER_OF_IMAGES", "number_of_images", ContactFields.NUMBER_OF_IMAGES),
     LAST_MODIFIED_OF_NEWEST_ATTACHMENT(105, "lastModifiedOfNewestAttachment", "LAST_MODIFIED_OF_NEWEST_ATTACHMENT", "lastModifiedOfNewestAttachment", ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC),
-    USE_COUNT(608, "use_count", "USE_COUNT", "useCount", ContactFields.USE_COUNT);
+    USE_COUNT(608, "use_count", "USE_COUNT", "useCount", ContactFields.USE_COUNT),
+    IMAGE1_URL(606, "image1_url", "IMAGE1_URL", "image1_url", ContactFields.IMAGE1_URL),
+    LAST_MODIFIED_UTC(6, "last_modified_utc", "LAST_MODIFIED_UTC", "last_modified_utc", ContactFields.LAST_MODIFIED_UTC);
 
 	private int columnNumber;
 	private String dbName, readableName, fieldName, ajaxName;

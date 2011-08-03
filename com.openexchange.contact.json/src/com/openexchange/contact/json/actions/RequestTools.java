@@ -49,40 +49,64 @@
 
 package com.openexchange.contact.json.actions;
 
-import java.util.Date;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 
 
 /**
- * {@link GetAction}
+ * {@link RequestTools}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends ContactAction {
-
-    public GetAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+public class RequestTools {
+    
+    public static int[] getIntArray(AJAXRequestData request, String parameter) {
+        String valueStr = request.getParameter("columns");
+        String[] valueStrArr = valueStr.split(",");
+        
+        int[] values = new int[valueStrArr.length];
+        for (int i = 0; i < values.length; i++) {
+            try {
+                values[i] = Integer.parseInt(valueStrArr[i].trim());
+            } catch (NumberFormatException e) {
+                // TODO: handle exception
+            }
+        }
+        
+        return values;
+    }
+    
+    public static int getNullableIntParameter(AJAXRequestData request, String parameter) {
+        try {
+            Integer sort = request.getParameter(parameter, int.class);
+            if (sort == null) {
+                return 0;
+            } else {
+                return sort.intValue();
+            }
+        } catch (NumberFormatException e) {
+            // TODO: handle exception
+            return 0;
+        } 
     }
 
-    @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        int id = req.getId();
-        int folder = req.getFolder();
-        ServerSession session = req.getSession();
+    public static int[][] buildObjectIdAndFolderId(JSONArray json) {
+        int[][] objectIdAndFolderId = new int[json.length()][];
+        for (int i = 0; i < json.length(); i++) {
+            try {
+                JSONObject object = json.getJSONObject(i);
+                int folder = object.getInt("folder");
+                int id = object.getInt("id");
+                objectIdAndFolderId[i] = new int[] { id, folder };
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        Contact contact = contactInterface.getObjectById(id, folder);     
-        Date lastModified = contact.getLastModified();
-        
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
-        
-        return new AJAXRequestResult(contact, lastModified, "contact");
+        return objectIdAndFolderId;
     }
+
 }

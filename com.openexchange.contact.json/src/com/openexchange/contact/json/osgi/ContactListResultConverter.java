@@ -47,42 +47,72 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contact.json.osgi;
 
-import java.util.Date;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.contact.json.actions.RequestTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.image.ImageService;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetAction}
+ * {@link ContactListResultConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GetAction extends ContactAction {
-
-    public GetAction(ServiceLookup serviceLookup) {
-        super(serviceLookup);
+public class ContactListResultConverter extends JSONResultConverter {    
+    
+    public ContactListResultConverter(ImageService imageService) {
+        super(imageService);
     }
 
     @Override
-    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        int id = req.getId();
-        int folder = req.getFolder();
-        ServerSession session = req.getSession();
-        
-        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
-        Contact contact = contactInterface.getObjectById(id, folder);     
-        Date lastModified = contact.getLastModified();
-        
-        // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
-        
-        return new AJAXRequestResult(contact, lastModified, "contact");
+    public String getInputFormat() {
+        return "contacts";
     }
+
+    @Override
+    public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        List<Contact> contacts = (List<Contact>) result.getResultObject();
+        int[] columns = RequestTools.getIntArray(request, "columns");
+        
+        JSONArray resultArray = new JSONArray();
+        for (Contact contact : contacts) {
+            JSONArray contactArray = new JSONArray();
+            
+            ContactGetter cg = new ContactGetter();
+            for (int column : columns) {
+                ContactField field = ContactField.getByValue(column);
+                if (field != null && !field.getAjaxName().isEmpty()) {                
+                    Object value = field.doSwitch(cg, contact);
+                    if (value == null) {
+                        contactArray.put(JSONObject.NULL);
+                    } else if (isSpecial(column)) {
+                        Object special = convertSpecial(field, contact, cg);
+                        if (special == null) {
+                            contactArray.put(JSONObject.NULL);                            
+                        } else {
+                            contactArray.put(special);
+                        }                        
+                    } else {
+                        contactArray.put(value);
+                    }
+                }
+            }
+            
+            resultArray.put(contactArray);
+        }
+        
+        result.setResultObject(resultArray, "json");
+    }
+
 }

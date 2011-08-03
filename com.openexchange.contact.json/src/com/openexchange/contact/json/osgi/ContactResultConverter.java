@@ -49,22 +49,13 @@
 
 package com.openexchange.contact.json.osgi;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.conversion.DataArguments;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.container.Contact;
@@ -72,38 +63,17 @@ import com.openexchange.image.ImageService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ContactResultConverter}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactResultConverter implements ResultConverter {
-    
+public class ContactResultConverter extends JSONResultConverter {
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactResultConverter.class));
-    
-    private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
-    
-    static {
-        specialColumns.put(Contact.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, "date");
-        specialColumns.put(Contact.CREATION_DATE, "date");
-        specialColumns.put(Contact.LAST_MODIFIED, "date");
-        specialColumns.put(Contact.BIRTHDAY, "date");
-        specialColumns.put(Contact.ANNIVERSARY, "date");
-        specialColumns.put(Contact.IMAGE_LAST_MODIFIED, "date");
-    }
-    
-    
-    private ImageService imageService;
-    
-    
+
     public ContactResultConverter(ImageService imageService) {
-        super();
-        this.imageService = imageService;
-    }
-    
-    public ContactResultConverter() {
-        super();
+        super(imageService);
     }
 
     @Override
@@ -112,17 +82,7 @@ public class ContactResultConverter implements ResultConverter {
     }
 
     @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-    
-    @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Contact contact = (Contact) result.getResultObject();
         result.setResultObject(convert(contact, session), "json");
     }
@@ -133,13 +93,18 @@ public class ContactResultConverter implements ResultConverter {
         ContactGetter cg = new ContactGetter();
         for (int column : Contact.JSON_COLUMNS) {
             ContactField field = ContactField.getByValue(column);
-            if (field != null && !field.getAjaxName().isEmpty()) {                
+            if (field != null && !field.getAjaxName().isEmpty()) {
                 try {
                     Object value = field.doSwitch(cg, contact);
-                    if (value != null && !String.valueOf(value).isEmpty()) {
-                        if (specialColumns.containsKey(column)) {
-                            treatSpecially(field, value, json);
-                        } else {
+                    
+                    if (isSpecial(column)) {
+                        Object special = convertSpecial(field, contact, cg);
+                        if (special != null && !String.valueOf(special).isEmpty()) {
+                            String jsonKey = field.getAjaxName();
+                            json.put(jsonKey, special);
+                        }                            
+                    } else {
+                        if (value != null && !String.valueOf(value).isEmpty()) {
                             String jsonKey = field.getAjaxName();
                             json.put(jsonKey, value);
                         }
@@ -150,51 +115,7 @@ public class ContactResultConverter implements ResultConverter {
             }
         }
         
-        // Set last_modified_utc
-        try {
-            Date lastModified = contact.getLastModified();
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTime(lastModified);
-            int offset = calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
-            calendar.add(Calendar.MILLISECOND, -offset);
-            json.put(ContactFields.LAST_MODIFIED_UTC, calendar.getTime().getTime());
-        } catch (JSONException e) {
-            OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-        }
-        
-        // Set image url
-        if (contact.containsImage1()) {
-            if (null == imageService) {
-                LOG.warn("Contact image URL cannot be written. Missing service: " + ImageService.class.getName());
-            } else {
-                final byte[] imageData = contact.getImage1();
-                if (imageData != null) {
-                    final String imageURL;
-                    final ContactImageDataSource imgSource = new ContactImageDataSource();
-                    final DataArguments args = new DataArguments();
-                    final String[] argsNames = imgSource.getRequiredArguments();
-                    args.put(argsNames[0], String.valueOf(contact.getParentFolderID()));
-                    args.put(argsNames[1], String.valueOf(contact.getObjectID()));
-                    imageURL = imageService.addImageData(session, imgSource, args).getImageURL();                    
-                    try {
-                        json.put(ContactFields.IMAGE1_URL, imageURL);
-                    } catch (JSONException e) {
-                        OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                    }
-                }
-            }
-        }
-        
         return json;
-    }
-
-    private void treatSpecially(ContactField field, Object value, JSONObject json) throws JSONException {
-        String type = specialColumns.get(field.getNumber());
-        if (type.equals("date")) {
-            String jsonKey = field.getAjaxName();
-            Date date = (Date) value;
-            json.put(jsonKey, date.getTime());
-        }
     }
 
 }

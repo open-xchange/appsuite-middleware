@@ -69,6 +69,9 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     public ContactActionFactory(ServiceLookup serviceLookup) {
         super();
         ACTIONS.put("get", new GetAction(serviceLookup));
+        ACTIONS.put("all", new AllAction(serviceLookup));
+        ACTIONS.put("list", new ListAction(serviceLookup));
+        ACTIONS.put("new", new NewAction(serviceLookup));
     }
 
     @Override

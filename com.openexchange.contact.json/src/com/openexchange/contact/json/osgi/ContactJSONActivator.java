@@ -72,8 +72,9 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ContactActionFactory(this), "newcontacts");
+        registerModule(new ContactActionFactory(this), "contacts");
         registerService(ResultConverter.class, new ContactResultConverter(getService(ImageService.class)));
+        registerService(ResultConverter.class, new ContactListResultConverter(getService(ImageService.class)));
     }
 
 }

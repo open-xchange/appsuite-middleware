@@ -50,7 +50,12 @@
 package com.openexchange.contact.json.actions;
 
 import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -64,6 +69,7 @@ public class ContactRequest {
     private AJAXRequestData request;
 
     private ServerSession session;
+
 
     public ContactRequest(AJAXRequestData request, ServerSession session) {
         super();
@@ -85,5 +91,59 @@ public class ContactRequest {
 
     public ServerSession getSession() {
         return session;
+    }
+    
+    public int[] getColumns() {
+        return RequestTools.getIntArray(request, "columns");
+    }
+
+    public int getSort() {
+        return RequestTools.getNullableIntParameter(request, "sort");    
+    }
+
+    public String getOrder() {
+        return request.getParameter("order");
+    }
+
+    public String getCollation() {
+        return request.getParameter("collation");
+    }
+    
+    public int getLeftHandLimit() {
+        return RequestTools.getNullableIntParameter(request, "left_hand_limit");    
+    }
+    
+    public int getRightHandLimit() {
+        return RequestTools.getNullableIntParameter(request, "right_hand_limit");    
+    }  
+    
+    public int[][] getListRequestData() {
+        JSONArray data = request.getParameter("data", JSONArray.class);
+        
+        return RequestTools.buildObjectIdAndFolderId(data);
+    }
+    
+    public boolean containsImage() {
+        return request.hasUploads();
+    }
+    
+    public JSONObject getContactJSON(boolean isUpload) throws OXException {
+        if (isUpload) {
+            String jsonField = request.getUploadEvent().getFormField("json");
+            try {
+                return new JSONObject(jsonField);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                
+                return null;
+            }
+        } else {
+            return (JSONObject) request.getData();
+        }
+    }
+    
+    public UploadEvent getUploadEvent() {
+        return request.getUploadEvent();
     }
 }
