@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.osgi;
+package com.openexchange.contact.json.converters;
 
 import java.util.Calendar;
 import java.util.Date;

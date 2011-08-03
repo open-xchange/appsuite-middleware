@@ -54,55 +54,78 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactSearchMultiplexer;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ListUserAction}
+ * {@link AdvancedSearchAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ListUserAction extends ContactAction {
+public class AdvancedSearchAction extends ContactAction {
 
     /**
-     * Initializes a new {@link ListUserAction}.
+     * Initializes a new {@link AdvancedSearchAction}.
      * @param serviceLookup
      */
-    public ListUserAction(ServiceLookup serviceLookup) {
+    public AdvancedSearchAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
         ServerSession session = req.getSession();
-        int[] uids = req.getUserIds();
-        Context ctx = session.getContext();
-        Date timestamp = new Date(0);
+        int[] columns = req.getColumns();
+        int sort = req.getSort();
+        Order order = req.getOrder();
+        String collation = req.getCollation();
         Date lastModified = null;
+        Date timestamp = new Date(0);
+        JSONObject json = (JSONObject) req.getData();
         
-        ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
-        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        JSONArray filterContent;
+        SearchIterator<Contact> it = null;
         List<Contact> contacts = new ArrayList<Contact>();
-        for (int uid : uids) {
-            Contact contact = contactInterface.getUserById(uid);
-            contacts.add(contact);
-            
-            lastModified = contact.getLastModified();
-            if (lastModified != null && timestamp.before(lastModified)) {
-                timestamp = lastModified;
+        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        try {
+            filterContent = json.getJSONArray("filter");
+            SearchTerm<?> searchTerm = SearchTermParser.parse(filterContent);
+
+            ContactSearchMultiplexer multiplexer = new ContactSearchMultiplexer(getContactInterfaceDiscoveryService());
+            it = multiplexer.extendedSearch(session, searchTerm, sort, order, collation, columns);
+            while (it.hasNext()) {
+                Contact contact = it.next();
+                contacts.add(contact);
+                
+                lastModified = contact.getLastModified();
+                if (lastModified != null && timestamp.before(lastModified)) {
+                    timestamp = lastModified;
+                }
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if (it != null) {
+                it.close();
             }
         }
-
-        contactMap.put("contacts", contacts);        
-        return new AJAXRequestResult(contactMap, timestamp, "contacts");
+        
+        contactMap.put("contacts", contacts);
+        return new AJAXRequestResult(contactMap, lastModified, "contacts");
     }
 
 }

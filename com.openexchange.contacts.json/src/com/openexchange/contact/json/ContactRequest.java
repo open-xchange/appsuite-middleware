@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contact.json;
 
 import gnu.trove.TIntArrayList;
 import java.util.TimeZone;
@@ -204,6 +204,10 @@ public class ContactRequest {
         return 0;
     }
     
+    public Object getData() {
+        return request.getData();
+    }
+    
     private int[] removeVirtual(final int[] columns) {
         final TIntArrayList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
@@ -220,7 +224,7 @@ public class ContactRequest {
         return helper.toNativeArray();
     }
     
-    protected int[] checkOrInsertLastModified(int[] columns) {
+    private int[] checkOrInsertLastModified(int[] columns) {
         if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
             int[] newColumns = new int[columns.length + 1];
             System.arraycopy(columns, 0, newColumns, 0, columns.length);

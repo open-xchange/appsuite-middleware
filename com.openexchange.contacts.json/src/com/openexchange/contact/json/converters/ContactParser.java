@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contact.json.converters;
 
 import java.util.Date;
 import java.util.HashMap;

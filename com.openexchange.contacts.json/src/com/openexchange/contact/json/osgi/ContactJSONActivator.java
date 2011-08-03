@@ -51,7 +51,9 @@ package com.openexchange.contact.json.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.json.actions.ContactActionFactory;
+import com.openexchange.contact.json.ContactActionFactory;
+import com.openexchange.contact.json.converters.ContactListResultConverter;
+import com.openexchange.contact.json.converters.ContactResultConverter;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.image.ImageService;
 

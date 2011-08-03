@@ -47,75 +47,88 @@
  *
  */
 
-package com.openexchange.contact.json.osgi;
+package com.openexchange.contact.json.converters;
 
-import org.apache.commons.logging.Log;
-import org.json.JSONException;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.contact.json.RequestTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.image.ImageService;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link ContactResultConverter}
- * 
+ * {@link ContactListResultConverter}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactResultConverter extends JSONResultConverter {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactResultConverter.class));
-
-    public ContactResultConverter(ImageService imageService) {
+public class ContactListResultConverter extends JSONResultConverter {    
+    
+    public ContactListResultConverter(ImageService imageService) {
         super(imageService);
     }
 
     @Override
     public String getInputFormat() {
-        return "contact";
+        return "contacts";
     }
 
     @Override
     public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Contact contact = (Contact) result.getResultObject();
-        result.setResultObject(convert(contact, session), "json");
-    }
-
-    private Object convert(Contact contact, ServerSession session) throws OXException {
-        JSONObject json = new JSONObject();
-
-        ContactGetter cg = new ContactGetter();
-        for (int column : Contact.JSON_COLUMNS) {
-            ContactField field = ContactField.getByValue(column);
-            if (field != null && !field.getAjaxName().isEmpty()) {
-                try {
+        Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) result.getResultObject();
+        List<Contact> contacts = null;
+        List<Contact> deleted = null;
+        if (contactMap.size() == 1) {
+            contacts = contactMap.get("contacts");
+        } else {
+            contacts = contactMap.get("modified");
+            deleted = contactMap.get("deleted");
+        }
+        
+        int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
+        
+        JSONArray resultArray = new JSONArray();
+        for (Contact contact : contacts) {
+            JSONArray contactArray = new JSONArray();
+            
+            ContactGetter cg = new ContactGetter();
+            for (int column : columns) {
+                ContactField field = ContactField.getByValue(column);
+                if (field != null && !field.getAjaxName().isEmpty()) {                
                     Object value = field.doSwitch(cg, contact);
-                    
-                    if (isSpecial(column)) {
+                    if (value == null) {
+                        contactArray.put(JSONObject.NULL);
+                    } else if (isSpecial(column)) {
                         Object special = convertSpecial(field, contact, cg);
-                        if (special != null && !String.valueOf(special).isEmpty()) {
-                            String jsonKey = field.getAjaxName();
-                            json.put(jsonKey, special);
-                        }                            
+                        if (special == null) {
+                            contactArray.put(JSONObject.NULL);                            
+                        } else {
+                            contactArray.put(special);
+                        }                        
                     } else {
-                        if (value != null && !String.valueOf(value).isEmpty()) {
-                            String jsonKey = field.getAjaxName();
-                            json.put(jsonKey, value);
-                        }
+                        contactArray.put(value);
                     }
-                } catch (JSONException e) {
-                    OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
+            }
+            
+            resultArray.put(contactArray);
+        }
+        
+        if (deleted != null) {
+            for (Contact contact : deleted) {
+                resultArray.put(contact.getObjectID());
             }
         }
         
-        return json;
+        result.setResultObject(resultArray, "json");
     }
 
 }

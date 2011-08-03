@@ -47,12 +47,25 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.contact.json;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.contact.json.actions.AdvancedSearchAction;
+import com.openexchange.contact.json.actions.AllAction;
+import com.openexchange.contact.json.actions.ContactAction;
+import com.openexchange.contact.json.actions.CopyAction;
+import com.openexchange.contact.json.actions.DeleteAction;
+import com.openexchange.contact.json.actions.GetAction;
+import com.openexchange.contact.json.actions.GetUserAction;
+import com.openexchange.contact.json.actions.ListAction;
+import com.openexchange.contact.json.actions.ListUserAction;
+import com.openexchange.contact.json.actions.NewAction;
+import com.openexchange.contact.json.actions.SearchAction;
+import com.openexchange.contact.json.actions.UpdateAction;
+import com.openexchange.contact.json.actions.UpdatesAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -64,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ContactActionFactory implements AJAXActionServiceFactory {
     
-    private static final Map<String, ContactAction> ACTIONS = new HashMap<String, ContactAction>();
+    private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
     
     public ContactActionFactory(ServiceLookup serviceLookup) {
         super();
@@ -78,6 +91,8 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         ACTIONS.put("listuser", new ListUserAction(serviceLookup));
         ACTIONS.put("getuser", new GetUserAction(serviceLookup));
         ACTIONS.put("copy", new CopyAction(serviceLookup));
+        ACTIONS.put("search", new SearchAction(serviceLookup));
+        ACTIONS.put("advancedSearch", new AdvancedSearchAction(serviceLookup));        
     }
 
     @Override

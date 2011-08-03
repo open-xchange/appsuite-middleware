@@ -52,6 +52,7 @@ package com.openexchange.contact.json.actions;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;

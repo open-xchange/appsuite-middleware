@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
@@ -107,6 +108,7 @@ public class ListAction extends ContactAction {
                 while (it.hasNext()) {
                     Contact contact = it.next();
                     contacts.add(contact);
+                    
                     lastModified = contact.getLastModified();
                     if (lastModified != null && timestamp.before(lastModified)) {
                         timestamp = lastModified;
