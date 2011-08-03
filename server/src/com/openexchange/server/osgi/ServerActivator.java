@@ -191,6 +191,7 @@ import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
@@ -257,7 +258,7 @@ public final class ServerActivator extends DeferredActivator {
             ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class, JDOMParser.class,
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
-            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class
+            FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class, ConfigViewFactory.class, StringParser.class
         };
 
     private final List<ServiceRegistration> registrationList;
@@ -772,9 +773,10 @@ public final class ServerActivator extends DeferredActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-        // http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
-        http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
-        // http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+//        http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
+//        http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
+//        http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+
         http.registerServlet("/ajax/mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         // http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
         // http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
