@@ -50,12 +50,15 @@
 package com.openexchange.threadpool.osgi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
@@ -113,6 +116,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
                 // "java.specification.version=1.5" OR "java.specification.version=1.6"
                 QueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
+            configureLogProperties();
             /*
              * Initialize thread pool
              */
@@ -144,6 +148,16 @@ public final class ThreadPoolActivator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
+        }
+    }
+
+    private void configureLogProperties() {
+        final ConfigurationService service = getService(ConfigurationService.class);
+        final String property = service.getProperty("com.openexchange.log.propertyNames");
+        if (null == property) {
+            LogProperties.configuredProperties(Collections.<String> emptyList());
+        } else {
+            LogProperties.configuredProperties(Arrays.asList(property.split(" *, *")));
         }
     }
 
