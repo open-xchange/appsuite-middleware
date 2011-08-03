@@ -132,7 +132,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                     }
                 }
             }
-            inits = new ArrayList<Initialization>(2);
+            inits = new ArrayList<Initialization>(3);
             /*
              * Set starter dependent on mode
              */
