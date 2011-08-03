@@ -86,4 +86,14 @@ public final class LogProperties {
         return THREAD_LOCAL.get();
     }
 
+    /**
+     * Puts specified log property.
+     * 
+     * @param name The property name
+     * @param value The property value
+     */
+    public static void putLogProperty(final String name, final Object value) {
+        THREAD_LOCAL.get().put(name, value);
+    }
+
 }
