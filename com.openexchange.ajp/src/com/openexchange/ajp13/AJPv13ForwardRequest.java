@@ -69,6 +69,7 @@ import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.log.LogProperties;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.regex.RFC2616Regex;
 
@@ -252,6 +253,18 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                 ajpRequestHandler.setContentLength(AJPv13RequestHandler.NOT_SET);
             } else {
                 ajpRequestHandler.setContentLength(contentLength);
+            }
+        }
+        {
+            /*
+             * Gather logging info
+             */
+            final String echoHeaderName = AJPv13Response.getEchoHeaderName();
+            if (null != echoHeaderName) {
+                final String echoValue = servletRequest.getHeader(echoHeaderName);
+                if (null != echoValue) {
+                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                }
             }
         }
         /*
