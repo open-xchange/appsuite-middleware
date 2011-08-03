@@ -1,0 +1,27 @@
+From: John Doe <jdoe@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Content-type: text/richtext
+Content-Transfer-Encoding: quoted-printable
+
+I have no problem with changing the BNF to permit the period, as Mark 
+suggests.   However, I disagree violently with the following 
+comment:<nl><nl><excerptedcaption>Excerpts from internet.ietf-822:
+23-Dec-91 a 
+MIME-Version misfeature Mark Crispin@cac.washing 
+(429*)</excerptedcaption><nl><nl><quotation>All in all, it's starting to
+look 
+like MIME-Version is not really all that<nl></quotation><quotation>well 
+thought out and is in danger of being superfluous 
+baggage.<nl></quotation><nl>Some kind of version number is, in my
+opinion, 
+totally vital -- getting rid of MIME-Version without some similar
+versioning 
+mechanism to replace it would be, for me, a real show-stopper.<nl><nl>By
+the 
+way, this message is being sent by an experimental version of Andrew I'm 
+playing with.  I'd be interested in any comments you have on its
+formatting, 
+etc.  -- Nathaniel<nl>\

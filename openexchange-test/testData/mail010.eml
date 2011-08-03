@@ -1,0 +1,77 @@
+Return-Path: <ubuntu-users-bounces@lists.ubuntu.com>
+Received: from ox.open-xchange.com ([unix socket]) by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA; Tue, 14 Aug 2007 18:44:31 +0200
+X-Sieve: CMU Sieve 2.2
+Received: by ox.open-xchange.com (Postfix, from userid 99) id D34E032CD82; Tue, 14 Aug 2007 18:44:31 +0200 (CEST)
+X-Spam-Checker-Version: SpamAssassin 3.1.8 (2007-02-13) on ox.open-xchange.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-2.6 required=5.0 tests=AWL,BAYES_00 autolearn=ham version=3.1.8
+Received: from chlorine.canonical.com (chlorine.canonical.com [82.211.81.204])
+	by ox.open-xchange.com (Postfix) with ESMTP id AA43B32C990
+	for <martin.braun@open-xchange.com>; Tue, 14 Aug 2007 18:44:27 +0200 (CEST)
+Received: from localhost ([127.0.0.1] helo=chlorine.canonical.com)
+	by chlorine.canonical.com with esmtp (Exim 4.60)
+	(envelope-from <ubuntu-users-bounces@lists.ubuntu.com>)
+	id 1IKzVK-0004MC-8N; Tue, 14 Aug 2007 17:44:26 +0100
+Received: from fk-out-0910.google.com ([209.85.128.186])
+	by chlorine.canonical.com with esmtp (Exim 4.60)
+	(envelope-from <ubuntu@bugabundo.net>) id 1IKzVG-0004Lw-Eq
+	for ubuntu-users@lists.ubuntu.com; Tue, 14 Aug 2007 17:44:22 +0100
+Received: by fk-out-0910.google.com with SMTP id 18so1843035fkq
+	for <ubuntu-users@lists.ubuntu.com>;
+	Tue, 14 Aug 2007 09:44:22 -0700 (PDT)
+Received: by 10.82.108.9 with SMTP id g9mr4426857buc.1187109860953;
+	Tue, 14 Aug 2007 09:44:20 -0700 (PDT)
+Received: by 10.82.108.5 with HTTP; Tue, 14 Aug 2007 09:44:20 -0700 (PDT)
+Message-ID: <c8be548f0708140944h58e88330jfc67e15ccfa2e4a4@mail.gmail.com>
+Date: Tue, 14 Aug 2007 17:44:20 +0100
+From: "=?ISO-8859-1?Q?(``-=5F-=B4=B4)_--_Fernando?=" <ubuntu@bugabundo.net>
+To: "Ubuntu user technical support, not for general discussions" <ubuntu-users@lists.ubuntu.com>
+Subject: [gutsy] mount, unmount, new mount will mark disk as readonly [PLEASE STAY ON TOPIC]
+MIME-Version: 1.0
+Content-Disposition: inline
+X-BeenThere: ubuntu-users@lists.ubuntu.com
+X-Mailman-Version: 2.1.8
+Precedence: list
+Reply-To: "Ubuntu user technical support,
+	not for general discussions" <ubuntu-users@lists.ubuntu.com>
+List-Id: "Ubuntu user technical support,
+	not for general discussions" <ubuntu-users.lists.ubuntu.com>
+List-Unsubscribe: <https://lists.ubuntu.com/mailman/listinfo/ubuntu-users>, <mailto:ubuntu-users-request@lists.ubuntu.com?subject=unsubscribe>
+List-Archive: <https://lists.ubuntu.com/archives/ubuntu-users>
+List-Post: <mailto:ubuntu-users@lists.ubuntu.com>
+List-Help: <mailto:ubuntu-users-request@lists.ubuntu.com?subject=help>
+List-Subscribe: <https://lists.ubuntu.com/mailman/listinfo/ubuntu-users>, <mailto:ubuntu-users-request@lists.ubuntu.com?subject=subscribe>
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Sender: ubuntu-users-bounces@lists.ubuntu.com
+Errors-To: ubuntu-users-bounces@lists.ubuntu.com
+
+There are now 3 threads on this subject and not one helpming me fix the
+pro=
+blem.
+So, please refer to my FIRST post and try helping me.
+
+As said, the problem is, that if I mount and unmount/unplug/eject an
+external usb disk, and then again try to mount it, the OS will say it
+is as readonly, even thought mount command says it RW.
+I've used both the mound command to manually mount the device, and the
+Nautilus tool.
+
+Any (good and on point) ideias?
+
+-- =
+
+BUGabundo  :o)
+(``-_-=B4=B4)
+Linux user #443786    GPG key 1024D/A1784EBB
+The body of this email is licensed under a Creative Commons
+Attribution-Noncommercial-Share Alike 3.0
+
+-- =
+
+ubuntu-users mailing list
+ubuntu-users@lists.ubuntu.com
+Modify settings or unsubscribe at:
+https://lists.ubuntu.com/mailman/listinf=
+o/ubuntu-users
+

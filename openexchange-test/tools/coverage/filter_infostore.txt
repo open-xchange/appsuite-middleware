@@ -1,0 +1,10 @@
++com.openexchange.groupware.infostore.*
++com.openexchange.groupware.webdav.action.*
++com.openexchange.groupware.webdav.protocol.*
++com.openexchange.groupware.webdav.tools.*
++com.openexchange.groupware.webdav.Infostore.*
++com.openexchange.groupware.webdav.InfostorePerformer
++com.openexchange.groupware.ajax.Infostore
++com.openexchange.groupware.ajax.request.InfostoreRequest
+
+
