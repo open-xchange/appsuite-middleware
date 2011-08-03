@@ -64,11 +64,11 @@ import com.openexchange.subscribe.crawler.osgi.Activator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public final class CrawlerUpdateMBeanImpl extends StandardMBean implements CrawlerUpdateMBean{
-    
-    private ConfigurationService configurationService;
-    
-    private Activator activator;
-    
+
+    private final ConfigurationService configurationService;
+
+    private final Activator activator;
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateMBeanImpl.class));
 
     /**
@@ -89,5 +89,5 @@ public final class CrawlerUpdateMBeanImpl extends StandardMBean implements Crawl
         CrawlerUpdateTask update = new CrawlerUpdateTask(configurationService, activator);
         update.run();
     }
-    
+
 }

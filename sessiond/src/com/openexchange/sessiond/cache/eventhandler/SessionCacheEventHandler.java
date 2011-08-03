@@ -57,7 +57,7 @@ import com.openexchange.sessiond.impl.SessionHandler;
 
 /**
  * {@link SessionCacheEventHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionCacheEventHandler implements ElementEventHandler {

@@ -49,32 +49,23 @@
 
 package com.openexchange.group.servlet.osgi;
 
-import static com.openexchange.group.servlet.services.GroupRequestServiceRegistry.getServiceRegistry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.servlet.preferences.Module;
-import com.openexchange.group.servlet.request.GroupManageRequest;
+import com.openexchange.group.servlet.request.GroupManageActionFactory;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
  * Activator for the group management requests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GroupManageActivator extends DeferredActivator {
+public class GroupManageActivator extends AJAXModuleActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] { UserService.class, GroupService.class };
 
-    private final Lock lock = new ReentrantLock();
-
-    private ServiceRegistration handlerRegistration;
-
-    private ServiceRegistration preferencesItemRegistration;
+    private GroupManageActionFactory factory;
 
     /**
      * {@inheritDoc}
@@ -88,33 +79,7 @@ public class GroupManageActivator extends DeferredActivator {
      * {@inheritDoc}
      */
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        getServiceRegistry().addService(clazz, getService(clazz));
-        registerService();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        getServiceRegistry().removeService(clazz);
-        unregisterService();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected void startBundle() throws Exception {
-        final ServiceRegistry registry = getServiceRegistry();
-        registry.clearRegistry();
-        for (final Class<?> tmp : getNeededServices()) {
-            final Object service = getService(tmp);
-            if (null != service) {
-                registry.addService(tmp, service);
-            }
-        }
         registerService();
     }
 
@@ -124,44 +89,21 @@ public class GroupManageActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         unregisterService();
+        super.stopBundle();
     }
 
     private void registerService() {
-        final boolean needsRegistration;
-        lock.lock();
-        try {
-            // Registration must only be done if all needed services are available
-            needsRegistration = NEEDED_SERVICES.length == getServiceRegistry().size();
-        } finally {
-            lock.unlock();
-        }
-        if (needsRegistration && handlerRegistration == null) {
-            handlerRegistration = context.registerService(AJAXRequestHandler.class.getName(),
-                new GroupManageRequest(), null);
-            preferencesItemRegistration = context.registerService(
-                PreferencesItemService.class.getName(), new Module(), null);
+        if (factory == null) {
+            factory = new GroupManageActionFactory(this);
+            registerModule(factory, "group");
+            registerService(PreferencesItemService.class, new Module());
         }
     }
 
     private void unregisterService() {
-        ServiceRegistration unregister1 = null;
-        ServiceRegistration unregister2 = null;
-        lock.lock();
-        try {
-            if (null != handlerRegistration) {
-                unregister1 = handlerRegistration;
-                handlerRegistration = null;
-                unregister2 = preferencesItemRegistration;
-                preferencesItemRegistration = null;
-            }
-        } finally {
-            lock.unlock();
-        }
-        if (null != unregister1) {
-            unregister1.unregister();
-        }
-        if (null != unregister2) {
-            unregister2.unregister();
+        if (null != factory) {
+            unregisterServices();
+            factory = null;
         }
     }
 }

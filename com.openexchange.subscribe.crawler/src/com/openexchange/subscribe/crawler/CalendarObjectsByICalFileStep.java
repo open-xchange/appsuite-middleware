@@ -64,7 +64,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * {@link CalendarObjectsByICalFileStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
@@ -75,6 +75,7 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
 
     }
 
+    @Override
     public void execute(WebClient webClient) {
         ArrayList<CalendarDataObject> tempEvents = new ArrayList<CalendarDataObject>();
         ArrayList<CalendarDataObject> events = new ArrayList<CalendarDataObject>();

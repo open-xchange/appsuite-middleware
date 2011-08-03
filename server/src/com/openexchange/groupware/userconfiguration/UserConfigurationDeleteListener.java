@@ -59,9 +59,9 @@ import com.openexchange.groupware.delete.DeleteListener;
 /**
  * {@link UserConfigurationDeleteListener} - The {@link DeleteListener delete
  * listener} for user configuration
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserConfigurationDeleteListener implements DeleteListener {
 
@@ -75,7 +75,8 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 		super();
 	}
 
-	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
+	@Override
+    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
 			throws OXException {
 		if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
 			try {

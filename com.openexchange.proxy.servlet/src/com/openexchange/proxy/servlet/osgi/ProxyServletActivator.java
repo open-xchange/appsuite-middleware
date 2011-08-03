@@ -73,7 +73,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link ProxyServletActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ProxyServletActivator implements BundleActivator {

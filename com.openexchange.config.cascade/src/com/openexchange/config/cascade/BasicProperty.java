@@ -66,7 +66,7 @@ public interface BasicProperty {
     void set(String metadataName, String value) throws OXException;
 
     String get(String metadataName) throws OXException;
-    
+
     public boolean isDefined() throws OXException;
 
     List<String> getMetadataNames() throws OXException;

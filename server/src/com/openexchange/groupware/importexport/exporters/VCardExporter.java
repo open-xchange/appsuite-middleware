@@ -196,6 +196,7 @@ public class VCardExporter implements Exporter {
         Contact.DEFAULT_ADDRESS
     };
 
+    @Override
     public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
             return false;
@@ -228,6 +229,7 @@ public class VCardExporter implements Exporter {
         return perm.canReadAllObjects();
     }
 
+    @Override
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {
@@ -277,6 +279,7 @@ public class VCardExporter implements Exporter {
                 Format.VCARD);
     }
 
+    @Override
     public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {

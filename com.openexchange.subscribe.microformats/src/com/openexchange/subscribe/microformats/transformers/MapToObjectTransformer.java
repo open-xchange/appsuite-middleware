@@ -61,8 +61,8 @@ import com.openexchange.exception.OXException;
  *
  */
 public interface MapToObjectTransformer {
-    
-    
-    
+
+
+
     public List<? extends Object> transform(List<Map<String, String>> list) throws OXException;
 }

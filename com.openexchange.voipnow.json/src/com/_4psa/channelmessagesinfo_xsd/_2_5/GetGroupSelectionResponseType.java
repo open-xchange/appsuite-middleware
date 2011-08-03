@@ -13,11 +13,11 @@ import com._4psa.common_xsd._2_5.Notice;
 
 /**
  * Get channel groups (available and assigned) : response type
- * 
+ *
  * <p>Java class for GetGroupSelectionResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetGroupSelectionResponseType">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com._4psa.common_xsd._2_5.Notice;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetGroupSelectionResponseType", propOrder = {
@@ -46,11 +46,11 @@ public class GetGroupSelectionResponseType {
 
     /**
      * Gets the value of the channelGroup property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ChannelGroupSelection }
-     *     
+     *
      */
     public ChannelGroupSelection getChannelGroup() {
         return channelGroup;
@@ -58,11 +58,11 @@ public class GetGroupSelectionResponseType {
 
     /**
      * Sets the value of the channelGroup property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ChannelGroupSelection }
-     *     
+     *
      */
     public void setChannelGroup(ChannelGroupSelection value) {
         this.channelGroup = value;
@@ -70,25 +70,25 @@ public class GetGroupSelectionResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link AJPv13ServiceRegistry} - Container class for the service registry of <i>com.openexchange.ajp13</i> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ServiceRegistry {
@@ -62,7 +62,7 @@ public final class AJPv13ServiceRegistry {
 
     /**
      * Gets the service registry of <i>com.openexchange.ajp13</i> bundle.
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getInstance() {
@@ -71,7 +71,7 @@ public final class AJPv13ServiceRegistry {
 
     /**
      * Gets the service registry of <i>com.openexchange.ajp13</i> bundle.
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

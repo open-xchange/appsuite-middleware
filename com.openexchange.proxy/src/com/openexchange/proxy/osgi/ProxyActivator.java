@@ -82,5 +82,5 @@ public class ProxyActivator implements BundleActivator {
             throw e;
         }
 	}
-	
+
 }

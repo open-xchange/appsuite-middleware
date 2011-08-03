@@ -60,7 +60,7 @@ import com.openexchange.mail.cache.PooledMailAccess;
 
 
 /**
- * {@link SingletonMailAccessQueue} - A thread-safe singleton queue backed by an {@link AtomicReference} instance. 
+ * {@link SingletonMailAccessQueue} - A thread-safe singleton queue backed by an {@link AtomicReference} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -79,6 +79,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         deprecated = new AtomicBoolean();
     }
 
+    @Override
     public PooledMailAccess pollDelayed() {
         PooledMailAccess tmp;
         do {
@@ -90,14 +91,17 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return null;
     }
 
+    @Override
     public boolean offer(final PooledMailAccess pooledMailAccess) {
         return singleton.compareAndSet(null, pooledMailAccess);
     }
 
+    @Override
     public PooledMailAccess poll() {
         return singleton.getAndSet(null);
     }
 
+    @Override
     public PooledMailAccess remove() {
         PooledMailAccess tmp;
         do {
@@ -109,10 +113,12 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return tmp;
     }
 
+    @Override
     public PooledMailAccess peek() {
         return singleton.get();
     }
 
+    @Override
     public PooledMailAccess element() {
         final PooledMailAccess tmp = singleton.get();
         if (null == tmp) {
@@ -121,14 +127,17 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return tmp;
     }
 
+    @Override
     public int size() {
         return null == singleton.get() ? 0 : 1;
     }
 
+    @Override
     public boolean isEmpty() {
         return null == singleton.get();
     }
 
+    @Override
     public boolean contains(final Object o) {
         final PooledMailAccess tmp = singleton.get();
         if (null == tmp) {
@@ -140,6 +149,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return tmp.equals(o);
     }
 
+    @Override
     public Iterator<PooledMailAccess> iterator() {
         final List<PooledMailAccess> list;
         final PooledMailAccess tmp = singleton.get();
@@ -151,6 +161,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return list.iterator();
     }
 
+    @Override
     public Object[] toArray() {
         final List<PooledMailAccess> list;
         final PooledMailAccess tmp = singleton.get();
@@ -162,6 +173,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return list.toArray();
     }
 
+    @Override
     public <T> T[] toArray(final T[] a) {
         final List<PooledMailAccess> list;
         final PooledMailAccess tmp = singleton.get();
@@ -173,10 +185,12 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return list.toArray(a);
     }
 
+    @Override
     public boolean add(final PooledMailAccess pooledMailAccess) {
         return singleton.compareAndSet(null, pooledMailAccess);
     }
 
+    @Override
     public boolean remove(final Object o) {
         final PooledMailAccess tmp = singleton.get();
         if (null == tmp) {
@@ -185,6 +199,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return (tmp.equals(o) && singleton.compareAndSet(tmp, null));
     }
 
+    @Override
     public boolean containsAll(final Collection<?> c) {
         if (null == c || c.isEmpty()) {
             return false;
@@ -203,6 +218,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return tmp.equals(o);
     }
 
+    @Override
     public boolean addAll(final Collection<? extends PooledMailAccess> c) {
         if (null == c || c.isEmpty()) {
             return false;
@@ -210,6 +226,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return offer(c.iterator().next());
     }
 
+    @Override
     public boolean removeAll(final Collection<?> c) {
         if (null == c || c.isEmpty()) {
             return false;
@@ -218,6 +235,7 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return remove(o);
     }
 
+    @Override
     public boolean retainAll(final Collection<?> c) {
         if (null == c || c.isEmpty()) {
             return false;
@@ -235,14 +253,17 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
         return false;
     }
 
+    @Override
     public void clear() {
         singleton.set(null);
     }
 
+    @Override
     public void markDeprecated() {
         deprecated.set(true);
     }
 
+    @Override
     public boolean isDeprecated() {
         return deprecated.get();
     }

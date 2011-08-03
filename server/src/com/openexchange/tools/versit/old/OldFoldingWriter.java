@@ -111,10 +111,12 @@ public class OldFoldingWriter implements VersitDefinition.Writer {
         rawEnd();
     }
 
+    @Override
     public void flush() throws IOException {
         w.flush();
     }
 
+    @Override
     public void close() throws IOException {
         w.close();
     }

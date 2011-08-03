@@ -61,7 +61,7 @@ public interface SecretService {
 
     /**
      * Gets the secret string for specified session.
-     * 
+     *
      * @param session The session
      * @return The secret string
      */

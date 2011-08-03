@@ -63,7 +63,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 
 /**
  * {@link WebDAVFileStorageResourceUtil} - Utility class for WebDAV resources.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageResourceUtil {
@@ -77,7 +77,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Parses the string from named property contained in given property set
-     * 
+     *
      * @param davPropertyName The DAV property name
      * @param propertySet The property set
      * @return The string
@@ -100,7 +100,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Parses the string from named property contained in given property set
-     * 
+     *
      * @param name The property name
      * @param propertySet The property set
      * @return The string
@@ -122,7 +122,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Parses the integer from named property contained in given property set
-     * 
+     *
      * @param name The property name
      * @param propertySet The property set
      * @return The integer
@@ -153,7 +153,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Gets the date property value from specified date.
-     * 
+     *
      * @param date The date
      * @return The date property value
      */
@@ -168,7 +168,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Parses the date from named property contained in given property set
-     * 
+     *
      * @param name The property name
      * @param propertySet The property set
      * @return The date
@@ -212,7 +212,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Checks if specified folder identifier ends with a <code>'/'</code> character.
-     * 
+     *
      * @param folderId The folder identifier to check
      * @param rootUri The root URI of the connected WebDAV server
      * @return The checked folder identifier
@@ -226,7 +226,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Checks if specified folder identifier ends with a <code>'/'</code> character.
-     * 
+     *
      * @param folderId The folder identifier to check
      * @return The checked folder identifier
      */
@@ -245,7 +245,7 @@ public final class WebDAVFileStorageResourceUtil {
      * <p>
      * If DAV property set denotes a collection (directory) the returned href is ensured to end with a <code>'/'</code> character; otherwise
      * the returned href does not end with a <code>'/'</code>.
-     * 
+     *
      * @param href The href as proved by multi-status response
      * @param propertySet The DAV property set
      * @return The proper href
@@ -268,7 +268,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Checks the href provided by a multi-status response.
-     * 
+     *
      * @param href The multi-status response's href
      * @param isDirectory <code>true</code> if href denotes a directory; otherwise <code>false</code>
      * @return The checked href
@@ -279,7 +279,7 @@ public final class WebDAVFileStorageResourceUtil {
 
     /**
      * Checks specified file identifier.
-     * 
+     *
      * @param fileId The file identifier
      * @return The checked file identifier
      */

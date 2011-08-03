@@ -60,16 +60,19 @@ public class InMemoryAliases implements WebdavFolderAliases {
     private final Map<String, Integer> ids = new HashMap<String, Integer>();
     private final Map<Integer, Integer> parents = new HashMap<Integer, Integer>();
 
+    @Override
     public void registerNameWithIDAndParent(String folderName, int id, int parent) {
         names.put(id, folderName);
         ids.put(folderName, id);
         parents.put(id, parent);
     }
 
+    @Override
     public String getAlias(int id) {
         return names.get(id);
     }
 
+    @Override
     public int getId(String alias, int parent) {
         if(! ids.containsKey(alias)) {
             return NOT_REGISTERED;

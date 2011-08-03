@@ -61,9 +61,9 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link MailFilterServletInit}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- * 
+ *
  */
 public class MailFilterServletInit implements Initialization {
 
@@ -90,7 +90,7 @@ public class MailFilterServletInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws OXException {
@@ -98,18 +98,18 @@ public class MailFilterServletInit implements Initialization {
 			LOG.error("MailFilterServlet already started.");
 			return;
 		}
-		
+
 		// adding parser to ParserFactory
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add action parser implementations");
 		}
-		
+
 		// adding writer to WriterFactory
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add action writer implementations");
 		}
-		
-		
+
+
 		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
@@ -131,7 +131,7 @@ public class MailFilterServletInit implements Initialization {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() {
@@ -149,10 +149,10 @@ public class MailFilterServletInit implements Initialization {
 			httpService.unregister(SC_SRVLT_ALIAS);
 		}
 	}
-	
+
 	/**
 	 * Checks if {@link SessiondInit} is started
-	 * 
+	 *
 	 * @return <code>true</code> if {@link SessiondInit} is started; otherwise
 	 *         <code>false</code>
 	 */

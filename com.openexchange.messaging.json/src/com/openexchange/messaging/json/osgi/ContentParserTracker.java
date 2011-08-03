@@ -68,14 +68,14 @@ public class ContentParserTracker extends ServiceTracker {
         super(context, MessagingContentParser.class.getName(), null);
         this.parser = parser;
     }
-    
+
     @Override
     public Object addingService(final ServiceReference reference) {
         final MessagingContentParser parser = (MessagingContentParser) super.addingService(reference);
         this.parser.addContentParser(parser);
         return parser;
     }
-    
+
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         parser.removeContentParser((MessagingContentParser) service);

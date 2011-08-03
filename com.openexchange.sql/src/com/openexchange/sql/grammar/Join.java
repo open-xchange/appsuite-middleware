@@ -86,7 +86,8 @@ public class Join extends Table {
 		return on;
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildJoin(this);
 	}
 }

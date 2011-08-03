@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultDispatcherTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultDispatcherTest extends TestCase {
@@ -77,7 +77,7 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
-        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null);
+        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null, null);
 
         assertSame(res, receivedResult);
     }
@@ -93,34 +93,34 @@ public class DefaultDispatcherTest extends TestCase {
         final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1");
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
         final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3");
-        
+
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c1));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c2));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c3));
-        
+
         dispatcher.register("someModule", factory);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
         SimAJAXCustomizer.LOG.clear();
-        
-        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null);
+
+        final AJAXRequestResult receivedResult = dispatcher.perform(requestData, null, null);
 
         assertSame(res, receivedResult);
-        
+
         assertSame(requestData, c1.getRequest());
         assertSame(requestData, c2.getRequest());
         assertSame(requestData, c3.getRequest());
-        
+
         assertSame(res, c1.getResult());
         assertSame(res, c2.getResult());
         assertSame(res, c3.getResult());
-        
+
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c3:outgoing", "c2:outgoing", "c1:outgoing"));
     }
-    
+
     public void testLaterIncoming() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
@@ -130,9 +130,9 @@ public class DefaultDispatcherTest extends TestCase {
         final StaticActionFactory factory = new StaticActionFactory(action);
 
         final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1") {
-            
+
             private boolean skipped = false;
-            
+
             @Override
             public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
                 if (!skipped) {
@@ -144,24 +144,24 @@ public class DefaultDispatcherTest extends TestCase {
         };
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
         final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3");
-        
+
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c1));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c2));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c3));
-        
+
         dispatcher.register("someModule", factory);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
         SimAJAXCustomizer.LOG.clear();
-        
-        dispatcher.perform(requestData, null);
+
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
-    
+
     public void testLaterIncomingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
@@ -171,9 +171,9 @@ public class DefaultDispatcherTest extends TestCase {
         final StaticActionFactory factory = new StaticActionFactory(action);
 
         final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1") {
-            
+
             private int skipCount = 0;
-            
+
             @Override
             public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
                 if (skipCount < 2) {
@@ -185,24 +185,24 @@ public class DefaultDispatcherTest extends TestCase {
         };
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
         final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3");
-        
+
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c1));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c2));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c3));
-        
+
         dispatcher.register("someModule", factory);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
         SimAJAXCustomizer.LOG.clear();
-        
-        dispatcher.perform(requestData, null);
+
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c2:incoming", "c3:incoming", "c1:incoming", "c1:outgoing", "c3:outgoing", "c2:outgoing"));
     }
-    
+
     public void testLaterOutgoing() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
@@ -211,12 +211,12 @@ public class DefaultDispatcherTest extends TestCase {
         final StaticActionService action = new StaticActionService(res);
         final StaticActionFactory factory = new StaticActionFactory(action);
 
-        final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1"); 
+        final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1");
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
         final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3"){
-            
+
             private boolean skipped = false;
-            
+
             @Override
             public AJAXRequestResult outgoing(final AJAXRequestData request,final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (!skipped) {
@@ -226,24 +226,24 @@ public class DefaultDispatcherTest extends TestCase {
                 return super.outgoing(request, res, session);
             }
         };
-        
+
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c1));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c2));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c3));
-        
+
         dispatcher.register("someModule", factory);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
         SimAJAXCustomizer.LOG.clear();
-        
-        dispatcher.perform(requestData, null);
+
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
-    
+
     public void testLaterOutgoingTwice() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
@@ -252,12 +252,12 @@ public class DefaultDispatcherTest extends TestCase {
         final StaticActionService action = new StaticActionService(res);
         final StaticActionFactory factory = new StaticActionFactory(action);
 
-        final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1"); 
+        final SimAJAXCustomizer c1 = new SimAJAXCustomizer("c1");
         final SimAJAXCustomizer c2 = new SimAJAXCustomizer("c2");
         final SimAJAXCustomizer c3 = new SimAJAXCustomizer("c3"){
-            
+
             private int skipCount = 0;
-            
+
             @Override
             public AJAXRequestResult outgoing(final AJAXRequestData request,final AJAXRequestResult res, final ServerSession session) throws OXException {
                 if (skipCount < 2) {
@@ -267,26 +267,26 @@ public class DefaultDispatcherTest extends TestCase {
                 return super.outgoing(request, res, session);
             }
         };
-        
+
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c1));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c2));
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(c3));
-        
+
         dispatcher.register("someModule", factory);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
         SimAJAXCustomizer.LOG.clear();
-        
-        dispatcher.perform(requestData, null);
+
+        dispatcher.perform(requestData, null, null);
 
         assertEquals(SimAJAXCustomizer.LOG, Arrays.asList("c1:incoming", "c2:incoming", "c3:incoming", "c2:outgoing", "c1:outgoing", "c3:outgoing"));
     }
-    
+
     // Error Cases
-    
+
     public void testUnknownModule() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -294,14 +294,14 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setAction("someAction");
 
         try {
-            dispatcher.perform(requestData, null);
+            dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
         } catch (final OXException x) {
             // All Done
         }
-        
+
     }
-    
+
     public void testUnknownAction() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
 
@@ -314,13 +314,13 @@ public class DefaultDispatcherTest extends TestCase {
         requestData.setAction("someAction");
 
         try {
-            dispatcher.perform(requestData, null);
+            dispatcher.perform(requestData, null, null);
             fail("Should have produced an OXException");
         } catch (final OXException x) {
             // All Done
         }
     }
-    
+
     public void testNullCustomizer() throws OXException {
         final DefaultDispatcher dispatcher = new DefaultDispatcher();
         final AJAXRequestResult res = new AJAXRequestResult();
@@ -331,31 +331,33 @@ public class DefaultDispatcherTest extends TestCase {
         dispatcher.register("someModule", factory);
 
         dispatcher.addCustomizer(new StaticAJAXCustomizerFactory(null));
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setModule("someModule");
         requestData.setAction("someAction");
 
-        dispatcher.perform(requestData, null);
+        dispatcher.perform(requestData, null, null);
     }
 
     private static class SimAJAXCustomizer implements AJAXActionCustomizer {
         public static List<String> LOG = new LinkedList<String>();
-        
+
         private AJAXRequestData request;
         private AJAXRequestResult result;
         private final String name;
-        
+
         private SimAJAXCustomizer(final String name) {
             this.name = name;
         }
 
+        @Override
         public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
             this.request = request;
             LOG.add(name+":incoming");
             return request;
         }
 
+        @Override
         public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
             this.result = result;
             LOG.add(name+":outgoing");
@@ -371,7 +373,7 @@ public class DefaultDispatcherTest extends TestCase {
         }
 
     }
-    
+
     private static final class StaticAJAXCustomizerFactory implements AJAXActionCustomizerFactory {
 
         private final AJAXActionCustomizer customizer;
@@ -381,10 +383,11 @@ public class DefaultDispatcherTest extends TestCase {
             this.customizer = customizer;
         }
 
+        @Override
         public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
             return customizer;
         }
-        
+
     }
 
     private static final class StaticActionService implements AJAXActionService {
@@ -399,6 +402,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.result = result;
         }
 
+        @Override
         public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
             this.request = request;
             this.session = session;
@@ -426,6 +430,7 @@ public class DefaultDispatcherTest extends TestCase {
             this.actionService = actionService;
         }
 
+        @Override
         public AJAXActionService createActionService(final String action) throws OXException {
             this.action = action;
             return actionService;

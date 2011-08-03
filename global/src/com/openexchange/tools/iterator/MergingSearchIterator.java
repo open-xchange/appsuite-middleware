@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * A {@link MergingSearchIterator} merges multiple (already sorted) search iterators according to a given criterion.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MergingSearchIterator<T> implements SearchIterator<T> {
@@ -66,7 +66,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     private Comparator<T> comparator;
     private List<T> topmost = null;
     private boolean hasNext;
-    
+
     public MergingSearchIterator(final Comparator<T> criterion, final SearchIterator<T>...iterators) throws OXException {
         this(criterion, Arrays.asList(iterators));
     }
@@ -151,7 +151,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         } else {
             topmost.set(largestIndex, null);
         }
-        
+
         // hasNext?
         hasNext = false;
         for(final T thing : topmost) {
@@ -159,7 +159,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
                 hasNext = true;
             }
         }
-        
+
         return largest;
     }
 

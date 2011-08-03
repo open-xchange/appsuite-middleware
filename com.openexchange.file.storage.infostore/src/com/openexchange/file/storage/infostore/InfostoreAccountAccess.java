@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreAccountAccess implements FileStorageAccountAccess {
-    
+
     private ServerSession session;
     private InfostoreFileStorageService service;
     private InfostoreFolderAccess folders;

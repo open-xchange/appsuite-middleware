@@ -63,19 +63,20 @@ import com.openexchange.java.Autoboxing;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
+public class TargetRegistryCustomizer implements ServiceTrackerCustomizer<TargetService, TargetService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TargetRegistryCustomizer.class));
 
     private final BundleContext context;
 
-    public TargetRegistryCustomizer(BundleContext context) {
+    public TargetRegistryCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    public Object addingService(ServiceReference reference) {
-        TargetService targetService = (TargetService) context.getService(reference);
+    @Override
+    public TargetService addingService(final ServiceReference<TargetService> reference) {
+        final TargetService targetService = context.getService(reference);
         final int module = parseModule(reference);
         if (-1 == module) {
             LOG.error("Registration of service " + targetService.getClass().getName() + " is missing property defining the module.");
@@ -86,11 +87,13 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
         return targetService;
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<TargetService> reference, final TargetService service) {
         // Nothing to do.
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    @Override
+    public void removedService(final ServiceReference<TargetService> reference, final TargetService service) {
         if (null == service) {
             return;
         }
@@ -98,8 +101,8 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer {
         context.ungetService(reference);
     }
 
-    private int parseModule(ServiceReference reference) {
-        Object obj = reference.getProperty(TargetService.MODULE_PROPERTY);
+    private int parseModule(final ServiceReference<TargetService> reference) {
+        final Object obj = reference.getProperty(TargetService.MODULE_PROPERTY);
         final int retval;
         if (obj instanceof Integer) {
             retval = Autoboxing.i((Integer) obj);

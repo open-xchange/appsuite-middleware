@@ -57,7 +57,8 @@ public class WHERE extends Clause {
 		super(predicate);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildWHERE(this);
 	}
 }

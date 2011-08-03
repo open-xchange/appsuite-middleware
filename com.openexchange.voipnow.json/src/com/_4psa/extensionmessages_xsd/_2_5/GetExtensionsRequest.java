@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -46,8 +46,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -72,11 +72,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the extensionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionType() {
         return extensionType;
@@ -84,11 +84,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the extensionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionType(String value) {
         this.extensionType = value;
@@ -96,11 +96,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -108,11 +108,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -120,11 +120,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the serverID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getServerID() {
         return serverID;
@@ -132,11 +132,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the serverID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setServerID(String value) {
         this.serverID = value;
@@ -144,11 +144,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the filter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFilter() {
         return filter;
@@ -156,11 +156,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the filter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFilter(String value) {
         this.filter = value;
@@ -168,11 +168,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -180,11 +180,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -192,11 +192,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -204,11 +204,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -216,11 +216,11 @@ public class GetExtensionsRequest {
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -228,11 +228,11 @@ public class GetExtensionsRequest {
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;

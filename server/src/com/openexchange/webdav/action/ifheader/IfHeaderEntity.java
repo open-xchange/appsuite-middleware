@@ -70,11 +70,11 @@ public abstract class IfHeaderEntity {
 	}
 
 	public static class ETag extends IfHeaderEntity{
-		
+
 		public ETag(final String etag) {
 			super(etag);
 		}
-		
+
 		@Override
 		public boolean isETag(){
 			return true;
@@ -100,11 +100,11 @@ public abstract class IfHeaderEntity {
 	public String getPayload() {
 		return payload;
 	}
-	
+
 	public boolean mustMatch() {
 		return matches;
 	}
-	
+
 	public void setMatches(final boolean matches) {
 		this.matches = matches;
 	}

@@ -80,6 +80,7 @@ public final class ContextInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         ContextStorage.start();
         ServerServiceRegistry.getInstance().addService(ContextService.class, new ContextServiceImpl());
@@ -88,6 +89,7 @@ public final class ContextInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         ServerServiceRegistry.getInstance().removeService(ContextService.class);
         ContextStorage.stop();

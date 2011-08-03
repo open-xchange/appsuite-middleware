@@ -64,7 +64,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 
 /**
  * {@link OSGIFileStorageServiceRegistry}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
@@ -91,7 +91,7 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
 
     /**
      * Starts the tracker.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {

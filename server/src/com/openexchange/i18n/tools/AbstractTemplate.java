@@ -69,6 +69,7 @@ public abstract class AbstractTemplate implements Template {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String render(final Locale locale, final String... substitutions) {
         if (substitutions.length % 2 != 0) {
             throw new IllegalArgumentException("Must provide matching key value pairs");

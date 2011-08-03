@@ -56,7 +56,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
  * {@link AJPv13Request} - Abstract super class for AJP requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AJPv13Request {
@@ -64,7 +64,7 @@ public abstract class AJPv13Request {
     /**
      * Max size of an incoming request body:<br>
      * 8192 (8K) - 4 bytes (0x12 + 0x34 + data length integer).
-     * 
+     *
      * @value 8188
      */
     protected final static int MAX_REQUEST_BODY_CHUNK_SIZE = 8188;
@@ -73,7 +73,7 @@ public abstract class AJPv13Request {
 
     /**
      * Sets the name of the echo header.
-     * 
+     *
      * @param headerName The header name
      */
     public static void setEchoHeaderName(final String headerName) {
@@ -86,7 +86,7 @@ public abstract class AJPv13Request {
 
     /**
      * Initializes a new {@link AJPv13Request}.
-     * 
+     *
      * @param payloadData The payload data
      */
     protected AJPv13Request(final byte[] payloadData) {
@@ -96,7 +96,7 @@ public abstract class AJPv13Request {
 
     /**
      * Process the AJP request.
-     * 
+     *
      * @param ajpRequestHandler The AJP request handler providing session data
      * @throws AJPv13Exception If an AJP error occurs
      * @throws IOException If an I/O error occurs
@@ -105,7 +105,7 @@ public abstract class AJPv13Request {
 
     /**
      * Writes AJP response package.
-     * 
+     *
      * @param ajpRequestHandler The AJP request handler providing session data
      * @throws AJPv13Exception If an AJP error occurs
      * @throws ServletException If a servlet error occurs
@@ -141,7 +141,7 @@ public abstract class AJPv13Request {
             }
             /*-
              * Call servlet's service() method which will then request all receivable data chunks from client through servlet input stream
-             * 
+             *
              * TODO: javax.servlet.Filter invocation here
              */
             final String headerName = ECHO_HEADER_NAME.get();
@@ -174,7 +174,7 @@ public abstract class AJPv13Request {
             writeChunked(remainingData, out);
         }
         /*-
-         * 
+         *
         else {
             writeEmpty(out);
         }
@@ -188,7 +188,7 @@ public abstract class AJPv13Request {
 
     /**
      * Writes specified data chunked as SEND_BODY packages.
-     * 
+     *
      * @param data The data to write
      * @param out The AJP connection's output stream to write to
      * @throws IOException If an I/O error occurs
@@ -215,7 +215,7 @@ public abstract class AJPv13Request {
 
     /**
      * Writes an empty SEND_BODY package.
-     * 
+     *
      * @param out The AJP connection's output stream to write to
      * @throws IOException If an I/O error occurs
      * @throws AJPv13Exception If an AJP error occurs
@@ -232,7 +232,7 @@ public abstract class AJPv13Request {
 
     /**
      * Writes specified bytes into given output stream.
-     * 
+     *
      * @param responseBytes The bytes to write
      * @param out The output stream to write to
      * @param flushStream Whether to flush the output stream
@@ -252,7 +252,7 @@ public abstract class AJPv13Request {
 
     /**
      * Writes specified AJP response into given output stream.
-     * 
+     *
      * @param response The AJP response
      * @param out The output stream to write to
      * @param flushStream Whether to flush the output stream
@@ -265,7 +265,7 @@ public abstract class AJPv13Request {
 
     /**
      * Checks if payload data is <code>null</code>.
-     * 
+     *
      * @return <code>true</code> if payload data is <code>null</code>; otherwise <code>false</code>
      */
     protected final boolean isPayloadNull() {
@@ -274,7 +274,7 @@ public abstract class AJPv13Request {
 
     /**
      * Gets the payload data length.
-     * 
+     *
      * @return The payload data length
      */
     protected final int getPayloadLength() {
@@ -283,7 +283,7 @@ public abstract class AJPv13Request {
 
     /**
      * Parses the next <code>int</code> value (which consumes next two bytes).
-     * 
+     *
      * @return The next <code>int</code> value
      */
     protected final int parseInt() {
@@ -292,7 +292,7 @@ public abstract class AJPv13Request {
 
     /**
      * Gets the next bytes (which consumes next <code>numOfBytes</code> bytes).
-     * 
+     *
      * @param numOfBytes The number of bytes to return
      * @return The next bytes
      */
@@ -306,7 +306,7 @@ public abstract class AJPv13Request {
 
     /**
      * Gets the next <i>unsigned</i> byte.
-     * 
+     *
      * @return The next <i>unsigned</i> byte
      */
     protected final int nextByte() {
@@ -315,7 +315,7 @@ public abstract class AJPv13Request {
 
     /**
      * Compares next available unsigned byte with given value.
-     * 
+     *
      * @param compareTo The value to compare to
      * @return <code>true</code> if next available unsigned byte is equal to given value; otherwise <code>false</code>
      */
@@ -328,7 +328,7 @@ public abstract class AJPv13Request {
 
     /**
      * Checks if there's another byte available.
-     * 
+     *
      * @return <code>true</code> if there's another byte available; otherwise <code>false</code>
      */
     protected final boolean hasNext() {

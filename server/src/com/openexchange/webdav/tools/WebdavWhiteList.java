@@ -92,7 +92,7 @@ public class WebdavWhiteList {
             }
 
         }
-        
+
     }
 
     public boolean acceptClient(final HttpServletRequest req) {

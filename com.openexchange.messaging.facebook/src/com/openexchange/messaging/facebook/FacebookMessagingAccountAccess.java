@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -77,7 +77,7 @@ public final class FacebookMessagingAccountAccess extends FacebookMessagingResou
 
     /**
      * Initializes a new {@link FacebookMessagingAccountAccess}.
-     * 
+     *
      * @param messagingAccount The facebook account
      * @param session The session
      * @throws OXException If initialization fails

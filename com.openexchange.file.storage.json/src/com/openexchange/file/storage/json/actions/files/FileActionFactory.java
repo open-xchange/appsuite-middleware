@@ -65,7 +65,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class FileActionFactory implements AJAXActionServiceFactory {
 
     public static FileActionFactory INSTANCE = new FileActionFactory();
-    
+
     private static final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>(){{
         put("new", new NewAction());
         put("update", new UpdateAction());
@@ -75,20 +75,20 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         put("lock", new LockAction());
         put("unlock", new UnlockAction());
         put("copy", new CopyAction());
-        
+
         put("all", new AllAction());
         put("updates", new UpdatesAction());
         put("list", new ListAction());
         put("versions", new VersionsAction());
         put("get", new GetAction());
         put("search", new SearchAction());
-        
+
         put("saveAs", new SaveAsAction());
-        
+
         put("document", new DocumentAction());
-        
+
     }};
-    
+
     public AJAXActionService createActionService(String action) throws OXException {
         AJAXActionService handler = ACTIONS.get(action);
         if(handler == null) {

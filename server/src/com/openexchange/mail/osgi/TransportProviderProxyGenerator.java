@@ -58,7 +58,7 @@ import com.openexchange.mail.transport.TransportProvider;
 /**
  * {@link TransportProviderProxyGenerator} - Generates proxy objects for mail provider which delegate method invocations to the service
  * obtained from a bundle context
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportProviderProxyGenerator {
@@ -67,7 +67,7 @@ public final class TransportProviderProxyGenerator {
      * TODO: Does not work since {@link TransportProvider} is not an interface
      * <p>
      * Create a new proxy object for mail provider which delegates method invocations to the service obtained from bundle context
-     * 
+     *
      * @param mailProviderServiceReference The service reference of a mail provider
      * @param context The bundle context (needed to get/unget the service)
      * @return A new proxy object for mail provider
@@ -101,6 +101,7 @@ public final class TransportProviderProxyGenerator {
             this.context = context;
         }
 
+        @Override
         public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
             Object result;
             try {

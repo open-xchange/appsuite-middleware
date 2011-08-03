@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MailAccountDeleteListener} - Listener interface for mail account deletion.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailAccountDeleteListener {
 
     /**
      * Handles the event <i>before</i> the denoted mail account is deleted.
-     * 
+     *
      * @param id The mail account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID
@@ -74,7 +74,7 @@ public interface MailAccountDeleteListener {
 
     /**
      * Handles the event <i>after</i> the denoted mail account is deleted.
-     * 
+     *
      * @param id The mail account ID
      * @param eventProps Optional properties for delete event
      * @param user The user ID

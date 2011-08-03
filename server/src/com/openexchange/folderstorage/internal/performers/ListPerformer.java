@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListPerformer} - Serves the <code>LIST</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListPerformer extends AbstractUserizedFolderPerformer {
@@ -96,7 +96,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link ListPerformer} from given session.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -106,7 +106,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link ListPerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -117,7 +117,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link ListPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -128,7 +128,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link ListPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -140,7 +140,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Performs the <code>LIST</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param parentId The parent folder identifier
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
@@ -187,7 +187,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Performs the <code>LIST</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param parentId The parent folder identifier
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
@@ -273,6 +273,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     final Log log = LOG;
                     completionService.submit(new Callable<Object>() {
 
+                        @Override
                         public Object call() throws OXException {
                             final StorageParameters newParameters = paramsProvider.getStorageParameters();
                             final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
@@ -447,6 +448,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             for (final FolderStorage neededStorage : neededStorages) {
                 completionService.submit(new Callable<List<SortableId>>() {
 
+                    @Override
                     public List<SortableId> call() throws OXException {
                         final StorageParameters newParameters = newStorageParameters();
                         final boolean started = neededStorage.startTransaction(newParameters, false);
@@ -543,6 +545,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             final Log log = LOG;
             completionService.submit(new Callable<Object>() {
 
+                @Override
                 public Object call() throws Exception {
                     final StorageParameters newParameters = paramsProvider.getStorageParameters();
                     final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(2);
@@ -663,7 +666,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         }
                         throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
-                    
+
                 }
             });
             taskCount++;
@@ -678,10 +681,12 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
 
+            @Override
             public Class<OXException> getType() {
                 return OXException.class;
             }
 
+            @Override
             public OXException newUnexpectedError(final Throwable t) {
                 return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
             }
@@ -689,7 +694,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.
-     * 
+     *
      * @param userizedFolders The array to trim
      * @return A newly allocated copy-array with <code>null</code> elements removed
      */

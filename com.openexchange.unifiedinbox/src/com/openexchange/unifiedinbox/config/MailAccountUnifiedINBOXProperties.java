@@ -54,14 +54,14 @@ import com.openexchange.mailaccount.MailAccount;
 
 /**
  * {@link MailAccountUnifiedINBOXProperties} - TODO Short description of this class' purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountUnifiedINBOXProperties extends MailAccountProperties implements IUnifiedINBOXProperties {
 
     /**
      * Initializes a new {@link MailAccountUnifiedINBOXProperties}.
-     * 
+     *
      * @param mailAccount The mail account
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */

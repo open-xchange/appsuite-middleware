@@ -61,12 +61,12 @@ public interface PollService {
     public void createPoll(Poll poll, int cid);
     public void updatePoll(Poll poll, int cid);
     public void saveAnswers(int id, int cid, Answer answer);
-    
+
     public Poll getPoll(int id, int cid);
     public List<Poll> getPolls(int cid);
-    
+
     public void deletePoll(int id, int cid);
-    
+
     // Blupp
     // Fix Bug 15634
 }

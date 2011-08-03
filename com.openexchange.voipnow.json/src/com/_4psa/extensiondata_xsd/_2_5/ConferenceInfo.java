@@ -13,11 +13,11 @@ import com._4psa.common_xsd._2_5.UnlimitedUInt;
 
 /**
  * Conference extension data
- * 
+ *
  * <p>Java class for ConferenceInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ConferenceInfo">
  *   &lt;complexContent>
@@ -46,8 +46,8 @@ import com._4psa.common_xsd._2_5.UnlimitedUInt;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ConferenceInfo", propOrder = {
@@ -81,11 +81,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the connectionSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isConnectionSndActive() {
         return connectionSndActive;
@@ -93,11 +93,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the connectionSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setConnectionSndActive(Boolean value) {
         this.connectionSndActive = value;
@@ -105,11 +105,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the connectionSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getConnectionSnd() {
         return connectionSnd;
@@ -117,11 +117,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the connectionSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setConnectionSnd(String value) {
         this.connectionSnd = value;
@@ -129,11 +129,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the size property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSize() {
         return size;
@@ -141,11 +141,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the size property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSize(BigInteger value) {
         this.size = value;
@@ -153,11 +153,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the record property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRecord() {
         return record;
@@ -165,11 +165,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the record property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRecord(BigInteger value) {
         this.record = value;
@@ -177,11 +177,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the storage property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public UnlimitedUInt getStorage() {
         return storage;
@@ -189,11 +189,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the storage property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UnlimitedUInt }
-     *     
+     *
      */
     public void setStorage(UnlimitedUInt value) {
         this.storage = value;
@@ -201,11 +201,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the mohActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMohActive() {
         return mohActive;
@@ -213,11 +213,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the mohActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMohActive(Boolean value) {
         this.mohActive = value;
@@ -225,11 +225,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the mohFolder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public JAXBElement<String> getMohFolder() {
         return mohFolder;
@@ -237,23 +237,23 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the mohFolder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public void setMohFolder(JAXBElement<String> value) {
-        this.mohFolder = ((JAXBElement<String> ) value);
+        this.mohFolder = value;
     }
 
     /**
      * Gets the value of the close property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isClose() {
         return close;
@@ -261,11 +261,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the close property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setClose(Boolean value) {
         this.close = value;
@@ -273,11 +273,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the announceUserCount property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnounceUserCount() {
         return announceUserCount;
@@ -285,11 +285,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the announceUserCount property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnounceUserCount(Boolean value) {
         this.announceUserCount = value;
@@ -297,11 +297,11 @@ public class ConferenceInfo
 
     /**
      * Gets the value of the announceUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAnnounceUser() {
         return announceUser;
@@ -309,11 +309,11 @@ public class ConferenceInfo
 
     /**
      * Sets the value of the announceUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAnnounceUser(Boolean value) {
         this.announceUser = value;

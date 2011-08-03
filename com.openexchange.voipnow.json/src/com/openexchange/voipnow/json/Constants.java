@@ -51,7 +51,7 @@ package com.openexchange.voipnow.json;
 
 /**
  * {@link Constants} - Constants for the HTTP JSON interface of the VoipNow component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {

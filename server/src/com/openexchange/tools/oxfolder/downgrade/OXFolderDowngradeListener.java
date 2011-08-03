@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data remaining from a former downgrade.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderDowngradeListener extends DowngradeListener {
@@ -176,7 +176,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * <li>Delete all shared permissions assigned to default calendar folder</li>
      * <li>Delete all public calendar folders' permissions assigned to affected user; reassign to context admin if necessary</li>
      * </ul>
-     * 
+     *
      * @param entity The user's ID
      * @param event The downgrade event
      * @throws OXException If a folder error occurs
@@ -192,7 +192,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * <li>Delete all shared permissions assigned to default task folder</li>
      * <li>Delete all public task folders' permissions assigned to affected user; reassign to context admin if necessary</li>
      * </ul>
-     * 
+     *
      * @param entity The user's ID
      * @param event The downgrade event
      * @throws OXException If a folder error occurs
@@ -208,7 +208,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
      * </ul>
      * <p>
      * Folder cache is updated, too
-     * 
+     *
      * @param entity The user's ID
      * @param event The downgrade event
      * @throws OXException If a folder error occurs
@@ -256,7 +256,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 
     /**
      * Deletes specified module's folder data and updates the folder cache
-     * 
+     *
      * @param entity The entity whose folder data ought to be deleted
      * @param module The module
      * @param event The downgrade event providing needed information
@@ -327,7 +327,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 
     /**
      * Deletes folders' content
-     * 
+     *
      * @param fuids The folder IDs
      * @param event The downgrade event
      * @throws OXException If deleting contents fails
@@ -443,7 +443,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 
     /**
      * Deletes the shared folder data and updates cache
-     * 
+     *
      * @param entity The entity
      * @param event The downgrade event
      * @throws OXException If deleting the shared folder data fails

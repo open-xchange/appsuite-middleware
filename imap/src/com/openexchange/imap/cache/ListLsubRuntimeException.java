@@ -51,7 +51,7 @@ package com.openexchange.imap.cache;
 
 /**
  * {@link ListLsubRuntimeException} - A {@link RuntimeException} thrown by LIST/LSUB cache.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListLsubRuntimeException extends RuntimeException {
@@ -60,7 +60,7 @@ public final class ListLsubRuntimeException extends RuntimeException {
 
     /**
      * Initializes a new {@link ListLsubRuntimeException}.
-     * 
+     *
      * @param message The error message
      */
     public ListLsubRuntimeException(final String message) {

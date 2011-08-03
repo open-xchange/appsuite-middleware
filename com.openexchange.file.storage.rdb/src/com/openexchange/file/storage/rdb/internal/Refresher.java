@@ -61,7 +61,7 @@ import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
 
 /**
  * {@link Refresher} - A copy of <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>'s Refresher class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -86,7 +86,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
 
     /**
      * Default constructor.
-     * 
+     *
      * @throws IllegalArgumentException If provided region name is <code>null</code>
      */
     protected Refresher(final FileStorageFactory<T> factory, final String regionName) {
@@ -116,7 +116,7 @@ public abstract class Refresher<T extends Serializable> implements Serializable 
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * 
+     *
      * @throws OXException if loading or putting into cache fails.
      */
     protected T refresh() throws OXException {

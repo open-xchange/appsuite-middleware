@@ -59,18 +59,18 @@ public enum Property implements PropertyInterface {
     OpensslTimeout(Integer.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.OpensslTimeout"),
     CertFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.CertFile"),
     KeyFile(String.class, new Required(Required.Value.CONDITION, new Condition[]{new Condition(SignConfig, Boolean.TRUE)}), "com.openexchange.mobile.configuration.generator.KeyFile");
-    
-    
+
+
     private final Class<?> clazz;
-    
+
     private final Required required;
-    
+
     private final String name;
-    
+
     /**
-     * Properties which must 
+     * Properties which must
      */
-    
+
     private Property(final Class<?> clazz, final Required required, final String name) {
         this.clazz = clazz;
         this.required = required;

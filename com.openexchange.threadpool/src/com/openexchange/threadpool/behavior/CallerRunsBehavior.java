@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link CallerRunsBehavior} - Implements "Caller-Runs" behavior.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object> {
@@ -65,7 +65,7 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
 
     /**
      * Gets the "Caller-Runs" behavior.
-     * 
+     *
      * @return The "Caller-Runs" behavior
      */
     @SuppressWarnings("unchecked")
@@ -82,7 +82,7 @@ public final class CallerRunsBehavior implements RefusedExecutionBehavior<Object
 
     /**
      * Executes task in the caller's thread, unless the thread pool has been shut down, in which case the task is discarded.
-     * 
+     *
      * @param task The task requested to be executed
      * @param threadPool The thread pool attempting to execute this task
      * @return Task's result or {@link RefusedExecutionBehavior#DISCARDED DISCARDED} constant if pool is shut down.

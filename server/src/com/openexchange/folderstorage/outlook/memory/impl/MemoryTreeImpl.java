@@ -71,7 +71,7 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link MemoryTreeImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MemoryTreeImpl implements MemoryTree {
@@ -95,19 +95,23 @@ public final class MemoryTreeImpl implements MemoryTree {
     /**
      * Gets the name of the folder held in virtual tree for the folder denoted by given folder identifier.
      */
+    @Override
     public String getFolderName(final String folderId) {
         final MemoryFolder memoryFolder = folderMap.get(folderId);
         return null == memoryFolder ? null : memoryFolder.getName();
     }
 
+    @Override
     public boolean containsParent(final String parentId) {
         return parentMap.containsKey(parentId);
     }
 
+    @Override
     public boolean containsFolder(final String folderId) {
         return folderMap.containsKey(folderId);
     }
 
+    @Override
     public boolean[] containsFolders(final String[] folderIds) {
         final boolean[] ret = new boolean[folderIds.length];
         for (int i = 0; i < ret.length; i++) {
@@ -116,6 +120,7 @@ public final class MemoryTreeImpl implements MemoryTree {
         return ret;
     }
 
+    @Override
     public boolean[] containsFolders(final SortableId[] folderIds) {
         final boolean[] ret = new boolean[folderIds.length];
         for (int i = 0; i < ret.length; i++) {
@@ -124,6 +129,7 @@ public final class MemoryTreeImpl implements MemoryTree {
         return ret;
     }
 
+    @Override
     public List<String[]> getSubfolderIds(final String parentId) {
         final Set<MemoryFolder> set = parentMap.get(parentId);
         if (null == set) {
@@ -136,10 +142,12 @@ public final class MemoryTreeImpl implements MemoryTree {
         return l;
     }
 
+    @Override
     public List<String> getFolders() {
         return new ArrayList<String>(folderMap.keySet());
     }
 
+    @Override
     public String[] getSubfolderIds(final Locale locale, final String parentId, final List<String[]> realSubfolderIds) {
         final List<String[]> ids = getSubfolderIds(parentId);
         final List<String> subfolderIds;
@@ -187,6 +195,7 @@ public final class MemoryTreeImpl implements MemoryTree {
         return subfolderIds.toArray(new String[subfolderIds.size()]);
     }
 
+    @Override
     public boolean fillFolder(final OutlookFolder outlookFolder) {
         final String folderId = outlookFolder.getID();
         final MemoryFolder memoryFolder = folderMap.get(folderId);
@@ -258,18 +267,22 @@ public final class MemoryTreeImpl implements MemoryTree {
         return true;
     }
 
+    @Override
     public MemoryCRUD getCrud() {
         return crud;
     }
 
+    @Override
     public int size() {
         return folderMap.size();
     }
 
+    @Override
     public boolean isEmpty() {
         return folderMap.isEmpty();
     }
 
+    @Override
     public void clear() {
         folderMap.clear();
     }
@@ -292,6 +305,7 @@ public final class MemoryTreeImpl implements MemoryTree {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String o1, final String o2) {
             return collator.compare(o1, o2);
         }
@@ -308,6 +322,7 @@ public final class MemoryTreeImpl implements MemoryTree {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final String[] o1, final String[] o2) {
             {
                 final String privateId = "1";

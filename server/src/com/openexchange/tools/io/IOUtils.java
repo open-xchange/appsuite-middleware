@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility methods for file handling.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class IOUtils {
@@ -78,7 +78,7 @@ public final class IOUtils {
 
     /**
      * Convenience method for closing an I/O resource.
-     * 
+     *
      * @param closeable The I/O resource to close.
      */
     public static void closeStuff(final Closeable closeable) {
@@ -93,7 +93,7 @@ public final class IOUtils {
 
     /**
      * Convenience method for closing streams.
-     * 
+     *
      * @param input The stream to close.
      */
     public static void closeStreamStuff(final InputStream input) {
@@ -102,7 +102,7 @@ public final class IOUtils {
 
     /**
      * Convenience method for closing readers.
-     * 
+     *
      * @param reader The reader to close.
      */
     public static void closeReaderStuff(final Reader reader) {
@@ -112,7 +112,7 @@ public final class IOUtils {
     /**
      * Convenience method for reading all from input stream and writing that to the output stream until end of file (EOF). This method does
      * not close either of the streams.
-     * 
+     *
      * @param in some input stream
      * @param out some output stream
      * @throws IOException if some problem occurs.

@@ -60,14 +60,14 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
  * {@link ReminderWriter} - Writer for reminder
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class ReminderWriter extends DataWriter {
 
 	/**
 	 * Initializes a new {@link ReminderWriter}
-	 * 
+	 *
 	 * @param timeZone
 	 *            The user time zone
 	 */

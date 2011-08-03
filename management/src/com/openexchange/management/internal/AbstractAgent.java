@@ -94,7 +94,7 @@ import com.openexchange.management.ManagementExceptionCode;
 
 /**
  * {@link AbstractAgent} - An abstract JMX agent
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractAgent {
@@ -230,7 +230,7 @@ public abstract class AbstractAgent {
 
     /**
      * Uniquely identifies the MBean and registers it to MBeanServer
-     * 
+     *
      * @param name The MBeans's object name as a string
      * @param mbean The MBean object
      * @throws OXException If registering the MBean to MBeanServer fails
@@ -245,7 +245,7 @@ public abstract class AbstractAgent {
 
     /**
      * Unregister the MBean identified through specified object name as a string.
-     * 
+     *
      * @param name The MBean's object name as a string
      * @throws OXException If unregistering the MBean fails
      */
@@ -259,7 +259,7 @@ public abstract class AbstractAgent {
 
     /**
      * Uniquely identifies the MBean and registers it to MBeanServer
-     * 
+     *
      * @param objectName The MBean's object name
      * @param mbean The MBean object
      * @throws OXException If registering the MBean to MBeanServer fails
@@ -283,7 +283,7 @@ public abstract class AbstractAgent {
 
     /**
      * Unregister the MBean identified through specified object name.
-     * 
+     *
      * @param objectName The MBean's object name
      * @throws OXException If unregistering the MBean fails
      */
@@ -302,7 +302,7 @@ public abstract class AbstractAgent {
 
     /**
      * Adds the MBean identified by given object name to {@link GaugeMonitor} for being observed
-     * 
+     *
      * @param objectName The MBean's object name
      * @param attributeName The observed attribute
      * @throws OXException If adding the MBean to {@link GaugeMonitor} fails
@@ -343,7 +343,7 @@ public abstract class AbstractAgent {
 
     /**
      * Removes the observed MBean identified by specified object name from the {@link GaugeMonitor}
-     * 
+     *
      * @param objectName The MBean's object name
      * @throws OXException If removing the MBean from {@link GaugeMonitor} fails
      */
@@ -356,7 +356,7 @@ public abstract class AbstractAgent {
 
     /**
      * Adds a RMI registry
-     * 
+     *
      * @param port The port on which the RMI registry should listen on
      * @param bindAddr The bind address for created sockets by RMI registry
      * @throws OXException If RMI registry cannot be created
@@ -396,7 +396,7 @@ public abstract class AbstractAgent {
 
     /**
      * Lists the RMI registries ports
-     * 
+     *
      * @return An array of <code>int</code> representing RMI ports
      */
     public final int[] getRMIRegistryPorts() {
@@ -411,7 +411,7 @@ public abstract class AbstractAgent {
 
     /**
      * Creates a JMX connector server bound to specified JMX URL.
-     * 
+     *
      * @param urlstr The JMX URL as a string
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
@@ -454,7 +454,7 @@ public abstract class AbstractAgent {
 
     /**
      * Removes the JMX connector server bound to specified JMX URL
-     * 
+     *
      * @param url The JMX URL
      */
     protected final void removeConnectorServer(final JMXServiceURL url) {
@@ -495,7 +495,7 @@ public abstract class AbstractAgent {
      * <li>If any exceptional condition is experienced, <code> 0 </code> is returned, indicating that the method failed for some reasons and
      * the callers should take the corrective action. (The method need not always throw an exception for this).
      * <li>Method is synchronized on this class.
-     * 
+     *
      * @return integer depicting the free port number available at this time 0 otherwise.
      */
     protected static final int getFreePort() {

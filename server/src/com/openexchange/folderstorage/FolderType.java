@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link FolderType} - The folder type of a certain folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FolderType {
@@ -60,15 +60,18 @@ public interface FolderType {
      * The folder type to store global parameters to {@link StorageParameters storage parameters}.
      */
     public static final FolderType GLOBAL = new FolderType() {
-        
+
+        @Override
         public boolean servesTreeId(final String treeId) {
             return false;
         }
-        
+
+        @Override
         public boolean servesParentId(final String parentId) {
             return false;
         }
-        
+
+        @Override
         public boolean servesFolderId(final String folderId) {
             return false;
         }
@@ -76,7 +79,7 @@ public interface FolderType {
 
     /**
      * Indicates if this folder type serves specified tree identifier.
-     * 
+     *
      * @param treeId The tree identifier
      * @return <code>true</code> if this folder type serves specified tree identifier; otherwise <code>false</code>
      */
@@ -84,7 +87,7 @@ public interface FolderType {
 
     /**
      * Indicates if this folder type serves specified folder identifier.
-     * 
+     *
      * @param folderId The folder identifier
      * @return <code>true</code> if this folder type serves specified folder identifier; otherwise <code>false</code>
      */
@@ -93,7 +96,7 @@ public interface FolderType {
     /**
      * Indicates if this folder type serves specified parent identifier. If <code>true</code> the
      * {@link FolderStorage#getSubfolders(String, String, StorageParameters)} delivers a non-empty array for this parent identifier.
-     * 
+     *
      * @param parentId The parent identifier
      * @return <code>true</code> if this folder type serves specified parent identifier; otherwise <code>false</code>
      */
@@ -102,11 +105,13 @@ public interface FolderType {
     /**
      * Must be implemented according to {@link Object#hashCode()}.
      */
+    @Override
     int hashCode();
 
     /**
      * Must be implemented according to {@link Object#equals(Object)}.
      */
+    @Override
     boolean equals(Object obj);
 
 }

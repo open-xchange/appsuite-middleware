@@ -61,53 +61,53 @@ import com.openexchange.file.storage.File;
 public class FileComparator implements Comparator<File>{
 
     private static final FileFieldGet GET = new FileFieldGet();
-    
+
     private Comparator delegate = null;
     private File.Field by = null;
-    
+
     public FileComparator(final File.Field by) {
         this.by = by;
     }
-    
+
     public FileComparator(final File.Field by, final Comparator comparator) {
         this.by = by;
         delegate = comparator;
     }
-    
+
     public int compare(final File o1, final File o2) {
         if(o1 == o2) {
             return 0;
         }
-        
+
         if(o1 == null) {
             return -1;
         }
-        
+
         if(o2 == null) {
             return 1;
         }
-        
+
         final Object v1 = by.doSwitch(GET, o1);
         final Object v2 = by.doSwitch(GET, o2);
-        
+
         if(v1 == v2) {
             return 0;
         }
-        
+
         if(v1 == null) {
             return -1;
         }
-        
+
         if(v2 == null) {
             return 1;
         }
-        
+
         if(delegate != null) {
             return delegate.compare(v1, v2);
         } else if (v1 instanceof Comparable) {
             return ((Comparable)v1).compareTo(v2);
         }
-        
+
         return 0;
     }
 

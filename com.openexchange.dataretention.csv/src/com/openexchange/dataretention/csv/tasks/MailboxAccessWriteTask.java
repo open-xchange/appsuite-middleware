@@ -57,7 +57,7 @@ import com.openexchange.dataretention.csv.CSVWriter.TransactionType;
 
 /**
  * {@link MailboxAccessWriteTask} - The write task for mailbox access event.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailboxAccessWriteTask extends AbstractWriteTask {
@@ -66,7 +66,7 @@ public final class MailboxAccessWriteTask extends AbstractWriteTask {
 
     /**
      * Initializes a new {@link MailboxAccessWriteTask}.
-     * 
+     *
      * @param retentionData The retention data to write as a CSV line
      * @param versionNumber The version number
      * @param sequenceNumber The sequence number

@@ -59,7 +59,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * URL encoding and decoding. RFC 2396
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein </a>
  */
 public final class URLCoder {
@@ -76,7 +76,7 @@ public final class URLCoder {
 
     /**
      * Decodes an URL using the charset UTF-8.
-     * 
+     *
      * @param url URL to decode.
      * @return the decoded URL.
      */

@@ -61,6 +61,6 @@ import com.openexchange.groupware.container.Contact;
 public interface FacebookService {
 
     public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
-    
+
     public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
 }

@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Incoming call rule data
- * 
+ *
  * <p>Java class for CallRuleTransferInfo complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CallRuleTransferInfo">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CallRuleTransferInfo", propOrder = {
@@ -52,25 +52,25 @@ public class CallRuleTransferInfo {
 
     /**
      * Gets the value of the transferNumber property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the transferNumber property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getTransferNumber().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getTransferNumber() {
         if (transferNumber == null) {
@@ -81,11 +81,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Gets the value of the ring property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getRing() {
         return ring;
@@ -93,11 +93,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Sets the value of the ring property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setRing(BigInteger value) {
         this.ring = value;
@@ -105,11 +105,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Gets the value of the call property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCall() {
         return call;
@@ -117,11 +117,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Sets the value of the call property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCall(Boolean value) {
         this.call = value;
@@ -129,11 +129,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Gets the value of the askForCaller property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAskForCaller() {
         return askForCaller;
@@ -141,11 +141,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Sets the value of the askForCaller property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAskForCaller(Boolean value) {
         this.askForCaller = value;
@@ -153,11 +153,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Gets the value of the transferFromCallee property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isTransferFromCallee() {
         return transferFromCallee;
@@ -165,11 +165,11 @@ public class CallRuleTransferInfo {
 
     /**
      * Sets the value of the transferFromCallee property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setTransferFromCallee(Boolean value) {
         this.transferFromCallee = value;

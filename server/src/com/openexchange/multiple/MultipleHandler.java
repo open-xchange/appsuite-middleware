@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MultipleHandler} - Handles a multiple request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MultipleHandler {
@@ -78,15 +78,15 @@ public interface MultipleHandler {
      * The constant for the key to get the hostname used in the access.
      */
     public static final String HOSTNAME = "__hostname";
-    
+
     /**
      * The constant for the key to get the route.
      */
     public static final String ROUTE = "__route";
-    
+
     /**
      * Performs the multiple request identified by specified action string.
-     * 
+     *
      * @param action The action string denoting the request to perform
      * @param jsonObject The JSON object providing request parameters and/or body
      * @param session The session providing needed user data
@@ -99,14 +99,14 @@ public interface MultipleHandler {
 
     /**
      * Gets the time stamp when {@link #performRequest()} has been called.
-     * 
+     *
      * @return The time stamp associated with performed request or <code>null</code> if none available
      */
     public Date getTimestamp();
 
     /**
      * Gets the warnings.
-     * 
+     *
      * @return The warnings
      */
     public Collection<OXException> getWarnings();

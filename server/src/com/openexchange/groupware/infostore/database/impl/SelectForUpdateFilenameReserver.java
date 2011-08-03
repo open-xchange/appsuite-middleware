@@ -64,6 +64,7 @@ import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
  */
 public class SelectForUpdateFilenameReserver implements InfostoreFilenameReserver {
 
+    @Override
     public InfostoreFilenameReservation reserveFilename(String fileName, long folderId, int id, Context context, DBProvider provider) throws OXException, SQLException {
         SelectForUpdateReservation reservation = new SelectForUpdateReservation(fileName, folderId, id, context, provider);
         if( reservation.reserve() ) {

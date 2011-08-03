@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link MultipleAdapter} maps the {@link MultipleHandler} to several {@link AJAXActionService}s. This class is not thread safe because it
  * has to remember the {@link AJAXRequestResult} between calling {@link #performRequest(String, JSONObject, ServerSession, boolean)} and
  * {@link #getTimestamp()} methods.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -78,7 +78,7 @@ public class MultipleAdapter implements MultipleHandler {
 
     /**
      * Initializes a new {@link MultipleAdapter}.
-     * 
+     *
      * @param factory The factory used to create {@link AJAXActionService} instances
      */
     public MultipleAdapter(final AJAXActionServiceFactory factory) {
@@ -87,17 +87,13 @@ public class MultipleAdapter implements MultipleHandler {
         result = new AtomicReference<AJAXRequestResult>();
     }
 
-    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
-        final AJAXActionService actionService = factory.createActionService(action);
-        if (null == actionService) {
-            throw AjaxExceptionCodes.UnknownAction.create( action);
-        }
+    public static AJAXRequestData parse(final String module, final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException {
         final AJAXRequestData request = new AJAXRequestData();
         request.setSecure(secure);
-        
+
         request.setHostname(jsonObject.getString(HOSTNAME));
         request.setRoute(jsonObject.getString(ROUTE));
-        
+
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             final String name = entry.getKey();
             if (RequestConstants.DATA.equals(name)) {
@@ -106,11 +102,26 @@ public class MultipleAdapter implements MultipleHandler {
                 request.putParameter(name, entry.getValue().toString());
             }
         }
+        request.setModule(module);
+        request.setFormat("json");
+        request.setAction(action);
+
+        return request;
+    }
+
+    @Override
+    public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
+        final AJAXActionService actionService = factory.createActionService(action);
+        if (null == actionService) {
+            throw AjaxExceptionCodes.UnknownAction.create( action);
+        }
+        final AJAXRequestData request = parse("", action, jsonObject, session, secure);
         final AJAXRequestResult ret = actionService.perform(request, session);
         result.set(ret);
         return ret.getResultObject();
     }
 
+    @Override
     public Date getTimestamp() {
         final AJAXRequestResult result = this.result.get();
         if (null == result) {
@@ -120,10 +131,12 @@ public class MultipleAdapter implements MultipleHandler {
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
+    @Override
     public void close() {
         result.set(null);
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         if (null == result.get()) {
             return Collections.<OXException> emptySet();

@@ -77,7 +77,7 @@ import com.openexchange.user.json.filter.UserCensorship;
 
 /**
  * {@link AbstractUserAction} - An abstract user action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractUserAction implements AJAXActionService {
@@ -97,7 +97,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Gets the attribute parameters.
-     * 
+     *
      * @param expectedParameterNames The expected parameter names
      * @param request The request
      * @return The attribute parameters
@@ -136,7 +136,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>Long</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>Long</code> value or <code>null</code> if not present
@@ -157,7 +157,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>long</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>long</code> value
@@ -178,7 +178,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value or <code>-1</code> if not present
@@ -199,7 +199,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value
@@ -220,7 +220,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code> value
@@ -235,7 +235,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");
-    
+
     private static final ContactCensorship DO_NOTHING_CENSORSHIP = new DoNothingCensorship();
     private static final ContactCensorship NO_GLOBAL_ADDRESSBOOK_CENSORSHIP = new NoGlobalAdressBookContactCensorship();
 
@@ -244,7 +244,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
@@ -265,7 +265,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
 
     /**
      * Parses specified optional parameter into an array of <code>int</code>.
-     * 
+     *
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
@@ -282,19 +282,19 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
         return columns;
     }
-    
+
     protected static void censor(final ServerSession session, final Contact...contacts) throws OXException {
         final ContactCensorship censorship = getContactCensorship(session);
-        
+
         for (final Contact contact : contacts) {
             if(contact.getInternalUserId() == session.getUserId()) {
                 continue;
             }
             censorship.censor(contact);
         }
-        
+
     }
-    
+
     protected static void censor(final ServerSession session, final User[] user) throws OXException {
         final UserCensorship censorship = getUserCensorship(session);
         for(int i = 0; i < user.length; i++) {
@@ -304,7 +304,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
             user[i] = censorship.censor(user[i]);
         }
     }
-    
+
     protected static User censor(final ServerSession session, final User user) throws OXException {
         if(user.getId() == session.getUserId()) {
             return user;
@@ -312,7 +312,7 @@ public abstract class AbstractUserAction implements AJAXActionService {
         final UserCensorship censorship = getUserCensorship(session);
         return censorship.censor(user);
     }
-    
+
 
 
     protected static ContactCensorship getContactCensorship(final ServerSession session) throws OXException {
@@ -321,12 +321,12 @@ public abstract class AbstractUserAction implements AJAXActionService {
         }
         return NO_GLOBAL_ADDRESSBOOK_CENSORSHIP;
     }
-    
+
     protected static UserCensorship getUserCensorship(final ServerSession session) throws OXException {
          if( canSeeGlobalAddressBook(session) ) {
              return DO_NOTHING_USER_CENSORSHIP;
          }
-         
+
          return NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP;
     }
 

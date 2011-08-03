@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
 
-    private List<StatementHolder> statements = new ArrayList<StatementHolder>();
+    private final List<StatementHolder> statements = new ArrayList<StatementHolder>();
 
     public SimpleStatementsUpdateTask() {
         statements();
@@ -89,8 +89,8 @@ public abstract class SimpleStatementsUpdateTask extends SimpleUpdateTask {
     }
 
     protected static class StatementHolder {
-        private String statement;
-        private Object[] values;
+        private final String statement;
+        private final Object[] values;
 
         public StatementHolder(String statement, Object...values) {
             this.statement = statement;

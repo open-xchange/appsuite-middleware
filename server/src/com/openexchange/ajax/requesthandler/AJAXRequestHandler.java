@@ -66,7 +66,7 @@ public interface AJAXRequestHandler {
 
     /**
      * Performs the action indicated through given parameter <code>action</code>.
-     * 
+     *
      * @param action The action to perform
      * @param jsonObject The JSON data object (containing "data", "timestamp", etc.)
      * @param session The session providing needed user data
@@ -79,14 +79,14 @@ public interface AJAXRequestHandler {
 
     /**
      * Gets this request handler's module.
-     * 
+     *
      * @return The module
      */
     public String getModule();
 
     /**
      * Gets this request handler's supported actions.
-     * 
+     *
      * @return The supported actions
      */
     public Set<String> getSupportedActions();

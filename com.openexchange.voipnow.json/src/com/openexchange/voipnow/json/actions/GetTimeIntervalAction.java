@@ -105,15 +105,15 @@ public class GetTimeIntervalAction extends AbstractVoipNowSOAPAction<PBXInterfac
 		PBXInterface port = configureStub(setting);
 
 		GetTimeIntervalBlocksRequest request = new GetTimeIntervalBlocksRequest();
-		
+
 		request.setUserID(new BigInteger(userId));
 
 		GetTimeIntervalBlocksResponseType response = port.getTimeIntervalBlocks(request, getUserCredentials(setting), new Holder<ServerInfo>());
-		
+
 		TimeIntervalBlock timeIntervalBlock = response.getTimeIntervalBlock().get(0);
-		
+
 		BigInteger id = timeIntervalBlock.getID();
-		
+
 		return new AJAXRequestResult(id.intValue());
     }
 

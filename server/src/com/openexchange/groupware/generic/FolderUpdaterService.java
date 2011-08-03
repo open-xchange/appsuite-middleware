@@ -62,7 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public interface FolderUpdaterService<T> {
     public boolean handles(FolderObject folder);
-    
+
     public boolean usesMultipleStrategy();
 
     public void save(Collection<T> data, TargetFolderDefinition target) throws OXException;

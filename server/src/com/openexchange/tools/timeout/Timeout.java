@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link Timeout} - A simple timeout
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Timeout implements Runnable {
@@ -79,7 +79,7 @@ public final class Timeout implements Runnable {
 
     /**
      * Timeout for current thread
-     * 
+     *
      * @param timeoutMillis The timeout in milliseconds
      */
     public Timeout(final long timeoutMillis) {
@@ -88,7 +88,7 @@ public final class Timeout implements Runnable {
 
     /**
      * Timeout for given thread
-     * 
+     *
      * @param target The target thread to kill if timeout elapsed
      * @param timeoutMillis The timeout in milliseconds
      */
@@ -132,7 +132,7 @@ public final class Timeout implements Runnable {
 
     /**
      * Reset
-     * 
+     *
      * @param millis The new timeout in milliseconds
      */
     public void reset(final long timeoutMillis) {
@@ -149,6 +149,7 @@ public final class Timeout implements Runnable {
      * (non-Javadoc)
      * @see java.lang.Runnable#run()
      */
+    @Override
     public void run() {
         lock.lock();
         try {

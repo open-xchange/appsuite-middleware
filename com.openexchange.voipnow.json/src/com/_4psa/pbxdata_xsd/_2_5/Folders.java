@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Folders data
- * 
+ *
  * <p>Java class for Folders complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Folders">
  *   &lt;complexContent>
@@ -34,8 +34,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Folders", propOrder = {
@@ -61,11 +61,11 @@ public class Folders {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -73,11 +73,11 @@ public class Folders {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -85,11 +85,11 @@ public class Folders {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -97,11 +97,11 @@ public class Folders {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -109,11 +109,11 @@ public class Folders {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -121,11 +121,11 @@ public class Folders {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -133,11 +133,11 @@ public class Folders {
 
     /**
      * Gets the value of the userName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserName() {
         return userName;
@@ -145,11 +145,11 @@ public class Folders {
 
     /**
      * Sets the value of the userName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserName(String value) {
         this.userName = value;
@@ -157,11 +157,11 @@ public class Folders {
 
     /**
      * Gets the value of the musicOnHoldSoundsNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMusicOnHoldSoundsNo() {
         return musicOnHoldSoundsNo;
@@ -169,11 +169,11 @@ public class Folders {
 
     /**
      * Sets the value of the musicOnHoldSoundsNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMusicOnHoldSoundsNo(BigInteger value) {
         this.musicOnHoldSoundsNo = value;
@@ -181,11 +181,11 @@ public class Folders {
 
     /**
      * Gets the value of the nonMusicOnHoldSoundsNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getNonMusicOnHoldSoundsNo() {
         return nonMusicOnHoldSoundsNo;
@@ -193,11 +193,11 @@ public class Folders {
 
     /**
      * Sets the value of the nonMusicOnHoldSoundsNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setNonMusicOnHoldSoundsNo(BigInteger value) {
         this.nonMusicOnHoldSoundsNo = value;
@@ -205,11 +205,11 @@ public class Folders {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -217,11 +217,11 @@ public class Folders {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

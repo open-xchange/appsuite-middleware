@@ -64,13 +64,13 @@ import javax.servlet.http.HttpServletResponse;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeferrerServlet extends HttpServlet {
-    
-    
+
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // get url to defer to
         // redirect
-        
+
         String redirectURL = req.getParameter("redirect");
         char concat = '?';
         if (redirectURL.contains("?")) {
@@ -78,7 +78,7 @@ public class DeferrerServlet extends HttpServlet {
         }
         Enumeration parameterNames = req.getParameterNames();
         StringBuilder builder = new StringBuilder(redirectURL);
-        
+
         while (parameterNames.hasMoreElements()) {
             String name = (String) parameterNames.nextElement();
             if (name.equals("redirect")) {
@@ -90,6 +90,6 @@ public class DeferrerServlet extends HttpServlet {
             builder.append(name).append('=').append(URLEncoder.encode(parameter, "UTF-8"));
         }
         resp.sendRedirect(builder.toString());
-        
+
     }
 }

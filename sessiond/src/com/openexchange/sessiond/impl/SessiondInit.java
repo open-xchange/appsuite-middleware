@@ -62,7 +62,7 @@ import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 
 /**
  * {@link SessiondInit} - Initializes sessiond service
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -122,7 +122,7 @@ public class SessiondInit implements Initialization {
 
     /**
      * Checks if {@link SessiondInit} is started
-     * 
+     *
      * @return <code>true</code> if {@link SessiondInit} is started; otherwise <code>false</code>
      */
     public boolean isStarted() {

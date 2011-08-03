@@ -95,7 +95,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Overridden service method that checks if a valid session can be found for the request.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -118,9 +118,9 @@ public abstract class SessionServlet extends AJAXServlet {
     private static volatile CookieHashSource hashSource;
 
     private static volatile boolean rangesLoaded;
-    
+
     private static final Lock RANGE_LOCK = new ReentrantLock();
-    
+
     /**
      * Initializes a new {@link SessionServlet}.
      */
@@ -244,7 +244,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Handle specified SessionD exception.
-     * 
+     *
      * @param e The SessionD exception
      * @param req The HTTP request
      * @param resp The HTTP response
@@ -267,7 +267,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Checks whether passed exception indicates an IP check error.
-     * 
+     *
      * @param e The exception to check
      * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
      */
@@ -278,7 +278,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
-     * 
+     *
      * @param checkIP <code>true</code> to deny request with an exception.
      * @param ranges The white-list ranges
      * @param session session object
@@ -315,7 +315,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Gets the cookie identifier from the request.
-     * 
+     *
      * @param req servlet request.
      * @return the cookie identifier.
      * @throws OXException if the cookie identifier can not be found.
@@ -346,7 +346,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Finds appropriate local session.
-     * 
+     *
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
@@ -358,7 +358,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Finds appropriate local session.
-     * 
+     *
      * @param hashSource defines how the cookie should be found
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
@@ -391,7 +391,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Extracts the secret string from specified cookies using given hash string.
-     * 
+     *
      * @param req the HTTP servlet request object.
      * @param hash remembered hash from session.
      * @param client the remembered client from the session.
@@ -412,7 +412,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Gets the appropriate hash for specified request.
-     * 
+     *
      * @param cookieHash defines how the cookie should be found.
      * @param req The HTTP request
      * @param hash The previously remembered hash
@@ -435,7 +435,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Convenience method to remember the session for a request in the servlet attributes.
-     * 
+     *
      * @param req servlet request.
      * @param session session to remember.
      */
@@ -445,7 +445,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Removes the Open-Xchange cookies belonging to specified hash string.
-     * 
+     *
      * @param hash The hash string identifying appropriate cookie
      * @param req The HTTP request
      * @param resp The HTTP response
@@ -488,7 +488,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
+     *
      * @param req servlet request.
      * @return the remembered session.
      */

@@ -59,8 +59,8 @@ import java.util.Set;
  */
 public class Or extends ContextSetTerm {
 
-    private ContextSetTerm firstOperand;
-    private ContextSetTerm otherOperand;
+    private final ContextSetTerm firstOperand;
+    private final ContextSetTerm otherOperand;
 
     public Or(ContextSetTerm firstOperand, ContextSetTerm otherOperand) {
         this.firstOperand = firstOperand;
@@ -71,7 +71,8 @@ public class Or extends ContextSetTerm {
     public boolean matches(Set<String> tags) {
         return firstOperand.matches(tags) || otherOperand.matches(tags);
     }
-    
+
+    @Override
     public String toString() {
         return "("+firstOperand.toString()+"|"+otherOperand.toString()+")";
     }

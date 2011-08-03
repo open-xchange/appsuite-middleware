@@ -84,7 +84,7 @@ public enum LogLevel {
 
     /**
      * Checks if this log level equals {@link #DEBUG}.
-     * 
+     *
      * @return <code>true</code> if this log level equals {@link #DEBUG}; otherwise <code>false</code>
      */
     public boolean isDebug() {
@@ -105,7 +105,7 @@ public enum LogLevel {
     /**
      * Checks if this log level implies specified category's log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR
      * ERROR}.
-     * 
+     *
      * @param category The category whose loglevel is possibly included
      * @return <code>true</code> if this log level implies specified category's log level; otherwise <code>false</code>
      */
@@ -115,7 +115,7 @@ public enum LogLevel {
 
     /**
      * Checks if this log level implies specified log level; e.g. {@link LogLevel#DEBUG DEBUG} implies {@link LogLevel#ERROR ERROR}.
-     * 
+     *
      * @param logLevel The log level possibly included
      * @return <code>true</code> if this log level implies specified log level; otherwise <code>false</code>
      */
@@ -125,7 +125,7 @@ public enum LogLevel {
 
     /**
      * Checks if this log level applies to specified logger.
-     * 
+     *
      * @param logger The logger
      * @return <code>true</code> if specified logger applies; otherwise <code>false</code>
      */
@@ -150,7 +150,7 @@ public enum LogLevel {
 
     /**
      * Logs specified logging and exception in appropriate log level.
-     * 
+     *
      * @param logging The logging
      * @param exception The exception
      * @param logger The logger
@@ -182,7 +182,7 @@ public enum LogLevel {
 
     /**
      * Gets the log levels in ranked order.
-     * 
+     *
      * @return The log levels in ranked order
      */
     public static LogLevel[] rankedOrder() {
@@ -195,7 +195,7 @@ public enum LogLevel {
 
     /**
      * Gets the highest ranked log level appropriate for specified log instance.
-     * 
+     *
      * @param log The log instance
      * @return The appropriate log level
      */

@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link FolderInitialization} - {@link Initialization} for folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderInitialization implements Initialization {
@@ -70,6 +70,7 @@ public final class FolderInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -77,6 +78,7 @@ public final class FolderInitialization implements Initialization {
         FolderDeleteListenerRegistry.initInstance();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

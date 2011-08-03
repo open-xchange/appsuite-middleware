@@ -69,7 +69,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception;
  * <p>
  * Reads the first four mandatory bytes of a non-blocking connection which signaled read-readiness in a transaction-like manner. Further
  * processing of AJP package's content is delegated to a data handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Execution(Execution.NONTHREADED)
@@ -94,6 +94,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         this.transactional = transactional;
     }
 
+    @Override
     public boolean onConnect(final INonBlockingConnection connection) throws IOException, MaxReadSizeExceededException {
         connection.setAttachment(new XAJPv13Session(this));
         connection.setAutoflush(false);
@@ -103,6 +104,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return true;
     }
 
+    @Override
     public boolean onData(final INonBlockingConnection connection) throws IOException, ClosedChannelException, MaxReadSizeExceededException {
         final int dataLength;
 
@@ -148,7 +150,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
 
     /**
      * Processes the incoming data based on the given blocking connection.
-     * 
+     *
      * @param dataSource The data source to process.
      * @param session The AJP session
      * @throws IOException If an I/O error occurs
@@ -172,7 +174,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
     /**
      * Reads the first four mandatory bytes of an incoming AJP package:<br>
      * <code>0x12 0x34 <i>&lt;data-length&gt;</i></code>.
-     * 
+     *
      * @param dataSource The data source from which to read the mandatory bytes
      * @return
      * @throws IOException If an I/O error occurs
@@ -192,6 +194,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return AJPv13Utility.parseInt(dataSource.readByte(), dataSource.readByte());
     }
 
+    @Override
     public boolean onDisconnect(final INonBlockingConnection connection) throws IOException {
         if (LOG.isDebugEnabled()) {
             LOG.debug(new StringBuilder(256).append("AJP connection disconnected. Either ").append(
@@ -202,6 +205,7 @@ public class XAJPv13ProtocolHandler implements IConnectHandler, IDataHandler, IC
         return true;
     }
 
+    @Override
     public boolean onConnectException(final INonBlockingConnection connection, final IOException ioe) throws IOException {
         LOG.error("Establishing AJP connection failed or timed out: " + ioe.getMessage(), ioe);
         return true;

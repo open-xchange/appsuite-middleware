@@ -53,14 +53,14 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 
 /**
  * {@link MultipleHandlerRegistry} - Registry for multiple handlers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MultipleHandlerRegistry {
 
     /**
      * Gets the factory service supporting specified module.
-     * 
+     *
      * @param module The module
      * @return The factory service supporting specified module or <code>null</code> if none available
      */
@@ -69,7 +69,7 @@ public interface MultipleHandlerRegistry {
     /**
      * Adds specified factory service to this registry. Factory service is associated with module name indicated through
      * {@link MultipleHandlerFactoryService#getSupportedModule()}.
-     * 
+     *
      * @param factoryService The factory service to register
      * @return <code>true</code> if factory service was successfully added; otherwise <code>false</code>
      */
@@ -77,7 +77,7 @@ public interface MultipleHandlerRegistry {
 
     /**
      * Removes the factory service associated with specified module.
-     * 
+     *
      * @param module The module
      */
     public void removeFactoryService(String module);

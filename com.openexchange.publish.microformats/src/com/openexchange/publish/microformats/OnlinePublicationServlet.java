@@ -71,13 +71,13 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link OnlinePublicationServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class OnlinePublicationServlet extends HttpServlet {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OnlinePublicationServlet.class));
-    
+
     private static final long serialVersionUID = 6966967169899449051L;
 
     protected static final String SECRET = "secret";

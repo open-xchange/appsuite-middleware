@@ -70,6 +70,7 @@ public final class UserSettingServerDeleteListener implements DeleteListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             try {

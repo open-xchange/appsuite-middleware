@@ -12,9 +12,9 @@ import com._4psa.extensiondata_xsd._2_5.RemoteAgent;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.extensiondata_xsd._2_5.RemoteAgent;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -53,11 +53,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Gets the value of the queueID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getQueueID() {
         return queueID;
@@ -65,11 +65,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Sets the value of the queueID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setQueueID(BigInteger value) {
         this.queueID = value;
@@ -77,11 +77,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Gets the value of the queueIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getQueueIdentifier() {
         return queueIdentifier;
@@ -89,11 +89,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Sets the value of the queueIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setQueueIdentifier(String value) {
         this.queueIdentifier = value;
@@ -101,11 +101,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Gets the value of the auth property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAuth() {
         return auth;
@@ -113,11 +113,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Sets the value of the auth property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAuth(Boolean value) {
         this.auth = value;
@@ -125,11 +125,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Gets the value of the pin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPIN() {
         return pin;
@@ -137,11 +137,11 @@ public class SetQueueRemoteAgentRequest
 
     /**
      * Sets the value of the pin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPIN(String value) {
         this.pin = value;

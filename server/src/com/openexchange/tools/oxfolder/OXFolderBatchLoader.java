@@ -72,7 +72,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link OXFolderBatchLoader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderBatchLoader {
@@ -86,6 +86,7 @@ public final class OXFolderBatchLoader {
             this.folderPermissions = folderPermissions;
         }
 
+        @Override
         public boolean execute(final FolderObject fo) {
             final int id = fo.getObjectID();
             final List<OCLPermission> permissions = folderPermissions.get(id);
@@ -106,6 +107,7 @@ public final class OXFolderBatchLoader {
             this.subfolderIds = subfolderIds;
         }
 
+        @Override
         public boolean execute(final FolderObject fo) {
             final ArrayList<Integer> ids = subfolderIds.get(fo.getObjectID());
             if (ids == null) {
@@ -140,7 +142,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -155,7 +157,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderIds The folder IDs
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -252,7 +254,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderIds The folder IDs
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -266,7 +268,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readCon A connection with read capability; may be <code>null</code> to fetch from pool
@@ -328,7 +330,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The IDs of the folders whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -342,7 +344,7 @@ public final class OXFolderBatchLoader {
 
     /**
      * Gets the subfolder IDs of specified folders.
-     * 
+     *
      * @param folderIds The IDs of the folders whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool

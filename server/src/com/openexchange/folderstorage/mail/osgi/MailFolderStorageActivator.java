@@ -63,7 +63,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderStorageActivator extends DeferredActivator {

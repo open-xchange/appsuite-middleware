@@ -74,38 +74,47 @@ final class AddSessionParameterImpl implements AddSessionParameter {
         this.ctx = ctx;
     }
 
+    @Override
     public String getClientIP() {
         return request.getClientIP();
     }
 
+    @Override
     public Context getContext() {
         return ctx;
     }
 
+    @Override
     public String getFullLogin() {
         return request.getLogin();
     }
 
+    @Override
     public String getUserLoginInfo() {
         return username;
     }
 
+    @Override
     public String getPassword() {
         return request.getPassword();
     }
 
+    @Override
     public int getUserId() {
         return user.getId();
     }
 
+    @Override
     public String getAuthId() {
         return request.getAuthId();
     }
 
+    @Override
     public String getHash() {
         return request.getHash();
     }
 
+    @Override
     public String getClient() {
         return request.getClient();
     }

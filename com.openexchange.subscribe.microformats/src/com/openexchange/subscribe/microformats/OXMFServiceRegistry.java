@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 public final class OXMFServiceRegistry extends AbstractServiceRegistry {
 
     private static final OXMFServiceRegistry SINGLETON = new OXMFServiceRegistry();
-    
+
     /**
      * Initializes a new {@link OXMFServiceRegistry}.
      */
@@ -70,11 +70,11 @@ public final class OXMFServiceRegistry extends AbstractServiceRegistry {
 
     /**
      * Gets the service registry instance.
-     * 
+     *
      * @return The service registry instance
      */
     public static OXMFServiceRegistry getInstance() {
         return SINGLETON;
     }
-    
+
 }

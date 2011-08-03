@@ -59,9 +59,9 @@ import com.openexchange.i18n.tools.TemplateReplacement;
 /**
  * {@link AbstractMultipleDateReplacement} - An abstract class for date string
  * replacements using {@link DateFormat#format(Date)}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public abstract class AbstractMultipleDateReplacement implements TemplateReplacement {
 
@@ -79,7 +79,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     /**
      * Initializes a new {@link AbstractMultipleDateReplacement}
-     * 
+     *
      * @param dates The dates
      */
     protected AbstractMultipleDateReplacement(final Date[] dates) {
@@ -88,11 +88,11 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
 
     /**
      * Initializes a new {@link AbstractMultipleDateReplacement}
-     * 
+     *
      * @param dates The dates
      * @param locale The locale
      * @param timeZone The time zone; may be <code>null</code>
-     * 
+     *
      */
     protected AbstractMultipleDateReplacement(final Date[] dates, final Locale locale, final TimeZone timeZone) {
         super();
@@ -139,14 +139,17 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
         return clone;
     }
 
+    @Override
     public TemplateReplacement getClone() throws CloneNotSupportedException {
         return (TemplateReplacement) clone();
     }
 
+    @Override
     public final boolean changed() {
         return changed;
     }
 
+    @Override
     public final TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;
@@ -156,6 +159,7 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * Gets the replacement for associated dates template or an empty string if
      * applied {@link Date} array is <code>null</code> or empty.
      */
+    @Override
     public String getReplacement() {
         if (dates == null || dates.length == 0) {
             return "";
@@ -172,10 +176,11 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * Applies given time zone to this replacement.
      * <p>
      * If given time zone is <code>null</code>, it is treated as a no-op.
-     * 
+     *
      * @param timeZone The new time zone to apply
      * @return This replacement with new time zone applied
      */
+    @Override
     public final TemplateReplacement setTimeZone(final TimeZone timeZone) {
         applyTimeZone(timeZone);
         return this;
@@ -185,15 +190,17 @@ public abstract class AbstractMultipleDateReplacement implements TemplateReplace
      * Applies given locale to this replacement.
      * <p>
      * If given locale is <code>null</code>, it is treated as a no-op.
-     * 
+     *
      * @param locale The new locale to apply
      * @return This replacement with new locale applied
      */
+    @Override
     public final TemplateReplacement setLocale(final Locale locale) {
         applyLocale(locale);
         return this;
     }
 
+    @Override
     public boolean merge(final TemplateReplacement other) {
         if (!AbstractMultipleDateReplacement.class.isInstance(other)) {
             /*

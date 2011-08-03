@@ -77,7 +77,7 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * This class implementes the storage methods for tasks using a relational database. The used SQL is currently optimized for MySQL. Maybe
  * other databases need SQL optimized in another way.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RdbTaskStorage extends TaskStorage {
@@ -127,7 +127,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * Deletes a task from the given table.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param taskId unique identifier of the task to delete.
@@ -188,6 +188,7 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append(SQL.getLimit(from, to));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
+            @Override
             public void perform(final PreparedStatement stmt) throws SQLException {
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
@@ -224,6 +225,7 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append(SQL.getOrder(orderBy, order));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
+            @Override
             public void perform(final PreparedStatement stmt) throws SQLException {
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
@@ -257,7 +259,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * Counts the tasks in a folder.
-     * 
+     *
      * @param ctx Context.
      * @param folderId unique identifier of the folder.
      * @param onlyOwn <code>true</code> if only own objects can be seen.
@@ -413,7 +415,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * Updates a task in the database.
-     * 
+     *
      * @param ctx Context.
      * @param con writable database connection.
      * @param type ACTIVE or DELETED.
@@ -462,7 +464,7 @@ public class RdbTaskStorage extends TaskStorage {
 
     /**
      * Parses the truncated fields out of the DataTruncation exception and transforms this to a OXException.
-     * 
+     *
      * @param exc DataTruncation exception.
      * @return a OXException.
      */
@@ -492,14 +494,17 @@ public class RdbTaskStorage extends TaskStorage {
             final int length = -1 == tmp2 ? 0 : tmp2;
             truncateds[i] = new OXException.Truncated() {
 
+                @Override
                 public int getId() {
                     return mapper.getId();
                 }
 
+                @Override
                 public int getLength() {
                     return valueLength;
                 }
 
+                @Override
                 public int getMaxSize() {
                     return length;
                 }
@@ -509,7 +514,7 @@ public class RdbTaskStorage extends TaskStorage {
         final OXException tske;
         if (truncateds.length > 0) {
             final OXException.Truncated truncated = truncateds[0];
-            tske = 
+            tske =
                 TaskExceptionCode.TRUNCATED.create(
                 exc,
                 sFields.toString(),

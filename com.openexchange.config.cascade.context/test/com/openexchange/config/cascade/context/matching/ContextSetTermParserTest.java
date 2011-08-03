@@ -55,12 +55,12 @@ import junit.framework.TestCase;
 
 /**
  * {@link ContextSetTermParserTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextSetTermParserTest extends TestCase {
 
-    private ContextSetTermParser parser = new ContextSetTermParser();
+    private final ContextSetTermParser parser = new ContextSetTermParser();
 
     public void testParseSingleTag() {
         String term = "green";

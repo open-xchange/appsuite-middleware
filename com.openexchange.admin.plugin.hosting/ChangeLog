@@ -1,0 +1,412 @@
+* 2011-06-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #19495: listfilestore now works again if server_id something else than 2.
+
+* 2011-03-31 - marcus.klein@open-xchange.com
+
+ - Bugfix #18788: Not dropping an existing schema if MySQL does not generate proper unique identifier.
+
+* 2011-03-01 - choeger@open-xchange.com
+
+ - Bugfix #18440: grant error message not distinguishable in initconfigdb
+
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2011-02-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #9614: Added host and port parameter to mysqladmin command for a remote database.
+
+* 2011-01-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #17840: Added missing columns to getmoduleaccessforcontext CLT.
+
+* 2010-12-01 - choeger@open-xchange.com
+
+ - Bugfix #16733: Production JVM settings differ from proposed server settings
+
+* 2010-11-19 - thorben.betten@open-xchange.com
+
+ - Bugfix #17292: Enabling hard pool limit by default when registering a database
+
+* 2010-11-11 - choeger@open-xchange.com
+
+ - Bugfix #13480: DNS is not rediscovered for E-Mail servers
+
+* 2010-11-10 - choeger@open-xchange.com
+
+ - Bugfix #17507: Wrong description in online help for disabling authentication
+
+* 2010-10-14 - choeger@open-xchange.com
+ 
+ - Bugfix #17204: [L3] movecontextfilestore doesn't work if rsync isn't installed
+ 
+* 2010-10-04 - choeger@open-xchange.com
+
+ - Bugfix #12012: showruntimestats missed the $JAVA_XTRAOPTS causes failure on
+   virtuozoo containers
+   JAVA_OXCMD_OPTS must be used for commandline options
+   fixed all commandline tools to only use JAVA_OXCMD_OPTS
+
+* 2010-09-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #16865: Default for the initial amount of connection to a new database is zero.
+
+* 2010-08-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #16721: NullPointerException does not occur anymore if some filestore is empty.
+
+* 2010-08-23 - choeger@open-xchange.com
+
+ - SoftwareChange_Request-371: added -XX:MaxPermSize=128M in oxinstaller for
+   /opt/open-xchange/etc/groupware/ox-scriptconf.sh
+
+* 2010-08-11 - tobias.prinz@open-xchange.com
+
+ - Bugfix 16353: #listcontext is now more time efficient.
+
+* 2010-07-29 - tobias.prinz@open-xchange.com
+
+ - Bugfix 16585: #getFilestores is now more time efficient.
+
+* 2010-07-27 - dennis.sieben@open-xchange.com
+
+ - added CSV import option to createcontext
+
+* 2010-06-24 - choeger@open-xchange.com
+
+ - Bugfix #13441 - Installation fails if not 'root'
+
+* 2010-06-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #16353: Listing contexts now works with multiple threads to improve performance.
+
+* 2010-03-05 - choeger@open-xchange.com
+
+ - Bugfix #15554 -[L3] unable to create new contexts even if max unit is not reached
+ 
+* 2009-12-18 - marcus.klein@open-xchange.com
+
+ - Bugfix #15073: Using new AJPv13TaskMonitor for statistics.
+
+* 2009-12-15 - dennis.sieben@open-xchange.com
+
+ - Bugfix #15081: showruntimestats -r doesn't work with IBM JAVA
+   - Using ManagementFactory now to determine JMX classes
+
+* 2009-11-25 - marcus.klein@open-xchange.com
+
+ - Bugfix #13634: Using same generic use checks as for creating normal users.
+
+* 2009-11-12 - thomas.schweiger@open-xchange.com
+
+ - API change: Due to SoftwareChange_Request-170 the "oxreport" call in "oxsysreport"
+               script has been changed to "report". "oxreport" isn't available
+               within 6.14 anymore.
+               
+* 2009-11-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #14782: Lazy loading of configuration file properties.
+ - Bugfix #14740: Optimized SQL query to find a not completely filled schema for creating a context.
+ - Bugfix #14708: Not loading filestore usage information when creating a context and searching for a filestore based on estimated usage. 
+
+* 2009-11-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #14510: Refusing start of administration daemon if master credentials are not configured properly.
+
+* 2009-10-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #14637: Creating a context is now as far as possible a transaction. This avoids breaking a schema.
+
+* 2009-10-14 - choeger@open-xchange.com
+
+ - API change: new option(s) --no-license/--add-license
+   --add-license now required, can be overridden with --no-license
+
+* 2009-09-11 - marcus.klein@open-xchange.com
+
+ - Bugfix #14486: Removed own implemenetation of the administration JMX interface and using now management bundle.
+
+* 2009-09-07 - marcus.klein@open-xchange.com
+
+ - Bugfix #14458: Added user permission flags for USM and ActiveSync to all CLTs.
+
+* 2009-09-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #14449: Fixed wrong variable reference introduced by fixing bug 12168.
+ - Bugfix #14451: Fixed adding another login mapping introduced by fixing bug 12168.
+
+* 2009-09-03 - marcus.klein@open-xchange.com
+
+ - Bugfix #14389: Administration daemon is now more resistant on context deletion if the context information is not complete.
+ - Bugfix #12168: Check for existing login mapping now throws a StorageException to have a good looking command line output.
+
+* 2009-07-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+
+* 2009-07-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #14128: Context deletion does not fail if some bundle extending the delete mechanism fails or if the remove method of the file
+   store fails.
+
+* 2009-07-17 - choeger@open-xchange.com
+
+ - Bugfix #14188: Update from SP5 to 6.10 RC5 fails with error
+
+* 2009-07-14 - schweigi@open-xchange.com
+
+ - Extended oxsysreport for distribution UCS and added some further commands
+
+* 2009-06-23 - marcus.klein@open-xchange.com
+
+ - Bugfix #13852: Adding OSGi services for creating and removing genconf, publish and subscribe tables to admin.
+
+* 2009-06-22 - marcus.klein@open-xchange.com
+
+ - Bugfix #12983: Added check if destination filestore has enough space for another context on moving context.
+
+* 2009-06-15 - marcus.klein@open-xchange.com
+
+ - Bugfix #13386: Improved exception message if maximum number of context for every database is reached.
+
+* 2009-06-12 - marcus.klein@open-xchange.com
+
+ - Bugfix #6692: Renamed group 0 to "All users" and group 1 to "Standard group". An update task fixes values in the database.
+
+* 2009-02-23 - choeger@open-xchange.com
+
+ - Bugfix #13252: oxinstaller broken when system has no FQDN
+   give proper error message
+
+* 2009-01-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #13006: Removed stripping of file:/ protocol in URI of filestore.
+
+* 2009-01-19 - marcus.klein@open-xchange.com
+
+ - Bugfix #12984: Improved code and exception handling when loading a filestore and its information.
+
+* 2009-01-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #12871: Improved exception message to give administrator a hint what must be done.
+
+* 2009-01-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #12873: Changed documentation for the --maxunit option.
+ - Bugfix #12872: Closing not close SQL statements.
+
+* 2008-12-17 - francisco.laguna@open-xchange.com
+
+ - Bugfix #12236: Readable error message when duplicate login mapping is used.
+
+* 2008-10-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #12234: Closing statements correctly.
+
+* 2008-09-09 - choeger@open-xchange.com
+
+ - Bugfix ID#9972: Checking if context already exists in target database on context move operation
+
+* 2008-08-22 - choeger@open-xchange.com
+
+ - Bugfix ID#12040 Context-related command line tools do not honor the
+  --access-edit-password/group/resource
+
+* 2008-07-29 - marcus.klein@open-xchange.com
+
+ - Bugfix #11681: Removed a lot of .toString() in debug messages to prevent
+   NullPointerExceptions.
+
+* 2008-07-28 - holgi@open-xchange.com
+
+  - Bugfix ID#11715 showruntimestats -d not usable for com.openexchange.caching
+
+* 2008-07-17 - choeger@open-xchange.com
+
+  - Bugfix ID#11572 CLT jmx tools do not work any more when jmx auth is enabled
+
+* 2008-07-07 - holger.achtziger@open-xchange.com
+
+  - Bugfix ID#11575 OX installer fails if configjump.properties does not exist
+
+* 2008-07-07 - choeger@open-xchange.com
+
+  - Bugfix ID#11500 JMX error when starting admindaemon
+    do not set contextclassloader
+
+* 2008-07-03 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
+
+* 2008-07-02 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#11539 oxreport does not run any more: "java.lang.NoClassDefFoundError: com/openexchange/admin/console/ReportingTool"
+
+* 2008-06-27 - holgi@open-xchange.com
+
+  - Bugfix ID#11533 added separate cache ports for admin and groupware
+  
+* 2008-06-24 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#11490 unable to create context using --access-combination-name on commandline
+
+* 2008-06-09 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#11358 [L3] Movecontextfilestore doesn't move filestore if context filestore isn't available
+
+* 2008-04-29 - choeger@open-xchange.com
+
+  - Bugfix ID#11194 getaccesscombinationnameforuser throws NoClassDefFoundError
+
+* 2008-03-05 - choeger@open-xchange.com
+
+  - Bugfix ID#10414 oxinstaller sets read db connection to the wrong server for master/slave setups
+
+* 2008-02-12 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10894 AJP and general monitoring does not work anymore with showRuntimeStats
+  
+* 2007-12-11 - choeger@open-xchange.com
+
+  - Bugfix ID#10223
+    [L3] file plugin/hosting.properties gets overwritten on package update
+    
+* 2007-12-10 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10592 [HEAD] Filestorage leftovers for deleted contexts
+  - Bugfix ID#10603 [HEAD] double push back on db connection causes warning log
+
+* 2007-12-07 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10577 [HEAD ]admin does breake Database replication
+
+* 2007-10-29 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9974 [HEAD] context deletion not to use any server api calls
+
+* 2007-10-29 - choeger@open-xchange.com
+
+  - Bugfix ID#9986 Admin should update schema automatically
+
+* 2007-10-25 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
+    is removed, only contained files
+  - Bugfix ID#9948 No rollback when deleting a context
+
+* 2007-09-25 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9569 showruntimestats shows "statistictools" as default usage
+
+* 2007-09-10 - choeger@open-xchange.com
+
+- Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending
+  package (the fix from 2007-08-20 does not really work)
+
+* 2007-09-05 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9254 showruntimestats gives NullPointerException
+
+* 2007-08-22 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#9023 createcontext name should be added to lmappings
+  
+* 2007-08-22 - choeger@open-xchange.com
+
+  - Bugfix ID#8989 generatempasswd no newline in output
+  - Bugfix ID#8991 initconfigdb, return code is always 0
+  - Bugfix ID#8853 'listcontexts' searchpattern only works for context id
+  - Bugfix ID#9026 listcontextsbyfilestore does not print a error when the given fs does not exist
+
+* 2007-08-21 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8543 rename of movedatabasecontext and movefilestorecontext
+  - Bugfix ID#9004 unregisterserver operation by name missing
+  - Bugfix ID#8993 clts should all be singular
+  - Bugfix ID#9007 Context login mappings not validated
+  - Bugfix ID#8994 oxinstaller --master-pass should not be needed if --disableauth is in use
+  
+* 2007-08-20 - choeger@open-xchange.com
+
+  - Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending
+  package
+
+* 2007-08-16 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8917 CLT 'showruntimestats' does not give any output
+  
+* 2007-08-16 - choeger@open-xchange.com
+
+  - Bugfix ID#8915 Classpath problems with CLTs
+
+* 2007-08-14 - choeger@open-xchange.com
+
+  - Bugfix ID#8822 'generatepassword' creates curious output
+
+* 2007-08-09 - choeger@open-xchange.com
+
+  - Bugfix ID#8623 oxinstaller: switch needed to turn on/of context authentication
+
+* 2007-08-07 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8629 movefilestorecontext StringIndexOutOfBoundsException
+  - Bugfix ID#8593 Operations by name not possible
+
+* 2007-08-06 - choeger@open-xchange.com
+
+  - Bugfix ID#8642 "listusers" command line tool output is limited to three digits
+    as a side effect of now dynamically determining the widest row, this is also fixed
+  
+* 2007-08-02 - choeger@open-xchange.com
+
+  - Bugfix ID#8651 no access must be the default when not specifying access on commandline
+    using lowest set of access options as default (webmail)
+  
+* 2007-07-31 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8597 [DEV] searchContextByFilestoreId,searchContextByFilestore and
+    searchContextByDatabase must only return contexts bound to specific SERVER_NAME
+    
+* 2007-07-30 - choeger@open-xchange.com
+
+  - Bugfix ID#8592 Misleading server response if "listuser" doesn't find any match
+
+* 2007-07-30 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8575 CLT createcontext: It should be possible to create a mapping between contextID
+  and context name during createcontext and not only on changecontext
+  
+* 2007-07-26 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#8553 CLT: After running CLT no reasonable message on console appear for user
+
+* 2007-07-25 - choeger@open-xchange.com
+
+  - Bugfix ID#8550 generatempasswd not developed to be used by humans
+  made generatempasswd usable by humans... :-)
+
+* 2007-07-11 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#8379 listcontext, lmapping not in csv output
+
+* 2007-07-09 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#7302 changecontext is missing
+
+* 2007-06-29 - dennis.sieben@open-xchange.com
+
+  -  Bugfix ID#8171 need for a tool that does reset the jmx max values
+
+* 2007-06-21 - manuel.kraft@open-xchange.com
+
+  -  Bugfix ID#7675 LTs to manage users can not deal with modules
+
+* 2007-06-12 - dennis.sieben@open-xchange.com
+
+  -  Bugfix ID#7657 console clients check extension errors in the wrong place
+  
+* 2007-05-29 - choeger@open-xchange.com
+
+  - Bugfix ID#7595 Groups member in several contexts are deleted on context delete

@@ -78,7 +78,7 @@ import com.openexchange.twitter.Status;
 
 /**
  * {@link TwitterMessagingBodyPart}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingBodyPart implements MessagingBodyPart {
@@ -123,7 +123,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
 
     /**
      * Initializes a new {@link TwitterMessagingBodyPart}.
-     * 
+     *
      * @param status The twitter status
      * @param html <code>true</code> to convert status to HTML; otherwise <code>false</code> for text-plain
      * @param parent The parental multipart
@@ -148,7 +148,7 @@ public final class TwitterMessagingBodyPart implements MessagingBodyPart {
                 final Matcher m = PATTERN_BODY.matcher(htmlContent);
                 htmlContent = m.replaceAll(MessageFormat.format("$1\r\n    <img src=\"{0}\" />", status.getUser().getProfileImageURL()));
             }
-            
+
             final HTMLService htmlService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(HTMLService.class);
             content = new StringContent(null == htmlService ? htmlContent: htmlService.replaceImages(htmlContent, session.getSessionID()));
             sectionId = "2";

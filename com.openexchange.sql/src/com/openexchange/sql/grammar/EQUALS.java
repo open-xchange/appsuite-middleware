@@ -52,7 +52,7 @@ package com.openexchange.sql.grammar;
 import com.openexchange.sql.builder.IStatementBuilder;
 
 public class EQUALS extends BinaryPredicate {
-	
+
 	public EQUALS(String column, Expression right) {
 		super(column, right);
 	}
@@ -64,7 +64,7 @@ public class EQUALS extends BinaryPredicate {
 	public EQUALS(String column, Object value) {
 		super(column, value);
 	}
-	
+
     public EQUALS(Column column, Object value) {
         super(column.getName(), value);
     }
@@ -73,11 +73,13 @@ public class EQUALS extends BinaryPredicate {
 		super(left, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildEQUALS(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "=";
 	}
 }

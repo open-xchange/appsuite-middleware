@@ -92,7 +92,7 @@ import com.openexchange.session.Session;
 
 /**
  * This class contains logic methods for the tasks.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TaskLogic {
@@ -112,7 +112,7 @@ public final class TaskLogic {
     /**
      * Checks if a new task is not missing any data, does not contains any wrong data and if the user is allowed to create a task in tasks
      * folder.
-     * 
+     *
      * @param task Task to create.
      * @param userId unique identifier of the user that wants to create the task.
      * @param userConfig groupware configuration of the user that wants to create the task.
@@ -133,7 +133,7 @@ public final class TaskLogic {
 
     /**
      * Checks if the data of an to update task is correct.
-     * 
+     *
      * @param task Task object with the updated attributes.
      * @param oldTask Task object that should be updated.
      * @param user user that wants to change the task.
@@ -168,7 +168,7 @@ public final class TaskLogic {
 
     /**
      * Checks if the new task is missing some attributes so that it can't be stored to the database.
-     * 
+     *
      * @param task Task to create.
      * @param userId user that wants to create the task and will be therefore used as task creator if no one is defined.
      * @throws OXException if the task can't be created.
@@ -203,7 +203,7 @@ public final class TaskLogic {
 
     /**
      * Checks every string attribute of a task for invalid characters.
-     * 
+     *
      * @param task task to check.
      * @throws OXException if a string contains invalid characters.
      */
@@ -228,7 +228,7 @@ public final class TaskLogic {
     /**
      * Checks if the start date is before the end date of a task. Some additional checks are done before. <code>null</code> dates are
      * ignored.
-     * 
+     *
      * @param task Task to check the dates of.
      * @throws OXException if the start date is before the end date.
      */
@@ -290,7 +290,7 @@ public final class TaskLogic {
 
     /**
      * This method checks if the user tries to delegate a private flagged task.
-     * 
+     *
      * @param privat private flag of the old or new task.
      * @param changed if updated task contains participants.
      * @param oldParts original participants of the task.
@@ -314,7 +314,7 @@ public final class TaskLogic {
 
     /**
      * Checks that the creator can't be participant if the according global option isn't set.
-     * 
+     *
      * @param participants Participants of the task.
      * @throws OXException if the check fails.
      */
@@ -327,7 +327,7 @@ public final class TaskLogic {
 
     /**
      * Checks if external participants contain consistent data. Currently external participants are checked to contain an email address.
-     * 
+     *
      * @param participants external participants.
      * @throws OXException if an external participant does not contain an email address.
      */
@@ -342,7 +342,7 @@ public final class TaskLogic {
 
     /**
      * This method checks if the necessary fields for a recurring task are defined.
-     * 
+     *
      * @param task Recurring task.
      * @param oldTask Original recurring task on update.
      * @throws OXException if a necessary recurrence attribute is missing.
@@ -403,7 +403,7 @@ public final class TaskLogic {
     /**
      * If a task is updated, it only contains the changed values. If the recurrence type is changed but not the interval it must be copied
      * from the original task to be able to perform the recurrence check.
-     * 
+     *
      * @param task updated task.
      * @param oldTask original task.
      */
@@ -478,7 +478,7 @@ public final class TaskLogic {
 
     /**
      * Creates task participant set from the user and group participants.
-     * 
+     *
      * @param ctx Context.
      * @param participants user and group participants.
      * @return a set of task participants.
@@ -570,7 +570,7 @@ public final class TaskLogic {
 
     /**
      * Creates the folder mappings for a task.
-     * 
+     *
      * @param folderId unique identifier of the folder that is the main folder of the task.
      * @param userId unique identifier of the user who created the task. The primary folder of the task will be added with this user
      *            identifier. On shared folders the user identifier should be the owner of the shared folder.
@@ -601,13 +601,13 @@ public final class TaskLogic {
                 fields.add(Integer.valueOf(mapper.getId()));
             }
         }
-        
+
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
         if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
             fields.add(Task.RECURRENCE_COUNT);
         }
-        
+
         final int[] retval = new int[fields.size()];
         for (int i = 0; i < fields.size(); i++) {
             retval[i] = fields.get(i).intValue();
@@ -617,7 +617,7 @@ public final class TaskLogic {
 
     /**
      * Calculates the next time values for a recurring task.
-     * 
+     *
      * @param task the task object.
      * @return <code>true</code> if a next occurence exists.
      * @throws OXException if an error occurs.
@@ -642,7 +642,7 @@ public final class TaskLogic {
 
     /**
      * This method does compatability changes to the task in that way that the recurrence calculation for appointment also works for tasks.
-     * 
+     *
      * @param task Task to modify and to calculate the recurrence for.
      * @return the new start and end date for the task.
      * @throws OXException if an error occurs.
@@ -668,7 +668,7 @@ public final class TaskLogic {
 
     /**
      * Extracts all participants that are added by the group.
-     * 
+     *
      * @param participants internal task participants.
      * @param groupId the group identifier.
      * @return All participants that are added by the group.
@@ -700,7 +700,7 @@ public final class TaskLogic {
 
     /**
      * Stores a task with its participants and folders.
-     * 
+     *
      * @param ctx Context.
      * @param task Task to store.
      * @param participants Participants of the task.
@@ -738,7 +738,7 @@ public final class TaskLogic {
 
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
-     * 
+     *
      * @param ctx Conetxt
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
@@ -767,7 +767,7 @@ public final class TaskLogic {
 
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.
-     * 
+     *
      * @param session Session.
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
@@ -825,7 +825,7 @@ public final class TaskLogic {
 
     /**
      * Informs other systems about a deleted task.
-     * 
+     *
      * @param session Session.
      * @param ctx the context.
      * @param con writable database connection.
@@ -843,7 +843,7 @@ public final class TaskLogic {
 
     /**
      * Removes a task object completely.
-     * 
+     *
      * @param session Session (for event handling)
      * @param ctx Context.
      * @param con writable database connection.

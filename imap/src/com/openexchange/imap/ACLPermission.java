@@ -64,7 +64,7 @@ import com.sun.mail.imap.Rights;
 
 /**
  * {@link ACLPermission} - Maps existing folder permissions to corresponding IMAP ACL.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ACLPermission extends MailPermission {
@@ -166,10 +166,10 @@ public final class ACLPermission extends MailPermission {
     public int canRename() {
         return canRename;
     }
-    
+
     /**
      * Sets the rename flag.
-     * 
+     *
      * @param canRename The rename flag
      */
     public void setCanRename(final int canRename) {
@@ -182,7 +182,7 @@ public final class ACLPermission extends MailPermission {
 
     /**
      * Maps this permission to ACL rights and fills them into an instance of {@link ACL}.
-     * 
+     *
      * @param args The IMAP-server-specific arguments used for mapping
      * @param imapConfig The user's IMAP configuration
      * @param imapStore The IMAP store
@@ -203,7 +203,7 @@ public final class ACLPermission extends MailPermission {
 
     /**
      * Parses the rights given through specified instance of {@link ACL} into this permission object.
-     * 
+     *
      * @param acl The source instance of {@link ACL}
      * @param args The IMAP-server-specific arguments used for mapping
      * @param imapStore The IMAP store
@@ -221,7 +221,7 @@ public final class ACLPermission extends MailPermission {
 
     /**
      * Parses given rights into this permission object
-     * 
+     *
      * @param rights -The rights to parse
      * @param imapConfig The IMAP configuration
      * @throws IMAPException If an IMAP error occurs
@@ -233,7 +233,7 @@ public final class ACLPermission extends MailPermission {
 
     /**
      * Maps given permission to rights
-     * 
+     *
      * @param permission The permission
      * @param imapConfig The IMAP configuration
      * @return Mapped rights
@@ -278,7 +278,7 @@ public final class ACLPermission extends MailPermission {
      * Parses specified rights into given permission object. If the latter parameter is left to <code>null</code>, a new instance of
      * {@link OCLPermission} is going to be created, filled, and returned. Otherwise the given instance of {@link OCLPermission} is filled
      * and returned.
-     * 
+     *
      * @param rights The rights to parse
      * @param permission The permission object which may be <code>null</code>
      * @param imapConfig The IMAP configuration

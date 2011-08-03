@@ -59,13 +59,14 @@ import com.openexchange.audit.impl.AuditEventHandler;
  */
 public class AuditFilter implements Filter {
 
-	public boolean isLoggable(LogRecord record) {
+	@Override
+    public boolean isLoggable(LogRecord record) {
 		if (record.getLoggerName().equals(AuditEventHandler.class.getName())
 				&& record.getLevel() != Level.WARNING
 				&& record.getLevel() != Level.SEVERE) {
 			return false;
 		}
-		
+
 		return true;
 	}
 

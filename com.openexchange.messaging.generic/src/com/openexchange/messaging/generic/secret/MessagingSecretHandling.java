@@ -85,7 +85,7 @@ public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMi
             accountManager.migrateToNewSecret(oldSecret, newSecret, session);
         }
     }
-    
+
     // Override me
     protected Collection<MessagingService> getMessagingServices() {
         return Collections.emptyList();

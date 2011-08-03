@@ -79,24 +79,24 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
-    
+
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
-    
+
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
-    
+
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp);
     }
-    
-    
+
+
     protected void handle(final HttpServletRequest req, final HttpServletResponse resp) {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
@@ -147,7 +147,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             LOG.error(e.getMessage(), e);
         }
     }
-    
+
     private void writeException(final OXException x, final Locale locale, final HttpServletResponse resp) {
         x.log(LOG);
         final Response response = new Response(locale);

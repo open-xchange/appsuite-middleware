@@ -68,7 +68,7 @@ import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link ConfigCascade}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigCascade implements ConfigViewFactory {
@@ -97,7 +97,7 @@ public class ConfigCascade implements ConfigViewFactory {
         this.searchPath = searchPath;
         this.path = null;
     }
-    
+
     public String[] getSearchPath() {
         return searchPath;
     }
@@ -108,8 +108,10 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         final List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
-        for (final String scope : searchPath) {
-            p.add(providers.get(scope));
+        if (null != searchPath) {
+            for (final String scope : searchPath) {
+                p.add(providers.get(scope));
+            }
         }
         return path = p;
     }
@@ -184,7 +186,7 @@ public class ConfigCascade implements ConfigViewFactory {
                     }
                     return null;
                 }
-                
+
                 public List<String> getMetadataNames() throws OXException {
                     final Set<String> metadataNames = new HashSet<String>();
                     for (final ConfigProviderService provider : getConfigProviders(null)) {

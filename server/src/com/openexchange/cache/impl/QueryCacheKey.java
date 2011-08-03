@@ -53,7 +53,7 @@ import java.io.Serializable;
 
 /**
  * QueryCacheKey
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QueryCacheKey implements Serializable {
@@ -84,7 +84,7 @@ public class QueryCacheKey implements Serializable {
 	private final int queryNum;
 
 	private final int hash;
-	
+
 	/**
      * Constructor
      */

@@ -61,14 +61,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionMailCache} - Several cacheable data bound to a user session.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionMailCache {
 
     /**
      * Gets the session-bound mail cache.
-     * 
+     *
      * @param session The session whose mail cache shall be returned
      * @param accountId The account ID
      * @return The session-bound mail cache.
@@ -134,7 +134,7 @@ public final class SessionMailCache {
      * possibly previously associated value with entry's key is removed from cache.
      * <p>
      * {@link SessionMailCacheEntry#getKey()} is used as key and {@link SessionMailCacheEntry#getValue()} as value.
-     * 
+     *
      * @param entry The mail cache entry
      */
     public <V extends Object> void put(final SessionMailCacheEntry<V> entry) {
@@ -148,7 +148,7 @@ public final class SessionMailCache {
     /**
      * Gets the entry acquired through {@link SessionMailCacheEntry#getKey()}. If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
-     * 
+     *
      * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */
@@ -159,7 +159,7 @@ public final class SessionMailCache {
     /**
      * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()} . If present it's applied to <code>entry</code> via
      * {@link SessionMailCacheEntry#setValue(Object)}.
-     * 
+     *
      * @param <V> The cache entry's type
      * @param entry The mail cache entry
      */

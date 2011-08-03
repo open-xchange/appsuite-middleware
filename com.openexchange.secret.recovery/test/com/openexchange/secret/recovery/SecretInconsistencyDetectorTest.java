@@ -67,54 +67,54 @@ import com.openexchange.tools.session.SimServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SecretInconsistencyDetectorTest {
-    
+
     private final DefaultSecretInconsistencyDetector detector = new DefaultSecretInconsistencyDetector();
     private ServerSession session;
-    
+
     private final Context ctx = new SimContext(1);
     private final SimUser user = new SimUser();
-    
+
     @Before
     public void setUp() {
         detector.setSecretService(new SimSecretService());
     }
-    
+
     @Test
     public void shouldDetectWhenSecretStringsCanNotBeDecrypted() throws OXException {
         detector.addCheck(new PassingSecretConsistencyCheck());
         detector.addCheck(new FailingSecretConsistencyCheck());
-        
+
         session = new SimServerSession(ctx, user, null);
         final String diagnosis = detector.isSecretWorking(session);
         assertTrue(diagnosis, diagnosis != null);
     }
-    
+
     @Test
     public void shouldDetectWhenAllIsWell() throws OXException {
         detector.addCheck(new PassingSecretConsistencyCheck());
         detector.addCheck(new PassingSecretConsistencyCheck());
-        
+
         session = new SimServerSession(ctx, user, null);
         final String diagnosis = detector.isSecretWorking(session);
         assertTrue(diagnosis, diagnosis == null);
-    }   
-    
-    
+    }
+
+
     private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
 
         public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return "Kabooom, Baby!";
         }
-        
+
     }
-    
+
     private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
 
         public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
             return null;
         }
-        
+
     }
-    
-    
+
+
 }

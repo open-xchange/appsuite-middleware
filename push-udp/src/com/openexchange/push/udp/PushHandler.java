@@ -73,7 +73,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
 
 /**
  * {@link PushHandler} - The push {@link EventHandler event handler}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushHandler implements EventHandler {
@@ -157,7 +157,7 @@ public class PushHandler implements EventHandler {
     }
 
     private static long getTimestamp(final DataObject object) {
-        return null == object ? 0 : getTimestamp(object.getLastModified()); 
+        return null == object ? 0 : getTimestamp(object.getLastModified());
     }
 
     private static final Map<Integer, Set<Integer>> transform(final Map<Integer, Set<Integer>> map) {

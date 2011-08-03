@@ -55,7 +55,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link SimpleIMAPCommand}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
@@ -66,7 +66,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     /**
      * Initializes a new {@link SimpleIMAPCommand}
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param command The command to execute
      */
@@ -78,7 +78,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     /**
      * Initializes a new {@link SimpleIMAPCommand}
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param command The command to execute
      * @param uids The UIDs

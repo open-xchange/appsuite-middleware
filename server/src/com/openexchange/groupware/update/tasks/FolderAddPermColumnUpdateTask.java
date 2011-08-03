@@ -67,17 +67,19 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderAddPermColumnUpdateTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddPermColumnUpdateTask.class));
 
+    @Override
     public int addedWithVersion() {
         return 28;
     }
 
+    @Override
     public int getPriority() {
         /*
          * Modification on database: highest priority.
@@ -93,6 +95,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
 
     private static final String SQL_MODIFY4 = "ALTER TABLE del_oxfolder_permissions DROP PRIMARY KEY, ADD PRIMARY KEY(cid, fuid, permission_id, system)";
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         if (checkColumn(contextId)) {
             if (LOG.isInfoEnabled()) {
@@ -161,7 +164,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
     /**
      * Determines if column named 'system' already exists in table
      * 'oxfolder_permissions'
-     * 
+     *
      * @param contextId - the context ID
      * @return <code>true</code> if column named 'system' was found; otherwise
      *         <code>false</code>
@@ -191,7 +194,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                  * 11. NULLABLE int => is NULL allowed.
                  *                     - columnNoNulls - might not allow NULL values
                  *                     - columnNullable - definitely allows NULL values
-                 *                     - columnNullableUnknown - nullability unknown 
+                 *                     - columnNullableUnknown - nullability unknown
                  * 12. REMARKS String => comment describing column (may be null)
                  * 13. COLUMN_DEF String => default value (may be null)14. SQL_DATA_TYPE int => unused
                  * 15. SQL_DATETIME_SUB int => unused
@@ -207,7 +210,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
                  *                           (null if the DATA_TYPE isn't REF)
                  * 22. SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type
                  *                               from java.sql.Types (null if DATA_TYPE isn't DISTINCT or user-generated
-                 *                               REF) 
+                 *                               REF)
                  */
                 boolean found = false;
                 while (rs.next() && !found) {
@@ -233,7 +236,7 @@ public class FolderAddPermColumnUpdateTask implements UpdateTask {
     /**
      * Determines if table 'oxfolder_permissions' already has its primary key
      * set to <code>[cid,&nbsp;fuid,&nbsp;permission_id,&nbsp;system]</code>
-     * 
+     *
      * @param contextId - the context ID
      * @return <code>true</code> if table 'oxfolder_permissions' already has its
      *         primary key properly set; otherwise <code>false</code>

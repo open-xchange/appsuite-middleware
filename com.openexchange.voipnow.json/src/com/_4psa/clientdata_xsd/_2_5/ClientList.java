@@ -12,11 +12,11 @@ import com._4psa.resellerdata_xsd._2_5.ResellerList;
 
 /**
  * Client list data
- * 
+ *
  * <p>Java class for ClientList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ClientList">
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import com._4psa.resellerdata_xsd._2_5.ResellerList;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ClientList", propOrder = {
@@ -60,11 +60,11 @@ public class ClientList {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -72,11 +72,11 @@ public class ClientList {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -84,11 +84,11 @@ public class ClientList {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -96,11 +96,11 @@ public class ClientList {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -108,11 +108,11 @@ public class ClientList {
 
     /**
      * Gets the value of the login property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -120,11 +120,11 @@ public class ClientList {
 
     /**
      * Sets the value of the login property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -132,11 +132,11 @@ public class ClientList {
 
     /**
      * Gets the value of the email property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail() {
         return email;
@@ -144,11 +144,11 @@ public class ClientList {
 
     /**
      * Sets the value of the email property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail(String value) {
         this.email = value;
@@ -156,11 +156,11 @@ public class ClientList {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -168,11 +168,11 @@ public class ClientList {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -180,11 +180,11 @@ public class ClientList {
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -192,11 +192,11 @@ public class ClientList {
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;

@@ -52,9 +52,9 @@ public abstract class ControlCommand extends ControlOrActionCommand {
     /*
      * A control command is similar, but it takes a test as an argument, and
      * ends with a block instead of a semicolon.
-     * 
+     *
      * Control structures are if..elsif..else, require, stop
-     * 
+     *
      */
 
 }

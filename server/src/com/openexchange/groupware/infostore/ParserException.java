@@ -55,7 +55,7 @@ package com.openexchange.groupware.infostore;
 public class ParserException extends Exception {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -8332582839285408682L;
 

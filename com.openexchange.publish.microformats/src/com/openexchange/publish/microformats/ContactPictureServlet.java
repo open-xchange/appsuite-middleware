@@ -86,19 +86,19 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     private static final String CONTACT_ID = "contactId";
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactPictureServlet.class));
-    
+
     private static OXMFPublicationService contactPublisher = null;
-    
+
     public static void setContactPublisher(final OXMFPublicationService service) {
         contactPublisher = service;
     }
-    
+
     private static ContactInterfaceDiscoveryService contacts;
-    
+
     public static void setContactInterfaceDiscoveryService(final ContactInterfaceDiscoveryService service) {
         contacts = service;
     }
-    
+
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Map<String, String> args = getPublicationArguments(req);
@@ -113,18 +113,18 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
             if (!checkProtected(publication, args, resp)) {
                 return;
             }
-            
+
             if (!checkPublicationPermission(publication, resp)) {
                 return;
             }
-            
+
             final int folderId = Integer.parseInt(publication.getEntityId());
             final int contactId = Integer.parseInt(args.get(CONTACT_ID));
-            
+
             final Contact contact = loadContact(publication, folderId, contactId);
-            
+
             writeImage(contact, resp);
-            
+
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
@@ -148,7 +148,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
         // URL format is: /publications/contactPictures/[cid]/[siteName]/[contactID]/[displayName]?secret=[secret]
-        
+
         final String[] path = SPLIT.split(req.getPathInfo(), 0);
         final List<String> normalized = new ArrayList<String>(path.length);
         for (int i = 0; i < path.length; i++) {
@@ -165,5 +165,5 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         args.put(CONTACT_ID, normalized.get(normalized.size()-2));
         return args;
     }
-    
+
 }

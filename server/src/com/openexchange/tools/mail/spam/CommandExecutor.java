@@ -58,7 +58,7 @@ import java.io.OutputStream;
 /**
  * CommandExecutor - executes given command in a separate process and supports possibility to additionally send data to running process and
  * reading its output and/or error data.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CommandExecutor {
@@ -90,7 +90,7 @@ public final class CommandExecutor {
 
     /**
      * Writes given string into process' input
-     * 
+     *
      * @throws IOException
      */
     public void send(final String in) throws IOException {
@@ -101,7 +101,7 @@ public final class CommandExecutor {
 
     /**
      * Turns given input stream to process' input
-     * 
+     *
      * @throws IOException
      */
     public void send(final InputStream in) throws IOException {
@@ -112,7 +112,7 @@ public final class CommandExecutor {
 
     /**
      * Causes the curretn thread to wait until background process has terminated.
-     * 
+     *
      * @return process' exit code
      */
     public int waitFor() throws InterruptedException {
@@ -150,7 +150,7 @@ public final class CommandExecutor {
     /**
      * InputStreamSucker - writes content of an <code>java.io.InputStream</code> into a <code>java.lang.StringBuilder</code> in a separate
      * thread. The content is then accessible through method <code>getBuffer()</code>.
-     * 
+     *
      * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
      */
     public static class InputStreamSucker extends Thread {

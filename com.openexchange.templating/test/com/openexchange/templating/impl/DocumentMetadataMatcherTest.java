@@ -61,53 +61,53 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
  *
  */
 public class DocumentMetadataMatcherTest extends TestCase {
-    
+
     public void testFilenameMatchesExactlyGivesPerfectMatch() {
-        
+
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template.tmpl");
-        
+
         matcher.propose(doc(1, "Some nice template", "not-test-template.tmpl"));
         matcher.propose(doc(23, "Nice template", "test-template.tmpl"));
-        
+
         assertTrue(matcher.hasPerfectMatch());
         assertEquals(23, matcher.getBestMatch().getId());
-        
+
     }
-    
+
     public void testMatchFilenameWithoutExtension() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
-        
+
         matcher.propose(doc(1, "Some Template", "not-test-template.tmpl"));
         matcher.propose(doc(23, "Nice template", "test-template.tmpl"));
-        
+
         assertFalse(matcher.hasPerfectMatch());
         assertEquals(23, matcher.getBestMatch().getId());
     }
-    
+
     public void testMatchTitle() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
-        
+
         matcher.propose(doc(1, "Some Template", "not-test-template.tmpl"));
         matcher.propose(doc(23, "test-template", "some-filename.tmpl"));
-        
+
         assertFalse(matcher.hasPerfectMatch());
         assertEquals(23, matcher.getBestMatch().getId());
-        
+
     }
-    
+
     public void testPreferDirectTitleMatchBeforeFilenameWithoutExtensionMatch() {
         DocumentMetadataMatcher matcher = new DocumentMetadataMatcher("test-template");
-        
+
         matcher.propose(doc(1, "Some Template", "test-template.tmpl"));
         matcher.propose(doc(23, "test-template", "some-filename.tmpl"));
-        
+
         assertFalse(matcher.hasPerfectMatch());
         assertEquals(23, matcher.getBestMatch().getId());
-        
-    }
-    
 
-    
+    }
+
+
+
     private DocumentMetadata doc(int id, String title, String filename) {
         DocumentMetadata document = new DocumentMetadataImpl();
         document.setId(id);
@@ -117,5 +117,5 @@ public class DocumentMetadataMatcherTest extends TestCase {
     }
 
 
-    
+
 }

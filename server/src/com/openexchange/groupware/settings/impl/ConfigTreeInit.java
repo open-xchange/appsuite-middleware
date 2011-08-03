@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConfigTreeInit implements Initialization {
@@ -77,6 +77,7 @@ public final class ConfigTreeInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         ConfigTree.init();
     }
@@ -84,6 +85,7 @@ public final class ConfigTreeInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() {
         ConfigTree.stop();
     }

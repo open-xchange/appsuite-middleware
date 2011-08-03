@@ -71,5 +71,5 @@ public class ConflictException extends Exception {
 	public ConflictException(final Throwable arg0) {
 		super(arg0);
 	}
-	
+
 }

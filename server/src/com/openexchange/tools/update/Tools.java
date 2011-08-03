@@ -79,7 +79,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * This class contains some tools to ease update of database.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -236,7 +236,7 @@ public final class Tools {
     /**
      * This method drops an index with the given name. Beware, this method is vulnerable to SQL injection because table and index name can
      * not be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table table name that index should be dropped.
      * @param index name of the index to drop.
@@ -323,7 +323,7 @@ public final class Tools {
     /**
      * This method creates a new index on a table. Beware, this method is vulnerable to SQL injection because table and column names can not
      * be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table name of the table that should get a new index.
      * @param name name of the index or <code>null</code> to let the database define the name.
@@ -363,7 +363,7 @@ public final class Tools {
     /**
      * This method creates a new index on a table. Beware, this method is vulnerable to SQL injection because table and column names can not
      * be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table name of the table that should get a new index.
      * @param columns names of the columns the index should cover.
@@ -412,7 +412,7 @@ public final class Tools {
 
     /**
      * Checks if denoted table has any primary key set.
-     * 
+     *
      * @param con The connection
      * @param table The table name
      * @return <code>true</code> if denoted table has any primary key set; otherwise <code>false</code>
@@ -431,7 +431,7 @@ public final class Tools {
 
     /**
      * Checks if denoted column in given table is of type {@link java.sql.Types#VARCHAR}.
-     * 
+     *
      * @param con The connection
      * @param table The table name
      * @param column The column name
@@ -444,7 +444,7 @@ public final class Tools {
 
     /**
      * Checks if denoted column in given table is of specified type from {@link java.sql.Types}.
-     * 
+     *
      * @param con The connection
      * @param table The table name
      * @param column The column name
@@ -458,7 +458,7 @@ public final class Tools {
 
     /**
      * Gets the type of specified column in given table from {@link java.sql.Types}.
-     * 
+     *
      * @param con The connection
      * @param table The table name
      * @param column The column name
@@ -516,7 +516,7 @@ public final class Tools {
 
     /**
      * Checks if specified column exists.
-     * 
+     *
      * @param con The connection
      * @param table The table name
      * @param column The column name

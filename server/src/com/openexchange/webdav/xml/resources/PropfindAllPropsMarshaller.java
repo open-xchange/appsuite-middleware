@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavStatusImpl;
 public class PropfindAllPropsMarshaller extends PropertiesMarshaller {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropfindAllPropsMarshaller.class));
-	
+
 	public PropfindAllPropsMarshaller(final String uriPrefix, final String charset) {
 		super(uriPrefix,charset);
 	}

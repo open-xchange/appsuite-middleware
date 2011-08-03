@@ -65,13 +65,13 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements
 		UndoableAction {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
-	
+
 	private DBProvider provider = null;
 	private Context context = null;
 
-	
+
 	protected int doUpdates(final UpdateBlock...updates) throws OXException {
 		Connection writeCon = null;
 		UpdateBlock current = null;
@@ -103,7 +103,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
     public void setContext(final Context context) {
 		this.context = context;
 	}
-	
+
 	public Context getContext(){
 		return this.context;
 	}
@@ -111,33 +111,35 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 	public void setProvider(final DBProvider provider) {
 		this.provider = provider;
 	}
-	
+
 	public DBProvider getProvider() {
 		return provider;
 	}
-	
+
 	protected interface UpdateBlock {
 		public int performUpdate(Connection writeCon) throws SQLException;
 		public String getStatement();
 		public void close();
 	}
-	
+
 	protected abstract class Update implements UpdateBlock{
 
 		protected PreparedStatement stmt;
 		protected ResultSet rs;
 		protected String sql;
 		protected String statementString = null;
-		
+
 		public Update(final String sql) {
 			this.sql = sql;
 		}
-		
-		public void close() {
+
+		@Override
+        public void close() {
 			DBUtils.closeSQLStuff(rs, stmt);
 		}
 
-		public int performUpdate(final Connection writeCon) throws SQLException {
+		@Override
+        public int performUpdate(final Connection writeCon) throws SQLException {
 			stmt = writeCon.prepareStatement(sql);
 			fillStatement();
 			statementString = stmt.toString();
@@ -148,17 +150,18 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 			//System.out.println(String.format("%d ::: %s",updated,statementString));
 			return updated;
 		}
-		
+
 		public abstract void fillStatement() throws SQLException;
 
-		public String getStatement() {
+		@Override
+        public String getStatement() {
 			return statementString == null ? sql : statementString;
 		}
-		
+
 	}
-	
+
 	protected static class OXExceptionRenamed extends Exception {
-		
+
 		private static final long serialVersionUID = -3823990951502455901L;
 		private final UpdateBlock update;
 		private final SQLException sqle;
@@ -168,15 +171,15 @@ public abstract class AbstractDBAction extends AbstractUndoable implements
 			this.sqle = sqle;
 			this.update = update;
 		}
-		
+
 		public SQLException getSQLException(){
 			return sqle;
 		}
-		
+
 		public UpdateBlock getUpdate(){
 			return update;
 		}
-		
+
 		public String getStatement(){
 			return update.getStatement();
 		}

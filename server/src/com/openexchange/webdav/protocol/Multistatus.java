@@ -55,10 +55,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
-	
+
 	private final List<WebdavStatus<T>> stadi = new ArrayList<WebdavStatus<T>>();
 	private final TIntObjectHashMap<List<WebdavStatus<T>>> rcMap = new TIntObjectHashMap<List<WebdavStatus<T>>>();
-	
+
 	public Multistatus(){
 		super();
 	}
@@ -70,25 +70,26 @@ public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
             addStatus(status);
 		}
 	}
-	
+
 	public void addStatus(final WebdavStatus<T> status) {
 		stadi.add(status);
 		List<WebdavStatus<T>> collocated = rcMap.get(status.getStatus());
-		if(null == collocated) { 
+		if(null == collocated) {
 			collocated = new ArrayList<WebdavStatus<T>>();
 			rcMap.put(status.getStatus(), collocated);
 		}
 		collocated.add(status);
 	}
 
-	public Iterator<WebdavStatus<T>> iterator() {
+	@Override
+    public Iterator<WebdavStatus<T>> iterator() {
 		return stadi.iterator();
 	}
-	
+
 	public Iterable<WebdavStatus<T>> toIterable(final int status) {
 		return rcMap.get(status);
 	}
-	
+
 	public int[] getStatusCodes(){
 		return rcMap.keys();
 	}

@@ -60,7 +60,7 @@ import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link BitExample}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class BitExample {

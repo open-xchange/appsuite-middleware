@@ -57,7 +57,7 @@ import com.openexchange.login.LoginHandlerService;
 
 /**
  * {@link LoginHandlerRegistry} - The registry for login handlers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LoginHandlerRegistry {
@@ -66,7 +66,7 @@ public final class LoginHandlerRegistry {
 
     /**
      * Gets the login performer instance.
-     * 
+     *
      * @return The login performer instance.
      */
     public static LoginHandlerRegistry getInstance() {
@@ -109,7 +109,7 @@ public final class LoginHandlerRegistry {
 
     /**
      * Adds specified login handler.
-     * 
+     *
      * @param loginHandler The login handler to add
      * @return <code>true</code> if login handler could be successfully added; otherwise <code>false</code>
      */
@@ -124,7 +124,7 @@ public final class LoginHandlerRegistry {
 
     /**
      * Removes specified login handler.
-     * 
+     *
      * @param loginHandler The login handler to remove
      */
     public void removeLoginHandler(final LoginHandlerService loginHandler) {
@@ -135,7 +135,7 @@ public final class LoginHandlerRegistry {
      * Gets a read-only {@link Iterator iterator} over the login handlers in this registry.
      * <p>
      * Invoking {@link Iterator#remove() remove} will throw an {@link UnsupportedOperationException}.
-     * 
+     *
      * @return A read-only {@link Iterator iterator} over the login handlers in this registry.
      */
     public Iterator<LoginHandlerService> getLoginHandlers() {

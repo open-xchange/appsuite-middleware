@@ -61,14 +61,14 @@ import java.io.Writer;
  * <p>
  * Like {@link PrintWriter} a possible I/O error is swallowed quietly, but further attempts to write data are treated as a no-op since
  * {@link #checkError()} returns <code>true</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param out
      */
     public ResponsivePrintWriter(final Writer out) {
@@ -77,7 +77,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param out
      */
     public ResponsivePrintWriter(final OutputStream out) {
@@ -86,7 +86,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param fileName
      * @throws FileNotFoundException
      */
@@ -96,7 +96,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param file
      * @throws FileNotFoundException
      */
@@ -106,7 +106,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param out
      * @param autoFlush
      */
@@ -116,7 +116,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param out
      * @param autoFlush
      */
@@ -126,7 +126,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param fileName
      * @param csn
      * @throws FileNotFoundException
@@ -138,7 +138,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
 
     /**
      * Initializes a new {@link ResponsivePrintWriter}.
-     * 
+     *
      * @param file
      * @param csn
      * @throws FileNotFoundException
@@ -152,7 +152,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
      * Write a single character.
      * <p>
      * If {@link #checkError()} is <code>true</code>, it is treated as a no-op.
-     * 
+     *
      * @param c int specifying a character to be written.
      */
     @Override
@@ -167,7 +167,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
      * Write A Portion of an array of characters.
      * <p>
      * If {@link #checkError()} is <code>true</code>, it is treated as a no-op.
-     * 
+     *
      * @param buf Array of characters
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
@@ -184,7 +184,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
      * Write an array of characters. This method cannot be inherited from the Writer class because it must suppress I/O exceptions.
      * <p>
      * If {@link #checkError()} is <code>true</code>, it is treated as a no-op.
-     * 
+     *
      * @param buf Array of characters to be written
      */
     @Override
@@ -196,7 +196,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
      * Write a portion of a string.
      * <p>
      * If {@link #checkError()} is <code>true</code>, it is treated as a no-op.
-     * 
+     *
      * @param s A String
      * @param off Offset from which to start writing characters
      * @param len Number of characters to write
@@ -213,7 +213,7 @@ public final class ResponsivePrintWriter extends PrintWriter {
      * Write a string. This method cannot be inherited from the Writer class because it must suppress I/O exceptions.
      * <p>
      * If {@link #checkError()} is <code>true</code>, it is treated as a no-op.
-     * 
+     *
      * @param s String to be written
      */
     @Override

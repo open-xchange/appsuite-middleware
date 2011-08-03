@@ -85,7 +85,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link WebDAVFileStorageAccountAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageAccountAccess implements FileStorageAccountAccess {
@@ -126,7 +126,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     private volatile WebDAVFileStorageFileAccess fileAccess;
 
-    private FileStorageService service;
+    private final FileStorageService service;
 
     /**
      * Initializes a new {@link WebDAVFileStorageAccountAccess}.
@@ -142,7 +142,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     /**
      * Gets the name of the WebDAV user.
-     * 
+     *
      * @return The name of te WebDAV user
      */
     public String getUser() {
@@ -151,7 +151,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     /**
      * Gets the associated session
-     * 
+     *
      * @return The session
      */
     public Session getSession() {
@@ -274,7 +274,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     /**
      * Gets the HttpClient for given WebDAV account.
-     * 
+     *
      * @param account The facebook messaging account providing credentials and settings
      * @param session The user session
      * @return The HttpClient; either newly created or fetched from underlying registry
@@ -297,7 +297,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     /**
      * Creates a new {@link HttpClient}.
-     * 
+     *
      * @return The newly created {@link HttpClient}
      * @throws OXException If creation fails
      */
@@ -387,7 +387,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
 
     /**
      * Performs a dummy request with given {@link HttpClient}.
-     * 
+     *
      * @param url The URL to WebDAV server
      * @param client The HttpClient to check
      * @throws OXException If check fails

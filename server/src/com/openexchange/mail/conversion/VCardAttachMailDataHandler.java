@@ -93,7 +93,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link VCardAttachMailDataHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VCardAttachMailDataHandler implements DataHandler {
@@ -109,14 +109,17 @@ public final class VCardAttachMailDataHandler implements DataHandler {
         super();
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx;
         final UserSettingMail usm;

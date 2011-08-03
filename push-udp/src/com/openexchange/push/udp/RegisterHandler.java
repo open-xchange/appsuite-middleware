@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * RegisterHandler
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

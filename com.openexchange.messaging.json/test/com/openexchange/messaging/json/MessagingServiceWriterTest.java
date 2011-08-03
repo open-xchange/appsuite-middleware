@@ -70,30 +70,30 @@ import com.openexchange.messaging.SimMessagingService;
 public class MessagingServiceWriterTest extends TestCase{
     public void testSimpleWrite() throws JSONException {
         final SimMessagingService messagingService = new SimMessagingService();
-        
+
         final List<MessagingAction> actions = new LinkedList<MessagingAction>();
         actions.add(new MessagingAction("powerize!", MessagingAction.Type.NONE));
         actions.add(new MessagingAction("send", MessagingAction.Type.MESSAGE));
         actions.add(new MessagingAction("retweet", MessagingAction.Type.STORAGE, "send"));
         actions.add(new MessagingAction("reply", MessagingAction.Type.STORAGE, "send"));
-        
-        
+
+
         messagingService.setId("com.openexchange.messaging.twitter");
         messagingService.setDisplayName("Twitter");
         messagingService.setMessageActions(actions);
         messagingService.setFormDescription(new DynamicFormDescription());
-        
+
         final JSONAssertion assertion = new JSONAssertion().isObject()
             .hasKey("id").withValue("com.openexchange.messaging.twitter")
             .hasKey("displayName").withValue("Twitter")
             .hasKey("messagingActions").withValueArray().withValues("powerize!", "send", "retweet", "reply").objectEnds()
             .hasKey("formDescription").withValueArray()
             .objectEnds();
-        
-        
+
+
         final JSONObject messagingServiceJSON = new MessagingServiceWriter(Translator.EMPTY).write(messagingService);
-        
+
         assertValidates(assertion, messagingServiceJSON);
-        
+
     }
 }

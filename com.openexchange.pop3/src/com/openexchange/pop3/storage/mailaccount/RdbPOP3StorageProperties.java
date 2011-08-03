@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RdbPOP3StorageProperties} - Database-backed implementation of {@link POP3StorageProperties}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdbPOP3StorageProperties implements POP3StorageProperties {
@@ -91,7 +91,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     /**
      * Drops all properties related to specified POP3 account.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -118,7 +118,7 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
     /**
      * Gets the named property related to specified POP3 account.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID

@@ -56,7 +56,7 @@ public class WebdavLock {
 	public static enum Scope { EXCLUSIVE_LITERAL, SHARED_LITERAL }
 
 	public static final long NEVER = -1;
-	
+
 	private Type type;
 	private Scope scope;
 	private int depth;
@@ -65,7 +65,7 @@ public class WebdavLock {
 	private boolean neverExpires;
 	private String token;
 	private final long creationTime = System.currentTimeMillis();
-	
+
 	public int getDepth() {
 		return depth;
 	}
@@ -114,11 +114,11 @@ public class WebdavLock {
 	public void setType(final Type type) {
 		this.type = type;
 	}
-	
+
 	public boolean locks(final WebdavResource locked, final WebdavResource resource) {
 		final WebdavPath urlLocked = locked.getUrl();
 		final WebdavPath urlRes = resource.getUrl();
-				
+
 		if(!urlRes.startsWith(urlLocked)) {
 			return false;
 		}
@@ -133,12 +133,12 @@ public class WebdavLock {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode(){
 		return token.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(final Object other){
 		if (other instanceof WebdavLock) {
@@ -147,10 +147,10 @@ public class WebdavLock {
 		}
 		return false;
 	}
-	
+
 	public boolean isActive(final long time) {
 		return getTimeout()!=0;
 	}
-	
+
 
 }

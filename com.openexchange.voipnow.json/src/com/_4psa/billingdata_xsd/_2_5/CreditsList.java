@@ -13,11 +13,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Charging plan recharge credits data
- * 
+ *
  * <p>Java class for CreditsList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CreditsList">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CreditsList", propOrder = {
@@ -52,11 +52,11 @@ public class CreditsList
 
     /**
      * Gets the value of the creditID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getCreditID() {
         return creditID;
@@ -64,11 +64,11 @@ public class CreditsList
 
     /**
      * Sets the value of the creditID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setCreditID(BigInteger value) {
         this.creditID = value;
@@ -76,11 +76,11 @@ public class CreditsList
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -88,11 +88,11 @@ public class CreditsList
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

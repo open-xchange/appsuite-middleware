@@ -64,22 +64,22 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropertyHelper {
-	
+
 	private final Map<WebdavProperty, WebdavProperty> properties = new HashMap<WebdavProperty, WebdavProperty>();
-	
+
 	private final Set<WebdavProperty> removedProperties = new HashSet<WebdavProperty>();
 	private boolean loadedAllProps;
 	private final List<WebdavProperty> changedProps = new ArrayList<WebdavProperty>();
 
 	private final PropertyStore propertyStore;
 	private final SessionHolder sessionHolder;
-	
+
 	private int id;
 	private final WebdavPath url;
 
 	private boolean changed;
-	
-	
+
+
 	public PropertyHelper(final PropertyStore props, final SessionHolder sessionHolder, final WebdavPath url) {
 		this.propertyStore = props;
 		this.sessionHolder = sessionHolder;
@@ -111,7 +111,7 @@ public class PropertyHelper {
 			markRemovedProperty(new WebdavProperty(namespace, name));
 		}
 	}
-	
+
 	public boolean isRemoved(final WebdavProperty property) {
 		return removedProperties.contains(property);
 	}
@@ -125,7 +125,7 @@ public class PropertyHelper {
 		removedProperties.remove(property);
 		changedProps.add(property);
 	}
-	
+
 	private void markChanged() {
 		changed = true;
 	}
@@ -149,7 +149,7 @@ public class PropertyHelper {
 			}
 			final WebdavProperty prop = list.get(0);
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
-			
+
 		} catch (final OXException e) {
 		    throw e;
 		}
@@ -170,7 +170,7 @@ public class PropertyHelper {
 		    throw e;
 		}
 	}
-	
+
 	public void dumpPropertiesToDB() throws OXException {
 		if(!changed) {
 			return;
@@ -182,7 +182,7 @@ public class PropertyHelper {
 		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
 		removedProperties.clear();
 	}
-	
+
 	public void deleteProperties() throws OXException {
 		final ServerSession session = getSession();
 		propertyStore.removeAll(id, session.getContext());
@@ -195,5 +195,5 @@ public class PropertyHelper {
             throw e;
         }
     }
-	
+
 }

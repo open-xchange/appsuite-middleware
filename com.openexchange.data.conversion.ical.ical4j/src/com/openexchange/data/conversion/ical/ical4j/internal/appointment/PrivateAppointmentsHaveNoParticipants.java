@@ -57,7 +57,7 @@ import com.openexchange.groupware.container.Appointment;
 
 /**
  * Verifies if a private flagged appointment does not have participants.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class PrivateAppointmentsHaveNoParticipants implements ObjectVerifier<Appointment> {

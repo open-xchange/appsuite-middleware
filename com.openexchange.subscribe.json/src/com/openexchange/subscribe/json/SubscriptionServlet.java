@@ -66,11 +66,11 @@ import com.openexchange.tools.session.ServerSession;
 public class SubscriptionServlet extends MultipleAdapterServlet {
 
     private static SubscriptionMultipleFactory multipleFactory = null;
-    
+
     public static void setFactory(SubscriptionMultipleFactory factory) {
         multipleFactory = factory;
     }
-    
+
     @Override
     protected MultipleHandler createMultipleHandler() {
         return multipleFactory.createMultipleHandler();
@@ -84,13 +84,13 @@ public class SubscriptionServlet extends MultipleAdapterServlet {
     protected boolean hasModulePermission(ServerSession session) {
         return session.getUserConfiguration().isSubscription();
     }
-    
-    
+
+
     @Override
     protected JSONObject modify(HttpServletRequest req, String action, JSONObject request) throws JSONException {
         request.put("__query", req.getQueryString());
         request.put("__serverURL", getServerURL(req));
-        
+
         return request;
     }
 
@@ -98,5 +98,5 @@ public class SubscriptionServlet extends MultipleAdapterServlet {
         String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(req);
         return protocol + req.getServerName();
     }
-    
+
 }

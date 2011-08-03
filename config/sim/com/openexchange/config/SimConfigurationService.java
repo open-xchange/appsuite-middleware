@@ -58,7 +58,7 @@ import java.util.Properties;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class SimConfigurationService implements ConfigurationService {
-    
+
     public Map<String, String> stringProperties = new HashMap<String, String>();
 
     public boolean getBoolProperty(final String name, final boolean defaultValue) {

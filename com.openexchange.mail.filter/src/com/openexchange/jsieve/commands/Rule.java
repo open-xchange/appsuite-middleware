@@ -58,13 +58,13 @@ public class Rule implements Comparable<Rule> {
     private boolean commented;
 
     private int linenumber = -1;
-    
+
     private int endlinenumber = -1;
-    
+
     private int position = -1;
-    
+
     private String text;
-    
+
     private String errormsg;
 
     private ArrayList<Command> commands;
@@ -145,8 +145,9 @@ public class Rule implements Comparable<Rule> {
     }
 
     public final ArrayList<Command> getCommands() {
-        if(commands == null)
+        if(commands == null) {
             commands = new ArrayList<Command>();
+        }
         return commands;
     }
 
@@ -168,7 +169,7 @@ public class Rule implements Comparable<Rule> {
         }
         return null;
     }
-    
+
     /**
      * A convenience method to get the if command if one is contained
      * @return the if command or null if none is contained
@@ -198,7 +199,7 @@ public class Rule implements Comparable<Rule> {
             return null;
         }
     }
-    
+
     /**
      * A convenience method for directly accessing the unique id
      * @return -1 if there is no unique id for this rule; a value > -1 otherwise

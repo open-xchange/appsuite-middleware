@@ -74,7 +74,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link InlineContentHandler} - Finds matching inline parts to given content IDs
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class InlineContentHandler implements MailMessageHandler {
@@ -89,7 +89,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     /**
      * Constructor
-     * 
+     *
      * @param cids The content IDs of the inline parts
      */
     public InlineContentHandler(final List<String> cids) {
@@ -101,7 +101,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     /**
      * Private constructor for recursive calls
-     * 
+     *
      * @param cids The content IDs of the inline parts
      * @param inlineContents The container for matching mail parts
      */
@@ -115,7 +115,7 @@ public final class InlineContentHandler implements MailMessageHandler {
     /**
      * Gets the found inline contents corresponding to given content IDs. Those inline content which could not be found are set to
      * <code>null</code>.
-     * 
+     *
      * @return The found inline contents
      */
     public Map<String, MailPart> getInlineContents() {
@@ -124,6 +124,7 @@ public final class InlineContentHandler implements MailMessageHandler {
 
     private static final String IMAGE = "image/";
 
+    @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
         if (part.getContentType().startsWith(IMAGE)) {
             String partCid = part.getContentId();
@@ -151,34 +152,42 @@ public final class InlineContentHandler implements MailMessageHandler {
         return true;
     }
 
+    @Override
     public boolean handleBccRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleCcRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleColorLabel(final int colorLabel) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleContentId(final String contentId) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleDispositionNotification(final InternetAddress dispositionNotificationTo, final boolean seen) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleFrom(final InternetAddress[] fromAddrs) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleHeaders(final int size, final Iterator<Entry<String, String>> iter) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleImagePart(final MailPart part, final String imageCIDArg, final String baseContentType, final boolean isInline, final String fileName, final String id) throws OXException {
         String imageCID = imageCIDArg;
         if (imageCID == null) {
@@ -200,34 +209,42 @@ public final class InlineContentHandler implements MailMessageHandler {
         return (inlineContents.size() < size);
     }
 
+    @Override
     public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleInlinePlainText(final String plainTextContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleInlineUUEncodedPlainText(final String decodedTextContent, final ContentType contentType, final int size, final String fileName, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public void handleMessageEnd(final MailMessage mail) throws OXException {
 
     }
 
+    @Override
     public boolean handleMsgRef(final String msgRef) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleMultipart(final MailPart mp, final int bodyPartCount, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
         final Object content = mailPart.getContent();
         final MailMessage nestedMail;
@@ -250,35 +267,43 @@ public final class InlineContentHandler implements MailMessageHandler {
         return (inlineContents.size() < size);
     }
 
+    @Override
     public boolean handlePriority(final int priority) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
 
         return true;
     }
 
+    @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleSubject(final String subject) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleSystemFlags(final int flags) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleToRecipient(final InternetAddress[] recipientAddrs) throws OXException {
         return true;
     }
 
+    @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
     }

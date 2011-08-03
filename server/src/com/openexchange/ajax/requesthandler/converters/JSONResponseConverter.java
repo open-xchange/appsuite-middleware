@@ -66,19 +66,23 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class JSONResponseConverter implements ResultConverter {
 
-    
+
+    @Override
     public String getInputFormat() {
         return "json";
     }
-        
+
+    @Override
     public String getOutputFormat() {
         return "apiResponse";
     }
-    
+
+    @Override
     public Quality getQuality() {
         return Quality.GOOD;
     }
-       
+
+    @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final Response response = new Response(session);
         response.setData(result.getResultObject());
@@ -91,5 +95,5 @@ public class JSONResponseConverter implements ResultConverter {
         }
         result.setResultObject(response);
     }
-    
+
 }

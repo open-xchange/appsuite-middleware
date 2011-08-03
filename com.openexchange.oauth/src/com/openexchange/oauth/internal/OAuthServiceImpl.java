@@ -110,7 +110,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -128,7 +128,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
 
     /**
      * Initializes a new {@link OAuthServiceImpl}.
-     * 
+     *
      * @param provider
      * @param simIDGenerator
      */

@@ -56,19 +56,19 @@ import com.openexchange.session.Session;
 
 /**
  * {@link AppointmentEventInterface}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public interface AppointmentEventInterface {
-	
+
     public void appointmentCreated(Appointment appointmentObj, Session sessionObj);
-	
+
     public void appointmentModified(Appointment appointmentObj, Session sessionObj);
 
     /**
 	 * Invoked if one of appointment's participants changed his confirmation
 	 * status to accepted.
-	 * 
+	 *
 	 * @param appointmentObj
 	 *            The appointment
 	 * @param sessionObj
@@ -79,7 +79,7 @@ public interface AppointmentEventInterface {
 	/**
 	 * Invoked if one of appointment's participants changed his confirmation
 	 * status to declined.
-	 * 
+	 *
 	 * @param appointmentObj
 	 *            The appointment
 	 * @param sessionObj
@@ -90,16 +90,16 @@ public interface AppointmentEventInterface {
 	/**
 	 * Invoked if one of appointment's participants changed his confirmation
 	 * status to tentatively accepted.
-	 * 
+	 *
 	 * @param appointmentObj
 	 *            The appointment
 	 * @param sessionObj
 	 *            The user session
 	 */
 	public void appointmentTentativelyAccepted(Appointment appointmentObj, Session sessionObj);
-		
+
     public void appointmentDeleted(Appointment appointmentObj, Session sessionObj);
-	
+
 }
 
 

@@ -10,11 +10,11 @@ import javax.xml.bind.annotation.XmlValue;
 
 /**
  * Unlimited attribute on float type
- * 
+ *
  * <p>Java class for unlimitedUFloat complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="unlimitedUFloat">
  *   &lt;simpleContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;/simpleContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "unlimitedUFloat", propOrder = {
@@ -40,7 +40,7 @@ public class UnlimitedUFloat {
 
     /**
      * Gets the value of the value property.
-     * 
+     *
      */
     public float getValue() {
         return value;
@@ -48,7 +48,7 @@ public class UnlimitedUFloat {
 
     /**
      * Sets the value of the value property.
-     * 
+     *
      */
     public void setValue(float value) {
         this.value = value;
@@ -56,11 +56,11 @@ public class UnlimitedUFloat {
 
     /**
      * Gets the value of the unlimited property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public boolean isUnlimited() {
         if (unlimited == null) {
@@ -72,11 +72,11 @@ public class UnlimitedUFloat {
 
     /**
      * Sets the value of the unlimited property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setUnlimited(Boolean value) {
         this.unlimited = value;

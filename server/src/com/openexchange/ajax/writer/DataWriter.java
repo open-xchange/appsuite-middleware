@@ -109,7 +109,7 @@ public class DataWriter {
     /**
      * Puts given name-<code>String</code>-pair into specified JSON object provided that <code>String</code> value is not <code>null</code>
      * and not empty
-     * 
+     *
      * @param name The name to which the value is bound
      * @param value The <code>String</code> value
      * @param json The JSON object to put into
@@ -150,7 +150,7 @@ public class DataWriter {
 
     /**
      * Conditionally puts given <code>int</code> value into specified JSON object
-     * 
+     *
      * @param name The value's name
      * @param value The <code>int</code> value
      * @param json The JSON object to put into
@@ -516,7 +516,7 @@ public class DataWriter {
 
         /**
          * Writes this writer's value taken from specified data object to given JSON array.
-         * 
+         *
          * @param data the data object
          * @param json The JSON array
          * @throws JSONException If writing to JSON array fails
@@ -527,54 +527,66 @@ public class DataWriter {
     }
 
     private static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getObjectID(), json, obj.containsObjectID());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.ID, obj.getObjectID(), json, obj.containsObjectID());
         }
     };
 
     private static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.CREATED_BY, obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
     };
 
     private static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.CREATION_DATE, obj.getCreationDate(), timeZone, json);
         }
     };
 
     private static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.MODIFIED_BY, obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED, obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
             writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
         }
+        @Override
         public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED_UTC, obj.getLastModified(), UTC, json, obj.containsLastModified());
         }

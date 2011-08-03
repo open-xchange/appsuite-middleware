@@ -69,7 +69,7 @@ import com.sun.mail.smtp.SMTPMessage;
 /**
  * {@link SMTPMessageFiller} - Fills an instance of {@link SMTPMessage} with headers/contents given through an instance of
  * {@link SMTPMailMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPMessageFiller extends MIMEMessageFiller {
@@ -78,7 +78,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 
     /**
      * Constructor
-     * 
+     *
      * @param session The session
      * @param ctx The context
      */
@@ -89,7 +89,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 
     /**
      * Constructor
-     * 
+     *
      * @param session The session
      * @param ctx The context
      * @param usm The user's mail settings
@@ -101,7 +101,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 
     /**
      * Fills given instance of {@link SMTPMessage}
-     * 
+     *
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @throws MessagingException If a messaging error occurs
@@ -114,7 +114,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 
     /**
      * Fills given instance of {@link SMTPMessage}
-     * 
+     *
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @param type The compose type

@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountDeleteListener implements DeleteListener {
@@ -72,6 +72,7 @@ public class MailAccountDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(

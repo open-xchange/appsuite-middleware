@@ -74,16 +74,16 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * An {@link AbstractStandardCaldavCollection} is the root class of certain caldav collection models. It represents, essentially, a read only caldav collection.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractStandardCaldavCollection extends AbstractCollection {
 
     protected final static ContentType CALENDAR_CTYPE = CalendarContentType.getInstance();
-    
+
     protected GroupwareCaldavFactory factory;
-    
-    
+
+
     public AbstractStandardCaldavCollection(final GroupwareCaldavFactory factory) {
         this.factory = factory;
 
@@ -183,11 +183,11 @@ public abstract class AbstractStandardCaldavCollection extends AbstractCollectio
     public void unlock(final String token) throws OXException {
         // IGNORE
     }
-    
+
     public OXException internalError(final OXException x) {
         return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
     }
-    
+
     protected List<WebdavResource> getVisibleCalendarFoldersOfType(final Type type) throws OXException {
         try {
             final FolderResponse<UserizedFolder[]> visibleFolders = factory.getFolderService().getVisibleFolders(FolderStorage.REAL_TREE_ID, CALENDAR_CTYPE, type, true, factory.getSession(), null);

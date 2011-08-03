@@ -61,12 +61,12 @@ import com.openexchange.search.internal.terms.OrTerm;
 /**
  * {@link CompositeSearchTerm} - Represents a compounded search term; e.g. <i>&lt;term1&gt;</i>&nbsp;<code>OR</code>
  * &nbsp;<i>&lt;term2&gt;</i>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
-	
-	private static final Integer PRETTY_BIG_NUMBER = Integer.MAX_VALUE / 2; //needed since someone used MAX_VALUE instead and then did a MAX_VALUE+1 comparison. Note: This is also wrong. Since this is going to become SQL code, it should reflect the allowed maximum length of a query... 
+
+	private static final Integer PRETTY_BIG_NUMBER = Integer.MAX_VALUE / 2; //needed since someone used MAX_VALUE instead and then did a MAX_VALUE+1 comparison. Note: This is also wrong. Since this is going to become SQL code, it should reflect the allowed maximum length of a query...
 
     private static interface InstanceCreator extends Serializable {
 
@@ -85,6 +85,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = -2839503961447478423L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new AndTerm();
             }
@@ -96,6 +97,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = 8612089760772780923L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new OrTerm();
             }
@@ -107,6 +109,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
             private static final long serialVersionUID = 5131782739497011902L;
 
+            @Override
             public CompositeSearchTerm newInstance() {
                 return new NotTerm();
             }
@@ -115,7 +118,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         private final String str;
 
         private final String sql;
-        
+
         private final InstanceCreator creator;
 
         private final int maxTerms;
@@ -131,17 +134,19 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             this.pos = pos;
         }
 
+        @Override
         public String getOperation() {
             return str;
         }
 
+        @Override
         public boolean equalsOperation(final String other) {
             return str.equalsIgnoreCase(other);
         }
 
         /**
          * Gets a new composite search term for this operation.
-         * 
+         *
          * @return A new composite search term for this operation.
          */
         public CompositeSearchTerm newInstance() {
@@ -150,13 +155,14 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         /**
          * Gets the max. number of search terms operands.
-         * 
+         *
          * @return The max. number of search terms operands.
          */
         public int getMaxTerms() {
             return maxTerms;
         }
-        
+
+        @Override
         public OperationPosition getPosition() {
         	return pos;
         }
@@ -174,7 +180,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         /**
          * Gets the composite operation corresponding to specified operation string.
-         * 
+         *
          * @param operation The operation string.
          * @return The operation corresponding to specified operation string or <code>null</code>.
          */
@@ -194,7 +200,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
         /**
          * Checks if specified operation string is a composite operation.
-         * 
+         *
          * @param operation The operation string
          * @return <code>true</code> if specified operation string is a composite operation; otherwise <code>false</code>
          */
@@ -202,7 +208,8 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
             return (null != getCompositeOperation(operation));
         }
 
-		public String getSqlRepresentation() {
+		@Override
+        public String getSqlRepresentation() {
 			return sql;
 		}
     }
@@ -224,7 +231,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
     /**
      * Initializes a new {@link CompositeSearchTerm} with default capacity (4).
-     * 
+     *
      * @param operation The composite operation.
      */
     public CompositeSearchTerm(final CompositeOperation operation) {
@@ -233,7 +240,7 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
     /**
      * Initializes a new {@link CompositeSearchTerm}.
-     * 
+     *
      * @param operation The composite operation.
      * @param initialCapacity The initial capacity of the list of operands
      */
@@ -243,17 +250,19 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         operands = new ArrayList<SearchTerm<?>>(initialCapacity);
     }
 
+    @Override
     public SearchTerm<?>[] getOperands() {
         return operands.toArray(new SearchTerm[operands.size()]);
     }
 
+    @Override
     public Operation getOperation() {
         return operation;
     }
 
     /**
      * Adds specified search term.
-     * 
+     *
      * @param searchTerm The search term to add.
      */
     public void addSearchTerm(final SearchTerm<?> searchTerm) {

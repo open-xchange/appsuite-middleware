@@ -60,7 +60,7 @@ import com.openexchange.oauth.json.service.ServiceRegistry;
 
 /**
  * Parses the JSON representation of an OAuth account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccountParser {

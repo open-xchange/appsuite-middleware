@@ -132,7 +132,7 @@ public class RecurrenceChecker {
         if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_WEEKDAY.create();
         }
-        
+
         if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
         }
@@ -168,7 +168,7 @@ public class RecurrenceChecker {
         if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
         }
-        
+
         if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
         }
@@ -208,7 +208,7 @@ public class RecurrenceChecker {
         if (!cdao.containsDays()) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create();
         }
-        
+
         if (cdao.getDays() < 1 || cdao.getDays() > 127) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_OR_WRONG_VALUE_DAYS.create(cdao.getDays());
         }
@@ -221,7 +221,7 @@ public class RecurrenceChecker {
 
     /**
      * Checks, if the given CalendarDataObject contains any recurrence information.
-     * 
+     *
      * @param cdao
      * @param exceptions Recurrence fields, which will not be checked
      * @return
@@ -240,7 +240,7 @@ public class RecurrenceChecker {
         };
 
         boolean skipType = false;
-        
+
         for (final int exception : exceptions) {
             recurrenceFields.remove(exception);
             if (exception == CalendarObject.RECURRENCE_TYPE) {
@@ -251,7 +251,7 @@ public class RecurrenceChecker {
         if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && (Integer)cdao.get(CalendarObject.RECURRENCE_TYPE) != CalendarObject.NO_RECURRENCE) {
             return true;
         }
-        
+
         for (final int recurrenceField : recurrenceFields) {
             if (cdao.contains(recurrenceField)) {
                 return true;

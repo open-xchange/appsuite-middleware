@@ -14,9 +14,9 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -68,8 +68,8 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -115,11 +115,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the templateID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTemplateID() {
         return templateID;
@@ -127,11 +127,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the templateID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTemplateID(BigInteger value) {
         this.templateID = value;
@@ -139,11 +139,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the extensionNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtensionNo() {
         return extensionNo;
@@ -151,11 +151,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the extensionNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtensionNo(BigInteger value) {
         this.extensionNo = value;
@@ -163,11 +163,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the extensionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionType() {
         return extensionType;
@@ -175,11 +175,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the extensionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionType(String value) {
         this.extensionType = value;
@@ -187,11 +187,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the parentID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParentID() {
         return parentID;
@@ -199,11 +199,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the parentID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParentID(BigInteger value) {
         this.parentID = value;
@@ -211,11 +211,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the parentIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentIdentifier() {
         return parentIdentifier;
@@ -223,11 +223,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the parentIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentIdentifier(String value) {
         this.parentIdentifier = value;
@@ -235,11 +235,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the parentLogin property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentLogin() {
         return parentLogin;
@@ -247,11 +247,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the parentLogin property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentLogin(String value) {
         this.parentLogin = value;
@@ -259,11 +259,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the fromUser property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getFromUser() {
         return fromUser;
@@ -271,11 +271,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the fromUser property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setFromUser(BigInteger value) {
         this.fromUser = value;
@@ -283,11 +283,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the fromUserIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFromUserIdentifier() {
         return fromUserIdentifier;
@@ -295,11 +295,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the fromUserIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFromUserIdentifier(String value) {
         this.fromUserIdentifier = value;
@@ -307,11 +307,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the chargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPlanID() {
         return chargingPlanID;
@@ -319,11 +319,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the chargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPlanID(BigInteger value) {
         this.chargingPlanID = value;
@@ -331,11 +331,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getChargingPlanIdentifier() {
         return chargingPlanIdentifier;
@@ -343,11 +343,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the chargingPlanIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setChargingPlanIdentifier(String value) {
         this.chargingPlanIdentifier = value;
@@ -355,11 +355,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the verbose property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isVerbose() {
         return verbose;
@@ -367,11 +367,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the verbose property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setVerbose(Boolean value) {
         this.verbose = value;
@@ -379,11 +379,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the notifyOnly property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNotifyOnly() {
         return notifyOnly;
@@ -391,11 +391,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the notifyOnly property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNotifyOnly(String value) {
         this.notifyOnly = value;
@@ -403,11 +403,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -415,11 +415,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;
@@ -427,11 +427,11 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the dku property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDku() {
         return dku;
@@ -439,11 +439,11 @@ public class AddExtensionRequest
 
     /**
      * Sets the value of the dku property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDku(String value) {
         this.dku = value;
@@ -451,25 +451,25 @@ public class AddExtensionRequest
 
     /**
      * Gets the value of the accountFlag property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the accountFlag property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAccountFlag().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getAccountFlag() {
         if (accountFlag == null) {

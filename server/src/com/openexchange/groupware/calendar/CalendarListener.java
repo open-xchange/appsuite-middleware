@@ -56,7 +56,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * A Calendar Listener provides callbacks for certain events in the calendar subsystem.
  * Always subclass AbstractCalendarListener for this, so that new events can always be introduced.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface CalendarListener {

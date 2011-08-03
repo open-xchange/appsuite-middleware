@@ -59,7 +59,7 @@ public class RecurringException extends Exception {
 
         private final String message;
         private final int id;
-        
+
         Code(final String message, final int id) {
             this.message = message;
             this.id = id;
@@ -81,7 +81,7 @@ public class RecurringException extends Exception {
 
 	private static final long serialVersionUID = 6780786273935450790L;
 	private final int value;
-    private final Code code;    
+    private final Code code;
 
     public RecurringException(final Code code, final int value) {
         this.code = code;

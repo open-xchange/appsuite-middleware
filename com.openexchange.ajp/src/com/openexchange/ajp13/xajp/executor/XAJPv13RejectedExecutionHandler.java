@@ -57,11 +57,11 @@ import java.util.concurrent.ThreadPoolExecutor;
  * {@link XAJPv13RejectedExecutionHandler} - A handler for rejected tasks handles by worker pool.
  * <p>
  * Tasks are created in the following way:
- * 
+ *
  * <pre>
- * 
+ *
  * Runnable task = new Runnable() {
- * 
+ *
  *     public void run() {
  *         try {
  *             performOnConnect(connection, taskQueue);
@@ -73,7 +73,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  *     }
  * };
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class XAJPv13RejectedExecutionHandler implements RejectedExecutionHandler {
@@ -82,13 +82,14 @@ final class XAJPv13RejectedExecutionHandler implements RejectedExecutionHandler 
 
     /**
      * Initializes a new {@link XAJPv13RejectedExecutionHandler}.
-     * 
+     *
      * @param watcher The task watcher to remove excess tasks from
      */
     public XAJPv13RejectedExecutionHandler() {
         super();
     }
 
+    @Override
     public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
         if (executor.isShutdown()) {
             // Proper logging

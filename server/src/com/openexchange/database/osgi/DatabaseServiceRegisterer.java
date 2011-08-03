@@ -78,6 +78,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Confi
         this.context = context;
     }
 
+    @Override
     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
         if (Initialization.getInstance().isStarted()) {
             // No reconfiguration;
@@ -97,6 +98,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Confi
     /**
      * {@inheritDoc}
      */
+    @Override
     public void modifiedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // Nothing to do.
     }
@@ -104,6 +106,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Confi
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");

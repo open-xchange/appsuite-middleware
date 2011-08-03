@@ -70,7 +70,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 /**
  * {@link IMAPNotifierTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPNotifierTask {
@@ -89,7 +89,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Initializes a new {@link IMAPNotifierTask}.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing user information
      */
@@ -103,7 +103,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Adds specified full name(s).
-     * 
+     *
      * @param fullName The first full name
      * @param other Optional further full names
      * @return This notifier task with specified full name added for chained invocations
@@ -121,7 +121,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Adds specified full names.
-     * 
+     *
      * @param fullNames The full names
      * @return This notifier task with specified full names added for chained invocations
      */
@@ -137,7 +137,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Adds specified full name if not already present.
-     * 
+     *
      * @param fullName The full name
      * @return <code>true</code> if full name is added; otherwise <code>false</code>
      */
@@ -147,7 +147,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Removes specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return The possibly removed full name or <code>null</code> if none was removed
      */
@@ -175,7 +175,7 @@ public final class IMAPNotifierTask {
 
     /**
      * Starts up this notifier task.
-     * 
+     *
      * @return <code>true</code> if this task has been successfully started; otherwise <code>false</code>
      */
     public boolean startUp() {

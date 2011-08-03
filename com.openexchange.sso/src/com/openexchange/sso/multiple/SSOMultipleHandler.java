@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SSOMultipleHandler} - The {@link MultipleHandler multiple handler} for single sign-on bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SSOMultipleHandler implements MultipleHandler {

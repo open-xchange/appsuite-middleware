@@ -67,7 +67,7 @@ public class LiberalUnLockMethod extends UnLockMethod {
     public LiberalUnLockMethod(String uri, String lockToken) {
         super(uri, lockToken);
     }
-    
+
     @Override
     protected boolean isSuccess(int statusCode) {
         return super.isSuccess(statusCode) || statusCode == 200;

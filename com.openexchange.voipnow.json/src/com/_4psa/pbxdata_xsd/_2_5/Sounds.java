@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Sound data
- * 
+ *
  * <p>Java class for Sounds complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Sounds">
  *   &lt;complexContent>
@@ -35,8 +35,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Sounds", propOrder = {
@@ -64,11 +64,11 @@ public class Sounds {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -76,11 +76,11 @@ public class Sounds {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -88,11 +88,11 @@ public class Sounds {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -100,11 +100,11 @@ public class Sounds {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -112,11 +112,11 @@ public class Sounds {
 
     /**
      * Gets the value of the system property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSystem() {
         return system;
@@ -124,11 +124,11 @@ public class Sounds {
 
     /**
      * Sets the value of the system property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSystem(BigInteger value) {
         this.system = value;
@@ -136,11 +136,11 @@ public class Sounds {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getStatus() {
         return status;
@@ -148,11 +148,11 @@ public class Sounds {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setStatus(BigInteger value) {
         this.status = value;
@@ -160,11 +160,11 @@ public class Sounds {
 
     /**
      * Gets the value of the folderID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getFolderID() {
         return folderID;
@@ -172,11 +172,11 @@ public class Sounds {
 
     /**
      * Sets the value of the folderID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setFolderID(BigInteger value) {
         this.folderID = value;
@@ -184,11 +184,11 @@ public class Sounds {
 
     /**
      * Gets the value of the folder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFolder() {
         return folder;
@@ -196,11 +196,11 @@ public class Sounds {
 
     /**
      * Sets the value of the folder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFolder(String value) {
         this.folder = value;
@@ -208,11 +208,11 @@ public class Sounds {
 
     /**
      * Gets the value of the musicOnHold property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMusicOnHold() {
         return musicOnHold;
@@ -220,11 +220,11 @@ public class Sounds {
 
     /**
      * Sets the value of the musicOnHold property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMusicOnHold(BigInteger value) {
         this.musicOnHold = value;
@@ -232,11 +232,11 @@ public class Sounds {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -244,11 +244,11 @@ public class Sounds {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

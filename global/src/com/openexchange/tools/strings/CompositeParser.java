@@ -72,7 +72,7 @@ public abstract class CompositeParser implements StringParser {
         }
         return null;
     }
-    
+
     protected abstract Collection<StringParser> getParsers();
 
 }

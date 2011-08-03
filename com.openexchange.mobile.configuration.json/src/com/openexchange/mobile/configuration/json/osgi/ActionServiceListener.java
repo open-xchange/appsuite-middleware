@@ -50,36 +50,34 @@
 package com.openexchange.mobile.configuration.json.osgi;
 
 import static com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
-public class ActionServiceListener implements ServiceTrackerCustomizer {
+public class ActionServiceListener implements ServiceTrackerCustomizer<ActionService, ActionService> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ActionServiceListener.class));
 
     private final BundleContext context;
 
-    public ActionServiceListener(BundleContext context) {
+    public ActionServiceListener(final BundleContext context) {
         this.context = context;
     }
 
-    public Object addingService(ServiceReference serviceReference) {
-        final Object service = context.getService(serviceReference);
+    public ActionService addingService(final ServiceReference<ActionService> serviceReference) {
+        final ActionService service = context.getService(serviceReference);
         if (null == service) {
             LOG.warn("Added service is null!", new Throwable());
         }
-        
-        if (service instanceof ActionService) {
+
+        {
             final Object identifier = serviceReference.getProperty("action");
             if (null == identifier) {
                 LOG.error("Missing identifier in action service: " + serviceReference.getClass().getName());
@@ -88,20 +86,20 @@ public class ActionServiceListener implements ServiceTrackerCustomizer {
             if (getInstance().getActionService((ActionTypes)identifier) != null) {
                 LOG.error("A action service is already registered for identifier: " + identifier.toString());
                 return service;
-            }            
-            getInstance().putActionService((ActionTypes)identifier, (ActionService) service);            
+            }
+            getInstance().putActionService((ActionTypes)identifier, service);
             LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered"));
         }
         return service;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<ActionService> reference, final ActionService service) {
         // Nothing to do
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<ActionService> reference, final ActionService service) {
         try {
-            if (service instanceof ActionService) {
+            {
                 final Object identifier = reference.getProperty("action");
                 if (null == identifier) {
                     LOG.error("Missing identifier in action service: " + service.getClass().getName());

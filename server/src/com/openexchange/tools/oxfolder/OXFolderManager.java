@@ -58,14 +58,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link OXFolderManager} - Offers routines for folder creation, update and deletion.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class OXFolderManager {
 
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
-     * 
+     *
      * @param session The session
      * @return An appropriate instance of {@link OXFolderManager}.
      * @throws OXException If an appropriate instance of {@link OXFolderManager} cannot be generated
@@ -76,7 +76,7 @@ public abstract class OXFolderManager {
 
     /**
      * Gets an appropriate instance of {@link OXFolderManager} with AppointmentSQLInterface for testing purposes.
-     * 
+     *
      * @param session The session
      * @param appSql AppointemtSQLInterface
      * @return An appropriate instance of {@link OXFolderManager}.
@@ -87,10 +87,10 @@ public abstract class OXFolderManager {
         retVal.setCSql(appSql);
         return retVal;
     }
-    
+
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
-     * 
+     *
      * @param session The session
      * @param oxfolderAccess An instance of {@link OXFolderAccess} to use; may be <code>null</code>
      * @return An appropriate instance of {@link OXFolderManager}
@@ -102,7 +102,7 @@ public abstract class OXFolderManager {
 
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
-     * 
+     *
      * @param session The session
      * @param readCon A connection with read capability; pass <code>null</code> to fetch from pool
      * @param writeCon A connection with write capability; pass <code>null</code> to fetch from pool
@@ -112,10 +112,10 @@ public abstract class OXFolderManager {
     public static final OXFolderManager getInstance(final Session session, final Connection readCon, final Connection writeCon) throws OXException {
         return new OXFolderManagerImpl(session, readCon, writeCon);
     }
-    
+
     /**
      * Gets an appropriate instance of {@link OXFolderManager} with AppointmentSQLInterface for testing purposes.
-     * 
+     *
      * @param session The session
      * @param appSql AppointemtSQLInterface
      * @return An appropriate instance of {@link OXFolderManager}.
@@ -130,7 +130,7 @@ public abstract class OXFolderManager {
 
     /**
      * Gets an appropriate instance of {@link OXFolderManager}.
-     * 
+     *
      * @param session The session
      * @param oxfolderAccess An instance of {@link OXFolderAccess} to use; may be <code>null</code>
      * @param readCon A connection with read capability; pass <code>null</code> to fetch from pool
@@ -145,7 +145,7 @@ public abstract class OXFolderManager {
     /**
      * Creates a folder filled with values from given folder object. <b>NOTE:</b> given instance of <tt>FolderObject</tt> is going to be
      * completely filled from storage. Thus it does not matter if you further work on this routine's return value or with parameter value.
-     * 
+     *
      * @return An instance of <tt>FolderObject</tt> representing newly created folder
      */
     public abstract FolderObject createFolder(FolderObject fo, boolean checkPermissions, long createTime) throws OXException;
@@ -160,7 +160,7 @@ public abstract class OXFolderManager {
      * be done, routine <tt>FolderObject.containsParentFolderID()</tt> should return <tt>true</tt>. Last, but not least, if an update of
      * folder's permissions should be done, routine <tt>FolderObject.containsPermissions()</tt> should return <tt>true</tt>.
      * </p>
-     * 
+     *
      * @return An instance of <tt>FolderObject</tt> representing modified folder
      */
     public abstract FolderObject updateFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;
@@ -170,7 +170,7 @@ public abstract class OXFolderManager {
      * if user can delete them, too. Furthermore user's permission on contained objects are checked as well. <b>NOTE:</b> given instance of
      * <tt>FolderObject</tt> is going to be completely filled from storage. Thus it does not matter if you further work on this routine's
      * return value or with parameter value.
-     * 
+     *
      * @param fo The folder object at least containing the ID of the folder that shall be deleted
      * @param checkPermissions Whether permissions shall be checked or not
      * @param lastModified The last-modified time stamp which is written into database; usually {@link System#currentTimeMillis()}.
@@ -180,7 +180,7 @@ public abstract class OXFolderManager {
 
     /**
      * Deletes the validated folder.
-     * 
+     *
      * @param folderID The folder ID
      * @param lastModified The last-modified time stamp
      * @param type The folder type
@@ -192,7 +192,7 @@ public abstract class OXFolderManager {
      * Clears a folder's content so that all items located in given folder are going to be deleted. <b>NOTE:</b> the returned instance of
      * <tt>FolderObject</tt> is the parameter object itself. Thus it does not matter if you further work on this routine's return value or
      * with parameter value.
-     * 
+     *
      * @return The cleaned instance of <tt>FolderObject</tt>
      */
     public abstract FolderObject clearFolder(FolderObject fo, boolean checkPermissions, long lastModified) throws OXException;

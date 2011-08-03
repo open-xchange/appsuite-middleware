@@ -74,24 +74,24 @@ import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService
  */
 public class OSGiPublicationTargetDiscovererCollector implements PublicationTargetDiscoveryService, ServiceTrackerCustomizer {
 
-    private BundleContext context;
-    private ServiceTracker tracker;
-  
-    private Set<PublicationTargetDiscoveryService> blacklist = new HashSet<PublicationTargetDiscoveryService>();
-    
-    private CompositePublicationTargetDiscoveryService delegate = new CompositePublicationTargetDiscoveryService();
-    
-    private List<ServiceReference> references = new LinkedList<ServiceReference>();
+    private final BundleContext context;
+    private final ServiceTracker tracker;
+
+    private final Set<PublicationTargetDiscoveryService> blacklist = new HashSet<PublicationTargetDiscoveryService>();
+
+    private final CompositePublicationTargetDiscoveryService delegate = new CompositePublicationTargetDiscoveryService();
+
+    private final List<ServiceReference> references = new LinkedList<ServiceReference>();
     private boolean grabbedAll = false;
-  
-    
+
+
     public OSGiPublicationTargetDiscovererCollector(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, PublicationTargetDiscoveryService.class.getName(), this);
         tracker.open();
         blacklist.add(this);
     }
-    
+
     public void close() {
         tracker.close();
         delegate.clear();
@@ -99,7 +99,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
             context.ungetService(reference);
         }
     }
-    
+
     private void grabAll() {
         grabbedAll = true;
         try {
@@ -111,7 +111,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
             // IGNORE
         }
     }
-    
+
     public Object addingService(ServiceReference reference) {
         return add(reference);
     }
@@ -124,7 +124,7 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
         delegate.removeDiscoveryService((PublicationTargetDiscoveryService) service);
         context.ungetService(reference);
     }
-    
+
     private PublicationTargetDiscoveryService add(ServiceReference ref) {
         PublicationTargetDiscoveryService discovery = (PublicationTargetDiscoveryService) context.getService(ref);
         if(blacklist.contains(discovery)) {
@@ -172,6 +172,6 @@ public class OSGiPublicationTargetDiscovererCollector implements PublicationTarg
 
     public void ignore(PublicationTargetDiscoveryService discovery) {
         blacklist.add(discovery);
-    }    
+    }
 
 }

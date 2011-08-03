@@ -177,8 +177,9 @@ public abstract class WeekAndDayCalculator {
      * @return true if start or end date are in work week, false otherwise (also if not set at all)
      */
     public boolean isWorkWeekAppointment(CPAppointment appointment) {
-        if (appointment.getStartDate() == null)
+        if (appointment.getStartDate() == null) {
             return false;
+        }
         return isInWorkWeek(appointment.getStartDate());
     }
 

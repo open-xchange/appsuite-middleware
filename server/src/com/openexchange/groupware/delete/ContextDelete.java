@@ -51,7 +51,7 @@ package com.openexchange.groupware.delete;
 
 /**
  * {@link ContextDelete} - Special delete listener for context deletion.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class ContextDelete implements DeleteListener {

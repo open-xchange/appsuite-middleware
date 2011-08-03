@@ -74,7 +74,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by the possibility to add extra parts to an existing
  * {@link MailMessage} instance whose MIME type is <code>multipart/*</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CompositeMailMessage extends MailMessage {
@@ -91,7 +91,7 @@ public final class CompositeMailMessage extends MailMessage {
 
     /**
      * Constructor
-     * 
+     *
      * @param delegate The delegate mail
      * @throws OXException If invocation of {@link MailMessage#getEnclosedCount()} fails
      */
@@ -185,7 +185,7 @@ public final class CompositeMailMessage extends MailMessage {
 
     /**
      * Appends the specified mail part
-     * 
+     *
      * @param mailPart The mail part to add
      */
     public void addAdditionalParts(final MailPart mailPart) {
@@ -195,7 +195,7 @@ public final class CompositeMailMessage extends MailMessage {
     /**
      * Removes the mail part at the specified position. Shifts any subsequent mail parts to the left (subtracts one from their indices).
      * Returns the mail part that was removed.
-     * 
+     *
      * @param index The index
      * @return The mail part that was removed.
      */
@@ -360,6 +360,7 @@ public final class CompositeMailMessage extends MailMessage {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
@@ -370,6 +371,7 @@ public final class CompositeMailMessage extends MailMessage {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }
@@ -403,6 +405,7 @@ public final class CompositeMailMessage extends MailMessage {
                 {
                     final StreamDataSource.InputStreamProvider isp = new StreamDataSource.InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return mp.getInputStream();
@@ -413,6 +416,7 @@ public final class CompositeMailMessage extends MailMessage {
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }

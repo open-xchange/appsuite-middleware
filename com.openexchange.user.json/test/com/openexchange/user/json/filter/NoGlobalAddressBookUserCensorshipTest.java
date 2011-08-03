@@ -73,11 +73,11 @@ import com.openexchange.user.json.field.UserField;
 public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
     public void testCensorsData() throws Exception {
         User user = getFilledUser();
-        
+
         final UserCensorship censorship = new NoGlobalAdressBookUserCensorship();
-        
+
         user = censorship.censor(user);
-        
+
         for(final UserField field : UserField.ALL_FIELDS) {
             if(!UserField.isUserOnlyField(field.getColumn())){
                 continue;
@@ -89,7 +89,7 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
                 assertTrue("Should have been hidden: "+field, value == null || -1 == (Integer)value);
             }
         }
-        
+
     }
 
     private Object get(final UserField field, final User user) {
@@ -107,7 +107,7 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
     private User getFilledUser() throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         final User user = new UserImpl();
         final BeanInfo beanInfo = Introspector.getBeanInfo(UserImpl.class);
-        
+
         final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
         for (final PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             final Method writeMethod = propertyDescriptor.getWriteMethod();
@@ -120,11 +120,11 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
                 }
             }
         }
-        
+
         return user;
     }
-    
-    
+
+
     private static final Map <Class, Object> DEFAULT_VALUES = new HashMap<Class, Object>() {{
         put(String.class, "Some String");
         put(Date.class, new Date());
@@ -136,5 +136,5 @@ public class NoGlobalAddressBookUserCensorshipTest extends TestCase {
         put(Locale.class, Locale.getDefault());
         put(String[].class, new String[0]);
     }};
-    
+
 }

@@ -53,21 +53,21 @@ import java.io.File;
 
 /**
  * {@link FileListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileListener {
 
     /**
      * Invoked if the last modified timestamp has changed
-     * 
+     *
      * @param file The changed file
      */
     public void onChange(File file);
 
     /**
      * Invoked if the file has been deleted
-     * 
+     *
      * @param file The deleted file
      */
     public void onDelete();

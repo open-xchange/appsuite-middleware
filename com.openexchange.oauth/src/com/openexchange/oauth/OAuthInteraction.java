@@ -51,7 +51,7 @@ package com.openexchange.oauth;
 
 /**
  * {@link OAuthInteraction} - Provides needed steps to create a new OAuth account.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -61,7 +61,7 @@ public interface OAuthInteraction {
     /**
      * 1. Step:<br>
      * Gets the authorization URL.
-     * 
+     *
      * @return The authorization URL
      */
     String getAuthorizationURL();
@@ -69,14 +69,14 @@ public interface OAuthInteraction {
     /**
      * 2. Step:<br>
      * Gets the interaction type.
-     * 
+     *
      * @return The interaction type
      */
     OAuthInteractionType getInteractionType();
 
     /**
      * Gets the request token needed to acquire the access token.
-     * 
+     *
      * @return The request token.
      */
     OAuthToken getRequestToken();

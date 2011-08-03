@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * {@link ConcurrentTIntObjectHashMap} - A concurrent {@link TIntObjectHashMap} implementation using a {@link ReadWriteLock} instance.
  * <p>
  * An open addressed Map implementation for int keys and Object values.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
@@ -80,7 +80,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
      * @param strategy used to compute hash codes and to compare keys.
@@ -93,7 +93,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param loadFactor used to calculate the threshold over which rehashing takes place.
      */
@@ -105,7 +105,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      * @param strategy used to compute hash codes and to compare keys.
      */
@@ -117,7 +117,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     * 
+     *
      * @param initialCapacity used to find a prime capacity for the table.
      */
     public ConcurrentTIntObjectHashMap(final int initialCapacity) {
@@ -128,7 +128,7 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> {
 
     /**
      * Initializes a new {@link ConcurrentTIntObjectHashMap}.
-     * 
+     *
      * @param strategy used to compute hash codes and to compare keys.
      */
     public ConcurrentTIntObjectHashMap(final TIntHashingStrategy strategy) {

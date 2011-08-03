@@ -57,9 +57,9 @@ import com.openexchange.user.internal.UserServiceImpl;
 
 /**
  * {@link UserStorageInit}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class UserStorageInit implements Initialization {
 
@@ -67,7 +67,7 @@ public final class UserStorageInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link UserStorageInit}
-     * 
+     *
      * @return The singleton instance of {@link UserStorageInit}
      */
     public static UserStorageInit getInstance() {
@@ -84,6 +84,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         UserStorage.start();
         ServerServiceRegistry.getInstance().addService(UserService.class, new UserServiceImpl());
@@ -92,6 +93,7 @@ public final class UserStorageInit implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         ServerServiceRegistry.getInstance().removeService(UserService.class);
         UserStorage.stop();

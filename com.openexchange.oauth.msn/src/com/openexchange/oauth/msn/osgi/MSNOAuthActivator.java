@@ -62,7 +62,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link MSNOAuthActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */

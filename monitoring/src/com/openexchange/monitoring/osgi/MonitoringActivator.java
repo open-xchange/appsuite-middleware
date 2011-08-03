@@ -65,7 +65,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MonitoringActivator} - The {@link BundleActivator activator} for monitoring bundle.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

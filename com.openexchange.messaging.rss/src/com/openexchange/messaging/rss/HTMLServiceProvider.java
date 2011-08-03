@@ -54,7 +54,7 @@ import com.openexchange.html.HTMLService;
 
 /**
  * {@link HTMLServiceProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLServiceProvider {

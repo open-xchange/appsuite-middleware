@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * OXFolderPermissionException
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXFolderPermissionException extends OXException {

@@ -60,12 +60,12 @@ import java.util.Collection;
 public class MessagingPartArrayContent implements MultipartContent {
 
     private MessagingBodyPart[] parts = null;
-    
+
     public MessagingPartArrayContent(final MessagingBodyPart[] parts) {
         super();
         this.parts = parts;
     }
-    
+
     public MessagingPartArrayContent(final Collection<? extends MessagingBodyPart> parts) {
         this.parts = parts.toArray(new MessagingBodyPart[parts.size()]);
     }

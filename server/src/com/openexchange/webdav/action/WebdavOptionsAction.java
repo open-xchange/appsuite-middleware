@@ -54,7 +54,8 @@ import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 
 public class WebdavOptionsAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		res.setHeader("Content-Length","0");
 		res.setHeader("Allow", join(req.getResource().getOptions()));

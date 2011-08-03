@@ -68,7 +68,7 @@ public class FolderFieldActivator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {
         context.registerService(AdditionalFolderField.class.getName(), new HasSubscriptions(DISCOVERY), null);
-        
+
     }
 
     public void stop(BundleContext context) throws Exception {

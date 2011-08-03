@@ -63,7 +63,7 @@ import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link AllTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AllTest extends AbstractMessagingActionTest {
@@ -224,7 +224,7 @@ public class AllTest extends AbstractMessagingActionTest {
 
         assertFails(requestData);
     }
-    
+
     public void testMissingColumns() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
@@ -233,7 +233,7 @@ public class AllTest extends AbstractMessagingActionTest {
         requestData.putParameter("account", "12");
 
         assertFails(requestData);
-        
+
     }
 
 /*    public void testInvalidIndex() {
@@ -252,7 +252,7 @@ public class AllTest extends AbstractMessagingActionTest {
 
         assertFails(requestData);
     }
-    
+
     public void testMissingServiceID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
@@ -263,7 +263,7 @@ public class AllTest extends AbstractMessagingActionTest {
         assertFails(requestData);
 
     }
-    
+
     public void testMissingAccountID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
@@ -273,7 +273,7 @@ public class AllTest extends AbstractMessagingActionTest {
 
         assertFails(requestData);
    }
-    
+
     public void testMissingFolderID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
@@ -284,7 +284,7 @@ public class AllTest extends AbstractMessagingActionTest {
         assertFails(requestData);
 
     }
-    
+
     public void testNumberFormatExceptionInAccountID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
 
@@ -302,6 +302,6 @@ public class AllTest extends AbstractMessagingActionTest {
         return new AllAction(registry, new MessagingMessageWriter(), new MessagingMessageParser());
     }
 
-   
+
 
 }

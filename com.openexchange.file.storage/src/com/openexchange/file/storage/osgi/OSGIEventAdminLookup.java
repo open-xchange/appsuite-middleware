@@ -58,7 +58,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * {@link OSGIEventAdminLookup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -81,7 +81,7 @@ public class OSGIEventAdminLookup {
 
     /**
      * Starts the tracker.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
@@ -103,7 +103,7 @@ public class OSGIEventAdminLookup {
 
     /**
      * Gets the tracked {@link EventAdmin} service
-     * 
+     *
      * @return The tracked {@link EventAdmin} service or <code>null</code>
      */
     public EventAdmin getEventAdmin() {

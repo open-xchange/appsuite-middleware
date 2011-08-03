@@ -59,7 +59,7 @@ import java.util.Set;
  */
 public abstract class ContextSetTerm {
 
-  
+
     public abstract boolean matches(Set<String> tags);
-    
+
 }

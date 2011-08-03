@@ -66,7 +66,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 
 /**
  * {@link UnifiedMailMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedMailMessage extends MailMessage {

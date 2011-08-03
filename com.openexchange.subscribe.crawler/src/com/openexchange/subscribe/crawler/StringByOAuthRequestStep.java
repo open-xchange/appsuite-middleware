@@ -85,7 +85,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link StringByOAuthRequestStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class StringByOAuthRequestStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
@@ -99,11 +99,11 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
     private OAuthAccessor oAuthAccessor;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByOAuthRequestStep.class));
-    
+
     private Page loginPage;
-    
+
     private final SingleConnectionPool connectionPool = new SingleConnectionPool();
-    
+
     public StringByOAuthRequestStep() {
     }
 
@@ -127,7 +127,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
      */
     @Override
     public void execute(final WebClient webClient) throws OXException {
-        
+
         try {
             // Request the OAuth token
             final OAuthClient client = new OAuthClient(new HttpClient4(connectionPool));
@@ -148,7 +148,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.error(e);
             }
 
-            // Authorize the request 
+            // Authorize the request
             String verifier = "";
             try {
                 oAuthAccessor = createOAuthAccessor();
@@ -156,7 +156,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
                 paramProps.setProperty("oauth_token", requestToken);
                 final OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
-                LOG.info("Successfully requested authorization-url: "+response.URL);   
+                LOG.info("Successfully requested authorization-url: "+response.URL);
 
                 // Fill out form / confirm the access otherwise
                 final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
@@ -164,9 +164,9 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 loginPage = authorizeStep.getLoginPage();
                 final HtmlPage pageWithVerifier = authorizeStep.getOutput();
                 final String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
-                LOG.debug("Page contains the verifier : " + pageString2.contains("access-code")); 
+                LOG.debug("Page contains the verifier : " + pageString2.contains("access-code"));
                 LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
-                
+
                 // get the verifier
                 final Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
                 final Matcher matcher = pattern.matcher(pageString2);
@@ -186,7 +186,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.error(e);
             }
 
-            
+
             // Access and confirm using the verifier
             try {
                 final Properties paramProps = new Properties();
@@ -204,8 +204,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             } catch (final OAuthException e) {
                 LOG.error(e);
             }
-            
-            // Execute an API-Request (fully logged in now)        
+
+            // Execute an API-Request (fully logged in now)
             try {
                 final Properties paramProps = new Properties();
                 paramProps.setProperty("oauth_token", accessToken);
@@ -223,7 +223,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             } catch (final OAuthException e) {
                 LOG.error(e);
             }
-            
+
         } finally {
             // Ensure connections are closed
             connectionPool.shutdown();
@@ -346,41 +346,41 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return password;
     }
 
-    
+
     public String getNameOfUserField() {
         return nameOfUserField;
     }
 
-    
+
     public void setNameOfUserField(final String nameOfUserField) {
         this.nameOfUserField = nameOfUserField;
     }
 
-    
+
     public String getNameOfPasswordField() {
         return nameOfPasswordField;
     }
 
-    
+
     public void setNameOfPasswordField(final String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
     }
 
-    
+
     public String getApiRequest() {
         return apiRequest;
     }
 
-    
+
     public void setApiRequest(final String apiRequest) {
         this.apiRequest = apiRequest;
     }
 
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
-    
+
     private static class SingleConnectionPool implements HttpClientPool {
 
         private DefaultHttpClient client;
@@ -395,15 +395,15 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 final HttpParams params = client.getParams();
                 client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
             }
-            
+
             return client;
         }
-        
+
         public void shutdown() {
             client.getConnectionManager().shutdown();
         }
-        
+
     }
 
-    
+
 }

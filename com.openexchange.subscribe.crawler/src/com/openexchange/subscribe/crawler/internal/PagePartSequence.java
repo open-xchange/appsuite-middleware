@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  * name is listed after the first name) - The sourcecode immediately surrounding it. There are two kinds of page parts: - Fillers, only used
  * to make the sequence unequivocal and containing a single-capture-group regex identifiyng them - Infos, containing a three-capture-group
  * regex (immediately before, relevant part, immediately after)
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PagePartSequence {
@@ -83,7 +83,7 @@ public class PagePartSequence {
      * This includes the parameter "limit" as a way to separate the input into parts beforehand that each will become a contact later on.
      * This is by far easier to do than using regular expressions to make sure that a specific bit of content belongs to one object and not
      * another. Initializes a new {@link PagePartSequence}.
-     * 
+     *
      * @param pageParts
      * @param page
      * @param limit

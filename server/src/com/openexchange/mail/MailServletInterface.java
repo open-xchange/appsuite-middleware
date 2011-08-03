@@ -71,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * <p>
  * This interface's purpose is to be conform to other interfaces used in other groupware modules which are used throughout servlet
  * instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailServletInterface {
@@ -90,7 +90,7 @@ public abstract class MailServletInterface {
      * Gets a proper implementation of {@link MailServletInterface}
      * <p>
      * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
-     * 
+     *
      * <pre>
      * MailInterface mailInterface = MailInterface.getInstance(session);
      * try {
@@ -99,7 +99,7 @@ public abstract class MailServletInterface {
      *     mailInterface.close(true);
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @return An instance of {@link MailServletInterface}
      * @throws OXException
@@ -112,7 +112,7 @@ public abstract class MailServletInterface {
 
     /**
      * Gets a mail's ID by specified "Message-Id" header.
-     * 
+     *
      * @param folder The folder to search in
      * @param messageID The "Message-Id" header
      * @return The ID of the mail corresponding to specified "Message-Id" header
@@ -148,7 +148,7 @@ public abstract class MailServletInterface {
 
     /**
      * Gets both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
-     * 
+     *
      * @param types The resource types; {@link #QUOTA_RESOURCE_STORAGE} or {@link #QUOTA_RESOURCE_MESSAGE}
      * @return Both quota limit and quota usage in an array with length set to <code>2</code> for each resource type
      * @throws OXException If quotas cannot be retrieved
@@ -209,7 +209,7 @@ public abstract class MailServletInterface {
 
     /**
      * Gets the mail identified through given ID from store located in given folder.
-     * 
+     *
      * @param folder The folder path
      * @param msgUID The mail ID
      * @return The mail identified through given ID from store located in given folder.
@@ -220,14 +220,14 @@ public abstract class MailServletInterface {
     /**
      * Returns a message's attachment located at given <code>attachmentPosition</code> wrapped by an instance of
      * <code>JSONMessageAttachmentObject</code> for a convenient access to its attributes and content.
-     * 
+     *
      * @param displayVersion <code>true</code> if returned object is for display purpose; otherwise <code>false</code>
      */
     public abstract MailPart getMessageAttachment(String folder, String msgUID, String attachmentPosition, boolean displayVersion) throws OXException;
 
     /**
      * Returns message's attachments as a ZIP file backed by returned managed file instance.
-     * 
+     *
      * @param folder The folder
      * @param msgUID The message ID
      * @param attachmentPositions The attachment positions
@@ -238,7 +238,7 @@ public abstract class MailServletInterface {
 
     /**
      * Returns messages as a ZIP file backed by returned managed file instance.
-     * 
+     *
      * @param folder The folder
      * @param msgIds The message identifiers
      * @return A ZIP file backed by returned managed file instance
@@ -257,7 +257,7 @@ public abstract class MailServletInterface {
      * <p>
      * If specified draft mail holds a reference to an existing draft mail - {@link MailMessage#getMsgref()} is not <code>null</code> - then
      * the referenced draft mail shall be replaced.
-     * 
+     *
      * @param draftMail The draft mail
      * @param autosave <code>true</code> to indicate an auto-save operation; otherwise <code>false</code>
      * @return The stored draft's mail path
@@ -272,7 +272,7 @@ public abstract class MailServletInterface {
 
     /**
      * Sends a form mail.
-     * 
+     *
      * @param composedMail The form mail (without any recipients)
      * @param groupId The identifier of the group to whose members shall receive the mail
      * @param accountId The account identifier
@@ -288,7 +288,7 @@ public abstract class MailServletInterface {
 
     /**
      * Appends given messages to given folder.
-     * 
+     *
      * @param destFolder The destination folder
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
@@ -296,10 +296,10 @@ public abstract class MailServletInterface {
      * @throws OXException If messages cannot be appended.
      */
     public abstract String[] appendMessages(String destFolder, MailMessage[] msgs, boolean force) throws OXException;
-    
+
     /**
      * Overwrite this to implement a different append behaviour for mail imports.
-     * 
+     *
      * @param destFolder The destination folder
      * @param msgs - The messages to append (<b>must</b> be completely pre-filled incl. content references)
      * @param force <code>true</code> to enforce append and to omit checks; otherwise <code>false</code>
@@ -352,7 +352,7 @@ public abstract class MailServletInterface {
 
     /**
      * Gets all updated messages in given folder
-     * 
+     *
      * @param folder The folder fullname
      * @param since The time stamp in UTC milliseconds
      * @param fields The desired fields to fill in returned messages
@@ -363,7 +363,7 @@ public abstract class MailServletInterface {
 
     /**
      * Gets all deleted messages in given folder
-     * 
+     *
      * @param folder The folder fullname
      * @param since The time stamp in UTC milliseconds
      * @param fields The desired fields to fill in returned messages
@@ -394,7 +394,7 @@ public abstract class MailServletInterface {
 
     /**
      * Closes the interface and releases all resources
-     * 
+     *
      * @param putIntoCache - whether or not to put associated conenction into pool
      */
     public abstract void close(boolean putIntoCache) throws OXException;
@@ -451,18 +451,18 @@ public abstract class MailServletInterface {
 
     /**
      * Gets the account ID to which the (primary) mail access is connected
-     * 
+     *
      * @return The account ID
      */
     public abstract int getAccountID();
 
     /**
      * Gets possible warnings.
-     * 
+     *
      * @return Possible warnings
      */
     public abstract Collection<OXException> getWarnings();
-    
+
     /**
      * Get results of imported mails.
      * Implement this if you want to return detailed informations for mail imports.

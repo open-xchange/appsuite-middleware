@@ -12,11 +12,11 @@ import com._4psa.billingmessages_xsd._2_5.EditChargingPackageRequest;
 
 /**
  * Free minutes package
- * 
+ *
  * <p>Java class for ChargingPackage complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ChargingPackage">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.billingmessages_xsd._2_5.EditChargingPackageRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ChargingPackage", propOrder = {
@@ -48,11 +48,11 @@ public class ChargingPackage {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -60,11 +60,11 @@ public class ChargingPackage {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -72,11 +72,11 @@ public class ChargingPackage {
 
     /**
      * Gets the value of the minutes property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMinutes() {
         return minutes;
@@ -84,11 +84,11 @@ public class ChargingPackage {
 
     /**
      * Sets the value of the minutes property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMinutes(BigInteger value) {
         this.minutes = value;

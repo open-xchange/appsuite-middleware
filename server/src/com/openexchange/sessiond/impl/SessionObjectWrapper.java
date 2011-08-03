@@ -55,7 +55,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 
 /**
  * SessionObjectWrapper
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -68,7 +68,7 @@ public final class SessionObjectWrapper {
 	/**
 	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
 	 * ID matches given <code>user_id</code>
-	 * 
+	 *
 	 * @param user_id
 	 *            The user ID
 	 * @param context_id
@@ -89,7 +89,7 @@ public final class SessionObjectWrapper {
 	/**
 	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
 	 * ID matches given <code>user_id</code>
-	 * 
+	 *
 	 * @param user_id
 	 *            The user ID
 	 * @param ctx
@@ -106,7 +106,7 @@ public final class SessionObjectWrapper {
 	/**
 	 * Creates a dummy instance of {@link SessionObject} assigned to user whose
 	 * ID matches given <code>user_id</code>
-	 * 
+	 *
 	 * @param user_id
 	 *            The user ID
 	 * @param ctx

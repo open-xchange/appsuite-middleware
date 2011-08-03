@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
@@ -144,7 +144,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
      * Appends specified POP3 messages fetched from POP3 account to this storage's INBOX folder.
      * <p>
      * The new UIDLs are automatically added to used {@link POP3StorageUIDLMap UIDL map}.
-     * 
+     *
      * @param pop3Messages The POP3 messages
      * @return The
      * @throws OXException
@@ -347,7 +347,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
 
     /**
      * Sets account ID and name in given instance of {@link MailMessage}.
-     * 
+     *
      * @param mailMessages The {@link MailMessage} instance
      * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws OXException If mail account cannot be obtained

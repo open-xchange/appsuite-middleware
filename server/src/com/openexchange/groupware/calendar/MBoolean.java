@@ -51,7 +51,7 @@ package com.openexchange.groupware.calendar;
 
 /**
  * {@link MBoolean} - Mutable holder for a <code>boolean</code> value.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public final class MBoolean {
@@ -60,7 +60,7 @@ public final class MBoolean {
 
     /**
      * Initializes a new {@link MBoolean}.
-     * 
+     *
      * @param b The <code>boolean</code> value.
      */
     public MBoolean(final boolean b) {
@@ -69,7 +69,7 @@ public final class MBoolean {
 
     /**
      * Sets the <code>boolean</code> value.
-     * 
+     *
      * @param b The <code>boolean</code> value.
      */
     public void setMBoolean(final boolean b) {
@@ -78,7 +78,7 @@ public final class MBoolean {
 
     /**
      * Gets the <code>boolean</code> value.
-     * 
+     *
      * @return The <code>boolean</code> value.
      */
     public boolean getMBoolean() {

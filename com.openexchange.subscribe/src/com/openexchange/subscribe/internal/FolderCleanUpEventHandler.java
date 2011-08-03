@@ -75,18 +75,18 @@ import com.openexchange.subscribe.SubscriptionStorage;
  *
  */
 public class FolderCleanUpEventHandler implements EventHandler {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCleanUpEventHandler.class));
     private final ContextService contexts;
     private final SubscriptionStorage storage;
     private ServiceRegistration registration;
-    
+
     public FolderCleanUpEventHandler(final BundleContext context, final SubscriptionStorage storage, final ContextService contexts) {
         this.contexts = contexts;
         this.storage = storage;
         register(context);
     }
-    
+
     private void register(final BundleContext context) {
         final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/folder/delete" });
@@ -96,11 +96,11 @@ public class FolderCleanUpEventHandler implements EventHandler {
     public void close() {
         registration.unregister();
     }
-    
+
     public void handleEvent(final Event event) {
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
         final FolderObject actionObj = (FolderObject) commonEvent.getActionObj();
-        
+
         // TODO: Special Handling for mail?
         final String folderId = String.valueOf(actionObj.getObjectID());
         Context context;
@@ -120,7 +120,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
             LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
         }
 
-        
+
     }
 
 }

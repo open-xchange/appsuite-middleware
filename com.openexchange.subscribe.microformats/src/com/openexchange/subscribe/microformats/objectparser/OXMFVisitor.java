@@ -66,7 +66,7 @@ import org.microformats.hCard.HCardParser.HCardVisitor;
  * <span class="ox_element">some unimportant stuff<span class="value">myValue</span></span>
  * </code> If both are
  * used, the second form takes precedence.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class OXMFVisitor extends HCardVisitor {
@@ -85,7 +85,7 @@ public class OXMFVisitor extends HCardVisitor {
 
     private Map<String, String> oxmfElement;
 
-    private List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
+    private final List<Map<String, String>> oxmfElements = new LinkedList<Map<String, String>>();
 
     public static final String OXMF_PREFIX = "ox_";
 
@@ -102,8 +102,9 @@ public class OXMFVisitor extends HCardVisitor {
         super.visitTag(tag);
         String hClass = tag.getAttribute("class");
 
-        if (hClass == null)
+        if (hClass == null) {
             return;
+        }
 
         if (hClass.equalsIgnoreCase("vcard")) {
             readingHCardNow = true;
@@ -145,14 +146,17 @@ public class OXMFVisitor extends HCardVisitor {
     public void visitStringNode(Text string) {
         super.visitStringNode(string);
 
-        if (!readingHCardNow)
+        if (!readingHCardNow) {
             return;
+        }
 
-        if (!readingSeparateValueNow && !readingElementValueNow)
+        if (!readingSeparateValueNow && !readingElementValueNow) {
             return;
+        }
 
-        if (attributeName == null)
+        if (attributeName == null) {
             throw new IllegalStateException("Reading an ox value without an ox element?");
+        }
 
         oxmfElement.put(attributeName, string.getText());
     }

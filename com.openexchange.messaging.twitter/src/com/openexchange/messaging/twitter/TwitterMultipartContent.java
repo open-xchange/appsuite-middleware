@@ -56,14 +56,14 @@ import com.openexchange.twitter.Status;
 
 /**
  * {@link TwitterMultipartContent}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMultipartContent implements MultipartContent {
 
     /**
      * Gets a newly created instance of {@link TwitterMultipartContent}.
-     * 
+     *
      * @param status The twitter status to turn into a multipart/alternative content
      * @return A newly created instance of {@link TwitterMultipartContent}
      */

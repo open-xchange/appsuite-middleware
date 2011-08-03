@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ReferenceContentRenderer implements MessagingContentWriter {
 
     /**
-     * 
+     *
      */
     private static final String REF = "ref";
 

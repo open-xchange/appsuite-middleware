@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 /**
  * FIXME {@link OXException} should not be thrown by MBeans. Normal JMX clients are not able to deserialize specialized
  * {@link Exception Exceptions}.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public interface ConsistencyMBean {

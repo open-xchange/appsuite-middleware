@@ -93,6 +93,7 @@ public class SchemaImpl implements Schema {
         this.schema = schema.getSchema();
     }
 
+    @Override
     public int getDBVersion() {
         return dbVersion;
     }
@@ -101,6 +102,7 @@ public class SchemaImpl implements Schema {
         this.dbVersion = dbVersion;
     }
 
+    @Override
     public boolean isAdminCompatible() {
         return adminCompatible;
     }
@@ -109,6 +111,7 @@ public class SchemaImpl implements Schema {
         this.adminCompatible = adminCompatible;
     }
 
+    @Override
     public boolean isGroupwareCompatible() {
         return groupwareCompatible;
     }
@@ -117,6 +120,7 @@ public class SchemaImpl implements Schema {
         this.groupwareCompatible = groupwareCompatible;
     }
 
+    @Override
     public boolean isLocked() {
         return locked;
     }
@@ -125,6 +129,7 @@ public class SchemaImpl implements Schema {
         this.locked = locked;
     }
 
+    @Override
     public String getServer() {
         return server;
     }
@@ -133,6 +138,7 @@ public class SchemaImpl implements Schema {
         this.server = server;
     }
 
+    @Override
     public String getSchema() {
         return schema;
     }

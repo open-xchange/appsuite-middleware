@@ -49,9 +49,6 @@
 
 package com.openexchange.webdav.directory;
 
-import java.util.Arrays;
-import java.util.Iterator;
-
 
 /**
  * {@link PathRegistration}
@@ -59,12 +56,12 @@ import java.util.Iterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PathRegistration {
-    private String[] paths;
+    private final String[] paths;
 
     public PathRegistration(String...paths) {
         this.paths = paths;
     }
-    
+
     public String[] getPaths() {
         return paths;
     }

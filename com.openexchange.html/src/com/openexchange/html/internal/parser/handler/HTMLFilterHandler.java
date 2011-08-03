@@ -71,7 +71,7 @@ import com.openexchange.html.services.ServiceRegistry;
 
 /**
  * {@link HTMLFilterHandler} - The HTML white-list filter.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLFilterHandler implements HTMLHandler {
@@ -147,7 +147,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTMLFilterHandler}.
-     * 
+     *
      * @param capacity The initial capacity
      * @param htmlMap The HTML map
      * @param styleMap The CSS style map
@@ -165,7 +165,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTMLFilterHandler}.
-     * 
+     *
      * @param capacity The initial capacity
      * @param mapStr The map as string representation
      */
@@ -182,7 +182,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Initializes a new {@link HTMLFilterHandler} with default white list.
-     * 
+     *
      * @param capacity The initial capacity
      */
     public HTMLFilterHandler(final HTMLService htmlService, final int capacity) {
@@ -213,7 +213,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Decrements <code>depth</code> counter and then marks its position as <code>false</code>.
-     * 
+     *
      * @return <code>true</code> if position's previous mark was set; otherwise <code>false</code>
      */
     private boolean getAndUnmark() {
@@ -229,7 +229,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Ensure capacity of <code>depthInfo</code> array. Double its length as long as specified index does not fit.
-     * 
+     *
      * @param index The index accessing the array
      */
     private void ensureCapacity(final int index) {
@@ -440,7 +440,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Adds tag occurring in white list to HTML result.
-     * 
+     *
      * @param tag The tag to add
      * @param a The tag's attribute set
      * @param simple <code>true</code> to write a simple tag; otherwise <code>false</code>
@@ -517,7 +517,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Gets the filtered HTML content.
-     * 
+     *
      * @return The filtered HTML content
      */
     public String getHTML() {
@@ -540,7 +540,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Parses specified HTML map.
-     * 
+     *
      * @param htmlMapStr The HTML map string
      * @return The parsed map
      */
@@ -623,7 +623,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Parses specified combination map for CSS elements.
-     * 
+     *
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
      */

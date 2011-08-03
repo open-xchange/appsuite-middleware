@@ -87,7 +87,7 @@ public final class AppointmentConverters {
     public static final AttributeConverter<VEvent, Appointment>[] REQUEST;
 
     public static final AttributeConverter<VEvent, Appointment>[] REPLY;
-    
+
     public static final AttributeConverter<VEvent, Appointment>[] CANCEL;
 
     /**
@@ -132,21 +132,21 @@ public final class AppointmentConverters {
 
         tmp.add(new CreatedBy<VEvent, Appointment>());
         tmp.add(new Sequence<VEvent, Appointment>());
-        
-        
+
+
         // All standard converters
         final List<AttributeConverter<VEvent, Appointment>> all = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
         final Participants<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
         participants.setVerifier(new PrivateAppointmentsHaveNoParticipants());
         all.add(participants);
         ALL = all.toArray(new AttributeConverter[all.size()]);
-        
+
         // Special Participant Converters for IMip
         final List<AttributeConverter<VEvent, Appointment>> request = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
         final RequestParticipants<VEvent, Appointment> requestParticipants = new RequestParticipants<VEvent, Appointment>();
         request.add(requestParticipants);
         REQUEST = request.toArray(new AttributeConverter[request.size()]);
-        
+
         final List<AttributeConverter<VEvent, Appointment>> reply = new ArrayList<AttributeConverter<VEvent, Appointment>>(tmp);
         final ReplyParticipants<VEvent, Appointment> replyParticipants = new ReplyParticipants<VEvent, Appointment>();
         reply.add(replyParticipants);

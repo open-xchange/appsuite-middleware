@@ -67,7 +67,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link MALPollModifyTableTask} - Modifies MAL Poll tables to add "cid" column.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MALPollModifyTableTask extends UpdateTaskAdapter {

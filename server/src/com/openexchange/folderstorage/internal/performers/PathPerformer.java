@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PathPerformer} - Serves the <code>PATH</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PathPerformer extends AbstractUserizedFolderPerformer {
@@ -78,7 +78,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link PathPerformer} from given session.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -88,7 +88,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link PathPerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -99,7 +99,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link PathPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -110,7 +110,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Initializes a new {@link PathPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decoratorde
@@ -137,6 +137,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             this.allowedContentTypes = allowedContentTypes;
         }
 
+        @Override
         public Permission getOwnPermission(final Folder folder) {
             return CalculatePermission.calculate(folder, session, allowedContentTypes);
         }
@@ -158,6 +159,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             this.allowedContentTypes = allowedContentTypes;
         }
 
+        @Override
         public Permission getOwnPermission(final Folder folder) throws OXException {
             return CalculatePermission.calculate(folder, user, ctx, allowedContentTypes);
         }
@@ -166,7 +168,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Performs the <code>PATH</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
@@ -250,7 +252,7 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
     /**
      * Performs the <code>PATH</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get

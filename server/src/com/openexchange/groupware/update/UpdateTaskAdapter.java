@@ -64,6 +64,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         super();
     }
 
+    @Override
     public final void perform(final Schema schema, final int contextId) throws OXException {
         perform(this, schema, contextId);
     }
@@ -74,10 +75,12 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         task.perform(params);
     }
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         @SuppressWarnings("deprecation")
         final
@@ -85,6 +88,7 @@ public abstract class UpdateTaskAdapter implements UpdateTaskV2 {
         return priority;
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }

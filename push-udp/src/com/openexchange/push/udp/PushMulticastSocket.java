@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * MultiCastPushSocket
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

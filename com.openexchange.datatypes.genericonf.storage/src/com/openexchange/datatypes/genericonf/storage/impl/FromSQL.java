@@ -55,7 +55,7 @@ import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 
 /**
  * {@link FromSQL}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FromSQL implements WidgetSwitcher {

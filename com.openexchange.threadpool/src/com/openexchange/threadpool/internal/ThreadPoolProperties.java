@@ -53,12 +53,12 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link ThreadPoolProperties} - Initialization of thread pool bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 /**
  * {@link ThreadPoolProperties}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolProperties {
@@ -88,7 +88,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Initializes this properties with given configuration service.
-     * 
+     *
      * @param configurationService The configuration service to use
      * @return This instance with properties applied from configuration service
      */
@@ -209,7 +209,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the corePoolSize
-     * 
+     *
      * @return The corePoolSize
      */
     public int getCorePoolSize() {
@@ -218,7 +218,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the prestartAllCoreThreads
-     * 
+     *
      * @return The prestartAllCoreThreads
      */
     public boolean isPrestartAllCoreThreads() {
@@ -227,7 +227,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the maximumPoolSize
-     * 
+     *
      * @return The maximumPoolSize
      */
     public int getMaximumPoolSize() {
@@ -236,7 +236,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the keepAliveTime
-     * 
+     *
      * @return The keepAliveTime
      */
     public long getKeepAliveTime() {
@@ -245,7 +245,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the workQueue
-     * 
+     *
      * @return The workQueue
      */
     public String getWorkQueue() {
@@ -257,7 +257,7 @@ public final class ThreadPoolProperties {
      * <p>
      * Note: If size of work queue is set to a value greater than zero, {@link #getWorkQueue()} is implicitly set to <code>"linked"</code>
      * to accomplish a bounded work queue.
-     * 
+     *
      * @return The work queue size
      */
     public int getWorkQueueSize() {
@@ -266,7 +266,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Whether a blocking behavior should be applied.
-     * 
+     *
      * @return <code>true</code> if a blocking behavior should be applied; otherwsie <code>false</code>
      */
     public boolean isBlocking() {
@@ -275,7 +275,7 @@ public final class ThreadPoolProperties {
 
     /**
      * Gets the refusedExecutionBehavior
-     * 
+     *
      * @return The refusedExecutionBehavior
      */
     public String getRefusedExecutionBehavior() {

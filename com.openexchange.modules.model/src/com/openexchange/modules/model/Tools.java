@@ -55,7 +55,7 @@ import java.util.List;
 
 /**
  * {@link Tools}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Tools {
@@ -96,7 +96,7 @@ public class Tools {
     public static <T extends Model<T>> List<Object> values(T thing, List<? extends Attribute<T>> fields) {
         return values(thing, fields, AttributeHandler.DO_NOTHING);
     }
-    
+
     public static <T extends Model<T>> T copy(T thing, AttributeHandler<T> modifier) {
         T copy = thing.getMetadata().create();
         for (Attribute<T> attribute : thing.getMetadata().getAllFields()) {
@@ -110,20 +110,20 @@ public class Tools {
     public static <T extends Model<T>> T copy(T thing) {
         return (T) copy(thing, AttributeHandler.DO_NOTHING);
     }
-    
+
     public static <T extends Model<T>> List<T> copy(List<T> things, AttributeHandler<T> modifier) {
         List<T> retval = new ArrayList<T>(things.size());
         for(T thing : things) {
             retval.add(copy(thing, modifier));
         }
-        
+
         return retval;
     }
 
     public static <T extends Model<T>> List<T> copy(List<T> things) {
         return copy(things, AttributeHandler.DO_NOTHING);
     }
-    
+
     public static <T extends Model<T>> void set(Collection<T> things, Attribute<T> attribute, Object value) {
         for (T thing : things) {
             thing.set(attribute, value);

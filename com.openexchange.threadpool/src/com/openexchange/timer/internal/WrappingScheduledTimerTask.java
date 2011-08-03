@@ -54,7 +54,7 @@ import com.openexchange.timer.ScheduledTimerTask;
 
 /**
  * {@link WrappingScheduledTimerTask} - A scheduled timer task wrapping a {@link ScheduledFuture scheduled future}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class WrappingScheduledTimerTask implements ScheduledTimerTask {
@@ -63,7 +63,7 @@ final class WrappingScheduledTimerTask implements ScheduledTimerTask {
 
     /**
      * Initializes a new {@link WrappingScheduledTimerTask}.
-     * 
+     *
      * @param scheduledFuture
      */
     WrappingScheduledTimerTask(final ScheduledFuture<?> scheduledFuture) {

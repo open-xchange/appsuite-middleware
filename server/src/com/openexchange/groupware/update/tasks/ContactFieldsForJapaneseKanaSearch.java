@@ -65,17 +65,19 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link ContactFieldsForJapaneseKanaSearch}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ContactFieldsForJapaneseKanaSearch extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { ContactInfoField2Text.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);

@@ -63,7 +63,8 @@ public abstract class Value extends Expression {
 		return new EQUALS(this, expression);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "";
 	}
 

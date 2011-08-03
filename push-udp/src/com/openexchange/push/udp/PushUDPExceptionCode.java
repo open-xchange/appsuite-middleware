@@ -66,7 +66,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
      * Missing payload in datagram package.
      */
     NO_CHANNEL("No UDP channel is configured. Check for failed channel opens on server startup.", 15, CATEGORY_ERROR);
-    
+
 
     /**
      * Message of the exception.
@@ -85,7 +85,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param message message.
      * @param category category.
      * @param detailNumber detail number.
@@ -95,7 +95,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
         this.category = category;
         this.detailNumber = detailNumber;
     }
-    
+
     public String getPrefix() {
         return "PUSHUDP";
     }
@@ -111,14 +111,14 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -127,7 +127,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -137,7 +137,7 @@ public enum PushUDPExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

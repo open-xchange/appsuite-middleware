@@ -54,7 +54,7 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * {@link PushObject} - The push object.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushObject extends AbstractPushObject {
@@ -73,7 +73,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Initializes a new {@link PushObject}.
-     * 
+     *
      * @param folderId The folder ID
      * @param module The module
      * @param contextId The context ID
@@ -101,7 +101,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the folder ID.
-     * 
+     *
      * @return The folder ID
      */
     public int getFolderId() {
@@ -110,7 +110,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the module.
-     * 
+     *
      * @return The module
      */
     public int getModule() {
@@ -119,7 +119,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the user IDs as an array.
-     * 
+     *
      * @return The user IDs as an array
      */
     public int[] getUsers() {
@@ -128,7 +128,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the creation date.
-     * 
+     *
      * @return The creation date
      */
     public Date getCreationDate() {
@@ -137,7 +137,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the time stamp or <code>0</code> if not available.
-     * 
+     *
      * @return The time stamp or <code>0</code> if not available
      */
     public long getTimestamp() {

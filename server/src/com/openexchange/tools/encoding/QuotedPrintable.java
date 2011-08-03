@@ -51,7 +51,7 @@ package com.openexchange.tools.encoding;
 
 /**
  * QuotedPrintable
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  */
 

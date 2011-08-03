@@ -57,7 +57,8 @@ public class DISTINCT extends Element {
 		super();
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildDISTINCT(this);
 	}
 }

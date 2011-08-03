@@ -53,21 +53,21 @@ import java.io.Serializable;
 
 /**
  * {@link ElementEvent}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ElementEvent extends Serializable {
 
     /**
      * Gets the element event attribute of the element event object.
-     * 
+     *
      * @return The element event value
      */
     public int getElementEvent();
 
     /**
      * The object on which the event initially occurred.
-     * 
+     *
      * @return The object on which the event initially occurred.
      */
     public Object getSource();

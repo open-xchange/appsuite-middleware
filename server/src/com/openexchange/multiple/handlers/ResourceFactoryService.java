@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ResourceFactoryService} - Factory service for resource module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ResourceFactoryService implements MultipleHandlerFactoryService {
@@ -74,10 +74,12 @@ public final class ResourceFactoryService implements MultipleHandlerFactoryServi
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new ResourceHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "resource";
     }
@@ -90,14 +92,17 @@ public final class ResourceFactoryService implements MultipleHandlerFactoryServi
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             final ResourceRequest request = new ResourceRequest(session);
             final Object retval = request.action(action, jsonObject);
@@ -105,6 +110,7 @@ public final class ResourceFactoryService implements MultipleHandlerFactoryServi
             return retval;
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

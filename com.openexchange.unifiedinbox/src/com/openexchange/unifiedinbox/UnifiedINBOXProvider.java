@@ -60,7 +60,7 @@ import com.openexchange.unifiedinbox.config.UnifiedINBOXProperties;
 
 /**
  * {@link UnifiedINBOXProvider} - The provider for Unified INBOX protocol.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXProvider extends MailProvider {
@@ -74,7 +74,7 @@ public final class UnifiedINBOXProvider extends MailProvider {
 
     /**
      * Gets the singleton instance of Unified INBOX provider.
-     * 
+     *
      * @return The singleton instance of Unified INBOX provider
      */
     public static UnifiedINBOXProvider getInstance() {

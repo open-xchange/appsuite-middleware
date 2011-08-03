@@ -75,6 +75,7 @@ public class NotifyAcceptedDeclinedAsCreator implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return PATH;
     }
@@ -82,8 +83,10 @@ public class NotifyAcceptedDeclinedAsCreator implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractMailFuncs() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.hasTask();
             }

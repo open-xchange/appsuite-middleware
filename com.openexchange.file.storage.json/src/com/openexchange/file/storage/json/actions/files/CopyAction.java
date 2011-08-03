@@ -66,9 +66,9 @@ public class CopyAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(Param.ID).requireFileMetadata();
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final String id = request.getId();
         final File file = request.getFile();
         final String folder = file.getFolderId();
@@ -79,7 +79,7 @@ public class CopyAction extends AbstractWriteAction {
         } else {
             newId = fileAccess.copy(id, folder, file, null, request.getSentColumns());
         }
-        
+
         return new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
     }
 

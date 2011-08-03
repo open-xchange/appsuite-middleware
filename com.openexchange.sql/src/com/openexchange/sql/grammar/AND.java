@@ -57,11 +57,13 @@ public class AND extends Condition {
 		super(left, right);
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildAND(this);
 	}
 
-	public String getSqlKeyword() {
+	@Override
+    public String getSqlKeyword() {
 		return "AND";
 	}
 }

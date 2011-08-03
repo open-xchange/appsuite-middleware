@@ -53,9 +53,9 @@ import java.util.List;
 
 /**
  * The base class for both if and elseif commands
- * 
+ *
  * @author d7
- * 
+ *
  */
 public abstract class IfOrElseIfCommand extends IfStructureCommand {
 

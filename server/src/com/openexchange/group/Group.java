@@ -63,11 +63,11 @@ public class Group implements Cloneable {
 		SIMPLE_NAME(700, "name", "identifier"), //Confused yet?
 		FULL_NAME(701, "display_name", "displayName"),
 		MEMBERS(702, "members", null);
-		
+
 		private int colNumber;
 		private String ajaxName;
 		private String dbName;
-		
+
 		private Field(int colNumber, String ajaxName, String dbName){
 			this.setColNumber(colNumber);
 			this.setAjaxName(ajaxName);
@@ -97,38 +97,40 @@ public class Group implements Cloneable {
 		public String getDbName() {
 			return dbName;
 		}
-		
+
 		public static Field getByColumnNumber(int num){
 			for(Field val: values()){
-				if(val.getColNumber() == num)
-					return val;
+				if(val.getColNumber() == num) {
+                    return val;
+                }
 			}
 			return null;
 		}
-		
+
 		public static int[] intValues(){
 			Field[] vals = values();
 			int[] retVal = new int[vals.length];
-			for(int i = 0; i< vals.length; i++)
-				retVal[i] = vals[i].getColNumber();
+			for(int i = 0; i< vals.length; i++) {
+                retVal[i] = vals[i].getColNumber();
+            }
 			return retVal;
 		}
-		
+
 	}
-	
+
 	public static int[] ALL_COLUMNS = new int[]{
-		Field.FULL_NAME.getColNumber(), 
-		Field.ID.getColNumber(), 
-		Field.LAST_MODIFIED.getColNumber(), 
-		Field.SIMPLE_NAME.getColNumber(), 
+		Field.FULL_NAME.getColNumber(),
+		Field.ID.getColNumber(),
+		Field.LAST_MODIFIED.getColNumber(),
+		Field.SIMPLE_NAME.getColNumber(),
 		Field.MEMBERS.getColNumber()};
 	public static int[] ALL_COLUMNS_EXCEPT_MEMBERS = new int[]{
-		Field.FULL_NAME.getColNumber(), 
-		Field.ID.getColNumber(), 
-		Field.LAST_MODIFIED.getColNumber(), 
+		Field.FULL_NAME.getColNumber(),
+		Field.ID.getColNumber(),
+		Field.LAST_MODIFIED.getColNumber(),
 		Field.SIMPLE_NAME.getColNumber()};
 
-	
+
     /**
      * Unique numeric identifier of this group.
      */
@@ -321,16 +323,21 @@ public class Group implements Cloneable {
     }
 
     public Object get(Group.Field field){
-    	if(field == Field.FULL_NAME)
-    		return getDisplayName();
-    	if(field == Field.SIMPLE_NAME)
-    		return getSimpleName();
-    	if(field == Field.ID)
-    		return getIdentifier();
-    	if(field == Field.LAST_MODIFIED)
-    		return getLastModified();
-    	if(field == Field.MEMBERS)
-    		return getMember();
+    	if(field == Field.FULL_NAME) {
+            return getDisplayName();
+        }
+    	if(field == Field.SIMPLE_NAME) {
+            return getSimpleName();
+        }
+    	if(field == Field.ID) {
+            return getIdentifier();
+        }
+    	if(field == Field.LAST_MODIFIED) {
+            return getLastModified();
+        }
+    	if(field == Field.MEMBERS) {
+            return getMember();
+        }
     	return null;
     }
     /**

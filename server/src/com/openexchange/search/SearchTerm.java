@@ -51,7 +51,7 @@ package com.openexchange.search;
 
 /**
  * {@link SearchTerm} - A search term used to filter elements.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchTerm<O> {
@@ -61,14 +61,14 @@ public interface SearchTerm<O> {
 	}
     /**
      * Gets this search term's operation.
-     * 
+     *
      * @return The search term's operation.
      */
     public Operation getOperation();
 
     /**
      * Gets this search term's operands.
-     * 
+     *
      * @return The search term's operands.
      */
     public O[] getOperands();

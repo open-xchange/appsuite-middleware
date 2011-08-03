@@ -78,7 +78,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 		}
 		final List<ByteRange> ranges = getRanges(req, res);
-		
+
 		long size = 0;
 		long offset = 0;
 		for(final ByteRange range : ranges) {
@@ -90,7 +90,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			size++;
 		}
 		head(res,resource,size);
-		
+
 		BufferedOutputStream out = null;
 		InputStream in = null;
 		try {
@@ -106,7 +106,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				if(offset > range.endOffset) {
 					continue;
 				}
-				int read = 0; 
+				int read = 0;
 				int need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
 				while(need > 0 && (read = in.read(chunk, 0, need)) != -1) {
 					out.write(chunk,0,read);
@@ -114,7 +114,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 					need = (int) Math.min(chunk.length, range.endOffset - offset + 1);
 				}
 			}
-			
+
 		} catch (final IOException e) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
@@ -131,7 +131,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 					LOG.debug("",e);
 				}*/
 			}
-			
+
 			if(in != null) {
 				try {
 					in.close();
@@ -141,18 +141,18 @@ public class WebdavGetAction extends WebdavHeadAction {
 			}
 		}
 	}
-	
+
 	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		final String byteRanges = req.getHeader("Bytes");
 		if(req.getResource().isCollection()) {
 			return new ArrayList<ByteRange>();
 		}
-		
+
 		final long length = req.getResource().getLength();
-		
+
 		final List<ByteRange> retVal = new ArrayList<ByteRange>();
 		if(byteRanges != null) {
-			
+
 			for(String range : byteRanges.split("\\s*,\\s*")) {
 				range = range.trim();
 				final ByteRange ro =parseRange(range, length, req.getUrl());
@@ -161,9 +161,9 @@ public class WebdavGetAction extends WebdavHeadAction {
 				}
 			}
 		}
-		
+
 		String range = req.getHeader("Range");
-		
+
 		if(range != null) {
 			final Matcher m = RANGE_PATTERN.matcher(range);
 			while(m.find()){
@@ -177,7 +177,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 				}
 			}
 		}
-		
+
 		if(retVal.size() == 0) {
 			res.setStatus(HttpServletResponse.SC_OK);
 			return Arrays.asList(new ByteRange(0, req.getResource().getLength()-1));
@@ -225,6 +225,7 @@ public class WebdavGetAction extends WebdavHeadAction {
             endOffset = end;
         }
 
+        @Override
         public int compareTo(final ByteRange arg0) {
             final ByteRange other = arg0;
             return (Long.valueOf(startOffset)).compareTo(Long.valueOf(other.startOffset));

@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link CSVDataRetentionActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVDataRetentionActivator extends DeferredActivator {

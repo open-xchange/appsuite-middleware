@@ -63,7 +63,7 @@ import com.openexchange.sql.grammar.UPDATE;
 
 /**
  * {@link SQLStructure}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -87,8 +87,8 @@ public class SQLStructure {
         SERVICE_ID("serviceId");
 
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
-        
-        
+
+
         private final Column column;
 
         private OAUTH_COLUMN(final String colName) {
@@ -97,7 +97,7 @@ public class SQLStructure {
 
         /**
          * Gets the associated column
-         * 
+         *
          * @return The associated column
          */
         public Column getColumn() {
@@ -106,7 +106,7 @@ public class SQLStructure {
 
         /**
          * Gets this column's associated value from given OAuth account
-         * 
+         *
          * @param account The account
          * @param cid The context identifier
          * @param userId The user identifier
@@ -136,7 +136,7 @@ public class SQLStructure {
 
     /**
      * Performs an INSERT for specified account.
-     * 
+     *
      * @param account The account
      * @param contextId The context identifier
      * @param user The user identifier

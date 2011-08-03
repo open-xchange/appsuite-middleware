@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -55,11 +55,11 @@ public class UserCredentials {
 
     /**
      * Gets the value of the username property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUsername() {
         return username;
@@ -67,11 +67,11 @@ public class UserCredentials {
 
     /**
      * Sets the value of the username property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUsername(String value) {
         this.username = value;
@@ -79,11 +79,11 @@ public class UserCredentials {
 
     /**
      * Gets the value of the password property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -91,11 +91,11 @@ public class UserCredentials {
 
     /**
      * Sets the value of the password property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -103,11 +103,11 @@ public class UserCredentials {
 
     /**
      * Gets the value of the cryptedAuth property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCryptedAuth() {
         return cryptedAuth;
@@ -115,11 +115,11 @@ public class UserCredentials {
 
     /**
      * Sets the value of the cryptedAuth property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCryptedAuth(String value) {
         this.cryptedAuth = value;
@@ -127,11 +127,11 @@ public class UserCredentials {
 
     /**
      * Gets the value of the appKey property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAppKey() {
         return appKey;
@@ -139,11 +139,11 @@ public class UserCredentials {
 
     /**
      * Sets the value of the appKey property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAppKey(String value) {
         this.appKey = value;
@@ -151,11 +151,11 @@ public class UserCredentials {
 
     /**
      * Gets the value of the appSecret property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAppSecret() {
         return appSecret;
@@ -163,11 +163,11 @@ public class UserCredentials {
 
     /**
      * Sets the value of the appSecret property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAppSecret(String value) {
         this.appSecret = value;

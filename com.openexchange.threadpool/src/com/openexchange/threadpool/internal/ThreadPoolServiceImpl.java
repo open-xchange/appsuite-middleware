@@ -74,7 +74,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 /**
  * {@link ThreadPoolServiceImpl} - A thread pool backed by a {@link ThreadPoolExecutor} instance which is accessible via
  * {@link #getExecutor()}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolServiceImpl implements ThreadPoolService {
@@ -83,7 +83,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given properties.
-     * 
+     *
      * @param properties The properties
      * @return A new {@link ThreadPoolServiceImpl} instance
      */
@@ -100,7 +100,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given initial parameters.
-     * 
+     *
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
@@ -135,7 +135,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     /**
      * Creates a new <tt>ThreadPoolServiceImpl</tt> with the given initial parameters.
-     * 
+     *
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
@@ -177,7 +177,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     /**
      * Blocks until all tasks have completed execution after a shutdown request, or the timeout occurs, or the current thread is
      * interrupted, whichever happens first.
-     * 
+     *
      * @param timeout The maximum time in milliseconds to wait
      * @return <code>true</code> if this thread pool terminated and <code>false</code> if the timeout elapsed before termination
      * @throws InterruptedException If interrupted while waiting
@@ -209,7 +209,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      * <p>
      * This implementation cancels tasks via Thread.interrupt, so if any tasks mask or fail to respond to interrupts, they may never
      * terminate.
-     * 
+     *
      * @return A list of tasks that never commenced execution
      */
     public List<Runnable> shutdownNow() {
@@ -362,7 +362,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
     /**
      * Gets the thread pool executor.
-     * 
+     *
      * @return The thread pool executor
      */
     public CustomThreadPoolExecutor getThreadPoolExecutor() {
@@ -437,7 +437,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         /**
          * Creates an {@link CustomExecutorCompletionService} using the supplied executor for base task execution and a
          * {@link LinkedBlockingQueue} as a completion queue.
-         * 
+         *
          * @param executor the executor to use
          * @throws NullPointerException if executor is <tt>null</tt>
          */

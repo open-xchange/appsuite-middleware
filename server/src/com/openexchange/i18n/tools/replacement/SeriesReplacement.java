@@ -62,7 +62,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link SeriesReplacement} - The replacement for series information
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SeriesReplacement extends LocalizedStringReplacement {
@@ -86,7 +86,7 @@ public final class SeriesReplacement extends LocalizedStringReplacement {
 
     /**
      * Initializes a new {@link SeriesReplacement}
-     * 
+     *
      * @param calendarObject The calendar object
      * @param isTask <code>true</code> if calendar object denotes a task; otherwise <code>false</code> for an appointment
      */

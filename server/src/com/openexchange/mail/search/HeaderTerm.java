@@ -62,7 +62,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link HeaderTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderTerm extends SearchTerm<String[]> {
@@ -81,7 +81,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 
     /**
      * Gets the header pattern: An array of {@link String} with length <code>2</code> with header name and header name-
-     * 
+     *
      * @return The header pattern
      */
     @Override

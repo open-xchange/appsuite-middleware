@@ -53,7 +53,7 @@ import com.openexchange.oauth.OAuthConstants;
 
 /**
  * {@link MetaDataField} - Enumeration for OAuth account fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MetaDataField {
@@ -77,7 +77,7 @@ public enum MetaDataField {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {

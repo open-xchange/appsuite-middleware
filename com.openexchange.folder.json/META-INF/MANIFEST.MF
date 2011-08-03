@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.folder.json
 Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.folder.json.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.requesthandler,

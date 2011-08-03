@@ -66,13 +66,13 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author Benjamin Otterbach
  */
 public class AuditActivator extends DeferredActivator {
-	
+
 	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuditActivator.class));
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
-	
+
 	final Dictionary<String,Object> serviceProperties;
-	
+
 	private ServiceRegistration auditServiceRegistration;
 
 	public AuditActivator() {
@@ -81,7 +81,7 @@ public class AuditActivator extends DeferredActivator {
 		serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{
 				"com/openexchange/groupware/*"});
 	}
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return NEEDED_SERVICES;
@@ -125,11 +125,11 @@ public class AuditActivator extends DeferredActivator {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-		
+
 	}
 
 	@Override
-	protected void stopBundle() throws Exception {		
+	protected void stopBundle() throws Exception {
 		try {
             if (null != auditServiceRegistration) {
             	auditServiceRegistration.unregister();

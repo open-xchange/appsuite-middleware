@@ -53,17 +53,17 @@ import com.openexchange.groupware.notify.State.Type;
 
 /**
  * {@link ITipContainer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ITipContainer {
 
-    private ITipMethod method;
+    private final ITipMethod method;
 
-    private Type type;
+    private final Type type;
 
-    private int userId;
-    
+    private final int userId;
+
     public ITipContainer() {
         this(ITipMethod.NO_METHOD, null, -1);
     }

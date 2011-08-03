@@ -55,7 +55,7 @@ import com.openexchange.caching.StatisticElement;
 /**
  * {@link JCSStatElementDelegator} - A {@link StatElement} backed by a {@link StatisticElement} object to which all invocations are
  * delegated.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSStatElementDelegator extends StatElement {

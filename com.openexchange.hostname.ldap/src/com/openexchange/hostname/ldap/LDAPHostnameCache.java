@@ -15,20 +15,20 @@ import com.openexchange.java.Autoboxing;
 public class LDAPHostnameCache {
 
     public final static String REGION_NAME = "LDAPHostname";
-    
+
     private static final ConcurrentMap<Object, ReadWriteLock> contextLocks = new ConcurrentHashMap<Object, ReadWriteLock>();
-    
+
     private static final Object[] EMPTY_ARGS = new Object[0];
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LDAPHostnameCache.class));
-    
+
     private static volatile LDAPHostnameCache singleton;
-    
+
     private Cache cache;
-    
+
     /**
      * Singleton instantiation.
-     * 
+     *
      * @throws OXException If cache instantiation fails
      */
     private LDAPHostnameCache() throws OXException {
@@ -38,7 +38,7 @@ public class LDAPHostnameCache {
 
     /**
      * Gets the singleton instance.
-     * 
+     *
      * @return The singleton instance
      * @throws OXException If instance initialization failed
      */
@@ -70,7 +70,7 @@ public class LDAPHostnameCache {
 
     /**
      * Fetches the appropriate lock.
-     * 
+     *
      * @param key The lock's key
      * @return The appropriate lock
      */
@@ -86,8 +86,8 @@ public class LDAPHostnameCache {
         return l;
     }
 
-    
-    
+
+
     public void addHostnameToCache(final int cid, final String hostname) throws OXException {
         if (null == cache) {
             return;
@@ -104,9 +104,9 @@ public class LDAPHostnameCache {
                 writeLock.unlock();
             }
         }
-        
+
     }
-    
+
     public String getHostnameFromCache(final int cid) {
         if (null == cache) {
             return null;
@@ -119,7 +119,7 @@ public class LDAPHostnameCache {
         } finally {
             readLock.unlock();
         }
-        
+
     }
 
     public void outputSettings() throws OXException {
@@ -154,10 +154,10 @@ public class LDAPHostnameCache {
         sb.append('\n');
         LOG.info(sb.toString());
     }
-    
+
     /**
      * Initializes cache reference.
-     * 
+     *
      * @throws OXException If initializing the cache reference fails
      */
     private void initCache() throws OXException {
@@ -169,5 +169,5 @@ public class LDAPHostnameCache {
         }
         cache = HostnameLDAPServiceRegistry.getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
     }
-    
+
 }

@@ -69,6 +69,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbLinkSQLInterface.class));
 
+    @Override
     public LinkObject[] getLinksOfObject(final int objectId, final int type, final int folder, final int user, final int[] group, final Session sessionobject) throws OXException {
         LinkObject[] lo = null;
         Connection readcon = null;
@@ -87,6 +88,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
         return lo;
     }
 
+    @Override
     public LinkObject[] getLinksByObjectID(final int objectId, final int type, final int user, final int[] group, final Session sessionobject) throws OXException {
         LinkObject[] lo = null;
         Connection readcon = null;
@@ -105,6 +107,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
         return lo;
     }
 
+    @Override
     public void saveLink(final LinkObject l, final int user, final int[] group, final Session so) throws OXException {
         Connection writecon = null;
         Context ctx = null;
@@ -121,6 +124,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
         }
     }
 
+    @Override
     public int[][] deleteLinks(final int id, final int type, final int folder, final int[][] data, final int user, final int[] group, final Session sessionobject) throws OXException {
 
         int[][] resp = null;

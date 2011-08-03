@@ -93,7 +93,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UnifiedINBOXMessageStorage} - The Unified INBOX message storage implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
@@ -128,7 +128,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     /**
      * Initializes a new {@link UnifiedINBOXMessageStorage}.
-     * 
+     *
      * @param access The Unified INBOX access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
@@ -147,7 +147,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
     /**
      * Gets session user's locale
-     * 
+     *
      * @return The session user's locale
      * @throws OXException If retrieving user's locale fails
      */
@@ -254,7 +254,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
                 /*-
-                 * 
+                 *
                 final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                 final int accountId = accountMapEntry.getKey().intValue();
                 // Get account's mail access

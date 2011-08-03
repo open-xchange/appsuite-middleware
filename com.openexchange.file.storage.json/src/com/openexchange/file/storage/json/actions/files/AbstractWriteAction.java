@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractWriteAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractWriteAction extends AbstractFileAction {
@@ -64,17 +64,17 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
         super.before(req);
         req.getFileAccess().startTransaction();
     }
-    
+
     @Override
     protected void success(final AJAXInfostoreRequest req, final AJAXRequestResult result) throws OXException {
         req.getFileAccess().commit();
     }
-    
+
     @Override
     protected void failure(final AJAXInfostoreRequest req, final Throwable throwable) throws OXException {
         req.getFileAccess().rollback();
     }
-    
+
     @Override
     protected void after(final AJAXInfostoreRequest req) throws OXException {
         req.getFileAccess().finish();

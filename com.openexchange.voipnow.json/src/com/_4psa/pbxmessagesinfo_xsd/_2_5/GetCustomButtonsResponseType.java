@@ -13,11 +13,11 @@ import com._4psa.pbxdata_xsd._2_5.CustomButton;
 
 /**
  * Get custom buttons list: response type
- * 
+ *
  * <p>Java class for GetCustomButtonsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCustomButtonsResponseType">
  *   &lt;complexContent>
@@ -42,8 +42,8 @@ import com._4psa.pbxdata_xsd._2_5.CustomButton;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCustomButtonsResponseType", propOrder = {
@@ -61,25 +61,25 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Gets the value of the button property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the button property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getButton().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link GetCustomButtonsResponseType.Button }
-     * 
-     * 
+     *
+     *
      */
     public List<GetCustomButtonsResponseType.Button> getButton() {
         if (button == null) {
@@ -90,11 +90,11 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -102,11 +102,11 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -114,11 +114,11 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Gets the value of the userIdentifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUserIdentifier() {
         return userIdentifier;
@@ -126,11 +126,11 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Sets the value of the userIdentifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUserIdentifier(String value) {
         this.userIdentifier = value;
@@ -138,25 +138,25 @@ public class GetCustomButtonsResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -168,9 +168,9 @@ public class GetCustomButtonsResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -182,8 +182,8 @@ public class GetCustomButtonsResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -197,11 +197,11 @@ public class GetCustomButtonsResponseType {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Boolean }
-         *     
+         *
          */
         public Boolean isStatus() {
             return status;
@@ -209,11 +209,11 @@ public class GetCustomButtonsResponseType {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Boolean }
-         *     
+         *
          */
         public void setStatus(Boolean value) {
             this.status = value;

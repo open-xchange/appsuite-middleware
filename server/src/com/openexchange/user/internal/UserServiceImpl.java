@@ -58,7 +58,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UserServiceImpl} - The {@link UserService} implementation
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserServiceImpl implements UserService {
@@ -70,6 +70,7 @@ public final class UserServiceImpl implements UserService {
         super();
     }
 
+    @Override
     public String getUserAttribute(String name, int userId, Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUserAttribute(name, userId, context);
@@ -78,6 +79,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
         try {
             UserStorage.getInstance().setUserAttribute(name, value, userId, context);
@@ -86,6 +88,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public void setAttribute(String name, String value, int userId, Context context) throws OXException {
         try {
             UserStorage.getInstance().setAttribute(name, value, userId, context);
@@ -94,6 +97,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public User getUser(int uid, Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUser(uid, context);
@@ -102,14 +106,17 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public User[] getUser(Context context, int[] userIds) throws OXException {
         return UserStorage.getInstance().getUser(context, userIds);
     }
 
+    @Override
     public User[] getUser(Context context) throws OXException {
         return UserStorage.getInstance().getUser(context);
     }
 
+    @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().getUserId(loginInfo, context);
@@ -118,14 +125,17 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public void invalidateUser(final Context ctx, final int userId) throws OXException {
         UserStorage.getInstance().invalidateUser(ctx, userId);
     }
 
+    @Override
     public int[] listAllUser(final Context context) throws OXException {
         return UserStorage.getInstance().listAllUser(context);
     }
 
+    @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
@@ -134,10 +144,12 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public int[] resolveIMAPLogin(final String imapLogin, final Context context) throws OXException {
         return UserStorage.getInstance().resolveIMAPLogin(imapLogin, context);
     }
 
+    @Override
     public User searchUser(final String email, final Context context) throws OXException {
         try {
             return UserStorage.getInstance().searchUser(email, context);
@@ -146,6 +158,7 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     public void updateUser(final User user, final Context context) throws OXException {
         try {
             UserStorage.getInstance().updateUser(user, context);
@@ -157,6 +170,7 @@ public final class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean authenticate(final User user, final String password) throws OXException {
         return UserStorage.authenticate(user, password);
     }

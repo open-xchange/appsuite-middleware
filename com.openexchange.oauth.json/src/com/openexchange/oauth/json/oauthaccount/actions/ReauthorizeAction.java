@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReauthorizeAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
@@ -78,17 +78,17 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         }
         final int id = Tools.getUnsignedInteger(accountId);
 
-        
+
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
         final OAuthService oAuthService = getOAuthService();
-        
+
         OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId);
-        
+
         Map<String, Object> arguments = processOAuthArguments(request, session, service);
-        
+
         /*
          * By now it doesn't matter which interaction type is passed
          */

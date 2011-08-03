@@ -55,7 +55,7 @@ public interface Delta<T> extends TimedResult<T> {
 	// Document Metadata
 	public SearchIterator<T> getNew();
 	public SearchIterator<T> getModified();
-	
+
 	// Integer
 	public SearchIterator<T> getDeleted();
 }

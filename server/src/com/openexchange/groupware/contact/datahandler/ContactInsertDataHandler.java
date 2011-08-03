@@ -85,7 +85,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 /**
  * {@link ContactInsertDataHandler} - A data handler for storing VCards into a contact folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactInsertDataHandler implements DataHandler {
@@ -103,14 +103,17 @@ public final class ContactInsertDataHandler implements DataHandler {
         super();
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return ARGS;
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return TYPES;
     }
 
+    @Override
     public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
         final int folder;
         try {

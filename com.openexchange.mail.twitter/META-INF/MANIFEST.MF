@@ -38,5 +38,5 @@ Import-Package: com.openexchange.caching,
  org.apache.commons.logging,
  com.openexchange.log,
  org.osgi.framework
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mail.twitter.osgi.TwitterMailActivator

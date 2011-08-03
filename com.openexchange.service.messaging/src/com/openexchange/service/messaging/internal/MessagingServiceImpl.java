@@ -57,7 +57,7 @@ import com.openexchange.service.messaging.internal.delivery.MessagingDatagramPos
 
 /**
  * {@link MessagingServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingServiceImpl implements MessagingService {
@@ -66,7 +66,7 @@ public final class MessagingServiceImpl implements MessagingService {
 
     /**
      * Initializes a new {@link MessagingServiceImpl}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public MessagingServiceImpl(final DatagramSocket datagramSocket) throws OXException {

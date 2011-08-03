@@ -88,6 +88,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int addedWithVersion() {
         return 17;
     }
@@ -95,6 +96,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
@@ -102,6 +104,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

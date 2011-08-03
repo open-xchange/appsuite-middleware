@@ -58,7 +58,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 /**
  * {@link DelegatingRejectedExecutionHandler} - Delegates to either default handler or task's individual {@link RefusedExecutionBehavior
  * behavior}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegatingRejectedExecutionHandler implements RejectedExecutionHandler {
@@ -69,7 +69,7 @@ public final class DelegatingRejectedExecutionHandler implements RejectedExecuti
 
     /**
      * Initializes a new {@link DelegatingRejectedExecutionHandler}.
-     * 
+     *
      * @param defaultBehavior The default behavior for refused tasks
      * @param threadPool The thread pool
      */

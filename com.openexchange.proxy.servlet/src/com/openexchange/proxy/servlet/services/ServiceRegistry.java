@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.AbstractServiceRegistry;
 
 /**
  * {@link ServiceRegistry} remembers needed services.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ServiceRegistry extends AbstractServiceRegistry {
@@ -66,7 +66,7 @@ public class ServiceRegistry extends AbstractServiceRegistry {
 
     /**
      * Gets the service registry instance.
-     * 
+     *
      * @return The service registry instance
      */
     public static ServiceRegistry getInstance() {

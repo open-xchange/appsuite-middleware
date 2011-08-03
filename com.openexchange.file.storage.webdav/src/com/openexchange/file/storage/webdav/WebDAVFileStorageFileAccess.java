@@ -108,7 +108,7 @@ import com.openexchange.tx.TransactionException;
 
 /**
  * {@link WebDAVFileStorageFileAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageFileAccess {
@@ -445,7 +445,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                              * Not a file
                              */
                             throw WebDAVFileStorageExceptionCodes.NOT_A_FILE.create(id);
-                        }   
+                        }
                         return true;
                     }
                 }

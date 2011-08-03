@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -42,11 +42,11 @@ public class SetCustomButtonStatusRequest {
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCode() {
         return code;
@@ -54,11 +54,11 @@ public class SetCustomButtonStatusRequest {
 
     /**
      * Sets the value of the code property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCode(String value) {
         this.code = value;
@@ -66,7 +66,7 @@ public class SetCustomButtonStatusRequest {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      */
     public boolean isStatus() {
         return status;
@@ -74,7 +74,7 @@ public class SetCustomButtonStatusRequest {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      */
     public void setStatus(boolean value) {
         this.status = value;

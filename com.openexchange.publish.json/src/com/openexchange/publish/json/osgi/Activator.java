@@ -64,7 +64,7 @@ public class Activator extends CompositeBundleActivator {
         new PreferencesActivator(),
         new TrackerActivator()
     };
-    
+
     @Override
     protected BundleActivator[] getActivators() {
         return ACTIVATORS;

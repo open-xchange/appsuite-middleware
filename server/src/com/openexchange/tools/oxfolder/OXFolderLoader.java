@@ -68,7 +68,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link OXFolderLoader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFolderLoader {
@@ -96,7 +96,7 @@ public final class OXFolderLoader {
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -114,7 +114,7 @@ public final class OXFolderLoader {
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -178,7 +178,7 @@ public final class OXFolderLoader {
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -195,7 +195,7 @@ public final class OXFolderLoader {
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readCon A connection with read capability; may be <code>null</code> to fetch from pool
@@ -242,7 +242,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs and names of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -258,7 +258,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs and names of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -293,7 +293,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -309,7 +309,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -344,7 +344,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -358,7 +358,7 @@ public final class OXFolderLoader {
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -426,7 +426,7 @@ public final class OXFolderLoader {
 
         /**
          * Gets the folder ID
-         * 
+         *
          * @return The folder ID
          */
         public int getFolderId() {
@@ -435,7 +435,7 @@ public final class OXFolderLoader {
 
         /**
          * Gets the folder name
-         * 
+         *
          * @return The folder name
          */
         public String getName() {

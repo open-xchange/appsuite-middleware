@@ -51,42 +51,42 @@ package com.openexchange.twitter;
 
 /**
  * {@link Paging} - Controls pagination.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Paging {
 
     /**
      * Gets the page which specifies the page of results to retrieve.
-     * 
+     *
      * @return The page
      */
     int getPage();
 
     /**
      * Sets the page. Specifies the page of results to retrieve.
-     * 
+     *
      * @param page The page
      */
     void setPage(int page);
 
     /**
      * Gets the count which specifies the number of statuses to retrieve. May not be greater than 200.
-     * 
+     *
      * @return The count
      */
     int getCount();
 
     /**
      * Sets the given count. Specifies the number of statuses to retrieve. May not be greater than 200.
-     * 
+     *
      * @param count The count
      */
     void setCount(int count);
 
     /**
      * Sets the given count. Specifies the number of statuses to retrieve. May not be greater than 200.
-     * 
+     *
      * @param count The count
      * @return This paging with new count applied
      */
@@ -94,21 +94,21 @@ public interface Paging {
 
     /**
      * Gets the since id as a <code>long</code>. Returns only statuses with an ID greater than (that is, more recent than) the specified ID.
-     * 
+     *
      * @return The since id
      */
     long getSinceId();
 
     /**
      * Sets the since id as an <code>int</code>. Returns only statuses with an ID greater than (that is, more recent than) the specified ID.
-     * 
+     *
      * @param sinceId The since id
      */
     void setSinceId(int sinceId);
 
     /**
      * Sets the since id as an <code>int</code>. Returns only statuses with an ID greater than (that is, more recent than) the specified ID.
-     * 
+     *
      * @param sinceId The since id
      * @return This paging with new since id applied
      */
@@ -116,14 +116,14 @@ public interface Paging {
 
     /**
      * Sets the since id as a <code>long</code>. Returns only statuses with an ID greater than (that is, more recent than) the specified ID.
-     * 
+     *
      * @param sinceId
      */
     void setSinceId(long sinceId);
 
     /**
      * Sets the since id as a <code>long</code>. Returns only statuses with an ID greater than (that is, more recent than) the specified ID.
-     * 
+     *
      * @param sinceId The since id
      * @return This paging with new since id applied
      */
@@ -131,21 +131,21 @@ public interface Paging {
 
     /**
      * Gets the maximum id. Returns only statuses with an ID less than (that is, older than) or equal to the specified ID.
-     * 
+     *
      * @return The maximum id
      */
     long getMaxId();
 
     /**
      * Sets the maximum id. Returns only statuses with an ID less than (that is, older than) or equal to the specified ID.
-     * 
+     *
      * @param maxId The maximum id
      */
     void setMaxId(long maxId);
 
     /**
      * Sets the maximum id. Returns only statuses with an ID less than (that is, older than) or equal to the specified ID.
-     * 
+     *
      * @param maxId The maximum id
      * @return This paging with new maximum id applied
      */

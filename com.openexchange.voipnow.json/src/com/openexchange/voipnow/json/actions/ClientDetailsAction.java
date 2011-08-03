@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link ClientDetailsAction} - Maps the action to a <tt>clientdetails</tt> action.
  * <p>
  * A client details is initiated using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientInterface> {
@@ -96,7 +96,7 @@ public class ClientDetailsAction extends AbstractVoipNowSOAPAction<ClientInterfa
 		VoipNowServerSetting setting = getSOAPVoipNowServerSetting(session);
 		ClientInterface port = configureStub(setting);
 		GetClientDetailsResponse response = port.getClientDetails(detailRequest, getUserCredentials(setting), new Holder<ServerInfo>());
-		
+
 
 		String email = response.getEmail();
 

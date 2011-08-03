@@ -63,9 +63,9 @@ import com.openexchange.exception.OXException;
  */
 public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
 
-    private ConfigView view;
-    private ConfigurationService config;
-    
+    private final ConfigView view;
+    private final ConfigurationService config;
+
     private Map<String, String> pathMapping = null;
 
     public CascadingConfigObjectRegistry(ConfigView view, ConfigurationService config, Map<String, String> pathMapping) {
@@ -73,12 +73,12 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
         this.config = config;
         this.pathMapping = pathMapping;
     }
-    
+
     public Object get(String path) throws OXException {
         try {
             String configKey = transform(path);
             String relevantFile = view.get(configKey, String.class);
-            
+
             Object yaml = config.getYaml(relevantFile);
             if(yaml == null && !relevantFile.endsWith(".yml")) {
                 yaml = config.getYaml(relevantFile+".yml");
@@ -90,13 +90,13 @@ public class CascadingConfigObjectRegistry implements ConfigObjectRegistry{
         } catch (OXException x) {
             throw new OXException(x);
         }
-        
+
     }
 
     protected String transform(String path) {
         return pathMapping.get(path);
     }
-    
- 
+
+
 
 }

@@ -68,49 +68,49 @@ public interface MemoryFolder {
 
     /**
      * Gets the treeId
-     * 
+     *
      * @return The treeId
      */
     public String getTreeId();
 
     /**
      * Gets the id
-     * 
+     *
      * @return The id
      */
     public String getId();
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName();
 
     /**
      * Gets the parentId
-     * 
+     *
      * @return The parentId
      */
     public String getParentId();
 
     /**
      * Gets the permissions
-     * 
+     *
      * @return The permissions
      */
     public Permission[] getPermissions();
 
     /**
      * Gets the modifiedBy
-     * 
+     *
      * @return The modifiedBy
      */
     public int getModifiedBy();
 
     /**
      * Gets the lastModified
-     * 
+     *
      * @return The lastModified
      */
     public Date getLastModified();

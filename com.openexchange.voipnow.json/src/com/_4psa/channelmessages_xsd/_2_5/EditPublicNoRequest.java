@@ -12,9 +12,9 @@ import com._4psa.channeldata_xsd._2_5.PublicNoInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -26,8 +26,8 @@ import com._4psa.channeldata_xsd._2_5.PublicNoInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -43,11 +43,11 @@ public class EditPublicNoRequest
 
     /**
      * Gets the value of the didID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getDidID() {
         return didID;
@@ -55,11 +55,11 @@ public class EditPublicNoRequest
 
     /**
      * Sets the value of the didID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setDidID(BigInteger value) {
         this.didID = value;

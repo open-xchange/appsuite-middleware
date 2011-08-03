@@ -61,7 +61,7 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
 
 /**
  * {@link ManagementServiceTracker}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
@@ -70,7 +70,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
-     * 
+     *
      * @param context The bundle context
      */
     public ManagementServiceTracker(final BundleContext context) {

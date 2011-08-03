@@ -64,7 +64,7 @@ import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link GetTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GetTest extends TestCase {
@@ -99,28 +99,28 @@ public class GetTest extends TestCase {
         final SimServerSession session = new SimServerSession(null, null, null);
 
         final AJAXRequestResult result = action.perform(requestData, session);
-    
+
         assertNotNull(result);
-        
+
         final Object resultObject = result.getResultObject();
         assertNotNull(resultObject);
         assertTrue(JSONObject.class.isInstance(resultObject));
-    
+
         assertEquals(12, accManager.getId());
         assertSame(session, accManager.getSession());
     }
-    
+
     // Error Cases
-    
+
     public void testMissingParameterID() throws OXException {
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("messagingService", "com.openexchange.twitter");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final GetAction action = new GetAction(null);
-        
+
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
@@ -128,15 +128,15 @@ public class GetTest extends TestCase {
             //SUCCESS
         }
     }
-    
+
     public void testMissingParameterMessagingService() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final GetAction action = new GetAction(null);
-        
+
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
@@ -144,16 +144,16 @@ public class GetTest extends TestCase {
             //SUCCESS
         }
     }
-    
+
     public void testNumberFormatExceptionInID() throws OXException {
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "I'm not a number");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final GetAction action = new GetAction(null);
-        
+
         try {
             action.perform(requestData, session);
             fail("Should have died horribly");
@@ -162,24 +162,24 @@ public class GetTest extends TestCase {
         }
 
     }
-    
+
     public void testOXExceptionInRegistry() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
         registry.setException(new OXException());
-        
+
         final SimAccountManager accManager = new SimAccountManager();
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
-        
+
         service.setId("com.openexchange.twitter");
         registry.add(service);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final GetAction action = new GetAction(registry);
         try {
             action.perform(requestData, session);
@@ -187,27 +187,27 @@ public class GetTest extends TestCase {
         } catch (final OXException x) {
             //SUCCESS
         }
-        
+
     }
-    
+
     public void testOXExceptionInAccountManager() throws OXException {
         final SimMessagingServiceRegistry registry = new SimMessagingServiceRegistry();
 
         final SimAccountManager accManager = new SimAccountManager();
         accManager.setException(new OXException());
-        
+
         final SimMessagingService service = new SimMessagingService();
         service.setAccountManager(accManager);
-        
+
         service.setId("com.openexchange.twitter");
         registry.add(service);
-        
+
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.putParameter("id", "12");
         requestData.putParameter("messagingService", "com.openexchange.twitter");
-        
+
         final SimServerSession session = new SimServerSession(null, null, null);
-        
+
         final GetAction action = new GetAction(registry);
         try {
             action.perform(requestData, session);
@@ -215,7 +215,7 @@ public class GetTest extends TestCase {
         } catch (final OXException x) {
             //SUCCESS
         }
-        
+
     }
-    
+
 }

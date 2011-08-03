@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 /**
  * {@link FileStorageAccountManagerProvider} - Provides the {@link FileStorageAccountManager account manager} appropriate for a certain
  * {@link FileStorageService file storage service}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface FileStorageAccountManagerProvider {
@@ -76,7 +76,7 @@ public interface FileStorageAccountManagerProvider {
 
     /**
      * Whether this provider supports specified {@link FileStorageService file storage service}.
-     * 
+     *
      * @param service The file storage service
      * @return <code>true</code> if this provider supports specified file storage service; otherwise <code>false</code>
      */
@@ -84,7 +84,7 @@ public interface FileStorageAccountManagerProvider {
 
     /**
      * Gets the appropriate account manager for specified {@link FileStorageService file storage service}.
-     * 
+     *
      * @param service The file storage service
      * @return The appropriate account manager for specified file storage service.
      * @throws OXException If an appropriate account manager cannot be returned
@@ -98,7 +98,7 @@ public interface FileStorageAccountManagerProvider {
      * <p>
      * A provider with a ranking of <code>Integer.MAX_VALUE</code> is very likely to be returned as the default service, whereas a provider
      * with a ranking of <code>Integer.MIN_VALUE</code> is very unlikely to be returned.
-     * 
+     *
      * @return The ranking
      */
     int getRanking();

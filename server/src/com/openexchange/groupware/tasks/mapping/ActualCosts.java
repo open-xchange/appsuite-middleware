@@ -66,18 +66,22 @@ public final class ActualCosts implements Mapper<Float> {
         super();
     }
 
+    @Override
     public int getId() {
         return Task.ACTUAL_COSTS;
     }
 
+    @Override
     public boolean isSet(Task task) {
         return task.containsActualCosts();
     }
 
+    @Override
     public String getDBColumnName() {
         return "actual_costs";
     }
 
+    @Override
     public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
         if (null == task.getActualCosts()) {
             stmt.setNull(pos, Types.FLOAT);
@@ -86,6 +90,7 @@ public final class ActualCosts implements Mapper<Float> {
         }
     }
 
+    @Override
     public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
         float actualCosts = result.getFloat(pos);
         if (!result.wasNull()) {
@@ -93,14 +98,17 @@ public final class ActualCosts implements Mapper<Float> {
         }
     }
 
+    @Override
     public boolean equals(Task task1, Task task2) {
         return task1.getActualCosts().equals(task2.getActualCosts());
     }
 
+    @Override
     public Float get(Task task) {
         return task.getActualCosts();
     }
 
+    @Override
     public void set(Task task, Float value) {
         task.setActualCosts(value);
     }

@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Registers the mail account servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccountServletInit implements Initialization {
@@ -81,6 +81,7 @@ public final class MailAccountServletInit implements Initialization {
         super();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -96,12 +97,15 @@ public final class MailAccountServletInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;
         }
-        final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class, true);
-        httpService.unregister(ALIAS);
+        final HttpService httpService = ServerServiceRegistry.getInstance().getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister(ALIAS);
+        }
         LOG.info("Mail account servlet successfully unregistered.");
     }
 }

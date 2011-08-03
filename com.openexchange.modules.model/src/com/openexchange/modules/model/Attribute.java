@@ -58,7 +58,7 @@ package com.openexchange.modules.model;
 public interface Attribute<T extends Model<T>> {
     public Object get(T thing);
     public void set(T thing, Object value);
-    
+
     public String getName();
     public Class getType();
 }

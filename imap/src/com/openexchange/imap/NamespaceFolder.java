@@ -61,14 +61,14 @@ import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link NamespaceFolder} - Represents a namespace folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class NamespaceFolder extends IMAPFolder {
 
     /**
      * Creates a new namespace folder.
-     * 
+     *
      * @param store The IMAP store
      * @param name The folder's name
      * @param separator The folder's separator

@@ -56,14 +56,14 @@ import com.openexchange.pop3.POP3Access;
 
 /**
  * {@link POP3StorageProvider} - Provider for POP3 storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface POP3StorageProvider {
 
     /**
      * Gets an appropriate POP3 storage.
-     * 
+     *
      * @param pop3Access The POP3 access to which the storage shall be bound
      * @param properties The properties for the storage; especially the POP3 {@link POP3StoragePropertyNames#PROPERTY_PATH path}
      * @return An appropriate POP3 storage
@@ -74,7 +74,7 @@ public interface POP3StorageProvider {
 
     /**
      * Gets the appropriate POP3 storage properties.
-     * 
+     *
      * @param pop3Access The POP3 access to which the storage properties belong
      * @return The appropriate POP3 storage properties
      * @throws OXException If no such storage properties can be found
@@ -83,21 +83,21 @@ public interface POP3StorageProvider {
 
     /**
      * Gets the POP3 storage name.
-     * 
+     *
      * @return The POP3 storage name
      */
     public String getPOP3StorageName();
 
     /**
      * Gets the {@link MailAccountDeleteListener delete listeners} for this provider.
-     * 
+     *
      * @return The {@link MailAccountDeleteListener delete listeners} or an empty list
      */
     public List<MailAccountDeleteListener> getDeleteListeners();
 
     /**
      * Indicates whether to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence.
-     * 
+     *
      * @return <code>true</code> to unregister {@link MailAccountDeleteListener delete listeners} on provider's absence; otherwise
      *         <code>false</code>
      */

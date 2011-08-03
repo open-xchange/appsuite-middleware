@@ -84,14 +84,14 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CrawlerUpdateCLT {
-    
+
     private static final Options toolkitOptions;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerUpdateCLT.class));
 
     static {
         toolkitOptions = new Options();
-        toolkitOptions.addOption("h", "help", false, "Prints a help text");        
+        toolkitOptions.addOption("h", "help", false, "Prints a help text");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -101,7 +101,7 @@ public class CrawlerUpdateCLT {
         final HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp("crawlerupdate \n This updates the crawlers on this machine according to the settings in the file crawler.properties", toolkitOptions);
     }
-    
+
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
         try {
@@ -128,7 +128,7 @@ public class CrawlerUpdateCLT {
                     }
                 }
             }
-            
+
 
             String jmxLogin = null;
             if (cmd.hasOption('l')) {
@@ -142,7 +142,7 @@ public class CrawlerUpdateCLT {
             final Map<String, Object> environment;
             if (jmxLogin == null || jmxPassword == null) {
                 environment = null;
-            } else {                
+            } else {
                 environment = new HashMap<String, Object>(1);
                 environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword ));
             }

@@ -54,7 +54,7 @@ import java.util.Locale;
 /**
  * A template is some text with place holders that are filled using the
  * RenderMap or the substitutions.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -63,7 +63,7 @@ public interface Template {
 
     /**
      * Renders this template with given render map
-     * 
+     *
      * @param renderMap The render map
      * @param locale The template will be rendered in the given locale.
      * @return The rendered template
@@ -72,7 +72,7 @@ public interface Template {
 
     /**
      * Renders this template with given string array
-     * 
+     *
      * @param substitutions a string array with the replacements in the order of
      *            place holders.
      * @param locale The template will be rendered in the given locale.

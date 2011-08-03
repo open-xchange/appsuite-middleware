@@ -12,11 +12,11 @@ import com._4psa.extensiondata_xsd._2_5.QueueMember;
 
 /**
  * Get queues for phone terminal membership: response type
- * 
+ *
  * <p>Java class for GetQueueMembershipResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetQueueMembershipResponseType">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.extensiondata_xsd._2_5.QueueMember;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetQueueMembershipResponseType", propOrder = {
@@ -44,25 +44,25 @@ public class GetQueueMembershipResponseType {
 
     /**
      * Gets the value of the member property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the member property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMember().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link QueueMember }
-     * 
-     * 
+     *
+     *
      */
     public List<QueueMember> getMember() {
         if (member == null) {
@@ -73,25 +73,25 @@ public class GetQueueMembershipResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {

@@ -12,11 +12,11 @@ import com._4psa.extensiondata_xsd._2_5.CardCodeList;
 
 /**
  * Get callign card codes: response data
- * 
+ *
  * <p>Java class for GetCardCodeResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetCardCodeResponseType">
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com._4psa.extensiondata_xsd._2_5.CardCodeList;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetCardCodeResponseType", propOrder = {
@@ -44,11 +44,11 @@ public class GetCardCodeResponseType {
 
     /**
      * Gets the value of the userID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getUserID() {
         return userID;
@@ -56,11 +56,11 @@ public class GetCardCodeResponseType {
 
     /**
      * Sets the value of the userID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setUserID(BigInteger value) {
         this.userID = value;
@@ -68,25 +68,25 @@ public class GetCardCodeResponseType {
 
     /**
      * Gets the value of the code property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the code property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getCode().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link CardCodeList }
-     * 
-     * 
+     *
+     *
      */
     public List<CardCodeList> getCode() {
         if (code == null) {

@@ -66,7 +66,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link HttpSessionWrapper} - A wrapper class for {@link HttpSession}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpSessionWrapper implements HttpSession {
@@ -98,7 +98,7 @@ public class HttpSessionWrapper implements HttpSession {
 
     /**
      * Initializes a new {@link HttpSessionWrapper}.
-     * 
+     *
      * @param id The HTTP session identifier
      */
     public HttpSessionWrapper(final String id) {
@@ -121,10 +121,10 @@ public class HttpSessionWrapper implements HttpSession {
         creationTime = lastAccessedTime = System.currentTimeMillis();
         this.id = id;
     }
- 
+
     /**
      * Touches this session's last-accessed time stamp.
-     * 
+     *
      * @return This session with last-accessed time stamp updated
      */
     public HttpSessionWrapper touch() {
@@ -132,30 +132,37 @@ public class HttpSessionWrapper implements HttpSession {
         return this;
     }
 
+    @Override
     public Object getAttribute(final String attributeName) {
         return attributes.get(attributeName);
     }
 
+    @Override
     public Enumeration<?> getAttributeNames() {
         return new IteratorEnumeration(attributes.keySet().iterator());
     }
 
+    @Override
     public long getCreationTime() {
         return creationTime;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public long getLastAccessedTime() {
         return lastAccessedTime;
     }
 
+    @Override
     public int getMaxInactiveInterval() {
         return maxInactiveIntervall;
     }
 
+    @Override
     public ServletContext getServletContext() {
         return servletContext;
     }
@@ -164,18 +171,22 @@ public class HttpSessionWrapper implements HttpSession {
         servletContext = context;
     }
 
+    @Override
     public HttpSessionContext getSessionContext() {
         return sessionContext;
     }
 
+    @Override
     public Object getValue(final String valueName) {
         return values.get(valueName);
     }
 
+    @Override
     public String[] getValueNames() {
         return values.keySet().toArray(new String[values.size()]);
     }
 
+    @Override
     public void invalidate() {
         /*
          * Remove attributes
@@ -200,6 +211,7 @@ public class HttpSessionWrapper implements HttpSession {
         HttpSessionManagement.removeHttpSession(id);
     }
 
+    @Override
     public boolean isNew() {
         return newSession;
     }
@@ -208,6 +220,7 @@ public class HttpSessionWrapper implements HttpSession {
         this.newSession = newSession;
     }
 
+    @Override
     public void putValue(final String valueName, final Object value) {
         values.put(valueName, value);
         if (value instanceof HttpSessionBindingListener) {
@@ -216,6 +229,7 @@ public class HttpSessionWrapper implements HttpSession {
         }
     }
 
+    @Override
     public void removeAttribute(final String attributeName) {
         final Object removedObj = attributes.remove(attributeName);
         if (removedObj instanceof HttpSessionBindingListener) {
@@ -224,6 +238,7 @@ public class HttpSessionWrapper implements HttpSession {
         }
     }
 
+    @Override
     public void removeValue(final String valueName) {
         final Object removedObj = values.remove(valueName);
         if (removedObj instanceof HttpSessionBindingListener) {
@@ -232,6 +247,7 @@ public class HttpSessionWrapper implements HttpSession {
         }
     }
 
+    @Override
     public void setAttribute(final String attributeName, final Object attributeValue) {
         if (attributeValue != null) {
             attributes.put(attributeName, attributeValue);
@@ -242,6 +258,7 @@ public class HttpSessionWrapper implements HttpSession {
         }
     }
 
+    @Override
     public void setMaxInactiveInterval(final int maxInactiveIntervall) {
         if (maxInactiveIntervall < 0 || maxInactiveIntervall > cookieTTL) {
             LOG.warn("Specified maxInactiveIntervall is negative or exceeds max. cookie time-to-live. Using max. cookie time-to-live: " + cookieTTL + "seconds");
@@ -259,10 +276,12 @@ public class HttpSessionWrapper implements HttpSession {
             this.iter = iter;
         }
 
+        @Override
         public boolean hasMoreElements() {
             return iter.hasNext();
         }
 
+        @Override
         public Object nextElement() {
             return iter.next();
         }

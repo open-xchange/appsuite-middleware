@@ -70,7 +70,7 @@ import com.openexchange.publish.json.types.EntityMap;
 
 /**
  * {@link PublicationWriter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PublicationWriter {
@@ -79,7 +79,7 @@ public class PublicationWriter {
 
     private static final ValueWriterSwitch valueWrite = new ValueWriterSwitch();
 
-    private Map<String, EntityType> entityTypes = new EntityMap();
+    private final Map<String, EntityType> entityTypes = new EntityMap();
 
     public PublicationWriter() {
     }

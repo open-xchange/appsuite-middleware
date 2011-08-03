@@ -69,7 +69,7 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
  * {@link MessagingComparator} - A {@link Comparator comparator} for {@link MessagingMessage messages}.
  * <p>
  * <b>Note</b>: Users must catch {@link RuntimeException}s that wrap messaging exceptions.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @since Open-Xchange v6.16
  */
@@ -106,7 +106,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
 
     /**
      * Initializes a new {@link MessagingComparator} to sort by given field in ascending order.
-     * 
+     *
      * @param field The field to sort by
      * @param locale The locale to use for sorting
      * @throws OXException If initialization fails
@@ -117,7 +117,7 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
 
     /**
      * Initializes a new {@link MessagingComparator} to sort by given field in specified order.
-     * 
+     *
      * @param field The field to sort by
      * @param descending <code>true</code> to sort in descending order; otherwise <code>false</code> for ascending order
      *  @param locale The locale to use for sorting
@@ -189,10 +189,10 @@ public class MessagingComparator implements Comparator<MessagingMessage> {
             if (String.class.isInstance(c1)) {
                 final String s1 = (String) c1;
                 final String s2 = (String) c2;
-                
+
                 return collator.compare(s1, s2);
             }
-            
+
             if (Comparable.class.isInstance(c1)) {
                 return ((Comparable<Object>) c1).compareTo(c2);
             }

@@ -64,7 +64,7 @@ import com.openexchange.user.json.field.UserField;
 
 /**
  * {@link Comparators} - TODO Short description of this class' purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Comparators {
@@ -151,7 +151,7 @@ public final class Comparators {
 
         /**
          * Initializes a new {@link LocalizedComparator}.
-         * 
+         *
          * @param locale The locale
          */
         protected LocalizedComparator(final Locale locale) {
@@ -179,7 +179,7 @@ public final class Comparators {
 
     /**
      * Gets the appropriate {@link Comparator} for given {@link UserField user field}.
-     * 
+     *
      * @param userField The user field
      * @param sessionLocale The session user's locale
      * @param descending <code>true</code> to sort in descending order; otherwise <code>false</code>

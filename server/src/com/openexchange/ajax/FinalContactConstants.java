@@ -68,13 +68,13 @@ public enum FinalContactConstants {
     PARAMETER_FOLDER_ID2("folder2"),
     PARAMETER_CONTACT_ID1("id1"),
     PARAMETER_CONTACT_ID2("id2");
-    
+
     private String name;
 
     private FinalContactConstants(String name) {
         this.name = name;
     }
-    
+
     public String getName(){
         return this.name;
     }

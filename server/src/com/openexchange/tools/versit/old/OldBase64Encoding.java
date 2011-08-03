@@ -67,6 +67,7 @@ public class OldBase64Encoding implements OldEncoding {
         super();
     }
 
+    @Override
     public byte[] decode(final OldScanner s) throws IOException {
         final StringBuilder sb = new StringBuilder();
         boolean newline = false;
@@ -77,6 +78,7 @@ public class OldBase64Encoding implements OldEncoding {
         return Base64.decode(sb.toString());
     }
 
+    @Override
     public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
         fw.rawStart();
         fw.write(Base64.encode(b));

@@ -54,7 +54,7 @@ import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 
 /**
  * {@link FacebookMessagingMessage} - Extends {@link MimeMessagingMessage} by facebook user identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -89,7 +89,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Gets the session user's locale:
-     * 
+     *
      * @return The locale;
      */
     public Locale getLocale() {
@@ -100,7 +100,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
      * Appends specified text. Does the same as <code>getMessageText().append(textContent)</code>.
      * <p>
      * Text should already be HTML-escaped: '<' ==> &amp;lt;
-     * 
+     *
      * @param textContent The text to append
      */
     public void appendTextContent(final String textContent) {
@@ -109,7 +109,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Gets the message text.
-     * 
+     *
      * @return The message text
      */
     public StringBuilder getMessageText() {
@@ -118,7 +118,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Sets the toString() text.
-     * 
+     *
      * @param toString The toString() text
      */
     public void setToString(final String toString) {
@@ -132,7 +132,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Gets the <i>"From"</i> entity identifier.
-     * 
+     *
      * @return The <i>"From"</i> entity identifier
      */
     public long getFromId() {
@@ -141,7 +141,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Sets the <i>"From"</i> entity identifier.
-     * 
+     *
      * @param fromId The <i>"From"</i> entity identifier to set
      */
     public void setFromId(final long fromId) {
@@ -150,7 +150,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Checks if entity denotes a group.
-     * 
+     *
      * @return <code>true</code> if entity denotes a group; otherwise <code>false</code>
      */
     public boolean isGroup() {
@@ -159,7 +159,7 @@ public final class FacebookMessagingMessage extends MimeMessagingMessage {
 
     /**
      * Sets whether entity denotes a group.
-     * 
+     *
      * @param group <code>true</code> if entity denotes a group; otherwise <code>false</code>
      */
     public void setGroup(final boolean group) {

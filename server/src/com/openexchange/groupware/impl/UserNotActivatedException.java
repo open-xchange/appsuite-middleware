@@ -61,23 +61,23 @@ package com.openexchange.groupware.impl;
 public class UserNotActivatedException extends Exception
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4194856090798310328L;
 
 	public UserNotActivatedException() {
 		super();
 	}
-	
+
 	public UserNotActivatedException(final String message) {
 		super(message);
 	}
-	
+
 	public UserNotActivatedException(final String message, final Exception exc) {
 		super(message, exc);
 	}
-	
+
 	public UserNotActivatedException(final Exception exc) {
 		super(exc);
-	}	
+	}
 }

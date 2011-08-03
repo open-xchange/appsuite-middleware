@@ -71,6 +71,7 @@ public class Module extends AbstractModules {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.extras", "module" };
     }

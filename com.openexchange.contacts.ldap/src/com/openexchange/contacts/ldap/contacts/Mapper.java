@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 public class Mapper {
 
     protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Mapper.class));
-    
+
     public interface SetterDateClosure {
 
         void set(Date attribute);
@@ -573,9 +573,9 @@ public class Mapper {
                 retval.setPosition(attribute);
             }
         });
-        
+
         commonParts(cols, folderid, adminid, retval, mappings, getter);
-        
+
         return retval;
     }
 
@@ -620,7 +620,7 @@ public class Mapper {
             }
         }
     }
-    
+
     private static void dateSetter(final ParameterObject parameterObject, final String attributename, final int field, final SetterDateClosure closure) throws OXException {
         if (parameterObject.getCols().contains(field)) {
             if (null != attributename && 0 != attributename.length()) {
@@ -631,7 +631,7 @@ public class Mapper {
             }
         }
     }
-    
+
     public static Contact getDistriContact(final LdapGetter getter, final Set<Integer> cols, final FolderProperties folderprop, final UidInterface uidInterface, final int folderid, final int adminid, final String[] attributes) throws OXException {
         final Contact retval = new Contact();
 
@@ -645,14 +645,14 @@ public class Mapper {
                 retval.setDisplayName(getter.getAttribute(displayname));
             }
         }
-        
+
         if (cols.contains(Contact.SUR_NAME)) {
             final String displayname = mappings.getDistributionlistname();
             if (null != displayname && 0 != displayname.length()) {
                 retval.setSurName(getter.getAttribute(displayname));
             }
         }
-        
+
         if (cols.contains(DataObject.OBJECT_ID)) {
             final String uniqueid = mappings.getDistributionuid();
             if (folderprop.isMemorymapping()) {
@@ -669,14 +669,14 @@ public class Mapper {
 
     /**
      * All those setting which are the same between users and distributionlists
-     * 
+     *
      * @param cols
      * @param folderid
      * @param adminid
      * @param retval
      * @param mappings TODO
      * @param getter TODO
-     * @throws OXException 
+     * @throws OXException
      */
     // protected to be able to test this
     protected static void commonParts(final Set<Integer> cols, final int folderid, final int adminid, final Contact retval, final Mappings mappings, final LdapGetter getter) throws OXException {
@@ -686,7 +686,7 @@ public class Mapper {
         if (cols.contains(Contact.CREATED_BY)) {
             retval.setCreatedBy(adminid);
         }
-        
+
         // Finally we add the timestamps here
         if (cols.contains(DataObject.CREATION_DATE)) {
             // A timestamp must be provided, so if it can be fetched from LDAP (due to configuration) this must be self-generated
@@ -788,7 +788,7 @@ public class Mapper {
         }
 
         retval.setEmailfield(DistributionListEntryObject.INDEPENDENT);
-        
+
         retval.setFolderID(folderid);
         return retval;
     }

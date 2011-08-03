@@ -66,7 +66,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     private final String[] dependencies;
     private final int version;
     private final DatabaseService databaseService;
-    
+
     public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
         super();
         this.create = create;
@@ -75,28 +75,34 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
         this.databaseService = databaseService;
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         // Creating Tables is blocking and schema level.
-        return new Attributes(); 
-        
+        return new Attributes();
+
     }
 
+    @Override
     public String[] getDependencies() {
         return dependencies;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
+    @Override
     public int addedWithVersion() {
         return version;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.HIGH.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
         try {

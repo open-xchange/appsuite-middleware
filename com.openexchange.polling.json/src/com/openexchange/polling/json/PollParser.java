@@ -69,34 +69,34 @@ public class PollParser {
     public Poll parse(final JSONObject obj) throws OXException {
         try {
             final Poll poll = new Poll();
-            
+
             poll.setTitle(obj.getString("title"));
-            
-            
+
+
             final JSONArray array = obj.getJSONArray("questions");
             final List<Question> questions = new ArrayList<Question>(array.length());
             for(int i = 0, size = array.length(); i < size; i++) {
                 final JSONObject q = array.getJSONObject(i);
                 final Question question = new Question();
                 question.setQuestion(q.getString("question"));
-                
+
                 final JSONArray array2 = q.getJSONArray("options");
                 final List<String> answerOptions = new ArrayList<String>(array2.length());
                 for(int j = 0, size2 = array2.length(); j < size2; j++) {
                     final String option = array2.getString(j);
                     answerOptions.add(option);
                 }
-                
+
                 question.setAnswerOptions(answerOptions);
                 questions.add(question);
             }
-            
+
             poll.setQuestions(questions);
-            
+
             return poll;
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create(x.getMessage());
         }
-        
+
     }
 }

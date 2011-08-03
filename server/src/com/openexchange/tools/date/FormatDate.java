@@ -77,7 +77,7 @@ public class FormatDate {
      * Laender Code = en : Pattern String = <BR>
      * Laender Code = en : Pattern String = <BR>
      * Laender Code = unknown : Pattern String = <BR>
-     * 
+     *
      * @param String Sprach Code
      * @param String Laender Code
      */
@@ -92,7 +92,7 @@ public class FormatDate {
 
     /**
      * Mit dieser Methode kann ein Datum konvertiert werden, wobei das Original Format sowie das Ausgabe Format angegeben werden muss.
-     * 
+     *
      * @param String Das Datum das konvertiert werden soll.
      * @param String Format des Original Datum.
      * @param String Format des gewuenschten Datums.
@@ -119,7 +119,7 @@ public class FormatDate {
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
      * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
-     * 
+     *
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum
@@ -140,7 +140,7 @@ public class FormatDate {
     /**
      * Ein Standart Datum wird Postgres gerecht konvertiert.<BR>
      * Rueckgabe Formatierung : "yyyy-dd-MM HH:mm:ss"
-     * 
+     *
      * @param String Das Datum das konvertiert werden soll.
      * @param boolean gibt an ob im Ausgabe Format die Zeitangabe mit enthalten sein soll.
      * @return String - Formatiertes Datum

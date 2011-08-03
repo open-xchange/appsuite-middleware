@@ -12,11 +12,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Channel list data
- * 
+ *
  * <p>Java class for ChannelList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ChannelList">
  *   &lt;complexContent>
@@ -50,8 +50,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ChannelList", propOrder = {
@@ -81,11 +81,11 @@ public class ChannelList {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -93,11 +93,11 @@ public class ChannelList {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -105,11 +105,11 @@ public class ChannelList {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -117,11 +117,11 @@ public class ChannelList {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -129,11 +129,11 @@ public class ChannelList {
 
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getType() {
         return type;
@@ -141,11 +141,11 @@ public class ChannelList {
 
     /**
      * Sets the value of the type property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setType(String value) {
         this.type = value;
@@ -153,7 +153,7 @@ public class ChannelList {
 
     /**
      * Gets the value of the status property.
-     * 
+     *
      */
     public boolean isStatus() {
         return status;
@@ -161,7 +161,7 @@ public class ChannelList {
 
     /**
      * Sets the value of the status property.
-     * 
+     *
      */
     public void setStatus(boolean value) {
         this.status = value;
@@ -169,7 +169,7 @@ public class ChannelList {
 
     /**
      * Gets the value of the paid property.
-     * 
+     *
      */
     public boolean isPaid() {
         return paid;
@@ -177,7 +177,7 @@ public class ChannelList {
 
     /**
      * Sets the value of the paid property.
-     * 
+     *
      */
     public void setPaid(boolean value) {
         this.paid = value;
@@ -185,11 +185,11 @@ public class ChannelList {
 
     /**
      * Gets the value of the flow property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFlow() {
         return flow;
@@ -197,11 +197,11 @@ public class ChannelList {
 
     /**
      * Sets the value of the flow property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFlow(String value) {
         this.flow = value;
@@ -209,11 +209,11 @@ public class ChannelList {
 
     /**
      * Gets the value of the crDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public XMLGregorianCalendar getCrDate() {
         return crDate;
@@ -221,11 +221,11 @@ public class ChannelList {
 
     /**
      * Sets the value of the crDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link XMLGregorianCalendar }
-     *     
+     *
      */
     public void setCrDate(XMLGregorianCalendar value) {
         this.crDate = value;

@@ -76,7 +76,7 @@ import com.openexchange.tools.regex.RFC2616Regex;
  * AJPv13ForwardRequest - this class' purpose is mainly to fill the http servlet request from AJP's forward request, to identify servlet
  * instance through request path and to apply the load-balancing and http-session-identifying <tt>JSESSIONID</tt> cookie or URL parameter to
  * the http serlvet response
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ForwardRequest extends AJPv13Request {
@@ -158,7 +158,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     /**
      * Initializes a new {@link AJPv13ForwardRequest}
-     * 
+     *
      * @param payloadData The payload data
      */
     public AJPv13ForwardRequest(final byte[] payloadData) {
@@ -348,7 +348,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request
-     * 
+     *
      * @param servletRequest The servlet request
      * @param queryStr The query string to be parsed
      * @throws UnsupportedEncodingException If charset provided by servlet request is not supported
@@ -359,7 +359,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     /**
      * Parses a query string and puts resulting parameters into given servlet request.
-     * 
+     *
      * @param servletRequest The servlet request
      * @param queryStr The query string to be parsed
      * @param fromAttribute <code>true</code> if query string comes from request's attributes; otherwise <code>false</code>
@@ -520,7 +520,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     /**
      * Re-Parse previous cookie in list
-     * 
+     *
      * @param headerValue The complete cookie header value
      * @param skipped The skipped string
      * @param valueBuilder A string builder needed to compose proper cookie value
@@ -565,7 +565,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
     /**
      * Prepares passed cookie value.
-     * 
+     *
      * @param cookieValue The cookie value to prepare
      * @return The prepared cookie value.
      */
@@ -598,12 +598,12 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             } else if (0x0a == attrNum) {
                 /*-
                  * "req_attribute": This optional attribute has a special syntax.
-                 * 
+                 *
                  * (sc_a_req_attribute string)(string) => 0a <attribute-name> <attribute-value>
-                 * 
+                 *
                  * Example:
                  * 0a 00 0f 41 4a 50 5f 52 45 4d 4f 54 45 5f 50 4f 52 54 00 00 05 33 33 38 36 36 00
-                 * 
+                 *
                  * <req_attribute> AJP_REMOTE_PORT 33866
                  */
                 servletRequest.setAttribute(parseString(), parseString());
@@ -786,7 +786,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         }
         if (encoded) {
             try {
-                return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING);
+                return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING == null ? "UTF-8" : DEFAULT_ENCODING);
             } catch (final IOException e) {
                 throw new AJPv13Exception(AJPCode.IO_ERROR, true, e, e.getMessage());
             } catch (final MessagingException e) {

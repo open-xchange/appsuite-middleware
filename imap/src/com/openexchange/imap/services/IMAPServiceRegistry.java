@@ -54,7 +54,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link IMAPServiceRegistry} - A registry for services needed by IMAP bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPServiceRegistry {
@@ -63,7 +63,7 @@ public final class IMAPServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {
@@ -72,7 +72,7 @@ public final class IMAPServiceRegistry {
 
     /**
      * Gets the service from registry defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
@@ -83,7 +83,7 @@ public final class IMAPServiceRegistry {
 
     /**
      * Gets the service from registry defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>

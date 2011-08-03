@@ -6,7 +6,7 @@ Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-ClassPath: lib/jmdns-3.1.6.jar,
  .
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,

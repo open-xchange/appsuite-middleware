@@ -158,6 +158,7 @@ public final class ReportingTool {
         List<List<Object>> data2 = new ArrayList<List<Object>>();
         data2.add(Arrays.asList((Object) "id", "users", "age", "created", "mappings" ));
         TreeSet<List<Object>> sorted = new TreeSet<List<Object>>(new Comparator<List<Object>>() {
+            @Override
             public int compare(List<Object> o1, List<Object> o2) {
                 Integer contextId1 = (Integer) o1.get(0);
                 Integer contextId2 = (Integer) o2.get(0);

@@ -65,9 +65,9 @@ public class DurationValueDefinition extends ValueDefinition {
 
     /**
      * Transformed LL(1) grammar:
-     * 
+     *
      * <pre>
-     * 
+     *
      *     	 value  = ([&quot;+&quot;] / &quot;-&quot;) &quot;P&quot; (time / 1*DIGIT (date / week))
      *     	 date   = day [time]
      *     	 day    = &quot;D&quot;
@@ -76,7 +76,7 @@ public class DurationValueDefinition extends ValueDefinition {
      *     	 hour   = &quot;H&quot; [1*DIGIT minute]
      *     	 minute = &quot;M&quot; [1*DIGIT second]
      *     	 second = &quot;S&quot;
-     * 
+     *
      * </pre>
      */
     @Override

@@ -55,7 +55,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link Results}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Results {
@@ -67,7 +67,7 @@ public class Results {
     public static <T> TimedResult<T> emptyTimedResult() {
         return new EmptyTimedResult<T>();
     }
-    
+
     public static <T> Delta<T> emptyDelta() {
         return new EmptyDelta<T>();
     }
@@ -89,11 +89,11 @@ public class Results {
     }
 
     private static final class EmptyDelta<T> implements Delta<T> {
-        
+
         public EmptyDelta() {
             // Do Nothing
         }
-        
+
         public SearchIterator<T> getDeleted() {
             return emptyIterator();
         }

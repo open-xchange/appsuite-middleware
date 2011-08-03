@@ -64,10 +64,11 @@ import com.openexchange.webdav.protocol.WebdavProperty;
  */
 public class InMemoryMixin implements PropertyMixin {
 
-    private Map<String, WebdavProperty> properties = new HashMap<String, WebdavProperty>();
+    private final Map<String, WebdavProperty> properties = new HashMap<String, WebdavProperty>();
 
     private PropertyMixin mixin = null;
-    
+
+    @Override
     public List<WebdavProperty> getAllProperties() throws OXException {
         ArrayList<WebdavProperty> allProperties = new ArrayList<WebdavProperty>(properties.values());
         if (mixin != null) {
@@ -76,6 +77,7 @@ public class InMemoryMixin implements PropertyMixin {
         return allProperties;
     }
 
+    @Override
     public WebdavProperty getProperty(String namespace, String name) throws OXException {
         WebdavProperty webdavProperty = properties.get(namespace+":"+name);
         if (webdavProperty == null && mixin != null) {
@@ -83,14 +85,14 @@ public class InMemoryMixin implements PropertyMixin {
         }
         return webdavProperty;
     }
-    
+
     public void setMixin(PropertyMixin mixin) {
         this.mixin = mixin;
     }
-    
+
     public void setProperty(WebdavProperty property) {
         properties.put(property.getNamespace()+":"+property.getName(), property);
     }
-    
- 
+
+
 }

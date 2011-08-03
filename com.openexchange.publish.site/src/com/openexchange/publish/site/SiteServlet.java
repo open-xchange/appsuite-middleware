@@ -85,7 +85,7 @@ import com.openexchange.tools.oxfolder.OXFolderLoader.IdAndName;
 
 /**
  * {@link SiteServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SiteServlet extends HttpServlet {
@@ -214,14 +214,14 @@ public class SiteServlet extends HttpServlet {
                 b.append(l).append("\n");
             }
             f.setDescription(b.toString());
-            
+
             fileAccess.saveFileMetadata(f, file.getSequenceNumber());
         } finally {
             if (r != null) {
                 r.close();
             }
         }
-        
+
     }
 
     private void sendDescription(final File file, final HttpServletResponse resp) throws IOException {

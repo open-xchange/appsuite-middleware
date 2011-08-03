@@ -9,11 +9,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * User statistics data
- * 
+ *
  * <p>Java class for UserStatistics complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="UserStatistics">
  *   &lt;complexContent>
@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "UserStatistics", propOrder = {
@@ -47,11 +47,11 @@ public class UserStatistics {
 
     /**
      * Gets the value of the total property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTotal() {
         return total;
@@ -59,11 +59,11 @@ public class UserStatistics {
 
     /**
      * Sets the value of the total property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTotal(BigInteger value) {
         this.total = value;
@@ -71,11 +71,11 @@ public class UserStatistics {
 
     /**
      * Gets the value of the active property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getActive() {
         return active;
@@ -83,11 +83,11 @@ public class UserStatistics {
 
     /**
      * Sets the value of the active property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setActive(BigInteger value) {
         this.active = value;
@@ -95,11 +95,11 @@ public class UserStatistics {
 
     /**
      * Gets the value of the expired property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExpired() {
         return expired;
@@ -107,11 +107,11 @@ public class UserStatistics {
 
     /**
      * Sets the value of the expired property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExpired(BigInteger value) {
         this.expired = value;
@@ -119,11 +119,11 @@ public class UserStatistics {
 
     /**
      * Gets the value of the suspended property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getSuspended() {
         return suspended;
@@ -131,11 +131,11 @@ public class UserStatistics {
 
     /**
      * Sets the value of the suspended property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setSuspended(BigInteger value) {
         this.suspended = value;

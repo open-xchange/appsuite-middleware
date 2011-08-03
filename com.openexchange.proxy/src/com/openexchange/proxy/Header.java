@@ -51,14 +51,14 @@ package com.openexchange.proxy;
 
 /**
  * {@link Header} - A HTTP header.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Header {
 
     /**
      * Return the name.
-     * 
+     *
      * @return String name The name
      * @see #setName(String)
      */
@@ -66,7 +66,7 @@ public interface Header {
 
     /**
      * Return the current value.
-     * 
+     *
      * @return String value The current value.
      */
     public String getValue();

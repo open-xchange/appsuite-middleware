@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; phishingheaders</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PhishingHeaders implements PreferencesItemService {
@@ -82,6 +82,7 @@ public class PhishingHeaders implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "mail", "phishingheaders" };
     }
@@ -89,12 +90,15 @@ public class PhishingHeaders implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
 
+            @Override
             public void getValue(final Session session, final Context ctx, final User user,
                     final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final String[] phishingHeaders = MailProperties.getInstance().getPhishingHeaders();

@@ -63,7 +63,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link NamespaceFoldersCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NamespaceFoldersCache {
@@ -87,7 +87,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Gets the separator for personal namespace.
-     * 
+     *
      * @return The separator
      */
     public static char getPersonalSeparator() {
@@ -96,7 +96,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Gets cached personal namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
-     * 
+     *
      * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -129,7 +129,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Checks if personal namespaces contain the specified fullname
-     * 
+     *
      * @param fullname The fullname to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
@@ -144,7 +144,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Gets cached user namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
-     * 
+     *
      * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -175,7 +175,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Checks if user namespaces contain the specified fullname
-     * 
+     *
      * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
@@ -190,7 +190,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Checks if provided full name starts with any of user namespaces.
-     * 
+     *
      * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
@@ -210,7 +210,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Gets cached shared namespaces when invoking <code>NAMESPACE</code> command on given IMAP store
-     * 
+     *
      * @param imapStore The IMAP store on which <code>NAMESPACE</code> command is invoked
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
      * @param session The session providing the session-bound cache
@@ -241,7 +241,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Checks if shared namespaces contain the specified fullname.
-     * 
+     *
      * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not
@@ -256,7 +256,7 @@ public final class NamespaceFoldersCache {
 
     /**
      * Checks if provided full name starts with any of shared namespaces.
-     * 
+     *
      * @param fullname The full name to check
      * @param imapStore The IMAP store
      * @param load Whether <code>NAMESPACE</code> command should be invoked if no cache entry present or not

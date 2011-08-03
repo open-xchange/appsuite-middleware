@@ -64,30 +64,30 @@ import org.osgi.service.http.HttpService;
 
 /**
  * {@link JettyHttpService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JettyHttpService implements HttpService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JettyHttpService.class));
-    
+
     private Server server;
 
     private ServletContextHandler root;
 
     public JettyHttpService(int port) {
         server = new Server();
-        
+
         SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         connector.setForwarded(true);
-        
+
         server.setConnectors(new Connector[]{ connector });
-        
+
         root = new ServletContextHandler(ServletContextHandler.SESSIONS);
         root.setContextPath("/");
         server.setHandler(root);
-        
+
     }
 
     public HttpContext createDefaultHttpContext() {
@@ -103,7 +103,7 @@ public class JettyHttpService implements HttpService {
             if (!alias.startsWith("/")) {
                 alias = "/" + alias;
             }
-            
+
             ServletHolder holder = new ServletHolder(servlet);
             if (initparams != null) {
                 Enumeration elements = initparams.elements();
@@ -112,15 +112,15 @@ public class JettyHttpService implements HttpService {
                     if(key == null) {
                         continue;
                     }
-                    
+
                     Object value = initparams.get(key);
-                    
-                    
-                    
+
+
+
                     holder.setInitParameter((String)key, (String)value);
                 }
             }
-            root.addServlet(holder, alias); 
+            root.addServlet(holder, alias);
             if(!alias.endsWith("/*")) {
                 root.addServlet(holder, alias+"/*");
             }
@@ -131,7 +131,7 @@ public class JettyHttpService implements HttpService {
     }
 
     public void unregister(String alias) {
-        
+
     }
 
     public void start() throws Exception {

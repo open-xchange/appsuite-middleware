@@ -57,12 +57,12 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultConverterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultConverterTest extends TestCase {
 
-    private DefaultConverter converter = new DefaultConverter();
+    private final DefaultConverter converter = new DefaultConverter();
 
     public void testSingleStepConversion() {
         TestConverter tc = new TestConverter("A", "B", Quality.GOOD);
@@ -123,7 +123,7 @@ public class DefaultConverterTest extends TestCase {
         converter.addConverter(a);
         converter.addConverter(b);
         converter.addConverter(c);
-        
+
         try {
             converter.getShortestPath("A", "E");
             fail("Huh?!");
@@ -144,11 +144,11 @@ public class DefaultConverterTest extends TestCase {
 
     public static class TestConverter implements ResultConverter {
 
-        private String input;
+        private final String input;
 
-        private String output;
+        private final String output;
 
-        private Quality quality;
+        private final Quality quality;
 
         public TestConverter(String input, String output, Quality quality) {
             super();
@@ -157,18 +157,22 @@ public class DefaultConverterTest extends TestCase {
             this.quality = quality;
         }
 
+        @Override
         public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
 
         }
 
+        @Override
         public String getInputFormat() {
             return input;
         }
 
+        @Override
         public String getOutputFormat() {
             return output;
         }
 
+        @Override
         public Quality getQuality() {
             return quality;
         }

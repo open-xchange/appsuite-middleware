@@ -57,7 +57,7 @@ public class OXSieveHandlerInvalidCredentialsException extends Exception {
     private static final long serialVersionUID = 2990692657778743217L;
 
     /**
-     * 
+     *
      */
     public OXSieveHandlerInvalidCredentialsException() {
 

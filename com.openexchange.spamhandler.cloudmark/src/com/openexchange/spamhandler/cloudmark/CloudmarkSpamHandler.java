@@ -134,7 +134,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     	if (move) {
     		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
     		mailAccess.connect();
-    		
+
     		try {
     			mailAccess.getMessageStorage().moveMessages(spamFullname, "INBOX", mailIDs, true);
     		} finally {

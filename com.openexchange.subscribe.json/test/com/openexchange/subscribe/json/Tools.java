@@ -60,7 +60,7 @@ package com.openexchange.subscribe.json;
 public class Tools {
 
     /**
-     * 
+     *
      */
     public static void initExceptionFactory() {
         // Nope

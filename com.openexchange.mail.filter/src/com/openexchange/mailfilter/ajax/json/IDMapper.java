@@ -73,7 +73,7 @@ final class IDMapper implements Mapper<Rule> {
         return ((null == obj.getRuleComment()) || (-1 == obj.getRuleComment().getUniqueid()));
     }
 
-    public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
+    public void setAttribute(final Rule obj, final Object attr) throws JSONException {
         final RuleComment ruleComment = obj.getRuleComment();
         if (null != ruleComment) {
             ruleComment.setUniqueid(((Integer)attr).intValue());

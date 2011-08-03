@@ -58,15 +58,15 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData{    
-    
-    private Activator activator;
-    
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData{
+
+    private final Activator activator;
+
     public OAuthServiceMetaDataLinkedInImpl(Activator activator){
         super();
         this.activator = activator;
     }
-    
+
     @Override
     public String getDisplayName() {
         return "LinkedIn";
@@ -76,7 +76,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public String getId() {
         return "com.openexchange.socialplugin.linkedin";
     }
-    
+
     @Override
     public String getAPIKey() {
         return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apikey");
@@ -87,14 +87,17 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
         return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apisecret");
     }
 
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
 
+    @Override
     public String getScope() {
         return null;
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }

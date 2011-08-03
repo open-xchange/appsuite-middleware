@@ -54,10 +54,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -69,87 +69,124 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultDispatcher implements Dispatcher {
 
-    private Map<String, AJAXActionServiceFactory> actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultDispatcher.class));
 
-    private Queue<AJAXActionCustomizerFactory> customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+    private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
 
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+    private final Queue<AJAXActionCustomizerFactory> customizerFactories;
+
+    /**
+     * Initializes a new {@link DefaultDispatcher}.
+     */
+    public DefaultDispatcher() {
+        super();
+        actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+        customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
+    }
+
+    @Override
+    public AJAXState begin() throws OXException {
+        return new AJAXState();
+    }
+
+    @Override
+    public void end(final AJAXState state) {
+        state.close();
+    }
+
+    @Override
+    public boolean handles(final String module) {
+        return actionFactories.containsKey(module);
+    }
+
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
-        List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
-        
-        for (AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
-            AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
-            if(customizer != null) {
+        final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
+
+        for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
+            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
+            if (customizer != null) {
                 todo.add(customizer);
             }
         }
-        
-        while(!todo.isEmpty()) {
-            Iterator<AJAXActionCustomizer> iterator = todo.iterator();
-            while(iterator.hasNext()) {
-                AJAXActionCustomizer customizer = iterator.next();
+
+        AJAXRequestData modifiedRequest = request;
+        while (!todo.isEmpty()) {
+            final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
+            while (iterator.hasNext()) {
+                final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    AJAXRequestData modified = customizer.incoming(request, session);
+                    final AJAXRequestData modified = customizer.incoming(modifiedRequest, session);
                     if (modified != null) {
-                        request = modified;
+                        modifiedRequest = modified;
                     }
 
                     outgoing.add(customizer);
                     iterator.remove();
-                } catch (FlowControl.Later l) {
+                } catch (final FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }
         }
-        
-        AJAXActionServiceFactory factory = lookupFactory(request.getModule());
-        
+
+        final AJAXActionServiceFactory factory = lookupFactory(modifiedRequest.getModule());
+
         if (factory == null) {
-            throw AjaxExceptionCodes.UNKNOWN_MODULE.create( request.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequest.getModule());
         }
-        AJAXActionService action = factory.createActionService(request.getAction());
+        final AJAXActionService action = factory.createActionService(modifiedRequest.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UnknownAction.create( request.getAction());
+            throw AjaxExceptionCodes.UnknownAction.create(modifiedRequest.getAction());
         }
-        Action actionMetadata = getActionMetadata(action);
-        
+        final Action actionMetadata = getActionMetadata(action);
+
         if (actionMetadata != null) {
-            if (request.getFormat() == null) {
-                request.setFormat(actionMetadata.defaultFormat());
+            if (modifiedRequest.getFormat() == null) {
+                modifiedRequest.setFormat(actionMetadata.defaultFormat());
             }
         } else {
-            if (request.getFormat() == null) {
-                request.setFormat("apiResponse");
+            if (modifiedRequest.getFormat() == null) {
+                modifiedRequest.setFormat("apiResponse");
             }
         }
-        
-        AJAXRequestResult result = action.perform(
-            request,
-            session);
-        
+
+        /*
+         * State already initialized for module?
+         */
+        if (factory instanceof AJAXStateHandler) {
+            final AJAXStateHandler handler = (AJAXStateHandler) factory;
+            if (state.addInitializer(modifiedRequest.getModule(), handler)) {
+                handler.begin(state);
+            }
+        }
+        modifiedRequest.setState(state);
+        AJAXRequestResult result = action.perform(modifiedRequest, session);
+
         Collections.reverse(outgoing);
         outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
-        while(!outgoing.isEmpty()) {
-            Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
-            
+        while (!outgoing.isEmpty()) {
+            final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
+
             while (iterator.hasNext()) {
-                AJAXActionCustomizer customizer = iterator.next();
+                final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    AJAXRequestResult modified = customizer.outgoing(request, result, session);
+                    final AJAXRequestResult modified = customizer.outgoing(modifiedRequest, result, session);
                     if (modified != null) {
                         result = modified;
                     }
                     iterator.remove();
-                } catch (FlowControl.Later l) {
+                } catch (final FlowControl.Later l) {
                     // Remains in list and is therefore retried
                 }
             }
-            
+
         }
         return result;
     }
 
-    private AJAXActionServiceFactory lookupFactory(String module) {
+    private AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (serviceFactory == null && module.contains("/")) {
             // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
@@ -158,20 +195,64 @@ public class DefaultDispatcher implements Dispatcher {
         return serviceFactory;
     }
 
-    private Action getActionMetadata(AJAXActionService action) {
+    private Action getActionMetadata(final AJAXActionService action) {
         return action.getClass().getAnnotation(Action.class);
     }
 
-    public void register(String module, AJAXActionServiceFactory factory) {
-        actionFactories.put(module, factory);
+    /**
+     * Registers specified factory under given module.
+     * 
+     * @param module The module
+     * @param factory The factory (possibly annotated with {@link Module})
+     */
+    public void register(final String module, final AJAXActionServiceFactory factory) {
+        synchronized (actionFactories) {
+            AJAXActionServiceFactory current = actionFactories.putIfAbsent(module, factory);
+            if (null != current) {
+                try {
+                    current = actionFactories.get(module);
+                    final CombinedActionFactory combinedFactory;
+                    if (current instanceof CombinedActionFactory) {
+                        combinedFactory = (CombinedActionFactory) current;
+                    } else {
+                        combinedFactory = new CombinedActionFactory();
+                        combinedFactory.add(current);
+                        actionFactories.put(module, combinedFactory);
+                    }
+                    combinedFactory.add(factory);
+                } catch (final IllegalArgumentException e) {
+                    LOG.error(e.getMessage());
+                }
+            }
+        }
     }
 
-    public void addCustomizer(AJAXActionCustomizerFactory factory) {
+    /**
+     * Adds specified customizer factory.
+     * 
+     * @param factory The customizer factory
+     */
+    public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
 
-    public void remove(String module) {
-        actionFactories.remove(module);
+    /**
+     * Releases specified factory from given module.
+     * 
+     * @param module The module
+     * @param factory The factory (possibly annotated with {@link Module})
+     */
+    public void remove(final String module, final AJAXActionServiceFactory factory) {
+        synchronized (actionFactories) {
+            final AJAXActionServiceFactory removed = actionFactories.remove(module);
+            if (removed instanceof CombinedActionFactory) {
+                final CombinedActionFactory combinedFactory = (CombinedActionFactory) removed;
+                combinedFactory.remove(factory);
+                if (!combinedFactory.isEmpty()) {
+                    actionFactories.put(module, combinedFactory);
+                }
+            }
+        }
     }
 
 }

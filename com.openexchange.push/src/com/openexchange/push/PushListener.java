@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link PushListener} - Uses Equinox Event framework to propagate new mails.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PushListener {
 
     /**
      * Notifies about new mails in <code>INBOX</code> folder.
-     * 
+     *
      * @throws OXException If notification fails
      */
     public void notifyNewMail() throws OXException;

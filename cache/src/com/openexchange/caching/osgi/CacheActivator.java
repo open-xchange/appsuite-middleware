@@ -56,8 +56,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheService;
@@ -68,31 +66,24 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheActivator extends DeferredActivator {
+public final class CacheActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheActivator.class));
 
-    private final Dictionary<String, String> dictionary;
-
-    private ServiceRegistration serviceRegistration;
-
     private ObjectName objectName;
-
-    private ServiceTracker tracker;
 
     /**
      * Initializes a new {@link CacheActivator}.
      */
     public CacheActivator() {
         super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("name", "oxcache");
     }
 
     @Override
@@ -125,8 +116,10 @@ public final class CacheActivator extends DeferredActivator {
         /*
          * Register service
          */
-        serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(), dictionary);
-        final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer {
+        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        dictionary.put("name", "oxcache");
+        registerService(CacheService.class, JCSCacheService.getInstance(), dictionary);
+        final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
             private final BundleContext bundleContext;
 
@@ -135,36 +128,32 @@ public final class CacheActivator extends DeferredActivator {
                 this.bundleContext = bundleContext;
             }
 
-            public Object addingService(final ServiceReference reference) {
-                final ManagementService management = (ManagementService) bundleContext.getService(reference);
+            @Override
+            public ManagementService addingService(final ServiceReference<ManagementService> reference) {
+                final ManagementService management = bundleContext.getService(reference);
                 registerCacheMBean(management);
                 return management;
             }
 
-            public void modifiedService(final ServiceReference reference, final Object service) {
+            @Override
+            public void modifiedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
                 // Nothing to do.
             }
 
-            public void removedService(final ServiceReference reference, final Object service) {
-                final ManagementService management = (ManagementService) service;
+            @Override
+            public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
+                final ManagementService management = service;
                 unregisterCacheMBean(management);
                 bundleContext.ungetService(reference);
             }
         }
-        tracker = new ServiceTracker(context, ManagementService.class.getName(), new ServiceTrackerCustomizerImpl(context));
-        tracker.open();
+        track(ManagementService.class, new ServiceTrackerCustomizerImpl(context));
+        openTrackers();
     }
 
     @Override
     protected void stopBundle() {
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
-        if (null != tracker) {
-            tracker.close();
-            tracker = null;
-        }
+        cleanUp();
         /*
          * Stop cache
          */
@@ -201,7 +190,7 @@ public final class CacheActivator extends DeferredActivator {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

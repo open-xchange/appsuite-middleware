@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * CachingUserSettingMailStorage - this storage tries to use a cache for instances of <code>{@link UserSettingMail}</code> and falls back to
  * database-based storage if any cache-related errors occur
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CachingUserSettingMailStorage extends UserSettingMailStorage {
@@ -132,7 +132,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     /**
      * Saves given user's mail settings to database
-     * 
+     *
      * @param usm the user's mail settings to save
      * @param user the user ID
      * @param ctx the context
@@ -247,14 +247,14 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private static final String SQL_DELETE = "DELETE FROM user_setting_mail WHERE cid = ? AND user = ?";
 
     private static final String SQL_DELETE_SIGNATURES = "DELETE FROM user_setting_mail_signature WHERE cid = ? AND user = ?";
 
     /**
      * Deletes the user's mail settings from database
-     * 
+     *
      * @param user the user ID
      * @param ctx the context
      * @param writeConArg the writable connection; may be <code>null</code>
@@ -313,7 +313,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
     /**
      * Loads user's mail settings from database
-     * 
+     *
      * @param user the user
      * @param ctx the context
      * @param readConArg the readable connection; may be <code>null</code> to fetch own connection.
@@ -624,10 +624,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         }
     }
 
+    @Override
     public void handleAbsence() throws OXException {
         releaseCache();
     }
 
+    @Override
     public void handleAvailability() throws OXException {
         initCache();
     }

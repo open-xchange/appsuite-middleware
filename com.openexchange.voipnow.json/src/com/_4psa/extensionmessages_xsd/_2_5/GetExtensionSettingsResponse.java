@@ -16,9 +16,9 @@ import com._4psa.extensiondata_xsd._2_5.VoicemailInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -66,8 +66,8 @@ import com._4psa.extensiondata_xsd._2_5.VoicemailInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -97,11 +97,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -109,11 +109,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -121,11 +121,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the extensionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionType() {
         return extensionType;
@@ -133,11 +133,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the extensionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionType(String value) {
         this.extensionType = value;
@@ -145,11 +145,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the phoneTerminal property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ExtendedPhoneTerminal }
-     *     
+     *
      */
     public ExtendedPhoneTerminal getPhoneTerminal() {
         return phoneTerminal;
@@ -157,11 +157,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the phoneTerminal property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ExtendedPhoneTerminal }
-     *     
+     *
      */
     public void setPhoneTerminal(ExtendedPhoneTerminal value) {
         this.phoneTerminal = value;
@@ -169,11 +169,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the queue property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ExtendedQueue }
-     *     
+     *
      */
     public ExtendedQueue getQueue() {
         return queue;
@@ -181,11 +181,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the queue property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ExtendedQueue }
-     *     
+     *
      */
     public void setQueue(ExtendedQueue value) {
         this.queue = value;
@@ -193,11 +193,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the ivr property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetExtensionSettingsResponse.IVR }
-     *     
+     *
      */
     public GetExtensionSettingsResponse.IVR getIVR() {
         return ivr;
@@ -205,11 +205,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the ivr property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetExtensionSettingsResponse.IVR }
-     *     
+     *
      */
     public void setIVR(GetExtensionSettingsResponse.IVR value) {
         this.ivr = value;
@@ -217,11 +217,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the voicemailCenter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link VoicemailInfo }
-     *     
+     *
      */
     public VoicemailInfo getVoicemailCenter() {
         return voicemailCenter;
@@ -229,11 +229,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the voicemailCenter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link VoicemailInfo }
-     *     
+     *
      */
     public void setVoicemailCenter(VoicemailInfo value) {
         this.voicemailCenter = value;
@@ -241,11 +241,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the queueCenter property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link QueueCenterInfo }
-     *     
+     *
      */
     public QueueCenterInfo getQueueCenter() {
         return queueCenter;
@@ -253,11 +253,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the queueCenter property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link QueueCenterInfo }
-     *     
+     *
      */
     public void setQueueCenter(QueueCenterInfo value) {
         this.queueCenter = value;
@@ -265,11 +265,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Gets the value of the conference property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ConferenceInfo }
-     *     
+     *
      */
     public ConferenceInfo getConference() {
         return conference;
@@ -277,11 +277,11 @@ public class GetExtensionSettingsResponse {
 
     /**
      * Sets the value of the conference property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ConferenceInfo }
-     *     
+     *
      */
     public void setConference(ConferenceInfo value) {
         this.conference = value;
@@ -290,9 +290,9 @@ public class GetExtensionSettingsResponse {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -304,8 +304,8 @@ public class GetExtensionSettingsResponse {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -319,11 +319,11 @@ public class GetExtensionSettingsResponse {
 
         /**
          * Gets the value of the cloneID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getCloneID() {
             return cloneID;
@@ -331,11 +331,11 @@ public class GetExtensionSettingsResponse {
 
         /**
          * Sets the value of the cloneID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setCloneID(BigInteger value) {
             this.cloneID = value;

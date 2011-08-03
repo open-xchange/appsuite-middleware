@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 /**
  * {@link PasswordChangeEvent} - Event for password change containing the session of the user whose password shall be changed, the context,
  * the new password, and the old password (needed for verification)
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PasswordChangeEvent {
@@ -71,7 +71,7 @@ public final class PasswordChangeEvent {
 
     /**
      * Initializes a new {@link PasswordChangeEvent}
-     * 
+     *
      * @param session The session of the user whose password shall be changed
      * @param ctx The context
      * @param newPassword The new password

@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Exception if problems occur in configuration classes.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigurationException extends OXException {
@@ -62,7 +62,7 @@ public class ConfigurationException extends OXException {
 
     /**
      * Initializes a new {@link ConfigurationException}
-     * 
+     *
      * @param cause The cause exception
      */
     private ConfigurationException() {

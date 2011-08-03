@@ -65,7 +65,7 @@ import com.openexchange.tools.file.external.FileStorage;
 
 /**
  * {@link CompositingFileStorageTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositingFileStorageTest extends TestCase {
@@ -151,40 +151,40 @@ public class CompositingFileStorageTest extends TestCase {
 
     public void testBulkDeleteWithAndWithoutPrefix() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
-        
+
         SimFileStorage prefixedStorage = new SimFileStorage() {
             @Override
             public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
-                
+
                 remember(true);
-                
+
                 return new HashSet<String>(Arrays.asList("ab/cd/ef/12345"));
             }
         };
-        
+
         SimFileStorage standardStorage = new SimFileStorage() {
             @Override
             public Set<String> deleteFiles(String[] arg0) throws OXException {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
-                
+
                 remember(true);
-                
+
                 return new HashSet<String>(Arrays.asList("ab/cd/ef/54321"));
             }
         };
 
         cStore.addStore("hash", prefixedStorage);
         cStore.addStore(standardStorage);
-        
+
         Set<String> notDeleted = cStore.deleteFiles(new String[]{"ab/cd/ef/12345", "hash/ab/cd/ef/12345", "ab/cd/ef/54321", "hash/ab/cd/ef/54321"});
-        
+
         assertEquals(notDeleted.size(), 2);
         assertTrue(notDeleted.contains("hash/ab/cd/ef/12345"));
         assertTrue(notDeleted.contains("ab/cd/ef/54321"));
-        
+
         assertEquals(Boolean.TRUE, prefixedStorage.getMemory().get(0));
         assertEquals(Boolean.TRUE, standardStorage.getMemory().get(0));
     }
@@ -201,7 +201,7 @@ public class CompositingFileStorageTest extends TestCase {
         long fileSize = cStore.getFileSize("ab/cd/ef/12345");
 
         assertEquals(12l, fileSize);
-        
+
         builder.assertAllWereCalled();
     }
 
@@ -215,9 +215,9 @@ public class CompositingFileStorageTest extends TestCase {
         cStore.addStore("hash", builder.getSim(FileStorage.class));
 
         long fileSize = cStore.getFileSize("hash/ab/cd/ef/12345");
-        
+
         assertEquals(12l, fileSize);
-        
+
         builder.assertAllWereCalled();
     }
 
@@ -243,16 +243,16 @@ public class CompositingFileStorageTest extends TestCase {
 
         SimBuilder standardBuilder = new SimBuilder();
         standardBuilder.expectCall("getFileList").andReturn(new TreeSet<String>(Arrays.asList("ab/cd/ef/54321")));
-        
+
         cStore.addStore("hash", prefixedBuilder.getSim(FileStorage.class));
         cStore.addStore(standardBuilder.getSim(FileStorage.class));
-        
+
         SortedSet<String> fileList = cStore.getFileList();
-        
+
         assertEquals(2, fileList.size());
         assertTrue(fileList.contains("hash/ab/cd/ef/12345"));
         assertTrue(fileList.contains("ab/cd/ef/54321"));
-        
+
         prefixedBuilder.assertAllWereCalled();
         standardBuilder.assertAllWereCalled();
     }
@@ -265,12 +265,12 @@ public class CompositingFileStorageTest extends TestCase {
 
         SimBuilder standardBuilder = new SimBuilder();
         standardBuilder.expectCall("remove");
-        
+
         cStore.addStore("hash", prefixedBuilder.getSim(FileStorage.class));
         cStore.addStore(standardBuilder.getSim(FileStorage.class));
-        
+
         cStore.remove();
-        
+
         prefixedBuilder.assertAllWereCalled();
         standardBuilder.assertAllWereCalled();
     }
@@ -283,17 +283,17 @@ public class CompositingFileStorageTest extends TestCase {
 
         SimBuilder standardBuilder = new SimBuilder();
         standardBuilder.expectCall("stateFileIsCorrect").andReturn(true);
-        
+
         cStore.addStore("hash", prefixedBuilder.getSim(FileStorage.class));
         cStore.addStore(standardBuilder.getSim(FileStorage.class));
-        
+
         boolean stateFileIsCorrect = cStore.stateFileIsCorrect();
-        
+
         assertFalse(stateFileIsCorrect);
 
         prefixedBuilder.assertAllWereCalled();
         standardBuilder.assertAllWereCalled();
-        
+
     }
 
     public void testIsStateFileCorrect2() throws OXException {
@@ -304,19 +304,19 @@ public class CompositingFileStorageTest extends TestCase {
 
         SimBuilder standardBuilder = new SimBuilder();
         standardBuilder.expectCall("stateFileIsCorrect").andReturn(true);
-        
+
         cStore.addStore("hash", prefixedBuilder.getSim(FileStorage.class));
         cStore.addStore(standardBuilder.getSim(FileStorage.class));
-        
+
         boolean stateFileIsCorrect = cStore.stateFileIsCorrect();
-        
+
         assertTrue(stateFileIsCorrect);
 
         prefixedBuilder.assertAllWereCalled();
         standardBuilder.assertAllWereCalled();
-        
+
     }
-    
+
     public void testRecreateStateFile() throws OXException {
         CompositingFileStorage cStore = new CompositingFileStorage();
 
@@ -325,65 +325,75 @@ public class CompositingFileStorageTest extends TestCase {
 
         SimBuilder standardBuilder = new SimBuilder();
         standardBuilder.expectCall("recreateStateFile");
-        
+
         cStore.addStore("hash", prefixedBuilder.getSim(FileStorage.class));
         cStore.addStore(standardBuilder.getSim(FileStorage.class));
-        
+
         cStore.recreateStateFile();
-        
+
         prefixedBuilder.assertAllWereCalled();
         standardBuilder.assertAllWereCalled();
     }
-    
+
     private class SimFileStorage implements FileStorage {
-        
+
         protected List<Object> remember = new ArrayList<Object>();
-    
+
+        @Override
         public boolean deleteFile(String identifier) throws OXException {
             return false;
         }
 
+        @Override
         public Set<String> deleteFiles(String[] identifiers) throws OXException {
             return null;
         }
 
+        @Override
         public InputStream getFile(String name) throws OXException {
             return null;
         }
 
+        @Override
         public SortedSet<String> getFileList() throws OXException {
             return null;
         }
 
+        @Override
         public long getFileSize(String name) throws OXException {
             return 0;
         }
 
+        @Override
         public String getMimeType(String name) throws OXException {
             return null;
         }
 
+        @Override
         public void recreateStateFile() throws OXException {
-            
+
         }
 
+        @Override
         public void remove() throws OXException {
-            
+
         }
 
+        @Override
         public String saveNewFile(InputStream file) throws OXException {
             return null;
         }
 
+        @Override
         public boolean stateFileIsCorrect() throws OXException {
             return false;
         }
-        
+
         protected void remember(Object o) {
             remember.add(o);
         }
-        
-        
+
+
         public List<Object> getMemory() {
             return remember;
         }

@@ -55,7 +55,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderServlet}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class FolderServlet extends MultipleAdapterServletNew {

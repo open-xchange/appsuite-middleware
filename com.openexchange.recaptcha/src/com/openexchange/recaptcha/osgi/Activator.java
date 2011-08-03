@@ -13,11 +13,11 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 public class Activator extends DeferredActivator {
-    
+
     private static final Log LOG = LogFactory.getLog(Activator.class);
-    
+
     private static final String ALIAS = "/ajax/recaptcha";
-    
+
     private ReCaptchaServlet servlet;
 
     private ServiceRegistration serviceRegistration;
@@ -48,29 +48,29 @@ public class Activator extends DeferredActivator {
                 registry.addService(classes[i], service);
             }
         }
-        
+
         final ConfigurationService config = registry.getService(ConfigurationService.class);
         final Properties props = config.getFile("recaptcha.properties");
         final Properties options = config.getFile("recaptcha_options.properties");
         final ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
         serviceRegistration = context.registerService(ReCaptchaService.class.getName(), reCaptchaService, null);
         registry.addService(ReCaptchaService.class, reCaptchaService);
-        
+
         registerServlet();
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        
+
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
             serviceRegistration = null;
         }
-        
+
         unregisterServlet();
         ReCaptchaServiceRegistry.getInstance().clearRegistry();
     }
-    
+
     private void registerServlet() {
         final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
         final HttpService httpService = registry.getService(HttpService.class);
@@ -83,7 +83,7 @@ public class Activator extends DeferredActivator {
             }
         }
     }
-    
+
     private void unregisterServlet() {
         final HttpService httpService = getService(HttpService.class);
         if(httpService != null && servlet != null) {

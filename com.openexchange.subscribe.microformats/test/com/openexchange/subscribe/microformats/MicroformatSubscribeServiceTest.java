@@ -70,64 +70,64 @@ import com.openexchange.subscribe.microformats.transformers.SimMapTransformer;
  *
  */
 public class MicroformatSubscribeServiceTest extends TestCase {
-    
+
     // here we'll test our transformation workflow
     // The data from the microformat source is passed on to the OXMF Parser which turns the OXMF into a List<Map<String, String>> structure
     // which in turn is passed to the transformer that spits out ox objects understood by the rest of the system
     public void testGetContent() throws OXException {
         MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
-        
+
         SimMicroformatSource mfSource = new SimMicroformatSource("I would normally be microformatted HTML");
-        
-        
+
+
         List<Map<String, String>> parsed = new ArrayList<Map<String, String>>();
-        
+
         Map<String, String> entry = new HashMap<String, String>();
         entry.put("ox_some_attribute", "some value");
         parsed.add(entry);
-        
+
         SimOXMFParser parser = new SimOXMFParser(parsed);
         SimOXMFParserFactory parserFactory = new SimOXMFParserFactory(parser);
-        
+
         List<Object> transformed = new ArrayList<Object>();
         Object value = new Object();
         transformed.add(value);
         SimMapTransformer transformer = new SimMapTransformer(transformed);
-        
+
         subscribeService.setOXMFSource(mfSource);
         subscribeService.setOXMFParserFactory(parserFactory);
         subscribeService.setTransformer(transformer);
-        
+
         Subscription subscription = new Subscription();
         subscription.setId(1337);
         Collection content = subscribeService.getContent(subscription);
-        
+
         assertNotNull("Content was null!", content);
         assertTrue("Expected transformed is returned", content.equals(transformed));
         assertTrue("Expected output from oxmf parser as input for transformation", parsed == transformer.getInput());
         assertEquals("Expected output from mfSource to be input for oxmf parser", "I would normally be microformatted HTML", parser.getHtml());
         assertTrue("Expected subscription as input to the mfSource", subscription == mfSource.getSubscription());
-        
-        
+
+
     }
-    
+
     public void testConfigureParser() {
         MicroformatSubscribeService subscribeService = new MicroformatSubscribeService();
-        
+
         SimOXMFParser parser = new SimOXMFParser(null);
-        
+
         subscribeService.addContainerElement("ox_contact");
         subscribeService.addContainerElement("ox_task");
         subscribeService.addPrefix("ox_");
         subscribeService.addPrefix("google_");
-        
+
         subscribeService.configureParser(parser);
-        
+
         assertTrue("Expected ox_contact as container", parser.knowsContainer("ox_contact"));
         assertTrue("Expected ox_task as container", parser.knowsContainer("ox_task"));
         assertTrue("Expected ox_ as prefix", parser.knowsPrefix("ox_"));
         assertTrue("Expected google_ as prefix", parser.knowsPrefix("google_"));
-        
-        
+
+
     }
 }

@@ -73,6 +73,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         this.managementService = managementService;
     }
 
+    @Override
     public void start() {
         try {
             managementService.registerMBean(Constants.OBJECT_NAME, new UpdateTaskMBean());
@@ -81,6 +82,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() {
         try {
             managementService.unregisterMBean(Constants.OBJECT_NAME);

@@ -83,30 +83,35 @@ public enum FilestoreExceptionCodes implements OXExceptionCode {
         this.category = category;
         this.number = number;
     }
-    
+
+    @Override
     public String getPrefix() {
         return "FLS";
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -115,7 +120,7 @@ public enum FilestoreExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -125,7 +130,7 @@ public enum FilestoreExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

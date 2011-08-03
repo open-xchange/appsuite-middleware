@@ -61,34 +61,34 @@ public class Question {
     private String question;
     private List<String> answerOptions;
     private int[] answerCount;
-    
+
     public String getQuestion() {
         return question;
     }
-    
+
     public void setQuestion(String question) {
         this.question = question;
     }
-    
+
     public List<String> getAnswerOptions() {
         return answerOptions;
     }
-    
+
     public void setAnswerOptions(List<String> answerOptions) {
         this.answerOptions = answerOptions;
         answerCount = new int[answerOptions.size()];
     }
-    
+
     public void incAnswerCount(int answerId) {
         if (answerId < 0) {
             return;
         }
         answerCount[answerId]++;
     }
-    
+
     public int[] getAnswerCount() {
         return answerCount;
     }
-    
-    
+
+
 }

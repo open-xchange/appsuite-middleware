@@ -68,13 +68,13 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link SimContactSQLInterface}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimContactSQLInterface implements ContactSQLInterface {
 
     private final Map<Integer, List<Contact>> folders = new HashMap<Integer, List<Contact>>();
-    
+
     /*
      * (non-Javadoc)
      * @see com.openexchange.api2.ContactSQLInterface#deleteContactObject(int, int, java.util.Date)
@@ -238,7 +238,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
         contact.setObjectID(id1);
         contact.setDisplayName(name);
         contact.setMarkAsDistributionlist(true);
-        
+
         getFolderList(folderId).add(contact);
     }
 
@@ -255,7 +255,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      */
     public void associateTwoContacts(final Contact master, final Contact slave) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     /* (non-Javadoc)
@@ -287,7 +287,7 @@ public class SimContactSQLInterface implements ContactSQLInterface {
      */
     public void separateTwoContacts(final Contact master, final Contact slave) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 	public SearchIterator<Contact> searchContacts(final SearchTerm term, final int orderBy,

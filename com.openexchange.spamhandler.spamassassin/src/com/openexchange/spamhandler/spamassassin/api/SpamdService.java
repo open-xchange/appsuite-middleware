@@ -62,7 +62,7 @@ public interface SpamdService {
 
     /**
      * Gets the provider data for this session
-     * 
+     *
      * @param session A {@link Session} object
      * @return A {@link SpamdProvider} object with the information needed for spamd can't be null. If the provider
      * cannot be fetched a {@link OXException} has to be raised

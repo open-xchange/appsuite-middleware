@@ -58,7 +58,7 @@ import com.openexchange.mailfilter.ajax.json.AbstractObject2JSON2Object;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAction<T, U extends AbstractRequest> {

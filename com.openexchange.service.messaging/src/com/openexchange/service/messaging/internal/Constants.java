@@ -51,7 +51,7 @@ package com.openexchange.service.messaging.internal;
 
 /**
  * {@link Constants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Constants {
@@ -95,7 +95,7 @@ public final class Constants {
 
     /**
      * The general prefix length of a messaging datagram package
-     * 
+     *
      * <pre>
      * &lt;magic&gt;&lt;uuid&gt;&lt;prefix-code&gt;&lt;continuation-flag&gt;
      *     3   16         1             1

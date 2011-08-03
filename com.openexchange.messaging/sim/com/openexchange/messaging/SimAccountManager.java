@@ -81,13 +81,13 @@ public class SimAccountManager implements MessagingAccountManager {
         exception();
         return createdAccount.getId();
     }
-    
-    
+
+
     public MessagingAccount getCreatedAccount() {
         return createdAccount;
     }
-    
-    
+
+
     public Session getSession() {
         return session;
     }
@@ -98,7 +98,7 @@ public class SimAccountManager implements MessagingAccountManager {
         exception();
     }
 
-    
+
     public MessagingAccount getAccount(final int id, final Session session) throws OXException {
         this.id = id;
         this.session = session;
@@ -120,7 +120,7 @@ public class SimAccountManager implements MessagingAccountManager {
     public void setException(final OXException OXException) {
         exception = OXException;
     }
-    
+
     private void exception() throws OXException {
         if(null != exception) {
             throw exception;
@@ -163,7 +163,7 @@ public class SimAccountManager implements MessagingAccountManager {
      */
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

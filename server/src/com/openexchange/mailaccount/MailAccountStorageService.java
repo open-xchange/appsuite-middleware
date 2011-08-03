@@ -59,14 +59,14 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link MailAccountStorageService} - The storage service for mail accounts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailAccountStorageService {
 
     /**
      * Invalidates specified mail account.
-     * 
+     *
      * @param id The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -76,7 +76,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail account identified by specified ID.
-     * 
+     *
      * @param id The mail account ID
      * @param user The user ID
      * @param cid The context ID
@@ -87,7 +87,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The user's mail accounts
@@ -97,7 +97,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @param con The connection to use
@@ -108,7 +108,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the default mail account belonging to specified user in given context.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @return The user's default mail account
@@ -118,7 +118,7 @@ public interface MailAccountStorageService {
 
     /**
      * Updates mail account's value taken from specified mail account.
-     * 
+     *
      * @param mailAccount The mail account containing the values to update.
      * @param attributes The attributes to update
      * @param user The user ID
@@ -130,7 +130,7 @@ public interface MailAccountStorageService {
 
     /**
      * Updates mail account's value taken from specified mail account.
-     * 
+     *
      * @param mailAccount The mail account containing the values to update.
      * @param attributes The attributes to update
      * @param user The user ID
@@ -144,7 +144,7 @@ public interface MailAccountStorageService {
 
     /**
      * Updates mail account's value taken from specified mail account.
-     * 
+     *
      * @param mailAccount The mail account containing the values to update.
      * @param user The user ID
      * @param cid The context ID
@@ -155,7 +155,7 @@ public interface MailAccountStorageService {
 
     /**
      * Inserts mail account's value taken from specified mail account.
-     * 
+     *
      * @param mailAccount The mail account containing the values to update.
      * @param user The user ID
      * @param ctx The context
@@ -167,7 +167,7 @@ public interface MailAccountStorageService {
 
     /**
      * Inserts mail account's value taken from specified mail account.
-     * 
+     *
      * @param mailAccount The mail account containing the values to update.
      * @param user The user ID
      * @param ctx The context
@@ -180,7 +180,7 @@ public interface MailAccountStorageService {
 
     /**
      * Deletes the mail account identified by specified ID.
-     * 
+     *
      * @param id The mail account ID
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
@@ -191,7 +191,7 @@ public interface MailAccountStorageService {
 
     /**
      * Deletes the mail account identified by specified ID.
-     * 
+     *
      * @param id The mail account ID
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
@@ -203,7 +203,7 @@ public interface MailAccountStorageService {
 
     /**
      * Deletes the mail account identified by specified ID.
-     * 
+     *
      * @param id The mail account ID
      * @param properties Optional properties for delete event (passed to {@link MailAccountDeleteListener} instances)
      * @param user The user ID
@@ -216,7 +216,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.
-     * 
+     *
      * @param login The login
      * @param cid The context ID
      * @return The mail accounts of the users whose login matches specified login
@@ -226,7 +226,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail accounts of the users whose login matches specified login on specified server.
-     * 
+     *
      * @param login The login
      * @param server The server's internet address
      * @param cid The context ID
@@ -237,7 +237,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail accounts of the users whose primary email address matches specified email on specified server.
-     * 
+     *
      * @param primaryAddress The primary email address
      * @param cid The context ID
      * @return The mail accounts of the users whose login matches specified login on specified server
@@ -247,7 +247,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the mail account matching specified primary email address of given user in given context.
-     * 
+     *
      * @param primaryAddress The primary address to look for
      * @param user The user ID
      * @param cid The context ID
@@ -258,7 +258,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
-     * 
+     *
      * @param hostNames The host names
      * @param user The user identifier
      * @param cid The context identifier
@@ -269,7 +269,7 @@ public interface MailAccountStorageService {
 
     /**
      * Gets the transport account for specified account ID.
-     * 
+     *
      * @param id The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -280,7 +280,7 @@ public interface MailAccountStorageService {
 
     /**
      * Checks whether the given users passwords can be decrypted with the given secret key.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @param secret The secret to test
@@ -291,7 +291,7 @@ public interface MailAccountStorageService {
 
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
-     * 
+     *
      * @param user The user ID
      * @param cid The context ID
      * @param oldSecret The secret used for decrypting the stored passwords

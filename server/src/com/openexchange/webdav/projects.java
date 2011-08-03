@@ -51,7 +51,7 @@ package com.openexchange.webdav;
 
 /**
  * {@link projects}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class projects {

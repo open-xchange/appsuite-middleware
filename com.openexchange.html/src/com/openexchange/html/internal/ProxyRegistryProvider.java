@@ -54,7 +54,7 @@ import com.openexchange.proxy.ProxyRegistry;
 
 /**
  * {@link ProxyRegistryProvider}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyRegistryProvider {

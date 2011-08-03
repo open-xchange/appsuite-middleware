@@ -55,7 +55,7 @@ import java.nio.charset.CharsetEncoder;
 
 /**
  * {@link StartsWithCharset} - A charset that delegates an unknown charset name to a supported charset whose name starts with unknown name.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StartsWithCharset extends Charset {
@@ -64,7 +64,7 @@ public final class StartsWithCharset extends Charset {
 
     /**
      * Initializes a new starts-with charset.
-     * 
+     *
      * @param canonicalName The canonical name of the starts-with charset
      * @param delegate The delegate charset
      */

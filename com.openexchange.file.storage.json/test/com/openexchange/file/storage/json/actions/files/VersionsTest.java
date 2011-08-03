@@ -73,7 +73,7 @@ public class VersionsTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request()
             .param("id", "12")
@@ -81,12 +81,12 @@ public class VersionsTest extends FileActionTest {
             .param("sort", "700")
             .param("order", "desc")
             .param("timezone", "Europe/Berlin");
-        
+
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME, File.Field.VERSION);
-        fileAccess().expectCall("getVersions", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult()); 
-        
+        fileAccess().expectCall("getVersions", "12", columns, File.Field.TITLE, SortDirection.DESC).andReturn(Results.emptyTimedResult());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
 

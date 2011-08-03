@@ -68,6 +68,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.exception.AJPv13InvalidByteSequenceException;
 import com.openexchange.ajp13.exception.AJPv13InvalidConnectionStateException;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
+import com.openexchange.ajp13.exception.AJPv13TimeoutException;
 import com.openexchange.concurrent.Blockable;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
@@ -78,7 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * assigned AJP request handler.
  * <p>
  * Moreover it keeps track of package numbers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
@@ -101,7 +102,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Initializes a new {@link AJPv13ConnectionImpl}
-     * 
+     *
      * @param listener The AJP listener providing client socket
      */
     AJPv13ConnectionImpl(final AJPv13Task task) throws AJPv13Exception {
@@ -120,10 +121,12 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void block() {
         blocker.block();
     }
 
+    @Override
     public void unblock() {
         blocker.unblock();
     }
@@ -148,7 +151,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     /**
      * Resets this connection instance and prepares it for next upcoming AJP cycle. That is associated request handler will be set to
      * <code>null</code>, its state is set to <code>IDLE</code> and the output stream is going to be flushed.
-     * 
+     *
      * @param releaseRequestHandler
      */
     void resetConnection(final boolean releaseRequestHandler) {
@@ -194,7 +197,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
      * Waits for and processes incoming AJP package through delegating to associated request handler.
      * <p>
      * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if it is <tt>IDLE</tt>.
-     * 
+     *
      * @throws AJPv13Exception If an AJP error occurs
      */
     void processRequest() throws AJPv13Exception {
@@ -216,7 +219,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Creates the AJP response data to previously received AJP package through delegating to request handler.
-     * 
+     *
      * @throws AJPv13Exception If an AJP error occurs while creating response data or this connection is not in <tt>ASSIGNED</tt> state
      * @throws ServletException If a servlet error occurs
      */
@@ -229,9 +232,10 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the associated AJP request handler which processes the AJP data sent over this connection
-     * 
+     *
      * @return The associated AJP request handler.
      */
+    @Override
     public AJPv13RequestHandler getAjpRequestHandler() {
         blocker.acquire();
         try {
@@ -243,10 +247,11 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the input stream from AJP client
-     * 
+     *
      * @return The input stream from AJP client
      * @throws IOException If input stream cannot be returned
      */
+    @Override
     public InputStream getInputStream() throws IOException {
         blocker.acquire();
         try {
@@ -258,10 +263,11 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the output stream to AJP client
-     * 
+     *
      * @return The output stream to AJP client
      * @throws IOException If output stream cannot be returned
      */
+    @Override
     public BlockableBufferedOutputStream getOutputStream() throws IOException {
         blocker.acquire();
         try {
@@ -273,10 +279,11 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
-     * 
+     *
      * @param millis The timeout in milliseconds
      * @throws AJPv13Exception If there is an error in the underlying protocol, such as a TCP error.
      */
+    @Override
     public void setSoTimeout(final int millis) throws AJPv13Exception {
         blocker.acquire();
         try {
@@ -290,9 +297,10 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the number of actual AJP package.
-     * 
+     *
      * @return The number of actual AJP package.
      */
+    @Override
     public int getPackageNumber() {
         blocker.acquire();
         try {
@@ -316,9 +324,10 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the current AJP connection's state
-     * 
+     *
      * @return Current AJP connection's state
      */
+    @Override
     public int getState() {
         blocker.acquire();
         try {
@@ -328,6 +337,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void close() {
         blocker.acquire();
         try {
@@ -427,7 +437,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Sets if this connection's task is long-running.
-     * 
+     *
      * @param longRunning <code>true</code> if this connection's task is long-running; otherwise <code>false</code>
      */
     void setLongRunning(final boolean longRunning) {
@@ -439,6 +449,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void blockInputStream(final boolean block) {
         blocker.acquire();
         try {
@@ -452,6 +463,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
         }
     }
 
+    @Override
     public void blockOutputStream(final boolean block) {
         blocker.acquire();
         try {
@@ -467,7 +479,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Gets the last write access time stamp.
-     * 
+     *
      * @return The last write access time stamp.
      */
     public long getLastWriteAccess() {
@@ -481,7 +493,7 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
 
     /**
      * Reads a certain amount or all data from given <code>InputStream</code> instance dependent on boolean value of <code>strict</code>.
-     * 
+     *
      * @param payloadLength
      * @param in
      * @param strict if <code>true</code> only <code>payloadLength</code> bytes are read, otherwise all data is read
@@ -603,6 +615,8 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
                 decrementWaiting();
             }
             return dataLength;
+        } catch (final java.net.SocketTimeoutException e) {
+            throw new AJPv13TimeoutException(e.getMessage(), e);
         } finally {
             blocker.release();
         }

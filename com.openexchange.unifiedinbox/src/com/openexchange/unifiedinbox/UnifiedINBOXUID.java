@@ -57,7 +57,7 @@ import com.openexchange.mail.MailPath;
 
 /**
  * {@link UnifiedINBOXUID} - The Unified INBOX UID.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXUID {
@@ -81,7 +81,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Initializes a new {@link UnifiedINBOXUID}.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -93,7 +93,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Initializes a new {@link UnifiedINBOXUID}.
-     * 
+     *
      * @param unifiedINBOXUID The Unified INBOX UID as a string
      * @throws OXException If parsing Unified INBOX UID fails
      */
@@ -104,7 +104,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Sets the UID of this {@link UnifiedINBOXUID}.
-     * 
+     *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
@@ -128,7 +128,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Sets the UID of this {@link UnifiedINBOXUID}.
-     * 
+     *
      * @param unifiedINBOXUID The Unified INBOX UID as a string
      * @throws MailException If parsing Unified INBOX UID fails
      * @return This {@link UnifiedINBOXUID} with new UID applied.
@@ -150,7 +150,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Gets the account ID.
-     * 
+     *
      * @return The account ID
      */
     public int getAccountId() {
@@ -159,7 +159,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Gets the folder full name.
-     * 
+     *
      * @return The folder full name
      */
     public String getFullName() {
@@ -168,7 +168,7 @@ public final class UnifiedINBOXUID {
 
     /**
      * Gets the mail ID.
-     * 
+     *
      * @return The mail ID
      */
     public String getId() {

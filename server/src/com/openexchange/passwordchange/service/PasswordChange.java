@@ -53,7 +53,7 @@ import com.openexchange.passwordchange.PasswordChangeService;
 
 /**
  * Provides a static method for changing a user's password.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class PasswordChange {
@@ -69,7 +69,7 @@ public final class PasswordChange {
 
     /**
      * Gets the service
-     * 
+     *
      * @return the service
      */
     public static PasswordChangeService getService() {
@@ -78,7 +78,7 @@ public final class PasswordChange {
 
     /**
      * Sets the service
-     * 
+     *
      * @param service the service to set
      */
     public static void setService(final PasswordChangeService service) {

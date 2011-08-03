@@ -54,7 +54,7 @@ public interface RecurringResultInterface {
     /**
      * Gets the recurring result's start time in milliseconds which is the
      * number of milliseconds since January 1, 1970, 00:00:00 GMT
-     * 
+     *
      * @return The recurring result's start time in milliseconds which is the
      *         number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
@@ -62,7 +62,7 @@ public interface RecurringResultInterface {
 
     /**
      * Gets the normalized recurring result's start time in milliseconds
-     * 
+     *
      * @return The normalized recurring result's start time in milliseconds
      * @see #getStart()
      */
@@ -71,7 +71,7 @@ public interface RecurringResultInterface {
     /**
      * Gets the recurring result's end time in milliseconds which is the number
      * of milliseconds since January 1, 1970, 00:00:00 GMT
-     * 
+     *
      * @return The recurring result's end time in milliseconds which is the
      *         number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
@@ -79,21 +79,21 @@ public interface RecurringResultInterface {
 
     /**
      * Gets the result's duration in milliseconds
-     * 
+     *
      * @return The result's duration in milliseconds
      */
     public abstract long getDiff();
 
     /**
      * Gets the length offset (actually the duration in days)
-     * 
+     *
      * @return The length offset (actually the duration in days)
      */
     public abstract int getOffset();
 
     /**
      * Gets the one-based position
-     * 
+     *
      * @return The one-based position
      */
     public abstract int getPosition();

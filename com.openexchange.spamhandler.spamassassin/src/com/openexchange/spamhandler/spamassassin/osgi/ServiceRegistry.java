@@ -51,7 +51,7 @@ package com.openexchange.spamhandler.spamassassin.osgi;
 
 /**
  * {@link ServiceRegistry} - The service registry for Ldap.
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class ServiceRegistry extends com.openexchange.server.osgiservice.ServiceRegistry {
@@ -60,7 +60,7 @@ public final class ServiceRegistry extends com.openexchange.server.osgiservice.S
 
     /**
      * Gets the service registry instance.
-     * 
+     *
      * @return The service registry instance.
      */
     public static ServiceRegistry getInstance() {

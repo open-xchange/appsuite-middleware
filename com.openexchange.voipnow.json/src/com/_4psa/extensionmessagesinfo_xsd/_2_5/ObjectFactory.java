@@ -5,18 +5,18 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.extensionmessagesinfo_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.extensionmessagesinfo_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -24,14 +24,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.extensionmessagesinfo_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType }
-     * 
+     *
      */
     public GetCallRulesInResponseType createGetCallRulesInResponseType() {
         return new GetCallRulesInResponseType();
@@ -39,7 +39,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules createGetCallRulesInResponseTypeRules() {
         return new GetCallRulesInResponseType.Rules();
@@ -47,7 +47,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules.Cascade }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules.Cascade createGetCallRulesInResponseTypeRulesCascade() {
         return new GetCallRulesInResponseType.Rules.Cascade();
@@ -55,7 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetAvailableCallerIDResponseType }
-     * 
+     *
      */
     public GetAvailableCallerIDResponseType createGetAvailableCallerIDResponseType() {
         return new GetAvailableCallerIDResponseType();
@@ -63,7 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType }
-     * 
+     *
      */
     public GetExtensionPLResponseType createGetExtensionPLResponseType() {
         return new GetExtensionPLResponseType();
@@ -71,7 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType.ExtensionPL }
-     * 
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL createGetExtensionPLResponseTypeExtensionPL() {
         return new GetExtensionPLResponseType.ExtensionPL();
@@ -79,7 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetQueueAgentsResponseType }
-     * 
+     *
      */
     public GetQueueAgentsResponseType createGetQueueAgentsResponseType() {
         return new GetQueueAgentsResponseType();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetConferenceSettingsResponseType }
-     * 
+     *
      */
     public GetConferenceSettingsResponseType createGetConferenceSettingsResponseType() {
         return new GetConferenceSettingsResponseType();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetVoicemailSettingsResponseType }
-     * 
+     *
      */
     public GetVoicemailSettingsResponseType createGetVoicemailSettingsResponseType() {
         return new GetVoicemailSettingsResponseType();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCardCodeCreditResponseType }
-     * 
+     *
      */
     public GetCardCodeCreditResponseType createGetCardCodeCreditResponseType() {
         return new GetCardCodeCreditResponseType();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCardCodeResponseType }
-     * 
+     *
      */
     public GetCardCodeResponseType createGetCardCodeResponseType() {
         return new GetCardCodeResponseType();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetQueueMembershipResponseType }
-     * 
+     *
      */
     public GetQueueMembershipResponseType createGetQueueMembershipResponseType() {
         return new GetQueueMembershipResponseType();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetAuthCallerIDCreditResponseType }
-     * 
+     *
      */
     public GetAuthCallerIDCreditResponseType createGetAuthCallerIDCreditResponseType() {
         return new GetAuthCallerIDCreditResponseType();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProvisionResponseType }
-     * 
+     *
      */
     public ProvisionResponseType createProvisionResponseType() {
         return new ProvisionResponseType();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionDetailsResponseType }
-     * 
+     *
      */
     public GetExtensionDetailsResponseType createGetExtensionDetailsResponseType() {
         return new GetExtensionDetailsResponseType();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetFaxCenterSettingsResponseType }
-     * 
+     *
      */
     public GetFaxCenterSettingsResponseType createGetFaxCenterSettingsResponseType() {
         return new GetFaxCenterSettingsResponseType();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionResponseType }
-     * 
+     *
      */
     public GetExtensionResponseType createGetExtensionResponseType() {
         return new GetExtensionResponseType();
@@ -167,7 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRecordingSettingsResponseType }
-     * 
+     *
      */
     public GetCallRecordingSettingsResponseType createGetCallRecordingSettingsResponseType() {
         return new GetCallRecordingSettingsResponseType();
@@ -175,7 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallerIDResponseType }
-     * 
+     *
      */
     public GetCallerIDResponseType createGetCallerIDResponseType() {
         return new GetCallerIDResponseType();
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules.Transfer }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules.Transfer createGetCallRulesInResponseTypeRulesTransfer() {
         return new GetCallRulesInResponseType.Rules.Transfer();
@@ -191,7 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules.Authenticate }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules.Authenticate createGetCallRulesInResponseTypeRulesAuthenticate() {
         return new GetCallRulesInResponseType.Rules.Authenticate();
@@ -199,7 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules.SetCallPriority }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules.SetCallPriority createGetCallRulesInResponseTypeRulesSetCallPriority() {
         return new GetCallRulesInResponseType.Rules.SetCallPriority();
@@ -207,7 +207,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetCallRulesInResponseType.Rules.Cascade.ToNumbers }
-     * 
+     *
      */
     public GetCallRulesInResponseType.Rules.Cascade.ToNumbers createGetCallRulesInResponseTypeRulesCascadeToNumbers() {
         return new GetCallRulesInResponseType.Rules.Cascade.ToNumbers();
@@ -215,7 +215,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetAvailableCallerIDResponseType.CallerID }
-     * 
+     *
      */
     public GetAvailableCallerIDResponseType.CallerID createGetAvailableCallerIDResponseTypeCallerID() {
         return new GetAvailableCallerIDResponseType.CallerID();
@@ -223,7 +223,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType.ExtensionPL.ShareVoicemail }
-     * 
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL.ShareVoicemail createGetExtensionPLResponseTypeExtensionPLShareVoicemail() {
         return new GetExtensionPLResponseType.ExtensionPL.ShareVoicemail();
@@ -231,7 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType.ExtensionPL.ShareFaxes }
-     * 
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL.ShareFaxes createGetExtensionPLResponseTypeExtensionPLShareFaxes() {
         return new GetExtensionPLResponseType.ExtensionPL.ShareFaxes();
@@ -239,7 +239,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType.ExtensionPL.ShareRecordings }
-     * 
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL.ShareRecordings createGetExtensionPLResponseTypeExtensionPLShareRecordings() {
         return new GetExtensionPLResponseType.ExtensionPL.ShareRecordings();
@@ -247,7 +247,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetExtensionPLResponseType.ExtensionPL.ShareCallHistory }
-     * 
+     *
      */
     public GetExtensionPLResponseType.ExtensionPL.ShareCallHistory createGetExtensionPLResponseTypeExtensionPLShareCallHistory() {
         return new GetExtensionPLResponseType.ExtensionPL.ShareCallHistory();
@@ -255,7 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GetQueueAgentsResponseType.LocalAgents }
-     * 
+     *
      */
     public GetQueueAgentsResponseType.LocalAgents createGetQueueAgentsResponseTypeLocalAgents() {
         return new GetQueueAgentsResponseType.LocalAgents();

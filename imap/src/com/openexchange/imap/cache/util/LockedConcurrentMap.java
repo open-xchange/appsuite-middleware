@@ -58,7 +58,7 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * {@link LockedConcurrentMap}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LockedConcurrentMap<K, V> implements ConcurrentMap<K, V> {

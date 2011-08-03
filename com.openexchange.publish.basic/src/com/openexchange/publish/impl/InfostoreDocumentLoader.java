@@ -64,20 +64,20 @@ import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link InfostoreDocumentLoader}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreDocumentLoader implements PublicationDataLoaderService {
 
-    private InfostoreFacade infostore;
+    private final InfostoreFacade infostore;
 
-    private UserService users;
+    private final UserService users;
 
-    private UserConfigurationService userConfigs;
+    private final UserConfigurationService userConfigs;
 
     /**
      * Initializes a new {@link InfostoreDocumentLoader}.
-     * 
+     *
      * @param infostoreFacade
      */
     public InfostoreDocumentLoader(InfostoreFacade infostoreFacade, UserService userService, UserConfigurationService userConfigService) {

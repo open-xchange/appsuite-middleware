@@ -66,22 +66,27 @@ public class JDBC4StatementWrapper extends JDBC3StatementWrapper {
         this.delegate = delegate;
     }
 
+    @Override
     public boolean isClosed() throws SQLException {
         return delegate.isClosed();
     }
 
+    @Override
     public boolean isPoolable() throws SQLException {
         return delegate.isPoolable();
     }
 
+    @Override
     public void setPoolable(boolean poolable) throws SQLException {
         delegate.setPoolable(poolable);
     }
 
+    @Override
     public boolean isWrapperFor(Class<?> iface) {
         return iface.isAssignableFrom(delegate.getClass());
     }
 
+    @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (iface.isAssignableFrom(delegate.getClass())) {
             return iface.cast(delegate);

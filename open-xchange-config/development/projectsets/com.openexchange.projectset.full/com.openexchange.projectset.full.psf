@@ -98,5 +98,6 @@
 <project reference="1.0,:pserver:192.168.32.126:/var/lib/cvs,open-xchange/com.openexchange.subscribe.yahoo,com.openexchange.subscribe.yahoo"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.spamhandler.cloudmark,com.openexchange.spamhandler.cloudmark"/>
 <project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.soap.cxf,com.openexchange.soap.cxf"/>
+<project reference="1.0,:pserver:cvs.netline.de:/var/lib/cvs,open-xchange/com.openexchange.blackwhitelist,com.openexchange.blackwhitelist"/>
 </provider>
 </psf>

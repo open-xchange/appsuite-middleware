@@ -70,9 +70,9 @@ public class ListAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody();
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         List<Field> columns = request.getColumns();
         boolean copy = false;
         if(!columns.contains(File.Field.FOLDER_ID)) {
@@ -80,7 +80,7 @@ public class ListAction extends AbstractFileAction {
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-        
+
         if(!columns.contains(File.Field.ID)) {
             if(!copy) {
                 columns = new ArrayList<File.Field>(columns);
@@ -88,14 +88,14 @@ public class ListAction extends AbstractFileAction {
             }
             columns.add(File.Field.ID);
         }
-        
+
         final List<String> ids = request.getIds();
-        
+
         // This is too complicated. We'd rather have layers below here aggressively check folders.
-        
+
         final TimedResult<File> documents = new FilteringTimedResult<File>(fileAccess.getDocuments(request.getIds(), columns)) {
             private int threshhold = 0;
-            
+
             @Override
             protected boolean accept(final File thing) throws OXException {
                 int i = threshhold;
@@ -109,9 +109,9 @@ public class ListAction extends AbstractFileAction {
                 final String folderForID = request.getFolderAt(i);
                 return folderForID.equals(thing.getFolderId());
             }
-            
+
         };
-        
+
         return result(documents, request);
     }
 

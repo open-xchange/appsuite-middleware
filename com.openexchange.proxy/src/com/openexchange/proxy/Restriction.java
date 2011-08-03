@@ -51,14 +51,14 @@ package com.openexchange.proxy;
 
 /**
  * {@link Restriction} - A restriction for a HTTP response.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Restriction {
 
     /**
      * Indicates whether specified HTTP response is allowed by this restriction.
-     * 
+     *
      * @param response The HTTP response
      * @return <code>true</code> if HTTP response is allowed; otherwise <code>false</code>
      */
@@ -66,7 +66,7 @@ public interface Restriction {
 
     /**
      * Gets a displayable description for this restriction.
-     * 
+     *
      * @return The description for this restriction
      */
     String getDescription();

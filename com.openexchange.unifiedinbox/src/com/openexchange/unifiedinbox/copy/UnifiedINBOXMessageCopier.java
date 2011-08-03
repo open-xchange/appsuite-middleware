@@ -73,7 +73,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
  * {@link UnifiedINBOXMessageCopier} - Copies messages from/to Unified INBOX folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXMessageCopier {
@@ -86,7 +86,7 @@ public final class UnifiedINBOXMessageCopier {
 
     /**
      * Initializes a new {@link UnifiedINBOXMessageCopier}.
-     * 
+     *
      * @param session The session
      * @param access The Unified INBOX access
      */
@@ -98,7 +98,7 @@ public final class UnifiedINBOXMessageCopier {
 
     /**
      * Performs the copy operation.
-     * 
+     *
      * @param sourceFolder The source folder
      * @param destFolder The destination folder
      * @param mailIds The mail IDs denoting the mails to copy from source folder

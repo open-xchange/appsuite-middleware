@@ -51,7 +51,7 @@ package com.openexchange.pop3.storage.mailaccount;
 
 /**
  * {@link SessionParameterNames} - Constants for session parameter names.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionParameterNames {
@@ -70,7 +70,7 @@ public final class SessionParameterNames {
 
     /**
      * Gets the property name for UIDL map.
-     * 
+     *
      * @param accountId The account ID
      * @return The property name for UIDL map
      */
@@ -85,7 +85,7 @@ public final class SessionParameterNames {
 
     /**
      * Gets the property name for POP3 storage properties.
-     * 
+     *
      * @param accountId The account ID
      * @return The property name for POP3 storage properties
      */
@@ -100,7 +100,7 @@ public final class SessionParameterNames {
 
     /**
      * Gets the property name for trash container.
-     * 
+     *
      * @param accountId The account ID
      * @return The property name for trash container
      */

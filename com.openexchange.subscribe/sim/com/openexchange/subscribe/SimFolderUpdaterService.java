@@ -79,40 +79,40 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
         this.data = data;
         this.target = target;
     }
-    
+
     public void setTarget(TargetFolderDefinition target) {
         this.target = target;
     }
-    
+
     public TargetFolderDefinition getTarget() {
         return target;
     }
-    
+
     public Collection getData() {
         return data;
     }
 
-    
+
     public void setData(Collection data) {
         this.data = data;
     }
 
-    
+
     public FolderObject getFolder() {
         return folder;
     }
 
-    
+
     public void setFolder(FolderObject folder) {
         this.folder = folder;
     }
 
-    
+
     public boolean isHandles() {
         return handles;
     }
 
-    
+
     public void setHandles(boolean handles) {
         this.handles = handles;
     }
@@ -127,5 +127,5 @@ public class SimFolderUpdaterService implements FolderUpdaterService {
     public void setUsesMultipleStrategy(boolean bool){
         this.usesMultipleStrategy = bool;
     }
-    
+
 }

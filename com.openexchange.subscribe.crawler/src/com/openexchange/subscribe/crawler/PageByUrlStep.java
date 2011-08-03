@@ -62,7 +62,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * This Step gets a page reachable via Url in the current context (WebClient)
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
@@ -72,7 +72,7 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
     private Exception exception;
 
     private boolean executedSuccessfully;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlStep.class));
 
     public PageByUrlStep() {
@@ -94,7 +94,7 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
             if (debuggingEnabled){
                 LOG.info("Page : " + pageByUrl.getWebResponse().getContentAsString());
                 openPageInBrowser(output);
-            }    
+            }
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);

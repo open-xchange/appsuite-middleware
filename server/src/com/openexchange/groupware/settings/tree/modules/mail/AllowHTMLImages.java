@@ -61,7 +61,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * <p>
  * Path in config tree:<br>
  * <code>modules -&gt; mail -&gt; allowhtmlimages</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllowHTMLImages implements PreferencesItemService {
@@ -76,16 +76,19 @@ public class AllowHTMLImages implements PreferencesItemService {
 	/**
 	 * {@inheritDoc}
 	 */
-	public String[] getPath() {
+	@Override
+    public String[] getPath() {
 		return new String[] { "modules", "mail", "allowhtmlimages" };
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public IValueHandler getSharedValue() {
+	@Override
+    public IValueHandler getSharedValue() {
 		return new AbstractMailFuncs() {
-			public boolean isAvailable(final UserConfiguration userConfig) {
+			@Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
 				return userConfig.hasWebMail();
 			}
 

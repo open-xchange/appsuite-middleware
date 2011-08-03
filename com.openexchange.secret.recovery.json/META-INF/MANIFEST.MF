@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.secret.recovery.json
 Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.secret.recovery.json.osgi.SecretRecoveryJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.exception,
  com.openexchange.groupware,

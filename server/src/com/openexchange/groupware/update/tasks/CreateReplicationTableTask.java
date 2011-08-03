@@ -89,10 +89,12 @@ public final class CreateReplicationTableTask extends UpdateTaskAdapter {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);

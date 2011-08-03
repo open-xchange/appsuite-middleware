@@ -62,7 +62,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
  * {@link FlagTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FlagTerm extends SearchTerm<Integer> {
@@ -84,7 +84,7 @@ public final class FlagTerm extends SearchTerm<Integer> {
 
     /**
      * Gets the flags pattern: Either a positive integer if enabled or a negative integer if disabled
-     * 
+     *
      * @return The flags pattern
      */
     @Override

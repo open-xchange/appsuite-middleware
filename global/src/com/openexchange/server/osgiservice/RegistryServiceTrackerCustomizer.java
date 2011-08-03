@@ -55,10 +55,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * {@link RegistryServiceTrackerCustomizer} can be used to remember discovered services in an {@link AbstractServiceRegistry}.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustomizer {
+public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustomizer<T, T> {
 
     protected final BundleContext context;
 
@@ -68,7 +68,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
 
     /**
      * Initializes a new {@link RegistryServiceTrackerCustomizer}.
-     * 
+     *
      * @param context The bundle context
      * @param registry The registry
      * @param clazz The service class to track
@@ -80,8 +80,9 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
         this.serviceClass = clazz;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final Object tmp = context.getService(reference);
+    @Override
+    public T addingService(final ServiceReference<T> reference) {
+        final T tmp = context.getService(reference);
         if (serviceClass.isInstance(tmp)) {
             registry.addService(serviceClass, tmp);
             serviceAcquired(tmp);
@@ -91,11 +92,13 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
         return null;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<T> reference, final T service) {
         // Nothing to do.
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<T> reference, final T service) {
         if (null != service) {
             final T removedService = registry.removeService(serviceClass);
             if (null != removedService) {
@@ -109,7 +112,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
      * A hook for additional actions for newly tracked service instance.
      * <p>
      * Sub-classes may cast service using {@link #serviceClass} member.
-     * 
+     *
      * @param service The newly tracked service
      */
     protected void serviceAcquired(final Object service) {
@@ -120,7 +123,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
      * A hook for additional actions for a removed tracked service instance.
      * <p>
      * Sub-classes may cast service using {@link #serviceClass} member.
-     * 
+     *
      * @param service The removed tracked service
      */
     protected void serviceReleased(final Object service) {

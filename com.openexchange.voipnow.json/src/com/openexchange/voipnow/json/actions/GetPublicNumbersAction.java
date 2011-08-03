@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link GetPublicNumbersAction} - The action to set followers.
  * <p>
  * Using VoipNow's SOAP API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class GetPublicNumbersAction extends AbstractVoipNowSOAPAction<ChannelInterface> {

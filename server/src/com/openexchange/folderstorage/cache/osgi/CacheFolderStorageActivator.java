@@ -77,7 +77,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link CacheFolderStorageActivator} - {@link BundleActivator Activator} for cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderStorageActivator extends DeferredActivator {
@@ -210,7 +210,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         final CacheFolderStorage tmp = cacheFolderStorage;
         {
             final EventHandler eventHandler = new EventHandler() {
-                
+
+                @Override
                 public void handleEvent(final Event event) {
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                     final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
@@ -228,7 +229,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
         {
             final EventHandler eventHandler = new EventHandler() {
-                
+
+                @Override
                 public void handleEvent(final Event event) {
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                     final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
@@ -252,7 +254,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         }
         {
             final EventHandler eventHandler = new EventHandler() {
-                
+
+                @Override
                 public void handleEvent(final Event event) {
                     final String topic = event.getTopic();
                     if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {

@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link StringCollection} - Provides useful string utility methods mainly for SQL.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,7 +93,7 @@ public final class StringCollection {
      * </ul>
      * <p>
      * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-     * 
+     *
      * @param s The string to be prepared for SQL search
      * @return A prepared search string for being used in <code>java.sql.PreparedStatement.setString()</code>
      */
@@ -113,7 +113,7 @@ public final class StringCollection {
      * </ul>
      * <p>
      * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-     * 
+     *
      * @param s The string to be prepared for SQL search
      * @param surroundWithWildcard <code>true</code> to prepend/append <code>'%'</code> character, if pattern does not start with/end with
      *            SQL wildcard character; otherwise <code>false</code>
@@ -133,7 +133,7 @@ public final class StringCollection {
      * </ul>
      * <p>
      * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-     * 
+     *
      * @param s The string to be prepared for SQL search
      * @param surroundWithWildcard <code>true</code> to prepend/append <code>'%'</code> character, if pattern does not start with/end with
      *            SQL wildcard character; otherwise <code>false</code>
@@ -182,7 +182,7 @@ public final class StringCollection {
      * </ul>
      * <p>
      * E.g.: <code>"Foo%Bar*xxx?Hoo"</code> =&gt; <code>"Foo\%Bar%xxx_Hoo"</code>
-     * 
+     *
      * @param s The string to be prepared for SQL search
      * @param prependWildcard <code>true</code> to prepend <code>'%'</code> character, if pattern does not start with <code>'*'</code>
      *            wildcard character; otherwise <code>false</code>
@@ -235,7 +235,7 @@ public final class StringCollection {
      * that will work use as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class.
      * The <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\')
      * and dollar signs ('$') will be given no special meaning.
-     * 
+     *
      * @param s The string to be literalized
      * @return A literal string replacement
      */
@@ -267,7 +267,7 @@ public final class StringCollection {
      * public static byte[] replaceGivenBytes(byte b[], byte replace[], byte replacement[])<BR>
      * Replace (replace) with (replacement) in source (b)<BR>
      * <BR>
-     * 
+     *
      * @param byte b[]
      * @param byte replace[]
      * @param byte replacement[]
@@ -316,7 +316,7 @@ public final class StringCollection {
      * public static final String getSqlInString<BR>
      * returns a normal (number based) SQL IN String for subqueries<BR>
      * <BR>
-     * 
+     *
      * @param int arr[]
      * @return SQLInString or null
      */
@@ -341,7 +341,7 @@ public final class StringCollection {
 
     /**
      * returns a SQL IN String containing all the integers in the set
-     * 
+     *
      * @param set
      * @return
      */
@@ -369,7 +369,7 @@ public final class StringCollection {
      * public static final String getSqlInString<BR>
      * returns a normal (number based) SQL IN String for subqueries<BR>
      * <BR>
-     * 
+     *
      * @param Object arr[]
      * @return SQLInString or null
      */
@@ -395,7 +395,7 @@ public final class StringCollection {
      * public static final String getSqlInString<BR>
      * returns a normal (number based) SQL IN String for subqueries<BR>
      * <BR>
-     * 
+     *
      * @param int arr[][]
      * @return SQLInString or null
      */
@@ -422,7 +422,7 @@ public final class StringCollection {
      * public static final String getSqlInString<BR>
      * returns a normal (number based) SQL IN String for subqueries<BR>
      * <BR>
-     * 
+     *
      * @param int i
      * @param int arr[]
      * @return SQLInString or null
@@ -452,7 +452,7 @@ public final class StringCollection {
      * public static final String getSqlInStringFromMap<BR>
      * returns a normal (number based) SQL IN String for subqueries<BR>
      * <BR>
-     * 
+     *
      * @param Map
      * @return SQLInString or null
      */
@@ -479,7 +479,7 @@ public final class StringCollection {
      * public static byte[] blurTrim(byte b[], int c)<BR>
      * Same as String.trim() but should be faster because we know the end (c).<BR>
      * <BR>
-     * 
+     *
      * @param byte b[]
      * @param int c
      * @return byte[]
@@ -494,7 +494,7 @@ public final class StringCollection {
      * public static byte[] expandArray(byte b[], int c, int l)<BR>
      * Expand a byte array.<BR>
      * <BR>
-     * 
+     *
      * @param byte b[]
      * @param int c (last position in b)
      * @param int l (last position in b + replacement.length)

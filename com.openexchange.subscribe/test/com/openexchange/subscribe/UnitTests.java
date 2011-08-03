@@ -80,7 +80,7 @@ public final class UnitTests {
         pubSuite.addTestSuite(MicroformatAppointmentParserTest.class);
         //pubSuite.addTestSuite(MicroformatContactParserTest.class);
         pubSuite.addTestSuite(StrategyFolderUpdaterTest.class);
-        pubSuite.addTestSuite(SubscriptionSourceCollectorTest.class);        
+        pubSuite.addTestSuite(SubscriptionSourceCollectorTest.class);
         return pubSuite;
     }
 }

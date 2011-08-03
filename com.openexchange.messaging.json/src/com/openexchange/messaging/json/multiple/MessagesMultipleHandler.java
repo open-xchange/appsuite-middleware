@@ -59,7 +59,7 @@ import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MessagesMultipleHandler extends AJAXActionServiceAdapterHandler {
-    
+
     public MessagesMultipleHandler() {
         super(MessagingActionFactory.INSTANCE, "messaging/message");
     }

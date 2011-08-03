@@ -63,7 +63,7 @@ import com.openexchange.file.storage.File.Field;
 
 /**
  * {@link WebDAVFileStorageDavRepr}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageDavRepr {
@@ -74,7 +74,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Initializes a new {@link WebDAVFileStorageDavRepr}.
-     * 
+     *
      * @param isDirectory <code>true</code> if this DAV representation denotes a directory; otherwise <code>false</code> for file
      */
     public WebDAVFileStorageDavRepr(final boolean isDirectory) {
@@ -90,7 +90,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Initializes a new {@link WebDAVFileStorageDavRepr} from given file.
-     * 
+     *
      * @param file The file
      * @see #WebDAVFileStorageDavRepr(File, List)
      */
@@ -100,7 +100,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Initializes a new {@link WebDAVFileStorageDavRepr}.
-     * 
+     *
      * @param file The file
      * @param modifiedColumns The list of fields to consider; others are ignored
      */
@@ -137,13 +137,13 @@ public final class WebDAVFileStorageDavRepr {
         }
         /*-
          * No field for "getcontentlanguage" DAV property
-         * 
+         *
          * This property is read-only
          */
         // setProperty0(DavConstants.PROPERTY_GETCONTENTLANGUAGE, file.getProperty(DavConstants.PROPERTY_GETCONTENTLANGUAGE));
         /*-
          * No field for "getetag" DAV property
-         * 
+         *
          * This property is read-only
          */
         // setProperty0(DavConstants.PROPERTY_GETETAG, file.getProperty(DavConstants.PROPERTY_GETETAG));
@@ -171,7 +171,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Sets specified property.
-     * 
+     *
      * @param name The property name
      * @param value The property value or <code>null</code> to indicate removal
      */
@@ -181,7 +181,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Gets the properties to set.
-     * 
+     *
      * @return The properties to set
      */
     public DavPropertySet getSetProperties() {
@@ -190,7 +190,7 @@ public final class WebDAVFileStorageDavRepr {
 
     /**
      * Gets the names of the properties to remove
-     * 
+     *
      * @return The names of the properties to remove
      */
     public DavPropertyNameSet getRemoveProperties() {

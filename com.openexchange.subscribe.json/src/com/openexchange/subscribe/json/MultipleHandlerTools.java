@@ -63,5 +63,5 @@ public class MultipleHandlerTools {
     public static OXException wrapThrowable(final Throwable t) {
         return THROWABLE.create(t, t.getMessage());
     }
-       
+
 }

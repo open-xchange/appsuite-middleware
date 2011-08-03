@@ -77,7 +77,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
 
     private static final String URL = "url";
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     private PublicationTarget buildTarget() {
         PublicationTarget target = new PublicationTarget();

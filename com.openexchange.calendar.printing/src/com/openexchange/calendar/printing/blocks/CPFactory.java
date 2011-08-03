@@ -63,31 +63,35 @@ public class CPFactory {
     private CPType type;
 
     private CPCalendar calendar;
-    
-    private List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
+
+    private final List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
 
     public void setTypeToProduce(CPType type) {
         this.type = type;
     }
-    
+
     public void setCalendar(CPCalendar calendar){
         this.calendar = calendar;
-        
-        if(strategies != null)
-            for(CPPartitioningStrategy strategy: strategies)
+
+        if(strategies != null) {
+            for(CPPartitioningStrategy strategy: strategies) {
                 strategy.setCalendar(calendar);
+            }
+        }
     }
 
     public void addStrategy(CPPartitioningStrategy strategy) {
         strategies.add(strategy);
-        if(calendar != null)
+        if(calendar != null) {
             strategy.setCalendar(calendar);
+        }
     }
 
     public CPPartition partition(List<CPAppointment> appointments) {
         for (CPPartitioningStrategy strategy : strategies) {
-            if (strategy.isPackaging(type))
+            if (strategy.isPackaging(type)) {
                 return strategy.partition(appointments);
+            }
         }
         return new CPPartition();
     }

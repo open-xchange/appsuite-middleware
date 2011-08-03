@@ -53,49 +53,49 @@ import java.util.Date;
 
 /**
  * {@link RetentionData} - The retention data to store.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RetentionData {
 
     /**
      * Gets the UTC start time.
-     * 
+     *
      * @return The UTC start time or <code>null</code> if not available.
      */
     public Date getStartTime();
 
     /**
      * Sets the UTC start time.
-     * 
+     *
      * @param startTime The UTC start time.
      */
     public void setStartTime(Date startTime);
 
     /**
      * Gets the client IP address.
-     * 
+     *
      * @return The client IP address or <code>null</code> if not available.
      */
     public String getIPAddress();
 
     /**
      * Sets the client IP address.
-     * 
+     *
      * @param ipAddress The client IP address
      */
     public void setIPAddress(String ipAddress);
 
     /**
      * Gets the mailbox identifier.
-     * 
+     *
      * @return The mailbox identifier or <code>null</code> if not available.
      */
     public String getIdentifier();
 
     /**
      * Sets the mailbox identifier.
-     * 
+     *
      * @param identifier The mailbox identifier.
      */
     public void setIdentifier(String identifier);
@@ -104,7 +104,7 @@ public interface RetentionData {
      * Gets the login identifier.
      * <p>
      * Only applicable to mailbox access event.
-     * 
+     *
      * @return The login identifier or <code>null</code> if not available.
      */
     public String getLogin();
@@ -113,7 +113,7 @@ public interface RetentionData {
      * Sets the login identifier.
      * <p>
      * Only applicable to mailbox access event.
-     * 
+     *
      * @param login The login identifier.
      */
     public void setLogin(String login);
@@ -122,7 +122,7 @@ public interface RetentionData {
      * Gets the sender's email address.
      * <p>
      * Only applicable to mail transport event.
-     * 
+     *
      * @return The sender's email address or <code>null</code> if not available.
      */
     public String getSenderAddress();
@@ -131,7 +131,7 @@ public interface RetentionData {
      * Sets the sender's email address.
      * <p>
      * Only applicable to mail transport event.
-     * 
+     *
      * @param sender The sender's email address.
      */
     public void setSenderAddress(String sender);
@@ -140,7 +140,7 @@ public interface RetentionData {
      * Gets the recipients' email addresses.
      * <p>
      * Only applicable to mail transport event.
-     * 
+     *
      * @return The recipients' email addresses or an empty array if not available.
      */
     public String[] getRecipientAddresses();
@@ -149,7 +149,7 @@ public interface RetentionData {
      * Sets the recipients' email addresses.
      * <p>
      * Only applicable to mail transport event.
-     * 
+     *
      * @param addresses The recipients' email addresses.
      */
     public void setRecipientAddresses(String[] addresses);

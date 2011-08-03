@@ -12,11 +12,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Ping 4PSA VoipNow server: response type
- * 
+ *
  * <p>Java class for PingResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PingResponseType">
  *   &lt;complexContent>
@@ -59,8 +59,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PingResponseType", propOrder = {
@@ -96,11 +96,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the title property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getTitle() {
         return title;
@@ -108,11 +108,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the title property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setTitle(String value) {
         this.title = value;
@@ -120,11 +120,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the version property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getVersion() {
         return version;
@@ -132,11 +132,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the version property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setVersion(String value) {
         this.version = value;
@@ -144,11 +144,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the buildNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getBuildNo() {
         return buildNo;
@@ -156,11 +156,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the buildNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setBuildNo(String value) {
         this.buildNo = value;
@@ -168,11 +168,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the resellers property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getResellers() {
         return resellers;
@@ -180,11 +180,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the resellers property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setResellers(BigInteger value) {
         this.resellers = value;
@@ -192,11 +192,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the clients property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getClients() {
         return clients;
@@ -204,11 +204,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the clients property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setClients(BigInteger value) {
         this.clients = value;
@@ -216,11 +216,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the extensions property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtensions() {
         return extensions;
@@ -228,11 +228,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the extensions property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtensions(BigInteger value) {
         this.extensions = value;
@@ -240,11 +240,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the activSSO property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isActivSSO() {
         return activSSO;
@@ -252,11 +252,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the activSSO property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setActivSSO(Boolean value) {
         this.activSSO = value;
@@ -264,11 +264,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the availableUpdate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAvailableUpdate() {
         return availableUpdate;
@@ -276,11 +276,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the availableUpdate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAvailableUpdate(String value) {
         this.availableUpdate = value;
@@ -288,25 +288,25 @@ public class PingResponseType {
 
     /**
      * Gets the value of the api property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the api property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getApi().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link PingResponseType.Api }
-     * 
-     * 
+     *
+     *
      */
     public List<PingResponseType.Api> getApi() {
         if (api == null) {
@@ -317,11 +317,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the infrastructureID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getInfrastructureID() {
         return infrastructureID;
@@ -329,11 +329,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the infrastructureID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setInfrastructureID(String value) {
         this.infrastructureID = value;
@@ -341,11 +341,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the currency property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getCurrency() {
         return currency;
@@ -353,11 +353,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the currency property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setCurrency(String value) {
         this.currency = value;
@@ -365,11 +365,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the charging property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCharging() {
         return charging;
@@ -377,11 +377,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the charging property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCharging(Boolean value) {
         this.charging = value;
@@ -389,11 +389,11 @@ public class PingResponseType {
 
     /**
      * Gets the value of the automationAgent property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isAutomationAgent() {
         return automationAgent;
@@ -401,11 +401,11 @@ public class PingResponseType {
 
     /**
      * Sets the value of the automationAgent property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setAutomationAgent(Boolean value) {
         this.automationAgent = value;
@@ -414,9 +414,9 @@ public class PingResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -429,8 +429,8 @@ public class PingResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -446,11 +446,11 @@ public class PingResponseType {
 
         /**
          * Gets the value of the protocol property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getProtocol() {
             return protocol;
@@ -458,11 +458,11 @@ public class PingResponseType {
 
         /**
          * Sets the value of the protocol property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setProtocol(String value) {
             this.protocol = value;
@@ -470,11 +470,11 @@ public class PingResponseType {
 
         /**
          * Gets the value of the version property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getVersion() {
             return version;
@@ -482,11 +482,11 @@ public class PingResponseType {
 
         /**
          * Sets the value of the version property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setVersion(String value) {
             this.version = value;

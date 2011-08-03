@@ -62,7 +62,7 @@ import com.openexchange.subscribe.crawler.internal.Step;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class GenericSubscribeServiceForSunCalendarTest extends GenericSubscribeServiceTestHelpers {
-    
+
     public void testSunCalendar(){
         String username = "";
         String password = "";
@@ -75,8 +75,8 @@ public class GenericSubscribeServiceForSunCalendarTest extends GenericSubscribeS
         crawler.setModule(FolderObject.CALENDAR);
         crawler.setPriority(1);
         crawler.setJavascriptEnabled(true);
-        
-        
+
+
 
         ArrayList<Step> steps = new ArrayList<Step>();
 
@@ -90,26 +90,26 @@ public class GenericSubscribeServiceForSunCalendarTest extends GenericSubscribeS
         loginStep.setNameOfPasswordField("IDToken2");
         loginStep.setStringAvailableAfterLogin(".*favicon.ico.*");
         steps.add(loginStep);
-        
+
         PageByFrameNumberStep pageByFrameNumberStep = new PageByFrameNumberStep();
         pageByFrameNumberStep.setFrameNumber(3);
         steps.add(pageByFrameNumberStep);
-        
+
         StringByRegexStep stringByRegexStep = new StringByRegexStep();
         stringByRegexStep.setRegex("uid',[^,]*,'([^']*)'");
         steps.add(stringByRegexStep);
-        
+
         PageByUrlAndParameterStep pageByUrlAndParameterStep = new PageByUrlAndParameterStep();
         pageByUrlAndParameterStep.setUrl("https://uwc1.us.es:444/uwc/calclient/ImportExport?calid=");
         steps.add(pageByUrlAndParameterStep);
-        
+
         PageByFillingOutFormStep pageByFillingOutFormStep = new PageByFillingOutFormStep();
         pageByFillingOutFormStep.setActionOfForm(".*ImportExport.*");
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("HtmlSubmitInput", "export");
         pageByFillingOutFormStep.setParameters(parameters);
         steps.add(pageByFillingOutFormStep);
-        
+
         steps.add(new CalendarObjectsByICalFileStep());
 
         crawler.finishUp(steps);

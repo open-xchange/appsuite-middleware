@@ -75,7 +75,7 @@ public class SearchTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException, JSONException {
         request()
             .body(new JSONObject("{pattern: 'someSearch'}"))
@@ -86,15 +86,15 @@ public class SearchTest extends FileActionTest {
             .param("start", "10")
             .param("end", "12")
             .param("timezone", "Europe/Berlin");
-        
+
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.emptyIterator()); 
-        
+        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.emptyIterator());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
     }
-    
+
 
     @Override
     public AbstractFileAction createAction() {

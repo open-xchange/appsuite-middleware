@@ -66,7 +66,7 @@ public class TwoCredentialsGenericSubscribeService extends GenericSubscribeServi
     public TwoCredentialsGenericSubscribeService(String displayName, String id, int module, String workflowString, int priority, Activator activator, boolean enableJavascript) {
         super(displayName, id, module, workflowString, priority, activator, enableJavascript);
     }
-    
+
     @Override
     protected void addExtraFields(DynamicFormDescription form) {
         form.add(FormElement.input("login2", FORM_LABEL_LOGIN)).add(FormElement.password("password2", FORM_LABEL_PASSWORD));

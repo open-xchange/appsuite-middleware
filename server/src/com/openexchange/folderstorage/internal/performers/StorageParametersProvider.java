@@ -61,9 +61,9 @@ public interface StorageParametersProvider {
 
     /**
      * Gets the storage parameters.
-     * 
+     *
      * @return The storage parameters
      */
     StorageParameters getStorageParameters();
-    
+
 }

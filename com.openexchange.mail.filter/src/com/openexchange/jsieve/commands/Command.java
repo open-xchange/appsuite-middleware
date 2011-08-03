@@ -52,14 +52,14 @@ import java.util.HashSet;
 
 /**
  * An abstract class defining common method of all command types
- * 
+ *
  * @author d7
- * 
+ *
  */
 public abstract class Command {
     /**
      * This method gets all extensions which must be required by one command
-     * 
+     *
      * @return A list of String defining the extensions
      */
     public abstract HashSet<String> getRequired();

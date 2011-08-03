@@ -53,34 +53,35 @@ import java.util.Date;
 
 /**
  * DateOrderObject
- * 
+ *
  * @author <a href="sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
+ *
  */
 public class DateOrderObject implements Comparable<DateOrderObject> {
 
 	protected Date orderBy;
-	
+
 	protected Object obj;
-	
+
 	public DateOrderObject(final Date orderBy, final Object obj) {
 		this.orderBy = orderBy;
 		this.obj = obj;
 	}
-	
+
 	public Date getOrderBy() {
 		return orderBy;
 	}
-	
+
 	public Object getObject() {
 		return obj;
 	}
 
-	public int compareTo(final DateOrderObject o) {
+	@Override
+    public int compareTo(final DateOrderObject o) {
 		if (o.getOrderBy() != null) {
 			return orderBy.compareTo(o.getOrderBy());
 		} else {
 			return 1;
 		}
-	}	
+	}
 }

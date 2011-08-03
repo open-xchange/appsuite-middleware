@@ -82,14 +82,17 @@ public class CorrectIndexes6_10 implements UpdateTask {
         super();
     }
 
+    @Override
     public int addedWithVersion() {
         return 54;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {

@@ -49,7 +49,7 @@ public class LDAPHostnameService implements HostnameService {
             final Boolean bind = LDAPHostnameProperties.getProperty(service, Property.bind);
             final String url = LDAPHostnameProperties.getProperty(service, Property.ldap_url);
             final String ownFilter = getRightFilter(filter, contextId);
-            
+
             context = new InitialLdapContext(getBasicLDAPProperties(url), null);
             if (bind.equals(Boolean.TRUE)) {
                 context.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
@@ -60,7 +60,7 @@ public class LDAPHostnameService implements HostnameService {
                 context.addToEnvironment(Context.SECURITY_AUTHENTICATION, "none");
                 context.reconnect(null);
             }
-            
+
             if (LOG.isDebugEnabled()) {
                 final StringBuilder sb = new StringBuilder('\n');
                 sb.append("LDAP search triggered with:\n");
@@ -130,13 +130,13 @@ public class LDAPHostnameService implements HostnameService {
         if (uri.startsWith("ldaps://")) {
             env.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
         }
-        
+
         return env;
     }
 
     /**
      * Sets the contextid inside the filter syntax
-     * 
+     *
      * @param filter
      * @param contextId
      * @return
@@ -144,7 +144,7 @@ public class LDAPHostnameService implements HostnameService {
     private static String getRightFilter(final String filter, final int contextId) {
         return filter.replace(PLACEHOLDER, String.valueOf(contextId));
     }
-    
+
     private static int getSearchControl(final SearchScope searchScope) {
         switch (searchScope) {
         case one:
@@ -164,7 +164,7 @@ public class LDAPHostnameService implements HostnameService {
         searchControls.setReturningAttributes(new String[] { ldapReturnField });
         return searchControls;
     }
-    
+
     public String getHostname(final int userId, final int contextId) {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);

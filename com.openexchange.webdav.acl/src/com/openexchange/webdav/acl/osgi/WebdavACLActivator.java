@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 /**
  * {@link WebdavACLActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavACLActivator extends HousekeepingActivator {
@@ -82,7 +82,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
             WebdavPrincipalPerformer.setServices(this);
 
             rememberTracker(new ServletRegistration(context, new WebdavPrincipalServlet(), "/servlet/dav/principals/users"));
-            
+
             WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);

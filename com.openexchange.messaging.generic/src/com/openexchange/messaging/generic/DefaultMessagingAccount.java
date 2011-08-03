@@ -55,7 +55,7 @@ import com.openexchange.messaging.MessagingService;
 
 /**
  * {@link DefaultMessagingAccount} - The default {@link MessagingAccount} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -98,7 +98,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     /**
      * Sets the configuration.
-     * 
+     *
      * @param configuration The configuration to set
      */
     public void setConfiguration(final Map<String, Object> configuration) {
@@ -107,7 +107,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     /**
      * Sets the display name.
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -116,7 +116,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     /**
      * Sets the ID.
-     * 
+     *
      * @param id The ID to set
      */
     public void setId(final int id) {
@@ -125,7 +125,7 @@ public class DefaultMessagingAccount implements MessagingAccount {
 
     /**
      * Sets the messaging service.
-     * 
+     *
      * @param messagingService The messaging service to set
      */
     public void setMessagingService(final MessagingService messagingService) {

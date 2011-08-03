@@ -51,7 +51,7 @@ package com.openexchange.tools.encoding;
 
 /**
  * Central entry point for a base64 en/decoder.
- * 
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -66,7 +66,7 @@ public class Base64 {
 
     /**
      * Encodes some binary data into base64.
-     * 
+     *
      * @param bytes binary data to encode.
      * @return a string containing the encoded data.
      */
@@ -76,7 +76,7 @@ public class Base64 {
 
     /**
      * Converts the string using UTF-8 character set encoding and encodes then into base64.
-     * 
+     *
      * @param source string the encode.
      * @return the base64 data for the string.
      */
@@ -86,7 +86,7 @@ public class Base64 {
 
     /**
      * Decodes some base64 data.
-     * 
+     *
      * @param source string to decode.
      * @return the decoded data.
      */

@@ -73,6 +73,7 @@ public abstract class ExtendedColumnCreationTask extends UpdateTaskAdapter {
         this.dbService = dbService;
     }
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int cid = params.getContextId();
         final Connection con = dbService.getForUpdateTask(cid);

@@ -51,7 +51,7 @@ package com.openexchange.conversion;
 
 /**
  * {@link SimpleData} - A simple data
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SimpleData<D extends Object> implements Data<D> {
@@ -62,7 +62,7 @@ public final class SimpleData<D extends Object> implements Data<D> {
 
     /**
      * Initializes a new {@link SimpleData} with empty data properties
-     * 
+     *
      * @param data The data
      */
     public SimpleData(final D data) {
@@ -71,7 +71,7 @@ public final class SimpleData<D extends Object> implements Data<D> {
 
     /**
      * Initializes a new {@link SimpleData}
-     * 
+     *
      * @param data The data
      * @param dataProperties The data properties
      */

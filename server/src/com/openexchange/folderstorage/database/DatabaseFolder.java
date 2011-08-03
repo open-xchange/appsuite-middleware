@@ -68,7 +68,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link DatabaseFolder} - A database folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DatabaseFolder extends AbstractFolder {
@@ -83,7 +83,7 @@ public class DatabaseFolder extends AbstractFolder {
 
     /**
      * Initializes an empty {@link DatabaseFolder}.
-     * 
+     *
      * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
      */
     public DatabaseFolder(final boolean cacheable) {
@@ -98,7 +98,7 @@ public class DatabaseFolder extends AbstractFolder {
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
-     * 
+     *
      * @param folderObject The underlying database folder
      */
     public DatabaseFolder(final FolderObject folderObject) {
@@ -110,7 +110,7 @@ public class DatabaseFolder extends AbstractFolder {
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
-     * 
+     *
      * @param folderObject The underlying database folder
      * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
      */
@@ -153,7 +153,7 @@ public class DatabaseFolder extends AbstractFolder {
 
     /**
      * Sets the cachable flag.
-     * 
+     *
      * @param cacheable The cachable flag.
      */
     public void setCacheable(final boolean cacheable) {
@@ -206,13 +206,14 @@ public class DatabaseFolder extends AbstractFolder {
         return SystemContentType.getInstance();
     }
 
+    @Override
     public boolean isGlobalID() {
         return global;
     }
 
     /**
      * Sets whether this database folder is globally valid or per-user valid.
-     * 
+     *
      * @param global <code>true</code> if this database folder is globally valid; otherwise <code>false</code> if per-user valid
      */
     public void setGlobal(final boolean global) {

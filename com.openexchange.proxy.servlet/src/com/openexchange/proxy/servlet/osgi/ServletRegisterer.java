@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 
 package com.openexchange.proxy.servlet.osgi;
@@ -16,7 +16,7 @@ import com.openexchange.proxy.servlet.ProxyServlet;
 
 /**
  * {@link ServletRegisterer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServletRegisterer implements ServiceTrackerCustomizer {
@@ -25,7 +25,7 @@ public class ServletRegisterer implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link ServletRegisterer}.
-     * 
+     *
      * @param context The bundle context
      */
     public ServletRegisterer(final BundleContext context) {

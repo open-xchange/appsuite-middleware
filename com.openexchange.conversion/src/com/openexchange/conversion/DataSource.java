@@ -54,14 +54,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DataSource} - A data source for obtaining data for conversion purpose.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DataSource {
 
     /**
      * Gets the data of this data source in desired type
-     * 
+     *
      * @param <D> The desired type
      * @param type The desired type's class reference
      * @param dataArguments The data arguments needed for obtaining data
@@ -74,14 +74,14 @@ public interface DataSource {
     /**
      * Gets the required arguments which must be present in corresponding instance of {@link DataArguments} when performing the
      * {@link #getData(Class, DataArguments, Session)} method
-     * 
+     *
      * @return The required arguments
      */
     public String[] getRequiredArguments();
 
     /**
      * Gets the supported types of this data source
-     * 
+     *
      * @return The supported types of this data source
      */
     public Class<?>[] getTypes();

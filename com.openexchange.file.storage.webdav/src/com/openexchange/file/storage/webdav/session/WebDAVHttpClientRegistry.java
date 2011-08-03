@@ -59,7 +59,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link WebDAVHttpClientRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -69,7 +69,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static WebDAVHttpClientRegistry getInstance() {
@@ -88,7 +88,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Adds specified HttpClient.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -110,7 +110,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Check presence of the HttpClient associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -123,7 +123,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Gets the HttpClient associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -137,7 +137,7 @@ public final class WebDAVHttpClientRegistry {
     /**
      * Removes specified session identifier associated with given user-context-pair and the HttpClient as well, if no more
      * user-associated session identifiers are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a HttpClient for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -159,7 +159,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Purges specified user's HttpClient.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -184,7 +184,7 @@ public final class WebDAVHttpClientRegistry {
 
     /**
      * Gets a {@link Iterator iterator} over the facebook sessions in this registry.
-     * 
+     *
      * @return A {@link Iterator iterator} over the facebook sessions in this registry.
      */
     Iterator<ConcurrentMap<String, HttpClient>> iterator() {

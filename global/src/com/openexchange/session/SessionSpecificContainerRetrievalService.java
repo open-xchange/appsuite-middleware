@@ -51,7 +51,7 @@ package com.openexchange.session;
 
 /**
  * A {@link SessionSpecificContainerRetrievalService} manages containers bound to a session and its lifecycle.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SessionSpecificContainerRetrievalService {
@@ -73,7 +73,7 @@ public interface SessionSpecificContainerRetrievalService {
 
         /**
          * Find out whether the given lifecycle is included in this lifecycle.
-         * 
+         *
          * @return
          */
         public boolean includes(Lifecycle other) {
@@ -90,7 +90,7 @@ public interface SessionSpecificContainerRetrievalService {
     /**
      * Creates or retrieves a session scoped container for the given name. Due to the lifecycle management and session migration (which
      * might not migrate these data sets) all values should be considered volatile.
-     * 
+     *
      * @param <T> The type of variable to be stored
      * @param name A namespace for the variables. Typically it should be constructed out of a bundles identifier and a postfix for each
      *            variable that has to be managed. Must not be null.
@@ -110,7 +110,7 @@ public interface SessionSpecificContainerRetrievalService {
      * Destroys a container in the given namespace. CleanUp will be invoked on all values currently bound to any session. May optionally
      * pass a clean up operation to be invoked instead of the registered one. Call this on bundle shutdown to get rid of all callbacks you
      * may have registered.
-     * 
+     *
      * @param name The namespace for the variables.
      * @param cleanUp A clean up operation overriding the registered one. May be null in which case the regular clean up operation is
      *            applied.
@@ -130,19 +130,19 @@ public interface SessionSpecificContainerRetrievalService {
      * @return A random token container
      */
     public <T> RandomTokenContainer<T> getRandomTokenContainer(String name, Lifecycle lifecycle, CleanUp<T> cleanUp);
-    
+
     /**
      * Destroys a container in the given namespace. CleanUp will be invoked on all values currently bound to any session. May optionally
      * pass a clean up operation to be invoked instead of the registered one. Call this on bundle shutdown to get rid of all callbacks you
      * may have registered.
-     * 
+     *
      * @param name The namespace for the variables.
      * @param cleanUp A clean up operation overriding the registered one. May be null in which case the regular clean up operation is
      *            applied.
      */
     public void destroyRandomTokenContainer(String name, CleanUp<?> cleanUp);
-    
-    
+
+
     /**
      * An {@link InitialValueFactory} is used to seed a session scoped container with an initial value.
      */

@@ -51,14 +51,14 @@ package com.openexchange.subscribe.microformats;
 
 /**
  * {@link OXMFParserFactoryService} - Factory service for {@link OXMFParser} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OXMFParserFactoryService {
 
     /**
      * Returns a new instance of {@link OXMFParser}.
-     * 
+     *
      * @return A new instance of {@link OXMFParser}
      */
     public OXMFParser getParser();

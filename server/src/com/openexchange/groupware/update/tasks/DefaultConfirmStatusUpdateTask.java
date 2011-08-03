@@ -88,14 +88,17 @@ public class DefaultConfirmStatusUpdateTask implements UpdateTask {
         }
     };
 
+    @Override
     public int addedWithVersion() {
         return 70;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(Schema schema, int contextId) throws OXException {
         Connection con = Database.getNoTimeout(contextId, true);
         try {

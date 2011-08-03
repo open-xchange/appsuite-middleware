@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link UWAWidgetExceptionCodes} - Enumeration of all {@link OXException}s.
- * 
+ *
  * @author Francisco Laguna <fla@synapps.de>
  */
 public enum UWAWidgetExceptionCodes implements OXExceptionCode {
@@ -64,9 +64,9 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1), 
-    SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2), 
-    NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3), 
+    UNEXPECTED_ERROR(UWAWidgetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    SQLError(UWAWidgetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
+    NOT_FOUND(UWAWidgetExceptionMessages.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
     PROTECTED(UWAWidgetExceptionMessages.PROTECTED_MSG, CATEGORY_ERROR, 4),
     INVALID_CONFIGURATION("Invalid configuration in widget definition file. Please ensure the file looks like this:\nwidget12:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget1\n  visible: true\n  title:Widget 1\n\nwidget13:\n  autorefresh: true\n  parameter: \"{someParam: true}\"\n  standalone: true\n  url: http://www.mydomain.invalid/widget2\n  visible: true\n  title:Widget 2\n", CATEGORY_CONFIGURATION, 5);
     ;
@@ -82,7 +82,7 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     public String getPrefix() {
         return "UWA_WIDGET";
     }
@@ -105,7 +105,7 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -114,7 +114,7 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -124,7 +124,7 @@ public enum UWAWidgetExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -55,7 +55,7 @@ import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
 
 /**
  * {@link VoipNowServlet} - The user servlet.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VoipNowServlet extends MultipleAdapterServletNew {
@@ -66,7 +66,7 @@ public final class VoipNowServlet extends MultipleAdapterServletNew {
      * Initializes a new {@link VoipNowServlet}.
      */
     public VoipNowServlet() {
-    	super(VoipNowActionFactory.getInstance());    		
+    	super(VoipNowActionFactory.getInstance());
     }
 
     @Override

@@ -69,7 +69,7 @@ public class ApacheURLDecoder {
      * @param string The String to decode
      * @param encoding The encoding to assume for special characters
      * @return
-     * @throws UnsupportedEncodingException 
+     * @throws UnsupportedEncodingException
      */
     public String decode(String string, String encoding) throws UnsupportedEncodingException {
         String[] chunks = string.split("\\+");
@@ -82,10 +82,10 @@ public class ApacheURLDecoder {
                 decoded.append('+');
             }
         }
-        
+
         return decoded.toString();
     }
 
     // Can be turned into an interface (maybe even a service?) when we want to support different http servers
-    
+
 }

@@ -119,9 +119,9 @@ import com.openexchange.sql.grammar.UnaryPLUS;
 import com.openexchange.sql.grammar.WHERE;
 
 public interface IStatementBuilder {
-	
+
 	String buildCommand(Command element);
-	
+
 	PreparedStatement prepareStatement(Connection con, Command element, List<? extends Object> values) throws SQLException;
 
 	void buildABS(ABS element);

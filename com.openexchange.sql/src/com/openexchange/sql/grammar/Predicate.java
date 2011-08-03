@@ -50,7 +50,7 @@
 package com.openexchange.sql.grammar;
 
 public abstract class Predicate extends Expression {
-	
+
 	public Predicate AND(Predicate predicate) {
 		return new AND(this, predicate);
 	}

@@ -11,18 +11,18 @@ import com._4psa.reportmessagesinfo_xsd._2_5.QuickStatsResponseType;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.reportmessages_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.reportmessages_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -33,14 +33,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.reportmessages_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link CallReportRequest }
-     * 
+     *
      */
     public CallReportRequest createCallReportRequest() {
         return new CallReportRequest();
@@ -48,7 +48,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallCostsRequest }
-     * 
+     *
      */
     public CallCostsRequest createCallCostsRequest() {
         return new CallCostsRequest();
@@ -56,7 +56,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallReportRequest.Interval }
-     * 
+     *
      */
     public CallReportRequest.Interval createCallReportRequestInterval() {
         return new CallReportRequest.Interval();
@@ -64,7 +64,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link QuickStatsRequest }
-     * 
+     *
      */
     public QuickStatsRequest createQuickStatsRequest() {
         return new QuickStatsRequest();
@@ -72,7 +72,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallCostsRequest.Interval }
-     * 
+     *
      */
     public CallCostsRequest.Interval createCallCostsRequestInterval() {
         return new CallCostsRequest.Interval();
@@ -80,7 +80,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link CallReportResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ReportMessages.xsd/2.5.1", name = "CallReportResponse")
     public JAXBElement<CallReportResponseType> createCallReportResponse(CallReportResponseType value) {
@@ -89,7 +89,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link CallCostsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ReportMessages.xsd/2.5.1", name = "CallCostsResponse")
     public JAXBElement<CallCostsResponseType> createCallCostsResponse(CallCostsResponseType value) {
@@ -98,7 +98,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link QuickStatsResponseType }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ReportMessages.xsd/2.5.1", name = "QuickStatsResponse")
     public JAXBElement<QuickStatsResponseType> createQuickStatsResponse(QuickStatsResponseType value) {

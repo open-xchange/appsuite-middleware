@@ -86,7 +86,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * Since a mail part causes troubles when its input stream is read multiple times, corresponding data is either stored in an internal byte
  * array or copied as a temporary file to disk (depending on {@link TransportConfig#getReferencedPartLimit()}). Therefore this part needs
  * special handling to ensure removal of temporary file when it is dispatched.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class ReferencedMailPart extends MailPart implements ComposedMailPart {
@@ -117,7 +117,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * The referenced part's content is loaded dependent on its size. If size exceeds defined
      * {@link TransportConfig#getReferencedPartLimit() limit} its content is temporary written to disc; otherwise its content is kept inside
      * an array of <code>byte</code>.
-     * 
+     *
      * @param referencedPart The referenced part
      * @param session The session used to store a possible temporary disc file
      * @throws OXException If a mail error occurs
@@ -137,7 +137,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
      * The referenced mail's content is loaded dependent on its size. If size exceeds defined
      * {@link TransportConfig#getReferencedPartLimit() limit} its content is temporary written to disc; otherwise its content is kept inside
      * an array of <code>byte</code>.
-     * 
+     *
      * @param referencedMail The referenced mail
      * @param session The session used to store a possible temporary disc file
      * @throws OXException If a mail error occurs
@@ -154,7 +154,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     /**
      * Handles referenced part dependent on its size. If size exceeds defined {@link TransportConfig#getReferencedPartLimit() limit} its
      * content is temporary written to disc; otherwise its content is kept inside an array of <code>byte</code>.
-     * 
+     *
      * @param referencedPart The referenced mail part
      * @param session The session to manage a possible temporary disc file
      * @return A file ID if content is written to disc; otherwise <code>null</code> to indicate content is held inside.
@@ -283,6 +283,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                     final ManagedFile managedFile = file;
                     final InputStreamProvider isp = new InputStreamProvider() {
 
+                        @Override
                         public InputStream getInputStream() throws IOException {
                             try {
                                 return managedFile.getInputStream();
@@ -293,6 +294,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                             }
                         }
 
+                        @Override
                         public String getName() {
                             return null;
                         }
@@ -408,7 +410,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     /**
      * Gets this referenced part's file ID if its content has been written to disc.
-     * 
+     *
      * @return The file ID or <code>null</code> if content is kept inside rather than on disc.
      */
     public String getFileID() {
@@ -417,7 +419,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     /**
      * Checks if referenced part is a mail
-     * 
+     *
      * @return <code>true</code> if referenced part is a mail; otherwise <code>false</code>
      */
     public boolean isMail() {
@@ -427,13 +429,14 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
     /**
      * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
      * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-     * 
+     *
      * @return A UUID string
      */
     private static String randomUUID() {
         return UUID.randomUUID().toString();
     }
 
+    @Override
     public ComposedPartType getType() {
         return ComposedMailPart.ComposedPartType.REFERENCE;
     }

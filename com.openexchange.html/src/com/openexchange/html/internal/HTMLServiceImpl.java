@@ -80,7 +80,7 @@ import com.openexchange.proxy.ProxyRegistry;
 
 /**
  * {@link HTMLServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLServiceImpl implements HTMLService {
@@ -109,7 +109,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Initializes a new {@link HTMLServiceImpl}.
-     * 
+     *
      * @param tidyConfiguration The jTidy configuration
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
@@ -343,7 +343,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Checks if specified URL needs to be converted to its ASCII form.
-     * 
+     *
      * @param url The URL to check
      * @return The checked URL
      * @throws MalformedURLException If URL is malformed
@@ -390,7 +390,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -516,7 +516,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -543,7 +543,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     * 
+     *
      * <pre>
      * String s = matcher.group();
      * int mlen = s.length() - 1;
@@ -574,7 +574,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding unicode character.
-     * 
+     *
      * @param entity The HTML entity
      * @return The corresponding unicode character or <code>null</code>
      */
@@ -750,7 +750,7 @@ public final class HTMLServiceImpl implements HTMLService {
         mr.appendTail(sb);
         return sb.toString();
     }
-    
+
     public String getConformHTML(final String htmlContent, final String charset) {
         return getConformHTML(htmlContent, charset, true);
     }
@@ -787,9 +787,9 @@ public final class HTMLServiceImpl implements HTMLService {
                 }
                 /*-
                  * In reverse order:
-                 * 
+                 *
                  * "\r\n    <meta content=\"text/html; charset=" + <charset> + "\" http-equiv=\"Content-Type\" />\r\n "
-                 * 
+                 *
                  */
                 sb.insert(start, "\" http-equiv=\"Content-Type\" />\r\n ");
                 sb.insert(start, cs);
@@ -861,7 +861,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * /*&lt;![CDATA[&#42;/
@@ -871,9 +871,9 @@ public final class HTMLServiceImpl implements HTMLService {
      * /*]]&gt;&#42;/
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
@@ -881,7 +881,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * --&gt;
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
@@ -934,21 +934,21 @@ public final class HTMLServiceImpl implements HTMLService {
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
      * adding dashes before and after each <code>if</code> statement tag to complete them as a valid HTML comment and leaves center code
      * open to rendering on non-IE browsers:
-     * 
+     *
      * <pre>
      * &lt;![if !IE]&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;![endif]&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;!--[if !IE]&gt;--&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;!--&lt;![endif]--&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
@@ -984,7 +984,7 @@ public final class HTMLServiceImpl implements HTMLService {
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
      * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */

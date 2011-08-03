@@ -63,8 +63,9 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class WebdavPutAction extends AbstractAction {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPutAction.class));
-	
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
+
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
 		final WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
@@ -77,7 +78,7 @@ public class WebdavPutAction extends AbstractAction {
 		    contentType = "application/octet-stream";
 		}
 		resource.setContentType(contentType);
-		
+
 		SizeExceededInputStream in = null;
 		try {
 			InputStream data = null;
@@ -86,7 +87,7 @@ public class WebdavPutAction extends AbstractAction {
 			} else {
 				data = req.getBody();
 			}
-				
+
 			resource.putBodyAndGuessLength(data);
 			if(resource.exists() && ! resource.isLockNull()) {
 				resource.save();
@@ -103,14 +104,14 @@ public class WebdavPutAction extends AbstractAction {
 				throw x;
 			}
 		}
-		
+
 	}
 
 	// Override for specific upload quota handling
 	public long getMaxSize() {
-		return -1; 
+		return -1;
 	}
-	
+
 	public static final class SizeExceededInputStream extends SizeAwareInputStream {
 		private boolean exceeded;
 		private final long maxSize;
@@ -119,7 +120,7 @@ public class WebdavPutAction extends AbstractAction {
 			super(delegate);
 			this.maxSize = maxSize;
 		}
-		
+
 		@Override
 		public void size(final long size) throws IOException {
 			if(size > maxSize) {
@@ -127,7 +128,7 @@ public class WebdavPutAction extends AbstractAction {
 				throw new IOException("Exceeded max upload size of "+maxSize);
 			}
 		}
-		
+
 		public boolean hasExceeded(){
 			return exceeded;
 		}

@@ -71,7 +71,7 @@ public class FolderSecurityStrategy implements SecurityStrategy {
     public FolderSecurityStrategy(final UserConfigurationService userConfigs) {
         this.userConfigs = userConfigs;
     }
-    
+
     public boolean mayCreate(final Publication publication) throws OXException {
         return isFolderAdmin(publication);
     }
@@ -94,8 +94,8 @@ public class FolderSecurityStrategy implements SecurityStrategy {
         final int userId = publication.getUserId();
         final Context ctx = publication.getContext();
         final UserConfiguration userConfig = userConfigs.getUserConfiguration(userId, ctx);
-        
-        
+
+
         return new OXFolderAccess(ctx).getFolderPermission(folderId, userId, userConfig);
     }
 

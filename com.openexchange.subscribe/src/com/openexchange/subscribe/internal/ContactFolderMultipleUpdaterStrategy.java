@@ -76,14 +76,14 @@ import com.openexchange.tools.iterator.SearchIterator;
  * {@link ContactFolderMultipleUpdaterStrategy}
  * This differs from ContactFolderUpdaterStrategy in 2 ways
  * - individual fields are only written if present in the update and not filled yet. So no fields will be deleted and none will be overwritten.
- * - aggregating relations between contacts (see {@link ContactInterface}) are respected as well as generated if appropriate 
+ * - aggregating relations between contacts (see {@link ContactInterface}) are respected as well as generated if appropriate
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
     private static final int SQL_INTERFACE = 1;
 
     private static final int TARGET = 2;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFolderMultipleUpdaterStrategy.class));
 
     // All columns need to be loaded here as we keep the original, not the update and no data may be lost
@@ -94,11 +94,11 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         final int threshhold = getThreshold(session);
         boolean contactsAreAbleToBeAssociated = false;
         final FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
-        
+
         if (false && candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
-            
+
             final UUID uuid = UUID.fromString(candidate.getUserField20());
-                                    
+
             try{
                 final Contact contactfromUUID = contactStore.getContactByUUID(uuid);
                 if (contactfromUUID != null){
@@ -113,10 +113,10 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                         score = 1000;
                     }
                 }
-            } catch (final OXException e) {                
-                LOG.error(e);                            
+            } catch (final OXException e) {
+                LOG.error(e);
             }
-        }        
+        }
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
@@ -139,7 +139,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
             score += 5;
         }
-        
+
         if( score < threshhold && original.equalsContentwise(candidate)) { //the score check is only to speed the process up
             score += threshhold + 1;
         }
@@ -147,7 +147,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         try {
             if (score >= threshhold && contactsAreAbleToBeAssociated){
                 final List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
-                //List<Contact> associatedContacts = 
+                //List<Contact> associatedContacts =
                 boolean alreadyAssociated = false;
                 for (final UUID uuid : idsOfAlreadyAssociatedContacts){
                     final Contact contact = contactStore.getContactByUUID(uuid);
@@ -156,12 +156,12 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
                     }
                 }
                 if (!alreadyAssociated){
-                    contactStore.associateTwoContacts(original, candidate);                
+                    contactStore.associateTwoContacts(original, candidate);
                 }
             }
         } catch (final OXException e) {
             LOG.error(e);
-        } 
+        }
         return score;
     }
 
@@ -235,7 +235,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         final OverridingContactInterface contacts = (OverridingContactInterface) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
-        
+
         // as this is a new contact it needs a UUID to make later aggregation possible. This has to be a new one.
         newElement.setUserField20(UUID.randomUUID().toString());
 

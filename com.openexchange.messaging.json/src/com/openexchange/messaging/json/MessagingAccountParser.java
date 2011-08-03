@@ -62,7 +62,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
 /**
  * Parses the JSON representation of a messaging account according to its messaging services dynamic form.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,7 +76,7 @@ public class MessagingAccountParser {
 
     public MessagingAccount parse(final JSONObject accountJSON, int userId, int contextId) throws OXException, JSONException {
         final DefaultMessagingAccount account = new DefaultMessagingAccount();
-        
+
         account.setId(accountJSON.optInt(ID));
         if(accountJSON.has("displayName")) {
             account.setDisplayName(accountJSON.optString("displayName"));
@@ -88,7 +88,7 @@ public class MessagingAccountParser {
                 accountJSON.getJSONObject("configuration"),
                 messagingService.getFormDescription()));
         }
-        
+
         return account;
     }
 }

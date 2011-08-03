@@ -61,11 +61,11 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class DocumentMetadataHolder {
     public String dataLink;
     public DocumentMetadata documentMetadata;
-    
+
     public DocumentMetadataHolder(String dataLink, DocumentMetadata documentMetadata) {
         super();
         this.dataLink = dataLink;
         this.documentMetadata = documentMetadata;
     }
-    
+
 }

@@ -76,21 +76,21 @@ import com.openexchange.publish.tools.PublicationTargetCollector;
 public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer, PublicationTargetDiscoveryService {
 
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiPublicationTargetCollector.class));
-    
-    private BundleContext context;
-    private ServiceTracker tracker;
-    
-    private PublicationTargetCollector delegate = new PublicationTargetCollector();
-    
-    private List<ServiceReference> references = new LinkedList<ServiceReference>();
+
+    private final BundleContext context;
+    private final ServiceTracker tracker;
+
+    private final PublicationTargetCollector delegate = new PublicationTargetCollector();
+
+    private final List<ServiceReference> references = new LinkedList<ServiceReference>();
     private boolean grabbedAll = false;
-    
+
     public OSGiPublicationTargetCollector(BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, PublicationService.class.getName(), this);
         tracker.open();
     }
-    
+
     public void close() {
         delegate.clear();
         for(ServiceReference reference : references) {
@@ -99,7 +99,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         this.tracker.close();
         grabbedAll = false;
     }
-    
+
     public Object addingService(ServiceReference reference) {
         try {
             return add(reference);
@@ -110,7 +110,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
     }
 
     public void modifiedService(ServiceReference reference, Object service) {
-        
+
     }
 
     public void removedService(ServiceReference reference, Object service) {
@@ -131,13 +131,13 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
             for(ServiceReference reference : refs) {
                 add(reference);
             }
-        
+
         } catch (InvalidSyntaxException e) {
             // Won't happen, we don't use filters;
         }
-        
+
     }
-    
+
     private void remove(ServiceReference reference, Object service) throws OXException {
         references.remove(reference);
         context.ungetService(reference);
@@ -185,7 +185,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         }
         return delegate.listTargets();
     }
-    
-    
+
+
 }
 

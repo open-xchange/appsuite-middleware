@@ -75,39 +75,50 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
         CPPartition blocks = new CPPartition();
         for (int i = 0, length = appointments.size(); i < length; i++) {
             CPAppointment appointment = appointments.get(i);
-            if (i > 0)
+            if (i > 0) {
                 lastStoredAppointment = appointments.get(i - 1);
+            }
 
             int pointer = blocks.getAppointments().size();
 
             if (isMissingDaysInbetween(lastStoredAppointment, appointment)) {
                 List<Date> days = getMissingDaysInbetween(lastStoredAppointment, appointment);
                 for (Date day : days) {
-                    if (isOnFirstDayOfMonth(day))
+                    if (isOnFirstDayOfMonth(day)) {
                         addMonthBreak(blocks, pointer, day);
-                    if (getCalendar().isOnFirstDayOfWeek(day)) 
+                    }
+                    if (getCalendar().isOnFirstDayOfWeek(day)) {
                         addWeekBreak(blocks, pointer, day);
+                    }
                     addDayBreak(blocks, pointer, day);
                 }
             }
-            if (isSignalForNewMonth(appointment))
+            if (isSignalForNewMonth(appointment)) {
                 addMonthBreak(blocks, pointer, appointment.getStartDate());
+            }
 
-            if (isSignalForNewWeek(appointment))
+            if (isSignalForNewWeek(appointment)) {
                 addWeekBreak(blocks, pointer, appointment.getStartDate());
+            }
 
-            if (isSignalForNewDay(appointment))
+            if (isSignalForNewDay(appointment)) {
                 addDayBreak(blocks, pointer, appointment.getStartDate());
+            }
 
             blocks.addAppointment(appointment);
 
             if (isOnTwoDays(appointment) || isInTwoWeeks(appointment) || isInTwoMonths(appointment))
+             {
                 blocks.addAppointment(appointment); // store again for use in second block
+            }
 
-            if (i == length - 1)
-                if (!isOnLastDayOfMonth(appointment.getStartDate()))
-                    for (Date day : getMissingDaysInbetween(appointment, null))
+            if (i == length - 1) {
+                if (!isOnLastDayOfMonth(appointment.getStartDate())) {
+                    for (Date day : getMissingDaysInbetween(appointment, null)) {
                         addDayBreak(blocks, ++pointer, day);
+                    }
+                }
+            }
         }
         return blocks;
     }
@@ -126,6 +137,7 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
         return cal.get(Calendar.DAY_OF_MONTH) == 1;
     }
 
+    @Override
     protected boolean isMissingDaysInbetween(CPAppointment first, CPAppointment second) {
         Date firstDate = null;
         if (first == null) {
@@ -134,11 +146,13 @@ public class MonthPartitioningStrategy extends WeekPartitioningStrategy {
             cal.set(Calendar.DAY_OF_MONTH, 1);
             cal.add(Calendar.DAY_OF_MONTH, -1);
             firstDate = cal.getTime();
-        } else
+        } else {
             firstDate = first.getStartDate();
+        }
         return isMissingDaysInbetween(firstDate, second.getStartDate());
     }
 
+    @Override
     protected List<Date> getMissingDaysInbetween(CPAppointment first, CPAppointment second) {
         Date firstDate = null, secondDate = null;
         if (first == null) {

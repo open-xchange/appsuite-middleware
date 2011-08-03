@@ -52,7 +52,7 @@ package com.openexchange.ajp13.exception;
 /**
  * {@link AJPv13SocketClosedException} - Thrown to indicate a closed AJP socket which cause to abort all communication to client. Therefore
  * {@link AJPv13Exception#keepAlive()} always returns <code>false</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
  */
 public class AJPv13SocketClosedException extends AJPv13Exception {
@@ -64,7 +64,7 @@ public class AJPv13SocketClosedException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13SocketClosedException}
-     * 
+     *
      * @param code The error code
      */
     public AJPv13SocketClosedException(final AJPCode code) {
@@ -73,7 +73,7 @@ public class AJPv13SocketClosedException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13SocketClosedException}
-     * 
+     *
      * @param code The error code
      * @param cause The init cause
      */
@@ -83,7 +83,7 @@ public class AJPv13SocketClosedException extends AJPv13Exception {
 
     /**
      * Initializes a new {@link AJPv13SocketClosedException}
-     * 
+     *
      * @param code The error code
      * @param cause The init cause
      * @param messageArgs The message arguments

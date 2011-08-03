@@ -65,17 +65,17 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link FileMetadataParser}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileMetadataParser implements FileMetadataParserService{
 
-	
+
     private static final FileMetadataParser instance = new FileMetadataParser();
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static FileMetadataParser getInstance() {
@@ -83,12 +83,12 @@ public class FileMetadataParser implements FileMetadataParserService{
     }
 
     private final JSONParserHandler jsonHandler;
-    
+
     private FileMetadataParser() {
         super();
         jsonHandler = new JSONParserHandler();
     }
-    
+
     public File parse(JSONObject object) throws OXException {
         DefaultFile file = new DefaultFile();
 
@@ -106,7 +106,7 @@ public class FileMetadataParser implements FileMetadataParserService{
 
     private static final class JSONParserHandler extends AbstractFileFieldHandler {
 
-        private FileFieldSet set = new FileFieldSet();
+        private final FileFieldSet set = new FileFieldSet();
 
         public Object handle(Field field, Object... args) {
             File md = md(args);
@@ -114,18 +114,18 @@ public class FileMetadataParser implements FileMetadataParserService{
             if(!object.has(field.getName())) {
                 return md;
             }
-            
+
             try {
                 Object value = object.get(field.getName());
-                
+
                 value = process(field, value);
-                
+
                 field.doSwitch(set, md, value);
             } catch (JSONException x) {
                 throw new RuntimeException(x);
             }
-            
-            
+
+
             return md;
         }
 
@@ -167,7 +167,7 @@ public class FileMetadataParser implements FileMetadataParserService{
                 }
                 return fields;
             }
-            
+
         }, new ArrayList<File.Field>());
     }
 

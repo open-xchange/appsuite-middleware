@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImapIdlePushManagerService} - The IMAP IDLE {@link PushManagerService} for primary mail account.
- * 
+ *
  */
 public final class ImapIdlePushManagerService implements PushManagerService {
 

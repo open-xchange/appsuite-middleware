@@ -65,14 +65,14 @@ public class SecretRecoveryActivator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
 	    detector = new WhiteboardSecretInconsistencyDetector(context);
 	    migrator = new WhiteboardSecretMigrator(context);
-	    
+
 	    context.registerService(SecretInconsistencyDetector.class.getName(), detector, null);
-	    
+
 	    final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
 	    properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-	    
+
 	    context.registerService(SecretMigrator.class.getName(), migrator, properties);
-	    
+
 	    detector.open();
 	    migrator.open();
 	}

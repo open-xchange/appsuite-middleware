@@ -65,39 +65,45 @@ public interface DBTransactionPolicy {
      */
     public static final DBTransactionPolicy NO_TRANSACTIONS = new DBTransactionPolicy() {
 
+        @Override
         public void commit(Connection con) {
             // Don't do a thing
         }
 
+        @Override
         public void rollback(Connection con) {
             // Don't do a thing
         }
 
+        @Override
         public void setAutoCommit(Connection con, boolean autoCommit) {
             // Don't do a thing
         }
-        
+
     };
-    
+
     /**
      * Partake in transaction handling normally. Just delegates to the corresponding methods on the connection.
      */
     public static final DBTransactionPolicy NORMAL_TRANSACTIONS = new DBTransactionPolicy() {
 
+        @Override
         public void commit(Connection con) throws SQLException {
             con.commit();
         }
 
+        @Override
         public void rollback(Connection con) throws SQLException {
             con.rollback();
         }
 
+        @Override
         public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException {
             con.setAutoCommit(autoCommit);
         }
-        
+
     };
-    
+
     public void setAutoCommit(Connection con, boolean autoCommit) throws SQLException;
     public void commit(Connection con) throws SQLException;
     public void rollback(Connection con) throws SQLException;

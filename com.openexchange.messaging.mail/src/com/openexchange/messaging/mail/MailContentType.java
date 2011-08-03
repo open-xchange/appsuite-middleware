@@ -68,7 +68,7 @@ public final class MailContentType implements ContentType {
 
     /**
      * Initializes a new {@link MailContentType}.
-     * 
+     *
      * @param contentType The mail content type
      */
     public MailContentType(final com.openexchange.mail.mime.ContentType contentType) {

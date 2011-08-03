@@ -58,7 +58,7 @@ import com.openexchange.datatypes.genericonf.IterationBreak;
 
 /**
  * {@link InsertIterator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InsertIterator implements MapIterator<String, Object> {
@@ -66,16 +66,16 @@ public class InsertIterator implements MapIterator<String, Object> {
     private static final String INSERT_STRING = "INSERT INTO genconf_attributes_strings (id, cid, name, value) VALUES (?,?,?,?)";
     private static final String INSERT_BOOL = "INSERT INTO genconf_attributes_bools (id, cid, name, value) VALUES (?,?,?,?)";
 
-    
+
     private SQLException exception;
 
-    private Map<Class, PreparedStatement> statementMap = new HashMap<Class, PreparedStatement>();
-    
+    private final Map<Class, PreparedStatement> statementMap = new HashMap<Class, PreparedStatement>();
+
     public void prepareStatements(TX tx) throws SQLException {
-        
+
         PreparedStatement insertString = tx.prepare(INSERT_STRING);
         PreparedStatement insertBool = tx.prepare(INSERT_BOOL);
-        
+
         statementMap.put(String.class, insertString);
         statementMap.put(Boolean.class, insertBool);
     }
@@ -83,7 +83,7 @@ public class InsertIterator implements MapIterator<String, Object> {
     public void setIds(int cid, int id) throws SQLException {
         for(PreparedStatement stmt : statementMap.values()) {
             stmt.setInt(1, id);
-            stmt.setInt(2, cid);            
+            stmt.setInt(2, cid);
         }
     }
 
@@ -99,7 +99,7 @@ public class InsertIterator implements MapIterator<String, Object> {
             exception = new SQLException("Unsupported object type: " + value.getClass().getName());
             throw new IterationBreak();
         }
-        
+
         try {
             stmt.setString(3, key);
             stmt.setObject(4, value);
@@ -110,7 +110,7 @@ public class InsertIterator implements MapIterator<String, Object> {
         }
 
     }
-    
+
     public void throwException() throws SQLException {
         if(exception != null) {
             throw exception;

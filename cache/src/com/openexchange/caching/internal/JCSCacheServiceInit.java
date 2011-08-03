@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link JCSCacheServiceInit} - Initialization for {@link JCSCache}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCacheServiceInit {
@@ -103,7 +103,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Gets the singleton instance of {@link JCSCacheServiceInit}
-     * 
+     *
      * @return The singleton instance of {@link JCSCacheServiceInit}
      */
     public static JCSCacheServiceInit getInstance() {
@@ -237,7 +237,7 @@ public final class JCSCacheServiceInit {
     /**
      * Delegates to {@link CompositeCacheManager#freeCache(String)}: The cache identified through given <code>cacheName</code> is removed
      * from cache manager and all of its items are going to be disposed.
-     * 
+     *
      * @param cacheName The name of the cache region that ought to be freed
      */
     public void freeCache(final String cacheName) {
@@ -263,7 +263,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Loads the cache configuration file denoted by specified cache configuration file.
-     * 
+     *
      * @param cacheConfigFile The cache configuration file
      * @throws OXException If configuration of JCS caching system fails
      */
@@ -275,7 +275,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Loads the cache configuration from given input stream.
-     * 
+     *
      * @param inputStream The input stream
      * @throws OXException If configuration of JCS caching system fails
      */
@@ -287,7 +287,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Loads the default cache configuration file.
-     * 
+     *
      * @throws OXException If configuration of JCS caching system fails
      */
     public void loadDefaultConfiguration() throws OXException {
@@ -300,7 +300,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Starts the JCS caching system.
-     * 
+     *
      * @param configurationService The configuration service
      * @throws CacheException If configuration of JCS caching system fails
      */
@@ -350,7 +350,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Checks presence of default auxiliary
-     * 
+     *
      * @throws CacheException If default auxiliary is missing
      */
     private void checkDefaultAuxiliary() throws OXException {
@@ -379,7 +379,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Sets the configuration service to specified reference.
-     * 
+     *
      * @param configurationService The configuration service to set
      */
     public void setConfigurationService(final ConfigurationService configurationService) {
@@ -388,7 +388,7 @@ public final class JCSCacheServiceInit {
 
     /**
      * Checks if specified region names is contained in default region names.
-     * 
+     *
      * @param regionName The region name to check
      * @return <code>true</code> if specified region names is contained in default region names; otherwise <code>false</code>.
      */
@@ -410,7 +410,7 @@ public final class JCSCacheServiceInit {
 
     private boolean checkAdditionalAuxiliary(final String key, final String value) {
         /*-
-         * 
+         *
         if (key.startsWith(REGION_PREFIX) && (key.indexOf("attributes") < 0) && (value != null) && (value.length() > 0)) {
             throw new ElevenException(CacheErrorCode.NO_ADDITIONAL_AUX_REGION, key.substring(REGION_PREFIX.length()), value);
         }

@@ -74,55 +74,61 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     private final String subscriptionSourceId;
-    
+
     private static final String DELETE = "DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;";
-    
-    
+
+
     public SubscriptionRemoverTask(final String subscriptionSourceId) {
         this.subscriptionSourceId = subscriptionSourceId;
     }
-    
+
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes(UpdateConcurrency.BACKGROUND);
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         perform(params.getSchema(), params.getContextId());
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTask.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         Connection con = null;
-        
+
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
             con = ds.getForUpdateTask(contextId);
         } catch (final OXException e) {
             throw new OXException(e);
         }
-        
+
         PreparedStatement stmt = null;
         try {
-            
+
             if(!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
                 return;
             }
-            
+
             stmt = con.prepareStatement(DELETE);
-            
+
             stmt.setString(1, subscriptionSourceId);
-            
+
             stmt.executeUpdate();
         } catch (final SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
@@ -139,10 +145,10 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             }
         }
     }
-    
-    
-    
-    
+
+
+
+
     /* This is a SQL Test Case for the poor. Do this in an empty database to check the validity of the sql statement */
     /*
     CREATE TABLE `subscriptions` (
@@ -206,6 +212,6 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
       DROP TABLE genconf_attributes_strings
       DROP TABLE genconf_attributes_bools
     */
-     
+
 
 }

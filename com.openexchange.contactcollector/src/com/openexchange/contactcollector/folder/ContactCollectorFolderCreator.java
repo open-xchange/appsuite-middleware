@@ -73,7 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link ContactCollectorFolderCreator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -107,11 +107,11 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
             }
         }
     }
-    
+
     public void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
-    
+
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
 
         final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
@@ -160,7 +160,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
                 ") successfully created for user ").append(userId).append(" in context ").append(cid));
         }
     }
-    
+
     private boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
         return setting.getContactCollectionFolder(cid, userId) != null;
     }

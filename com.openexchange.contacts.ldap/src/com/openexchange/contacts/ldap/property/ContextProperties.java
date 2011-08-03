@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class ContextProperties {
 
-    private List<FolderProperties> folderproperties;
+    private final List<FolderProperties> folderproperties;
 
     /**
      * Initializes a new {@link ContextProperties}.
@@ -73,7 +73,7 @@ public class ContextProperties {
     private ContextProperties() {
         this.folderproperties = new ArrayList<FolderProperties>();
     }
-    
+
     public static ContextProperties getContextPropertiesFromDir(final ConfigurationService service, final File dir, final int contextid, StringBuilder logBuilder) throws OXException {
         final ContextProperties retval = new ContextProperties();
         // First list the folderdirs which should be registered to that context

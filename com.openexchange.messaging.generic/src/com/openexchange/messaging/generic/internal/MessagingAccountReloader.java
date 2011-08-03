@@ -56,7 +56,7 @@ import com.openexchange.messaging.MessagingService;
 
 /**
  * {@link MessagingAccountReloader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -71,7 +71,7 @@ public final class MessagingAccountReloader extends Refresher<MessagingAccount> 
 
     /**
      * Initializes a new {@link MessagingAccountReloader}.
-     * 
+     *
      * @throws OXException If initial load of the object fails.
      */
     public MessagingAccountReloader(final OXObjectFactory<MessagingAccount> factory, final String regionName) throws OXException {

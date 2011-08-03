@@ -53,12 +53,12 @@ package com.openexchange.api2;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface MailInterfaceMonitorMBean {
 
 	/**
-	 * 
+	 *
 	 * @return the number of active connections which were opened from
 	 *         <code>Store</code>, <code>Folder</code> or
 	 *         <code>Transport</code> instances
@@ -97,46 +97,46 @@ public interface MailInterfaceMonitorMBean {
 
 	/**
 	 * Resets the number of broken connections
-	 * 
+	 *
 	 */
 	void resetNumBrokenConnections();
 
 	/**
-	 * 
+	 *
 	 * @return the number of timed-out connections
 	 */
 	int getNumTimeoutConnections();
 
 	/**
 	 * Resets the number of timed-out connections
-	 * 
+	 *
 	 */
 	void resetNumTimeoutConnections();
 
 	/**
-	 * 
+	 *
 	 * @return the number of successfull logins
 	 */
 	int getNumSuccessfulLogins();
 
 	/**
 	 * Resets the number of successful logins
-	 * 
+	 *
 	 */
 	void resetNumSuccessfulLogins();
 
 	/**
-	 * 
+	 *
 	 * @return the number of failed logins
 	 */
 	int getNumFailedLogins();
 
 	/**
 	 * Resets the number of failed logins
-	 * 
+	 *
 	 */
 	void resetNumFailedLogins();
-	
+
 	/**
 	 * @return the occurrences of unsupported encoding exceptions as a
 	 *         comma-separated string of the form:

@@ -57,8 +57,8 @@ import java.util.Set;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public interface CSVTranslator {
-    
+
     public Set<Locale> getLocales();
-    
+
     public String translate(Locale locale, String text);
 }

@@ -57,7 +57,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link FacebookOAuthAccessRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -67,7 +67,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static FacebookOAuthAccessRegistry getInstance() {
@@ -86,7 +86,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Adds specified facebook OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -108,7 +108,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Check presence of the facebook OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -121,7 +121,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Gets the facebook OAuth access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -134,7 +134,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Removes the OAuth access associated with given user-context-pair, if no more user-associated accesses are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a facebook OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -156,7 +156,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Purges specified user's facebook OAuth access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -180,7 +180,7 @@ public final class FacebookOAuthAccessRegistry {
 
     /**
      * Gets a {@link Iterator iterator} over the facebook OAuth access instances in this registry.
-     * 
+     *
      * @return A {@link Iterator iterator} over the facebook OAuth access instances in this registry.
      */
     Iterator<ConcurrentMap<Integer, FacebookOAuthAccess>> iterator() {

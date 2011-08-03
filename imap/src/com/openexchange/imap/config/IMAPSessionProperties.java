@@ -56,7 +56,7 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
 /**
  * {@link IMAPSessionProperties} - Default properties for an IMAP session established via <code>JavaMail</code> API
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSessionProperties {
@@ -72,7 +72,7 @@ public final class IMAPSessionProperties {
 
     /**
      * Creates a <b>cloned</b> version of default IMAP session properties
-     * 
+     *
      * @return a cloned version of default IMAP session properties
      */
     public static Properties getDefaultSessionProperties() {

@@ -64,7 +64,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link ContactsByCsvFileStep}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {

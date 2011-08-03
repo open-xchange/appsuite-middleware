@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class CalendarCallbacks implements CalendarListener {
     private final List<CalendarListener> listeners = new ArrayList<CalendarListener>();
     private List<CalendarListener> copyForReading = new ArrayList<CalendarListener>();
-    
+
     private static final CalendarCallbacks INSTANCE = new CalendarCallbacks();
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCallbacks.class));
 
@@ -124,6 +124,7 @@ public class CalendarCallbacks implements CalendarListener {
         return new ServerSessionAdapter(session);
     }
 
+    @Override
     public void createdChangeExceptionInRecurringAppointment(final Appointment master, final Appointment changeException,final int inFolder, final ServerSession serverSession) throws OXException {
         final List<String> exceptionIDs = new ArrayList<String>();
         for (final CalendarListener listener : getListeners()) {

@@ -65,7 +65,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 /**
  * {@link SearchTermMapper} - Maps a given instance of {@link com.openexchange.search.SearchTerm} to an appropriate instance of
  * {@link com.openexchange.mail.search.SearchTerm}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchTermMapper {
@@ -79,7 +79,7 @@ public final class SearchTermMapper {
 
     /**
      * Generates an appropriate mail search term from specified search term.
-     * 
+     *
      * @param searchTerm The search term
      * @return An appropriate mail search term
      * @throws IllegalArgumentException If an appropriate mail search term cannot be generated

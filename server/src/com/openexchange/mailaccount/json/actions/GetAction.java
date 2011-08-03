@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetAction extends AbstractMailAccountAction {
@@ -79,6 +79,7 @@ public final class GetAction extends AbstractMailAccountAction {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, request);
 

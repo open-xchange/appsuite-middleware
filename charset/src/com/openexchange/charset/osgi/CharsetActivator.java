@@ -61,7 +61,7 @@ import com.openexchange.charset.ModifyCharsetStandardProvider;
 
 /**
  * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {
@@ -85,6 +85,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         super();
     }
 
+    @Override
     public CharsetProvider addingService(final ServiceReference<CharsetProvider> reference) {
         final CharsetProvider addedService = context.getService(reference);
         {
@@ -96,10 +97,12 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         return addedService;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
         // Nope
     }
 
+    @Override
     public void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
         {
             collectionCharsetProvider.removeCharsetProvider(service);
@@ -110,6 +113,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         context.ungetService(reference);
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         LOG.info("starting bundle: com.openexchange.charset");
 
@@ -141,6 +145,7 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
         }
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         LOG.info("stopping bundle: com.openexchange.charset");
         try {

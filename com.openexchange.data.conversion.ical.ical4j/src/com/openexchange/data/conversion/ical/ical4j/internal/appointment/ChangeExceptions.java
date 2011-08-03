@@ -79,7 +79,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChangeExceptions.class));
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-    
+
     private static CalendarCollectionService calendarCollection;
 
     public ChangeExceptions() {

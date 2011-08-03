@@ -61,16 +61,16 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link CascadingConfigObjectRegistryFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistryFactory {
 
-    private ConfigViewFactory configFactory;
+    private final ConfigViewFactory configFactory;
 
-    private ConfigurationService config;
+    private final ConfigurationService config;
 
-    private Map<String, String> pathMapping = new HashMap<String, String>();
+    private final Map<String, String> pathMapping = new HashMap<String, String>();
 
     public CascadingConfigObjectRegistryFactory(ConfigViewFactory configFactory, ConfigurationService config) throws OXException {
         this.configFactory = configFactory;

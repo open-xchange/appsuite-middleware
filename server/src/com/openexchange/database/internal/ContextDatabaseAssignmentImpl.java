@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssignmentService {
@@ -98,6 +98,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         this.configDatabaseService = configDatabaseService;
     }
 
+    @Override
     public Assignment getAssignment(final int contextId) throws OXException {
         Assignment retval;
         if (null == cache) {
@@ -148,6 +149,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
+    @Override
     public void removeAssignments(final int contextId) throws OXException {
         if (null != cache) {
             try {

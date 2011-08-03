@@ -66,7 +66,7 @@ public final class SourcedImage {
 
     /**
      * Initializes a new {@link SourcedImage}.
-     * 
+     *
      * @param contentType The Content-Type
      * @param transferEncoding The transfer encoding; e.g. <code>"base64"</code>
      * @param contentId The content identifier
@@ -82,7 +82,7 @@ public final class SourcedImage {
 
     /**
      * Gets the content identifier.
-     * 
+     *
      * @return The content identifier
      */
     public String getContentId() {
@@ -91,7 +91,7 @@ public final class SourcedImage {
 
     /**
      * Gets the content type.
-     * 
+     *
      * @return The content type
      */
     public String getContentType() {
@@ -100,7 +100,7 @@ public final class SourcedImage {
 
     /**
      * Gets the transfer encoding.
-     * 
+     *
      * @return The transfer encoding
      */
     public String getTransferEncoding() {
@@ -109,7 +109,7 @@ public final class SourcedImage {
 
     /**
      * Gets the data.
-     * 
+     *
      * @return The data
      */
     public String getData() {

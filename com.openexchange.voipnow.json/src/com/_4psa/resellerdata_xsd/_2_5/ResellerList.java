@@ -9,11 +9,11 @@ import com._4psa.clientdata_xsd._2_5.ClientList;
 
 /**
  * Reseller list data
- * 
+ *
  * <p>Java class for ResellerList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ResellerList">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.clientdata_xsd._2_5.ClientList;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ResellerList")

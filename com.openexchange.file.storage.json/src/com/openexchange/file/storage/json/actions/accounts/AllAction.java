@@ -82,24 +82,24 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        
+
         final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
-        
+
         final List<FileStorageService> services = new ArrayList<FileStorageService>();
         if(fsServiceId != null) {
             services.add(registry.getFileStorageService(fsServiceId));
         } else {
             services.addAll(registry.getAllServices());
         }
-        
+
         final JSONArray result = new JSONArray();
-        
+
         for (final FileStorageService messagingService : services) {
             for (final FileStorageAccount account : messagingService.getAccountManager().getAccounts(session)) {
                 result.put(writer.write(account));
             }
         }
-        
+
         return new AJAXRequestResult(result);
     }
 

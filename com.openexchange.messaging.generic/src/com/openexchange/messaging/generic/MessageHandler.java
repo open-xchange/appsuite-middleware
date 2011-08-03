@@ -63,14 +63,14 @@ import com.openexchange.messaging.MultipartContent;
  * <p>
  * Each methods returns a boolean value which indicates whether the underlying {@link MessageParser} instance should continue or quit
  * message parsing after method invocation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessageHandler {
 
     /**
      * Handles specified message headers.
-     * 
+     *
      * @param headers The message headers
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling headers fails
@@ -79,7 +79,7 @@ public interface MessageHandler {
 
     /**
      * Handles specified color label.
-     * 
+     *
      * @param colorLabel The message's color label
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling color label fails
@@ -88,7 +88,7 @@ public interface MessageHandler {
 
     /**
      * Handles message's system flags (//SEEN, //ANSWERED, ...).
-     * 
+     *
      * @param flags The message's system flags
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling system flags fails
@@ -97,7 +97,7 @@ public interface MessageHandler {
 
     /**
      * Handle message's user flags.
-     * 
+     *
      * @param userFlags The message's user flags
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling user flags fails
@@ -106,7 +106,7 @@ public interface MessageHandler {
 
     /**
      * Handle message's received date.
-     * 
+     *
      * @param receivedDate The received date's number of milliseconds since January 1, 1970, 00:00:00 GMT
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling received date fails
@@ -115,7 +115,7 @@ public interface MessageHandler {
 
     /**
      * Handles specified messaging part.
-     * 
+     *
      * @param part The messaging part
      * @param isInline <code>true</code> if part is considered to be inline; otherwise <code>false</code>
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
@@ -125,7 +125,7 @@ public interface MessageHandler {
 
     /**
      * Handles specified multipart content.
-     * 
+     *
      * @param multipart The multipart content
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling multipart fails
@@ -134,7 +134,7 @@ public interface MessageHandler {
 
     /**
      * Handles a nested message (<code>message/rfc822</code>)
-     * 
+     *
      * @param message The nested message
      * @return <code>true</code> to continue processing; otherwise <code>false</code> to quit
      * @throws OXException If handling nested message fails
@@ -143,7 +143,7 @@ public interface MessageHandler {
 
     /**
      * Performs some optional finishing operations
-     * 
+     *
      * @param message The message whose end has been reached
      * @throws OXException If handling message end fails
      */

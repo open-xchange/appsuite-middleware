@@ -56,7 +56,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * This timer tests the outgoing connections of the session cache.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SessionCacheTimer implements Runnable {

@@ -86,7 +86,7 @@ import com.openexchange.user.json.writer.UserWriter;
 
 /**
  * {@link SearchAction} - Maps the action to a <tt>search</tt> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchAction extends AbstractUserAction {
@@ -241,7 +241,7 @@ public final class SearchAction extends AbstractUserAction {
 
     /**
      * Parses optional field out of specified JSON object.
-     * 
+     *
      * @param jsonObj The JSON object to parse
      * @param name The optional field name
      * @return The optional field's value or <code>null</code> if there's no such field
@@ -290,7 +290,7 @@ public final class SearchAction extends AbstractUserAction {
 
     /**
      * Parses optional array field out of specified JSON object
-     * 
+     *
      * @param jsonObj The JSON object to parse
      * @param name The optional array field's name
      * @return The optional array field's value as an array of {@link String} or <code>null</code> if there's no such field

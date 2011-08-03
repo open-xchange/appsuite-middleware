@@ -67,11 +67,11 @@ public class AllAction extends AbstractFileAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.require(FOLDER_ID);
-        
+
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final TimedResult<File> documents = fileAccess.getDocuments(request.getFolderId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
-        
+
         return result( documents, request );
     }
 

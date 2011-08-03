@@ -66,9 +66,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
@@ -84,13 +82,13 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * Attachment
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MailAttachment extends AJAXServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3109402774466180271L;
 
@@ -120,6 +118,28 @@ public class MailAttachment extends AJAXServlet {
             }
             Tools.removeCachingHeader(res);
             final AttachmentToken token = AttachmentTokenRegistry.getInstance().getToken(id);
+            if (null == token) {
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
+            /*-
+             * Security check
+             * 
+             * IP-Check appropriate for roaming mobile devices?
+             */
+            if (false && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
+                AttachmentTokenRegistry.getInstance().removeToken(id);
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
+            /*
+             * At least expect the same user agent as the one which created the attachment token
+             */
+            if (null != token.getUserAgent() && !token.getUserAgent().equals(req.getHeader("user-agent"))) {
+                AttachmentTokenRegistry.getInstance().removeToken(id);
+                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+            }
+            /*
+             * Write part to output stream
+             */
             final MailPart mailPart = token.getAttachment();
             InputStream attachmentInputStream = null;
             try {
@@ -207,7 +227,7 @@ public class MailAttachment extends AJAXServlet {
 
     /**
      * Generates a wrapping {@link AbstractOXException} for specified exception.
-     * 
+     *
      * @param cause The exception to wrap
      * @return The wrapping {@link AbstractOXException}
      */

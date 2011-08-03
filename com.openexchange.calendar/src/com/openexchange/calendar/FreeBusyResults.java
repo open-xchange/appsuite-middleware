@@ -82,7 +82,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
-    
+
     public final static int MAX_SHOW_USER_PARTICIPANTS = 5;
 
     private final List<OXException> warnings;
@@ -107,28 +107,28 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private final Participant conflict_objects[];
     private final long range_start;
     private final long range_end;
-    
+
     private int last_up_oid;
     private UserParticipant last_up[];
     private int last_p_oid;
     private Participant last_p[];
-    
+
     private List<CalendarDataObject> al = new ArrayList<CalendarDataObject>(16);
     private int counter;
-    
+
     private PrivateFolderInformationObject[] private_folder_array;
     private final PreparedStatement private_folder_information;
 
     private final CalendarSqlImp calendarsqlimp;
 
     private final CalendarCollection recColl;
-    
+
     private int readFolderId;
 
     private String categories;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyResults.class));
-    
+
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
     	this.rs = rs;
@@ -140,7 +140,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         rsNext();
         preFill();
     }*/
-    
+
     public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp) throws OXException {
     	this(rs, prep, c, uid, groups, uc, con, show_details, conflict_objects, private_folder_information, calendarsqlimp, 0, 0);
     }
@@ -166,7 +166,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         rsNext();
         preFill();
     }
-    
+
     private final void preFill() throws OXException {
         try {
             while (myhasNext()) {
@@ -184,11 +184,11 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             myclose();
         }
     }
-    
+
     public final CalendarDataObject next() throws OXException {
         return al.get(counter++);
     }
-    
+
     public final CalendarDataObject mynext() throws SearchIteratorException, OXException {
         CalendarDataObject cdao = null;
         if (seq >= 0 && rrs != null) {
@@ -265,11 +265,11 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         rsNext();
         return cdao;
     }
-    
+
     public int size() {
         return -1;
     }
-    
+
     public boolean hasSize() {
         return false;
     }
@@ -285,7 +285,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 	public boolean hasWarnings() {
 		return !warnings.isEmpty();
 	}
-    
+
     private final CalendarDataObject recurringDAO(final RecurringResultInterface rr) throws OXException {
         if (rr != null) {
             final CalendarDataObject cdao = new CalendarDataObject();
@@ -308,7 +308,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private void fillDetails(final CalendarDataObject cdao) throws OXException {
         if (show_details) {
-            if (checkPermissions()) {                
+            if (checkPermissions()) {
                 cdao.setTitle(title);
                 cdao.setParentFolderID(readFolderId);
                 cdao.setLabel(colorLabel);
@@ -318,21 +318,21 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             cdao.setParticipants(ret.getList());
         }
     }
-    
+
     public boolean hasNext() throws OXException {
         if (!al.isEmpty() && counter < al.size()) {
             return true;
         }
         return false;
     }
-    
+
     public final boolean myhasNext() {
         if (seq >= 0) {
             return true;
         }
         return has_next;
     }
-    
+
     private void rsNext() {
         if (rs != null) {
             try {
@@ -343,13 +343,13 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             }
         }
     }
-    
+
     public void close() throws OXException {
         al = null;
         title = null;
         rrs = null;
     }
-    
+
     public final void myclose() {
         recColl.closeResultSet(rs);
         recColl.closePreparedStatement(prep);
@@ -358,14 +358,14 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             DBPool.push(c, con);
         }
     }
-    
+
     private final boolean checkPermissions() {
         if ((pflag == 0 && isVisible()) || (pflag == 1 && owner == uid)) {
             return true;
         }
         return false;
     }
-    
+
     private final boolean isVisible() {
         if (cfo == null) {
             return false;
@@ -398,13 +398,13 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                             readFolderId = p;
                             return true;
                         }
-                    } 
+                    }
                 }
             }
         }
         return false;
     }
-    
+
     private final void preFillPermissionArray(final int groups[], final UserConfiguration uc) throws OXException {
         try {
             cfo = recColl.getAllVisibleAndReadableFolderObject(uid, groups, c, uc, con);
@@ -412,7 +412,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(ex);
         }
     }
-    
+
     private final Participants resolveConflictingUserParticipants() throws OXException {
         final Participants p = new Participants();
         int counter = 0;
@@ -480,7 +480,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
         return p;
     }
-    
+
     private final void preFillPrivateFolderInformation() {
 
         final List<PrivateFolderInformationObject> list = new ArrayList<PrivateFolderInformationObject>(16);
@@ -490,7 +490,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         int uid = 0;
         PreparedStatement shared_folder_info = null;
         try {
-            
+
 
             ResultSet result = private_folder_information.executeQuery();
             while (result.next()) {
@@ -506,7 +506,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             // Add shared folders and check if there are such shared folders
             if (! cfo.getSharedFolderList().isEmpty()) {
                 shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
-    
+
                 result = shared_folder_info.executeQuery();
                 while (result.next()) {
                     object_id = result.getInt(1);
@@ -532,5 +532,5 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         }
         private_folder_array = list.toArray(new PrivateFolderInformationObject[list.size()]);
     }
-    
+
 }

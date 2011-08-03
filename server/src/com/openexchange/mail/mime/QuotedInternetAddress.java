@@ -73,7 +73,7 @@ import javax.mail.internet.MimeUtility;
  * <code>``"M&uuml;ller,&nbsp;Jan"&nbsp;&lt;mj@foo.de&gt;''</code><br>
  * is converted to<br>
  * <code>``=?UTF-8?Q?=22M=C3=BCller=2C_Jan=22?=&nbsp;&lt;mj@foo.de&gt;''</code>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotedInternetAddress extends InternetAddress {
@@ -90,7 +90,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Converts given array of {@link InternetAddress} to quoted addresses
-     * 
+     *
      * @param addrs The addresses to convert
      * @return The quoted addresses
      * @throws AddressException If conversion fails
@@ -108,7 +108,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Parse the given comma separated sequence of addresses into {@link InternetAddress} objects. Addresses must follow RFC822 syntax.
-     * 
+     *
      * @param addresslist A comma separated address strings
      * @return An array of {@link InternetAddress} objects
      * @exception AddressException If the parse failed
@@ -125,7 +125,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * <p>
      * Non-strict parsing is typically used when parsing a list of mail addresses entered by a human. Strict parsing is typically used when
      * parsing address headers in mail messages.
-     * 
+     *
      * @param addresslist A comma separated address strings
      * @param strict <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return An array of {@link InternetAddress} objects
@@ -144,7 +144,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * <code>parse</code> method when the strict flag is false and enforces more rules when the strict flag is true. If the strict flag is
      * false and the parse is successful in separating out an email address or addresses, the syntax of the addresses themselves is not
      * checked.
-     * 
+     *
      * @param addresslist A comma separated address strings
      * @param strict <code>true</code> to enforce RFC822 syntax; otherwise <code>false</code>
      * @return An array of {@link InternetAddress} objects
@@ -748,7 +748,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
-     * 
+     *
      * @param idnAddress The unicode representation of an internet address
      * @return The ASCII-encoded (punycode) of given internet address
      * @throws AddressException If ASCII representation of given internet address cannot be created
@@ -781,7 +781,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
-     * 
+     *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address
      */
@@ -824,7 +824,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Parse the given string and create an InternetAddress. See the parse method for details of the parsing. The address is parsed using
      * "strict" parsing. This constructor does not perform the additional syntax checks that the InternetAddress(String address, boolean
      * strict) constructor does when strict is true. This constructor is equivalent to InternetAddress(address, false).
-     * 
+     *
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
@@ -838,7 +838,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * <p>
      * Parse the given string and create an InternetAddress. If strict is <code>false</code>, the detailed syntax of the address isn't
      * checked. toACE
-     * 
+     *
      * @param address The address in RFC822 format
      * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
      * @throws AddressException If parsing the address fails
@@ -858,7 +858,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * Initializes a new {@link QuotedInternetAddress}.
      * <p>
      * Construct an instance given the address and personal name. The address is assumed to be a syntactically valid RFC822 address.
-     * 
+     *
      * @param address The address in RFC822 format
      * @param personal The personal name
      * @throws AddressException If parsing the address fails
@@ -870,7 +870,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Initializes a new {@link QuotedInternetAddress}.
-     * 
+     *
      * @param address The address in RFC822 format
      * @param personal The personal name
      * @param charset The MIME charset for the name
@@ -885,7 +885,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Parses the given string into this {@link QuotedInternetAddress}.
-     * 
+     *
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
@@ -895,7 +895,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Internal parse routine.
-     * 
+     *
      * @param address The address in RFC822 format
      * @throws AddressException If parsing the address fails
      */
@@ -919,7 +919,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Sets the email address.
-     * 
+     *
      * @param address The email address
      */
     @Override
@@ -934,7 +934,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Gets the email address in Unicode characters.
-     * 
+     *
      * @return The email address in Unicode characters
      */
     public String getUnicodeAddress() {
@@ -944,7 +944,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Convert this address into a RFC 822 / RFC 2047 encoded address. The resulting string contains only US-ASCII characters, and hence is
      * mail-safe.
-     * 
+     *
      * @return possibly encoded address string
      */
     @Override
@@ -991,7 +991,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             return new StringBuilder(32).append(encodedPersonal).append(" <").append(address).append('>').toString();
 
             /*-
-             * 
+             *
             if (encodedPersonal.startsWith("=?", 0)) {
                 return new StringBuilder(32).append('"').append(encodedPersonal).append("\" <").append(address).append('>').toString();
             }
@@ -1006,7 +1006,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     /**
      * Returns a properly formatted address (RFC 822 syntax) of Unicode characters.
-     * 
+     *
      * @return The Unicode address string
      */
     @Override

@@ -11,7 +11,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 public class TemplatingJSONActivator extends DeferredActivator {
 
     /**
-     * 
+     *
      */
     private static final String SERVLET_PATH = "ajax/templating";
     private static final Class<?>[] NEEDED_SERVICES = new Class[]{TemplateService.class};
@@ -33,11 +33,11 @@ public class TemplatingJSONActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         TemplateMultipleHandler.setServices(this);
-        
+
         context.registerService(MultipleHandlerFactoryService.class.getName(), new MultipleHandlerFactoryService() {
 
             private final MultipleHandler HANDLER = new TemplateMultipleHandler();
-            
+
             public MultipleHandler createMultipleHandler() {
                 return HANDLER;
             }
@@ -45,9 +45,9 @@ public class TemplatingJSONActivator extends DeferredActivator {
             public String getSupportedModule() {
                 return "templating";
             }
-            
+
         }, null);
-        
+
         registration = new SessionServletRegistration(context, new TemplatingServlet(), SERVLET_PATH);
     }
 

@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AbstractUserizedFolderPerformer} - Abstract super class for actions which return one or multiple instances of
  * {@link UserizedFolder}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
@@ -94,7 +94,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -106,7 +106,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -119,7 +119,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -132,7 +132,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Initializes a new {@link AbstractUserizedFolderPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -146,7 +146,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Gets the optional folder service decorator.
-     * 
+     *
      * @return The folder service decorator or <code>null</code>
      */
     protected FolderServiceDecorator getDecorator() {
@@ -158,7 +158,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * <p>
      * If a {@link FolderServiceDecorator decorator} was set and its {@link FolderServiceDecorator#getTimeZone() getTimeZone()} method
      * returns a non-<code>null</code> value, then decorator's time zone is returned; otherwise user's time zone is returned.
-     * 
+     *
      * @return The time zone
      */
     protected TimeZone getTimeZone() {
@@ -180,7 +180,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * <p>
      * If a {@link FolderServiceDecorator decorator} was set and its {@link FolderServiceDecorator#getLocale() getLocale()} method returns a
      * non-<code>null</code> value, then decorator's locale is returned; otherwise user's locale is returned.
-     * 
+     *
      * @return The locale
      */
     protected Locale getLocale() {
@@ -199,7 +199,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Gets the allowed content types.
-     * 
+     *
      * @return The allowed content types
      */
     protected java.util.List<ContentType> getAllowedContentTypes() {
@@ -217,7 +217,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
     /**
      * Gets the user-sensitive folder for given folder.
-     * 
+     *
      * @param folder The folder
      * @param ownPermission The user's permission on given folder
      * @param treeId The tree identifier
@@ -234,7 +234,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         final UserizedFolder userizedFolder;
         /*-
          * Type
-         * 
+         *
          * Create user-sensitive folder dependent on shared flag
          */
         final boolean isShared;

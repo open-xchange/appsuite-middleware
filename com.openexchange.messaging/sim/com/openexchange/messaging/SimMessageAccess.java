@@ -70,12 +70,12 @@ public class SimMessageAccess implements MessagingMessageAccess {
             this.name = name;
             this.args = args;
         }
-        
-        
+
+
         public String getName() {
             return name;
         }
-        
+
         public Object[] getArgs() {
             return args;
         }
@@ -84,11 +84,11 @@ public class SimMessageAccess implements MessagingMessageAccess {
     private final List<Call> called = new ArrayList<Call>();
     private MessagingMessage templateMessage;
     private MessagingPart templatePart;
-    
+
     public List<Call> getCalls() {
         return called;
     }
-    
+
     public void setTemplateMessage(final MessagingMessage templateMessage) {
         this.templateMessage = templateMessage;
     }
@@ -97,7 +97,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
         called.add(new Call("getAttachment", folder, messageId, sectionId));
         return templatePart;
     }
-    
+
     public void appendMessages(final String folder, final MessagingMessage[] messages) throws OXException {
         called.add(new Call("appendMessages", folder, messages));
     }
@@ -115,7 +115,7 @@ public class SimMessageAccess implements MessagingMessageAccess {
         called.add(new Call("getAllMessages", folder, indexRange, sortField, order, fields));
         return new ArrayList<MessagingMessage>(Arrays.asList(templateMessage));
     }
-    
+
 
     public MessagingMessage getMessage(final String folder, final String id, final boolean peek) throws OXException {
         called.add(new Call("getMessage", folder, id, peek));

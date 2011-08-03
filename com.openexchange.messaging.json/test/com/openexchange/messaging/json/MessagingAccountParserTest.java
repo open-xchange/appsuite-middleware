@@ -70,62 +70,62 @@ public class MessagingAccountParserTest extends TestCase {
     public void testParse() throws JSONException, OXException {
 
         final SimMessagingService messagingService = new SimMessagingService();
-        
+
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
-        
+
         messagingService.setId("com.openexchange.twitter");
         messagingService.setFormDescription(formDescription);
-        
+
         final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.add(messagingService);
-        
+
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("id", 12);
         accountJSON.put("displayName", "My nice twitter feed");
         accountJSON.put("messagingService", "com.openexchange.twitter");
-       
+
         final JSONObject configJSON = new JSONObject();
         configJSON.put("inputField", "My nice input value");
         accountJSON.put("configuration", configJSON);
-        
+
         final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
-        
+
         assertNotNull("Account was null!", account);
         assertEquals(12, account.getId());
         assertEquals("My nice twitter feed", account.getDisplayName());
         assertSame(messagingService, account.getMessagingService());
         assertEquals("My nice input value", account.getConfiguration().get("inputField"));
     }
-    
+
     public void testMandatoryFieldsOnly() throws OXException, JSONException {
         final SimMessagingService messagingService = new SimMessagingService();
-        
+
         final DynamicFormDescription formDescription = new DynamicFormDescription().add(FormElement.input("inputField", "My nice input field"));
-        
+
         messagingService.setId("com.openexchange.twitter");
         messagingService.setFormDescription(formDescription);
-        
+
         final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.add(messagingService);
-        
+
         final JSONObject accountJSON = new JSONObject();
         accountJSON.put("messagingService", "com.openexchange.twitter");
-       
-        
+
+
         final MessagingAccount account = new MessagingAccountParser(serviceRegistry).parse(accountJSON, -1, -1);
-        
+
         assertNotNull("Account was null!", account);
         assertTrue("Expected unset ID, but was: "+account.getId(), 0 >= account.getId());
         assertTrue("Expected unset displayName, but was: '"+account.getDisplayName()+"'", null == account.getDisplayName());
         assertTrue("Expected unset configuration, but was: "+account.getConfiguration(), null == account.getConfiguration());
         assertSame(messagingService, account.getMessagingService());
     }
-    
+
     public void testUnknownMessagingService() throws JSONException {
         final OXException exception = new OXException();
         final SimMessagingServiceRegistry serviceRegistry = new SimMessagingServiceRegistry();
         serviceRegistry.setException(exception);
-        
+
         try {
             final JSONObject accountJSON = new JSONObject();
             accountJSON.put("messagingService", "com.openexchange.twitter");

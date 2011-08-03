@@ -63,16 +63,16 @@ import com.openexchange.session.Session;
 public class WhiteboardSecretService implements SecretService{
 
     private final ServiceTracker tracker;
-    
+
     /**
      * Initializes a new {@link WhiteboardSecretService}.
-     * 
+     *
      * @param context The bundle context
      */
     public WhiteboardSecretService(final BundleContext context) {
         tracker = new ServiceTracker(context, SecretService.class.getName(), null);
     }
-    
+
     public String getSecret(final Session session) {
         final SecretService secretService = (SecretService) tracker.getService();
         if (secretService == null) {
@@ -80,19 +80,19 @@ public class WhiteboardSecretService implements SecretService{
         }
         return secretService.getSecret(session);
     }
-    
+
     /**
-     * Open this {@link WhiteboardSecretService} and begin tracking {@link SecretService}. 
+     * Open this {@link WhiteboardSecretService} and begin tracking {@link SecretService}.
      */
     public void open() {
         tracker.open();
     }
-    
+
     /**
      * Close this {@link WhiteboardSecretService}.
      */
     public void close() {
         tracker.close();
     }
-    
+
 }

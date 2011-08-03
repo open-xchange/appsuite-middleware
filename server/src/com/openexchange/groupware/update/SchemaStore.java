@@ -61,7 +61,7 @@ import com.openexchange.groupware.update.internal.SchemaStoreImpl;
 
 /**
  * Abstract class defining the interface for reading the schema version information.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class SchemaStore {
@@ -72,7 +72,7 @@ public abstract class SchemaStore {
 
     /**
      * Factory method.
-     * 
+     *
      * @return an implementation for this interface.
      */
     public static SchemaStore getInstance() {
@@ -83,7 +83,7 @@ public abstract class SchemaStore {
 
     /**
      * Marks given schema as locked due to a start of an update process.
-     * 
+     *
      * @param schema the schema
      * @param contextId unique context identifier
      * @param background <code>false</code> if blocking tasks are executed.
@@ -93,7 +93,7 @@ public abstract class SchemaStore {
 
     /**
      * Marks given schem as unlocked to release this schema from an update process.
-     * 
+     *
      * @param schema the schema
      * @param contextId the unique context identifier
      * @param background <code>false</code> if blocking tasks finished.

@@ -53,22 +53,22 @@ import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
  * {@link CreateOAuthAccountTable}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
 
     public static final String CREATE_TABLE_STATEMENT =
         "CREATE TABLE oauthAccounts (" +
-        "cid INT4 UNSIGNED NOT NULL," + 
-        "user INT4 UNSIGNED NOT NULL," + 
-        "id INT4 UNSIGNED NOT NULL," + 
-        "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," + 
-        "PRIMARY KEY (cid, id)," + 
-        "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" + 
+        "cid INT4 UNSIGNED NOT NULL," +
+        "user INT4 UNSIGNED NOT NULL," +
+        "id INT4 UNSIGNED NOT NULL," +
+        "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        "PRIMARY KEY (cid, id)," +
+        "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     public CreateOAuthAccountTable() {

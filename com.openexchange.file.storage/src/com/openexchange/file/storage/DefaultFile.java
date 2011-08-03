@@ -56,7 +56,7 @@ import java.util.Set;
 
 /**
  * {@link DefaultFile}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultFile extends AbstractFile {
@@ -194,7 +194,7 @@ public class DefaultFile extends AbstractFile {
 
     /**
      * Sets specified property. A <code>null</code> value removes the property.
-     * 
+     *
      * @param name The name
      * @param value The value or <code>null</code> for removal
      */

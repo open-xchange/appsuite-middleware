@@ -52,7 +52,7 @@ package com.openexchange.exception;
 
 /**
  * {@link OXExceptionConstants} - Provides access to constants for <a href="http://www.open-xchange.com">Open-Xchange</a> exceptions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OXExceptionConstants {
@@ -66,7 +66,7 @@ public interface OXExceptionConstants {
      * The empty message.
      */
     public static final String EMPTY_MSG = "[Not available]";
-    
+
     /**
      * The empty message arguments.
      */

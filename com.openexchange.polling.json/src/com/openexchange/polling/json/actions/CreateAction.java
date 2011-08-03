@@ -15,12 +15,12 @@ public class CreateAction extends PollAction {
 	@Override
 	protected AJAXRequestResult perform(PollRequest req) throws OXException {
 		PollService polls = getPollService();
-		
+
 		int cid = req.getContextId();
 		Poll poll = req.getPoll();
 
 		polls.createPoll(poll, cid);
-		
+
 		return new AJAXRequestResult(poll, "poll");
 	}
 

@@ -64,7 +64,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link LogServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LogServiceImpl implements LogService {
@@ -139,8 +139,12 @@ public final class LogServiceImpl implements LogService {
         default:
             doLogging = false;
         }
-        if (doLogging && null != loggable.getMessage()) {
-            queue.offer(loggable); // Throw away Loggable if queue capacity is exceeded
+        if (doLogging && loggable.isLoggable()) {
+            try {
+                queue.offer(loggable); // Throw away Loggable if queue capacity is exceeded
+            } catch (final Exception e) {
+                // Ignore
+            }
         }
     }
 

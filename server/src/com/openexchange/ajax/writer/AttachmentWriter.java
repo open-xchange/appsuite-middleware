@@ -61,7 +61,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 
 public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
-    
+
     public AttachmentWriter(final JSONWriter writer) {
         super(writer);
     }
@@ -92,7 +92,7 @@ public class AttachmentWriter extends TimedWriter<AttachmentMetadata> {
             final long time = ((Date)o).getTime();
             final int offset = tz.getOffset(time);
             return Long.valueOf(time + offset);
-        } 
+        }
         return o;
     }
 

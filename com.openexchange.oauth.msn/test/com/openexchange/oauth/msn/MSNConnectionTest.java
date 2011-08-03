@@ -72,7 +72,7 @@ import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class MSNConnectionTest extends TestCase{
-    
+
     public void testMSNServiceImpl(){
        String apiKey = "000000004C03D925";
        String apiSecret = "dFxbH5WdWnt3cdjqWeKaoyqm1lrNiD28";
@@ -88,7 +88,7 @@ public class MSNConnectionTest extends TestCase{
            System.out.println("last name : " + contact.getSurName());
        }
     }
-    
+
     public void testGetAccessTokenViaOAuthServiceMetaDataMSNImpl(){
         final String clientID = "0000000040052F00";
         final String clientSecret = "zCH5gYyMcZz6blXGM5M44kC6N98OQ1Uc";
@@ -97,13 +97,13 @@ public class MSNConnectionTest extends TestCase{
 
         String authURL = "https://consent.live.com/connect.aspx?wrap_client_id=" + clientID + "&wrap_callback=" + callbackURL + "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn";
         System.out.println("Authorization URL (paste this into browser) : ");
-        System.out.println(authURL);      
+        System.out.println(authURL);
 
         // Now lets try to get an access token with this wrap_verification_code ...
         System.out.println("paste the wrap_verification_code here");
         System.out.print(">>");
         String wrap_verification_code = in.nextLine();
-        
+
         OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret, null);
         HashMap<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, wrap_verification_code);
@@ -115,45 +115,45 @@ public class MSNConnectionTest extends TestCase{
             e.printStackTrace();
         }
     }
-    
+
     public void testURLLength(){
         String longURL = "";
         String shortURL = "";
-        
+
        System.out.println("Length of long URL : " + longURL.length());
        System.out.println("Length of short URL : " + shortURL.length());
     }
-    
+
     public void testHandlingOfInvalidSSLCertificate(){
         OutputStreamWriter writer = null;
         BufferedReader reader = null;
         try {
-            
 
-            final URL url = new URL("https://consent.live.com/AccessToken.aspx");            
+
+            final URL url = new URL("https://consent.live.com/AccessToken.aspx");
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(2500);
             connection.setReadTimeout(2500);
             connection.setDoOutput(true);
 
             writer = new OutputStreamWriter(connection.getOutputStream());
-            
+
             writer.flush();
-            
+
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             String line = null;
-            
+
             DefaultOAuthToken token = new DefaultOAuthToken();
             token.setSecret("");
-            
+
             while((line = reader.readLine()) != null) {
                 String[] keyValuePairs = line.split("&");
                 for (String keyValuePair : keyValuePairs) {
                     System.out.println(keyValuePair);
                 }
             }
-            
+
         } catch (UnsupportedEncodingException x) {
             System.out.println(x.getMessage());
         } catch (IOException e) {

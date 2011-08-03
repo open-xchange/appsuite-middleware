@@ -20,25 +20,25 @@ public class CabUtilTest extends CabUtil {
         final short littleEndian = toLittleEndian((short)0xFFFE);
         Assert.assertTrue("Value of 0xFFFE must be 0xFEFF, but is " + Integer.toHexString(littleEndian), littleEndian == (short)0xFEFF);
     }
-    
+
     @Test
     public void testLittleEndianShort3() {
         final short littleEndian = toLittleEndian((short)0x0FFE);
         Assert.assertTrue("Value of 0x0FFE must be 0xFE0F, but is " + Integer.toHexString(littleEndian), littleEndian == (short)0xFE0F);
     }
-    
+
     @Test
     public void testLittleEndianShort4() {
         final short littleEndian = toLittleEndian((short)0xFFFF);
         Assert.assertTrue("Value of 0xFFFF must be 0xFFFF, but is " + Integer.toHexString(littleEndian), littleEndian == (short)0xFFFF);
     }
-    
+
     @Test
     public void testLittleEndianInt() {
         final int littleEndian = toLittleEndian(0x4010);
         Assert.assertTrue("Value of 0x4010 must be 0x10400000, but is " + Integer.toHexString(littleEndian), littleEndian == 0x10400000);
     }
-    
+
     @Test
     public void testLittleEndianInt2() {
         final int littleEndian = toLittleEndian(0x4010FFFF);
@@ -50,13 +50,13 @@ public class CabUtilTest extends CabUtil {
         final int littleEndian = toLittleEndian(0xFFFEFFFF);
         Assert.assertTrue("Value of 0xFFFEFFFF must be 0xFFFFFEFF, but is " + Integer.toHexString(littleEndian), littleEndian == 0xFFFFFEFF);
     }
-    
+
     @Test
     public void testLittleEndianInt4() {
         final int littleEndian = toLittleEndian(0xFEFFFFFF);
         Assert.assertTrue("Value of 0xFEFFFFFF must be 0xFFFFFFFE, but is " + Integer.toHexString(littleEndian), littleEndian == 0xFFFFFFFE);
     }
-    
+
     @Test
     public void testGetDate() {
         final Calendar instance = Calendar.getInstance();
@@ -70,7 +70,7 @@ public class CabUtilTest extends CabUtil {
         final short littleEndian = toLittleEndian(date);
         Assert.assertTrue("Date value should be 0xBF3C but is " + Integer.toHexString(littleEndian), (short)0xBF3C == littleEndian);
     }
-    
+
     @Test
     public void testGetTime() {
         final Calendar instance = Calendar.getInstance();
@@ -78,18 +78,18 @@ public class CabUtilTest extends CabUtil {
         instance.set(Calendar.HOUR_OF_DAY, 14);
         instance.set(Calendar.MINUTE, 11);
         instance.set(Calendar.SECOND, 24);
-        
+
         final short time = getTime(instance);
         final short littleEndian = toLittleEndian(time);
         Assert.assertTrue("Date value should be 0x6C71 but is " + Integer.toHexString(littleEndian), (short)0x6C71 == littleEndian);
     }
-    
+
 //    @Test
 //    public void testFileGeneration() throws FileNotFoundException, IOException, ConfigurationException, TemplateException {
 //        final DataOutputStream pw = new DataOutputStream(new FileOutputStream("test.cab"));
 //        writeCabFile(pw, MobileConfigServlet.write(null, "ox6-dev.open-xchange.com", "tara", "user.name"));
 //        pw.close();
-        
+
 //        final BufferedInputStream bis1 = new BufferedInputStream(new FileInputStream("test.cab"));
 //        final BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream("testdata/test.cab"));
 //        final byte[] bytes = new byte[10];

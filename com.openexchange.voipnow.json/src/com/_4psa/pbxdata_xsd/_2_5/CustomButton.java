@@ -12,11 +12,11 @@ import com._4psa.pbxmessages_xsd._2_5.EditCustomButtonRequest;
 
 /**
  * Custom button data
- * 
+ *
  * <p>Java class for CustomButton complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="CustomButton">
  *   &lt;complexContent>
@@ -50,8 +50,8 @@ import com._4psa.pbxmessages_xsd._2_5.EditCustomButtonRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CustomButton", propOrder = {
@@ -88,11 +88,11 @@ public class CustomButton
 
     /**
      * Gets the value of the url property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getURL() {
         return url;
@@ -100,11 +100,11 @@ public class CustomButton
 
     /**
      * Sets the value of the url property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setURL(String value) {
         this.url = value;
@@ -112,11 +112,11 @@ public class CustomButton
 
     /**
      * Gets the value of the location property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLocation() {
         return location;
@@ -124,11 +124,11 @@ public class CustomButton
 
     /**
      * Sets the value of the location property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLocation(String value) {
         this.location = value;
@@ -136,11 +136,11 @@ public class CustomButton
 
     /**
      * Gets the value of the action property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAction() {
         return action;
@@ -148,11 +148,11 @@ public class CustomButton
 
     /**
      * Sets the value of the action property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAction(String value) {
         this.action = value;
@@ -160,11 +160,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeResellerID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeResellerID() {
         return includeResellerID;
@@ -172,11 +172,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeResellerID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeResellerID(Boolean value) {
         this.includeResellerID = value;
@@ -184,11 +184,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeClientID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeClientID() {
         return includeClientID;
@@ -196,11 +196,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeClientID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeClientID(Boolean value) {
         this.includeClientID = value;
@@ -208,11 +208,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeExtensionID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeExtensionID() {
         return includeExtensionID;
@@ -220,11 +220,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeExtensionID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeExtensionID(Boolean value) {
         this.includeExtensionID = value;
@@ -232,11 +232,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeExtensionNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeExtensionNo() {
         return includeExtensionNo;
@@ -244,11 +244,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeExtensionNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeExtensionNo(Boolean value) {
         this.includeExtensionNo = value;
@@ -256,11 +256,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeExtensionPublicNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeExtensionPublicNo() {
         return includeExtensionPublicNo;
@@ -268,11 +268,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeExtensionPublicNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeExtensionPublicNo(Boolean value) {
         this.includeExtensionPublicNo = value;
@@ -280,11 +280,11 @@ public class CustomButton
 
     /**
      * Gets the value of the includeChargingPlanID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIncludeChargingPlanID() {
         return includeChargingPlanID;
@@ -292,11 +292,11 @@ public class CustomButton
 
     /**
      * Sets the value of the includeChargingPlanID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIncludeChargingPlanID(Boolean value) {
         this.includeChargingPlanID = value;

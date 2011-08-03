@@ -62,7 +62,7 @@ package com.openexchange.subscribe.parser;
 
 /**
  * {@link ExternalSubscriptionHandlerImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ExternalSubscriptionHandlerImpl extends ContactHandler {
@@ -92,7 +92,7 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 ////        }
 ////        return null;
 ////    }
-//    
+//
 //    public String[] getServices() {
 //        return new String[]{"xing", "linkedin", "facebook"};
 //    }

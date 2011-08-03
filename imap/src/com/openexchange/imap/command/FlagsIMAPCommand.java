@@ -57,7 +57,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link FlagsIMAPCommand} - Enables/disables message's system e.g. \SEEN or \DELETED and user flags as well.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
@@ -76,7 +76,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
     /**
      * Constructor to set flags in messages identified through given UIDs.
-     * 
+     *
      * @param imapFolder - the IMAP folder
      * @param uids - the UIDs
      * @param flags - the flags
@@ -146,7 +146,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      * Constructor to set flags in all messages
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty.
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param flags - the flags
      * @param enable - whether to enable or disable affected flags
@@ -181,7 +181,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
     /**
      * Constructor to set flags starting at message whose sequence number matches specified <code>startSeqNum</code> and ending at message
      * whose sequence number matches specified <code>endSeqNum</code>
-     * 
+     *
      * @param imapFolder - the imap folder
      * @param startSeqNum The start sequence number
      * @param endSeqNum The end sequence number

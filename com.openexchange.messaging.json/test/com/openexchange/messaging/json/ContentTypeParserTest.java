@@ -69,64 +69,64 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 public class ContentTypeParserTest extends TestCase {
     public void testParseComplex() throws JSONException, OXException {
         final ContentTypeParser parser = new ContentTypeParser();
-        
+
         assertTrue(parser.handles("content-type", null));
-        
+
         final JSONObject jsonCType = new JSONObject();
         jsonCType.put("type", "text/plain");
-        
+
         final JSONObject params = new JSONObject();
         params.put("charset", "UTF-8");
         params.put("name", "something.txt");
-        
+
         jsonCType.put("params", params);
-        
+
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-    
+
         parser.parseAndAdd(headers, "content-type", jsonCType);
-        
+
         assertTrue(!headers.isEmpty());
-        
+
         final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
-        
+
         final ContentType cType = (ContentType) collection.iterator().next();
-        
+
         assertEquals("text/plain", cType.getBaseType());
         assertEquals("text", cType.getPrimaryType());
         assertEquals("plain", cType.getSubType());
-    
+
         assertEquals("UTF-8", cType.getCharsetParameter());
         assertEquals("something.txt", cType.getNameParameter());
     }
-    
-    
+
+
     public void testParseBasic() throws OXException, JSONException {
         final ContentTypeParser parser = new ContentTypeParser();
-        
+
         final String stringCType = "text/plain;charset=UTF-8;name=something.txt";
 
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
-        
+
         parser.parseAndAdd(headers, "content-type", stringCType);
-        
+
         assertTrue(!headers.isEmpty());
-        
+
         final Collection<MessagingHeader> collection = headers.get(MimeContentType.getContentTypeName());
         assertNotNull(collection);
         assertEquals(1, collection.size());
-        
+
         final ContentType cType = (ContentType) collection.iterator().next();
-        
+
         assertEquals("text/plain", cType.getBaseType());
         assertEquals("text", cType.getPrimaryType());
         assertEquals("plain", cType.getSubType());
-    
+
         assertEquals("UTF-8", cType.getCharsetParameter());
         assertEquals("something.txt", cType.getNameParameter());
 
     }
-    
-    
+
+
 }

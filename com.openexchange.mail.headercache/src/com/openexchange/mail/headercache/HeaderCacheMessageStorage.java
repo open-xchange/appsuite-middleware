@@ -83,7 +83,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link HeaderCacheMessageStorage} - The header cache message storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheMessageStorage implements IMailMessageStorage {
@@ -135,7 +135,7 @@ public final class HeaderCacheMessageStorage implements IMailMessageStorage {
 
     /**
      * Initializes a new {@link HeaderCacheMessageStorage}.
-     * 
+     *
      * @param session The session
      * @param mailAccess The mail access
      * @throws OXException If initialization fails

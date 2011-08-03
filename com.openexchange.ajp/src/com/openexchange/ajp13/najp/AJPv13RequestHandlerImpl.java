@@ -67,9 +67,11 @@ import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.AJPv13Utility;
+import com.openexchange.ajp13.BlockableBufferedInputStream;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.exception.AJPv13TimeoutException;
 import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpErrorServlet;
 import com.openexchange.ajp13.servlet.http.HttpServletManager;
@@ -87,7 +89,7 @@ import com.openexchange.configuration.ServerConfig;
  * <p>
  * Sub-sequential AJP communication may be initiated through {@link AJPv13ServletInputStream} and {@link AJPv13ServletOutputStream} during
  * servlets' processing.
- * 
+ *
  * @see AJPv13ServletInputStream
  * @see AJPv13ServletOutputStream
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -153,9 +155,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Processes an incoming AJP package from web server. If first package of an AJP cycle is processed its prefix code determines further
      * handling. Any subsequent packages are treated as data-only packages.
-     * 
+     *
      * @throws AJPv13Exception If package processing fails
      */
+    @Override
     public void processPackage() throws AJPv13Exception {
         ajpConblocker.acquire();
         try {
@@ -205,9 +208,8 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                     /*
                      * Unknown prefix code in first package: Leave routine.
                      */
-                    if (LOG.isWarnEnabled()) {
-                        final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
-                        LOG.warn(ajpExc.getMessage(), ajpExc);
+                    final AJPv13UnknownPrefixCodeException ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
+                    {
                         /*
                          * Dump package
                          */
@@ -219,9 +221,12 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                         clonedPackage[3] = (byte) (dataLength & (255));
                         clonedPackage[4] = (byte) prefixCode;
                         System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
-                        LOG.warn("Corresponding AJP package:\n" + AJPv13Utility.dumpBytes(clonedPackage));
+                        ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
                     }
-                    return;
+                    /*
+                     * Throw exception
+                     */
+                    throw ajpExc;
                 }
             } else {
                 /*
@@ -230,11 +235,30 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
                 ajpRequest = new AJPv13RequestBody(ajpCon.getPayloadData(dataLength, true));
             }
             ajpRequest.processRequest(this);
+        } catch (final AJPv13Exception e) {
+            clearBuffers();
+            throw e;
         } catch (final IOException e) {
+            clearBuffers();
+            throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
+        } catch (final AJPv13TimeoutException e) {
+            clearBuffers();
+            throw e;
+        } catch (final RuntimeException e) {
+            clearBuffers();
             throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
         } finally {
             ajpConblocker.release();
         }
+    }
+
+    private void clearBuffers() {
+        try {
+            ((BlockableBufferedInputStream) ajpCon.getInputStream()).clearBuffer();
+        } catch (final IOException e1) {
+            LOG.warn("Error clearing AJP input stream", e1);
+        }
+        ajpCon.dropOutstandingData();
     }
 
     private static final String EAS_URI = "/Microsoft-Server-ActiveSync";
@@ -246,7 +270,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Checks for long-running EAS ping command, that is URI is equal to <code>"/Microsoft-Server-ActiveSync"</code> and request's
      * <code>"Cmd"</code> parameter equals <code>"Ping"</code>.
-     * 
+     *
      * @return <code>true</code> if EAS ping command is detected; otherwise <code>false</code>
      */
     private final boolean isEASPingCommand() {
@@ -310,10 +334,11 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Creates and writes the AJP response package corresponding to last received AJP package.
-     * 
+     *
      * @throws AJPv13Exception If an AJP error occurs
      * @throws ServletException If processing the request fails
      */
+    @Override
     public void createResponse() throws AJPv13Exception, ServletException {
         ajpConblocker.acquire();
         try {
@@ -342,9 +367,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the forward request's bytes as a formatted string or "&lt;not enabled&gt;" if not enabled via configuration.
-     * 
+     *
      * @return The forward request's bytes as a formatted string
      */
+    @Override
     public String getForwardRequest() {
         ajpConblocker.acquire();
         try {
@@ -356,9 +382,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the AJP connection of this request handler.
-     * 
+     *
      * @return The AJP connection of this request handler
      */
+    @Override
     public AJPv13Connection getAJPConnection() {
         ajpConblocker.acquire();
         try {
@@ -370,7 +397,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets the AJP connection of this request handler.
-     * 
+     *
      * @param ajpCon The AJP connection
      */
     void setAJPConnection(final AJPv13ConnectionImpl ajpCon) {
@@ -393,6 +420,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Releases associated servlet instance and resets request handler to hold initial values
      */
+    @Override
     public void reset(final boolean discardConnection) {
         ajpConblocker.acquire();
         try {
@@ -460,9 +488,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets this request hander's servlet reference to the one bound to given path argument
-     * 
+     *
      * @param requestURI The request URI
      */
+    @Override
     public void setServletInstance(final String requestURI) {
         ajpConblocker.acquire();
         try {
@@ -493,7 +522,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Removes specified character if given path ends with such a character.
-     * 
+     *
      * @param path The path to prepare
      * @param c The (trailing) character to remove
      * @return The path possibly with ending character removed
@@ -512,10 +541,11 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * <p>
      * This request handler is then marked to have the service() method called; meaning {@link #isServiceMethodCalled()} will return
      * <code>true</code>.
-     * 
+     *
      * @throws IOException If an I/O error occurs
      * @throws ServletException If a servlet error occurs
      */
+    @Override
     public void doServletService() throws ServletException, IOException {
         /*
          * Execute service() method without obtaining blockable
@@ -535,7 +565,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Flushes the response to output stream
-     * 
+     *
      * @throws IOException If an I/O error occurs
      */
     private void doResponseFlush() throws IOException {
@@ -547,11 +577,12 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Writes the HTTP headers to specified output stream if not already written.
-     * 
+     *
      * @param out The output stream
      * @throws AJPv13Exception If composing the <code>SEND_HEADERS</code> package fails
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public void doWriteHeaders(final BlockableBufferedOutputStream out) throws AJPv13Exception, IOException {
         ajpConblocker.acquire();
         try {
@@ -571,6 +602,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public boolean isHeadersSent() {
         ajpConblocker.acquire();
         try {
@@ -582,10 +614,11 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the response output stream's data and clears it
-     * 
+     *
      * @return The response output stream's data
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public byte[] getAndClearResponseData() throws IOException {
         ajpConblocker.acquire();
         try {
@@ -602,10 +635,11 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Sets/appends new data to servlet request's input stream
-     * 
+     *
      * @param newData The new data to set
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public void setData(final byte[] newData) throws IOException {
         ajpConblocker.acquire();
         try {
@@ -615,6 +649,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public byte[] peekData() throws IOException {
         ajpConblocker.acquire();
         try {
@@ -626,10 +661,11 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Parses given form's data into servlet request
-     * 
+     *
      * @param contentBytes The content bytes representing a form's data
      * @throws UnsupportedEncodingException If encoding is not supported
      */
+    @Override
     public void doParseQueryString(final byte[] contentBytes) throws UnsupportedEncodingException {
         String charEnc = request.getCharacterEncoding();
         if (charEnc == null) {
@@ -638,28 +674,33 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
     }
 
+    @Override
     public void setServletRequest(final HttpServletRequestWrapper request) {
         this.request = request;
         supplyRequestWrapperWithServlet();
     }
 
+    @Override
     public HttpServletRequest getServletRequest() {
         return request;
     }
 
+    @Override
     public void setServletResponse(final HttpServletResponseWrapper response) {
         this.response = response;
     }
 
+    @Override
     public HttpServletResponse getServletResponse() {
         return response;
     }
 
     /**
      * Gets the content length
-     * 
+     *
      * @return The content length
      */
+    @Override
     public long getContentLength() {
         return contentLength;
     }
@@ -667,15 +708,17 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * @return <code>true</code> if content length has been set; otherwise <code>false</code>
      */
+    @Override
     public boolean containsContentLength() {
         return bContentLength;
     }
 
     /**
      * Sets the request's content length
-     * 
+     *
      * @param contentLength The content length
      */
+    @Override
     public void setContentLength(final long contentLength) {
         this.contentLength = contentLength;
         bContentLength = true;
@@ -683,9 +726,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the total requested content length
-     * 
+     *
      * @return The total requested content length
      */
+    @Override
     public long getTotalRequestedContentLength() {
         ajpConblocker.acquire();
         try {
@@ -697,9 +741,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Increases the total requested content length by specified argument
-     * 
+     *
      * @param increaseBy The value by which the total requested content length is increased
      */
+    @Override
     public void increaseTotalRequestedContentLength(final long increaseBy) {
         ajpConblocker.acquire();
         try {
@@ -711,9 +756,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Checks if the <code>service()</code> method has already been called
-     * 
+     *
      * @return <code>true</code> if <code>service()</code> method has already been called; otherwise <code>false</code>
      */
+    @Override
     public boolean isServiceMethodCalled() {
         ajpConblocker.acquire();
         try {
@@ -725,9 +771,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Checks if AJP's end response package has been sent to web server
-     * 
+     *
      * @return <code>true</code> if AJP's end response package has been sent to web server; otherwise <code>false</code>
      */
+    @Override
     public boolean isEndResponseSent() {
         ajpConblocker.acquire();
         try {
@@ -740,6 +787,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
     /**
      * Sets the end response flag
      */
+    @Override
     public void setEndResponseSent() {
         ajpConblocker.acquire();
         try {
@@ -751,19 +799,21 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Indicates if request content type equals <code>application/x-www-form-urlencoded</code>
-     * 
+     *
      * @return <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise <code>false</code>
      */
+    @Override
     public boolean isFormData() {
         return isFormData;
     }
 
     /**
      * Marks that requests content type equals <code>application/x-www-form-urlencoded</code>
-     * 
+     *
      * @param isFormData <code>true</code> if request content type equals <code>application/x-www-form-urlencoded</code>; otherwise
      *            <code>false</code>
      */
+    @Override
     public void setFormData(final boolean isFormData) {
         ajpConblocker.acquire();
         try {
@@ -775,9 +825,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the number of bytes that are left for being requested from web server
-     * 
+     *
      * @return The number of bytes that are left for being requested
      */
+    @Override
     public int getNumOfBytesToRequestFor() {
         ajpConblocker.acquire();
         try {
@@ -795,9 +846,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * Checks if amount of received data is equal to value of header 'Content-Length'.
      * <p>
      * This method will always return false if content-length is not set unless method {@link #makeEqual()} is invoked
-     * 
+     *
      * @return <code>true</code> if amount of received data is equal to value of header 'Content-Length'; otherwise <code>false</code>
      */
+    @Override
     public boolean isAllDataRead() {
         ajpConblocker.acquire();
         try {
@@ -815,9 +867,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * 'Content-Length'.
      * <p>
      * No empty data package received AND requested data length is still less than header 'Content-Length'.
-     * 
+     *
      * @return <code>true</code> if servlet container still expects data from web server; otherwise <code>false</code>
      */
+    @Override
     public boolean isMoreDataExpected() {
         ajpConblocker.acquire();
         try {
@@ -832,9 +885,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Checks if header 'Content-Length' has not been set
-     * 
+     *
      * @return <code>true</code> if header 'Content-Length' has not been set; otherwise <code>false</code>
      */
+    @Override
     public boolean isNotSet() {
         ajpConblocker.acquire();
         try {
@@ -846,9 +900,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Indicates if amount of received data exceeds value of header "content-length"
-     * 
+     *
      * @return
      */
+    @Override
     public boolean isMoreDataReadThanExpected() {
         ajpConblocker.acquire();
         try {
@@ -862,6 +917,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
      * Total requested content length is made equal to header "content-length" which has the effect that no more data is going to be
      * requested from web server cause <code>AJPv13RequestHandler.isAllDataRead()</code> will return <code>true</code>.
      */
+    @Override
     public void makeEqual() {
         ajpConblocker.acquire();
         try {
@@ -871,6 +927,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public Cookie getHttpSessionCookie() {
         ajpConblocker.acquire();
         try {
@@ -880,6 +937,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         }
     }
 
+    @Override
     public void setHttpSessionCookie(final Cookie httpSessionCookie, final boolean join) {
         ajpConblocker.acquire();
         try {
@@ -892,9 +950,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Checks if the HTTP session has joined a previous HTTP session
-     * 
+     *
      * @return <code>true</code> if the HTTP session has joined a previous HTTP session; otherwise <code>false</code>
      */
+    @Override
     public boolean isHttpSessionJoined() {
         ajpConblocker.acquire();
         try {
@@ -906,9 +965,10 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
 
     /**
      * Gets the servlet path (which is not the request path). The servlet path is defined in servlet mapping configuration.
-     * 
+     *
      * @return The servlet path
      */
+    @Override
     public String getServletPath() {
         ajpConblocker.acquire();
         try {

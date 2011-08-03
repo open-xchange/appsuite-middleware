@@ -51,7 +51,7 @@ package com.openexchange.event;
 
 /**
  * {@link RemoteEvent} - Interface for remote event distributed by OSGi's event admin.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface RemoteEvent {
@@ -73,42 +73,42 @@ public interface RemoteEvent {
 
     /**
      * Gets the action.
-     * 
+     *
      * @return The action
      */
     public int getAction();
 
     /**
      * Gets the context ID.
-     * 
+     *
      * @return The context ID
      */
     public int getContextId();
 
     /**
      * Gets the folder ID.
-     * 
+     *
      * @return The folder ID
      */
     public int getFolderId();
 
     /**
      * Gets the user ID.
-     * 
+     *
      * @return The user ID
      */
     public int getUserId();
 
     /**
      * Gets the module.
-     * 
+     *
      * @return The module
      */
     public int getModule();
 
     /**
      * Gets the time stamp of the modification (if not available, <code>0</code> is returned).
-     * 
+     *
      * @return The time stamp of the modification (if not available, <code>0</code> is returned)
      */
     public long getTimestamp();

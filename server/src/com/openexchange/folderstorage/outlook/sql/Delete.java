@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Delete} - SQL for deleting a virtual folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Delete {
@@ -75,23 +75,23 @@ public final class Delete {
 
     private static final String SQL_DELETE_SUBS =
         "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-    
+
     private static final String SQL_GLOBAL_DELETE_SUBS =
         "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_INSERT_SUBS =
         "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-    
+
     private static final String SQL_GLOBAL_DELETE_INSERT_SUBS =
         "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-    
+
     private static final String SQL_GLOBAL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
 
     private static final String SQL_DELETE_INSERT_PERMS =
         "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-    
+
     private static final String SQL_GLOBAL_DELETE_INSERT_PERMS =
         "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND folderId = ?";
 
@@ -107,7 +107,7 @@ public final class Delete {
 
     /**
      * Deletes specified folder.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -142,7 +142,7 @@ public final class Delete {
 
     /**
      * Deletes specified folder with specified connection.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

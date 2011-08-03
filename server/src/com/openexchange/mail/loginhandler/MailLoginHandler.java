@@ -58,14 +58,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
  * {@link MailLoginHandler} - The login handler delivering mailbox access event
  * to data retention.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailLoginHandler implements LoginHandlerService {
@@ -77,7 +76,8 @@ public final class MailLoginHandler implements LoginHandlerService {
 		super();
 	}
 
-	public void handleLogin(final LoginResult login) throws OXException {
+	@Override
+    public void handleLogin(final LoginResult login) throws OXException {
 		/*
 		 * Track mail login in data retention service
 		 */
@@ -102,12 +102,12 @@ public final class MailLoginHandler implements LoginHandlerService {
 		}
 	}
 
-	public void handleLogout(final LoginResult logout) throws OXException {
+	@Override
+    public void handleLogout(final LoginResult logout) throws OXException {
 		// Time-out mail access cache
 		final Session session = logout.getSession();
 		MailAccess.getMailAccessCache().clearUserEntries(session);
-		AttachmentTokenRegistry.getInstance().dropFor(session.getUserId(),
-				session.getContextId());
+		// AttachmentTokenRegistry.getInstance().dropFor(session);
 
 	}
 }

@@ -69,6 +69,7 @@ public class DelegateTasks extends AbstractModules {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "tasks", "delegate_tasks" };
     }

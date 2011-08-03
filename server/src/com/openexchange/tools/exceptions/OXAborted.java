@@ -55,7 +55,7 @@ package com.openexchange.tools.exceptions;
 public class OXAborted extends RuntimeException {
 
     /**
-	 * 
+	 *
 	 */
     private static final long serialVersionUID = 8334216056095164302L;
 }

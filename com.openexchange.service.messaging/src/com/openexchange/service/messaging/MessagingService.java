@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingService} - The messaging service to broadcast messages to remote hosts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.22
  */
@@ -62,7 +62,7 @@ public interface MessagingService {
 
     /**
      * Initiate asynchronous delivery of a message. This method returns to the caller before delivery of the message is completed.
-     * 
+     *
      * @param message The message to send to all listeners which subscribe to the topic of the message.
      * @throws OXException If posting given message fails
      */

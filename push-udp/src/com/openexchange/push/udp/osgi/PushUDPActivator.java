@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushUDPActivator} - OSGi bundle activator for the push UDP.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class PushUDPActivator extends DeferredActivator {

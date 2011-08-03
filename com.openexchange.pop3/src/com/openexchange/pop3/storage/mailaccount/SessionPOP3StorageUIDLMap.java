@@ -69,14 +69,14 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link SessionPOP3StorageUIDLMap} - Session-backed implementation of {@link POP3StorageUIDLMap}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
     /**
      * Gets the UIDL map bound to specified POP3 access.
-     * 
+     *
      * @param pop3Access The POP3 access
      * @return The UIDL map bound to specified POP3 access
      * @throws OXException If instance cannot be returned

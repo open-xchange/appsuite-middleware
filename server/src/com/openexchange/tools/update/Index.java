@@ -66,14 +66,14 @@ import com.openexchange.tools.Collections.Filter;
 /**
  * This class models database indexes (in mysql).An index operates on a table, has a name and a list of columns it indexes. You can use the
  * find-methods to load indexes from the database. Use the instance methods to drop or create an index.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.org">Francisco Laguna</a>
  */
 public class Index {
 
     /**
      * Returns a list of all indexes defined on a certain table.
-     * 
+     *
      * @param con - The Connection to the Database.
      * @param tableName - The name of the table on which the indexes have to be defined.
      * @return A list of all indexes on this table.
@@ -188,7 +188,7 @@ public class Index {
 
     /**
      * Remove this index from the table
-     * 
+     *
      * @param con
      * @throws SQLException
      */
@@ -206,7 +206,7 @@ public class Index {
 
     /**
      * Creates an index on the table. Make sure table, name and columns all contain values.
-     * 
+     *
      * @param con
      * @throws SQLException
      */
@@ -270,6 +270,7 @@ public class Index {
             this.name = name;
         }
 
+        @Override
         public boolean accept(final Index object) {
             return object.getName().equalsIgnoreCase(name);
         }
@@ -284,6 +285,7 @@ public class Index {
             this.columns = columns;
         }
 
+        @Override
         public boolean accept(final Index object) {
             final Set<String> needed = new HashSet<String>(Arrays.asList(columns));
             for (final String col : object.getColumns()) {
@@ -309,6 +311,7 @@ public class Index {
             this.columns = columns;
         }
 
+        @Override
         public boolean accept(final Index object) {
             if (columns.length != object.getColumns().size()) {
                 return false;

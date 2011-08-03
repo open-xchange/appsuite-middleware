@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DeleteListener} - Performs the action(s) related to a received delete event
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DeleteListener extends EventListener {
 
     /**
      * Performs the action(s) related to received delete event
-     * 
+     *
      * @param event the delete event
      * @param readCon a read-only connection
      * @param writeCon a writable connection

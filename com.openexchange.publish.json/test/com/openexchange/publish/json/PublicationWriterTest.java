@@ -76,18 +76,18 @@ public class PublicationWriterTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-    
+
         PublicationTarget target = new PublicationTarget();
         target.setId("com.openexchange.publish.test");
-        
+
         DynamicFormDescription form = new DynamicFormDescription();
         form.add(FormElement.input("siteName", "Site Name")).add(FormElement.checkbox("protected", "Protected"));
         target.setFormDescription(form);
-        
+
         Map<String, Object> config = new HashMap<String, Object>();
         config.put("siteName", "publication");
         config.put("protected", true);
-        
+
         publication = new Publication();
         publication.setId(23);
         publication.setEntityId("12");
@@ -97,11 +97,11 @@ public class PublicationWriterTest extends TestCase {
         publication.setDisplayName("myName");
         publication.setEnabled(true);
     }
-    
+
     public void testWriteObject() throws JSONException, OXException {
         PublicationWriter writer = new PublicationWriter();
         JSONObject object = writer.write(publication, null);
-        
+
         JSONAssertion assertion = new JSONAssertion()
                 .hasKey("id").withValue(23)
                 .hasKey("entity").withValueObject()
@@ -116,16 +116,16 @@ public class PublicationWriterTest extends TestCase {
                     .hasKey("protected").withValue(true)
                     .objectEnds()
                 .objectEnds();
-        
-        
+
+
        assertValidates(assertion, object);
     }
-    
+
     public void testWriteArray() throws JSONException, OXException {
         Map<String, String[]> specialCols = new HashMap<String, String[]>();
         String[] basicCols = new String[] { "id", "target", "displayName", "enabled" };
         specialCols.put("com.openexchange.publish.test", new String[] { "siteName" });
-        
+
         JSONArray array = new PublicationWriter().writeArray(
             publication,
             basicCols,
@@ -135,15 +135,15 @@ public class PublicationWriterTest extends TestCase {
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(23, "com.openexchange.publish.test", "myName", true, "publication");
 
         assertValidates(assertion, array);
-        
+
     }
-    
+
     public void testThrowsExceptionOnUnknownColumn() {
         try {
             new PublicationWriter().writeArray(publication, new String[]{"id", "unknownColumn"}, new HashMap<String, String[]>(), Arrays.asList("com.openexchange.publish.test"), publication.getTarget().getFormDescription());
             fail("Should have failed");
         } catch (OXException e) {
-            
+
         } catch (JSONException e) {
 
         }

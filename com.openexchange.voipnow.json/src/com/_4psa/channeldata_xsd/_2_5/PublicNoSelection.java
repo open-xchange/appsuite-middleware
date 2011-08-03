@@ -14,11 +14,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Public phone numbers selection list: available and assigned phone numbers for a certain user
- * 
+ *
  * <p>Java class for PublicNoSelection complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PublicNoSelection">
  *   &lt;complexContent>
@@ -70,8 +70,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PublicNoSelection", propOrder = {
@@ -85,25 +85,25 @@ public class PublicNoSelection {
 
     /**
      * Gets the value of the available property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the available property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAvailable().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link PublicNoSelection.Available }
-     * 
-     * 
+     *
+     *
      */
     public List<PublicNoSelection.Available> getAvailable() {
         if (available == null) {
@@ -114,25 +114,25 @@ public class PublicNoSelection {
 
     /**
      * Gets the value of the assigned property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the assigned property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAssigned().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link PublicNoSelection.Assigned }
-     * 
-     * 
+     *
+     *
      */
     public List<PublicNoSelection.Assigned> getAssigned() {
         if (assigned == null) {
@@ -144,9 +144,9 @@ public class PublicNoSelection {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -175,8 +175,8 @@ public class PublicNoSelection {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -210,11 +210,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the id property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getID() {
             return id;
@@ -222,11 +222,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the id property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setID(BigInteger value) {
             this.id = value;
@@ -234,11 +234,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the channelID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getChannelID() {
             return channelID;
@@ -246,11 +246,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the channelID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setChannelID(BigInteger value) {
             this.channelID = value;
@@ -258,11 +258,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the channel property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getChannel() {
             return channel;
@@ -270,11 +270,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the channel property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setChannel(String value) {
             this.channel = value;
@@ -282,11 +282,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the externalNo property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getExternalNo() {
             return externalNo;
@@ -294,11 +294,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the externalNo property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setExternalNo(String value) {
             this.externalNo = value;
@@ -306,11 +306,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the did property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getDid() {
             return did;
@@ -318,11 +318,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the did property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setDid(String value) {
             this.did = value;
@@ -330,11 +330,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the cost property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getCost() {
             return cost;
@@ -342,11 +342,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the cost property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setCost(Float value) {
             this.cost = value;
@@ -354,11 +354,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the callbackExt property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getCallbackExt() {
             return callbackExt;
@@ -366,11 +366,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the callbackExt property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setCallbackExt(String value) {
             this.callbackExt = value;
@@ -378,11 +378,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the callbackExtID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getCallbackExtID() {
             return callbackExtID;
@@ -390,11 +390,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the callbackExtID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setCallbackExtID(BigInteger value) {
             this.callbackExtID = value;
@@ -402,11 +402,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the flow property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getFlow() {
             return flow;
@@ -414,11 +414,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the flow property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setFlow(String value) {
             this.flow = value;
@@ -426,11 +426,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the crDate property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public XMLGregorianCalendar getCrDate() {
             return crDate;
@@ -438,11 +438,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the crDate property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link XMLGregorianCalendar }
-         *     
+         *
          */
         public void setCrDate(XMLGregorianCalendar value) {
             this.crDate = value;
@@ -453,9 +453,9 @@ public class PublicNoSelection {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -469,8 +469,8 @@ public class PublicNoSelection {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -487,11 +487,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the id property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getID() {
             return id;
@@ -499,11 +499,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the id property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setID(BigInteger value) {
             this.id = value;
@@ -511,11 +511,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the channel property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getChannel() {
             return channel;
@@ -523,11 +523,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the channel property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setChannel(String value) {
             this.channel = value;
@@ -535,11 +535,11 @@ public class PublicNoSelection {
 
         /**
          * Gets the value of the externalNo property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getExternalNo() {
             return externalNo;
@@ -547,11 +547,11 @@ public class PublicNoSelection {
 
         /**
          * Sets the value of the externalNo property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setExternalNo(String value) {
             this.externalNo = value;

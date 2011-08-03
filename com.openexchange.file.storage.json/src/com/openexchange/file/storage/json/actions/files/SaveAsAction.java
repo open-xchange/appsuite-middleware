@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SaveAsAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SaveAsAction extends AbstractWriteAction {
@@ -136,7 +136,7 @@ public class SaveAsAction extends AbstractWriteAction {
             session.getUserConfiguration());
 
         fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-        
+
         return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
     }
 

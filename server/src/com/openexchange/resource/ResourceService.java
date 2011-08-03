@@ -56,14 +56,14 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link ResourceService} - This service defines the API to the resource component.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ResourceService {
 
     /**
      * Gets the resource identified by specified ID located in given context.
-     * 
+     *
      * @param resourceId The unique identifier of the resource to return.
      * @param context The context.
      * @return The data object of the resource.
@@ -73,7 +73,7 @@ public interface ResourceService {
 
     /**
      * Searches all resources which identifier matches the given pattern.
-     * 
+     *
      * @param pattern The identifier of all returned resources will match this pattern.
      * @param context The context.
      * @return a string array with the resource identifiers. If no identifiers match, an empty array will be returned.
@@ -83,7 +83,7 @@ public interface ResourceService {
 
     /**
      * Searches all resources which email address matches the given pattern.
-     * 
+     *
      * @param pattern The email address pattern to search for
      * @param context The context
      * @return An array of {@link Resource resources} whose email address matches the given pattern.
@@ -93,7 +93,7 @@ public interface ResourceService {
 
     /**
      * This method returns resources that have been modified since the given timestamp.
-     * 
+     *
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
@@ -104,17 +104,17 @@ public interface ResourceService {
 
     /**
      * This method returns resources that have been deleted since the given timestamp.
-     * 
+     *
      * @param modifiedSince timestamp after that the resources have been modified.
      * @param context The context.
      * @return an array of resources.
      * @throws OXException If an error occurs.
      */
     public abstract Resource[] listDeleted(Date modifiedSince, Context context) throws OXException;
-    
+
     /**
      * Creates a resource.
-     * 
+     *
      * @param user The user in whose name the insertion takes place
      * @param ctx The context.
      * @param resource The resource to create.
@@ -124,7 +124,7 @@ public interface ResourceService {
 
     /**
      * Updates a resource.
-     * 
+     *
      * @param user The user in whose name the update takes place
      * @param ctx The context.
      * @param resource The resource to update.
@@ -135,7 +135,7 @@ public interface ResourceService {
 
     /**
      * Deletes a resource.
-     * 
+     *
      * @param user The user in whose name the deletion takes place
      * @param ctx The context.
      * @param resource The resource to delete.

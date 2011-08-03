@@ -75,7 +75,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 public class UWAWidgetActivator extends HousekeepingActivator {
 
     private static final Class[] NEEDED = new Class[]{DatabaseService.class, IDGeneratorService.class, ConfigurationService.class, ConfigViewFactory.class};
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
@@ -87,31 +87,31 @@ public class UWAWidgetActivator extends HousekeepingActivator {
         IDGeneratorService idGenService = getService(IDGeneratorService.class);
         ConfigurationService configService = getService(ConfigurationService.class);
         ConfigViewFactory configViewsService = getService(ConfigViewFactory.class);
-        
+
         UWAWidgetServiceFactoryImpl factory = new UWAWidgetServiceFactoryImpl(dbService, configViewsService, configService, idGenService);
-        
+
         registerService(UWAWidgetServiceFactory.class, factory);
-        
-        
+
+
         // Database
-        
+
         CreatePositionsTable positionsTable = new CreatePositionsTable();
         registerService(CreateTableService.class, positionsTable);
-        
+
         CreateWidgetTable widgetTable = new CreateWidgetTable();
         registerService(CreateTableService.class, widgetTable);
-        
+
         final CreatePositionsTableTask updateTask1 = new CreatePositionsTableTask(dbService);
         final CreateWidgetTableTask updateTask2 = new CreateWidgetTableTask(dbService);
-        
+
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             public Collection<? extends UpdateTask> getUpdateTasks() {
                 return Arrays.asList(updateTask1, updateTask2);
             }
-            
+
         });
-        
+
     }
 
 }

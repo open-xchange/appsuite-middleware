@@ -69,63 +69,63 @@ public interface ListLsubEntry {
 
     /**
      * Indicates whether associated IMAP folder is subscribed.
-     * 
+     *
      * @return <code>true</code> if associated IMAP folder is subscribed; otherwise <code>false</code>
      */
     boolean isSubscribed();
 
     /**
      * Indicates whether associated IMAP folder exists.
-     * 
+     *
      * @return <code>true</code> if associated IMAP folder exists; otherwise <code>false</code>
      */
     boolean exists();
 
     /**
      * Gets this LIST/LSUB entry's parent or <code>null</code> if no parent exists.
-     * 
+     *
      * @return The parent or <code>null</code> for no parent
      */
     ListLsubEntry getParent();
 
     /**
      * Gets the children of this LIST/LSUB entry.
-     * 
+     *
      * @return The children
      */
     List<ListLsubEntry> getChildren();
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     String getFullName();
 
     /**
      * Gets the attributes
-     * 
+     *
      * @return The attributes
      */
     Set<String> getAttributes();
 
     /**
      * Gets the separator
-     * 
+     *
      * @return The separator
      */
     char getSeparator();
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     String getName();
 
     /**
      * Gets the change state
-     * 
+     *
      * @return The change state
      */
     ListLsubEntry.ChangeState getChangeState();
@@ -134,7 +134,7 @@ public interface ListLsubEntry {
      * Gets the has-inferiors flag.
      * <p>
      * {@link Folder#HOLDS_FOLDERS}
-     * 
+     *
      * @return The has-inferiors flag
      */
     boolean hasInferiors();
@@ -143,28 +143,28 @@ public interface ListLsubEntry {
      * Gets the can-open flag (folder is selectable).
      * <p>
      * {@link Folder#HOLDS_MESSAGES}
-     * 
+     *
      * @return The can-open flag
      */
     boolean canOpen();
 
     /**
      * Indicates whether this entry denotes a namespace folder.
-     * 
+     *
      * @return <code>true</code> for namespace folder; otherwise <code>false</code>
      */
     boolean isNamespace();
 
     /**
      * Indicates whether this entry has children.
-     * 
+     *
      * @return <code>true</code> if children exist; otherwise <code>false</code>
      */
     boolean hasChildren();
 
     /**
      * Gets the folder's type.
-     * 
+     *
      * @return The type
      * @see Folder#HOLDS_FOLDERS
      * @see Folder#HOLDS_MESSAGES
@@ -173,49 +173,49 @@ public interface ListLsubEntry {
 
     /**
      * Gets MYRIGHTS.
-     * 
+     *
      * @return MYRIGHTS or <code>null</code> if absent
      */
     public Rights getMyRights();
 
     /**
      * Gets the ACL list.
-     * 
+     *
      * @return The ACL list or <code>null</code> if undetermined
      */
     List<ACL> getACLs();
 
     /**
      * Remembers specified ACLs.
-     * 
+     *
      * @param aclList The ACL list
      */
     void rememberACLs(List<ACL> aclList);
 
     /**
      * Gets the number of messages as returned by <i>STATUS</i> command.
-     * 
+     *
      * @return The number of messages or <code>-1</code> if undetermined
      */
     int getMessageCount();
 
     /**
      * Gets the number of new messages as returned by <i>STATUS</i> command.
-     * 
+     *
      * @return The number of new messages or <code>-1</code> if undetermined
      */
     int getNewMessageCount();
 
     /**
      * Gets the number of unread messages as returned by <i>STATUS</i> command.
-     * 
+     *
      * @return The number of unread messages or <code>-1</code> if undetermined
      */
     int getUnreadMessageCount();
 
     /**
      * Remembers specified counts.
-     * 
+     *
      * @param total The total count
      * @param recent The recent count
      * @param unseen The unseen count

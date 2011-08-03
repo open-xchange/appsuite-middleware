@@ -80,7 +80,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, stringAvailableAfterLogin, baseUrl;
 
     private int numberOfForm;
-    
+
     private Page loginPage;
 
     public LoginPageByFormActionRegexVerifiedByStringStep() {
@@ -106,7 +106,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
                 }
                 numberOfFormCounter++;
             }
-            if (loginForm != null) {                
+            if (loginForm != null) {
                 final HtmlTextInput userfield = loginForm.getInputByName(nameOfUserField);
                 userfield.setValueAttribute(username);
                 final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
@@ -124,7 +124,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
 //                        openPageInBrowser(output);
 //                    }
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
-                    
+
                 } else {
                     executedSuccessfully = true;
                 }
@@ -215,10 +215,10 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
     public void setBaseUrl(final String baseUrl) {
         this.baseUrl = baseUrl;
     }
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
-    
-    
+
+
 }

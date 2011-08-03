@@ -124,7 +124,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailFolderStorage} - The mail folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderStorage implements FolderStorage {
@@ -140,26 +140,31 @@ public final class MailFolderStorage implements FolderStorage {
         super();
     }
 
+    @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
+    @Override
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] {
             MailContentType.getInstance(), DraftsContentType.getInstance(), SentContentType.getInstance(), SpamContentType.getInstance(),
             TrashContentType.getInstance() };
     }
 
+    @Override
     public ContentType getDefaultContentType() {
         return MailContentType.getInstance();
     }
 
+    @Override
     public void commitTransaction(final StorageParameters params) throws OXException {
         /*
          * Nothing to do
          */
     }
 
+    @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!MailType.getInstance().equals(type) && !PrivateType.getInstance().equals(type)) {
             return new SortableId[0];
@@ -183,7 +188,7 @@ public final class MailFolderStorage implements FolderStorage {
             final MailFolder rootFolder = mailAccess.getRootFolder();
             folders.add(rootFolder);
             /*
-             * Start recursive iteration 
+             * Start recursive iteration
              */
             addSubfolders(MailFolder.DEFAULT_FOLDER_ID, folders, mailAccess.getFolderStorage());
             /*
@@ -245,10 +250,12 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public Folder prepareFolder(final String treeId, final Folder folder, final StorageParameters storageParameters) throws OXException {
         return folder;
     }
 
+    @Override
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -276,6 +283,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -325,6 +333,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void clearFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -375,6 +384,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -418,6 +428,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public String getDefaultFolderID(final User user, final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
         if (!(contentType instanceof MailContentType)) {
             throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
@@ -455,10 +466,12 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public Type getTypeByParent(final User user, final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         return MailType.getInstance();
     }
 
+    @Override
     public boolean containsForeignObjects(final User user, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -481,6 +494,7 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public boolean isEmpty(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -515,14 +529,17 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void updateLastModified(final long lastModified, final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to do
     }
 
+    @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageParameters storageParameters) throws OXException {
         return getFolders(treeId, folderIds, StorageType.WORKING, storageParameters);
     }
 
+    @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
         for (final String folderId : folderIds) {
@@ -531,10 +548,12 @@ public final class MailFolderStorage implements FolderStorage {
         return ret;
     }
 
+    @Override
     public Folder getFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return getFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
+    @Override
     public Folder getFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
@@ -619,7 +638,7 @@ public final class MailFolderStorage implements FolderStorage {
                             if (pop3StorageFolders.contains(mf.getFullname())) {
                                 it.remove();
                             }
-                        }            
+                        }
                     }
                     Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
                     final String[] subfolderIds = new String[children.size()];
@@ -722,10 +741,12 @@ public final class MailFolderStorage implements FolderStorage {
             arr[StorageUtility.INDEX_TRASH] };
     }
 
+    @Override
     public FolderType getFolderType() {
         return MailFolderType.getInstance();
     }
 
+    @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -786,7 +807,7 @@ public final class MailFolderStorage implements FolderStorage {
                     if (pop3StorageFolders.contains(mailFolder.getFullname())) {
                         it.remove();
                     }
-                }            
+                }
             }
             addWarnings(mailAccess, storageParameters);
             /*
@@ -863,12 +884,14 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public void rollback(final StorageParameters params) {
         /*
          * Nothing to do
          */
     }
 
+    @Override
     public boolean startTransaction(final StorageParameters parameters, final boolean modify) throws OXException {
         /*
          * Nothing to do
@@ -876,14 +899,17 @@ public final class MailFolderStorage implements FolderStorage {
         return false;
     }
 
+    @Override
     public StoragePriority getStoragePriority() {
         return StoragePriority.NORMAL;
     }
 
+    @Override
     public boolean containsFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
     }
 
+    @Override
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         if (StorageType.BACKUP.equals(storageType)) {
             return false;
@@ -912,10 +938,12 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
         return new String[0];
     }
 
+    @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
         if (null == includeContentTypes || includeContentTypes.length == 0) {
             return new String[0];
@@ -933,6 +961,7 @@ public final class MailFolderStorage implements FolderStorage {
         return ret.toArray(new String[ret.size()]);
     }
 
+    @Override
     public void updateFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         MailAccess<?, ?> mailAccess = null;
         try {
@@ -1124,7 +1153,7 @@ public final class MailFolderStorage implements FolderStorage {
         // Append messages to destination account
         /* final String[] mailIds = */destMessageStorage.appendMessages(destFullname, msgs);
         /*-
-         * 
+         *
         // Ensure flags
         final String[] arr = new String[1];
         for (int i = 0; i < msgs.length; i++) {
@@ -1159,6 +1188,7 @@ public final class MailFolderStorage implements FolderStorage {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailAccount o1, final MailAccount o2) {
             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o1.getMailProtocol())) {
                 if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(o2.getMailProtocol())) {
@@ -1191,6 +1221,7 @@ public final class MailFolderStorage implements FolderStorage {
             collator.setStrength(Collator.SECONDARY);
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             return collator.compare(o1.getName(), o2.getName());
         }
@@ -1223,6 +1254,7 @@ public final class MailFolderStorage implements FolderStorage {
             return ret;
         }
 
+        @Override
         public int compare(final MailFolder o1, final MailFolder o2) {
             if (o1.isDefaultFolder()) {
                 if (o2.isDefaultFolder()) {

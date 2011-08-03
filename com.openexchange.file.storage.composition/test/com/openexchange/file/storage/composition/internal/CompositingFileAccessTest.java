@@ -81,7 +81,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
  * {@link CompositingFileAccessTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CompositingFileAccessTest extends CompositingIDBasedFileAccess implements FileStorageService, FileStorageAccountAccess, FileStorageAccountManager {
@@ -92,25 +92,25 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private FileStorageFileAccess files;
 
-    private SimBuilder fileAccess = new SimBuilder();
+    private final SimBuilder fileAccess = new SimBuilder();
 
     private String accountId;
 
-    private FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
+    private final FileID fileId = new FileID("com.openexchange.test", "account 23", "folder", "id");
 
-    private FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
+    private final FolderID folderId = new FolderID(fileId.getService(), fileId.getAccountId(), fileId.getFolderId());
 
     private String serviceId2;
 
     private String accountId2;
 
-    private FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
+    private final FileID fileId2 = new FileID("com.openexchange.test2", "account 12", "folder2", "id2");
 
-    private FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
-    
-    private IDSetter setId = new IDSetter(fileId.getFileId());
-    
-    
+    private final FolderID folderId2 = new FolderID(fileId2.getService(), fileId2.getAccountId(), fileId2.getFolderId());
+
+    private final IDSetter setId = new IDSetter(fileId.getFileId());
+
+
 
     public CompositingFileAccessTest() {
         super(new SimSession());
@@ -474,7 +474,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     // update file
-    
+
     @Test
     public void testUpdateDocument1() throws OXException {
         File file = new DefaultFile();
@@ -540,136 +540,136 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     }
 
     // Moving across filestores
-    
+
     @Test
     public void testMoveACompleteFileWithANewUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-        
+
         // Firstly the file should be created in the destination as a new file
         File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
-        
+
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        
+
         // Secondly the original must be deleted
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
-                
+
         move(file, EMPTY_INPUT_STREAM, 1337, null);
-        
+
         verifyAccount(); // Store on destination account then
         verifyAccount2(); // Remove from source account
-        
+
         fileAccess.assertAllWereCalled();
-        
+
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
     }
-    
+
     @Test
     public void testPartialMetadataWithANewUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         file.setTitle("New Title"); // And we want to set a new title
-        
+
         // Since this is only a partial file, firstly the original document should be loaded
         File storedFile = new DefaultFile();
         storedFile.setTitle("Old Title");
         storedFile.setDescription("Old Description"); // We want to keep the old description
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
-        
+
         // Next the file should be created in the destination as a new file
         File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
-        
+
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        
+
         // And lastly the original must be deleted
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
-                
+
         move(file, EMPTY_INPUT_STREAM, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
-        
+
         fileAccess.assertAllWereCalled();
-        
+
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
-        
+
         File fileThatWasCreated = setId.getFile();
-        
+
         assertEquals("New Title", fileThatWasCreated.getTitle());
         assertEquals("Old Description", fileThatWasCreated.getDescription());
     }
-    
+
     @Test
     public void testMoveCompleteFileWithoutUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
-        
+
         // No Input Stream is provided, so load the file from the source store
         fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
-        
+
         // Next the file should be created in the destination as a new file, with the input stream provided above
         File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
-        
+
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        
+
         // Lastly the original must be deleted
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
-                
+
         move(file, null, 1337, null);
-        
+
         fileAccess.assertAllWereCalled();
-        
+
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
     }
-    
+
     @Test
     public void testMovePartialFileWithoutUpload() throws OXException {
         File file = new DefaultFile();
         file.setId(fileId2.toUniqueID()); // We start in FileStore 2
         file.setFolderId(folderId.toUniqueID()); // And want to move to FileStore 1
         file.setTitle("New Title"); // And we want to set a new title
-        
+
         // No Input Stream is provided, so load the file from the source store
         fileAccess.expectCall("getDocument", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(EMPTY_INPUT_STREAM);
-        
+
         // Since this is only a partial file, firstly the original document should be loaded
         File storedFile = new DefaultFile();
         storedFile.setTitle("Old Title");
         storedFile.setDescription("Old Description"); // We want to keep the old description
         fileAccess.expectCall("getFileMetadata", fileId2.getFolderId(), fileId2.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(storedFile);
-        
+
         // Next the file should be created in the destination as a new file
         File destinationFile = new DefaultFile();
         destinationFile.setId(FileStorageFileAccess.NEW);
         destinationFile.setFolderId(folderId.getFolderId());
-        
+
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andDo(setId);
-        
+
         // And lastly the original must be deleted
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId())), 1337l);
-                
+
         move(file, null, 1337, Arrays.asList(File.Field.TITLE, File.Field.FOLDER_ID)); // Title and FolderID have been changed
-        
+
         fileAccess.assertAllWereCalled();
-        
+
         // The document will receive a new ID
         assertEquals(file.getId(), fileId.toUniqueID());
-        
+
         File fileThatWasCreated = setId.getFile();
-        
+
         assertEquals("New Title", fileThatWasCreated.getTitle());
         assertEquals("Old Description", fileThatWasCreated.getDescription());
     }
@@ -943,7 +943,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
             (this.file = (File) arguments[0]).setId(id);
             return null;
         }
-        
+
         public File getFile() {
             return file;
         }

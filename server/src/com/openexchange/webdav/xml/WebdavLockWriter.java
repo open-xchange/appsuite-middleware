@@ -75,7 +75,7 @@ public class WebdavLockWriter {
 		lockXML.append("<D:locktoken><D:href>");
 		lockXML.append(lock.getToken());
 		lockXML.append("</D:href></D:locktoken>");
-		
+
 	}
 
 	private final void timeout(final WebdavLock lock, final StringBuffer lockXML) {
@@ -119,7 +119,7 @@ public class WebdavLockWriter {
 		/*switch(lock.getType()) {
 		case WebdavLock.Type.WRITE_LITERAL: lockXML.append("<write />"); break;
 		default: break;
-		}*/ 
+		}*/
 		if(lock.getType().equals(WebdavLock.Type.WRITE_LITERAL)) {
 			lockXML.append("<D:write />");
 		}

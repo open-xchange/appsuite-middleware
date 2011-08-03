@@ -55,7 +55,7 @@ import java.util.Set;
 
 /**
  * {@link MailConstants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
@@ -159,6 +159,8 @@ public final class MailConstants {
     public static final String MAIL_SERVER = "mailServer";
 
     public static final String MAIL_PERSONAL = "personal";
+
+    public static final String MAIL_REPLY_TO = "replyTo";
 
     public static final String MAIL_PRIMARY_ADDRESS = "primaryAddress";
 

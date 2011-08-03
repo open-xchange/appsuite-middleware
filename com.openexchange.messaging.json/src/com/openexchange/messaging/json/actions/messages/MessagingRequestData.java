@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Represents a request to the messaging subsystem. The class contains common parsing methods for arguments.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -126,9 +126,9 @@ public class MessagingRequestData {
 
     /**
      * Tries to get a message access for the messaging service and account ID as given in the request parameters
-     * @param user 
-     * @param cid 
-     * 
+     * @param user
+     * @param cid
+     *
      * @throws OXException If parameters 'messagingService' or 'account' are missing
      */
     public MessagingMessageAccess getMessageAccess(final int user, final int cid) throws OXException {
@@ -182,7 +182,7 @@ public class MessagingRequestData {
 
     /**
      * Reads and parses the 'account' parameter.
-     * 
+     *
      * @throws OXException - When the 'account' parameter was not set or is not a valid integer.
      */
     public int getAccountID() throws OXException {
@@ -200,7 +200,7 @@ public class MessagingRequestData {
 
     /**
      * Reads the 'folder' parameter, failing when it is not set.
-     * 
+     *
      * @throws OXException - When the 'folder' parameter is not set.
      */
     public String getFolderId() throws OXException {
@@ -213,7 +213,7 @@ public class MessagingRequestData {
     /**
      * Reads and parses the 'columns' parameter. Fails when 'columns' is not set or if it contains an unknown value. Columns are a string
      * separated list of MessagingField names.
-     * 
+     *
      * @return An array of MessagingFields corresponding to the comma-separated list given in the 'columns' parameter.
      * @throws OXException - When the 'columns' parameter was not set or contains an illegal value.
      */
@@ -236,7 +236,7 @@ public class MessagingRequestData {
     /**
      * Retrieves and parses the 'sort' parameter, turning it into a MessagingField. Returns <code>null</code> when 'sort' is unset. Fails
      * when 'sort' contains an unknown MessagingField.
-     * 
+     *
      * @throws OXException - When the 'sort' parameter contains an illegal value.
      */
     public MessagingField getSort() throws OXException {
@@ -254,7 +254,7 @@ public class MessagingRequestData {
     /**
      * Retrieves and parses the 'order' parameter. Returns <code>null</code> when 'order' is not set. Fails when 'order' contains neither
      * 'desc' and 'asc'. Matches case-insensitively.
-     * 
+     *
      * @throws OXException - When 'order' contains an illegal value.
      */
     public OrderDirection getOrder() throws OXException {
@@ -271,7 +271,7 @@ public class MessagingRequestData {
 
     /**
      * Retrieves the given 'id' parameter. Fails when the 'id' parameter is unset.
-     * 
+     *
      * @throws OXException - When the 'id' parameter is unset.
      */
     public String getId() throws OXException {
@@ -281,7 +281,7 @@ public class MessagingRequestData {
     /**
      * Retrieves and parses the 'peek' parameter. Returns 'false' when 'peek' is not set. Fails when 'peek' contains neither 'true' nor
      * 'false'. Matches case insensitively.
-     * 
+     *
      * @throws OXException - When 'peek' contains an illegal value.
      */
     public boolean getPeek() throws OXException {
@@ -300,7 +300,7 @@ public class MessagingRequestData {
 
     /**
      * Retrieves the 'messageAction' parameter. Fails when 'messageAction' was not set.
-     * 
+     *
      * @return
      * @throws OXException - When 'messageAction' was not set.
      */
@@ -334,8 +334,8 @@ public class MessagingRequestData {
     /**
      * Retrieves the MessagingAccountTransport that matches the parameters 'messagingService' and 'account'. Fails when either of the
      * parameters has not been set.
-     * @param user 
-     * @param cid 
+     * @param user
+     * @param cid
      */
     public MessagingAccountTransport getTransport(final int user, final int cid) throws OXException {
         return registry.getMessagingService(getMessagingServiceId(), user, cid).getAccountTransport(getAccountID(), session);
@@ -343,7 +343,7 @@ public class MessagingRequestData {
 
     /**
      * Retrieves and parses the 'recipients' parameter. May return null, if no recipients were set.
-     * 
+     *
      * @throws OXException
      */
     public Collection<MessagingAddressHeader> getRecipients() throws OXException {
@@ -356,7 +356,7 @@ public class MessagingRequestData {
 
     /**
      * Tries to either parse the folder in its long form or assemble it from the content
-     * 
+     *
      * @throws OXException
      */
     public MessagingFolderAddress getLongFolder() throws OXException {

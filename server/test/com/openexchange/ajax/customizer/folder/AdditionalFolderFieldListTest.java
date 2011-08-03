@@ -59,11 +59,11 @@ import junit.framework.TestCase;
  *
  */
 public class AdditionalFolderFieldListTest extends TestCase {
-    
+
     private SimFolderField field;
     private SimFolderField field2;
     private AdditionalFolderFieldList fields;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -72,62 +72,62 @@ public class AdditionalFolderFieldListTest extends TestCase {
         field.setColumnName("someField");
         field.setJsonValue("jsonValue");
         field.setValue("someValue");
-        
+
         field2 = new SimFolderField();
         field2.setColumnId(13);
         field2.setColumnName("someOtherField");
         field2.setJsonValue("otherJsonValue");
         field2.setValue("someOtherValue");
-        
+
         fields = new AdditionalFolderFieldList();
         fields.addField(field);
         fields.addField(field2);
-    
+
     }
-    
+
     public void testLookup() {
         assertEquals(field, fields.get(12));
         assertEquals(field2, fields.get(13));
         assertEquals(field, fields.get("someField"));
         assertEquals(field2, fields.get("someOtherField"));
-        
+
     }
-    
+
     public void testColumnIDCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnId(field.getColumnID());
         fields.addField(collision);
-        
+
         assertEquals(field, fields.get(12));
     }
-    
+
     public void testColumnNameCollision() {
         // First come first serve
         SimFolderField collision = new SimFolderField();
         collision.setColumnName(field.getColumnName());
         fields.addField(collision);
-        
+
         assertEquals(field, fields.get("someField"));
     }
-    
+
     public void testKnows() {
         assertTrue(fields.knows(12));
         assertTrue(fields.knows("someField"));
         assertFalse(fields.knows(23));
         assertFalse(fields.knows("someUnknownField"));
     }
-    
+
     public void testRemove() {
         fields.remove(12);
         assertFalse(fields.knows(12));
     }
-    
+
     public void testNullField() {
         AdditionalFolderField field3 = fields.get(23);
         assertNotNull(field3);
         assertEquals(null, field3.getValue(null, null));
         assertEquals(null, field3.renderJSON(null));
     }
-    
+
 }

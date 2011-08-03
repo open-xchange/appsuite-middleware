@@ -75,16 +75,16 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
 /**
  * {@link SpamAssassinSpamHandler} - The spam-assassin spam handler which expects spam mails being wrapped inside a mail created by
  * spam-assassin. Therefore handling a formerly spam mail as ham requires to extract the original mail.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public final class SpamAssassinSpamHandler extends SpamHandler {
 
     private static class PlainAndNestedMessages {
-        
+
         private final String[] nestedMessages;
-        
+
         private final String[] plainMessages;
 
         public PlainAndNestedMessages(final String[] nestedMessages, final String[] plainMessages) {
@@ -93,47 +93,47 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             this.plainMessages = plainMessages;
         }
 
-        
+
         public String[] getNestedMessages() {
             return nestedMessages;
         }
 
-        
+
         public String[] getPlainMessages() {
             return plainMessages;
         }
-        
+
     }
 
     private static class SpamdSettings {
 
         private final String hostname;
-        
+
         private final int port;
-        
+
         private final String username;
-        
+
         public SpamdSettings(final String hostname, final int port, final String username) {
             this.hostname = hostname;
             this.port = port;
             this.username = username;
         }
 
-        
+
         public String getHostname() {
             return hostname;
         }
 
-        
+
         public int getPort() {
             return port;
         }
 
-        
+
         public String getUsername() {
             return username;
         }
-        
+
     }
 
     private static class UnwrapParameter {
@@ -162,11 +162,11 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             return m_move;
         }
     }
-    
+
     private static final MailField[] FIELDS_HEADER_CT = { MailField.HEADERS, MailField.CONTENT_TYPE };
 
     private static final SpamAssassinSpamHandler instance = new SpamAssassinSpamHandler();
-    
+
 //    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class));
 
     private static final String NAME = "SpamAssassin";
@@ -180,7 +180,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
     /**
      * Gets the singleton instance of {@link SpamAssassinSpamHandler}.
-     * 
+     *
      * @return The singleton instance of {@link SpamAssassinSpamHandler}
      */
     public static SpamAssassinSpamHandler getInstance() {
@@ -278,7 +278,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
         return nestedMails.toArray(new MailMessage[nestedMails.size()]);
     }
-    
+
     private SpamdSettings getSpamdSettings(final Session session, final PropertyHandler propertyHandler) throws OXException {
         SpamdSettings spamdSettings = null;
         if (propertyHandler.isSpamd()) {
@@ -307,7 +307,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
      * @param source - A string containing the message
      * @param spam - Whether the message should be marked as spam or ham, if set to false it's marked as ham
      * @param spamdsettings the settings how spamd can be reached
-     * @throws OXException 
+     * @throws OXException
      */
     private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings) throws OXException {
         final Spamc spamc = new Spamc();
@@ -356,7 +356,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         for (final MailMessage mail : mails) {
             // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
             final String source = mail.getSource();
-            
+
             // ...last send the plaintext over to the spamassassin daemon
             sendToSpamd(source, spam, spamdSettings);
         }
@@ -381,7 +381,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
              * Handle spamassassin messages
              */
             final String[] nestedMessages = plainAndNestedMessages.getNestedMessages();
-            
+
             final MailMessage[] nestedMails = getNestedMailsAndHandleOthersAsPlain(parameterObject, confirmedHamFullname, nestedMessages, spamdSettings);
             if (null != spamdSettings) {
                 spamdMessageProcessing(nestedMails, spamdSettings, false);

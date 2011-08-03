@@ -1,0 +1,14 @@
+createuser
+deleteuser
+changeuser
+listuser
+creategroup
+deletegroup
+changegroup
+listgroup
+createresource
+deleteresource
+changeresource
+listresource
+getaccesscombinationnameforuser
+changeaccessglobal

@@ -74,6 +74,7 @@ public class DeleteAttachmentAction extends AttachmentListQueryAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         if (getAttachments().size() == 0) {
             return;

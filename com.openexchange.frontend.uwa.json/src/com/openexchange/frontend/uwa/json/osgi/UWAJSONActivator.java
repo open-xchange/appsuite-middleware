@@ -64,7 +64,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link UWAJSONActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UWAJSONActivator extends HousekeepingActivator {
@@ -89,7 +89,7 @@ public class UWAJSONActivator extends HousekeepingActivator {
         UWAWidgetServlet.FACTORY = actions;
 
         servletRegistration = new SessionServletRegistration(context, new UWAWidgetServlet(), "/ajax/uwaWidgets");
-    
+
         registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
     }
 

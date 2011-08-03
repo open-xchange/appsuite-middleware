@@ -10,18 +10,18 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com._4psa.extensiondata_xsd._2_5 package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com._4psa.extensiondata_xsd._2_5 package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -34,14 +34,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com._4psa.extensiondata_xsd._2_5
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link Equipments }
-     * 
+     *
      */
     public Equipments createEquipments() {
         return new Equipments();
@@ -49,7 +49,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PhoneCallerIDInfo }
-     * 
+     *
      */
     public PhoneCallerIDInfo createPhoneCallerIDInfo() {
         return new PhoneCallerIDInfo();
@@ -57,7 +57,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PhoneTerminal }
-     * 
+     *
      */
     public PhoneTerminal createPhoneTerminal() {
         return new PhoneTerminal();
@@ -65,7 +65,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ProvisioningInfo }
-     * 
+     *
      */
     public ProvisioningInfo createProvisioningInfo() {
         return new ProvisioningInfo();
@@ -73,7 +73,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreditInfo }
-     * 
+     *
      */
     public CreditInfo createCreditInfo() {
         return new CreditInfo();
@@ -81,7 +81,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link QueueCenterInfo }
-     * 
+     *
      */
     public QueueCenterInfo createQueueCenterInfo() {
         return new QueueCenterInfo();
@@ -89,7 +89,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtensionPLInfo }
-     * 
+     *
      */
     public ExtensionPLInfo createExtensionPLInfo() {
         return new ExtensionPLInfo();
@@ -97,7 +97,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallRuleInfo }
-     * 
+     *
      */
     public CallRuleInfo createCallRuleInfo() {
         return new CallRuleInfo();
@@ -105,7 +105,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RemoteAgent }
-     * 
+     *
      */
     public RemoteAgent createRemoteAgent() {
         return new RemoteAgent();
@@ -113,7 +113,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtensionInfo }
-     * 
+     *
      */
     public ExtensionInfo createExtensionInfo() {
         return new ExtensionInfo();
@@ -121,7 +121,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CardCodeList }
-     * 
+     *
      */
     public CardCodeList createCardCodeList() {
         return new CardCodeList();
@@ -129,7 +129,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FaxCenter }
-     * 
+     *
      */
     public FaxCenter createFaxCenter() {
         return new FaxCenter();
@@ -137,7 +137,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallRuleTransferInfo }
-     * 
+     *
      */
     public CallRuleTransferInfo createCallRuleTransferInfo() {
         return new CallRuleTransferInfo();
@@ -145,7 +145,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ConferenceInfo }
-     * 
+     *
      */
     public ConferenceInfo createConferenceInfo() {
         return new ConferenceInfo();
@@ -153,7 +153,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtendedExtensionInfo }
-     * 
+     *
      */
     public ExtendedExtensionInfo createExtendedExtensionInfo() {
         return new ExtendedExtensionInfo();
@@ -161,7 +161,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Queue }
-     * 
+     *
      */
     public Queue createQueue() {
         return new Queue();
@@ -169,7 +169,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Conference }
-     * 
+     *
      */
     public Conference createConference() {
         return new Conference();
@@ -177,7 +177,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link IVR }
-     * 
+     *
      */
     public IVR createIVR() {
         return new IVR();
@@ -185,7 +185,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CardCodeInfo }
-     * 
+     *
      */
     public CardCodeInfo createCardCodeInfo() {
         return new CardCodeInfo();
@@ -193,7 +193,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtensionList }
-     * 
+     *
      */
     public ExtensionList createExtensionList() {
         return new ExtensionList();
@@ -201,7 +201,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Voicemail }
-     * 
+     *
      */
     public Voicemail createVoicemail() {
         return new Voicemail();
@@ -209,7 +209,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Agent }
-     * 
+     *
      */
     public Agent createAgent() {
         return new Agent();
@@ -217,7 +217,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtendedPhoneTerminal }
-     * 
+     *
      */
     public ExtendedPhoneTerminal createExtendedPhoneTerminal() {
         return new ExtendedPhoneTerminal();
@@ -225,7 +225,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallerIDList }
-     * 
+     *
      */
     public CallerIDList createCallerIDList() {
         return new CallerIDList();
@@ -233,7 +233,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallRecording }
-     * 
+     *
      */
     public CallRecording createCallRecording() {
         return new CallRecording();
@@ -241,7 +241,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ExtendedQueue }
-     * 
+     *
      */
     public ExtendedQueue createExtendedQueue() {
         return new ExtendedQueue();
@@ -249,7 +249,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RechargeInfo }
-     * 
+     *
      */
     public RechargeInfo createRechargeInfo() {
         return new RechargeInfo();
@@ -257,7 +257,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CallerIDInfo }
-     * 
+     *
      */
     public CallerIDInfo createCallerIDInfo() {
         return new CallerIDInfo();
@@ -265,7 +265,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link VoicemailInfo }
-     * 
+     *
      */
     public VoicemailInfo createVoicemailInfo() {
         return new VoicemailInfo();
@@ -273,7 +273,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link QueueMember }
-     * 
+     *
      */
     public QueueMember createQueueMember() {
         return new QueueMember();
@@ -281,7 +281,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Equipments.Firmware }
-     * 
+     *
      */
     public Equipments.Firmware createEquipmentsFirmware() {
         return new Equipments.Firmware();
@@ -289,7 +289,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigDecimal }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "service", scope = Queue.class)
     public JAXBElement<BigDecimal> createQueueService(BigDecimal value) {
@@ -298,7 +298,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigInteger }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "waitFor", scope = Queue.class, defaultValue = "20")
     public JAXBElement<BigInteger> createQueueWaitFor(BigInteger value) {
@@ -307,7 +307,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigInteger }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "callBetween", scope = Queue.class, defaultValue = "30")
     public JAXBElement<BigInteger> createQueueCallBetween(BigInteger value) {
@@ -316,7 +316,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "mohFolder", scope = ConferenceInfo.class, defaultValue = "-1")
     public JAXBElement<String> createConferenceInfoMohFolder(String value) {
@@ -325,7 +325,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link BigInteger }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "intervalID", scope = CallRuleInfo.class)
     public JAXBElement<BigInteger> createCallRuleInfoIntervalID(BigInteger value) {
@@ -334,7 +334,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "mohFolder", scope = IVR.class, defaultValue = "-1")
     public JAXBElement<String> createIVRMohFolder(String value) {
@@ -343,7 +343,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://4psa.com/ExtensionData.xsd/2.5.1", name = "mohFolder", scope = PhoneTerminal.class, defaultValue = "-1")
     public JAXBElement<String> createPhoneTerminalMohFolder(String value) {

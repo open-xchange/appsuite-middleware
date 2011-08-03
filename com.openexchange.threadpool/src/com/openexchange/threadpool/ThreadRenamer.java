@@ -51,14 +51,14 @@ package com.openexchange.threadpool;
 
 /**
  * {@link ThreadRenamer} - Offers methods for thread renaming.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ThreadRenamer {
 
     /**
      * Renames thread's name to given <tt>newName</tt>.
-     * 
+     *
      * @param newName The new name
      */
     public void rename(String newName);
@@ -71,7 +71,7 @@ public interface ThreadRenamer {
      * Hence only the first part is renamed to keep thread's number appendix.
      * <p>
      * <b>Note</b>: If thread's name does not obey described pattern, this method does the same as {@link #rename(String)} does.
-     * 
+     *
      * @param newPrefix The new prefix
      */
     public void renamePrefix(String newPrefix);

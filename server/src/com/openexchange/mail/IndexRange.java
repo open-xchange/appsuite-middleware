@@ -51,7 +51,7 @@ package com.openexchange.mail;
 
 /**
  * {@link IndexRange} - A simple class representing an index range.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexRange {
@@ -119,7 +119,7 @@ public final class IndexRange {
 
     /**
      * Gets the start index
-     * 
+     *
      * @return The start index
      */
     public int getStart() {
@@ -128,7 +128,7 @@ public final class IndexRange {
 
     /**
      * Gets the end index
-     * 
+     *
      * @return The end index
      */
     public int getEnd() {

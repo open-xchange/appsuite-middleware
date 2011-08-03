@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 public interface InfostoreRequest {
 
     InfostoreRequest require(Param...params) throws OXException ;
-    
+
     InfostoreRequest requireBody() throws OXException;
 
     InfostoreRequest requireFileMetadata() throws OXException;
@@ -81,7 +81,7 @@ public interface InfostoreRequest {
     String getId() throws OXException;
 
     int getVersion() throws OXException;
-    
+
     String getFolderId() throws OXException;
 
     List<Field> getColumns() throws OXException;
@@ -89,9 +89,9 @@ public interface InfostoreRequest {
     Field getSortingField() throws OXException;
 
     SortDirection getSortingOrder() throws OXException;
- 
+
     TimeZone getTimezone() throws OXException;
-    
+
     ServerSession getSession() throws OXException;
 
     long getTimestamp() throws OXException;
@@ -117,9 +117,9 @@ public interface InfostoreRequest {
     File getFile() throws OXException;
 
     List<File.Field> getSentColumns() throws OXException;
-    
+
     public boolean hasUploads() throws OXException;
-    
+
     public InputStream getUploadedFileData() throws OXException;
 
     int getAttachedId();

@@ -60,7 +60,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarDataObject extends Appointment {
-   
+
     private String rec_string;
 
     private Context context;
@@ -84,7 +84,7 @@ public class CalendarDataObject extends Appointment {
     private CalendarCollectionService getCalendarCollectionService(){
     	return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
     }
-    
+
     @Override
     public final void setUntil(final Date until) {
         if (until != null) {
@@ -102,7 +102,7 @@ public class CalendarDataObject extends Appointment {
             super.setUntil(until);
         }
     }
-    
+
     @Override
     public void setOccurrence(final int occurrence) {
         if (occurrence == 0) {

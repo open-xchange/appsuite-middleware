@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailPartDataSource} - A generic {@link DataSource} for mail parts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailPartDataSource implements DataSource {
@@ -101,10 +101,12 @@ public abstract class MailPartDataSource implements DataSource {
         }
     }
 
+    @Override
     public String[] getRequiredArguments() {
         return new String[] { ARGS[0], ARGS[1], ARGS[2] };
     }
 
+    @Override
     public Class<?>[] getTypes() {
         return new Class<?>[] { InputStream.class };
     }

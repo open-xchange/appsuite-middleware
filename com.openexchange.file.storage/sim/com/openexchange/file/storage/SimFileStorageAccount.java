@@ -91,7 +91,7 @@ public final class SimFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the configuration.
-     * 
+     *
      * @param configuration The configuration to set
      */
     public void setConfiguration(final Map<String, Object> configuration) {
@@ -100,7 +100,7 @@ public final class SimFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the display name.
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -109,7 +109,7 @@ public final class SimFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the ID.
-     * 
+     *
      * @param id The ID to set
      */
     public void setId(final String id) {
@@ -118,7 +118,7 @@ public final class SimFileStorageAccount implements FileStorageAccount {
 
     /**
      * Sets the file storage service.
-     * 
+     *
      * @param fsService The file storage service to set
      */
     public void setFileStorageService(final FileStorageService fsService) {

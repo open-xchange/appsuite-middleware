@@ -55,7 +55,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link HeaderCacheServiceRegistry} - A registry for services needed by header cache bundle
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HeaderCacheServiceRegistry {
@@ -64,7 +64,7 @@ public final class HeaderCacheServiceRegistry {
 
     /**
      * Gets the service registry
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {
@@ -73,7 +73,7 @@ public final class HeaderCacheServiceRegistry {
 
     /**
      * Gets the service from registry defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
@@ -84,7 +84,7 @@ public final class HeaderCacheServiceRegistry {
 
     /**
      * Gets the service from registry defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>

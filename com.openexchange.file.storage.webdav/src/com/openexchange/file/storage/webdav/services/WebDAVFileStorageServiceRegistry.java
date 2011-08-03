@@ -53,7 +53,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link WebDAVFileStorageServiceRegistry} - Container class for the service registry of <i>com.openexchange.file.storage.webdav</i> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WebDAVFileStorageServiceRegistry {
@@ -62,7 +62,7 @@ public final class WebDAVFileStorageServiceRegistry {
 
     /**
      * Gets the service registry of <i>com.openexchange.file.storage.webdav</i> bundle.
-     * 
+     *
      * @return The service registry
      */
     public static ServiceRegistry getServiceRegistry() {

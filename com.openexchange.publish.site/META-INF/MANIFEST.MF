@@ -4,7 +4,7 @@ Bundle-Name: Publishing Sites Plug-in
 Bundle-SymbolicName: com.openexchange.publish.site
 Bundle-Version: 6.22.0.0
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.context,
  com.openexchange.datatypes.genericonf,

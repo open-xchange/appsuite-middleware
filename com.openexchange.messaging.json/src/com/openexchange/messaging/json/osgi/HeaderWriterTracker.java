@@ -69,20 +69,20 @@ public class HeaderWriterTracker extends ServiceTracker {
         super(context, MessagingHeaderWriter.class.getName(), null);
         this.writer = writer;
     }
-    
+
     @Override
     public Object addingService(final ServiceReference reference) {
         final MessagingHeaderWriter writer = (MessagingHeaderWriter) super.addingService(reference);
         this.writer.addHeaderWriter(writer);
         return writer;
     }
-    
+
     @Override
     public void removedService(final ServiceReference reference, final Object service) {
         writer.removeHeaderWriter((MessagingHeaderWriter) service);
         super.removedService(reference, service);
     }
-    
-    
+
+
 
 }

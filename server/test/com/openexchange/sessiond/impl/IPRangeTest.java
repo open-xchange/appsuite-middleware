@@ -60,16 +60,16 @@ import org.junit.Test;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IPRangeTest {
-    
+
     @Test
     public void simpleIP() {
         IPRange singleIP = new IPRange(new int[]{192,168,32,99});
-        
+
         assertTrue(singleIP.contains("192.168.32.99"));
         assertFalse(singleIP.contains("192.168.32.98"));
-        
+
     }
-    
+
     @Test
     public void range() {
         IPRange range = new IPRange(new int[]{192,168,32,100}, new int[]{192,168,32,200});
@@ -77,56 +77,56 @@ public class IPRangeTest {
         assertFalse(range.contains("192.168.32.99"));
         assertFalse(range.contains("191.168.32.150"));
     }
-    
+
     @Test
     public void rangeWithCarryOver() {
         IPRange range = new IPRange(new int[]{192,168,32,99}, new int[]{192,168,33,20});
-        
+
         assertTrue(range.contains("192.168.32.100"));
         assertTrue(range.contains("192.168.33.19"));
         assertFalse(range.contains("192.168.34.0"));
-        
+
     }
-    
+
     @Test
     public void parseSimple() {
         IPRange range = IPRange.parseRange("192.168.32.99");
-        
+
         int[] start = range.getStart();
-        
+
         assertEquals(192, start[0]);
         assertEquals(168, start[1]);
         assertEquals(32, start[2]);
         assertEquals(99, start[3]);
-        
+
         int[] end = range.getEnd();
-        
+
         assertEquals(192, end[0]);
         assertEquals(168, end[1]);
         assertEquals(32, end[2]);
         assertEquals(99, end[3]);
-        
-        
+
+
     }
-    
+
     @Test
     public void parseRange() {
         IPRange range = IPRange.parseRange("192.168.32.100  -  192.168.32.200");
-        
+
         int[] start = range.getStart();
-        
+
         assertEquals(192, start[0]);
         assertEquals(168, start[1]);
         assertEquals(32, start[2]);
         assertEquals(100, start[3]);
-        
+
         int[] end = range.getEnd();
-        
+
         assertEquals(192, end[0]);
         assertEquals(168, end[1]);
         assertEquals(32, end[2]);
         assertEquals(200, end[3]);
-        
+
     }
-    
+
 }

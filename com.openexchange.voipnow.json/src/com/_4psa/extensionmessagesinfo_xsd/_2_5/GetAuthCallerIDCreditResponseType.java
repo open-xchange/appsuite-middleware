@@ -13,11 +13,11 @@ import com._4psa.extensiondata_xsd._2_5.RechargeInfo;
 
 /**
  * Get authorized Caller ID recharges history: response type
- * 
+ *
  * <p>Java class for GetAuthCallerIDCreditResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetAuthCallerIDCreditResponseType">
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com._4psa.extensiondata_xsd._2_5.RechargeInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetAuthCallerIDCreditResponseType", propOrder = {
@@ -46,11 +46,11 @@ public class GetAuthCallerIDCreditResponseType {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -58,11 +58,11 @@ public class GetAuthCallerIDCreditResponseType {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -70,25 +70,25 @@ public class GetAuthCallerIDCreditResponseType {
 
     /**
      * Gets the value of the recharge property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the recharge property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRecharge().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link RechargeInfo }
-     * 
-     * 
+     *
+     *
      */
     public List<RechargeInfo> getRecharge() {
         if (recharge == null) {

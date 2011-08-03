@@ -63,7 +63,7 @@ import com.openexchange.smtp.SMTPProvider;
 
 /**
  * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPActivator extends DeferredActivator {

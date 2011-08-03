@@ -55,7 +55,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Defines a class able to export a certain type of OX folder as a certain format
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  * @see com.openexchange.groupware.Types
  */
@@ -72,7 +72,7 @@ public interface Exporter {
 	public abstract boolean canExport(ServerSession sessObj, Format format, String folder, Map<String, String[]> optionalParams) throws OXException;
 
 	/**
-	 * 
+	 *
 	 * @param sessObj: The session object to be able to check permissions.
 	 * @param format: Format the returned InputStream should be in.
 	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.
@@ -85,7 +85,7 @@ public interface Exporter {
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws OXException;
 
 	/**
-	 * 
+	 *
 	 * @param sessObj: The session object to be able to check permissions.
 	 * @param format: Format the returned InputStream should be in.
 	 * @param folder: Folder that should be exported. Note: A folder can only contain data of one type.

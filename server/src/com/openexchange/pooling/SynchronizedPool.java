@@ -195,6 +195,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void back(final T pooled) throws PoolingException {
         if (null == pooled) {
             throw new NullPointerException(
@@ -258,6 +259,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public T get() throws PoolingException {
         final long startTime = System.currentTimeMillis();
         while (running) {
@@ -378,6 +380,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void destroy() {
         running = false;
         cleaner.cancel();
@@ -386,6 +389,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isEmpty() {
         synchronized (data) {
             return data.isIdleEmpty() && data.isActiveEmpty();
@@ -395,6 +399,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getNumIdle() {
         synchronized (data) {
             return data.numIdle();
@@ -404,6 +409,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getNumActive() {
         synchronized (data) {
             return data.numActive();
@@ -413,6 +419,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getPoolSize() {
         synchronized (data) {
             return data.numActive() + data.numIdle();
@@ -429,6 +436,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getMaxUseTime() {
         return maxUseTime;
     }
@@ -436,6 +444,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public long getMinUseTime() {
         return minUseTime;
     }
@@ -443,6 +452,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getNumBroken() {
         return numBroken;
     }
@@ -450,6 +460,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void resetMaxUseTime() {
         maxUseTime = 0;
     }
@@ -457,6 +468,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void resetMinUseTime() {
         minUseTime = Long.MAX_VALUE;
     }
@@ -522,6 +534,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void run() {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting cleaner run.");
@@ -546,7 +559,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     idleSize = data.numIdle();
                     lifecycle.destroy(metaData.getPooled());
                     continue;
-                } 
+                }
                 index++;
             }
             ensureMinIdle();

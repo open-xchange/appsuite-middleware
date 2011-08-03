@@ -51,7 +51,7 @@ package com.openexchange.user.json.field;
 
 /**
  * {@link DistributionListField} - Distribution list fields.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum DistributionListField {
@@ -76,7 +76,7 @@ public enum DistributionListField {
 
     /**
      * Gets the column or <code>-1</code> if none available.
-     * 
+     *
      * @return The column or <code>-1</code> if none available
      */
     public int getColumn() {
@@ -85,7 +85,7 @@ public enum DistributionListField {
 
     /**
      * Gets the name or <code>null</code> if none available.
-     * 
+     *
      * @return The name or <code>null</code> if none available
      */
     public String getName() {

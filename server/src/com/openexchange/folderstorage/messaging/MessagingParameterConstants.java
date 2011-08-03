@@ -51,7 +51,7 @@ package com.openexchange.folderstorage.messaging;
 
 /**
  * {@link MessagingParameterConstants} - Constants for parameter names.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessagingParameterConstants {

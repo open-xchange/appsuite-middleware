@@ -10,11 +10,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Extension list data
- * 
+ *
  * <p>Java class for ExtensionList complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ExtensionList">
  *   &lt;complexContent>
@@ -48,8 +48,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ExtensionList", propOrder = {
@@ -79,11 +79,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -91,11 +91,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -103,11 +103,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the extensionID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtensionID() {
         return extensionID;
@@ -115,11 +115,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the extensionID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtensionID(BigInteger value) {
         this.extensionID = value;
@@ -127,11 +127,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -139,11 +139,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -151,11 +151,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the login property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -163,11 +163,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the login property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -175,11 +175,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the email property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getEmail() {
         return email;
@@ -187,11 +187,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the email property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setEmail(String value) {
         this.email = value;
@@ -199,11 +199,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the extensionType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getExtensionType() {
         return extensionType;
@@ -211,11 +211,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the extensionType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setExtensionType(String value) {
         this.extensionType = value;
@@ -223,11 +223,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the extensionNo property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getExtensionNo() {
         return extensionNo;
@@ -235,11 +235,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the extensionNo property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setExtensionNo(BigInteger value) {
         this.extensionNo = value;
@@ -247,11 +247,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -259,11 +259,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;
@@ -271,11 +271,11 @@ public class ExtensionList {
 
     /**
      * Gets the value of the scope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScope() {
         return scope;
@@ -283,11 +283,11 @@ public class ExtensionList {
 
     /**
      * Sets the value of the scope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScope(String value) {
         this.scope = value;

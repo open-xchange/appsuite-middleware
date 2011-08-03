@@ -54,7 +54,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link TwitterOAuthServiceRegistry} - Container class for the service registry of <i>com.openexchange.oauth.facebook</i> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterOAuthServiceRegistry {

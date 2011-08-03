@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXInfostoreRequest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AJAXInfostoreRequest implements InfostoreRequest {
@@ -105,15 +105,15 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private static final FileMetadataParser parser = FileMetadataParser.getInstance();
 
     private static final String JSON = "json";
-    
+
     private File file;
-    
+
     private List<File.Field> fields;
 
     private IDBasedFileAccess files;
 
     private List<String> folders = null;
-    
+
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         this.data = requestData;
         this.session = session;
@@ -137,13 +137,13 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         return this;
     }
-    
+
     public boolean has(final String paramName) {
         return data.getParameter(paramName) != null;
     }
-    
+
     public InfostoreRequest requireFileMetadata() throws OXException {
-        return requireBody(); 
+        return requireBody();
     }
 
     public String getFolderId() throws OXException {
@@ -216,7 +216,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         return files = Services.getFileAccessFactory().createAccess(session);
     }
-    
+
     public AttachmentBase getAttachmentBase() {
         return Services.getAttachmentBase();
     }
@@ -285,11 +285,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
     }
-    
+
     public String getFolderAt(final int index) {
         return folders.get(index);
     }
-    
+
     public List<String> getFolders() {
         return folders;
     }
@@ -352,20 +352,20 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return "";
         }
         final JSONObject queryObject = (JSONObject) data2;
-        
+
         try {
             return queryObject.getString("pattern");
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSONError.create( x.getMessage());
         }
     }
-    
+
     protected void parseFile() throws OXException {
         if(file != null) {
             return;
         }
         requireFileMetadata();
-        
+
         JSONObject object = (JSONObject) data.getData();
         if(object == null) {
             try {
@@ -378,53 +378,53 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         UploadFile uploadFile = null;
         if(data.hasUploads()) {
             uploadFile = data.getFiles().get(0);
-        }    
-        
+        }
+
         if(data.getUploadEvent() != null && data.getUploadEvent().getUploadFileByFieldName("file") != null) {
             uploadFile = data.getUploadEvent().getUploadFileByFieldName("file");
         }
-        
-        file = parser.parse(object); 
+
+        file = parser.parse(object);
         fields = parser.getFields(object);
         if(uploadFile != null) {
             if(!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
                 fields.add(File.Field.FILENAME);
             }
-            
+
             if(!fields.contains(File.Field.FILE_MIMETYPE)) {
                 file.setFileMIMEType(uploadFile.getContentType());
                 fields.add(File.Field.FILE_MIMETYPE);
             }
             // TODO: Guess Content-Type
         }
-        
+
         final String fileDisplay = data.getParameter("filedisplay");
         if(fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
             file.setFileName(fileDisplay);
             fields.add(File.Field.FILENAME);
         }
-        
+
         if(has("id") && ! fields.contains(File.Field.ID)) {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
     }
-    
+
     public File getFile() throws OXException {
         parseFile();
         return file;
     }
-    
+
     public List<Field> getSentColumns() throws OXException {
         parseFile();
         return fields;
     }
-    
+
     public boolean hasUploads() throws OXException {
         return data.hasUploads();
     }
-    
+
     public InputStream getUploadedFileData() throws OXException {
         if(data.hasUploads()) {
             try {
@@ -465,6 +465,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
-    
+
 
 }

@@ -65,7 +65,7 @@ import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 
 /**
  * {@link AddressHeaderWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressHeaderWriterTest extends TestCase {

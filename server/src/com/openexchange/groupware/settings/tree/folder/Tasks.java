@@ -68,7 +68,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 public final class Tasks implements PreferencesItemService {
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
     public Tasks() {
         super();
@@ -77,6 +77,7 @@ public final class Tasks implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String[] getPath() {
         return new String[] { "folder", "tasks" };
     }
@@ -84,11 +85,14 @@ public final class Tasks implements PreferencesItemService {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasTask();
             }
+            @Override
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {

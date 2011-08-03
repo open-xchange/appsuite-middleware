@@ -58,140 +58,237 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-
 /**
- * A {@link HousekeepingActivator} helps with housekeeping tasks like remembering service trackers or service registrations
- * and cleaning them up later.
- *
+ * A {@link HousekeepingActivator} helps with housekeeping tasks like remembering service trackers or service registrations and cleaning
+ * them up later.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class HousekeepingActivator extends DeferredActivator {
 
-    private List<ServiceTracker> serviceTrackers = new LinkedList<ServiceTracker>();
-    private List<ServiceRegistration> serviceRegistrations = new LinkedList<ServiceRegistration>();
+    private final List<ServiceTracker<?, ?>> serviceTrackers;
+
+    private final List<ServiceRegistration<?>> serviceRegistrations;
+
+    /**
+     * Initializes a new {@link HousekeepingActivator}.
+     */
+    protected HousekeepingActivator() {
+        super();
+        serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
+        serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
+    }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         // Override if needed
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         // Override if needed
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         cleanUp();
     }
 
-    protected <T> void registerService(Class<T> klass, T service, Dictionary properties) {
-        serviceRegistrations.add(context.registerService(klass.getName(), service, properties));
+    /**
+     * Registers specified service with the specified properties under the specified class.
+     * 
+     * @param clazz The service's class
+     * @param service The service reference
+     * @param properties The service's properties
+     */
+    protected <S> void registerService(final Class<S> clazz, final S service, final Dictionary<String, ?> properties) {
+        serviceRegistrations.add(context.registerService(clazz.getName(), service, properties));
     }
-    
-    protected <T> void registerService(Class<T> klass, T service) {
-        registerService(klass, service, null);
+
+    /**
+     * Registers specified service under the specified class.
+     * 
+     * @param clazz The service's class
+     * @param service The service reference
+     */
+    protected <S> void registerService(final Class<S> clazz, final S service) {
+        registerService(clazz, service, null);
     }
-    
-    protected void rememberTracker(ServiceTracker tracker) {
-       serviceTrackers.add(tracker);
+
+    /**
+     * Adds specified service tracker to this activator. Thus it is automatically closed and removed by {@link #cleanUp()}.
+     * 
+     * @param tracker The service tracker
+     */
+    protected void rememberTracker(final ServiceTracker<?, ?> tracker) {
+        serviceTrackers.add(tracker);
     }
-    
-    protected void forgetTracker(ServiceTracker tracker) {
+
+    /**
+     * Removes specified service tracker from this activator.
+     * 
+     * @param tracker The service tracker
+     */
+    protected void forgetTracker(final ServiceTracker<?, ?> tracker) {
         serviceTrackers.remove(tracker);
     }
-    
-    protected ServiceTracker track(Class<?> klass, ServiceTrackerCustomizer customizer) {
-        ServiceTracker tracker = new ServiceTracker(context, klass.getName(), customizer);
-        rememberTracker(tracker);
-        return tracker;
-    }
-    
-    protected ServiceTracker track(Filter filter, ServiceTrackerCustomizer customizer) {
-        ServiceTracker tracker = new ServiceTracker(context, filter, customizer);
-        rememberTracker(tracker);
-        return tracker;
-    }
-    
-    protected ServiceTracker track(Class<?> klass) {
-        return track(klass, (ServiceTrackerCustomizer) null);
-    }
-    
-    protected ServiceTracker track(Filter filter) {
-        return track(filter, (ServiceTrackerCustomizer) null);
-    }
-    
-    protected <T> ServiceTracker track(Class<?> klass, final SimpleRegistryListener<T> listener) {
-        return track(klass, new ServiceTrackerCustomizer() {
 
-            public Object addingService(ServiceReference arg0) {
-                Object service = context.getService(arg0);
-                listener.added(arg0, (T) service);
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
+     * 
+     * @param clazz The class of the tracked service
+     * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final ServiceTrackerCustomizer<S, S> customizer) {
+        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz.getName(), customizer);
+        rememberTracker(tracker);
+        return tracker;
+    }
+
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance parameterized with given customizer.
+     * 
+     * @param filter The tracker's filter
+     * @param customizer The customizer applied to newly created {@link ServiceTracker} instance
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Filter filter, final ServiceTrackerCustomizer<S, S> customizer) {
+        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, filter, customizer);
+        rememberTracker(tracker);
+        return tracker;
+    }
+
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance for specified service's class.
+     * 
+     * @param clazz The service's class
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz) {
+        return track(clazz, (ServiceTrackerCustomizer<S, S>) null);
+    }
+
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance for specified filter.
+     * 
+     * @param filter The filter to apply
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Filter filter) {
+        return track(filter, (ServiceTrackerCustomizer<S, S>) null);
+    }
+
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
+     * 
+     * @param clazz The service's class
+     * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Class<? extends S> clazz, final SimpleRegistryListener<S> listener) {
+        return track(clazz, new ServiceTrackerCustomizer<S, S>() {
+
+            @Override
+            public S addingService(final ServiceReference<S> arg0) {
+                final S service = context.getService(arg0);
+                listener.added(arg0, service);
                 return service;
             }
 
-            public void modifiedService(ServiceReference arg0, Object arg1) {
-               // Don't care
-                
+            @Override
+            public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
+                // Don't care
             }
 
-            public void removedService(ServiceReference arg0, Object arg1) {
-                listener.removed(arg0, (T) arg1);
+            @Override
+            public void removedService(final ServiceReference<S> arg0, final S arg1) {
+                listener.removed(arg0, arg1);
                 context.ungetService(arg0);
             }
-            
+
         });
     }
-    
-    protected <T> ServiceTracker track(Filter filter, final SimpleRegistryListener<T> listener) {
-        return track(filter, new ServiceTrackerCustomizer() {
 
-            public Object addingService(ServiceReference arg0) {
-                Object service = context.getService(arg0);
-                listener.added(arg0, (T) service);
+    /**
+     * Creates and starts a new {@link ServiceTracker} instance with given listener applied.
+     * 
+     * @param filter The service filter
+     * @param listener The service's listener triggered on {@link ServiceTracker#addingService(ServiceReference)} and so on
+     * @return The newly created {@link ServiceTracker} instance
+     */
+    protected <S> ServiceTracker<S, S> track(final Filter filter, final SimpleRegistryListener<S> listener) {
+        return track(filter, new ServiceTrackerCustomizer<S, S>() {
+
+            @Override
+            public S addingService(final ServiceReference<S> arg0) {
+                final S service = context.getService(arg0);
+                listener.added(arg0, service);
                 return service;
             }
 
-            public void modifiedService(ServiceReference arg0, Object arg1) {
+            @Override
+            public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
                 // TODO Auto-generated method stub
-                
+
             }
 
-            public void removedService(ServiceReference arg0, Object arg1) {
-                listener.removed(arg0, (T) arg1);
+            @Override
+            public void removedService(final ServiceReference<S> arg0, final S arg1) {
+                listener.removed(arg0, arg1);
                 context.ungetService(arg0);
             }
-            
+
         });
     }
-    
+
+    /**
+     * Opens all trackers.
+     */
     protected void openTrackers() {
-        for (ServiceTracker tracker : new LinkedList<ServiceTracker>(serviceTrackers)) {
+        for (final ServiceTracker<?, ?> tracker : new LinkedList<ServiceTracker<?, ?>>(serviceTrackers)) {
             tracker.open();
         }
     }
-    
+
+    /**
+     * Closes all trackers.
+     */
     protected void closeTrackers() {
-        for (ServiceTracker tracker : new LinkedList<ServiceTracker>(serviceTrackers)) {
+        for (final ServiceTracker<?, ?> tracker : new LinkedList<ServiceTracker<?, ?>>(serviceTrackers)) {
             tracker.close();
         }
     }
-    
+
+    /**
+     * Drops all trackers kept by this activator.
+     */
     protected void clearTrackers() {
         serviceTrackers.clear();
     }
-    
+
+    /**
+     * Unregisters all services.
+     */
     protected void unregisterServices() {
-        for (ServiceRegistration reg : serviceRegistrations) {
+        for (final ServiceRegistration<?> reg : serviceRegistrations) {
             reg.unregister();
         }
         serviceRegistrations.clear();
     }
-    
+
+    /**
+     * Performs whole clean-up:
+     * <ul>
+     * <li>Close all trackers</li>
+     * <li>Clear all trackers</li>
+     * <li>Unregister all services</li>
+     * </ul>
+     */
     protected void cleanUp() {
         closeTrackers();
         clearTrackers();
         unregisterServices();
     }
-    
+
 }

@@ -73,7 +73,7 @@ import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link DigestUtility}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DigestUtility {
@@ -82,7 +82,7 @@ public final class DigestUtility {
 
     /**
      * Gets the {@link DigestUtility} instance.
-     * 
+     *
      * @return The instance
      */
     public static DigestUtility getInstance() {
@@ -115,7 +115,7 @@ public final class DigestUtility {
 
     /**
      * Generates the server digest from given HTTP request (containing <code>"Authorization"</code> header) and given password.
-     * 
+     *
      * @param req The HTTP request
      * @param password The password
      * @return The generated digest
@@ -162,7 +162,7 @@ public final class DigestUtility {
 
     /**
      * Generates the HEX string from specified digest.
-     * 
+     *
      * @param digest The digest
      * @return The HEX string
      */
@@ -177,7 +177,7 @@ public final class DigestUtility {
 
     /**
      * Generates the NOnce from given HTTP request.
-     * 
+     *
      * @param req The HTTP request
      * @return The NOnce
      */
@@ -215,7 +215,7 @@ public final class DigestUtility {
 
     /**
      * Parses specified <code>"Authorization"</code> header value.
-     * 
+     *
      * @param authorization The <code>"Authorization"</code> header value
      * @return The parsed <code>"Authorization"</code> header value
      */
@@ -285,7 +285,7 @@ public final class DigestUtility {
 
     /**
      * Gets the clear-text password by specified user name.
-     * 
+     *
      * @param userName The user name
      * @return The clear-text password or <code>null</code> if not available
      * @throws OXException If clear-text password cannot be returned

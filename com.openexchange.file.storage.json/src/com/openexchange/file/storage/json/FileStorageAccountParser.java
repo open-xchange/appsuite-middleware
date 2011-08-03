@@ -61,7 +61,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 /**
  * {@link FileStorageAccountParser} - Parses the JSON representation of a messaging account according to its messaging services dynamic
  * form.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileStorageAccountParser {

@@ -67,7 +67,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link FromTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FromTerm extends SearchTerm<String> {
@@ -125,7 +125,7 @@ public final class FromTerm extends SearchTerm<String> {
             final InternetAddress[] addresses = MIMEMessageUtility.parseAddressList(MIMEMessageUtility.decodeMultiEncodedHeader(headers[0]), false, false);
             if (containsWildcard()) {
                 return toRegex(addr).matcher(getAllAddresses(addresses)).find();
-            }          
+            }
             return (getAllAddresses(addresses).toLowerCase(Locale.ENGLISH).indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
         } catch (final MessagingException e) {
             com.openexchange.log.Log.valueOf(LogFactory.getLog(FromTerm.class)).warn("Error during search.", e);

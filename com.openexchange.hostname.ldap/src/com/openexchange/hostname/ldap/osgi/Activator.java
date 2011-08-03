@@ -118,14 +118,14 @@ public class Activator extends DeferredActivator {
             }
 
             checkConfiguration();
-            
+
             activateCaching();
-            
+
             // register hostname service to modify hostnames in directlinks, this will also init the cache class
             hostnameservice = new LDAPHostnameService();
-            
+
             LDAPHostnameCache.getInstance().outputSettings();
-            
+
             hostname_registration = context.registerService(HostnameService.class.getName(), hostnameservice, null);
 
         } catch (final Throwable t) {

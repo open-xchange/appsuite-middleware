@@ -57,7 +57,7 @@ import javax.mail.internet.MimeUtility;
 
 /**
  * This class contains some helpers for encoding. It only contains simple methods that encode some things.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Helper {
@@ -72,7 +72,7 @@ public class Helper {
 
     /**
      * Escapes every <code>'"'</code> and <code>'\'</code> character in given string with a heading <code>'\'</code> character.
-     * 
+     *
      * @param value The value to escape
      * @return The escaped value
      */
@@ -88,7 +88,7 @@ public class Helper {
      * <li>header attribute name: Content-Disposition</li>
      * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
      * </ul>
-     * 
+     *
      * @param orig filename containing non ascii characters
      * @param encoding Character encoding to be used.
      * @param internetExplorer set this true if the client is a Microsoft InternetExplorer
@@ -124,7 +124,7 @@ public class Helper {
      * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
      * </ul>
      * This method encodes especially for Internet Explorer.
-     * 
+     *
      * @param orig filename containing non ascii characters
      * @param charset Char set to be used.
      * @return the encoded filename that can be put directly into the filename of the content-disposition header
@@ -147,7 +147,7 @@ public class Helper {
      * <li>header attribute name: Content-Disposition</li>
      * <li>header attribute value: filename=&quot;<with this method encoded filename>&quot;</li>
      * </ul>
-     * 
+     *
      * @param orig filename containing non ascii characters
      * @param charset Char set to be used.
      * @return the encoded filename that can be put directly into the filename of the content-disposition header

@@ -60,12 +60,13 @@ import java.util.Comparator;
  */
 public class QueryStringPositionComparator implements Comparator<String> {
 
-    private String queryString;
+    private final String queryString;
 
     public QueryStringPositionComparator(String queryString) {
         this.queryString = queryString;
     }
 
+    @Override
     public int compare(String o1, String o2) {
         int p1 = queryString.indexOf(o1);
         int p2 = queryString.indexOf(o2);

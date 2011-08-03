@@ -70,11 +70,10 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURCE;
 
 /**
  * {@link SubscriptionExecutionServiceImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
@@ -92,7 +91,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         this.folderUpdaters = folderUpdaters;
         this.contextService = contexts;
     }
-    
+
     public int executeSubscription(String sourceId, ServerSession session, int subscriptionId) throws OXException {
         SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
         Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
@@ -119,16 +118,16 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     /**
      * @param subscription
      */
-    public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {        
+    public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {
         final FolderObject folder = getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
-//             
-        final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null); 
+//
+        final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
         for (final FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
                 if (moreThanOneSubscriptionOnThisFolder && updater.usesMultipleStrategy()) {return updater;}
                 if (!moreThanOneSubscriptionOnThisFolder && !updater.usesMultipleStrategy()) {return updater;}
-                
+
             }
         }
         // if there are 2 or more subscriptions on a folder but no multiple-variant Strategy is available use a single one
@@ -136,7 +135,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             if (updater.handles(folder)) {
                 return updater;
             }
-        }    
+        }
         return null;
     }
 
@@ -168,7 +167,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             subscription.setSession(session);
             if(!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription "+subscription.getDisplayName()+" because it is disabled");
-                
+
             } else {
             	final SubscriptionSource source = subscription.getSource();
             	if(source == null) {

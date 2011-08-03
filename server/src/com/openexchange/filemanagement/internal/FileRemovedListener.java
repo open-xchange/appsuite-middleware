@@ -53,14 +53,14 @@ import java.io.File;
 
 /**
  * {@link FileRemovedListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 interface FileRemovedListener {
 
     /**
      * Handles the remove event for specified file
-     * 
+     *
      * @param file The removed file
      */
     void removePerformed(File file);

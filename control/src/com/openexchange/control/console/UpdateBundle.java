@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link UpdateBundle} - The console handler for <code>&quot;updatebundle&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class UpdateBundle extends AbstractConsoleHandler {
@@ -68,7 +68,7 @@ public final class UpdateBundle extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link UpdateBundle} with specified arguments and performs {@link #update(String, boolean) update}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public UpdateBundle(final String args[]) {

@@ -63,12 +63,12 @@ import com.openexchange.publish.PublicationStorage;
  *
  */
 public class EntityCleanUp {
-    private PublicationStorage storage;
+    private final PublicationStorage storage;
 
     public EntityCleanUp(PublicationStorage storage) {
         this.storage = storage;
     }
-    
+
     public void cleanUp(Context ctx, String module, String entityId) throws OXException {
         List<Publication> publications = storage.getPublications(ctx, module, entityId);
         for (Publication publication : publications) {

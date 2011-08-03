@@ -61,7 +61,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link Entity2ACL} - Maps numeric entity IDs to corresponding IMAP login name (used in ACLs) and vice versa
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class Entity2ACL {
@@ -80,7 +80,7 @@ public abstract class Entity2ACL {
 
     /**
      * Creates a new instance implementing the {@link Entity2ACL} interface.
-     * 
+     *
      * @param imapConfig The user's IMAP config
      * @return an instance implementing the {@link Entity2ACL} interface.
      * @throws OXException if the instance can't be created.
@@ -106,7 +106,7 @@ public abstract class Entity2ACL {
 
     /**
      * Creates a new instance implementing the {@link Entity2ACL} interface.
-     * 
+     *
      * @param imapStore The IMAP store
      * @param imapConfig The user's IMAP configuration
      * @return an instance implementing the {@link Entity2ACL} interface.
@@ -141,7 +141,7 @@ public abstract class Entity2ACL {
 
     /**
      * Only invoked if auto-detection is turned off
-     * 
+     *
      * @param singleton The singleton instance of {@link Entity2ACL}
      */
     protected final static void setInstance(final Entity2ACL singleton) {
@@ -162,7 +162,7 @@ public abstract class Entity2ACL {
 
     /**
      * Returns a newly created {@link UserGroupID} instance reflecting a found user.
-     * 
+     *
      * @param userId The user ID
      * @return A newly created {@link UserGroupID} instance reflecting a found user.
      */
@@ -175,7 +175,7 @@ public abstract class Entity2ACL {
 
     /**
      * Determines the entity name of the user/group whose ID matches given <code>entity</code> that is used in IMAP server's ACL list.
-     * 
+     *
      * @param entity The user/group ID
      * @param ctx The context
      * @param args The arguments container
@@ -186,7 +186,7 @@ public abstract class Entity2ACL {
 
     /**
      * Determines the user/group ID whose either ACL entity name or user name matches given <code>pattern</code>.
-     * 
+     *
      * @param pattern The pattern for either IMAP login or user name
      * @param ctx The context
      * @param args The arguments container

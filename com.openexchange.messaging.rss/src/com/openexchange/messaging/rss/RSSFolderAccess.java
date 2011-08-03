@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link RSSFolderAccess}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RSSFolderAccess extends RSSCommon implements MessagingFolderAccess {

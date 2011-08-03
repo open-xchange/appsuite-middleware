@@ -24,4 +24,4 @@ Bundle-Activator: com.openexchange.spellcheck.osgi.SpellCheckActivator
 Bundle-ClassPath: .,
  lib/jazzy-0.5.2.jar
 Export-Package: com.openexchange.spellcheck
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

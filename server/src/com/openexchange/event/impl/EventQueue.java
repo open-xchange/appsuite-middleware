@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link EventQueue} - The event queue.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -106,6 +106,7 @@ public final class EventQueue {
             this.closing = shuttingDown;
         }
 
+        @Override
         public void run() {
             try {
                 if (useFirst.compareAndSet(true, false)) {
@@ -216,7 +217,7 @@ public final class EventQueue {
 
     /**
      * Initializes the {@link EventQueue}.
-     * 
+     *
      * @param config The configuration with which event queue is going to be configured
      */
     static void init(final EventConfig config) {

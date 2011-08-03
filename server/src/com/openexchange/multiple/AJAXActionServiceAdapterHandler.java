@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Gleamed from the UserMultipleHandler
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -82,10 +82,12 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         this.module = module;
     }
 
+    @Override
     public void close() {
         result = null;
     }
 
+    @Override
     public Date getTimestamp() {
         if (null == result) {
             return null;
@@ -94,6 +96,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
+    @Override
     public Collection<OXException> getWarnings() {
         if (null == result) {
             return Collections.<OXException> emptySet();
@@ -101,6 +104,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         return result.getWarnings();
     }
 
+    @Override
     public Object performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
         final AJAXActionService actionService = factory.createActionService(action);
         if (null == actionService) {
@@ -122,10 +126,12 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         return result.getResultObject();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return this;
     }
 
+    @Override
     public String getSupportedModule() {
         return module;
     }

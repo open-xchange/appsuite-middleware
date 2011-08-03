@@ -56,7 +56,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * {@link FileStorageAccountReloader}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
@@ -71,7 +71,7 @@ public final class FileStorageAccountReloader extends Refresher<FileStorageAccou
 
     /**
      * Initializes a new {@link FileStorageAccountReloader}.
-     * 
+     *
      * @throws OXException If initial load of the object fails.
      */
     public FileStorageAccountReloader(final FileStorageFactory<FileStorageAccount> factory, final String regionName) throws OXException {

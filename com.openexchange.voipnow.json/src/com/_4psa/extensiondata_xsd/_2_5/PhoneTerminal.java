@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Phone terminal extension data
- * 
+ *
  * <p>Java class for PhoneTerminal complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="PhoneTerminal">
  *   &lt;complexContent>
@@ -43,8 +43,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PhoneTerminal", propOrder = {
@@ -85,11 +85,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the mohFolder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public JAXBElement<String> getMohFolder() {
         return mohFolder;
@@ -97,23 +97,23 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the mohFolder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public void setMohFolder(JAXBElement<String> value) {
-        this.mohFolder = ((JAXBElement<String> ) value);
+        this.mohFolder = value;
     }
 
     /**
      * Gets the value of the noAnswer property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getNoAnswer() {
         return noAnswer;
@@ -121,11 +121,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the noAnswer property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setNoAnswer(BigInteger value) {
         this.noAnswer = value;
@@ -133,11 +133,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the parkTimeout property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getParkTimeout() {
         return parkTimeout;
@@ -145,11 +145,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the parkTimeout property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setParkTimeout(BigInteger value) {
         this.parkTimeout = value;
@@ -157,11 +157,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the im property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isIM() {
         return im;
@@ -169,11 +169,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the im property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setIM(Boolean value) {
         this.im = value;
@@ -181,11 +181,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the callWaiting property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isCallWaiting() {
         return callWaiting;
@@ -193,11 +193,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the callWaiting property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setCallWaiting(Boolean value) {
         this.callWaiting = value;
@@ -205,11 +205,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the dnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDnd() {
         return dnd;
@@ -217,11 +217,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the dnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDnd(Boolean value) {
         this.dnd = value;
@@ -229,11 +229,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the dndSndActive property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isDndSndActive() {
         return dndSndActive;
@@ -241,11 +241,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the dndSndActive property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setDndSndActive(Boolean value) {
         this.dndSndActive = value;
@@ -253,11 +253,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the dndSnd property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDndSnd() {
         return dndSnd;
@@ -265,11 +265,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the dndSnd property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDndSnd(String value) {
         this.dndSnd = value;
@@ -277,11 +277,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the phoneAccess property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isPhoneAccess() {
         return phoneAccess;
@@ -289,11 +289,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the phoneAccess property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setPhoneAccess(Boolean value) {
         this.phoneAccess = value;
@@ -301,11 +301,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the block property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isBlock() {
         return block;
@@ -313,11 +313,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the block property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setBlock(Boolean value) {
         this.block = value;
@@ -325,11 +325,11 @@ public class PhoneTerminal
 
     /**
      * Gets the value of the phoneAccessPassword property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPhoneAccessPassword() {
         return phoneAccessPassword;
@@ -337,11 +337,11 @@ public class PhoneTerminal
 
     /**
      * Sets the value of the phoneAccessPassword property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPhoneAccessPassword(String value) {
         this.phoneAccessPassword = value;

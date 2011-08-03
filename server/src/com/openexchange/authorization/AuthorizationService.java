@@ -57,7 +57,7 @@ import com.openexchange.groupware.ldap.User;
  *
  */
 public interface AuthorizationService {
-    
+
     public void authorizeUser(final Context ctx, final User user) throws OXException;
-    
+
 }

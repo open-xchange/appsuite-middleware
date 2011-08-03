@@ -56,7 +56,7 @@ package com.openexchange.http.deferrer;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface DeferringURLService {
-    
+
     public String getDeferredURL(String url);
-    
+
 }

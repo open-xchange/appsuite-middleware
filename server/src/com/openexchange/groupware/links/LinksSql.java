@@ -64,14 +64,14 @@ public interface LinksSql {
 
 
 	public String iFperformLinkStorage(LinkObject l, int cid);
-	
+
 	public String iFperformLinkStorageInsertString();
-	
+
 	public String iFgetLinkFromObject(int first_id, int first_type, int second_id, int second_type, int cid);
-	
+
 	/**
 	 * Retrieves all available links by linked object's ID and its folder
-	 * 
+	 *
 	 * @param id The linked object's ID
 	 * @param type The linked object's type
 	 * @param folder The linked object's folder
@@ -82,7 +82,7 @@ public interface LinksSql {
 
 	/**
 	 * Retrieves all available links by linked object's ID only
-	 * 
+	 *
 	 * @param id The linked object's ID
 	 * @param type The linked object's type
 	 * @param cid The context ID
@@ -91,9 +91,9 @@ public interface LinksSql {
 	public String iFgetAllLinksByObjectID(int id, int type, int cid);
 
 	public void iFDeleteLinkFromObject(Statement del, boolean second, int id, int type, int folder, int loadid, int loadfolder, int loadtype, int cid) throws SQLException;
-		
+
 	public String iFdeleteAllObjectLinks();
 
 	public String iFdeleteAllFolderLinks();
-	
+
 }

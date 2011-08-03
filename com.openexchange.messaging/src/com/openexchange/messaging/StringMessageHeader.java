@@ -59,12 +59,12 @@ package com.openexchange.messaging;
 public class StringMessageHeader implements MessagingHeader {
 
     private final String name;
-    
+
     private final String value;
 
     /**
      * Initializes a new {@link StringMessageHeader}.
-     * 
+     *
      * @param name The name
      * @param value The value
      */
@@ -90,5 +90,5 @@ public class StringMessageHeader implements MessagingHeader {
     public String toString() {
         return new StringBuilder(32).append(name).append('=').append(value).toString();
     }
-    
+
 }

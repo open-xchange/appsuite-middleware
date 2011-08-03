@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link StorageParameters} - The storage parameters to perform a certain storage operation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface StorageParameters {
@@ -67,35 +67,35 @@ public interface StorageParameters {
     /**
      * Adds a warning to this storage parameters.<br>
      * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
-     * 
+     *
      * @param warning The warning to add
      */
     void addWarning(OXException warning);
 
     /**
      * Checks if this storage parameters contain warnings.
-     * 
+     *
      * @return <code>true</code> if this storage parameters contain warnings; otherwise <code>false</code>
      */
     boolean hasWarnings();
 
     /**
      * Gets the warnings of this storage parameters as an unmodifiable {@link Set set}.
-     * 
+     *
      * @return The warnings as an unmodifiable set
      */
     Set<OXException> getWarnings();
 
     /**
      * Gets the context.
-     * 
+     *
      * @return The context
      */
     Context getContext();
 
     /**
      * Convenience method to get the context identifier.
-     * 
+     *
      * @return The context identifier
      * @see #getContext()
      */
@@ -103,14 +103,14 @@ public interface StorageParameters {
 
     /**
      * Gets the user.
-     * 
+     *
      * @return The user
      */
     User getUser();
 
     /**
      * Convenience method to get the user identifier.
-     * 
+     *
      * @return The user identifier
      * @see #getUser()
      */
@@ -118,28 +118,28 @@ public interface StorageParameters {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     Session getSession();
 
     /**
      * Gets the optional decorator.
-     * 
+     *
      * @return The decorator or <code>null</code>
      */
     FolderServiceDecorator getDecorator();
 
     /**
      * Sets the decorator.
-     * 
+     *
      * @param decorator The decorator
      */
     void setDecorator(FolderServiceDecorator decorator);
 
     /**
      * Gets a <b>copy</b> of the requestor's last-modified time stamp.
-     * 
+     *
      * @return A <b>copy</b> of the requestor's last-modified time stamp or <code>null</code>
      */
     Date getTimeStamp();
@@ -148,14 +148,14 @@ public interface StorageParameters {
      * Sets the requestor's last-modified time stamp.
      * <p>
      * <b>Note</b>: Given time stamp is copied if not <code>null</code>.
-     * 
+     *
      * @param timeStamp The requestor's last-modified time stamp or <code>null</code> to remove
      */
     void setTimeStamp(Date timeStamp);
 
     /**
      * Gets the parameter bound to given name.
-     * 
+     *
      * @param folderType The folder type
      * @param name The parameter name
      * @return The parameter bound to given name
@@ -164,7 +164,7 @@ public interface StorageParameters {
 
     /**
      * Removes the parameter bound to given name.
-     * 
+     *
      * @param folderType The folder type
      * @param name The parameter name
      * @return The parameter previously bound to given name
@@ -176,7 +176,7 @@ public interface StorageParameters {
      * parameter.
      * <p>
      * A <code>null</code> value removes the parameter.
-     * 
+     *
      * @param folderType The folder type
      * @param name The parameter name
      * @param value The parameter value
@@ -187,7 +187,7 @@ public interface StorageParameters {
      * (Atomically) Puts given parameter only if the specified name is not already associated with a value.
      * <p>
      * A <code>null</code> value is not permitted.
-     * 
+     *
      * @param folderType The folder type
      * @param name The parameter name
      * @param value The parameter value
@@ -203,7 +203,7 @@ public interface StorageParameters {
 
     /**
      * Gets the trace of the thread that set the committed marker to this storage parameters.
-     * 
+     *
      * @return The trace
      */
     String getCommittedTrace();

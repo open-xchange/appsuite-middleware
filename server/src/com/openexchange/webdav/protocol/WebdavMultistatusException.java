@@ -78,9 +78,9 @@ public class WebdavMultistatusException extends WebdavProtocolException {
         ret.addCategory(category);
         ret.setPrefix(CODE.getPrefix());
         return ret;
-	    
+
 	}
-	
+
 	public static WebdavMultistatusException create(final WebdavPath url, final Collection<WebdavProtocolException> exceptions) {
         final Category category = CODE.getCategory();
         final WebdavMultistatusException ret;
@@ -99,7 +99,7 @@ public class WebdavMultistatusException extends WebdavProtocolException {
         ret.addCategory(category);
         ret.setPrefix(CODE.getPrefix());
         return ret;
-        
+
     }
 
 	private final WebdavProtocolException[] exceptions;
@@ -111,7 +111,7 @@ public class WebdavMultistatusException extends WebdavProtocolException {
         super(207, url, code, displayMessage, cause, displayArgs);
         this.exceptions = exceptions;
     }
-    
+
     /**
      * No direct instantiation.
      */

@@ -78,6 +78,7 @@ public class UpdateProcess implements Runnable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void run() {
         try {
             // Load schema

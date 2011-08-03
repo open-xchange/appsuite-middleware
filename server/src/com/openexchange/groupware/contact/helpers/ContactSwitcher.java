@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.Contact;
  * fields. Imagine you have some values you want to insert into a contact. You might call every single setter method. But maybe you are
  * lazy. Or you don't know the names, but have only a list of values. Then you should use an object whose class implements this interface.
  * Note: This class was generated automagically.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  * @see com.openexchange.groupware.container.Contact
  */
@@ -281,6 +281,6 @@ public interface ContactSwitcher {
     public Object defaultaddress(Object... objects) throws OXException;
 
     public Object numberofattachments(Object... objects) throws OXException;
-    
+
     public boolean _unknownfield(Contact contact, String fieldname, Object value, Object... additionalObjects) throws OXException;
 }

@@ -169,7 +169,7 @@ public class SubscriptionSourceMultipleHandler implements MultipleHandler {
         }
         return -1;
     }
-    
+
     protected SubscriptionSourceDiscoveryService getDiscovery(final ServerSession session) throws OXException {
         return discoverer.filter(session.getUserId(), session.getContextId());
     }

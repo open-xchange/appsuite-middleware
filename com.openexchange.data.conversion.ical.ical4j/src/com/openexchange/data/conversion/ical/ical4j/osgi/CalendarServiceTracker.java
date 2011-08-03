@@ -62,13 +62,13 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CalendarServiceTracker implements ServiceTrackerCustomizer {
+public class CalendarServiceTracker implements ServiceTrackerCustomizer<CalendarCollectionService, CalendarCollectionService> {
 
     private final BundleContext context;
 
     /**
      * Initializes a new {@link CalendarServiceTracker}.
-     * @param context 
+     * @param context
      */
     public CalendarServiceTracker(final BundleContext context) {
         super();
@@ -78,8 +78,9 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public Object addingService(final ServiceReference reference) {
-        final CalendarCollectionService calendarCollection = (CalendarCollectionService) context.getService(reference);
+    @Override
+    public CalendarCollectionService addingService(final ServiceReference<CalendarCollectionService> reference) {
+        final CalendarCollectionService calendarCollection = context.getService(reference);
         EmitterTools.setCalendarCollection(calendarCollection);
         ChangeExceptions.setCalendarCollection(calendarCollection);
         return calendarCollection;
@@ -88,14 +89,16 @@ public class CalendarServiceTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<CalendarCollectionService> reference, final CalendarCollectionService service) {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<CalendarCollectionService> reference, final CalendarCollectionService service) {
         ChangeExceptions.setCalendarCollection(null);
         EmitterTools.setCalendarCollection(null);
         context.ungetService(reference);

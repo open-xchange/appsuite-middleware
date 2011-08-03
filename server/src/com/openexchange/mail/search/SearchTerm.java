@@ -62,7 +62,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SearchTerm}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class SearchTerm<T> implements Serializable {
@@ -80,21 +80,21 @@ public abstract class SearchTerm<T> implements Serializable {
 
     /**
      * Gets the pattern to which the expression should match.
-     * 
+     *
      * @return The pattern
      */
     public abstract T getPattern();
 
     /**
      * Adds the addressed MailField to specified collection
-     * 
+     *
      * @param col The collection which gathers addressed fields
      */
     public abstract void addMailField(Collection<MailField> col);
 
     /**
      * Checks if given message matches this search term
-     * 
+     *
      * @param msg The message to check
      * @return <code>true</code> if message matches this search term; otherwise <code>false</code>
      * @throws OXException If check fails
@@ -103,7 +103,7 @@ public abstract class SearchTerm<T> implements Serializable {
 
     /**
      * Checks if specified mail message matches this search term
-     * 
+     *
      * @param mailMessage The mail message to check
      * @return <code>true</code> if specified mail message matches this search term; otherwise <code>false</code>
      * @throws OXException If checking mail message against search term fails
@@ -113,7 +113,7 @@ public abstract class SearchTerm<T> implements Serializable {
     /**
      * Generates the corresponding <i><a href="http://java.sun.com/products/javamail/">JavaMail</a></i> instance of
      * {@link javax.mail.search.SearchTerm} from this search term
-     * 
+     *
      * @return The corresponding instance of {@link javax.mail.search.SearchTerm}
      */
     public abstract javax.mail.search.SearchTerm getJavaMailSearchTerm();
@@ -122,7 +122,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * Generates the corresponding instance of {@link javax.mail.search.SearchTerm} from this search term without any wildcard characters.
      * <p>
      * This is useful to preselect possible positives and to manually filtering out false positives.
-     * 
+     *
      * @return The corresponding instance of {@link javax.mail.search.SearchTerm} without any wildcard characters.
      * @see #containsWildcard()
      */
@@ -146,7 +146,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * </ol>
      * <p>
      * <b>Note</b>: Only a shallow copy is generated; meaning further working on this search term may influence return value's search term.
-     * 
+     *
      * @param filter An array containing unsupported classes of {@link SearchTerm} to filter against
      * @return A new search term with the unsupported search terms removed
      */
@@ -174,7 +174,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * </ol>
      * <p>
      * <b>Note</b>: Only a shallow copy is generated; meaning further working on this search term may influence return value's search term.
-     * 
+     *
      * @param filterSet The filter set containing classes unsupported search terms
      * @return A new search term with the unsupported search terms removed
      */
@@ -189,7 +189,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * Checks if this search term's pattern only consists of ASCII 7 bit characters.
      * <p>
      * This method implies that this search is some kind of string search term. Returns <code>true</code> if not appropriate.
-     * 
+     *
      * @return <code>true</code> if search term's pattern only consists of ASCII 7 bit characters; otherwise <code>false</code>
      */
     public boolean isAscii() {
@@ -200,7 +200,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * Checks if this search term's pattern contains wildcard characters <code>'*'</code> and <code>'?'</code>.
      * <p>
      * This method implies that this search is some kind of string search term. Returns <code>false</code> if not appropriate.
-     * 
+     *
      * @return <code>true</code> if this search term's pattern contains wildcard characters; otherwise <code>false</code>
      */
     public boolean containsWildcard() {
@@ -209,7 +209,7 @@ public abstract class SearchTerm<T> implements Serializable {
 
     /**
      * Checks whether the specified string only consists of ASCII 7 bit characters.
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string only consists of ASCII 7 bit characters; otherwise <code>false</code>
      */
@@ -231,7 +231,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * If specified pattern contains no wildcard characters, it is returned unchanged.
      * <p>
      * If specified pattern only consists of wildcard characters, an empty string is returned.
-     * 
+     *
      * @param pattern The pattern possibly containing wildcard characters
      * @return The largest non-wildcard part
      */
@@ -261,7 +261,7 @@ public abstract class SearchTerm<T> implements Serializable {
      * Converts specified pattern into a corresponding regular expression.
      * <p>
      * Any wildcard characters are replaced with appropriate regex characters.
-     * 
+     *
      * @param pattern The wildcard pattern
      * @return The corresponding regular expression
      */
@@ -271,7 +271,7 @@ public abstract class SearchTerm<T> implements Serializable {
 
     /**
      * Converts specified wildcard string to a regular expression.
-     * 
+     *
      * @param wildcard The wildcard string to convert
      * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
      */

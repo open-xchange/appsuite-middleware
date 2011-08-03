@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 /**
  * {@link FolderObject} - Represents a folder.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.org">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> - generic methods
@@ -91,7 +91,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the locale-specific folder name
-     * 
+     *
      * @param id The folder ID
      * @param locale The locale
      * @return The locale-specific folder name or <code>null</code> if no locale-specific folder name is available
@@ -272,7 +272,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Tests if specified type is valid; meaning either {@link #PRIVATE}, {@link #PUBLIC}, or {@link #SHARED}.
-     * 
+     *
      * @param type The folder type to test
      * @return <code>true</code> if specified type is valid; otherwise <code>false</code>
      */
@@ -343,7 +343,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Initializes a new {@link FolderObject}
-     * 
+     *
      * @param objectId The folder's object ID
      */
     public FolderObject(final int objectId) {
@@ -354,7 +354,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Initializes a new {@link FolderObject}
-     * 
+     *
      * @param folderName The folder name
      * @param objectId The object ID
      * @param module The module; {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
@@ -378,7 +378,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder denotes a user's default folder
-     * 
+     *
      * @return <code>true</code> if this folder denotes a user's default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder() {
@@ -387,7 +387,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if default folder status has been set in this folder object
-     * 
+     *
      * @return <code>true</code> if default folder status has been set in this folder object; otherwise <code>false</code>
      */
     public boolean containsDefaultFolder() {
@@ -396,7 +396,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the default folder status for this folder object
-     * 
+     *
      * @param defaultFolder <code>true</code> if this folder denotes a user's default folder; otherwise <code>false</code>
      */
     public void setDefaultFolder(final boolean defaultFolder) {
@@ -414,7 +414,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the folder name
-     * 
+     *
      * @return The folder name
      */
     public String getFolderName() {
@@ -423,7 +423,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if folder name has been set in this folder object
-     * 
+     *
      * @return <code>true</code> if folder name has been set in this folder object; otherwise <code>false</code>
      */
     public boolean containsFolderName() {
@@ -432,7 +432,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the folder name
-     * 
+     *
      * @param folderName The folder name to set
      */
     public void setFolderName(final String folderName) {
@@ -451,7 +451,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     /**
      * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
      * {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
-     * 
+     *
      * @return The module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
      *         {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
      */
@@ -461,7 +461,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if module has been set in this folder object
-     * 
+     *
      * @return <code>true</code> if module has been set in this folder object; otherwise <code>false</code>
      */
     public boolean containsModule() {
@@ -470,7 +470,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the module
-     * 
+     *
      * @param module The module to set; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}
      *            , {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
      */
@@ -489,7 +489,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the permission flag; either {@link #PRIVATE_PERMISSION}, {@link #PUBLIC_PERMISSION} or {@link #CUSTOM_PERMISSION}
-     * 
+     *
      * @return The permission flag; either {@link #PRIVATE_PERMISSION}, {@link #PUBLIC_PERMISSION} or {@link #CUSTOM_PERMISSION}
      */
     public int getPermissionFlag() {
@@ -498,7 +498,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if permission flag has been set in this folder object
-     * 
+     *
      * @return <code>true</code> if permission flag has been set in this folder object; otherwise <code>false</code>
      */
     public boolean containsPermissionFlag() {
@@ -507,7 +507,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the permission flag
-     * 
+     *
      * @param permissionFlag The permission flag to set; either {@link #PRIVATE_PERMISSION} , {@link #PUBLIC_PERMISSION} or
      *            {@link #CUSTOM_PERMISSION}
      */
@@ -526,7 +526,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets all permissions
-     * 
+     *
      * @return All permissions
      */
     public List<OCLPermission> getPermissions() {
@@ -535,7 +535,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets all permissions
-     * 
+     *
      * @return All permissions
      */
     public OCLPermission[] getPermissionsAsArray() {
@@ -546,7 +546,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the non-system permissions
-     * 
+     *
      * @return The non-system permissions
      */
     public OCLPermission[] getNonSystemPermissionsAsArray() {
@@ -561,7 +561,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the non-system permission this folder grants to specified entity
-     * 
+     *
      * @param entity The entity ID; either a group or user ID
      * @return The non-system permission or <code>null</code> if none granted
      */
@@ -576,7 +576,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder grants a non-system permission to specified entity which allows at least folder visibility
-     * 
+     *
      * @param entity The entity ID; either a group or user ID
      * @return <code>true</code> if this folder grants a non-system permission to specified entity which allows at least folder visibility;
      *         otherwise <code>false</code>
@@ -596,7 +596,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * <p>
      * <b>Note</b>: This method only checks <b><small>ALL</small></b> basic permissions and does not consider any configuration settings.
      * Use {@link #isVisible(int, UserConfiguration)} for a detailed check if this folder is visible to a certain user.
-     * 
+     *
      * @param entity The entity ID (either a user or a group ID)
      * @return <code>true</code> if this folder is visible to specified entity; otherwise <code>false</code>
      * @see #isVisible(int, UserConfiguration)
@@ -612,7 +612,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has permissions set
-     * 
+     *
      * @return <code>true</code> if this folder has permissions set; otherwise <code>false</code>
      */
     public boolean containsPermissions() {
@@ -621,7 +621,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Applies given permissions to this folder.
-     * 
+     *
      * @param permissions The permissions to set
      */
     public void setPermissionsNoClone(final List<OCLPermission> permissions) {
@@ -633,7 +633,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * Applies given permissions to this folder.
      * <p>
      * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions is passed to this folder not a reference.
-     * 
+     *
      * @param permissions The permissions to set
      */
     public void setPermissions(final List<OCLPermission> permissions) {
@@ -649,7 +649,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * Applies given permissions to this folder.
      * <p>
      * <b>NOTE</b>: A <b><small>DEEP</small></b> copy of specified permissions is passed to this folder not a reference.
-     * 
+     *
      * @param permissions The permissions to set
      */
     public void setPermissionsAsArray(final OCLPermission[] permissions) {
@@ -666,7 +666,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Adds given permission to this folder object.
-     * 
+     *
      * @param permission The permission to add
      */
     public void addPermission(final OCLPermission permission) {
@@ -692,7 +692,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * Gets this folder's type
      * <p>
      * <b>NOTE</b>: To check if this folder is shared call {@link #isShared(int)} or {@link #getType(int)}
-     * 
+     *
      * @return The type which is either {@link #PUBLIC} or {@link #PRIVATE}.
      */
     public int getType() {
@@ -704,7 +704,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * <p>
      * <b>NOTE</b>: This method does not check if specified used holds at least read-folder permission but only checks against its type and
      * owner values.
-     * 
+     *
      * @param userId The user ID
      * @return The type which is either {@link #PUBLIC}, {@link #PRIVATE} or {@link #SHARED}.
      */
@@ -714,7 +714,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has its type set
-     * 
+     *
      * @return <code>true</code> if this folder has its type set; otherwise <code>false</code>
      */
     public boolean containsType() {
@@ -723,7 +723,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets this folder's type
-     * 
+     *
      * @param type The type which is either {@link #PUBLIC} or {@link #PRIVATE}
      */
     public void setType(final int type) {
@@ -741,7 +741,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the creator
-     * 
+     *
      * @return The creator
      */
     public int getCreator() {
@@ -750,7 +750,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if creator is set
-     * 
+     *
      * @return <code>true</code> if creator is set; otherwise <code>false</code>
      */
     public boolean containsCreator() {
@@ -759,7 +759,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the creator
-     * 
+     *
      * @param creator The creator
      */
     public void setCreator(final int creator) {
@@ -777,7 +777,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has subfolders
-     * 
+     *
      * @return <code>true</code> if this folder has subfolders; otherwise <code>false</code>
      */
     public boolean hasSubfolders() {
@@ -786,7 +786,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has subfolders visible to specified user
-     * 
+     *
      * @param user The user
      * @param userConfig The user's configuration
      * @param ctx The context
@@ -801,7 +801,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has subfolders visible to specified user
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's group IDs
      * @param userConfig The user configuration
@@ -864,7 +864,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Checks if this folder has the sub-folder flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the sub-folder flag set; otherwise <code>false</code>
      */
     public boolean containsSubfolderFlag() {
@@ -873,7 +873,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Sets the sub-folder flag
-     * 
+     *
      * @param subfolderFlag The sub-folder flag
      */
     public void setSubfolderFlag(final boolean subfolderFlag) {
@@ -891,7 +891,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets a list of user-visible subfolders
-     * 
+     *
      * @param userObj The user
      * @param userConfig The user configuration
      * @param ctx The context
@@ -1034,7 +1034,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Fills this folder with all availbable values from given folder and returns itself.
-     * 
+     *
      * @return filled folder
      */
     public final FolderObject fill(final FolderObject other) {
@@ -1043,7 +1043,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Fills this folder with all availbable values from given folder and returns itself.
-     * 
+     *
      * @param other The other instance of <code>{@link FolderObject}</code> serving as source
      * @param overwrite <code>true</code> to overwrite even if value is already present; <code>false</code> to only fill value if not
      *            present
@@ -1108,7 +1108,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     /**
      * Checks if this folder exists in underlying storage by checking its object ID or (if object ID is not present) by its folder name,
      * parent and module. An <code>OXException</code> is thrown if folder does not hold sufficient information to verify existence.
-     * 
+     *
      * @return <code>true</code> if a corresponding folder can be detected, otherwise <code>false</code>
      */
     public final boolean exists(final Context ctx) throws OXException {
@@ -1140,7 +1140,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
     /**
      * <b>NOTE:</b> This method does not check user's permissions on this folder, but only checks if this folder is of type
      * <code>PRIVATE</code> and user is not folder's creator
-     * 
+     *
      * @return <code>true</code> if this folder is of type PRIVATE and user is not folder's creator, <code>false</code> otherwise
      */
     public final boolean isShared(final int userId) {
@@ -1486,7 +1486,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1501,7 +1501,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Loads specified folder from database.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1518,7 +1518,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1532,7 +1532,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Loads folder permissions from database. Creates a new connection if <code>null</code> is given.
-     * 
+     *
      * @param folderId The folder ID
      * @param ctx The context
      * @param readCon A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1547,7 +1547,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1561,7 +1561,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Gets the subfolder IDs of specified folder.
-     * 
+     *
      * @param folderId The ID of the folder whose subfolders' IDs shall be returned
      * @param ctx The context
      * @param readConArg A connection with read capability; may be <code>null</code> to fetch from pool
@@ -1589,7 +1589,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Creates a folder instance representing a virtual folder.
-     * 
+     *
      * @param objectID The virtual object ID
      * @param name The name
      * @param module The module
@@ -1603,7 +1603,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Creates a folder instance representing a virtual folder.
-     * 
+     *
      * @param objectID The virtual object ID
      * @param name The name
      * @param module The module
@@ -1626,7 +1626,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Creates a folder instance representing a virtual folder.
-     * 
+     *
      * @param fullName The folder's fullname
      * @param name The name
      * @param module The module
@@ -1648,7 +1648,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     /**
      * Creates a folder instance representing a shared folder.
-     * 
+     *
      * @param createdBy The user ID of shared folder's owner
      * @param creatorDisplayName The display name of shared folder's owner
      * @return A folder instance representing a shared folder.

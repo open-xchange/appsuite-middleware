@@ -51,7 +51,7 @@ package com.openexchange.timer;
 
 /**
  * {@link ScheduledTimerTask} - Represents a cancelable timer task scheduled to a {@link TimerService timer}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ScheduledTimerTask {
@@ -64,7 +64,7 @@ public interface ScheduledTimerTask {
      * <p>
      * If the task has already started, then the <tt>mayInterruptIfRunning</tt> parameter determines whether the thread executing this task
      * should be interrupted in an attempt to stop the task.
-     * 
+     *
      * @param mayInterruptIfRunning <code>true</code> if the thread executing this task should be interrupted; otherwise, in-progress tasks
      *            are allowed to complete
      * @return <code>false</code> if the task could not be canceled, typically because it has already completed normally; <code>true</code>
@@ -78,7 +78,7 @@ public interface ScheduledTimerTask {
      * already completed or already been canceled.
      * <p>
      * If successful, and this task has not started when <tt>cancel()</tt> is called, this task should never run.
-     * 
+     *
      * @return <code>false</code> if the task could not be canceled, typically because it has already completed normally; <code>true</code>
      *         otherwise
      */

@@ -71,7 +71,7 @@ public class RemindAgain {
 
     /**
      * Initializes a new {@link RemindAgain}.
-     * 
+     *
      * @param reminder The reminder
      * @param session The session
      * @param ctx The context
@@ -86,7 +86,7 @@ public class RemindAgain {
 
     /**
      * Performs the update of reminder's alarm date.
-     * 
+     *
      * @throws OXException If update fails
      */
     public void remindAgain() throws OXException {

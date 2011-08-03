@@ -60,7 +60,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 /**
  * {@link MailProvider} - The main intention of the provider class is to make the implementing classes available which define the abstract
  * classes of mail API.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailProvider {
@@ -102,7 +102,7 @@ public abstract class MailProvider {
 
     /**
      * Checks if this provider is deprecated; any cached references should be discarded
-     * 
+     *
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
     public boolean isDeprecated() {
@@ -111,7 +111,7 @@ public abstract class MailProvider {
 
     /**
      * Sets the deprecated flag
-     * 
+     *
      * @param deprecated <code>true</code> if deprecated; otherwise <code>false</code>
      */
     public void setDeprecated(final boolean deprecated) {
@@ -120,7 +120,7 @@ public abstract class MailProvider {
 
     /**
      * Performs provider's start-up
-     * 
+     *
      * @throws OXException If start-up fails
      */
     public void startUp() throws OXException {
@@ -133,7 +133,7 @@ public abstract class MailProvider {
 
     /**
      * Performs provider's shut-down
-     * 
+     *
      * @throws OXException if shut-down fails
      */
     public void shutDown() throws OXException {
@@ -149,7 +149,7 @@ public abstract class MailProvider {
      * <p>
      * Returns a {@link DefaultMailPermission default permission} instance if mailing system does not support permission(s). Overwrite if
      * needed.
-     * 
+     *
      * @return A newly created {@link MailPermission mail permission}.
      */
     public MailPermission createNewMailPermission() {
@@ -158,7 +158,7 @@ public abstract class MailProvider {
 
     /**
      * Gets the spam handler used by this mail provider.
-     * 
+     *
      * @return The spam handler
      */
     public SpamHandler getSpamHandler() {
@@ -167,7 +167,7 @@ public abstract class MailProvider {
 
     /**
      * Gets this mail provider's protocol
-     * 
+     *
      * @return The protocol
      */
     public abstract Protocol getProtocol();
@@ -177,7 +177,7 @@ public abstract class MailProvider {
      * <p>
      * If {@link SpamHandler#SPAM_HANDLER_FALLBACK} is returned, no spam handler is going to be used; meaning all spam-related actions are
      * ignored..
-     * 
+     *
      * @return The registration name of the spam handler
      */
     protected String getSpamHandlerName() {
@@ -188,7 +188,7 @@ public abstract class MailProvider {
      * Checks if this mail provider supports the given protocol (which is either in secure or non-secure notation).
      * <p>
      * This is a convenience method that invokes {@link Protocol#isSupported(String)}
-     * 
+     *
      * @param protocol The protocol
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
@@ -201,7 +201,7 @@ public abstract class MailProvider {
      * <p>
      * If specified session is <code>null</code>, a dummy instance for initialization purpose is supposed to be returned. Implementation may
      * return <code>null</code> in this case if no start-up/shut-down actions are needed.
-     * 
+     *
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @return The newly created {@link MailAccess mail access}.
      * @throws OXException If new {@link MailAccess mail access} instance cannot be created
@@ -213,7 +213,7 @@ public abstract class MailProvider {
      * <p>
      * If specified session is <code>null</code>, a dummy instance for initialization purpose is supposed to be returned. Implementation may
      * return <code>null</code> in this case if no start-up/shut-down actions are needed.
-     * 
+     *
      * @param session The session providing needed user data; may be <code>null</code> to obtain a dummy instance for initialization purpose
      * @param accountId The account ID
      * @return The newly created {@link MailAccess mail access}.
@@ -223,14 +223,14 @@ public abstract class MailProvider {
 
     /**
      * Gets the protocol properties
-     * 
+     *
      * @return The protocol properties
      */
     protected abstract AbstractProtocolProperties getProtocolProperties();
 
     /**
      * Gets the protocol properties
-     * 
+     *
      * @return The protocol properties
      */
     public AbstractProtocolProperties getProtocolProps() {

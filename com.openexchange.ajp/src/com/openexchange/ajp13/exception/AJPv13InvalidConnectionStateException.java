@@ -51,7 +51,7 @@ package com.openexchange.ajp13.exception;
 
 /**
  * {@link AJPv13InvalidConnectionStateException} - Thrown to indicate an invalid AJP connection state.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13InvalidConnectionStateException extends AJPv13Exception {

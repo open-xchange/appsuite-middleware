@@ -63,7 +63,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * {@link SessionContainer} - A thread-safe container for {@link Session} objects wrapped by a {@link SessionControl} object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class SessionContainer {
@@ -84,7 +84,7 @@ final class SessionContainer {
 
     /**
      * Gets the current number of sessions held by this container
-     * 
+     *
      * @return The current number of sessions held by this container
      */
     int size() {
@@ -93,7 +93,7 @@ final class SessionContainer {
 
     /**
      * Checks if this container contains an entry for specified session ID
-     * 
+     *
      * @param sessionId The session ID
      * @return <code>true</code> if this container contains an entry for specified session ID; otherwise <code>false</code>
      */
@@ -103,7 +103,7 @@ final class SessionContainer {
 
     /**
      * Checks if this container contains a session for specified user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return <code>true</code> if this container contains an entry for specified user; otherwise <code>false</code>
@@ -114,7 +114,7 @@ final class SessionContainer {
 
     /**
      * Gets the number of sessions bound to specified user in specified context
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The number of sessions bound to specified user in specified context
@@ -126,7 +126,7 @@ final class SessionContainer {
 
     /**
      * Gets the session bound to specified session ID.
-     * 
+     *
      * @param sessionId The session ID
      * @return The session bound to specified session ID, or <code>null</code> if there's no session for specified session ID.
      */
@@ -136,7 +136,7 @@ final class SessionContainer {
 
     /**
      * Gets the sessions bound to specified user ID and context ID.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The sessions bound to specified user ID and context ID
@@ -155,7 +155,7 @@ final class SessionContainer {
 
     /**
      * Wraps specified session by a newly created {@link SessionControl} object and puts it into this container
-     * 
+     *
      * @param session The session to put
      * @return The wrapping {@link SessionControl session control}.
      */
@@ -200,9 +200,9 @@ final class SessionContainer {
 
     /**
      * Puts specified {@link SessionControl} object into this container
-     * 
+     *
      * @param sessionControl The session control to put
-     * @throws OXException 
+     * @throws OXException
      */
     void putSessionControl(final SessionControl sessionControl) throws OXException {
         final Session session = sessionControl.getSession();
@@ -227,7 +227,7 @@ final class SessionContainer {
 
     /**
      * Removes the session bound to specified session ID.
-     * 
+     *
      * @param sessionId The session Id
      * @return The {@link SessionControl session control} previously associated with specified session ID, or <code>null</code>.
      */
@@ -247,7 +247,7 @@ final class SessionContainer {
 
     /**
      * Removes the sessions bound to specified user ID and context ID.
-     * 
+     *
      * @param userId The user ID
      * @param contextId The context ID
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
@@ -272,7 +272,7 @@ final class SessionContainer {
      * Returns a collection view of the {@link SessionControl} objects contained in this container. The collection is
      * <b><small>not</small></b> backed by the container, so changes to the map are not reflected in the container, but changes made to any
      * {@link SessionControl} object is reflected in this container.
-     * 
+     *
      * @return A collection view of the {@link SessionControl} objects contained in this container.
      */
     Collection<SessionControl> getSessionControls() {

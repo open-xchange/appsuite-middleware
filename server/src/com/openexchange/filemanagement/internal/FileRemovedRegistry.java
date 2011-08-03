@@ -51,14 +51,14 @@ package com.openexchange.filemanagement.internal;
 
 /**
  * {@link FileRemovedRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 interface FileRemovedRegistry {
 
     /**
      * Removes specified listener
-     * 
+     *
      * @param listener The listener to remove
      */
     void removeListener(FileRemovedListener listener);

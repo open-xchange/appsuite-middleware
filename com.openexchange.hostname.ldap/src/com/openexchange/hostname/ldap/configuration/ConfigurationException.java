@@ -4,7 +4,7 @@ package com.openexchange.hostname.ldap.configuration;
 public class ConfigurationException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -2013680717346194369L;
 
@@ -24,5 +24,5 @@ public class ConfigurationException extends Exception {
         super(cause);
     }
 
-    
+
 }

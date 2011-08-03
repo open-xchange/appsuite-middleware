@@ -50,8 +50,8 @@
 package com.openexchange.sql.grammar;
 
 public abstract class BinaryPredicate extends Predicate {
-	private Expression leftExpression;
-	private Expression rightExpression;
+	private final Expression leftExpression;
+	private final Expression rightExpression;
 
 	public BinaryPredicate(Expression left, Expression right) {
 		super();

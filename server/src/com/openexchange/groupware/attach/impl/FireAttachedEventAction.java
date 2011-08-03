@@ -72,6 +72,7 @@ public class FireAttachedEventAction extends AttachmentEventAction {
         }
     }
 
+    @Override
     public void perform() throws OXException {
         final List<AttachmentMetadata> processed = new ArrayList<AttachmentMetadata>();
         try {

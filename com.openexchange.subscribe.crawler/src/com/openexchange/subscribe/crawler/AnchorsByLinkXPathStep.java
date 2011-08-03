@@ -78,12 +78,12 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private final ArrayList<String> outputHref;
 
     private ArrayList<HtmlPage> subpages;
-    
+
     private String xpath;
-    
-    private int intervalStart; 
+
+    private int intervalStart;
     private int intervalStop;
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkXPathStep.class));
 
     public AnchorsByLinkXPathStep() {
@@ -99,18 +99,18 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         this.xpath = xpath;
         this.intervalStart = intervalStart;
         this.intervalStop = intervalStop;
-        
+
         subpagesHref = new ArrayList<String>();
         outputHref = new ArrayList<String>();
         subpages = new ArrayList<HtmlPage>();
-        output = new ArrayList<HtmlAnchor>();        
+        output = new ArrayList<HtmlAnchor>();
     }
-    
-    
+
+
 
     @Override
     public void execute(final WebClient webClient) throws OXException {
-        try {         
+        try {
             // add the first page as there should always be results there
             subpages.add(input);
             LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
@@ -136,26 +136,26 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                     String currentXPath;
                     if (i == 0){
                         currentXPath = xpath.replace("[REPLACE_THIS]", "");
-                        
+
                     } else {
                         currentXPath = xpath.replace("REPLACE_THIS", Integer.toString(i));
                     }
                     if ( subpage.getByXPath(currentXPath) != null && subpage.getByXPath(currentXPath).size() != 0){
                         possibleLinkToResultpage = (HtmlAnchor) subpage.getByXPath(currentXPath).get(0);
                     }
-                    
+
                     if (possibleLinkToResultpage != null && !outputHref.contains(possibleLinkToResultpage.getHrefAttribute())) {
-                        
+
                             output.add(possibleLinkToResultpage);
                             outputHref.add(possibleLinkToResultpage.getHrefAttribute());
-                            LOG.info("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());                        
-                        
+                            LOG.info("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
+
                     }
                 }
-                
+
             }
             if (output != null && output.size() != 0){
-                executedSuccessfully = true;                
+                executedSuccessfully = true;
             } else {
                 LOG.error("No links matching the criteria were found.");
                 LOG.info(input.getWebResponse().getContentAsString());
@@ -208,36 +208,36 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         this.subpages = subpages;
     }
 
-    
+
     public String getXpath() {
         return xpath;
     }
 
-    
+
     public void setXpath(String xpath) {
         this.xpath = xpath;
     }
 
-    
+
     public int getIntervalStart() {
         return intervalStart;
     }
 
-    
+
     public void setIntervalStart(int intervalStart) {
         this.intervalStart = intervalStart;
     }
 
-    
+
     public int getIntervalStop() {
         return intervalStop;
     }
 
-    
+
     public void setIntervalStop(int intervalStop) {
         this.intervalStop = intervalStop;
     }
 
-    
-   
+
+
 }

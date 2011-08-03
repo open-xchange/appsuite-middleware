@@ -62,22 +62,22 @@ import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
  * This class represent constants as used in the classes Contacts
  * and ContactObject. It also allows for operations to be performed
  * using one of these fields using the class ContactSwitcher.
- * 
+ *
  * Reason: Though Contacts allows for single object operations, you cannot
  * do bulk operations like "these are my field names and here is a list
  * of values for them, insert them". This class allows to find fields by
  * different names and IDs, then write a Switcher which will perform an
- * action (on one or more ContactObjects in most cases). 
- * 
+ * action (on one or more ContactObjects in most cases).
+ *
  * The design pattern used has no widely acknowledged name (to the best
  * of my knowledge) but is used in Hibernate under the name Switcher.
- * 
+ *
  * Note: This class was mostly generated automatically.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
-public enum ContactField{  
+public enum ContactField{
 
     DISPLAY_NAME (500 , "field01" , "DISPLAY_NAME" , "Display name"  , ContactFields.DISPLAY_NAME),
     SUR_NAME (502 , "field02" , "SUR_NAME" , "Sur name" , ContactFields.LAST_NAME),
@@ -240,7 +240,7 @@ public enum ContactField{
 	public String getAjaxName(){
 		return ajaxName;
 	}
-	
+
 	public String getVCardElementName(){
 		return readableName; //TODO get real VCard element name
 	}
@@ -253,7 +253,7 @@ public enum ContactField{
         if( "".equals(dbFieldName)) {
             return null;
         }
-        
+
         for(final ContactField field: values()){
 			if(dbFieldName.equals( field.getDBName() )){
 				return field;
@@ -269,7 +269,7 @@ public enum ContactField{
 	    if( "".equals(displayName)) {
             return null;
         }
-	    
+
 		for(final ContactField field : values()){
 			if(displayName.equals( field.getReadableName() ) ){
 				return field;
@@ -277,7 +277,7 @@ public enum ContactField{
 		}
 		return null;
 	}
-	
+
 	public static ContactField getByFieldName(final String fieldName){
 	       if( null == fieldName) {
             return null;
@@ -285,7 +285,7 @@ public enum ContactField{
 	        if( "".equals(fieldName)) {
                 return null;
             }
-	        
+
 		for(final ContactField field : values()){
 			if(fieldName.equals( field.getFieldName() ) ){
 				return field;

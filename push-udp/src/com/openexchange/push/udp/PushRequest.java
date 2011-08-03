@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link PushRequest}
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushRequest {
@@ -92,7 +92,7 @@ public class PushRequest {
 
     /**
      * Initializes this push request from specified datagram packet.
-     * 
+     *
      * @param datagramPacket The datagram packet to initializes from
      */
     public void init(final DatagramPacket datagramPacket) {
@@ -210,7 +210,7 @@ public class PushRequest {
 
     /**
      * Gets specified datagram packet's arguments and check its magic bytes.
-     * 
+     *
      * @param datagramPacket The datagram packet
      * @return The datagram packet's arguments
      * @throws OXException If datagram packet's magic bytes or its length are invalid

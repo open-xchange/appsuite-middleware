@@ -60,7 +60,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 /**
  * The class <code>QuotedPrintable</code> offers static methods to encode/decode <code>String</code> instances with quoted-printable codec
  * based on <code>javax.mail.internet.MimeUtility</code> class
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotedPrintable {
@@ -83,7 +83,7 @@ public final class QuotedPrintable {
 
     /**
      * Encodes specified original string with given character encoding and transfer encoding <code>QUOTED PRINTABLE</code>.
-     * 
+     *
      * @param originalStr The original string to encode
      * @param charset The character encoding
      * @return The quoted-printable encoded string
@@ -100,7 +100,7 @@ public final class QuotedPrintable {
 
     /**
      * Decodes specified quoted-printable encoded string using given character encoding.
-     * 
+     *
      * @param quotedPrintableStr The quoted-printable encoded string
      * @param charset The character encoding
      * @return The quoted-printable decoded string

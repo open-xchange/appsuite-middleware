@@ -57,16 +57,16 @@ import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
- * 
+ *
  */
 public final class MobilityProvisioningServiceRegistry extends ServiceRegistry {
-	
+
 	private final static MobilityProvisioningServiceRegistry instance = new MobilityProvisioningServiceRegistry();
 
 	private final Map<ActionTypes, ActionService> actionServices = new ConcurrentHashMap<ActionTypes, ActionService>();
-	
+
     public static MobilityProvisioningServiceRegistry getInstance() {
         return instance;
     }
@@ -74,23 +74,23 @@ public final class MobilityProvisioningServiceRegistry extends ServiceRegistry {
     public void putActionService(final ActionTypes identifier, final ActionService actionService) {
         actionServices.put(identifier, actionService);
     }
-    
+
     public ActionService getActionService(final ActionTypes identifier) {
         return actionServices.get(identifier);
     }
-    
+
     public ActionService removeActionService(final ActionTypes identifier) {
         return actionServices.remove(identifier);
     }
-    
+
     public boolean containsService(final ActionTypes identifier) {
     	return actionServices.containsKey(identifier);
     }
-    
+
     public void clearActionServices() {
         actionServices.clear();
     }
-	
+
 	/**
 	 * Initializes a new {@link MobilityProvisioningServiceRegistry}
 	 */

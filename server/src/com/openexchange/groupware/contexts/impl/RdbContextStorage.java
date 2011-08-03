@@ -93,7 +93,7 @@ public class RdbContextStorage extends ContextStorage {
      */
     private static final String GET_LOGININFOS =
         "SELECT login_info FROM login2context WHERE cid=?";
-    
+
     /**
      * Default constructor.
      */
@@ -183,7 +183,7 @@ public class RdbContextStorage extends ContextStorage {
         ResultSet result = null;
         try {
             con = DBPool.pickup(ctx);
-            
+
             stmt = con.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
@@ -194,7 +194,7 @@ public class RdbContextStorage extends ContextStorage {
             }
         } catch (final SQLException e) {
             try {
-                if(!Tools.tableExists(con, "contextAttribute")) { 
+                if(!Tools.tableExists(con, "contextAttribute")) {
                     // This would be an explanation for the exception. Will
                     // happen once for every schema.
                     return;

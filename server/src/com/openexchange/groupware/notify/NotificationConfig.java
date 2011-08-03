@@ -126,6 +126,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         return Boolean.parseBoolean(boolVal);
     }
 
+    @Override
     public void start() throws OXException {
         if(!INSTANCE.isPropertiesLoadInternal()) {
             INSTANCE.loadPropertiesInternal();
@@ -133,6 +134,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
         NotificationPool.getInstance().startup();
     }
 
+    @Override
     public void stop() {
          NotificationPool.getInstance().shutdown();
         INSTANCE = new NotificationConfig();

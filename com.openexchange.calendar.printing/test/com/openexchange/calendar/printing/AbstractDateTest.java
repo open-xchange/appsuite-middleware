@@ -81,7 +81,7 @@ public abstract class AbstractDateTest extends TestCase {
         cal.add(Calendar.HOUR_OF_DAY, 1);
         return cal.getTime();
     }
-    
+
     /**
      * Gets you four dates, starting one day and two hours before the given calendar point
      */
@@ -93,7 +93,7 @@ public abstract class AbstractDateTest extends TestCase {
         Date date01 = cal.getTime();
         cal.add(Calendar.HOUR_OF_DAY, -1);
         Date date00 = cal.getTime();
-        
+
         cal.add(Calendar.DAY_OF_YEAR, 1);
         cal.add(Calendar.HOUR_OF_DAY, 2);
         return new Date[]{date00,date01,date10,date11};
@@ -109,8 +109,8 @@ public abstract class AbstractDateTest extends TestCase {
         cal.set(Calendar.HOUR_OF_DAY, 12);
         return cal.getTime();
     }
-    
-    
+
+
     /**
      * @return 14.1.2009 was a Wednesday
      */
@@ -133,7 +133,7 @@ public abstract class AbstractDateTest extends TestCase {
         cal.set(Calendar.HOUR_OF_DAY, 12);
         return cal.getTime();
     }
-        
+
     /**
      * @return 8.1.2009 was a Thursday
      */
@@ -175,7 +175,7 @@ public abstract class AbstractDateTest extends TestCase {
         cal.set(Calendar.HOUR_OF_DAY, 12);
         return cal.getTime();
     }
-    
+
     protected Calendar getCalendar(){
         return Calendar.getInstance();
     }

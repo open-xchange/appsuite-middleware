@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TwitterMessagingService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessagingService implements MessagingService {
@@ -84,7 +84,7 @@ public final class TwitterMessagingService implements MessagingService {
 
     /**
      * Gets the service identifier for twitter messaging service.
-     * 
+     *
      * @return The service identifier
      */
     public static String getServiceId() {

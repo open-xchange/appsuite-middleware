@@ -59,7 +59,7 @@ import java.util.Set;
  */
 public class Negation extends ContextSetTerm {
 
-    private ContextSetTerm term;
+    private final ContextSetTerm term;
 
     public Negation(ContextSetTerm term) {
         this.term = term;
@@ -69,7 +69,8 @@ public class Negation extends ContextSetTerm {
     public boolean matches(Set<String> tags) {
         return !term.matches(tags);
     }
-    
+
+    @Override
     public String toString() {
         return "!("+term.toString()+")";
     }

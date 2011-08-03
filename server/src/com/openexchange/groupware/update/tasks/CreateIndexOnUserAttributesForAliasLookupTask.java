@@ -64,6 +64,7 @@ public class CreateIndexOnUserAttributesForAliasLookupTask extends CreateIndexUp
         super(null, "user_attribute", "cid", "cid", "name", "value(20)");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[]{AllowTextInValuesOfDynamicUserAttributesTask.class.getName()};
     }

@@ -53,7 +53,7 @@ import java.util.Date;
 
 /**
  * {@link UserParticipant} - Represents an internal user participant.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class UserParticipant implements Participant, Comparable<Participant> {
@@ -96,7 +96,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param id unique identifier of the user.
      */
     public UserParticipant(final int id) {
@@ -111,6 +111,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * @deprecated Use {@link #UserParticipant(int)}.
      */
+    @Override
     @Deprecated
     public void setIdentifier(final int id) {
         this.id = id;
@@ -119,6 +120,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getIdentifier() {
         return id;
     }
@@ -173,6 +175,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
@@ -180,6 +183,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getDisplayName() {
         return displayName;
     }
@@ -187,6 +191,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getEmailAddress() {
         return emailaddress;
     }
@@ -213,6 +218,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int getType() {
         return USER;
     }
@@ -244,6 +250,7 @@ public class UserParticipant implements Participant, Comparable<Participant> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int compareTo(final Participant part) {
         final int retval;
         if (USER == part.getType()) {
@@ -272,14 +279,17 @@ public class UserParticipant implements Participant, Comparable<Participant> {
         return clone;
     }
 
+    @Override
     public Participant getClone() throws CloneNotSupportedException {
         return (Participant) clone();
     }
 
+    @Override
     public boolean isIgnoreNotification() {
         return ignoreNotification;
     }
 
+    @Override
     public void setIgnoreNotification(final boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
     }

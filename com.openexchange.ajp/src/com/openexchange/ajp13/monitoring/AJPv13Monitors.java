@@ -51,7 +51,7 @@ package com.openexchange.ajp13.monitoring;
 
 /**
  * {@link AJPv13Monitors} - Provides access to AJP's monitor variables.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Monitors {
@@ -75,7 +75,7 @@ public final class AJPv13Monitors {
 
     /**
      * Sets the listener monitor instance.
-     * 
+     *
      * @param listenerMonitor
      */
     public static void setListenerMonitor(final AJPv13TaskMonitorMBean listenerMonitor) {
@@ -91,7 +91,7 @@ public final class AJPv13Monitors {
 
     /**
      * Gets the listener monitor instance.
-     * 
+     *
      * @return The listener monitor instance.
      */
     public static AJPv13TaskMonitorMBean getListenerMonitor() {

@@ -54,7 +54,7 @@ import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
  * {@link SMTPBodyPart} - The SMTP text body part implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPBodyPart extends TextBodyMailPart {
@@ -66,7 +66,7 @@ public final class SMTPBodyPart extends TextBodyMailPart {
 
     /**
      * Initializes a new {@link SMTPBodyPart}.
-     * 
+     *
      * @param mailBody The text body as HTML content
      */
     public SMTPBodyPart(final String mailBody) {

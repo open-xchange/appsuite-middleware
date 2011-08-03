@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link ConcurrentStack} - A concurrent stack using Treiber's algorithm.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentStack<E> {
@@ -73,7 +73,7 @@ public final class ConcurrentStack<E> {
 
     /**
      * Pushes an element on this stack.
-     * 
+     *
      * @param item The element to push
      */
     public void push(final E item) {
@@ -87,7 +87,7 @@ public final class ConcurrentStack<E> {
 
     /**
      * Gets and removes the last element from this stack.
-     * 
+     *
      * @return The last element or <code>null</code> if empty
      */
     public E pop() {

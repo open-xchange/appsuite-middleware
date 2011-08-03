@@ -68,7 +68,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link ListLsubCache} - A user-bound cache for LIST/LSUB entries.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListLsubCache {
@@ -145,7 +145,7 @@ public final class ListLsubCache {
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param session The session providing user information
      */
     public static void dropFor(final Session session) {
@@ -158,7 +158,7 @@ public final class ListLsubCache {
 
     /**
      * Removes cached LIST/LSUB entry.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param session The session
@@ -178,7 +178,7 @@ public final class ListLsubCache {
 
     /**
      * Checks if associated mailbox is considered as MBox format.
-     * 
+     *
      * @param accountId The account ID
      * @param imapFolder The IMAP folder
      * @param session The session
@@ -195,7 +195,7 @@ public final class ListLsubCache {
 
     /**
      * Clears the cache.
-     * 
+     *
      * @param accountId The account ID
      * @param session The session
      */
@@ -214,7 +214,7 @@ public final class ListLsubCache {
 
     /**
      * Adds single entry to cache. Replaces any existing entry.
-     * 
+     *
      * @param fullName The entry's full name
      * @param accountId The account ID
      * @param imapFolder The IMAP folder providing connected protocol
@@ -233,7 +233,7 @@ public final class ListLsubCache {
 
     /**
      * Gets the separator character.
-     * 
+     *
      * @param accountId The account ID
      * @param imapStore The connected IMAP store instance
      * @param session The session
@@ -250,7 +250,7 @@ public final class ListLsubCache {
 
     /**
      * Gets the separator character.
-     * 
+     *
      * @param accountId The account ID
      * @param imapFolder An IMAP folder
      * @param session The session
@@ -263,7 +263,7 @@ public final class ListLsubCache {
 
     /**
      * Gets cached LSUB entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param imapFolder The IMAP
@@ -296,7 +296,7 @@ public final class ListLsubCache {
 
     /**
      * Gets cached LIST entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param imapStore The IMAP store
@@ -334,7 +334,7 @@ public final class ListLsubCache {
 
     /**
      * Gets up-to-date LIST entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param imapStore The IMAP store
@@ -356,7 +356,7 @@ public final class ListLsubCache {
 
     /**
      * Gets cached LIST entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param imapFolder The IMAP
@@ -400,7 +400,7 @@ public final class ListLsubCache {
 
     /**
      * Gets cached LIST/LSUB entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account ID
      * @param imapFolder The IMAP
@@ -531,7 +531,7 @@ public final class ListLsubCache {
 
     /**
      * Checks for any subscribed subfolder.
-     * 
+     *
      * @param fullName The full name
      * @return <code>true</code> if a subscribed subfolder exists; otherwise <code>false</code>
      * @throws OXException If a mail error occurs

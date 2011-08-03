@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
  * <p>
  * Moreover this class provides several convenience implementations of {@link SearchIterator} accessible via {@link #emptyIterator()},
  * {@link #createArrayIterator(Object)} and {@link #toIterable(SearchIterator)}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
@@ -119,7 +119,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link SearchIteratorAdapter}.
-     * 
+     *
      * @param iter The iterator to delegate to
      */
     public SearchIteratorAdapter(final Iterator<T> iter) {
@@ -132,7 +132,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Initializes a new {@link SearchIteratorAdapter}.
-     * 
+     *
      * @param iter The iterator to delegate to
      * @param size The number of elements contained by passed iterator
      */
@@ -181,7 +181,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Creates an empty {@link SearchIterator iterator} of specified type.
-     * 
+     *
      * @param <T> The iterator's type
      * @return An empty iterator
      */
@@ -191,7 +191,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Creates an {@link SearchIterator iterator} for given array.
-     * 
+     *
      * @param <T> The array's type
      * @param array The array to iterate
      * @return An {@link SearchIterator iterator} for given array
@@ -205,7 +205,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Turns specified {@link SearchIterator iterator} to an {@link Iterable}.
-     * 
+     *
      * @param <T> The iterator's type
      * @param iterator The iterator from which to create the {@link Iterable}
      * @return The {@link Iterable}
@@ -246,7 +246,7 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
     /**
      * Turns specified {@link SearchIterator iterator} to a {@link List}.
-     * 
+     *
      * @param <T> The iterator's type
      * @param iterator The iterator from which to create the list
      * @return The list created from iterator

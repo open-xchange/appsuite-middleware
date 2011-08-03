@@ -53,7 +53,7 @@ import java.util.Iterator;
 
 /**
  * {@link ReadOnlyIterator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReadOnlyIterator<E> implements Iterator<E> {

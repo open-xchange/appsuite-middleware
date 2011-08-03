@@ -80,9 +80,9 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
 
     private final FeedFetcher feedFetcher;
     private final MessagingAccountManager accounts;
-    
+
     private FeedAdapter feed = null;
-    
+
     public RSSMessageAccess(final int accountId, final Session session, final FeedFetcher fetcher, final MessagingAccountManager accounts) {
         super(accountId, session);
         this.accountId = accountId;
@@ -158,11 +158,11 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     public List<MessagingMessage> searchMessages(final String folder, final IndexRange indexRange, final MessagingField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MessagingField[] fields) throws OXException {
         checkFolder(folder);
         List<SyndMessage> messages = loadFeed().getMessages();
-        
+
         messages = filter(messages, searchTerm);
         sort(messages, sortField, order);
         messages = sublist(messages, indexRange);
-        
+
         return new ArrayList<MessagingMessage>(messages);
     }
 
@@ -172,15 +172,15 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         }
         int start = Math.min(indexRange.getStart(), messages.size()-1);
         int end = Math.min(indexRange.getEnd(), messages.size()-1);
-        
+
         if (start < 0) {
             start = 0;
         }
-        
+
         if(end < 0) {
             end = 0;
         }
-        
+
         return messages.subList(start, end);
     }
 
@@ -207,9 +207,9 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         if(searchTerm == null) {
             return messages;
         }
-        
+
         final List<SyndMessage> list = new ArrayList<SyndMessage>(messages.size());
-        
+
         for (final SyndMessage syndMessage : list) {
             if(searchTerm.matches(syndMessage)) {
                 list.add(syndMessage);
@@ -221,13 +221,13 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
     public void updateMessage(final MessagingMessage message, final MessagingField[] fields) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(RSSMessagingService.ID);
     }
-    
+
     private FeedAdapter loadFeed() throws OXException {
         if(feed != null) {
             return feed;
         }
         final String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
-        
+
         try {
             return feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "", session);
         } catch (final Exception e) {

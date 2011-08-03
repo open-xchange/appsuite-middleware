@@ -191,7 +191,6 @@ import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.StringParser;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
@@ -200,11 +199,11 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends DeferredActivator {
-	
+
 	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer {
 
         private final BundleContext context;
@@ -214,23 +213,26 @@ public final class ServerActivator extends DeferredActivator {
             this.context = context;
         }
 
+        @Override
         public void removedService(final ServiceReference reference, final Object service) {
             ServerServiceRegistry.getInstance().removeService(FileMetadataParserService.class);
             context.ungetService(reference);
         }
 
+        @Override
         public void modifiedService(final ServiceReference reference, final Object service) {
             // Nope
         }
 
+        @Override
         public Object addingService(final ServiceReference reference) {
             final Object service = context.getService(reference);
             ServerServiceRegistry.getInstance().addService(FileMetadataParserService.class, service);
             return service;
         }
     }
-	
-	
+
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
@@ -399,13 +401,13 @@ public final class ServerActivator extends DeferredActivator {
         // ICal Parser
         serviceTrackerList.add(new ServiceTracker(context, ICalParser.class.getName(), new RegistryCustomizer<ICalParser>(
             context,
-            ICalParser.class){ 
-            
+            ICalParser.class){
+
             @Override
             protected ICalParser customize(final ICalParser service) {
                 return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
-            
+
         }));
 
         // ICal Emitter
@@ -428,7 +430,7 @@ public final class ServerActivator extends DeferredActivator {
             context,
             FolderDeleteListenerService.class.getName(),
             new FolderDeleteListenerServiceTrackerCustomizer(context)));
-        
+
         /*
          * Register EventHandler
          */
@@ -501,9 +503,9 @@ public final class ServerActivator extends DeferredActivator {
                 new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
 
             // Folder Fields
-            
+
             serviceTrackerList.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(context, Folder.getAdditionalFields())));
-            
+
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
@@ -512,7 +514,7 @@ public final class ServerActivator extends DeferredActivator {
                 context,
                 FileMetadataParserService.class.getName(),
                 new ServiceAdderTrackerCustomizer(context)));
-            
+
             // Start up server the usual way
             starter.start();
         }
@@ -550,14 +552,20 @@ public final class ServerActivator extends DeferredActivator {
             registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounterImpl(), null));
             registrationList.add(context.registerService(MailIdleCounter.class.getName(), new MailIdleCounterImpl(), null));
         }
-        registrationList.add(context.registerService(ImageService.class.getName(), ServerServiceRegistry.getInstance().getService(
-            ImageService.class), null));
         {
-            // Register ImageSessionEventHandler 
+            final ImageService imageService = ServerServiceRegistry.getInstance().getService(ImageService.class);
+            if (null == imageService) {
+                LOG.warn("Missing service: " + ImageService.class.getName());
+            } else {
+                registrationList.add(context.registerService(ImageService.class.getName(), imageService, null));
+            }
+        }
+        {
+            // Register ImageSessionEventHandler
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrationList.add(context.registerService(EventHandler.class.getName(), new ImageSessionEventHandler(), serviceProperties));
-        }        
+        }
         // TODO: Register search service here until its encapsulated in an own bundle
         registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
@@ -652,7 +660,7 @@ public final class ServerActivator extends DeferredActivator {
 
         // Register AttachmentBase
         registrationList.add(context.registerService(AttachmentBase.class.getName(), Attachment.ATTACHMENT_BASE, null));
-        
+
         // Register ContactSQL
         registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));
 
@@ -668,13 +676,13 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-        
+
         // Fake bundle start
         activators.add(new FolderStorageActivator());
         for (final BundleActivator activator : activators) {
             activator.start(context);
         }
-        
+
         ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
 
@@ -683,7 +691,7 @@ public final class ServerActivator extends DeferredActivator {
          */
         if (!adminBundleInstalled.booleanValue()) {
             registerServlets(getService(HttpService.class));
-        }        
+        }
     }
 
     @Override
@@ -725,7 +733,10 @@ public final class ServerActivator extends DeferredActivator {
              * Clear service registry
              */
             ServerServiceRegistry.getInstance().clearRegistry();
-            secretService.close();
+            if (null != secretService) {
+                secretService.close();
+                secretService = null;
+            }
         } finally {
             started.set(false);
             adminBundleInstalled = null;
@@ -735,7 +746,7 @@ public final class ServerActivator extends DeferredActivator {
     /**
      * Determines if admin bundle is installed by iterating context's bundles whose status is set to {@link Bundle#INSTALLED} or
      * {@link Bundle#ACTIVE} and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
-     * 
+     *
      * @param context The bundle context
      * @return <code>true</code> if admin bundle is installed; otherwise <code>false</code>
      */
@@ -761,21 +772,21 @@ public final class ServerActivator extends DeferredActivator {
         http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
-        http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
+        // http.registerServlet("/ajax/tasks", new com.openexchange.ajax.Tasks(), null, null);
         http.registerServlet("/ajax/contacts", new com.openexchange.ajax.Contact(), null, null);
-        http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
+        // http.registerServlet("/ajax/mail", new com.openexchange.ajax.Mail(), null, null);
         http.registerServlet("/ajax/mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
-        http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
-        http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
-        http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);
-        http.registerServlet("/ajax/reminder", new com.openexchange.ajax.Reminder(), null, null);
-        http.registerServlet("/ajax/group", new com.openexchange.ajax.Group(), null, null);
-        http.registerServlet("/ajax/resource", new com.openexchange.ajax.Resource(), null, null);
+        // http.registerServlet("/ajax/calendar", new com.openexchange.ajax.Appointment(), null, null);
+        // http.registerServlet("/ajax/config", new com.openexchange.ajax.ConfigMenu(), null, null);
+        // http.registerServlet("/ajax/attachment", new com.openexchange.ajax.Attachment(), null, null);
+        // http.registerServlet("/ajax/reminder", new com.openexchange.ajax.Reminder(), null, null);
+        // http.registerServlet("/ajax/group", new com.openexchange.ajax.Group(), null, null);
+        // http.registerServlet("/ajax/resource", new com.openexchange.ajax.Resource(), null, null);
         http.registerServlet("/ajax/link", new com.openexchange.ajax.Link(), null, null);
         http.registerServlet("/ajax/multiple", new com.openexchange.ajax.Multiple(), null, null);
-        http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
+        // http.registerServlet("/ajax/quota", new com.openexchange.ajax.Quota(), null, null);
         http.registerServlet("/ajax/control", new com.openexchange.ajax.ConfigJump(), null, null);
-        http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
+        // http.registerServlet("/ajax/file", new com.openexchange.ajax.AJAXFile(), null, null);
         http.registerServlet("/ajax/import", new com.openexchange.ajax.ImportServlet(), null, null);
         http.registerServlet("/ajax/export", new com.openexchange.ajax.ExportServlet(), null, null);
         http.registerServlet("/ajax/image", new com.openexchange.image.servlet.ImageServlet(), null, null);

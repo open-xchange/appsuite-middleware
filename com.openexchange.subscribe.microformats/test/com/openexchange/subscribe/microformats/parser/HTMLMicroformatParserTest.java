@@ -64,20 +64,21 @@ public class HTMLMicroformatParserTest extends ParserTest {
     public void testIncorrectXML() throws OXException {
         String text = "<html><head><meta attr=\"value\"></head><body><div class=\"ox_contact\"><span class=\"ox_givenName\">Bla</span>&</div>";
         List<Map<String, String>> result = parse(text);
-    
+
         assertNotNull(result);
         assertEquals(1, result.size());
         Map<String, String> first = result.get(0);
-        
+
         assertEquals("Bla", first.get("ox_givenName"));
     }
 
+    @Override
     protected List<Map<String, String>> parse(String text) throws OXException {
         HTMLMicroformatParser microformatParser = new HTMLMicroformatParser();
         microformatParser.addContainerElement("ox_contact");
         microformatParser.addAttributePrefix("ox_");
         return microformatParser.parse(text);
     }
-    
+
 
 }

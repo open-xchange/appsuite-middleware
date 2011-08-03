@@ -62,7 +62,7 @@ import com.openexchange.tx.TransactionAware;
 
 /**
  * A {@link FileStorageFileAccess} provides access to files in a file hierarchy.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface FileStorageFileAccess extends TransactionAware {
@@ -251,7 +251,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Find out whether the file with a given ID exists or not.
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The ID to check for
      * @param version The version to check for
@@ -262,7 +262,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Load the metadata about a file
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The id of the file
      * @param version The version number of the file. May pass in CURRENT_VERSION to load the current version
@@ -273,7 +273,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Save the file metadata.
-     * 
+     *
      * @param file The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
@@ -283,7 +283,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Save the file metadata.
-     * 
+     *
      * @param file The metadata to save
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
      *            DISTANT_FUTURE to circumvent the check
@@ -291,11 +291,11 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException
      */
     public void saveFileMetadata(File file, long sequenceNumber, List<File.Field> modifiedFields) throws OXException;
-    
+
     /**
      * Copy a file from a given source to a given destination. Changes to the metadata can be applied and a new file attachment
      * may be uploaded as well.
-     * 
+     *
      * @param source The file to copy
      * @param dest Where to copy the file to. This is a folder id.
      * @param update Which other changes to apply to the copy. May be null, if no changes are to be applied.
@@ -305,10 +305,10 @@ public interface FileStorageFileAccess extends TransactionAware {
      * @throws OXException
      */
     public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFil, List<File.Field> modifiedFields) throws OXException;
-    
+
     /**
      * Load the file content
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The id of the file
      * @param version The version of the file. Pass in CURRENT_VERSION for the current version of the file.
@@ -319,7 +319,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Save the file metadata and binary content
-     * 
+     *
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or
@@ -330,7 +330,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Save the file metadata.
-     * 
+     *
      * @param file The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
@@ -341,7 +341,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Remove all files in the given folder.
-     * 
+     *
      * @param folderId The folder to clear
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @throws OXException
@@ -351,7 +351,7 @@ public interface FileStorageFileAccess extends TransactionAware {
     /**
      * Removes the files with the given identifiers from the folder. Documents identifiers that could not be removed due to an
      * edit-delete conflict are returned.
-     * 
+     *
      * @param ids The identifiers
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass DISTANT_FUTURE to circumvent the check
      * @return
@@ -361,7 +361,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Remove a certain version of a file
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file id whose version is to be removed
      * @param versions The versions to be remvoed. The versions that couldn't be removed are returned again.
@@ -372,7 +372,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Unlocks a given file.
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file to unlock
      * @throws OXException
@@ -381,7 +381,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Locks a given file for the given duration (in milliseconds)
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file to lock
      * @param diff The duration in milliseconds
@@ -391,7 +391,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Updates a files sequence number
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file whose sequence number should be updated
      * @throws OXException
@@ -400,7 +400,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List a folders content
-     * 
+     *
      * @param folderId The folder whose contents to list
      * @return
      * @throws OXException
@@ -409,7 +409,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List a folders content loading only the fields given
-     * 
+     *
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
      * @return
@@ -419,7 +419,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List a folders content loading only the fields given and sorting by a certain field either ascending or descending.
-     * 
+     *
      * @param folderId The folder whose contents to list
      * @param fields The fields to load
      * @param sort The field to sort by
@@ -431,7 +431,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a file
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file's identifier
      * @return All versions of a file
@@ -441,7 +441,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a file loading the given fields
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file's identifier
      * @param fields The fields to load
@@ -452,7 +452,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * List all versions of a file loading the given fields sorted according to the given field in a given order
-     * 
+     *
      * @param folderId The folder identifier
      * @param id The file's identifier
      * @param fields The fields to load
@@ -463,7 +463,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Load the file metadata with the given identifiers.
-     * 
+     *
      * @param ids The identifiers
      * @param fields The fields to load
      * @return The file metadatas
@@ -473,7 +473,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Get changes in a given folder since a certain sequence number
-     * 
+     *
      * @param folderId The folder to examine
      * @param updateSince The sequence number to check against
      * @param fields The fields to load
@@ -485,7 +485,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Get changes in a given folder since a certain sequence number
-     * 
+     *
      * @param folderId The folder to examine
      * @param updateSince The sequence number to check against
      * @param fields The fields to load
@@ -499,7 +499,7 @@ public interface FileStorageFileAccess extends TransactionAware {
 
     /**
      * Search for a given file.
-     * 
+     *
      * @param pattern The search pattern possibly containing wild-cards
      * @param fields Which fields to load
      * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.

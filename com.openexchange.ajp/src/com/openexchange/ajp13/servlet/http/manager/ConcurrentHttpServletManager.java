@@ -72,7 +72,7 @@ import com.openexchange.ajp13.servlet.http.SingletonServletQueue;
 
 /**
  * {@link ConcurrentHttpServletManager} - A HTTP servlet manager using a {@link ReadWriteLock concurrent read-write lock}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConcurrentHttpServletManager extends AbstractHttpServletManager {
@@ -87,7 +87,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
 
     /**
      * Initializes a new {@link ConcurrentHttpServletManager}.
-     * 
+     *
      * @param servletConstructorMap The servlet constructor map from which to initialize static servlet instances
      */
     public ConcurrentHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
@@ -98,6 +98,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         implierCache = new ConcurrentHashMap<String, ServletQueue>();
     }
 
+    @Override
     public void destroyServlet(final String id, final HttpServlet servletObj) {
         writeLock.lock();
         try {
@@ -115,6 +116,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         }
     }
 
+    @Override
     public HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
         readLock.lock();
         try {
@@ -221,6 +223,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         }
     }
 
+    @Override
     public void putServlet(final String path, final HttpServlet servlet) {
         if (implierCache.containsKey(path)) {
             /*
@@ -267,6 +270,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
 
     }
 
+    @Override
     public void registerServlet(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
         writeLock.lock();
         try {
@@ -277,6 +281,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
         }
     }
 
+    @Override
     public void unregisterServlet(final String id) {
         writeLock.lock();
         try {

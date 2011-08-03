@@ -58,14 +58,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link Searcher} - Provides methods to check if a single mail message matches a search term.
  * <p>
  * Moreover it provides a method to search for matching mail messages in a given message array with a given search term.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Searcher {
 
     /**
      * Checks if specified mail message matches given search term
-     * 
+     *
      * @param mailMessage The mail message to check
      * @param searchTerm The search term to apply
      * @return <code>true</code> if specified mail message matches given search term; otherwise <code>false</code>
@@ -79,7 +79,7 @@ public final class Searcher {
 
     /**
      * Applies specified search term against given instances of {@link MailMessage}
-     * 
+     *
      * @param mailMessages The mail messages to check
      * @param searchTerm The search term to apply
      * @return The matching mail messages in order of appearance
@@ -97,7 +97,7 @@ public final class Searcher {
 
     /**
      * Applies specified search term against given instances of {@link MailMessage}
-     * 
+     *
      * @param mailMessages The mail messages to check
      * @param searchTerm The search term to apply
      * @return The matching mail messages in order of appearance

@@ -66,7 +66,7 @@ import com.openexchange.datatypes.genericonf.FormElement;
 public class FormContentParser {
 
     private static final ValueReaderSwitch valueReader = new ValueReaderSwitch();
-    
+
     public Map<String, Object> parse(JSONObject object, DynamicFormDescription form) throws JSONException {
         Map<String, Object> content = new HashMap<String, Object>();
         for(FormElement element : form) {

@@ -72,27 +72,39 @@ import com.openexchange.server.ServiceLookup;
  * When all needed services are available, the {@link #startBundle()} method is invoked. For each absent service the
  * {@link #handleUnavailability(Class)} method is triggered to let the programmer decide which actions are further taken. In turn, the
  * {@link #handleAvailability(Class)} method is invoked if a service re-appears.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
-    private final class DeferredSTC implements ServiceTrackerCustomizer {
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
 
-        private final Class<?> clazz;
+    /**
+     * The empty class array.
+     */
+    protected static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
+    private <S> DeferredSTC<S> newDeferredSTC(final Class<? extends S> clazz, final int index, final Map<Class<?>, Object> services) {
+        return new DeferredSTC<S>(clazz, index, services);
+    }
+
+    private final class DeferredSTC<S> implements ServiceTrackerCustomizer<S, S> {
+
+        private final Class<? extends S> clazz;
 
         private final int index;
 
         private final Map<Class<?>, Object> stcServices;
 
-        public DeferredSTC(final Class<?> clazz, final int index, final Map<Class<?>, Object> services) {
+        public DeferredSTC(final Class<? extends S> clazz, final int index, final Map<Class<?>, Object> services) {
             super();
             this.clazz = clazz;
             this.index = index;
             stcServices = services;
         }
 
-        public Object addingService(final ServiceReference reference) {
+        @Override
+        public S addingService(final ServiceReference<S> reference) {
             final Object addedService = context.getService(reference);
             if (clazz.isInstance(addedService)) {
                 stcServices.put(clazz, addedService);
@@ -100,17 +112,19 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Signal availability
                  */
                 signalAvailability(index, clazz);
-                return addedService;
+                return clazz.cast(addedService);
             }
             context.ungetService(reference);
             return null;
         }
 
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        @Override
+        public void modifiedService(final ServiceReference<S> reference, final S service) {
             // Nothing to do
         }
 
-        public void removedService(final ServiceReference reference, final Object service) {
+        @Override
+        public void removedService(final ServiceReference<S> reference, final S service) {
             if (null != service) {
                 try {
                     if (clazz.isInstance(service)) {
@@ -131,8 +145,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
         }
     }
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
 
     /**
      * An atomic boolean to keep track of started/stopped status.
@@ -157,7 +169,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The initialized service trackers for needed services.
      */
-    private ServiceTracker[] serviceTrackers;
+    private ServiceTracker<?, ?>[] serviceTrackers;
 
     /**
      * The available service instances.
@@ -174,7 +186,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Gets the classes of the services which need to be available to start this activator.
-     * 
+     *
      * @return The array of {@link Class} instances of needed services
      */
     protected abstract Class<?>[] getNeededServices();
@@ -185,7 +197,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * <p>
      * On the one hand, if the service in question is not needed to further keep on running, it may be discarded. On the other hand, if the
      * service is absolutely needed; the {@link #stopBundle()} method can be invoked.
-     * 
+     *
      * @param clazz The service's class
      */
     protected abstract void handleUnavailability(final Class<?> clazz);
@@ -193,14 +205,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * Handles the re-availability of a needed service. The specific activator may decide which actions are further done dependent on given
      * service's class.
-     * 
+     *
      * @param clazz The service's class
      */
     protected abstract void handleAvailability(final Class<?> clazz);
 
     /**
      * Initializes this deferred activator's members.
-     * 
+     *
      * @throws Exception If no needed services are specified and immediately starting bundle fails
      */
     private final void init() throws Exception {
@@ -223,7 +235,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
              * Initialize service trackers for needed services
              */
             for (int i = 0; i < len; i++) {
-                serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(), new DeferredSTC(classes[i], i, services));
+                final Class<? extends Object> clazz = classes[i];
+                serviceTrackers[i] = new ServiceTracker<Object, Object>(context, clazz.getName(), newDeferredSTC(clazz, i, services));
                 serviceTrackers[i].open();
             }
             if (len == 0) {
@@ -258,7 +271,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * <p>
      * If not started, yet, and all needed services are available, then the {@link #startBundle()} method is invoked. If already started the
      * service's re-availability is propagated.
-     * 
+     *
      * @param index The class' index
      * @param clazz The service's class
      */
@@ -300,6 +313,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                          */
                         new Thread(new Runnable() {
 
+                            @Override
                             public void run() {
                                 shutDownBundle(bundle, errorBuilder);
                             }
@@ -314,7 +328,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Shuts-down specified bundle.
-     * 
+     *
      * @param bundle The bundle to shut-down
      * @param errorBuilder The error string builder
      */
@@ -339,7 +353,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * Marks the class whose index in array provided by {@link #getNeededServices()} is equal to given <code>index</code> argument as absent
      * and notifies its unavailability.
-     * 
+     *
      * @param index The class' index
      * @param clazz The service's class
      */
@@ -350,6 +364,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
+    @Override
     public final void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
@@ -366,12 +381,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * needs.
      * <p>
      * This method must complete and return to its caller in a timely manner.
-     * 
+     *
      * @throws Exception If this method throws an exception, this bundle is marked as stopped and the Framework will remove this bundle's
      *             listeners, unregister all services registered by this bundle, and release all services used by this bundle.
      */
     protected abstract void startBundle() throws Exception;
 
+    @Override
     public final void stop(final BundleContext context) throws Exception {
         try {
             stopBundle();
@@ -390,7 +406,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * started by this bundle when this bundle returns. A stopped bundle must not call any Framework objects.
      * <p>
      * This method must complete and return to its caller in a timely manner.
-     * 
+     *
      * @throws Exception If this method throws an exception, the bundle is still marked as stopped, and the Framework will remove the
      *             bundle's listeners, unregister all services registered by the bundle, and release all services used by the bundle.
      */
@@ -398,11 +414,12 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Returns {@link ServiceTracker#getService()} invoked on the service tracker bound to specified class.
-     * 
+     *
      * @param <S> Type of service's class
      * @param clazz The service's class
      * @return The service obtained by service tracker or <code>null</code>
      */
+    @Override
     public final <S extends Object> S getService(final Class<? extends S> clazz) {
         if (null == services) {
             /*
@@ -422,7 +439,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
     /**
      * Checks if activator currently holds all needed services.
-     * 
+     *
      * @return <code>true</code> if activator currently holds all needed services; otherwise <code>false</code>
      */
     protected final boolean allAvailable() {

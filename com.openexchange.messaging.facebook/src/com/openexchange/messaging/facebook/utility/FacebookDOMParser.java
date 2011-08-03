@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link FacebookDOMParser} - Parser for Facebook XML results from a FQL query.
- * 
+ *
  * <pre>
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  * &lt;fql_query_response xmlns="http://api.facebook.com/1.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" list="true"&gt;
@@ -76,7 +76,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  *   &lt;/user&gt;
  * &lt;/fql_query_response&gt;
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacebookDOMParser {
@@ -90,19 +90,19 @@ public final class FacebookDOMParser {
 
     public static void main(final String[] args) {
         try {
-            parseXMLResponse("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
-            		"<fql_query_response xmlns=\"http://api.facebook.com/1.0/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" list=\"true\">\n" + 
-            		"  <stream_post>\n" + 
-            		"    <updated_time>1297960981</updated_time>\n" + 
-            		"    <filter_key>nf</filter_key>\n" + 
-            		"    <message>This is my new, dynamic test-post. Enjoy!</message>\n" + 
-            		"    <post_id>1551949035_1539050846839</post_id>\n" + 
-            		"    <attachment>\n" + 
-            		"      <description/>\n" + 
-            		"    </attachment>\n" + 
-            		"    <actor_id>1551949035</actor_id>\n" + 
-            		"    <created_time>1297960981</created_time>\n" + 
-            		"  </stream_post>\n" + 
+            parseXMLResponse("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            		"<fql_query_response xmlns=\"http://api.facebook.com/1.0/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" list=\"true\">\n" +
+            		"  <stream_post>\n" +
+            		"    <updated_time>1297960981</updated_time>\n" +
+            		"    <filter_key>nf</filter_key>\n" +
+            		"    <message>This is my new, dynamic test-post. Enjoy!</message>\n" +
+            		"    <post_id>1551949035_1539050846839</post_id>\n" +
+            		"    <attachment>\n" +
+            		"      <description/>\n" +
+            		"    </attachment>\n" +
+            		"    <actor_id>1551949035</actor_id>\n" +
+            		"    <created_time>1297960981</created_time>\n" +
+            		"  </stream_post>\n" +
             		"</fql_query_response>");
         } catch (final Exception e) {
             System.err.println(e.getMessage());
@@ -113,7 +113,7 @@ public final class FacebookDOMParser {
 
     /**
      * Parses XML-formatted FQL query response
-     * 
+     *
      * @param xmlReponse The XML-formatted FQL query response
      * @return The parsed list of elements
      * @throws OXException If parsing fails

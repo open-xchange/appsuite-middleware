@@ -60,7 +60,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link FileWatcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileWatcher {
@@ -96,7 +96,7 @@ public final class FileWatcher {
 
     /**
      * Gets a file watcher bound to given file. If no file watcher has been bound to specified file, yet, a new one is created and returned.
-     * 
+     *
      * @param file The file
      * @return The file watcher
      */
@@ -150,7 +150,7 @@ public final class FileWatcher {
 
     /**
      * Initializes a new file watcher
-     * 
+     *
      * @param file The file to watch
      */
     private FileWatcher(final File file) {
@@ -163,7 +163,7 @@ public final class FileWatcher {
 
     /**
      * Adds an instance of {@link FileListener} to this watcher's listeners that is going to be notified on change or delete events.
-     * 
+     *
      * @param listener The listener to add
      */
     public void addFileListener(final FileListener listener) {
@@ -184,7 +184,7 @@ public final class FileWatcher {
 
     /**
      * Start this file watcher
-     * 
+     *
      * @param period The time in milliseconds between successive file watcher executions.
      */
     public void startFileWatcher(final long period) {

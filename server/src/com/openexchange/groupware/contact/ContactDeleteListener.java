@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactDeleteListener} - The delete listener for contact module
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactDeleteListener implements DeleteListener {
@@ -75,6 +75,7 @@ public final class ContactDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         try {
             if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {

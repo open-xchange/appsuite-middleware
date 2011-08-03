@@ -54,7 +54,7 @@ import com.sun.mail.iap.Response;
 
 /**
  * {@link QuotaExceededException} - Thrown to indicate that quota restrictions (either number of messages or storage size) were exceeded.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QuotaExceededException extends CommandFailedException {
@@ -70,7 +70,7 @@ public class QuotaExceededException extends CommandFailedException {
 
     /**
      * Initializes a new {@link QuotaExceededException}.
-     * 
+     *
      * @param message The error message
      */
     public QuotaExceededException(final String message) {
@@ -79,7 +79,7 @@ public class QuotaExceededException extends CommandFailedException {
 
     /**
      * Initializes a new {@link QuotaExceededException}.
-     * 
+     *
      * @param response The (NO) response; meaning {@link Response#isNO()} returns <code>true</code>
      */
     public QuotaExceededException(final Response response) {

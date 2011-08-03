@@ -64,7 +64,7 @@ import com.openexchange.server.impl.EffectivePermission;
 
 /**
  * {@link AbstractSubscribeService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractSubscribeService implements SubscribeService {
@@ -88,11 +88,11 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     private Collection<Subscription> prepareSubscriptions(final List<Subscription> allSubscriptions, final String secret, final Context context, final int userId) throws OXException {
         final List<Subscription> subscriptions = new ArrayList<Subscription>();
         final Map<String, Boolean> canSee = new HashMap<String, Boolean>();
-        
+
         for (final Subscription subscription : allSubscriptions) {
             if (subscription.getSource() != null && getSubscriptionSource() != null && subscription.getSource().getId().equals(
                 getSubscriptionSource().getId())) {
-                
+
                 if(userId == -1) {
                     subscriptions.add(subscription);
                 } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId())) {
@@ -104,9 +104,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                     if(visible) {
                         subscriptions.add(subscription);
                     }
-                    
+
                 }
-                
+
             }
         }
         for (final Subscription subscription : subscriptions) {
@@ -209,7 +209,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             return null;
         }
         final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
-        
+
         for (final Subscription subscription : allSubscriptions) {
             try {
                 final Map<String, Object> configuration = subscription.getConfiguration();
@@ -262,8 +262,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             }
         }
     }
-    
-    
+
+
     protected void removeWhereConfigMatches(final Context context, final Map<String, Object> query) throws OXException {
         STORAGE.deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
     }

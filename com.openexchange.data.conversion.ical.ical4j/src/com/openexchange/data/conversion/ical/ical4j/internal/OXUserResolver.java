@@ -101,7 +101,7 @@ public class OXUserResolver implements UserResolver {
 
     /**
      * Sets the userService
-     * 
+     *
      * @param userService The userService to set
      */
     public void setUserService(final UserService userService) {

@@ -93,7 +93,7 @@ public class Activator extends DeferredActivator {
     private final List<ServiceRegistration> registrations = new LinkedList<ServiceRegistration>();
 
     private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
-    
+
     private MessagingServiceRegistry registry;
 
     private MessagingMessageParser parser;
@@ -126,7 +126,7 @@ public class Activator extends DeferredActivator {
             reg.close();
         }
         servletRegistrations.clear();
-        
+
         for (final ServiceRegistration registration : registrations) {
             registration.unregister();
         }
@@ -157,31 +157,41 @@ public class Activator extends DeferredActivator {
 
     private void register() {
         try {
-
-            registry = getService(MessagingServiceRegistry.class);
-            cacheService = getService(CacheService.class);
+            boolean initializeFacs = false;
+            if (cacheService == null) {
+                cacheService = getService(CacheService.class);
+                initializeFacs = true;
+            }
+            if (registry == null) {
+                registry = getService(MessagingServiceRegistry.class);
+                initializeFacs = true;
+            }
 
             if (!allAvailable()) {
                 return;
             }
 
-            AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-            MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-            ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
-
-            servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
-            servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
-            servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));
-
-            for(final SessionServletRegistration reg : servletRegistrations) {
-                reg.open();
+            if (initializeFacs) {
+                AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+                MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
+                ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
             }
 
-            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
-            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
-            registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
-            registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            if (servletRegistrations.isEmpty()) {
+                servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
+                servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
+                servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));
+                for (final SessionServletRegistration reg : servletRegistrations) {
+                    reg.open();
+                }
+            }
+            if (registrations.isEmpty()) {
+                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
+                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
+                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
+                registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
+                registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -207,9 +217,15 @@ public class Activator extends DeferredActivator {
             for (final ServiceTracker tracker : trackers) {
                 tracker.close();
             }
+            trackers.clear();
+            for(final SessionServletRegistration reg : servletRegistrations) {
+                reg.close();
+            }
+            servletRegistrations.clear();
             for (final ServiceRegistration registration : registrations) {
                 registration.unregister();
             }
+            registrations.clear();
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;

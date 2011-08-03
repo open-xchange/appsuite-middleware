@@ -66,7 +66,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
 
 public class Activator implements BundleActivator {
-    
+
     private ServiceRegistration appointmentSqlFactoryRegistration;
     private ServiceRegistration calendarCollectionRegistration;
     private ServiceRegistration calendarAdministrationRegistration;

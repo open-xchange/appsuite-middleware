@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 /**
  * {@link MailService} - The mail service to obtain both an appropriate instance of {@link MailAccess} for accessing mail system and an
  * appropriate instance of {@link MailTransport} for sending mails.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MailService {
@@ -67,7 +67,7 @@ public interface MailService {
      * <p>
      * When starting to work with obtained {@link MailAccess mail access} at first its {@link MailAccess#connect()} method is supposed to be invoked.
      * On finished work the final {@link MailAccess#close(boolean)} must be called in order to release resources:
-     * 
+     *
      * <pre>
      * final MailAccess mailAccess = mailService.getMailAccess(session);
      * mailAccess.connect();
@@ -77,7 +77,7 @@ public interface MailService {
      * 	mailAccess.close(putToCache)
      * }
      * </pre>
-     * 
+     *
      * @param session The session
      * @param accountId The account ID
      * @return An appropriate instance of {@link MailAccess}
@@ -89,7 +89,7 @@ public interface MailService {
      * Gets an appropriate instance of {@link MailTransport mail transport} parameterized with given session.
      * <p>
      * Note: Don't forget to call final {@link MailTransport#close()} on obtained {@link MailTransport mail transport}:
-     * 
+     *
      * <pre>
      * final MailTransport mailTransport = mailService.getMailTransport(session);
      * try {
@@ -98,7 +98,7 @@ public interface MailService {
      *     mailTransport.close();
      * }
      * </pre>
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      * @return An appropriate instance of {@link MailTransport}

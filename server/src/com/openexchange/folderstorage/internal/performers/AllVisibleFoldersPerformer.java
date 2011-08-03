@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AllVisibleFoldersPerformer} - Serves the request to deliver all visible folders.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
@@ -75,7 +75,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      */
@@ -85,7 +85,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context final
      * @param decorator The optional folder service decorator
@@ -96,7 +96,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
-     * 
+     *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -107,7 +107,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
@@ -119,7 +119,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
     /**
      * Gets all visible folders
-     * 
+     *
      * @param treeId The tree identifier
      * @param filter The (optional) folder filter; set to <code>null</code> to filter none
      * @return All visible folders

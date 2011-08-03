@@ -55,7 +55,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link DeleteRegistryInitialization} - Initialization for {@link DeleteRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteRegistryInitialization implements Initialization {
@@ -70,6 +70,7 @@ public final class DeleteRegistryInitialization implements Initialization {
         started = new AtomicBoolean();
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             return;
@@ -77,6 +78,7 @@ public final class DeleteRegistryInitialization implements Initialization {
         DeleteRegistry.initInstance();
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             return;

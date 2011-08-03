@@ -70,7 +70,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link RemoveAdminPermissionOnInfostoreTask} - Removed incorrect admin permission on top level infostore folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
@@ -93,10 +93,12 @@ public class RemoveAdminPermissionOnInfostoreTask extends UpdateTaskAdapter {
 
     private static final String[] DEPENDENCIES = { ContactsAddIndex4AutoCompleteSearch.class.getName() };
 
+    @Override
     public String[] getDependencies() {
         return DEPENDENCIES;
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int triggeringContextId = params.getContextId();
         final int[] ctxIds = Database.getContextsInSameSchema(triggeringContextId);

@@ -65,22 +65,23 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class AbstractCollection extends AbstractResource implements
 		WebdavCollection {
-	
+
 	@Override
 	public boolean isCollection(){
 		return true;
 	}
-	
+
 	@Override
 	public void putBody(final InputStream data, final boolean guessSize) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
-	public InputStream getBody() throws OXException {
+
+	@Override
+    public InputStream getBody() throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	@Override 
+	@Override
 	public WebdavCollection toCollection() {
 		return this;
 	}
@@ -89,29 +90,35 @@ public abstract class AbstractCollection extends AbstractResource implements
 	public String getResourceType() throws OXException {
 		return Protocol.COLLECTION;
 	}
-	
-	public String getLanguage() throws OXException{
+
+	@Override
+    public String getLanguage() throws OXException{
 		return null;
 	}
-	
-	public void setLanguage(final String lang) throws OXException{
+
+	@Override
+    public void setLanguage(final String lang) throws OXException{
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
-	
-	public Long getLength() throws OXException{
+
+	@Override
+    public Long getLength() throws OXException{
 		return null;
 	}
-	
-	public String getContentType() throws OXException {
+
+	@Override
+    public String getContentType() throws OXException {
 		return "httpd/unix-directory";
 	}
-	
-	
-	public void setSource(final String source) throws OXException {
+
+
+	@Override
+    public void setSource(final String source) throws OXException {
 		//IGNORE
 	}
-	
-	public void delete() throws OXException {
+
+	@Override
+    public void delete() throws OXException {
 		final List<WebdavResource> copy = new ArrayList<WebdavResource>(getChildren());
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
 		for(final WebdavResource res : copy) {
@@ -140,12 +147,12 @@ public abstract class AbstractCollection extends AbstractResource implements
 	}
 
 	protected abstract void internalDelete() throws OXException;
-	
+
 	@Override
 	public AbstractCollection instance(final WebdavPath url) throws OXException {
 		return (AbstractCollection) getFactory().resolveCollection(url);
 	}
-	
+
 	@Override
 	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
 		final List<WebdavProtocolException> exceptions = new ArrayList<WebdavProtocolException>();
@@ -156,7 +163,7 @@ public abstract class AbstractCollection extends AbstractResource implements
 			} else {
 				copy = getFactory().resolveCollection(dest);
 			}
-			
+
 			for(final WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
 				try {
 					res.copy(dest.dup().append(res.getUrl().name()));
@@ -181,41 +188,48 @@ public abstract class AbstractCollection extends AbstractResource implements
 		}
 		throw new IllegalStateException("Impossible");
 	}
-	
-	public void setLength(final Long l) throws OXException {
-	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
-	}
-	
-	public String getETag() throws OXException{
-		return null;
-	}
-	
-	public void setContentType(final String s) throws OXException {
+
+	@Override
+    public void setLength(final Long l) throws OXException {
 	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final WebdavPath subPath) throws OXException {
+	@Override
+    public String getETag() throws OXException{
+		return null;
+	}
+
+	@Override
+    public void setContentType(final String s) throws OXException {
+	    throw WebdavProtocolException.Code.NO_BODIES_ALLOWED.create(getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
+	}
+
+	@Override
+    public WebdavResource resolveResource(final WebdavPath subPath) throws OXException {
 		return getFactory().resolveResource(getUrl().dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
+	@Override
+    public WebdavCollection resolveCollection(final WebdavPath subPath) throws OXException {
 		return getFactory().resolveCollection(getUrl()+"/"+subPath);
 	}
 
-	public Iterator<WebdavResource> iterator() {
+	@Override
+    public Iterator<WebdavResource> iterator() {
 		try {
 			return new ChildTreeIterator(getChildren().iterator());
 		} catch (final OXException e) {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public boolean hasBody(){
 		return false;
 	}
-	
-	public Iterable<WebdavResource> toIterable(final int depth) throws OXException {
+
+	@Override
+    public Iterable<WebdavResource> toIterable(final int depth) throws OXException {
 		switch(depth) {
 		case 0: return new LinkedList<WebdavResource>();
 		case 1: return getChildren();
@@ -223,17 +237,18 @@ public abstract class AbstractCollection extends AbstractResource implements
 		default : 	throw new IllegalArgumentException("Depth can only be one of 0, 1 or INFINITY");
 		}
 	}
-	
+
 	protected static class ChildTreeIterator implements Iterator<WebdavResource> {
-		
+
 		private Iterator<WebdavResource> subIterator;
 		private final Iterator<WebdavResource> childIterator;
-		
+
 		public ChildTreeIterator(final Iterator<WebdavResource> childIterator) {
 			this.childIterator = childIterator;
 		}
-		
-		public boolean hasNext() {
+
+		@Override
+        public boolean hasNext() {
 			if(subIterator != null) {
 				if(subIterator.hasNext()) {
 					return true;
@@ -243,7 +258,8 @@ public abstract class AbstractCollection extends AbstractResource implements
 			return childIterator.hasNext();
 		}
 
-		public WebdavResource next() {
+		@Override
+        public WebdavResource next() {
 			if(subIterator != null && subIterator.hasNext()) {
 				return subIterator.next();
 			}
@@ -254,9 +270,10 @@ public abstract class AbstractCollection extends AbstractResource implements
 			return res;
 		}
 
-		public void remove() {
+		@Override
+        public void remove() {
 			throw new UnsupportedOperationException();
 		}
-		
+
 	}
 }

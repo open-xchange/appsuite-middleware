@@ -73,15 +73,16 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
 
     private String actionOfForm = "";
-    
+
     private Map<String, String> parameters = new HashMap<String, String>();
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFillingOutFormStep.class));
-    
+
     public PageByFillingOutFormStep(){
-        
+
     }
-    
+
+    @Override
     public void execute(final WebClient webClient) throws OXException {
         HtmlForm theForm = null;
         for (final HtmlForm form : input.getForms()) {
@@ -104,29 +105,29 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
                 executedSuccessfully = true;
             } catch (IOException e) {
                 LOG.error(e);
-            }            
+            }
         }
     }
 
-    
+
     public String getActionOfForm() {
         return actionOfForm;
     }
 
-    
+
     public void setActionOfForm(String actionOfForm) {
         this.actionOfForm = actionOfForm;
     }
 
-    
+
     public Map<String, String> getParameters() {
         return parameters;
     }
 
-    
+
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }
-    
-    
+
+
 }

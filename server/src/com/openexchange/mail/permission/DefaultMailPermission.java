@@ -54,7 +54,7 @@ import com.openexchange.server.impl.OCLPermission;
 /**
  * {@link DefaultMailPermission} - The default mail permission which grants full access to a mail folder (possibly to bypass permission
  * settings if none provided by mailing system).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultMailPermission extends MailPermission {

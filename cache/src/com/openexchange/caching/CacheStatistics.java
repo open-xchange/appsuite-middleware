@@ -51,35 +51,35 @@ package com.openexchange.caching;
 
 /**
  * {@link CacheStatistics} - Holds statistical information on a region for both auxiliary and core statistics.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CacheStatistics extends Statistics {
 
     /**
      * Statistics are for a region, though auxiliary data may be for more.
-     * 
+     *
      * @return The region name
      */
     public abstract String getRegionName();
 
     /**
      * Sets the region name to which this cache statistics apply
-     * 
+     *
      * @param name The region name
      */
     public abstract void setRegionName(String name);
 
     /**
      * Gets the auxiliary cache statistics
-     * 
+     *
      * @return The auxiliary cache statistics
      */
     public abstract Statistics[] getAuxiliaryCacheStats();
 
     /**
      * Sets the auxiliary cache statistics
-     * 
+     *
      * @param stats The auxiliary cache statistics
      */
     public abstract void setAuxiliaryCacheStats(Statistics[] stats);

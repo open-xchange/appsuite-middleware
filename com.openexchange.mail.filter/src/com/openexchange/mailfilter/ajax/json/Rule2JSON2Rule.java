@@ -122,7 +122,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         final static String DATEPART = "datepart";
         final static String DATEVALUE = "datevalue";
     }
-    
+
     private static class AllofOrAnyOfTestFields {
         final static String TESTS = "tests";
     }
@@ -144,11 +144,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         ADDRESSES("addresses",":addresses"),
         SUBJECT("subject",":subject"),
         TEXT("text",null);
-        
+
         private final String fieldname;
-        
+
         private final String tagname;
-        
+
         private VacationActionFields(final String fieldname, final String tagname) {
             this.fieldname = fieldname;
             this.tagname = tagname;
@@ -167,40 +167,40 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         public final String getTagname() {
             return tagname;
         }
-        
-        
+
+
     }
-    
+
     static class AddFlagsActionFields {
         final static String FLAGS = "flags";
     }
-    
-    public Rule2JSON2Rule() {      
+
+    public Rule2JSON2Rule() {
         super();
     }
-    
+
     @Override
-	protected Mapper<Rule>[] allMapper() {        
+	protected Mapper<Rule>[] allMapper() {
         return mappers;
     }
-    
+
     @Override
-	protected Rule createObject() {       
+	protected Rule createObject() {
         return new Rule();
     }
-    
+
     @Override
-	protected String[] getListFields() {        
+	protected String[] getListFields() {
         return RULE_FIELDS_LIST;
     }
-    
+
     private final static Map<String, Mapper<Rule>> attr2Mapper;
 
     @Override
 	protected Mapper<Rule> getMapper(final String attrName) {
         return attr2Mapper.get(attrName);
     }
-    
+
     static TagArgument createTagArg(final VacationActionFields fields) {
         final Token token = new Token();
         token.image = fields.getTagname();
@@ -212,7 +212,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         token.image = ":" + string;
         return new TagArgument(token);
     }
-    
+
     static List<String> JSONArrayToStringList(final JSONArray jarray) throws JSONException {
         final ArrayList<String> retval = new ArrayList<String>(jarray.length());
         for (int i = 0; i < jarray.length(); i++) {
@@ -220,7 +220,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         }
         return retval;
     }
-    
+
     static List<String> JSONDateArrayToStringList(final JSONArray jarray) throws JSONException {
         final ArrayList<String> retval = new ArrayList<String>(jarray.length());
         for (int i = 0; i < jarray.length(); i++) {
@@ -228,7 +228,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         }
         return retval;
     }
-    
+
     private static String convertJSONDate2Sieve(String string) throws JSONException {
         try {
             final Date date = new Date(Long.parseLong(string));
@@ -238,7 +238,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         } catch (NumberFormatException e) {
             throw new JSONException("Date field \"" + string + "\" is no date value");
         }
-        
+
     }
 
     static NumberArgument createNumberArg(final String string) {
@@ -247,28 +247,28 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new NumberArgument(token);
     }
 
-    private static final Mapper<Rule>[] mappers = new Mapper[] { 
+    private static final Mapper<Rule>[] mappers = new Mapper[] {
         new IDMapper(),
-        
+
         new Mapper<Rule>() {
-            
+
             public String getAttrName() {
                 return RuleFields.POSITION;
             }
-            
+
             public Object getAttribute(final Rule obj) throws JSONException {
                 return Integer.valueOf(obj.getPosition());
             }
-            
+
             public boolean isNull(final Rule obj) {
                 return -1 == obj.getPosition();
             }
-            
-            public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
+
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setPosition(((Integer)attr).intValue());
             }
         },
-        
+
         new Mapper<Rule>() {
 
             public String getAttrName() {
@@ -284,11 +284,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 				return JSONObject.NULL;
             }
 
-            public boolean isNull(final Rule obj) {                
+            public boolean isNull(final Rule obj) {
                 return false;
             }
 
-            public void setAttribute(final Rule obj, final Object attr) throws JSONException {                
+            public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     ruleComment.setRulename((String)attr);
@@ -297,7 +297,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
         },
-        
+
         new Mapper<Rule>() {
 
             public String getAttrName() {
@@ -308,7 +308,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return Boolean.valueOf(!obj.isCommented());
             }
 
-            public boolean isNull(final Rule obj) {                
+            public boolean isNull(final Rule obj) {
                 return false;
             }
 
@@ -316,7 +316,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 obj.setCommented(!((Boolean) attr).booleanValue());
             }
         },
-        
+
         new Mapper<Rule>() {
 
             public String getAttrName() {
@@ -334,7 +334,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
-            public boolean isNull(final Rule obj) {                
+            public boolean isNull(final Rule obj) {
                 return false;
             }
 
@@ -367,7 +367,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 return tmp;
             }
 
-            public boolean isNull(final Rule obj) {                
+            public boolean isNull(final Rule obj) {
                 return (null == obj.getTestCommand());
             }
 
@@ -473,11 +473,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
                 return new TestCommand(command, new ArrayList<Object>(), commandlist);
             }
-            
+
             /**
              * This method is used to create a JSON object from a TestCommand. It is done this way because a separate
              * converter class would have to do the check for the right TestCommand for each id.
-             * 
+             *
              * @param tmp the JSONObject into which the values are written
              * @param testCommand the TestCommand itself
              * @throws JSONException
@@ -581,7 +581,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 argList.add(JSONArrayToStringList(getJSONArray(jobj, AddressEnvelopeAndHeaderTestFields.VALUES, command.getCommandname())));
                 return new TestCommand(command, argList, new ArrayList<TestCommand>());
             }
-            
+
             private JSONArray getJSONArray(final JSONObject jobj, final String value, final String component) throws OXException {
                 try {
                     return jobj.getJSONArray(value);
@@ -589,7 +589,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading TestCommand " + component + ": " + e.getMessage());
                 }
             }
-            
+
             private String getString(final JSONObject jobj, final String value, final String component) throws OXException {
                 try {
                     return jobj.getString(value);
@@ -598,9 +598,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 }
             }
         },
-        
+
         new ActionCommandMapper(),
-        
+
         new Mapper<Rule>() {
 
             public String getAttrName() {
@@ -618,31 +618,31 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setText((String)attr);
             }
-            
+
         },
 
         new Mapper<Rule>() {
-            
+
             public String getAttrName() {
                 return RuleFields.ERRORMSG;
             }
-            
+
             public Object getAttribute(final Rule obj) throws JSONException {
                 return obj.getErrormsg();
             }
-            
+
             public boolean isNull(final Rule obj) {
                 return null == obj.getErrormsg();
             }
-            
+
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 obj.setErrormsg((String)attr);
             }
-            
+
         }
-        
+
     };
-    
+
     static {
         final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>();
         for (final Mapper<Rule> mapper : mappers) {

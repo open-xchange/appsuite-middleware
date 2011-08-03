@@ -86,16 +86,19 @@ public class ProgressStatusImpl implements ProgressState {
         this.schema = schema;
     }
 
+    @Override
     public void setTotal(int total) {
         this.total = total;
         lastLogTime = System.currentTimeMillis();
     }
 
+    @Override
     public void setState(int state) {
         this.state = state;
         logState();
     }
 
+    @Override
     public void incrementState() {
         state++;
         logState();

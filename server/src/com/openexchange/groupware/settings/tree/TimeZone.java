@@ -71,18 +71,23 @@ public final class TimeZone implements PreferencesItemService {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { NAME };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
+            @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
                 setting.setSingleValue(user.getTimeZone());
             }
+            @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
+            @Override
             public boolean isWritable() {
                 return true;
             }

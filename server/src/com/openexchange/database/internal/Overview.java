@@ -63,6 +63,7 @@ public class Overview implements OverviewMBean {
         this.pools = pools;
     }
 
+    @Override
     public int getNumConnections() {
         int retval = 0;
         for (ConnectionPool pool : pools.getPools()) {
@@ -71,14 +72,17 @@ public class Overview implements OverviewMBean {
         return retval;
     }
 
+    @Override
     public long getMasterConnectionsFetched() {
         return ReplicationMonitor.getMasterConnectionsFetched();
     }
 
+    @Override
     public long getSlaveConnectionsFetched() {
         return ReplicationMonitor.getSlaveConnectionsFetched();
     }
 
+    @Override
     public long getMasterInsteadOfSlave() {
         return ReplicationMonitor.getMasterInsteadOfSlave();
     }

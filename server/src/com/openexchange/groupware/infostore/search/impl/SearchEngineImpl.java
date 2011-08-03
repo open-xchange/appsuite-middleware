@@ -87,7 +87,7 @@ import com.openexchange.tools.sql.SearchStrings;
 
 /**
  * SearchEngineImpl
- * 
+ *
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
@@ -117,11 +117,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         }
     }
 
+    @Override
     public SearchIterator<DocumentMetadata> search(String query, final Metadata[] cols, final int folderId, final Metadata sortedBy, final int dir, final int start, final int end, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
-        
+
         boolean addQuery = false;
         try {
             final int userId = user.getId();
@@ -187,7 +188,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             checkPatternLength(query);
             final boolean containsWildcard = query.contains("*");
             addQuery = true;
-            
+
             query = query.replaceAll("\\\\", "\\\\\\\\");
             query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
             query = query.replace('*', '%');
@@ -297,10 +298,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
         return joined.toString();
     }
 
+    @Override
     public void index(final DocumentMetadata document, final Context ctx, final User user, final UserConfiguration userConfig) {
         // Nothing to do.
     }
 
+    @Override
     public void unIndex0r(final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
         // Nothing to do.
     }
@@ -441,10 +444,12 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
+        @Override
         public boolean hasNext() throws OXException {
             return next != null;
         }
 
+        @Override
         public DocumentMetadata next() throws OXException, OXException {
             try {
                 DocumentMetadata retval = null;
@@ -470,6 +475,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
+        @Override
         public void close() throws OXException {
             next = null;
             try {
@@ -496,6 +502,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             }
         }
 
+        @Override
         public int size() {
             return -1;
         }
@@ -504,14 +511,17 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             return false;
         }
 
+        @Override
         public void addWarning(final OXException warning) {
             warnings.add(warning);
         }
 
+        @Override
         public OXException[] getWarnings() {
             return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
         }
 
+        @Override
         public boolean hasWarnings() {
             return !warnings.isEmpty();
         }

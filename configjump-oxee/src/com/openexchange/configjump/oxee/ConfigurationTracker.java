@@ -60,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
  * this bundles service.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConfigurationTracker implements ServiceTrackerCustomizer {
+public class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
     private final BundleContext context;
 
@@ -68,7 +68,7 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
 
     /**
      * Default constructor.
-     * @param services 
+     * @param services
      */
     public ConfigurationTracker(final BundleContext context,
         final Services services) {
@@ -80,8 +80,9 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public Object addingService(final ServiceReference reference) {
-        final ConfigurationService configuration = (ConfigurationService) context
+    @Override
+    public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
+        final ConfigurationService configuration = context
             .getService(reference);
         final Properties props = configuration.getFile("configjump.properties");
         // TODO put URL somewhere
@@ -93,16 +94,18 @@ public class ConfigurationTracker implements ServiceTrackerCustomizer {
     /**
      * {@inheritDoc}
      */
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<ConfigurationService> reference,
+        final ConfigurationService service) {
         // Nothing to do.
     }
 
     /**
      * {@inheritDoc}
      */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
+    @Override
+    public void removedService(final ServiceReference<ConfigurationService> reference,
+        final ConfigurationService service) {
         // Nothing to do.
     }
 }

@@ -62,11 +62,11 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link YahooOAuthActivator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class YahooOAuthActivator extends HousekeepingActivator {
-    
+
     private static final Class[] NEEDED = new Class[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class };
 
     private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
@@ -74,26 +74,26 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
 
     private OAuthService oauthService;
-    
-    private OAuthServiceMetaDataYahooImpl oAuthMetaData;   
-    
+
+    private OAuthServiceMetaDataYahooImpl oAuthMetaData;
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooOAuthActivator.class));
-    
+
     public OAuthService getOauthService() {
         return oauthService;
     }
 
-    
+
     public void setOauthService(OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
-    
+
     public OAuthServiceMetaDataYahooImpl getOAuthMetaData() {
         return oAuthMetaData;
     }
 
-    
+
     public void setOAuthMetaData(OAuthServiceMetaDataYahooImpl oauthMetaData) {
         this.oAuthMetaData = oauthMetaData;
     }
@@ -126,9 +126,9 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
         registerService(YahooService.class, yahooService);
         LOG.info("YahooService was started.");
-        
+
     }
-	
-	
+
+
 
 }

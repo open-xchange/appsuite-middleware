@@ -50,7 +50,7 @@
 package com.openexchange.mailfilter.ajax.actions;
 
 /**
- * 
+ *
  * @author d7
  */
 public class MailfilterRequest extends AbstractRequest {

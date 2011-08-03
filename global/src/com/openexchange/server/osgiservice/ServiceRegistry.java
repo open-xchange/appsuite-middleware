@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ServiceRegistry} - A registry for needed services
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServiceRegistry implements ServiceLookup {
@@ -76,7 +76,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Initializes a new {@link ServiceRegistry}
-     * 
+     *
      * @param initialCapacity The initial capacity
      */
     public ServiceRegistry(final int initialCapacity) {
@@ -93,7 +93,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Removes a service bound to given class from this service registry
-     * 
+     *
      * @param clazz The service's class
      */
     public void removeService(final Class<?> clazz) {
@@ -102,7 +102,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Adds a service bound to given class to this service registry
-     * 
+     *
      * @param clazz The service's class
      * @param service The service itself
      */
@@ -112,7 +112,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @return The service if found; otherwise <code>null</code>
@@ -130,7 +130,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
@@ -153,7 +153,7 @@ public class ServiceRegistry implements ServiceLookup {
 
     /**
      * Gets the number of services currently held by this service registration
-     * 
+     *
      * @return The number of services currently held by this service registration
      */
     public int size() {

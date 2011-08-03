@@ -64,7 +64,7 @@ import com.openexchange.server.impl.DBPool;
 
 /**
  * {@link RdbUserConfigurationStorage} - The database storage implementation of an user configuration storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RdbUserConfigurationStorage extends UserConfigurationStorage {
@@ -137,7 +137,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     /**
      * Saves given user configuration to database. If <code>insert</code> is <code>true</code> an INSERT command is performed, otherwise an
      * UPDATE command.
-     * 
+     *
      * @param userConfig - the user configuration to save
      * @param insert - <code>true</code> for an INSERT; otherwise UPDATE
      * @param writeCon - the writable connection; may be <code>null</code>
@@ -152,7 +152,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Saves given user configuration to database by self-determining if an INSERT or UPDATE is going to be performed.
-     * 
+     *
      * @param permissionBits The permission bits.
      * @param userId The user ID.
      * @param ctx The context the user belongs to.
@@ -187,7 +187,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     /**
      * Saves given user configuration to database. If <code>insert</code> is <code>true</code> an INSERT command is performed, otherwise an
      * UPDATE command.
-     * 
+     *
      * @param permissionBits The permission bits.
      * @param userId The user ID.
      * @param insert - <code>true</code> for an INSERT; otherwise UPDATE
@@ -235,7 +235,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>{@link UserConfiguration}</code>
@@ -249,7 +249,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param groups - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
@@ -265,7 +265,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     /**
      * Special method invoked by admin to load user configuration since no exception is thrown if no matching config could be found. In this
      * case an instance of {@link UserConfiguration} is returned that does not hold any permissions.
-     * 
+     *
      * @param userId - the user ID
      * @param groups - the group IDs the user belongs to; may be <code>null</code>
      * @param cid - the context ID
@@ -300,7 +300,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Counts all users with the permission as set in {@link UserConfiguration} object
-     * 
+     *
      * @param cid - the context id
      * @param userconf {@link UserConfiguration} object containing set of permissions to count
      * @param readConArg - the readable context; may be <code>null</code>
@@ -341,7 +341,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Loads the user configuration from database specified through user ID and context
-     * 
+     *
      * @param userId - the user ID
      * @param groupsArg - the group IDs the user belongs to; may be <code>null</code>
      * @param ctx - the context
@@ -451,7 +451,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * Deletes the user configuration from database specified through ID and context. This is a convenience method that delegates invokation
      * to <code>{@link #deleteUserConfiguration(int, Connection, Context)}</code>. whereby connection is set to <code>null</code>, thus a
      * new writeable connection is going to be obtained from connection pool.
-     * 
+     *
      * @param userId - the user ID
      * @param ctx - the context
      * @throws SQLException - if user configuration cannot be removed from database
@@ -465,7 +465,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
     /**
      * Deletes the user configuration from database specified through ID and context.
-     * 
+     *
      * @param userId - the user ID
      * @param writeConArg - the writeable connection
      * @param ctx - the context

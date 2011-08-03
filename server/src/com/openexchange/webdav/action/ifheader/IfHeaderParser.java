@@ -56,7 +56,7 @@ import java.util.List;
 public class IfHeaderParser {
 
 	private int i;
-	
+
 	public IfHeader parse(final String string) throws IfHeaderParseException {
 		i = 0;
 		return ifHeader(string.toCharArray());
@@ -98,8 +98,8 @@ public class IfHeaderParser {
 		while(i < cs.length) {
 			final char c = cs[i++];
 			switch(c) {
-			case '<' : list.add(lockToken(matches, cs)); matches = true; break; 
-			case '[' : list.add(etag(matches, cs)); matches = true; break; 
+			case '<' : list.add(lockToken(matches, cs)); matches = true; break;
+			case '[' : list.add(etag(matches, cs)); matches = true; break;
 			case ')' : return new IfHeaderList(tag, list);
 			case 'n' :
 			case 'N' : not(cs); matches = false; break;
@@ -119,7 +119,7 @@ public class IfHeaderParser {
 		if(c != 't' && c != 'T') {
 			throw new IfHeaderParseException("Illegal character "+c+" in list",i+1);
 		}
-		
+
 	}
 
 	private IfHeaderEntity lockToken(final boolean matches, final char[] cs) throws IfHeaderParseException {
@@ -130,7 +130,7 @@ public class IfHeaderParser {
 		} catch (final IfHeaderParseException x) {
 			throw new IfHeaderParseException("Unfinished LockToken", x.getColumn());
 		}
-		
+
 	}
 
 	private IfHeaderEntity etag(final boolean matches, final char[] cs) throws IfHeaderParseException {
@@ -144,7 +144,7 @@ public class IfHeaderParser {
 			default : etag.append(c);
 			}
 		}
-		
+
 		throw new IfHeaderParseException("Unfinished ETag", start+1);
 	}
 

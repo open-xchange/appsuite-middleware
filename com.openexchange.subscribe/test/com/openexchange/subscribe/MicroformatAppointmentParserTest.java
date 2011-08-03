@@ -10,13 +10,13 @@ import com.openexchange.subscribe.parser.MicroformatAppointmentParser;
 
 
 public class MicroformatAppointmentParserTest extends TestCase {
-    public Date defaultStartDate; 
+    public Date defaultStartDate;
     public Date defaultEndDate;
     public SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, HH:mm:ss z");
-    
+
     public String wellBehavedHtml;
-    
-    
+
+
     public MicroformatAppointmentParserTest(){
         super();
         try {
@@ -25,17 +25,17 @@ public class MicroformatAppointmentParserTest extends TestCase {
         } catch (ParseException e) {
             e.printStackTrace();
         };
-        wellBehavedHtml =  
-            "<div class=\"ox-appointment\">\n" + 
+        wellBehavedHtml =
+            "<div class=\"ox-appointment\">\n" +
             "   <span class=\"title\">My appointment</span>\n"+
             "   <span class=\"note\">There are many appointments but this one is mine</span>\n"+
             "   <span class=\"location\">Your place or mine?</span>\n"+
             "   <span class=\"startDate\">" + dateFormat.format(defaultStartDate) + "</span>\n" +
-            "   <span class=\"endDate\">" + dateFormat.format(defaultEndDate) + "</span>\n" + 
+            "   <span class=\"endDate\">" + dateFormat.format(defaultEndDate) + "</span>\n" +
             "</div>";
 
     }
-    
+
     public void testShouldWorkUnderBestPossibleCircumstances(){
         MicroformatAppointmentParser parser = new MicroformatAppointmentParser();
         parser.parse(wellBehavedHtml);
@@ -48,5 +48,5 @@ public class MicroformatAppointmentParserTest extends TestCase {
         assertEquals("Should parse start date", defaultStartDate, appointment.getStartDate() );
         assertEquals("Should parse end date", defaultEndDate, appointment.getEndDate() );
     }
-    
+
 }

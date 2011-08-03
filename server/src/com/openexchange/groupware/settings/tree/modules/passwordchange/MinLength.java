@@ -62,24 +62,28 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MinLength}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class MinLength implements PreferencesItemService {
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.passwordchange", "minLength" };
     }
 
+    @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
                 ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
                 setting.setSingleValue(property);
             }
 
+            @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return true;
             }

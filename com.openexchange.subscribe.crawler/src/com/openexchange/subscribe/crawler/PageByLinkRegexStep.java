@@ -63,7 +63,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
  * This Step gets a page reachable via Link in the current context (WebClient)
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
@@ -73,7 +73,7 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
     private Exception exception;
 
     protected boolean executedSuccessfully;
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByLinkRegexStep.class));
 
     public PageByLinkRegexStep() {
@@ -95,20 +95,20 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
                     break;
                 }
             }
-            
+
             if (debuggingEnabled){
                 openPageInBrowser(output);
             }
-            
+
             if (output != null) {
-                executedSuccessfully = true;                 
+                executedSuccessfully = true;
             } else {
                 LOG.error("The expected link was not on this page. Expectation was something matching this: "+ linkRegex);
                 for (final HtmlAnchor link : input.getAnchors()) {
                     LOG.debug("Available Link : " + link.getHrefAttribute());
-                }               
+                }
             }
-            
+
         } catch (final FailingHttpStatusCodeException e) {
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final MalformedURLException e) {

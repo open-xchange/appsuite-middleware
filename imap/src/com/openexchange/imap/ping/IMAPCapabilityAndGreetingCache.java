@@ -66,7 +66,7 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link IMAPCapabilityAndGreetingCache} - A cache for CAPABILITY and greeting from IMAP servers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPCapabilityAndGreetingCache {
@@ -120,7 +120,7 @@ public final class IMAPCapabilityAndGreetingCache {
 
     /**
      * Gets the cached greeting from IMAP server denoted by specified parameters.
-     * 
+     *
      * @param address The IMAP server's address
      * @param isSecure Whether to establish a secure connection
      * @param imapProperties The IMAP properties

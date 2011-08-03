@@ -55,7 +55,7 @@ import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link UnifiedINBOXConfig}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedINBOXConfig extends MailConfig {

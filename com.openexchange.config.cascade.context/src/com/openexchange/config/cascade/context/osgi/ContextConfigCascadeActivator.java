@@ -63,7 +63,7 @@ import com.openexchange.userconf.UserConfigurationService;
 public class ContextConfigCascadeActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED = new Class[]{ ContextService.class, ConfigurationService.class, UserConfigurationService.class};
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
@@ -74,31 +74,31 @@ public class ContextConfigCascadeActivator extends HousekeepingActivator {
         ContextService contexts = getService(ContextService.class);
         ConfigurationService configuration = getService(ConfigurationService.class);
         UserConfigurationService userConfigs = getService(UserConfigurationService.class);
-        
+
         {
             ContextConfigProvider provider = new ContextConfigProvider(contexts);
-        
+
             Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "context");
-        
+
             registerService(ConfigProviderService.class, provider, properties);
         }
-        
+
         {
             Whiteboard whiteboard = new Whiteboard(context);
-            
+
             ConfigViewFactory configViews = whiteboard.getService(ConfigViewFactory.class);
-            
+
             ContextSetConfigProvider provider = new ContextSetConfigProvider(contexts, configuration, userConfigs, configViews);
-        
+
             Hashtable<String, Object> properties = new Hashtable<String,Object>();
             properties.put("scope", "contextSets");
-        
+
             registerService(ConfigProviderService.class, provider, properties);
         }
-        
-        
-        
+
+
+
     }
 
 

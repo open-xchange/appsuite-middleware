@@ -53,7 +53,7 @@ package com.openexchange.webdav.xml.fields;
 
 /**
  * FolderChildFields
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
@@ -62,33 +62,33 @@ public interface FolderFields extends FolderChildFields {
 	public static final String TITLE = "title";
 
 	public static final String MODULE = "module";
-	
+
 	public static final String TYPE = "type";
-	
+
 	public static final String SUBFOLDERS = "subfolders";
-	
+
 	public static final String OWN_RIGHTS = "own_rights";
-	
+
 	public static final String PERMISSIONS = "permissions";
-	
+
 	public static final String SUMMARY = "summary";
-	
+
 	public static final String STANDARD_FOLDER = "standard_folder";
-	
+
 	public static final String TOTAL = "total";
-	
+
 	public static final String NEW = "new";
-	
+
 	public static final String UNREAD = "unread";
-	
+
 	public static final String DELETED = "deleted";
-	
+
 	public static final String BITS = "bits";
-	
+
 	public static final String RIGHTS = "rights";
-	
+
 	public static final String ENTITY = "entity";
-	
+
 	public static final String GROUP = "group";
-	
+
 }

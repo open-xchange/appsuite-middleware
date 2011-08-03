@@ -57,7 +57,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * FolderSQLInterface for OX Folders
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface FolderSQLInterface {
@@ -154,7 +154,7 @@ public interface FolderSQLInterface {
 
     /**
      * Either creates (if folder does not exist, yet) or changes a folder
-     * 
+     *
      * @return an instance of <tt>FolderObject</tt> that represents the newly
      *         created or modified <tt>FolderObject</tt> object
      */
@@ -162,14 +162,14 @@ public interface FolderSQLInterface {
 
     /**
      * Deletes a folder
-     * 
+     *
      * @return the id of the deleted <tt>FolderObject</tt> object
      */
     int deleteFolderObject(FolderObject folderobject, Date clientLastModified) throws OXException;
 
     /**
      * Deletes all items located in given folder
-     * 
+     *
      * @param delFolderObj -
      *            the unique ID of the folder whose content should be deleted
      * @param clientLastModified -

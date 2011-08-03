@@ -58,7 +58,7 @@ import com.openexchange.messaging.generic.internal.ParameterizedHeader;
 
 /**
  * {@link MimeContentDisposition} - The MIME content disposition.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -70,7 +70,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Gets the <i>Content-Disposition</i> name.
-     * 
+     *
      * @return The <i>Content-Disposition</i> name
      */
     public static String getContentDispositionName() {
@@ -89,7 +89,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Initializes a new {@link MimeContentDisposition}
-     * 
+     *
      * @param contentDisp The content disposition
      * @throws OXException If content disposition cannot be parsed
      */
@@ -149,7 +149,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Applies given content disposition to this content disposition
-     * 
+     *
      * @param contentDisp The content disposition to apply
      */
     public void setContentDisposition(final MimeContentDisposition contentDisp) {
@@ -212,7 +212,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Checks if disposition is inline
-     * 
+     *
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      */
     public boolean isInline() {
@@ -221,7 +221,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Checks if disposition is attachment
-     * 
+     *
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      */
     public boolean isAttachment() {
@@ -235,7 +235,7 @@ public final class MimeContentDisposition extends ParameterizedHeader implements
 
     /**
      * Returns a RFC2045 style (ASCII-only) string representation of this content disposition.
-     * 
+     *
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content disposition
      */

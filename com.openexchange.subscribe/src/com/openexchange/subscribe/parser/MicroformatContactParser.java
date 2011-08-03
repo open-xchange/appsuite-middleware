@@ -71,15 +71,15 @@ import com.openexchange.subscribe.TargetFolderSession;
 public class MicroformatContactParser extends ContactHandler implements SubscriptionHandler {
     protected Collection<Contact> contacts;
     protected SubscribeService service;
-    
+
     public MicroformatContactParser(){
         super();
     }
-    
+
     public MicroformatContactParser(final SubscribeService service){
         this.service = service;
     }
- 
+
     /**
      * Read the site of a subscription and return its content as a string
      * @param subscription
@@ -89,7 +89,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
     protected String readSubscription(final Subscription subscription) throws IOException{
         BufferedReader buffy = null;
         final StringBuilder bob = new StringBuilder();
-               
+
         try {
             final URL url = new URL(""); //new URL(subscription.getUrl());
             final URLConnection connection = url.openConnection();
@@ -111,11 +111,11 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
     public void handleSubscription(final Subscription subscription) throws OXException{
         try {
             final String website = readSubscription(subscription);
-            
+
             parse( website );
-            
+
             storeContacts(new TargetFolderSession(subscription), subscription.getFolderIdAsInt(), this.getContacts());
-            
+
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -123,7 +123,7 @@ public class MicroformatContactParser extends ContactHandler implements Subscrip
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
 
     public void parse(final String text) {

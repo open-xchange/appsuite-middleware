@@ -11,9 +11,9 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionPLInfo;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -28,8 +28,8 @@ import com._4psa.extensiondata_xsd._2_5.ExtensionPLInfo;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -50,11 +50,11 @@ public class SetExtensionPLRequest
 
     /**
      * Gets the value of the shareVoicemail property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Share }
-     *     
+     *
      */
     public Share getShareVoicemail() {
         return shareVoicemail;
@@ -62,11 +62,11 @@ public class SetExtensionPLRequest
 
     /**
      * Sets the value of the shareVoicemail property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Share }
-     *     
+     *
      */
     public void setShareVoicemail(Share value) {
         this.shareVoicemail = value;
@@ -74,11 +74,11 @@ public class SetExtensionPLRequest
 
     /**
      * Gets the value of the shareFaxes property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Share }
-     *     
+     *
      */
     public Share getShareFaxes() {
         return shareFaxes;
@@ -86,11 +86,11 @@ public class SetExtensionPLRequest
 
     /**
      * Sets the value of the shareFaxes property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Share }
-     *     
+     *
      */
     public void setShareFaxes(Share value) {
         this.shareFaxes = value;
@@ -98,11 +98,11 @@ public class SetExtensionPLRequest
 
     /**
      * Gets the value of the shareRecordings property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Share }
-     *     
+     *
      */
     public Share getShareRecordings() {
         return shareRecordings;
@@ -110,11 +110,11 @@ public class SetExtensionPLRequest
 
     /**
      * Sets the value of the shareRecordings property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Share }
-     *     
+     *
      */
     public void setShareRecordings(Share value) {
         this.shareRecordings = value;
@@ -122,11 +122,11 @@ public class SetExtensionPLRequest
 
     /**
      * Gets the value of the shareCallHistory property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Share }
-     *     
+     *
      */
     public Share getShareCallHistory() {
         return shareCallHistory;
@@ -134,11 +134,11 @@ public class SetExtensionPLRequest
 
     /**
      * Sets the value of the shareCallHistory property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Share }
-     *     
+     *
      */
     public void setShareCallHistory(Share value) {
         this.shareCallHistory = value;

@@ -58,7 +58,7 @@ import com.openexchange.file.storage.FileStorageService;
 
 /**
  * Renders a FileStorageAccount in its JSON representation also using the dynamic form description of the parent file storage service.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

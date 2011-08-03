@@ -59,14 +59,14 @@ public class DeltaImpl<T> implements Delta<T> {
     private final SearchIterator<T> Modified;
     private final SearchIterator<T> Deleted;
     private final long sequenceNumber;
-    
+
     public DeltaImpl(final SearchIterator<T> New, final SearchIterator<T> Modified, final SearchIterator<T> Deleted, final long sequenceNumber) {
         this.New = New;
         this.Modified = Modified;
         this.Deleted = Deleted;
         this.sequenceNumber = sequenceNumber;
     }
-    
+
     public SearchIterator<T> getNew() {
         return New;
     }
@@ -86,8 +86,8 @@ public class DeltaImpl<T> implements Delta<T> {
     public long sequenceNumber() throws OXException {
         return sequenceNumber;
     }
-    
-    
+
+
     public void close() throws OXException {
         New.close();
         Modified.close();

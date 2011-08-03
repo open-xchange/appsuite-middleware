@@ -58,7 +58,7 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link SimSubscribeService}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SimSubscribeService implements SubscribeService {
@@ -127,7 +127,7 @@ public class SimSubscribeService implements SubscribeService {
     public List<Subscription> getSubscriptionIDs() {
         return subscriptionIds;
     }
-    
+
     public void clearSim() {
         subscriptionIds.clear();
     }
@@ -135,11 +135,11 @@ public class SimSubscribeService implements SubscribeService {
     public void setContent(final Collection content) {
         this.content = content;
     }
-    
+
     public boolean knows(final Context context, final int subscriptionId) {
         return true;
     }
-    
+
     public void setSubscriptions(final List<Subscription> subscriptions){
         this.subscriptionIds = subscriptions;
     }
@@ -165,7 +165,7 @@ public class SimSubscribeService implements SubscribeService {
      */
     public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

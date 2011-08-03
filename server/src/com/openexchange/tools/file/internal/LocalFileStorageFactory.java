@@ -60,6 +60,7 @@ public class LocalFileStorageFactory implements FileStorageFactory {
         super();
     }
 
+    @Override
     public LocalFileStorage getFileStorage(final URI uri) throws OXException {
         LocalFileStorage fs;
         try {

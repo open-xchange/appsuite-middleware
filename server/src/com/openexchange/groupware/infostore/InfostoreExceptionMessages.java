@@ -79,7 +79,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String NO_TARGET_CREATE_PERMISSION_MSG = "You are not allowed to create objects in the target folder.";
 
     public static final String NOT_ALL_DELETED_MSG = "Could not delete all objects.";
-    
+
     public static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG = "You do not have sufficient permission to delete this version.";
 
     public static final String ITERATE_FAILED_MSG = "Could not iterate result.";
@@ -87,7 +87,7 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     public static final String ALREADY_LOCKED_MSG = "This document is locked.";
 
     public static final String LOCKED_BY_ANOTHER_MSG = "You cannot unlock this document.";
-    
+
     public static final String WRITE_PERMS_FOR_LOCK_MISSING_MSG = "You need write permissions to lock a document.";
 
     public static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";

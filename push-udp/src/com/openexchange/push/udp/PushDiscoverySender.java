@@ -60,7 +60,7 @@ import com.openexchange.tools.encoding.Charsets;
 
 /**
  * PushOutputQueue
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushDiscoverySender implements Runnable {
@@ -112,6 +112,6 @@ public class PushDiscoverySender implements Runnable {
     }
 
     public void stopSender() {
-        task.cancel();        
+        task.cancel();
     }
 }

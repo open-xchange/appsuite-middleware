@@ -71,9 +71,9 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class FileMetadataWriter {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
-    
+
     private static final JSONHandler JSON = new JSONHandler();
-    
+
     public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
         final JSONArray array = new JSONArray();
         while (files.hasNext()) {
@@ -89,8 +89,8 @@ public class FileMetadataWriter {
         }
         return array;
     }
-    
-    
+
+
     private Object writeAttribute(final File f, final Field field, final TimeZone tz) {
         return field.handle(JSON, f, tz);
     }
@@ -114,15 +114,15 @@ public class FileMetadataWriter {
                 }
                 if(field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
                     return 0;
-                } 
+                }
                 return writeDate((Date) value, tz);
             }
-            
+
             switch(field) {
             case CATEGORIES: return handleCategories((String) value);
             default: // do nothing;
             }
-            
+
             return value;
         }
 
@@ -145,10 +145,10 @@ public class FileMetadataWriter {
             for (final String string : strings) {
                 array.put(string);
             }
-            
+
             return array;
         }
-        
+
     }
 
 
@@ -164,7 +164,7 @@ public class FileMetadataWriter {
                 }
                 return o;
             }
-            
+
         }, new JSONObject());
     }
 }

@@ -61,11 +61,11 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link State} - Reflects the notification state for a calendar object.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public interface State {
 
@@ -87,7 +87,7 @@ public interface State {
 
 	/**
 	 * Indicates if specified settings enable notification
-	 * 
+	 *
 	 * @param userSettingMail
 	 *            The user's mail settings
 	 * @param owner
@@ -104,7 +104,7 @@ public interface State {
 	/**
 	 * Gets the date/time formatter with default formatting styles for the given
 	 * locale.
-	 * 
+	 *
 	 * @param locale
 	 *            The locale
 	 * @return The date/time formatter with default formatting styles for the
@@ -114,7 +114,7 @@ public interface State {
 
 	/**
 	 * Adds special replacements to render map.
-	 * 
+	 *
 	 * @param obj
 	 *            The calendar object
 	 * @param oldObj
@@ -128,7 +128,7 @@ public interface State {
 
 	/**
 	 * Gets the calendar object's module.
-	 * 
+	 *
 	 * @return The calendar object's module (one of the constants defined in
 	 *         {@link com.openexchange.groupware.Types})
 	 */
@@ -140,21 +140,21 @@ public interface State {
 
 	/**
 	 * Gets the notification template appropriate for this state
-	 * 
+	 *
 	 * @return The notification template appropriate for this state
 	 */
 	public Template getTemplate();
 
 	/**
 	 * Gets the action replacement
-	 * 
+	 *
 	 * @return The action replacement
 	 */
 	public TemplateReplacement getAction();
 
 	/**
 	 * Gets the confirmation action replacement
-	 * 
+	 *
 	 * @return The confirmation action replacement or <code>null</code> if not
 	 *         applicable to this state
 	 */
@@ -162,7 +162,7 @@ public interface State {
 
 	/**
 	 * Gets this state's type
-	 * 
+	 *
 	 * @return This state's type
 	 */
 	public Type getType();

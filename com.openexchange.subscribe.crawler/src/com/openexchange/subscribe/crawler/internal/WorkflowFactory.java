@@ -58,7 +58,7 @@ import com.openexchange.subscribe.crawler.Workflow;
 
 /**
  * Gets a text input and creates Workflow
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class WorkflowFactory {
@@ -88,7 +88,7 @@ public class WorkflowFactory {
     private static void checkSanity(final Workflow workflow) throws OXException {
         Step previousStep = null;
         for (final Step currentStep : workflow.getSteps()) {
-            if (previousStep != null) {                
+            if (previousStep != null) {
                 if (!previousStep.runEmpty()[0].equals(currentStep.runEmpty()[1])) {
                     throw SubscriptionErrorMessage.INVALID_WORKFLOW.create();
                 }

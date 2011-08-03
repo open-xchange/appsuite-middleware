@@ -56,14 +56,14 @@ import java.util.List;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
 
     /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector
-     * 
+     *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @return connected strings or null if collection == null or empty string if collection is empty
@@ -106,10 +106,10 @@ public class Strings {
         }
         return join(list, connector);
     }
-    
+
     /**
      * Removes byte order marks from UTF8 strings.
-     * @return new instance of trimmed string - or reference to old one if unchanged 
+     * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(String str) {
 		final byte[][] byteOrderMarks = new byte[][]{
@@ -118,26 +118,29 @@ public class Strings {
 				new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF},
 				new byte[]{(byte)0xFE, (byte)0xFF},
 				new byte[]{(byte)0xFE, (byte)0xFF}
-			};				
-		
+			};
+
 		byte[] bytes = str.getBytes();
 		for(byte[] bom: byteOrderMarks){
-			if(bom.length > bytes.length)
-				continue;
-			
+			if(bom.length > bytes.length) {
+                continue;
+            }
+
 			String pattern = new String(bom);
-			if(! str.startsWith(pattern))
-				continue;
-			
+			if(! str.startsWith(pattern)) {
+                continue;
+            }
+
 			int bomLen = new String(bom).getBytes().length; //sadly the BOM got encoded meanwhile
-			
+
 			int len = bytes.length-bomLen;
 			byte[] trimmed = new byte[len];
-			for(int i = 0; i < len; i++)
-				trimmed[i] = bytes[i+bomLen];
+			for(int i = 0; i < len; i++) {
+                trimmed[i] = bytes[i+bomLen];
+            }
 			return new String(trimmed);
 		}
-		
+
 		return str;
 	}
 

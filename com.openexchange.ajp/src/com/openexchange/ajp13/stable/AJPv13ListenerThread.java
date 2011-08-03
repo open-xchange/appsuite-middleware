@@ -52,7 +52,7 @@ package com.openexchange.ajp13.stable;
 /**
  * {@link AJPv13ListenerThread} - A subclass of {@link Thread thread} enhanced with an additional flag to indicate <i>dead</i> status. This
  * flag is checked inside AJP listener to prevent this thread from further running.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13ListenerThread extends Thread {

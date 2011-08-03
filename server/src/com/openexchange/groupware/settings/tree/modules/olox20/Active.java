@@ -63,6 +63,7 @@ public class Active extends AbstractModules {
         super();
     }
 
+    @Override
     public String[] getPath() {
         return new String[] { "modules", "olox20", "active" };
     }

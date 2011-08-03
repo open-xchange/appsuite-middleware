@@ -59,9 +59,10 @@ import com.openexchange.authentication.service.Authentication;
 
 /**
  * Authentication service tracker putting the service into the static authentication class.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
+public class AuthenticationCustomizer implements ServiceTrackerCustomizer<AuthenticationService, AuthenticationService> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthenticationCustomizer.class));
 
@@ -72,8 +73,9 @@ public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final AuthenticationService auth = (AuthenticationService) context.getService(reference);
+    @Override
+    public AuthenticationService addingService(final ServiceReference<AuthenticationService> reference) {
+        final AuthenticationService auth = context.getService(reference);
         if (Authentication.setService(auth)) {
             return auth;
         }
@@ -81,13 +83,14 @@ public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
         return null;
     }
 
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
         // Nothing to do.
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
-        final AuthenticationService auth = (AuthenticationService) service;
+    @Override
+    public void removedService(final ServiceReference<AuthenticationService> reference, final AuthenticationService service) {
+        final AuthenticationService auth = service;
         if (!Authentication.dropService(auth)) {
             LOG.error("Removed authentication services was not active!");
         }

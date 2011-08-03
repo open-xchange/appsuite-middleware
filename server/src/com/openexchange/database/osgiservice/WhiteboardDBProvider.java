@@ -61,19 +61,21 @@ import com.openexchange.tools.global.OXCloseable;
 
 /**
  * {@link WhiteboardDBProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardDBProvider implements DBProvider{
 
-    
+
     public static class Factory implements WhiteboardFactoryService<DBProvider> {
 
+        @Override
         public DBProvider create(final BundleContext context, final Collection<OXCloseable> closeables) {
             final WhiteboardDBProvider provider = new WhiteboardDBProvider(context);
             return provider;
         }
 
+        @Override
         public Class<DBProvider> getType() {
             return DBProvider.class;
         }
@@ -86,6 +88,7 @@ public class WhiteboardDBProvider implements DBProvider{
         this.context = context;
     }
 
+    @Override
     public Connection getReadConnection(final Context ctx) throws OXException {
         DBProvider provider = null;
         ServiceReference<DBProvider> reference = null;
@@ -98,6 +101,7 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
+    @Override
     public Connection getWriteConnection(final Context ctx) throws OXException {
         DBProvider provider = null;
         ServiceReference<DBProvider> reference = null;
@@ -110,6 +114,7 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
+    @Override
     public void releaseReadConnection(final Context ctx, final Connection con) {
         DBProvider provider = null;
         ServiceReference<DBProvider> reference = null;
@@ -122,6 +127,7 @@ public class WhiteboardDBProvider implements DBProvider{
         }
     }
 
+    @Override
     public void releaseWriteConnection(final Context ctx, final Connection con) {
         DBProvider provider = null;
         ServiceReference<DBProvider> reference = null;

@@ -56,7 +56,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link FacebookConfiguration}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -66,7 +66,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the {@link FacebookConfiguration instance}.
-     * 
+     *
      * @return The instance
      */
     public static FacebookConfiguration getInstance() {
@@ -116,7 +116,7 @@ public final class FacebookConfiguration {
 
     /**
      * Configures this {@link FacebookConfiguration instance} using given {@link ConfigurationService configuration service}.
-     * 
+     *
      * @param configurationService The configuration service
      */
     public void configure(final ConfigurationService configurationService) {
@@ -189,7 +189,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the login page base URL; e.g. <i>http://www.facebook.com/login.php</i>.
-     * 
+     *
      * @return The login page base URL
      */
     public String getLoginPageBaseURL() {
@@ -198,7 +198,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the API key.
-     * 
+     *
      * @return The API key
      */
     public String getApiKey() {
@@ -207,7 +207,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the secret key.
-     * 
+     *
      * @return The secret key
      */
     public String getSecretKey() {
@@ -216,7 +216,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the API version.
-     * 
+     *
      * @return The API version
      */
     public String getApiVersion() {
@@ -225,7 +225,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the name of the user field.
-     * 
+     *
      * @return The name of the user field
      */
     public String getNameOfUserField() {
@@ -234,7 +234,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the name of the password field.
-     * 
+     *
      * @return The name of the password field
      */
     public String getNameOfPasswordField() {
@@ -243,7 +243,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the pattern to check the link of the expected page after a successful login to facebook.
-     * 
+     *
      * @return The pattern
      */
     public Pattern getLinkAfterLoginPattern() {
@@ -252,7 +252,7 @@ public final class FacebookConfiguration {
 
     /**
      * Gets the action of the login form; e.g. <i>https://login.facebook.com/login.php?login_attempt=1</i>.
-     * 
+     *
      * @return The action of the login form
      */
     public String getActionOfLoginForm() {

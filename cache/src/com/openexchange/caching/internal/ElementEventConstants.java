@@ -51,7 +51,7 @@ package com.openexchange.caching.internal;
 
 /**
  * {@link ElementEventConstants}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class ElementEventConstants {

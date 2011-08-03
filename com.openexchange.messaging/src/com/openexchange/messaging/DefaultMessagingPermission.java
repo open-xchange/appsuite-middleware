@@ -51,7 +51,7 @@ package com.openexchange.messaging;
 
 /**
  * {@link DefaultMessagingPermission} - The default messaging permission granting full access.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -59,7 +59,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
 
     /**
      * Creates a new instance of {@link DefaultMessagingPermission} with {@link #setMaxPermissions()} invoked.
-     * 
+     *
      * @return A new instance of {@link DefaultMessagingPermission} with {@link #setMaxPermissions()} invoked
      */
     public static DefaultMessagingPermission newInstance() {

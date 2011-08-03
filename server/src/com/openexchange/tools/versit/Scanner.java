@@ -166,7 +166,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
 
     /**
      * Returns a single unfolded character and updates peek.
-     * 
+     *
      * @return The character, or -1 at the end of the stream, or -2 at the end of a logical line.
      * @throws IOException
      */
@@ -178,7 +178,7 @@ public abstract class Scanner implements VersitDefinition.Reader {
 
     /**
      * Reads a single character and performs unfolding.
-     * 
+     *
      * @return The character, or -1 at the end of the stream, or -2 at the end of a logical line.
      * @throws IOException
      */

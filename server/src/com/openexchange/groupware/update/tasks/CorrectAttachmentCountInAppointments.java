@@ -64,5 +64,5 @@ public class CorrectAttachmentCountInAppointments extends SimpleStatementsUpdate
         add("UPDATE prg_dates AS d SET d.intfield08 = (SELECT count(*) FROM prg_attachment AS a WHERE a.cid=d.cid AND a.module = 1 AND a.attached = d.intfield01)");
     }
 
- 
+
 }

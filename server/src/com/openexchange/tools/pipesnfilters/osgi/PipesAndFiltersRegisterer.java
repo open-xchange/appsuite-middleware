@@ -72,6 +72,7 @@ public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(ServiceReference reference) {
         ThreadPoolService service = (ThreadPoolService) context.getService(reference);
         if (null == registration) {
@@ -80,10 +81,12 @@ public class PipesAndFiltersRegisterer implements ServiceTrackerCustomizer {
         return service;
     }
 
+    @Override
     public void modifiedService(ServiceReference reference, Object service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference reference, Object service) {
         if (null != registration) {
             registration.unregister();

@@ -70,6 +70,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         super();
     }
 
+    @Override
     public long attached(final AttachmentEvent e) throws OXException {
         final int userId = e.getUser().getId();
         final int[] groups = e.getUser().getGroups();
@@ -79,6 +80,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         return co.getLastModified().getTime();
     }
 
+    @Override
     public long detached(final AttachmentEvent event) throws OXException {
         final Contact co = Contacts.getContactById(event.getAttachedId(),event.getUser().getId(),event.getUser().getGroups(),event.getContext(),event.getUserConfig(),event.getWriteConnection());
         if (co.getNumberOfAttachments() < 1) {
@@ -91,6 +93,7 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         return co.getLastModified().getTime();
     }
 
+    @Override
     public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         final boolean back = Contacts.performContactWriteCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
         if (!back) {
@@ -98,10 +101,12 @@ public class ContactsAttachment implements AttachmentListener, AttachmentAuthori
         }
     }
 
+    @Override
     public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         checkMayAttach(folderId, objectId,user,userConfig,ctx);
     }
 
+    @Override
     public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
         final boolean back = Contacts.performContactReadCheckByID(folderId, objectId,user.getId(),ctx,userConfig);
         if (!back) {

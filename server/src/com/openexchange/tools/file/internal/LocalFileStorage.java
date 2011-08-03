@@ -140,9 +140,9 @@ public class LocalFileStorage implements FileStorage {
         tmp.add(STATEFILENAME);
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
-    
+
     /**
      * This lock is used to avoid threads from creating a filestore dir simultaneously.
      */
@@ -150,7 +150,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
-     * 
+     *
      * @param depth depth of sub directories for storing files.
      * @param entries number of entries per sub directory.
      * @throws OXException if a problem occurs while creating the file storage.
@@ -158,9 +158,9 @@ public class LocalFileStorage implements FileStorage {
     public LocalFileStorage(final URI uri) throws OXException {
         super();
         storage = new File(uri);
-        
+
        	alreadyInitialized = storage.exists();
-        
+
     }
 
     /**
@@ -183,11 +183,12 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Checks, if Statefile is correct. Especially if nextEntry is right and all Files really exist.
-     * 
+     *
      * @author Steffen Templin
      * @return True if Statefile is correct
      * @throws OXException
      */
+    @Override
     public boolean stateFileIsCorrect() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
@@ -245,7 +246,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Calculates the Entrypath of the file that is previous to identifier
-     * 
+     *
      * @param identifier
      * @return String of the previous File
      * @throws OXException
@@ -319,11 +320,12 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Stores a new file in the file storage.
-     * 
+     *
      * @param input the files data will be written from this input stream.
      * @return the identifier of the newly created file.
      * @throws OXException if an error occurs while storing the file.
      */
+    @Override
     public String saveNewFile(final InputStream input) throws OXException {
     	initialize();
         String nextentry = null;
@@ -389,19 +391,21 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Gets a file from the file storage.
-     * 
+     *
      * @param identifier identifier of the file.
      * @return an inputstream from that the file can be read once.
      * @throws OXException if an error occurs.
      */
+    @Override
     public InputStream getFile(final String identifier) throws OXException {
-        
+
         return load(identifier);
     }
 
     /**
      * @return a complete list of files in this filestorage
      */
+    @Override
     public SortedSet<String> getFileList() {
         final SortedSet<String> allIds = new TreeSet<String>();
         listRecursively(allIds, "", storage);
@@ -429,6 +433,7 @@ public class LocalFileStorage implements FileStorage {
         }
     }
 
+    @Override
     public long getFileSize(final String name) throws OXException {
         final File dataFile = new File(storage, name);
         if (!dataFile.exists()) {
@@ -437,6 +442,7 @@ public class LocalFileStorage implements FileStorage {
         return dataFile.length();
     }
 
+    @Override
     public String getMimeType(final String name) {
         final MimetypesFileTypeMap map = new MimetypesFileTypeMap();
         return map.getContentType(new File(storage, name));
@@ -444,11 +450,12 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Deletes a file in the FileStorage.
-     * 
+     *
      * @param identifier identifier of the file to delete.
      * @return true if the file has been deleted successfully.
      * @throws OXException if an error occurs.
      */
+    @Override
     public boolean deleteFile(final String identifier) throws OXException {
         final boolean retval = delete(new String[] { identifier }).isEmpty();
         if (retval) {
@@ -466,11 +473,12 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Deletes a set of files in the FileStorage.
-     * 
+     *
      * @param identifier identifier of the files to delete.
      * @return a set of identifiers that could not be deleted.
      * @throws OXException if an error occurs.
      */
+    @Override
     public Set<String> deleteFiles(final String[] identifiers) throws OXException {
         final Set<String> notDeleted = delete(identifiers);
         if (notDeleted.size() < identifiers.length) {
@@ -492,9 +500,10 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * This method removes the complete FileStorage and its elements.
-     * 
+     *
      * @throws OXException if removing fails.
      */
+    @Override
     public void remove() throws OXException {
         // Already initialized?
         if (!alreadyInitialized || !storage.exists()) {
@@ -507,9 +516,10 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Recreates the state file of a storage no matter if it exists or not
-     * 
+     *
      * @throws OXException if an error occurs.
      */
+    @Override
     public void recreateStateFile() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
@@ -525,7 +535,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Calculates the next free Entry of the Storage
-     * 
+     *
      * @param identifier last used Entry in the Storage
      * @return Path of the next free Entry as String
      * @throws OXException if an error occurs while calculating the next free Entry
@@ -567,7 +577,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Scans the whole Storage and creates a list of unused Entries
-     * 
+     *
      * @return Set of free Entries
      * @throws OXException if an error occurs while scanning
      */
@@ -585,7 +595,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Calculates the very first Entry in the Store based on the depth
-     * 
+     *
      * @return Path to the first Entry as String
      */
     protected String computeFirstEntry() {
@@ -600,7 +610,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Checks if File or Folder exists
-     * 
+     *
      * @param name Name of the file that has to be checked
      * @return true if File or Folder exists
      * @throws OXException
@@ -611,7 +621,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Saves the Inputfile in the Storage
-     * 
+     *
      * @param name Name of the Inputfile
      * @param input The Inputfile
      * @throws OXException
@@ -619,7 +629,7 @@ public class LocalFileStorage implements FileStorage {
     protected void save(final String name, final InputStream input) throws OXException {
         final File file = new File(storage, name);
         final File parentDir = file.getParentFile();
-        
+
         if (!parentDir.exists()) {
             try {
                 LOCK.lock();
@@ -628,9 +638,9 @@ public class LocalFileStorage implements FileStorage {
                 }
             } finally {
                 LOCK.unlock();
-            }            
+            }
         }
-        
+
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -690,7 +700,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Deletes the lock
-     * 
+     *
      * @throws OXException
      */
     protected void unlock() throws OXException {
@@ -705,7 +715,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Loads the state file.
-     * 
+     *
      * @return a successfully loaded state file.
      * @throws OXException if the state file cannot be loaded.
      */
@@ -720,7 +730,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Saves the state file.
-     * 
+     *
      * @param state state file to save.
      * @throws OXException if the saving fails.
      */
@@ -735,7 +745,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Loads the File
-     * 
+     *
      * @param name Name of the File
      * @return File as FileInputStream
      * @throws OXException
@@ -759,7 +769,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Formats the entry name as a string. Names will bein the range 0 till (entries - 1).
-     * 
+     *
      * @param entry to format
      * @return formated entry name
      */
@@ -777,7 +787,7 @@ public class LocalFileStorage implements FileStorage {
     /**
      * This method eliminates the complete storage of files including state files and parent directory. Before eliminating the storage, it
      * will be locked to exclude other instances throwing ugly errors.
-     * 
+     *
      * @throws OXException if eliminating fails.
      */
     protected void eliminate() throws OXException {
@@ -801,7 +811,7 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * Deletes a set of Files
-     * 
+     *
      * @param names The Filenames
      * @return Set of Files that could not be deleted
      */
@@ -818,7 +828,7 @@ public class LocalFileStorage implements FileStorage {
     /**
      * Tries to recreate the state file. This is only a fast restore because it determines only the next free slot in the FileStorage. This
      * method doesn't care about empty (deleted) slots.
-     * 
+     *
      * @return a fastly repaired state object.
      * @throws OXException if checking for existing files throws an IOException.
      */
@@ -848,12 +858,12 @@ public class LocalFileStorage implements FileStorage {
         }
         return directory.mkdir();
     }
-    
+
     private void initialize() throws OXException{
     	if(alreadyInitialized) {
             return;
         }
-    	
+
         try {
             LOCK.lock();
             if (!storage.exists() && !mkdirs(storage)) {
@@ -862,7 +872,7 @@ public class LocalFileStorage implements FileStorage {
         } finally {
             LOCK.unlock();
         }
-        
+
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {

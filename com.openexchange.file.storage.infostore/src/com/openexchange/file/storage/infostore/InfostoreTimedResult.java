@@ -63,7 +63,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class InfostoreTimedResult implements TimedResult<File> {
 
-    private TimedResult<DocumentMetadata> documents;
+    private final TimedResult<DocumentMetadata> documents;
 
     public InfostoreTimedResult(TimedResult<DocumentMetadata> documents) {
         this.documents = documents;

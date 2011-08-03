@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 /**
  * {@link ConversionService} - The conversion service which offers look-up methods for {@link DataSource data sources} and
  * {@link DataHandler data handlers}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ConversionService {
@@ -66,7 +66,7 @@ public interface ConversionService {
      * <p>
      * The identifier should correspond to java's package naming; e.g.<br>
      * <code>&quot;my.path.to.specific.datasource&quot;</code>
-     * 
+     *
      * @param identifier The identifier string
      * @return The data source associated with specified identifier or <code>null</code>.
      */
@@ -77,7 +77,7 @@ public interface ConversionService {
      * <p>
      * The identifier should correspond to java's package naming; e.g.<br>
      * <code>&quot;my.path.to.specific.datahandler&quot;</code>
-     * 
+     *
      * @param identifier The identifier string
      * @return The data handler associated with specified identifier or <code>null</code>.
      */
@@ -87,7 +87,7 @@ public interface ConversionService {
      * Looks-up and checks appropriate {@link DataSource data source} and {@link DataHandler data handler}. Then the
      * {@link DataHandler#processData(Object, DataArguments, Session)} method is triggered with
      * {@link DataSource#getData(Class, DataArguments, Session)} as input invoked with a matching supported type.
-     * 
+     *
      * @param dataSourceIdentifier The data source identifier
      * @param dataSourceArguments The data source arguments
      * @param dataHandlerIdentifier The data handler identifier
@@ -102,7 +102,7 @@ public interface ConversionService {
      * Looks-up and checks appropriate {@link DataHandler data handler}. Then the
      * {@link DataHandler#processData(Object, DataArguments, Session)} method is triggered with specified input stream as input provided
      * that {@link DataHandler data handler} supports {@link InputStream} class.
-     * 
+     *
      * @param inputStream The input stream
      * @param dataHandlerIdentifier The data handler identifier
      * @param dataHandlerArguments The data handler arguments

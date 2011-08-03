@@ -24,19 +24,19 @@ import org.apache.jsieve.parser.generated.Token;
 
 /**
  * <p>A parsed representation of the RFC3028 BNF...</p>
- * 
+ *
  * <code>1*DIGIT [QUANTIFIER]</code>
- * 
+ *
  * <p>Note that the stored value is the absolute value after applying the quantifier.
  * </p>
- * 
+ *
  */
 public class NumberArgument implements Argument
 {
-    
+
     /**
-     * The absolute value of the number after applying the quentifier. 
-     */ 
+     * The absolute value of the number after applying the quentifier.
+     */
     private Integer fieldValue;
 
     /**
@@ -46,7 +46,7 @@ public class NumberArgument implements Argument
     {
         super();
     }
-    
+
     /**
      * Constructor for NumberArgument.
      * @param token
@@ -73,7 +73,7 @@ public class NumberArgument implements Argument
     {
         return fieldValue;
     }
-    
+
     /**
      * Method getInteger answers the value of the receiver as an Integer.
      * @return Integer
@@ -81,7 +81,7 @@ public class NumberArgument implements Argument
     public Integer getInteger()
     {
         return fieldValue;
-    }    
+    }
 
     /**
      * Sets the value of the receiver from a Token.
@@ -116,6 +116,7 @@ public class NumberArgument implements Argument
     /**
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString()
     {
         return (getValue() == null) ? "null" : getValue().toString();

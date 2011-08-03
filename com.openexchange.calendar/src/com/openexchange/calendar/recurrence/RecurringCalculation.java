@@ -107,7 +107,7 @@ public class RecurringCalculation {
 
     private int PMAXTC = 999;
 
-    private CalendarCollection recColl;
+    private final CalendarCollection recColl;
 
     /**
      * set true if a recurrence calculation should find also appointments which are not completely surrounded by the given range.

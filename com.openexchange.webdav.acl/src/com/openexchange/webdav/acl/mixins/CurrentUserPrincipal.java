@@ -63,12 +63,12 @@ public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "current-user-principal";
     private SessionHolder sessionHolder = null;
-    
+
     public CurrentUserPrincipal(SessionHolder sessionHolder) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.sessionHolder = sessionHolder;
     }
-    
+
     @Override
     protected String getValue() {
         return "<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";

@@ -64,7 +64,7 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 
 /**
  * {@link ContentDispositionWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContentDispositionWriterTest extends TestCase{
@@ -80,12 +80,12 @@ public class ContentDispositionWriterTest extends TestCase{
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Disposition", writer.writeKey(entry));
-        
+
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
-        
+
         final JSONObject jsonCDisp = (JSONObject) value;
-        
+
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("type").withValue(ContentDisposition.ATTACHMENT)
@@ -93,11 +93,11 @@ public class ContentDispositionWriterTest extends TestCase{
                     .hasKey("filename").withValue("foo.dat")
                 .objectEnds()
             .objectEnds();
-        
+
         assertValidates(assertion, jsonCDisp);
-        
+
     }
-    
+
     public void testWriteBasicHeader() throws OXException, JSONException {
         final MessagingHeader contentDisp = new StringMessageHeader("Content-Disposition", ContentDisposition.ATTACHMENT+";filename=foo.dat");
 
@@ -107,10 +107,10 @@ public class ContentDispositionWriterTest extends TestCase{
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Disposition", writer.writeKey(entry));
-        
+
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
-        
+
         final JSONObject jsonCDisp = (JSONObject) value;
 
         final JSONAssertion assertion = new JSONAssertion()
@@ -120,9 +120,9 @@ public class ContentDispositionWriterTest extends TestCase{
                 .hasKey("filename").withValue("foo.dat")
             .objectEnds()
         .objectEnds();
-        
+
         assertValidates(assertion, jsonCDisp);
-        
+
     }
 
     private SimEntry<String, Collection<MessagingHeader>> entry(final MessagingHeader header) {

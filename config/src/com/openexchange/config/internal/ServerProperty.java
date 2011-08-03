@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ServerProperty}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -68,8 +68,8 @@ public class ServerProperty implements BasicProperty {
 
     private boolean defined;
 
-    private Map<String, String> metadata = new HashMap<String, String>();
-    
+    private final Map<String, String> metadata = new HashMap<String, String>();
+
     public String get() {
         return value;
     }

@@ -90,7 +90,7 @@ public class Bug16158Test extends TestCase {
         for (int i = 0; i < rotators.length; i++) {
             rotators[i] = new SessionRotator();
             rotatorThreads[i] = new Thread(rotators[i]);
-            
+
         }
     }
 

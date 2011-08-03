@@ -69,7 +69,7 @@ import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AddressHeaderParser implements MessagingHeaderParser {
-    
+
     private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
         "From",
         "To",
@@ -84,7 +84,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         "Resent-To",
         "Resent-Cc",
         "Resent-Bcc"));
-    
+
     public int getRanking() {
         return 1;
     }
@@ -95,7 +95,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
 
     public void parseAndAdd(final Map<String, Collection<MessagingHeader>> headers, final String key, final Object value) throws JSONException, OXException {
         final ArrayList<MessagingHeader> list = new ArrayList<MessagingHeader>();
-        
+
         if(JSONArray.class.isInstance(value)) {
             final JSONArray arr = (JSONArray) value;
             for(int i = 0, size = arr.length(); i < size; i++) {
@@ -104,7 +104,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         } else {
             parse(key, value, list);
         }
-        
+
         headers.put(key, list);
     }
 

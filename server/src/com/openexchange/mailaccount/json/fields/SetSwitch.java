@@ -55,7 +55,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
  * {@link SetSwitch}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SetSwitch implements AttributeSwitch {
@@ -75,81 +75,103 @@ public class SetSwitch implements AttributeSwitch {
         this.value = value;
     }
 
+    @Override
+    public Object replyTo() {
+        desc.setReplyTo((String) value);
+        return null;
+    }
+
+    @Override
     public Object confirmedHam() {
         desc.setConfirmedHam((String) value);
         return null;
     }
 
+    @Override
     public Object confirmedSpam() {
         desc.setConfirmedSpam((String) value);
         return null;
     }
 
+    @Override
     public Object drafts() {
         desc.setDrafts((String) value);
         return null;
     }
 
+    @Override
     public Object id() {
         desc.setId(((Integer) value).intValue());
         return null;
     }
 
+    @Override
     public Object login() {
         desc.setLogin((String) value);
         return null;
     }
 
+    @Override
     public Object mailURL() throws OXException {
         desc.parseMailServerURL((String) value);
         return null;
     }
 
+    @Override
     public Object name() {
         desc.setName((String) value);
         return null;
     }
 
+    @Override
     public Object password() {
         desc.setPassword((String) value);
         return null;
     }
 
+    @Override
     public Object primaryAddress() {
         desc.setPrimaryAddress((String) value);
         return null;
     }
 
+    @Override
     public Object personal() {
         desc.setPersonal((String) value);
         return null;
     }
 
+    @Override
     public Object sent() {
         desc.setSent((String) value);
         return null;
     }
 
+    @Override
     public Object spam() {
         desc.setSpam((String) value);
         return null;
     }
 
+    @Override
     public Object spamHandler() {
         desc.setSpamHandler((String) value);
         return null;
     }
 
+    @Override
     public Object transportURL() throws OXException {
         desc.parseTransportServerURL((String) value);
         return null;
     }
 
+    @Override
     public Object trash() {
         desc.setTrash((String) value);
         return null;
     }
 
+    @Override
     public Object mailPort() {
         try {
             desc.setMailPort(Integer.parseInt(value.toString()));
@@ -162,21 +184,25 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
     public Object mailProtocol() {
         desc.setMailProtocol((String) value);
         return null;
     }
 
+    @Override
     public Object mailSecure() {
         desc.setMailSecure(Boolean.parseBoolean(value.toString()));
         return null;
     }
 
+    @Override
     public Object mailServer() {
         desc.setMailServer((String) value);
         return null;
     }
 
+    @Override
     public Object transportPort() {
         try {
             desc.setTransportPort(Integer.parseInt(value.toString()));
@@ -189,86 +215,103 @@ public class SetSwitch implements AttributeSwitch {
         return null;
     }
 
+    @Override
     public Object transportProtocol() {
         desc.setTransportProtocol((String) value);
         return null;
     }
 
+    @Override
     public Object transportSecure() {
         desc.setTransportSecure(Boolean.parseBoolean(value.toString()));
         return null;
     }
 
+    @Override
     public Object transportServer() {
         desc.setTransportServer((String) value);
         return null;
     }
 
+    @Override
     public Object transportLogin() {
         desc.setTransportLogin((String) value);
         return null;
     }
 
+    @Override
     public Object transportPassword() {
         desc.setTransportPassword((String) value);
         return null;
     }
 
+    @Override
     public Object unifiedINBOXEnabled() {
         desc.setUnifiedINBOXEnabled(((Boolean) value).booleanValue());
         return null;
     }
 
+    @Override
     public Object confirmedHamFullname() {
         desc.setConfirmedHamFullname((String) value);
         return null;
     }
 
+    @Override
     public Object confirmedSpamFullname() {
         desc.setConfirmedSpamFullname((String) value);
         return null;
     }
 
+    @Override
     public Object draftsFullname() {
         desc.setDraftsFullname((String) value);
         return null;
     }
 
+    @Override
     public Object sentFullname() {
         desc.setSentFullname((String) value);
         return null;
     }
 
+    @Override
     public Object spamFullname() {
         desc.setSpamFullname((String) value);
         return null;
     }
 
+    @Override
     public Object trashFullname() {
         desc.setTrashFullname((String) value);
         return null;
     }
 
+    @Override
     public Object pop3DeleteWriteThrough() {
         desc.addProperty("pop3.deletewt", value.toString());
         return null;
     }
 
+    @Override
     public Object pop3ExpungeOnQuit() {
         desc.addProperty("pop3.expunge", value.toString());
         return null;
     }
 
+    @Override
     public Object pop3RefreshRate() {
         desc.addProperty("pop3.refreshrate", (String) value);
         return null;
     }
 
+    @Override
     public Object pop3Path() {
         desc.addProperty("pop3.path", (String) value);
         return null;
     }
 
+    @Override
     public Object pop3Storage() {
         desc.addProperty("pop3.storage", (String) value);
         return null;

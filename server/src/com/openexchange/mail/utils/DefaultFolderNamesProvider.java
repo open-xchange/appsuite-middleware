@@ -69,7 +69,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link DefaultFolderNamesProvider} - Provides the default folder (full-)names for a certain mail account.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultFolderNamesProvider {
@@ -87,7 +87,7 @@ public final class DefaultFolderNamesProvider {
 
     /**
      * Initializes a new {@link DefaultFolderNamesProvider}.
-     * 
+     *
      * @param accountId The account ID
      * @param user The user ID
      * @param cid The context ID
@@ -107,7 +107,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
@@ -126,7 +126,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the names
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder names as an array of {@link String}
@@ -141,11 +141,11 @@ public final class DefaultFolderNamesProvider {
             mailAccount.getConfirmedHam(),
             isSpamEnabled);
     }
-    
+
     /**
      * Determines the default folder names (<b>not</b> fullnames). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param trash The trash name
      * @param sent The sent name
      * @param drafts The drafts name
@@ -219,7 +219,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder fullnames as an array of {@link String}
@@ -238,7 +238,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param mailAccount The mail account providing the fullnames
      * @param isSpamEnabled <code>true</code> if spam is enabled for current user; otherwise <code>false</code>
      * @return The default folder fullnames as an array of {@link String}
@@ -261,7 +261,7 @@ public final class DefaultFolderNamesProvider {
     /**
      * Determines the default folder fullnames (<b>not</b> names). The returned array of {@link String} indexes the names as given through
      * constants: {@link StorageUtility#INDEX_DRAFTS}, {@link StorageUtility#INDEX_SENT}, etc.
-     * 
+     *
      * @param trashFullname The trash fullname
      * @param sentFullname The sent fullname
      * @param draftsFullname The drafts fullname
@@ -340,6 +340,7 @@ public final class DefaultFolderNamesProvider {
             this.defaultAccount = defaultAccount;
         }
 
+        @Override
         public String getConfirmeHam() {
             final String ret = defaultAccount.getConfirmedHam();
             if (ret == null || ret.length() == 0) {
@@ -348,6 +349,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getConfirmedSpam() {
             final String ret = defaultAccount.getConfirmedSpam();
             if (ret == null || ret.length() == 0) {
@@ -356,6 +358,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getDrafts() {
             final String ret = defaultAccount.getDrafts();
             if (ret == null || ret.length() == 0) {
@@ -364,6 +367,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getSent() {
             final String ret = defaultAccount.getSent();
             if (ret == null || ret.length() == 0) {
@@ -372,6 +376,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getSpam() {
             final String ret = defaultAccount.getSpam();
             if (ret == null || ret.length() == 0) {
@@ -380,6 +385,7 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
         public String getTrash() {
             final String ret = defaultAccount.getTrash();
             if (ret == null || ret.length() == 0) {
@@ -395,26 +401,32 @@ public final class DefaultFolderNamesProvider {
      */
     public static final FallbackProvider DEFAULT_PROVIDER = new FallbackProvider() {
 
+        @Override
         public String getConfirmeHam() {
             return STD_CONFIRMED_HAM;
         }
 
+        @Override
         public String getConfirmedSpam() {
             return STD_CONFIRMED_HAM;
         }
 
+        @Override
         public String getDrafts() {
             return STD_DRAFTS;
         }
 
+        @Override
         public String getSent() {
             return STD_SENT;
         }
 
+        @Override
         public String getSpam() {
             return STD_SPAM;
         }
 
+        @Override
         public String getTrash() {
             return STD_TRASH;
         }

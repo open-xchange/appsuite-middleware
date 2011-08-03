@@ -64,7 +64,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 
 /**
  * {@link ContentTypeWriterTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContentTypeWriterTest extends TestCase{
@@ -82,12 +82,12 @@ public class ContentTypeWriterTest extends TestCase{
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
-        
+
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
-        
+
         final JSONObject jsonCType = (JSONObject) value;
-        
+
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("type").withValue("text/plain")
@@ -96,11 +96,11 @@ public class ContentTypeWriterTest extends TestCase{
                     .hasKey("name").withValue("something.txt")
                 .objectEnds()
             .objectEnds();
-        
+
         assertValidates(assertion, jsonCType);
-        
+
     }
-    
+
     public void testWriteBasicHeader() throws OXException, JSONException {
         final MessagingHeader contentType = new StringMessageHeader("Content-Type", "text/plain;charset=UTF-8;name=something.txt");
 
@@ -110,12 +110,12 @@ public class ContentTypeWriterTest extends TestCase{
 
         assertTrue(writer.handles(entry));
         assertEquals("Content-Type", writer.writeKey(entry));
-        
+
         final Object value = writer.writeValue(entry, null);
         assertNotNull(value);
-        
+
         final JSONObject jsonCType = (JSONObject) value;
-        
+
         final JSONAssertion assertion = new JSONAssertion()
             .isObject()
                 .hasKey("type").withValue("text/plain")
@@ -124,9 +124,9 @@ public class ContentTypeWriterTest extends TestCase{
                     .hasKey("name").withValue("something.txt")
                 .objectEnds()
             .objectEnds();
-        
+
         assertValidates(assertion, jsonCType);
-        
+
     }
 
     private SimEntry<String, Collection<MessagingHeader>> entry(final MessagingHeader header) {

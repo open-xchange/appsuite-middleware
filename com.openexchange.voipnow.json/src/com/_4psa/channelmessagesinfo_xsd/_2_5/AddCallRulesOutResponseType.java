@@ -9,11 +9,11 @@ import com._4psa.common_xsd._2_5.UpdateObject;
 
 /**
  * Add outgoing routing rules in a group: response response type
- * 
+ *
  * <p>Java class for AddCallRulesOutResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="AddCallRulesOutResponseType">
  *   &lt;complexContent>
@@ -22,8 +22,8 @@ import com._4psa.common_xsd._2_5.UpdateObject;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "AddCallRulesOutResponseType")

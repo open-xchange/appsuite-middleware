@@ -70,18 +70,20 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     private final WebdavFactory factory;
     private final Map<String, Object> userInfo = new HashMap<String, Object>();
     private Document bodyDocument;
-    
+
     public AbstractWebdavRequest(final WebdavFactory factory) {
         this.factory = factory;
     }
 
+    @Override
     public WebdavResource getResource() throws OXException {
         if(res != null) {
             return res;
         }
         return res = factory.resolveResource(getUrl());
     }
-    
+
+    @Override
     public WebdavResource getDestination() throws OXException {
         if(null == getDestinationUrl()) {
             return null;
@@ -91,21 +93,24 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         }
         return dest = factory.resolveResource(getDestinationUrl());
     }
-    
+
+    @Override
     public WebdavCollection getCollection() throws OXException {
         if(res != null && res.isCollection()) {
             return (WebdavCollection) res;
         }
         return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
     }
-    
+
+    @Override
     public Document getBodyAsDocument() throws JDOMException, IOException {
         if (bodyDocument != null) {
             return bodyDocument;
         }
         return bodyDocument = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
     }
-    
+
+    @Override
     public IfHeader getIfHeader() throws IfHeaderParseException {
         final String ifHeader = getHeader("If");
         if(ifHeader == null) {
@@ -113,7 +118,8 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         }
         return new IfHeaderParser().parse(getHeader("If"));
     }
-    
+
+    @Override
     public int getDepth(final int def){
         final String depth = getHeader("depth");
         if(null == depth) {
@@ -121,11 +127,13 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         }
         return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
     }
-    
+
+    @Override
     public WebdavFactory getFactory(){
         return factory;
     }
-    
+
+    @Override
     public boolean hasBody() {
         if(getHeader("Content-Length") == null) {
             return false;
@@ -138,7 +146,8 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         }
         return length > 0;
     }
-    
+
+    @Override
     public Map<String, Object> getUserInfo() {
         return userInfo;
     }

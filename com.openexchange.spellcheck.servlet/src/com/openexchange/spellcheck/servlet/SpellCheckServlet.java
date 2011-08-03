@@ -82,7 +82,7 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link SpellCheckServlet}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SpellCheckServlet extends SessionServlet {
@@ -403,7 +403,7 @@ public final class SpellCheckServlet extends SessionServlet {
 
     /**
      * Parses given locale string into an instance of {@link Locale}
-     * 
+     *
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale}
      * @throws OXException If locale string is invalid
@@ -426,7 +426,7 @@ public final class SpellCheckServlet extends SessionServlet {
 
     /**
      * Converts given HTML text into a {@link javax.swing.text.Document}
-     * 
+     *
      * @param html The HTML text
      * @return The HTML document filled with given HTML text
      * @throws IOException On any I/O error
@@ -446,8 +446,8 @@ public final class SpellCheckServlet extends SessionServlet {
 
     /**
      * <pre>
-     * 
-     * 
+     *
+     *
      * private static String optStringParam(final HttpServletRequest req, final String paramName) throws OXException {
      *     final String paramVal = req.getParameter(paramName);
      *     if (paramVal == null || paramVal.length() == 0 || &quot;null&quot;.equals(paramVal)) {

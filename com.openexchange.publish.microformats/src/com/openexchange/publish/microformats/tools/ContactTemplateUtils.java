@@ -75,7 +75,7 @@ public class ContactTemplateUtils {
             return "/publications/contactPictures/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get("siteName")+"/"+contactObject.getObjectID()+"/image";
         }
     }
-    
+
     public List<Contact> onlyPublic(List<Contact> contacts) {
         List<Contact> filtered = new ArrayList<Contact>(contacts.size());
         for (Contact contact : contacts) {

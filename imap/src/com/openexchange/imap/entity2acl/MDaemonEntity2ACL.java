@@ -73,7 +73,7 @@ import com.openexchange.user.UserService;
  * <ul>
  * <li><i>anonymous</i> which refers to the anonymous, or unauthenticated user</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDaemonEntity2ACL extends Entity2ACL {
@@ -84,7 +84,7 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static MDaemonEntity2ACL getInstance() {

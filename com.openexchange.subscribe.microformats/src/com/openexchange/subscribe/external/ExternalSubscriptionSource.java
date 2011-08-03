@@ -65,7 +65,7 @@ public class ExternalSubscriptionSource extends SubscriptionSource {
     public String getExternalAddress() {
         return externalAddress;
     }
-    
+
     public void setExternalAddress(String externalAddress) {
         this.externalAddress = externalAddress;
     }

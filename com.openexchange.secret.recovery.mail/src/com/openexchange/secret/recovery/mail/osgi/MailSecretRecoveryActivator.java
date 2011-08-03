@@ -93,13 +93,13 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
             }
 
         }, null);
-        
+
         migratorReg = context.registerService(SecretMigrator.class.getName(), new SecretMigrator() {
 
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
                 mailAccountStorage.migratePasswords(session.getUserId(), session.getContextId(), oldSecret, newSecret);
             }
-            
+
         }, null);
     }
 
@@ -108,7 +108,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
         if(consistencyReg != null) {
             consistencyReg.unregister();
         }
-        
+
         if(migratorReg != null) {
             migratorReg.unregister();
         }

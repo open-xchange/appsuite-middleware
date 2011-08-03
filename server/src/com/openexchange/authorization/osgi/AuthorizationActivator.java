@@ -67,6 +67,7 @@ public class AuthorizationActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         /*
          * Start tracker
@@ -75,6 +76,7 @@ public class AuthorizationActivator implements BundleActivator {
         tracker.open();
     }
 
+    @Override
     public void stop(final BundleContext context) throws Exception {
         if (null != tracker) {
             tracker.close();

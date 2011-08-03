@@ -67,7 +67,7 @@ import com.openexchange.folderstorage.FolderStorageComparator;
 
 /**
  * {@link ContentTypeRegistry} - A registry for a tree's content types.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
@@ -78,7 +78,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Gets the {@link ContentTypeRegistry} instance.
-     * 
+     *
      * @return The {@link ContentTypeRegistry} instance
      */
     public static ContentTypeRegistry getInstance() {
@@ -107,7 +107,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
         /**
          * Performs an atomic clear&addAll by reassigning volatile variable.
-         * 
+         *
          * @param replacement The replacement
          */
         public void replaceGeneralStorages(final List<FolderStorage> replacement) {
@@ -148,7 +148,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Associates specified folder storage to given content type.
-     * 
+     *
      * @param treeId The folder storage's tree identifier
      * @param contentType The content type to register
      * @param folderStorage The content type's folder storage
@@ -169,7 +169,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Adds a general-purpose folder storage (capable to serve every content type) to this registry.
-     * 
+     *
      * @param treeId The folder storage's tree identifier
      * @param folderStorage The general-purpose folder storage
      * @return <code>true</code> if folder storage was successfully registered; otherwise <code>false</code>
@@ -186,7 +186,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Gets the available content types.
-     * 
+     *
      * @return The available content types
      */
     public Map<Integer, ContentType> getAvailableContentTypes() {
@@ -204,7 +204,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Gets the specified content type's storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      * @return The content type's storage or <code>null</code>
@@ -226,6 +226,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
         return types.get(contentType);
     }
 
+    @Override
     public ContentType getByString(final String contentTypeString) {
         for (final Entry<String, Element> entry : registry.entrySet()) {
             final Queue<FolderStorage> generalStorages = entry.getValue().getGeneralStorages();
@@ -263,7 +264,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Removes specified content type.
-     * 
+     *
      * @param treeId The tree identifier
      * @param contentType The content type
      */
@@ -278,7 +279,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Removes specified general-purpose folder storage.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderStorage The general-purpose folder storage
      */
@@ -296,7 +297,7 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
 
     /**
      * Removes tree's content types.
-     * 
+     *
      * @param treeId The tree identifier
      */
     public void removeTreeContentTypes(final String treeId) {

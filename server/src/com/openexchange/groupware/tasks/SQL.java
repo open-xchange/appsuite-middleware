@@ -196,7 +196,7 @@ public final class SQL {
      */
     static final Map<StorageType, String> SEARCH_FOLDER_BY_USER =
         new EnumMap<StorageType, String>(StorageType.class);
-    
+
     /**
      * Prevent instantiation
      */

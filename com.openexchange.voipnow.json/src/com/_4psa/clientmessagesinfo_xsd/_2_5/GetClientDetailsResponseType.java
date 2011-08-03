@@ -14,11 +14,11 @@ import com._4psa.common_xsd._2_5.AdvertisingTemplate;
 
 /**
  * Get client account details: response type
- * 
+ *
  * <p>Java class for GetClientDetailsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetClientDetailsResponseType">
  *   &lt;complexContent>
@@ -31,8 +31,8 @@ import com._4psa.common_xsd._2_5.AdvertisingTemplate;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetClientDetailsResponseType", propOrder = {
@@ -53,11 +53,11 @@ public class GetClientDetailsResponseType
 
     /**
      * Gets the value of the advertisingTemplate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link AdvertisingTemplate }
-     *     
+     *
      */
     public AdvertisingTemplate getAdvertisingTemplate() {
         return advertisingTemplate;
@@ -65,11 +65,11 @@ public class GetClientDetailsResponseType
 
     /**
      * Sets the value of the advertisingTemplate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link AdvertisingTemplate }
-     *     
+     *
      */
     public void setAdvertisingTemplate(AdvertisingTemplate value) {
         this.advertisingTemplate = value;
@@ -77,11 +77,11 @@ public class GetClientDetailsResponseType
 
     /**
      * Gets the value of the industry property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIndustry() {
         return industry;
@@ -89,11 +89,11 @@ public class GetClientDetailsResponseType
 
     /**
      * Sets the value of the industry property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIndustry(String value) {
         this.industry = value;

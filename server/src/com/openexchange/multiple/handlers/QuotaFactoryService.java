@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link QuotaFactoryService} - Factory service for quota module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotaFactoryService implements MultipleHandlerFactoryService {
@@ -75,10 +75,12 @@ public final class QuotaFactoryService implements MultipleHandlerFactoryService 
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new QuotaHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "quota";
     }
@@ -91,14 +93,17 @@ public final class QuotaFactoryService implements MultipleHandlerFactoryService 
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             try {
                 final QuotaRequest request = new QuotaRequest(session);
@@ -110,6 +115,7 @@ public final class QuotaFactoryService implements MultipleHandlerFactoryService 
             }
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

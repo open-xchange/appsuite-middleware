@@ -66,7 +66,7 @@ import com.openexchange.timer.TimerService;
 /**
  * {@link MailAccessWatcher} - Keeps track of connected instances of {@link MailAccess} and allows a forced close if connection time exceeds
  * allowed time
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailAccessWatcher {
@@ -144,7 +144,7 @@ public final class MailAccessWatcher {
      * Adds specified mail access to this watcher's tracing if not already added before. If already present its timestamp is updated.
      * <p>
      * Watcher is established if not running, yet
-     * 
+     *
      * @param mailAccess The mail access to add
      */
     public static void addMailAccess(final MailAccess<?, ?> mailAccess) {
@@ -156,7 +156,7 @@ public final class MailAccessWatcher {
 
     /**
      * Removes specified mail access from this watcher's tracing
-     * 
+     *
      * @param mailAccess The mail access to remove
      */
     public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
@@ -165,7 +165,7 @@ public final class MailAccessWatcher {
 
     /**
      * Gets the number of currently tracked mail accesses.
-     * 
+     *
      * @return The number of currently tracked mail accesses
      */
     public static int getNumberOfMailAccesses() {
@@ -174,7 +174,7 @@ public final class MailAccessWatcher {
 
     /**
      * Gets the number of currently tracked idling mail accesses.
-     * 
+     *
      * @return The number of currently tracked idling mail accesses
      */
     public static int getNumberOfIdlingMailAccesses() {
@@ -211,6 +211,7 @@ public final class MailAccessWatcher {
             traceEnabled = logger.isTraceEnabled();
         }
 
+        @Override
         public void run() {
             try {
                 if (map.isEmpty()) {

@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdatePerformer extends AbstractPerformer {
@@ -78,7 +78,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
-     * 
+     *
      * @param session The session
      */
     public UpdatePerformer(final ServerSession session) {
@@ -87,7 +87,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UpdatePerformer} from given user-context-pair.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -97,7 +97,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UpdatePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -107,7 +107,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link UpdatePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -118,7 +118,7 @@ public final class UpdatePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>UPDATE</code> request.
-     * 
+     *
      * @param folder The object which denotes the folder to update and provides the changes to perform
      * @param timeStamp The requestor's last-modified time stamp
      * @throws OXException If update fails

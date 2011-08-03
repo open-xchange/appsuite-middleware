@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MessagingPart} - A message part.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -76,7 +76,7 @@ public interface MessagingPart {
 
     /**
      * Gets the headers as an unmodifiable {@link Map}.
-     * 
+     *
      * @return The headers as an unmodifiable {@link Map}.
      * @throws OXException If headers cannot be returned
      */
@@ -84,7 +84,7 @@ public interface MessagingPart {
 
     /**
      * Gets the header associated with specified name or <code>null</code> if not present
-     * 
+     *
      * @param name The header name
      * @return The header associated with specified name or <code>null</code> if not present
      * @throws OXException If header cannot be returned
@@ -93,7 +93,7 @@ public interface MessagingPart {
 
     /**
      * Gets the first header value associated with specified name or <code>null</code> if not present
-     * 
+     *
      * @param name The header name
      * @return The first header value associated with specified name or <code>null</code> if not present
      * @throws OXException If header cannot be returned
@@ -106,13 +106,13 @@ public interface MessagingPart {
      * The disposition describes how the part should be presented (see RFC 2183). The return value should be compared case-insensitive. For
      * example:
      * <p>
-     * 
+     *
      * <pre>
      * String disposition = part.getDisposition();
      * if (disposition == null || MessagingPart.ATTACHMENT.equalsIgnoreCase(disposition))
      *  // treat as attachment if not first part
      * </pre>
-     * 
+     *
      * @return The disposition of this part, or null if unknown
      * @throws OXException If disposition cannot be returned
      * @see #ATTACHMENT
@@ -123,7 +123,7 @@ public interface MessagingPart {
     /**
      * Gets the <code>Content-Type</code> header of this part's content. <code>null</code> is returned if the <code>Content-Type</code>
      * header could not be determined.
-     * 
+     *
      * @return The <code>Content-Type</code> header of this part
      * @throws OXException If content type cannot be returned
      */
@@ -131,7 +131,7 @@ public interface MessagingPart {
 
     /**
      * Get the size of this part in bytes. Return <code>-1</code> if the size cannot be determined.
-     * 
+     *
      * @return The size of this part or <code>-1</code>
      * @throws OXException If size cannot be returned
      */
@@ -142,7 +142,7 @@ public interface MessagingPart {
      * <p>
      * Useful if this part represents an "attachment" that was loaded from a file. The filename will usually be a simple name, not including
      * directory components.
-     * 
+     *
      * @return The filename to associate with this part
      * @throws OXException If filename cannot be returned
      */
@@ -150,14 +150,14 @@ public interface MessagingPart {
 
     /**
      * Gets the section identifier.
-     * 
+     *
      * @return The section identifier or <code>null</code> if top level
      */
     public String getSectionId();
 
     /**
      * Gets the content.
-     * 
+     *
      * @return The content
      * @throws OXException If content cannot be returned
      */
@@ -168,7 +168,7 @@ public interface MessagingPart {
      * content bytes.
      * <p>
      * The bytes are typically used for transport.
-     * 
+     *
      * @exception IOException If an I/O error occurs
      * @exception OXException If an error occurs fetching the data to be written
      */

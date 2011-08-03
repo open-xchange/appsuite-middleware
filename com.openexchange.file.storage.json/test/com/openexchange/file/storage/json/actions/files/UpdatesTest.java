@@ -74,7 +74,7 @@ public class UpdatesTest extends FileActionTest {
             assertTrue(true);
         }
     }
-    
+
     public void testAction() throws OXException {
         request()
             .param("folder", "12")
@@ -84,16 +84,16 @@ public class UpdatesTest extends FileActionTest {
             .param("order", "desc")
             .param("ignore", "deleted")
             .param("timezone", "Europe/Berlin");
-        
+
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("getDelta", "12", D("Yesterday at 12:00").getTime(), columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta()); 
-        
+        fileAccess().expectCall("getDelta", "12", D("Yesterday at 12:00").getTime(), columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());
+
         perform();
-        
+
         fileAccess().assertAllWereCalled();
-        
+
     }
-    
+
     public void testTimestampDefaultsToDistantPast() throws OXException {
         request()
         .param("folder", "12")
@@ -102,14 +102,14 @@ public class UpdatesTest extends FileActionTest {
         .param("order", "desc")
         .param("ignore", "deleted")
         .param("timezone", "Europe/Berlin");
-    
+
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("getDelta", "12", FileStorageFileAccess.DISTANT_PAST, columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta()); 
-    
+        fileAccess().expectCall("getDelta", "12", FileStorageFileAccess.DISTANT_PAST, columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());
+
         perform();
-    
+
         fileAccess().assertAllWereCalled();
-    
+
     }
 
     @Override

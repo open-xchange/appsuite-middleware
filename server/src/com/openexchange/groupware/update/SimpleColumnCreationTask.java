@@ -69,6 +69,7 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
     private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
 
+    @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
         final Connection con = Database.getNoTimeout(contextId, true);
@@ -107,6 +108,6 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
     protected abstract String getColumnName();
 
     protected abstract String getColumnDefinition();
-    
-    
+
+
 }

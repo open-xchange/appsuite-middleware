@@ -64,8 +64,8 @@ import com.openexchange.webdav.xml.fields.FolderChildFields;
  */
 
 public class FolderChildParser extends DataParser {
-	
-	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final XmlPullParser parser) throws XmlPullParserException, IOException {		
+
+	protected void parseElementFolderChildObject(final FolderChildObject folderchildobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
 		if (isTag(parser, FolderChildFields.FOLDER_ID)) {
 		    super.setInFolder(getValueAsInt(parser));
 		} else if (isTag(parser, FolderChildFields.FOLDER)) {

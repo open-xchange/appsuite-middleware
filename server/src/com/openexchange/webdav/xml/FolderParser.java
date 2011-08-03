@@ -70,20 +70,20 @@ import com.openexchange.webdav.xml.fields.FolderFields;
  */
 
 public class FolderParser extends FolderChildParser {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderParser.class));
-	
+
 	public FolderParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
-	
+
 	public void parse(final XmlPullParser parser, final FolderObject folderobject) throws OXException, XmlPullParserException {
 		try {
 			while (true) {
 				if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equals("prop")) {
 					break;
 				}
-				
+
 				parseElementFolder(folderobject, parser);
 				parser.nextTag();
 			}
@@ -93,7 +93,7 @@ public class FolderParser extends FolderChildParser {
 			throw new OXException(exc);
 		}
 	}
-	
+
 	protected void parseElementFolder(final FolderObject folderobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
 			if (LOG.isTraceEnabled()) {
@@ -102,10 +102,10 @@ public class FolderParser extends FolderChildParser {
 			parser.nextText();
 			return ;
 		}
-		
+
 		if (isTag(parser, FolderFields.TITLE)) {
 			folderobject.setFolderName(getValue(parser));
-			
+
 			return ;
 		} else if (isTag(parser, FolderFields.TYPE)) {
 			final String type = getValue(parser);
@@ -116,7 +116,7 @@ public class FolderParser extends FolderChildParser {
 			} else {
 				throw WebdavExceptionCode.IO_ERROR.create("unknown value in " + FolderFields.TYPE + ": " + type);
 			}
-			
+
 			return ;
 		} else if (isTag(parser, FolderFields.MODULE)) {
 			final String module = getValue(parser);
@@ -131,37 +131,37 @@ public class FolderParser extends FolderChildParser {
 			} else {
 				throw WebdavExceptionCode.IO_ERROR.create("unknown value in " + FolderFields.MODULE + ": " + module);
 			}
-			
+
 			return ;
 		} else if (isTag(parser, FolderFields.PERMISSIONS)) {
 			parseElementPermissions(folderobject, parser);
-			
+
 			return;
 		} else {
 			parseElementFolderChildObject(folderobject, parser);
 		}
 	}
-	
+
 	protected void parseElementPermissions(final FolderObject folderobject, final XmlPullParser parser) throws OXException {
 		final ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>();
-		
+
 		try {
 			boolean isPermission = true;
-			
+
 			while (isPermission) {
 				parser.nextTag();
-				
+
 				if (isEnd(parser)) {
 					throw WebdavExceptionCode.IO_ERROR.create("invalid xml in permission!");
 				}
-				
+
 				if (parser.getName().equals(FolderFields.PERMISSIONS) && parser.getEventType() == XmlPullParser.END_TAG) {
 					isPermission = false;
 					break;
 				}
-				
+
 				final OCLPermission oclp = new OCLPermission();
-				
+
 				if (isTag(parser, "user")) {
 					parseElementPermissionAttributes(oclp, parser);
 					parseEntity(oclp, parser);
@@ -172,34 +172,34 @@ public class FolderParser extends FolderChildParser {
 				} else {
 					throw WebdavExceptionCode.IO_ERROR.create("unknown xml tag in permissions: " + parser.getName());
 				}
-				
+
 				permissions.add(oclp);
 			}
 		} catch (final Exception exc) {
 			throw new OXException(exc);
 		}
-		
+
 		folderobject.setPermissions(permissions);
 	}
-	
+
 	protected void parseEntity(final OCLPermission oclp, final XmlPullParser parser) throws Exception {
 		oclp.setEntity( getValueAsInt(parser));
 	}
-	
+
 	protected void parseElementPermissionAttributes(final OCLPermission oclp, final XmlPullParser parser) throws Exception {
 		final int fp = getPermissionAttributeValue(parser, "folderpermission");
 		final int orp = getPermissionAttributeValue(parser, "objectreadpermission");
 		final int owp = getPermissionAttributeValue(parser, "objectwritepermission");
 		final int odp = getPermissionAttributeValue(parser, "objectdeletepermission");
-		
+
 		oclp.setAllPermission(fp, orp, owp, odp);
 		oclp.setFolderAdmin(getPermissionAdminFlag(parser));
 	}
-	
+
 	protected int getPermissionAttributeValue(final XmlPullParser parser, final String name) throws Exception {
 		return Integer.parseInt(parser.getAttributeValue(XmlServlet.NAMESPACE, name));
 	}
-	
+
 	protected boolean getPermissionAdminFlag(final XmlPullParser parser) throws Exception {
 		return Boolean.parseBoolean(parser.getAttributeValue(XmlServlet.NAMESPACE, "admin_flag"));
 	}

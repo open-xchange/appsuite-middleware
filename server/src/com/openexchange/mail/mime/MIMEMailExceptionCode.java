@@ -16,7 +16,7 @@ import com.openexchange.mail.MailExceptionCode;
  * The detail number range in subclasses generated in mail bundles is supposed to start with 2000 and may go up to 2999.
  * <p>
  * The detail number range in subclasses generated in transport bundles is supposed to start with 3000 and may go up to 3999.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MIMEMailExceptionCode implements OXExceptionCode {
@@ -278,29 +278,34 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public String getPrefix() {
         return "MSG";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -309,7 +314,7 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -319,7 +324,7 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

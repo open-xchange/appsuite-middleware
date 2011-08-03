@@ -56,7 +56,7 @@ import com.openexchange.groupware.ldap.User;
 /**
  * {@link UserConfigurationStorage} - Storage for instances of
  * {@link UserConfiguration}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class UserConfigurationStorage {
@@ -77,7 +77,7 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Sets the singleton instance of {@link UserConfigurationStorage}
-     * 
+     *
      * @param singleton The singleton instance
      * @throws OXException If singleton cannot be configured
      */
@@ -88,7 +88,7 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Releases the singleton instance of {@link UserConfigurationStorage}
-     * 
+     *
      * @throws OXException If singleton cannot be configured
      */
     static void releaseInstance() throws OXException {
@@ -98,7 +98,7 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Factory method for an instance of UserConfigurationStorage.
-     * 
+     *
      * @return an instance implementing the
      *         <code>UserConfigurationStorage</code> interface
      */
@@ -126,7 +126,7 @@ public abstract class UserConfigurationStorage {
      * A convenience method that invokes
      * {@link #getUserConfigurationSafe(int, int[], Context)} with the group
      * parameter set to <code>null</code>
-     * 
+     *
      * @param userId The user ID
      * @param ctx The context
      * @return The corresponding instance of {@link UserConfiguration} or
@@ -141,7 +141,7 @@ public abstract class UserConfigurationStorage {
      * A convenience method that invokes
      * {@link #getUserConfiguration(int, int[], Context)}. If an exception
      * occurs <code>null</code> is returned
-     * 
+     *
      * @param userId The user ID
      * @param groups The user's groups
      * @param ctx The contexts
@@ -160,7 +160,7 @@ public abstract class UserConfigurationStorage {
     /**
      * Determines the instance of <code>UserConfiguration</code> that
      * corresponds to given user ID.
-     * 
+     *
      * @param userId - the user ID
      * @param ctx - the context
      * @return the instance of <code>UserConfiguration</code>
@@ -175,14 +175,14 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Perform necessary actions to start instance
-     * 
+     *
      * @throws OXException
      */
     protected abstract void startInternal() throws OXException;
 
     /**
      * Perform necessary actions to stop instance
-     * 
+     *
      * @throws OXException
      */
     protected abstract void stopInternal() throws OXException;
@@ -191,7 +191,7 @@ public abstract class UserConfigurationStorage {
      * Determines the instance of <code>UserConfiguration</code> that
      * corresponds to given user ID. If <code>groups</code> argument is set,
      * user's groups need not to be loaded from user storage
-     * 
+     *
      * @param userId - the user ID
      * @param groups - user's groups
      * @param ctx - the context
@@ -211,7 +211,7 @@ public abstract class UserConfigurationStorage {
      * <p>
      * <b>NOTE:</b> Only the instances are going to be removed from storage;
      * underlying database is not affected
-     * 
+     *
      * @throws OXException If clearing fails
      */
     public abstract void clearStorage() throws OXException;
@@ -223,7 +223,7 @@ public abstract class UserConfigurationStorage {
      * <p>
      * <b>NOTE:</b> Only the instance is going to be removed from storage;
      * underlying database is not affected
-     * 
+     *
      * @param userId - the user ID
      * @param ctx - the context
      * @throws OXException If removal fails
@@ -232,7 +232,7 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Saves specified user configuration.
-     * 
+     *
      * @param userConfiguration The user configuration to save.
      * @throws OXException If saving user configuration fails.
      */
@@ -244,7 +244,7 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Saves specified user configuration.
-     * 
+     *
      * @param permissionBits The permission bits.
      * @param userId The user ID.
      * @param ctx The context the user belongs to.

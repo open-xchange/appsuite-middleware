@@ -63,7 +63,7 @@ import com.openexchange.config.internal.filewatcher.FileListener;
 
 /**
  * {@link PropertyWatcher}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PropertyWatcher implements FileListener {
@@ -74,7 +74,7 @@ public final class PropertyWatcher implements FileListener {
 
     /**
      * Gets an existing property watcher bound to given property name
-     * 
+     *
      * @param name The property name
      * @return The corresponding property watcher or <code>null</code> if none bound to given property name
      */
@@ -84,7 +84,7 @@ public final class PropertyWatcher implements FileListener {
 
     /**
      * Removes an existing property watcher bound to given property name
-     * 
+     *
      * @param name The property name
      */
     public static void removePropertWatcher(final String name) {
@@ -94,7 +94,7 @@ public final class PropertyWatcher implements FileListener {
     /**
      * Adds a new property watcher bound to given property name. If a previous property watcher has already been bound to specified property
      * name, the existing one is returned and no new watcher is created.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      * @param caseInsensitive <code>true</code> to compare changed values case-insensitive; otherwise <code>false</code>
@@ -122,7 +122,7 @@ public final class PropertyWatcher implements FileListener {
 
     /**
      * Initializes a new property watcher
-     * 
+     *
      * @param name The property name to watch
      * @param value The current property value
      * @param caseInsensitive <code>true</code> to compare changed values case-insensitive; otherwise <code>false</code>
@@ -138,7 +138,7 @@ public final class PropertyWatcher implements FileListener {
     /**
      * Adds an instance of {@link PropertyListener} to this watcher's listeners that is going to be notified on property change or delete
      * events.
-     * 
+     *
      * @param listener The listener to add
      */
     public void addPropertyListener(final PropertyListener listener) {
@@ -149,7 +149,7 @@ public final class PropertyWatcher implements FileListener {
 
     /**
      * Removes specified instance of {@link PropertyListener} from this watcher's listeners
-     * 
+     *
      * @param listener The listener to remove
      */
     public void removePropertyListener(final PropertyListener listener) {
@@ -160,7 +160,7 @@ public final class PropertyWatcher implements FileListener {
 
     /**
      * Checks if this property watcher is empty; meaning zero number of added property listeners
-     * 
+     *
      * @return <code>true</code> if this property watcher is empty; otherwise <code>false</code>
      */
     public boolean isEmpty() {

@@ -67,11 +67,13 @@ public final class SystemNameActivator implements BundleActivator {
         super();
     }
 
+    @Override
     public void start(BundleContext context) throws Exception {
         tracker = new ServiceTracker(context, ConfigurationService.class.getName(), new SystemNameServiceRegisterer(context));
         tracker.open();
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         tracker.close();
     }

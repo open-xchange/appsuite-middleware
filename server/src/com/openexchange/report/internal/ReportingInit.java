@@ -69,13 +69,14 @@ public class ReportingInit implements Initialization {
 
     /**
      * Default constructor.
-     * @param managementService 
+     * @param managementService
      */
     public ReportingInit(ManagementService managementService) {
         super();
         this.managementService = managementService;
     }
 
+    @Override
     public void start() {
         try {
             managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
@@ -85,6 +86,7 @@ public class ReportingInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() {
         try {
             managementService.unregisterMBean(Constants.REPORTING_NAME);

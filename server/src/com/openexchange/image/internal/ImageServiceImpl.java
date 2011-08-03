@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ImageServiceImpl} - Implementation of {@link ImageService} using {@link ImageRegistry}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageServiceImpl implements ImageService {
@@ -68,42 +68,52 @@ public final class ImageServiceImpl implements ImageService {
         super();
     }
 
+    @Override
     public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments, final int timeToLive) {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments, timeToLive);
     }
 
+    @Override
     public ImageData addImageData(final Session session, final ImageDataSource imageSource, final DataArguments imageArguments) {
         return ImageRegistry.getInstance().addImageData(session, imageSource, imageArguments);
     }
 
+    @Override
     public void addImageData(final Session session, final ImageData imageData) {
         ImageRegistry.getInstance().addImageData(session, imageData);
     }
 
+    @Override
     public void clearRegistry() {
         ImageRegistry.getInstance().clearRegistry();
     }
 
+    @Override
     public boolean containsImageData(final Session session, final String uniqueId) {
         return ImageRegistry.getInstance().containsImageData(session, uniqueId);
     }
 
+    @Override
     public ImageData[] getImageData(final Session session) {
         return ImageRegistry.getInstance().getImageData(session);
     }
 
+    @Override
     public ImageData getImageData(final Session session, final String uniqueId) {
         return ImageRegistry.getInstance().getImageData(session, uniqueId);
     }
 
+    @Override
     public String getSessionForUID(final String uniqueId) {
         return ImageRegistry.getInstance().getSessionForUID(uniqueId);
     }
 
+    @Override
     public ImageData getSessionBoundImageData(final String uniqueID) {
         return ImageRegistry.getInstance().getSessionBoundImageData(uniqueID);
     }
 
+    @Override
     public void removeImageData(final Session session) {
         ImageRegistry.getInstance().removeImageToSessionMappings(session);
     }

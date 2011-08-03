@@ -58,7 +58,7 @@ import com.openexchange.folderstorage.Type;
 
 /**
  * {@link ParsedFolder} - A parsed folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ParsedFolder implements Folder {

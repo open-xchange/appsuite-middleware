@@ -51,14 +51,14 @@ package com.openexchange.server;
 
 /**
  * {@link ServiceHolderListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ServiceHolderListener<S> {
 
     /**
      * Invoked if service reference is applied to service holder
-     * 
+     *
      * @param service The service reference
      */
     public void onServiceAvailable(S service) throws Exception;

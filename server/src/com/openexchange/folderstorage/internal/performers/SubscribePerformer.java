@@ -65,14 +65,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscribePerformer} - Serves the <code>SUBSCRIBE</code> action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link SubscribePerformer}.
-     * 
+     *
      * @param session
      */
     public SubscribePerformer(final ServerSession session) {
@@ -81,7 +81,7 @@ public final class SubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link SubscribePerformer}.
-     * 
+     *
      * @param user
      * @param context
      */
@@ -91,7 +91,7 @@ public final class SubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link SubscribePerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -101,7 +101,7 @@ public final class SubscribePerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link SubscribePerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -112,7 +112,7 @@ public final class SubscribePerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>SUBSCRIBE</code> action.
-     * 
+     *
      * @param sourceTreeId The source tree identifier
      * @param folderId The folder identifier
      * @param targetTreeId The target tree identifier

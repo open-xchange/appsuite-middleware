@@ -72,7 +72,7 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link UpdateTaskSchemasAndVersionsCLT} - Command-Line access to get schemas and versions via update task toolkit.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskSchemasAndVersionsCLT {

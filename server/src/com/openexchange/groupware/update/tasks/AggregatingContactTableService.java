@@ -69,9 +69,9 @@ import com.openexchange.tools.sql.DBUtils;
 
 
 /**
- * Note: This one does not use foreign key constraints on prg_contact.userfield20, 
+ * Note: This one does not use foreign key constraints on prg_contact.userfield20,
  * because it might be used for something else later on.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class AggregatingContactTableService  extends AbstractCreateTableImpl implements UpdateTaskV2 {
@@ -82,23 +82,26 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         return "CREATE TABLE "+AGGREGATING_CONTACTS+" (" +
                     "contributor BINARY(16) NOT NULL, " +
         		    "aggregator BINARY(16) NOT NULL," +
-        		    "state TINYINT NOT NULL" + 
+        		    "state TINYINT NOT NULL" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
-    
+
     @Override
     protected String[] getCreateStatements() {
         return new String[] { getTableSQL() };
     }
 
+    @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[0];
     }
 
+    @Override
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
@@ -108,22 +111,27 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         }
     }
 
+    @Override
     public int addedWithVersion() {
         return Schema.NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return UpdateTaskV2.UpdateTaskPriority.NORMAL.priority;
     }
 
+    @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
         UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
+    @Override
     public String[] requiredTables() {
         return new String[] { };
     }
 
+    @Override
     public String[] tablesToCreate() {
         return new String[] { AGGREGATING_CONTACTS };
     }

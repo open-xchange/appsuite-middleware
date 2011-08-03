@@ -75,7 +75,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * Object handling the multi threaded access to session container. Excessive locking is used to secure container data structures.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class SessionData {
@@ -133,7 +133,7 @@ final class SessionData {
 
     /**
      * Rotates the session containers. A new slot is added to head of each queue, while the last one is removed.
-     * 
+     *
      * @return The removed sessions
      */
     List<SessionControl> rotateShort() {
@@ -174,7 +174,7 @@ final class SessionData {
 
     /**
      * Checks if given user in specified context has an active session kept in session container(s)
-     * 
+     *
      * @param userId The user ID
      * @param context The user's context
      * @return <code>true</code> if given user in specified context has an active session; otherwise <code>false</code>
@@ -560,7 +560,7 @@ final class SessionData {
     }
 
     public void removeThreadPoolService() {
-        threadPoolService = null; 
+        threadPoolService = null;
     }
 
     private void scheduleTask2MoveSession2FirstContainer(final String sessionId, final boolean longTerm) {

@@ -57,9 +57,9 @@ import com.openexchange.spellcheck.SpellChecker;
 
 /**
  * {@link SpellCheckServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class SpellCheckServiceImpl implements SpellCheckService {
 
@@ -72,7 +72,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      com.openexchange.groupware.contexts.Context)
 	 */
@@ -82,7 +82,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      java.lang.String, com.openexchange.groupware.contexts.Context)
 	 */
@@ -93,7 +93,7 @@ public final class SpellCheckServiceImpl implements SpellCheckService {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
 	 *      java.util.Locale, com.openexchange.groupware.contexts.Context)
 	 */

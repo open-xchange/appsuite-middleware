@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OXMFParser} - Parses a given HTML content into container elements.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OXMFParser {
@@ -69,21 +69,21 @@ public interface OXMFParser {
 
     /**
      * Adds a container element name; e.g. <code>"ox_contact"</code>.
-     * 
+     *
      * @param containerElement The container element name
      */
     public void addContainerElement(final String containerElement);
 
     /**
      * Adds an attribute prefix; e.g. <code>"ox_"</code>.
-     * 
+     *
      * @param prefix The attribute prefix
      */
     public void addAttributePrefix(final String prefix);
 
     /**
      * Parses passed HTML content. Each container element's name-value-pairs are backed by a map. Each map is contained in list.
-     * 
+     *
      * @param html The HTML content to parse
      * @return A list of maps each map backing container element's name-value-pairs
      * @throws OXException If parsing the HTML content fails
@@ -92,7 +92,7 @@ public interface OXMFParser {
 
     /**
      * Parses passed HTML content. Each container element's name-value-pairs are backed by a map. Each map is contained in list.
-     * 
+     *
      * @param html The reader providing HTML content to parse
      * @return A list of maps each map backing container element's name-value-pairs
      * @throws OXException If parsing the HTML content fails

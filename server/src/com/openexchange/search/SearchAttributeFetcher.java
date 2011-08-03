@@ -51,14 +51,14 @@ package com.openexchange.search;
 
 /**
  * {@link SearchAttributeFetcher} - A generic interface to fetch attributes from a candidate.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchAttributeFetcher<C> {
 
     /**
      * Fetches specified attribute from given candidate.
-     * 
+     *
      * @param attributeName The attribute name
      * @param candidate The candidate to fetch from
      * @return The fetched attribute

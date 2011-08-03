@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link TransportLoginHandler} - The login handler for mail transport.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TransportLoginHandler implements LoginHandlerService {
@@ -99,7 +99,8 @@ public final class TransportLoginHandler implements LoginHandlerService {
 			.unmodifiableList(new ArrayList<Field>(Arrays.asList(Field.ID,
 					Field.CREATED, Field.CREATED_BY)));
 
-	public void handleLogin(final LoginResult login) throws OXException {
+	@Override
+    public void handleLogin(final LoginResult login) throws OXException {
 		try {
 			/*
 			 * Ensure publishing infostore folder exists
@@ -275,7 +276,8 @@ public final class TransportLoginHandler implements LoginHandlerService {
 		return newFolder;
 	}
 
-	public void handleLogout(final LoginResult logout) throws OXException {
+	@Override
+    public void handleLogout(final LoginResult logout) throws OXException {
 		// Nothing to do
 	}
 

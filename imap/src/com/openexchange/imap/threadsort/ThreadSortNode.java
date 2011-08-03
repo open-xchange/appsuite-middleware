@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * {@link ThreadSortNode} - Represents a tree node in a thread-sort string.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -69,7 +69,7 @@ public class ThreadSortNode {
 
     /**
      * Initializes a new {@link ThreadSortNode}.
-     * 
+     *
      * @param msgNum The number of this tree node's message.
      */
     ThreadSortNode(final int msgNum) {
@@ -79,7 +79,7 @@ public class ThreadSortNode {
 
     /**
      * Adds a child to this tree node.
-     * 
+     *
      * @param child The child to add.
      */
     void addChild(final ThreadSortNode child) {
@@ -88,7 +88,7 @@ public class ThreadSortNode {
 
     /**
      * Adds children to this tree node.
-     * 
+     *
      * @param childThreads The children to add.
      */
     void addChildren(final List<ThreadSortNode> childThreads) {
@@ -102,7 +102,7 @@ public class ThreadSortNode {
 
     /**
      * Gets the number of this tree node's message.
-     * 
+     *
      * @return The number of this tree node's message.
      */
     public int getMsgNum() {
@@ -111,7 +111,7 @@ public class ThreadSortNode {
 
     /**
      * Gets this tree node's children.
-     * 
+     *
      * @return This tree node's children.
      */
     public List<ThreadSortNode> getChilds() {

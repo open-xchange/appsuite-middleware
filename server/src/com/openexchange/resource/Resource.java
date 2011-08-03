@@ -53,7 +53,7 @@ import java.util.Date;
 
 /**
  * {@link Resource} - This is the data container class for resources.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -118,7 +118,7 @@ public final class Resource {
 
     /**
      * Fills this resource's non-set fields with the one from specified source resource
-     * 
+     *
      * @param src The source resource
      */
     public void fill(final Resource src) {
@@ -217,7 +217,7 @@ public final class Resource {
 
     /**
      * Performs an equality check which ignores the last-modified timestamp
-     * 
+     *
      * @param other The other resource to compare with
      * @return <code>true</code> if this resource is equal to other resource; otherwise <code>false</code>
      */
@@ -261,7 +261,7 @@ public final class Resource {
 
     /**
      * Setter for identifier.
-     * 
+     *
      * @param identifier identifier.
      */
     public void setIdentifier(final int identifier) {
@@ -271,7 +271,7 @@ public final class Resource {
 
     /**
      * Checks if identifier has been set
-     * 
+     *
      * @return <code>true</code> if identifier has been set; otherwise <code>false</code>
      */
     public boolean isIdentifierSet() {
@@ -288,7 +288,7 @@ public final class Resource {
 
     /**
      * Getter for identifier.
-     * 
+     *
      * @return the identifier.
      */
     public int getIdentifier() {
@@ -297,7 +297,7 @@ public final class Resource {
 
     /**
      * Getter for displayName.
-     * 
+     *
      * @return the display name.
      */
     public String getDisplayName() {
@@ -306,7 +306,7 @@ public final class Resource {
 
     /**
      * Returns if the resource is available. If a resource is available, it can be booked.
-     * 
+     *
      * @return <code>true</code> if the resource is available.
      */
     public boolean isAvailable() {
@@ -315,7 +315,7 @@ public final class Resource {
 
     /**
      * Checks if available has been set
-     * 
+     *
      * @return <code>true</code> if available has been set; otherwise <code>false</code>
      */
     public boolean isAvailableSet() {
@@ -332,7 +332,7 @@ public final class Resource {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -342,7 +342,7 @@ public final class Resource {
 
     /**
      * Checks if display name has been set
-     * 
+     *
      * @return <code>true</code> if display name has been set; otherwise <code>false</code>
      */
     public boolean isDisplayNameSet() {
@@ -359,7 +359,7 @@ public final class Resource {
 
     /**
      * Setter for available.
-     * 
+     *
      * @param available <code>true</code> if the resource is available.
      */
     public void setAvailable(final boolean available) {
@@ -369,7 +369,7 @@ public final class Resource {
 
     /**
      * Setter for description.
-     * 
+     *
      * @param description Description.
      */
     public void setDescription(final String description) {
@@ -379,7 +379,7 @@ public final class Resource {
 
     /**
      * Checks if description has been set
-     * 
+     *
      * @return <code>true</code> if description has been set; otherwise <code>false</code>
      */
     public boolean isDescriptionSet() {
@@ -396,7 +396,7 @@ public final class Resource {
 
     /**
      * Getter for description.
-     * 
+     *
      * @return Description.
      */
     public String getDescription() {
@@ -405,7 +405,7 @@ public final class Resource {
 
     /**
      * Getter for last-modified timestamp
-     * 
+     *
      * @return Returns the lastModified timestamp.
      */
     public Date getLastModified() {
@@ -414,7 +414,7 @@ public final class Resource {
 
     /**
      * Checks if last-modified timestamp has been set
-     * 
+     *
      * @return <code>true</code> if last-modified timestamp has been set; otherwise <code>false</code>
      */
     public boolean isLastModifiedSet() {
@@ -431,7 +431,7 @@ public final class Resource {
 
     /**
      * Setter for last-modified timestamp
-     * 
+     *
      * @param lastModified The lastModified to set.
      */
     public void setLastModified(final Date lastModified) {
@@ -441,7 +441,7 @@ public final class Resource {
 
     /**
      * Setter for last-modified timestamp
-     * 
+     *
      * @param lastModified The lastModified to set; the milliseconds since January 1, 1970, 00:00:00 GMT.
      */
     public void setLastModified(final long lastModified) {
@@ -466,7 +466,7 @@ public final class Resource {
 
     /**
      * Checks if mail has been set
-     * 
+     *
      * @return <code>true</code> if mail has been set; otherwise <code>false</code>
      */
     public boolean isMailSet() {
@@ -498,7 +498,7 @@ public final class Resource {
 
     /**
      * Checks if simple name has been set
-     * 
+     *
      * @return <code>true</code> if simple name has been set; otherwise <code>false</code>
      */
     public boolean isSimpleNameSet() {

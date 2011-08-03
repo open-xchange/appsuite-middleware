@@ -175,6 +175,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         this.chooser = chooser;
     }
 
+    @Override
     public void close() throws OXException {
         if(rs == null) {
             return;
@@ -192,6 +193,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         if(!queried) {
             query();
@@ -215,14 +217,17 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return next;
     }
 
+    @Override
     public void addWarning(final OXException warning) {
         warnings.add(warning);
     }
 
+    @Override
     public OXException[] getWarnings() {
         return warnings.isEmpty() ? null : warnings.toArray(new OXException[warnings.size()]);
     }
 
+    @Override
     public boolean hasWarnings() {
         return !warnings.isEmpty();
     }
@@ -262,6 +267,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return false;
     }
 
+    @Override
     public DocumentMetadata next() throws OXException {
         hasNext();
         if(exception != null) {
@@ -315,6 +321,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }

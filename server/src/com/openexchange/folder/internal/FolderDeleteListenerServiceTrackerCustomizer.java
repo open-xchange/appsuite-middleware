@@ -56,7 +56,7 @@ import com.openexchange.folder.FolderDeleteListenerService;
 
 /**
  * {@link FolderDeleteListenerServiceTrackerCustomizer} - The service tracker customizer for {@link FolderDeleteListenerService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderDeleteListenerServiceTrackerCustomizer implements ServiceTrackerCustomizer {
@@ -71,6 +71,7 @@ public final class FolderDeleteListenerServiceTrackerCustomizer implements Servi
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         /*
          * Optionally expect class name with org.osgi.framework.Constants.SERVICE_DESCRIPTION property
@@ -90,10 +91,12 @@ public final class FolderDeleteListenerServiceTrackerCustomizer implements Servi
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

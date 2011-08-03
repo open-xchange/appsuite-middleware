@@ -79,20 +79,20 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  */
 public class LinkRequest {
-	
+
 	private static final String PARAMETER_MODULE = "module";
-	
+
 	private final Session session;
-	
+
 	private final User user;
-	
+
 	private final JSONWriter jsonWriter;
-	
+
 	private final Context ctx;
 
 	/**
 	 * Initializes a new {@link LinkRequest}
-	 * 
+	 *
 	 * @param session The session
 	 * @param pw The (print) writer to write to
 	 * @param ctx The context
@@ -103,10 +103,10 @@ public class LinkRequest {
 		this.ctx = ctx;
 		user = UserStorage.getStorageUser(session.getUserId(), ctx);
 	}
-	
+
 	/**
 	 * Handles specified action.
-	 * 
+	 *
 	 * @param action The action
 	 * @param jsonObject The JSON object containing request data
 	 * @throws OXMandatoryFieldException If handling action fails due to missing mandatory field
@@ -126,7 +126,7 @@ public class LinkRequest {
 			throw AjaxExceptionCodes.UnknownAction.create( action);
 		}
 	}
-	
+
 	public void actionAll(final JSONObject jsonObj) throws JSONException, OXException,
 			OXException, OXException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
@@ -150,7 +150,7 @@ public class LinkRequest {
 				availableLinks.addAll(Arrays.asList(lo));
 			}
 		}
-		
+
 		if (availableLinks.isEmpty()) {
 			// Immediate return
 			jsonWriter.array();
@@ -187,7 +187,7 @@ public class LinkRequest {
 		final int[] group =	this.user.getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 
-		
+
 		if (jData.has("id1")) {
 			lo.setFirstId(jData.getInt("id1"));
 		}
@@ -207,10 +207,10 @@ public class LinkRequest {
 			lo.setSecondFolder(jData.getInt("folder2"));
 		}
 		lo.setContext(ctx.getContextId());
-		
+
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
 		linksql.saveLink(lo,user,group,session);
-		
+
 		jsonWriter.object();
 		jsonWriter.key(ResponseFields.DATA).value("");
 		jsonWriter.endObject();
@@ -224,11 +224,11 @@ public class LinkRequest {
 		final int user = this.user.getId();
 		final int[] group =	this.user.getGroups();
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
-		
+
 		final JSONArray jo = jData.getJSONArray(ResponseFields.DATA);
-		
+
 		final int[][] del = new int[jo.length()][3];
-		
+
 		for (int i = 0; i < jo.length(); i++){
 			final JSONArray dl = jo.getJSONArray(i);
 			del[i][0] = dl.getInt(0);
@@ -237,7 +237,7 @@ public class LinkRequest {
 		}
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
 		final int[][] rep = linksql.deleteLinks(id,type,folder,del,user,group,session);
-		
+
 		jsonWriter.array();
 
 		final JSONArray jo2 = new JSONArray();
@@ -248,7 +248,7 @@ public class LinkRequest {
 			jsonWriter.value(jo2);
 			jo2.reset();
 		}
-		
+
 		jsonWriter.endArray();
 	}
 }

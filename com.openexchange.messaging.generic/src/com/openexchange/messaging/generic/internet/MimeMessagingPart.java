@@ -81,7 +81,7 @@ import com.openexchange.messaging.StringContent;
 
 /**
  * {@link MimeMessagingPart} - The MIME messaging part.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -151,7 +151,7 @@ public class MimeMessagingPart implements MessagingPart {
 
         /**
          * Adds an appropriate {@link MessagingHeader} created from given header to specified collection
-         * 
+         *
          * @param header The header to convert to a {@link MessagingHeader} instance
          * @param collection The collection to add to
          * @throws OXException If adding header fails
@@ -290,7 +290,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Initializes a new {@link MimeMessagingPart}.
-     * 
+     *
      * @param part The part
      */
     public MimeMessagingPart(final MimePart part) {
@@ -473,7 +473,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets the section identifier.
-     * 
+     *
      * @param sectionId The section identifier
      */
     public void setSectionId(final String sectionId) {
@@ -496,7 +496,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets this part's size. If passed argument is less than or equal to zero, specified size will not be set.
-     * 
+     *
      * @param size The size to set
      */
     public void setSize(final long size) {
@@ -513,7 +513,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Adds given header collection to the existing headers of this messaging part.
-     * 
+     *
      * @param headers The headers to add
      * @throws OXException If adding headers fails
      */
@@ -533,7 +533,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Adds specified header value to the existing values for the associated header name.
-     * 
+     *
      * @param headerName The header name
      * @param headerValue The header value
      * @throws OXException If adding header fails
@@ -553,7 +553,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Adds specified header value to the existing values for the associated header name.
-     * 
+     *
      * @param header The header to add
      * @throws OXException If adding header fails
      */
@@ -572,7 +572,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Remove all headers associated with specified name.
-     * 
+     *
      * @param headerName The header name
      * @throws OXException If header removal fails
      */
@@ -591,7 +591,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets the given multipart as this part's content.
-     * 
+     *
      * @param mp The multipart
      * @throws OXException If multipart cannot be set as content
      */
@@ -612,7 +612,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets this part's content.
-     * 
+     *
      * @param content The content
      * @param type The content type
      * @throws OXException If content cannot be applied
@@ -653,7 +653,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Set the disposition of this part.
-     * 
+     *
      * @param disposition The disposition to set
      * @throws OXException If setting disposition fails
      */
@@ -670,7 +670,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets this part's file name.
-     * 
+     *
      * @param filename The file name
      * @throws OXException If setting file name fails
      */
@@ -687,7 +687,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Sets given header collection to this messaging part.
-     * 
+     *
      * @param headers The headers to set
      * @throws OXException If setting headers fails
      */
@@ -719,7 +719,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Set the value for this header name. Replaces all existing header values associated with header name.
-     * 
+     *
      * @param headerName The header name
      * @param headerValue The header value
      * @throws OXException If setting header fails
@@ -739,7 +739,7 @@ public class MimeMessagingPart implements MessagingPart {
 
     /**
      * Set the value for this header name. Replaces all existing header values associated with header name.
-     * 
+     *
      * @param header The header to set
      * @throws OXException If setting header fails
      */
@@ -765,7 +765,7 @@ public class MimeMessagingPart implements MessagingPart {
      * determine what charset to use.
      * <p>
      * If the charset is already known, use the <code>setText</code> method that takes the charset parameter.
-     * 
+     *
      * @param text The text content to set
      * @throws OXException If text cannot be applied
      * @see #setText(String text, String charset)
@@ -777,7 +777,7 @@ public class MimeMessagingPart implements MessagingPart {
     /**
      * Convenience method that sets the given String as this part's content, with a MIME type of "text/plain" and the specified charset. The
      * given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset" parameter.
-     * 
+     *
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @throws OXException If text cannot be applied
@@ -790,7 +790,7 @@ public class MimeMessagingPart implements MessagingPart {
      * Convenience method that sets the given String as this part's content, with a primary MIME type of "text" and the specified MIME
      * subtype. The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
      * parameter.
-     * 
+     *
      * @param text The text content to set
      * @param charset The charset to use for the text
      * @param subtype The MIME subtype to use (e.g., "html")

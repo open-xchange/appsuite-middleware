@@ -57,6 +57,7 @@ public class OldXBitEncoding implements OldEncoding {
 
     public static final OldXBitEncoding Default = new OldXBitEncoding();
 
+    @Override
     public byte[] decode(final OldScanner s) throws IOException {
         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
         while (s.peek != -1 && s.peek != -2) {
@@ -65,6 +66,7 @@ public class OldXBitEncoding implements OldEncoding {
         return out.toByteArray();
     }
 
+    @Override
     public void encode(final OldFoldingWriter fw, final byte[] b) throws IOException {
         fw.writeln(b);
     }

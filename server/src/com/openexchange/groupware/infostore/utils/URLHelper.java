@@ -55,7 +55,7 @@ public class URLHelper {
 
 	private static final Pattern SCHEMA_PATTERN = Pattern.compile("^\\S+?:(//)?");
 	private static final Pattern MAYBE_MAIL = Pattern.compile("\\S+?@\\S+?\\.\\w+$");
-	
+
 	public String process(final String url) {
 		if(!hasSchema(url)) {
 			return isMail(url) ? "mailto:"+url : "http://"+url;

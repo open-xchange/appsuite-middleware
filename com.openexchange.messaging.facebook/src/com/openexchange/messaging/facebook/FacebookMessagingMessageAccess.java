@@ -105,7 +105,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingMessageAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -117,7 +117,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     /**
      * Initializes a new {@link FacebookMessagingMessageAccess}.
-     * 
+     *
      * @param facebookOAuthAccess The Facebook OAuth access
      * @param messagingAccount The Facebook messaging account
      * @param session The associated session
@@ -129,7 +129,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     /**
      * Sets whether to retry requesting failed user data.
-     * 
+     *
      * @param retrySafetyCheck <code>true</code> to retry requesting failed user data; otherwise <code>false</code>
      * @return This Facebook message access with new behavior applied
      */
@@ -903,7 +903,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     /**
      * Gets the messaging account.
-     * 
+     *
      * @return The messaging account
      */
     public MessagingAccount getMessagingAccount() {
@@ -912,7 +912,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     /**
      * Gets the facebook user identifier.
-     * 
+     *
      * @return The facebook user identifier
      */
     public String getFacebookUserId() {

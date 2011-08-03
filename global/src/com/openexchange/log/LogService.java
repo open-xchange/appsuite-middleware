@@ -54,21 +54,21 @@ import com.openexchange.log.Loggable.Level;
 
 /**
  * {@link LogService} - The logging service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LogService {
 
     /**
      * Logs specified {@link Loggable} instance.
-     * 
+     *
      * @param loggable The loggable to log
      */
     public void log(Loggable loggable);
 
     /**
      * Logs specified {@link Throwable} instance.
-     * 
+     *
      * @param level The log level
      * @param log The logger
      * @param throwable The throwable to log
@@ -77,7 +77,7 @@ public interface LogService {
 
     /**
      * Creates a new {@link Loggable} with specified arguments.
-     * 
+     *
      * @param level The log level
      * @param log The log
      * @param message The message
@@ -88,7 +88,7 @@ public interface LogService {
 
     /**
      * Creates a new {@link Loggable} with specified arguments.
-     * 
+     *
      * @param level The log level
      * @param log The log
      * @param message The message

@@ -61,7 +61,7 @@ import com.openexchange.tools.net.URIParser;
 
 /**
  * {@link SMTPConfig} - The SMTP configuration.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPConfig extends TransportConfig {
@@ -94,7 +94,7 @@ public final class SMTPConfig extends TransportConfig {
 
     /**
      * Gets the smtpPort
-     * 
+     *
      * @return the smtpPort
      */
     @Override
@@ -104,7 +104,7 @@ public final class SMTPConfig extends TransportConfig {
 
     /**
      * Gets the smtpServer
-     * 
+     *
      * @return the smtpServer
      */
     @Override

@@ -54,7 +54,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
 /**
  * {@link OAuthServiceMetaDataTwitterImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData {
@@ -101,14 +101,17 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
         return configurationService.getProperty("com.openexchange.twitter.consumerSecret", KEY_SECRET);
     }
 
+    @Override
     public boolean needsRequestToken() {
         return true;
     }
 
+    @Override
     public String getScope() {
         return null;
     }
 
+    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }

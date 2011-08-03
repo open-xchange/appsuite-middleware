@@ -59,15 +59,15 @@ import com.openexchange.tx.TransactionAware;
 public interface LockManager extends TransactionAware{
 	public static enum Scope {EXCLUSIVE, SHARED}
 	public static enum Type {WRITE}
-	
+
 	public static final int INFINITE = -1;
 
 	List<Lock> findLocks(int id, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
-	
+
 	void unlock(int lockId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	void removeAll(int id, Context context, User userObject, UserConfiguration userConfiguration) throws OXException;
-	
+
 	void insertLock(int entity, Lock lock, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-		
+
 }

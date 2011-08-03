@@ -67,7 +67,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 
 /**
  * {@link FacebookSubscribeService}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookSubscribeService extends AbstractSubscribeService {
@@ -75,10 +75,10 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookSubscribeService.class));
 
     private final SubscriptionSource source = new SubscriptionSource();
-    
-    private OAuthServiceMetaData facebookMetaData;
-    
-    private FacebookService facebookService;
+
+    private final OAuthServiceMetaData facebookMetaData;
+
+    private final FacebookService facebookService;
 
     public FacebookSubscribeService(OAuthServiceMetaData facebookMetaData, FacebookService facebookService) {
         this.facebookMetaData = facebookMetaData;
@@ -128,8 +128,9 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
         String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId) {
             Integer accountIdInt = Integer.parseInt(accountId);
-            if (null != accountIdInt)
+            if (null != accountIdInt) {
                 subscription.getConfiguration().put("account", accountIdInt);
+            }
             String displayName = null;
             if (subscription.getSecret() != null) {
                 displayName = facebookService.getAccountDisplayName(

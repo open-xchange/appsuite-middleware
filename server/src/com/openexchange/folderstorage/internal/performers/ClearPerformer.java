@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ClearPerformer} - Serves the <code>CLEAR</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ClearPerformer extends AbstractPerformer {
@@ -68,7 +68,7 @@ public final class ClearPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ClearPerformer}.
-     * 
+     *
      * @param session The session
      */
     public ClearPerformer(final ServerSession session) {
@@ -77,7 +77,7 @@ public final class ClearPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ClearPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      */
@@ -87,7 +87,7 @@ public final class ClearPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ClearPerformer}.
-     * 
+     *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
@@ -97,7 +97,7 @@ public final class ClearPerformer extends AbstractPerformer {
 
     /**
      * Initializes a new {@link ClearPerformer}.
-     * 
+     *
      * @param user The user
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
@@ -108,7 +108,7 @@ public final class ClearPerformer extends AbstractPerformer {
 
     /**
      * Performs the <code>CLEAR</code> request.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderId The folder identifier
      * @throws OXException If an error occurs during deletion

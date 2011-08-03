@@ -53,13 +53,13 @@ package com.openexchange.groupware.reminder;
 
 /**
  * ReminderEvent
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
 public interface ReminderEvent
 {
-	
+
 	void alarm( ReminderObject reminderobject );
 
 }

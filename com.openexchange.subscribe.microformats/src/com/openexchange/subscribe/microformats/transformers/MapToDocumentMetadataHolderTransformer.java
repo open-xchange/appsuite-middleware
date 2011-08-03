@@ -90,11 +90,11 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
         put("ox_tags", CATEGORIES_LITERAL);
         put("ox_versionComment", VERSION_COMMENT_LITERAL);
     }};
-    
-    
+
+
     public List<? extends Object> transform(List<Map<String, String>> list) throws OXException {
         List<DocumentMetadataHolder> documents = new ArrayList<DocumentMetadataHolder>(list.size());
-        
+
         for(Map<String, String> attributes : list) {
             DocumentMetadataImpl metadata = new DocumentMetadataImpl();
             SetSwitch setter = new SetSwitch(metadata);
@@ -108,12 +108,12 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
                     }
                 }
             }
-            
+
             String fileURL = attributes.get("ox_file");
-            
+
             documents.add(new DocumentMetadataHolder(fileURL, metadata));
         }
-        
+
         return documents;
     }
 
@@ -133,6 +133,6 @@ public class MapToDocumentMetadataHolderTransformer implements MapToObjectTransf
             return null;
         }
     }
-    
+
 
 }

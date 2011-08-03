@@ -48,7 +48,7 @@
  */
 
 /**
- * 
+ *
  */
 
 package com.openexchange.ajp13.exception;
@@ -60,7 +60,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link AJPv13Exception} - Indicates an AJP error.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13Exception extends OXException {
@@ -209,7 +209,7 @@ public class AJPv13Exception extends OXException {
 
     /**
      * Initializes a new {@link AJPv13Exception}
-     * 
+     *
      * @param code The AJP error code
      * @param keepAlive Whether to keep the AJP connection alive or not
      */
@@ -219,7 +219,7 @@ public class AJPv13Exception extends OXException {
 
     /**
      * Initializes a new {@link AJPv13Exception}
-     * 
+     *
      * @param code The AJP error code
      * @param keepAlive Whether to keep the AJP connection alive or not
      * @param messageArgs The error message arguments
@@ -230,7 +230,7 @@ public class AJPv13Exception extends OXException {
 
     /**
      * Initializes a new {@link AJPv13Exception}
-     * 
+     *
      * @param code The AJP error code
      * @param keepAlive Whether to keep the AJP connection alive or not
      * @param cause The init cause
@@ -244,7 +244,7 @@ public class AJPv13Exception extends OXException {
 
     /**
      * Initializes a new {@link AJPv13Exception} used as wrapper for given throwable to be conform to logging format
-     * 
+     *
      * @param cause The throwable to wrap
      */
     public AJPv13Exception(final Throwable cause) {
@@ -255,7 +255,7 @@ public class AJPv13Exception extends OXException {
 
     /**
      * Determines if AJP connection shall be kept alive or closed
-     * 
+     *
      * @return <code>true</code> if AJP connection shall be kept alive; otherwise <code>false</code> for closure
      */
     public boolean keepAlive() {

@@ -61,7 +61,7 @@ import com.openexchange.file.storage.FileFieldSwitcher;
 
 /**
  * {@link FileFieldHandling}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileFieldHandling {
@@ -122,7 +122,7 @@ public class FileFieldHandling {
             field.doSwitch(set, file, entry.getValue());
         }
     }
-    
+
     public static void fromMap(final Map<String, Object> map, final File file) {
         fromMap(map, file, new ArrayList<Field>(map.size()));
     }

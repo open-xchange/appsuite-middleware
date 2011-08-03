@@ -100,12 +100,13 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
 
     /**
      * Returns a connection that is created without timeouts.
-     * @param con connection to return. 
+     * @param con connection to return.
      */
     public void backWithoutTimeout(final Connection con) {
         lifecycle.destroy(con);
     }
 
+    @Override
     public int getNumBrokenConnections() {
         return getNumBroken();
     }

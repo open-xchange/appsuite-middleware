@@ -59,7 +59,7 @@ import com.openexchange.concurrent.Synchronizer;
 
 /**
  * {@link SynchronizableBufferedOutputStream} - A synchronizable version of {@link BufferedOutputStream}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SynchronizableBufferedOutputStream extends BufferedOutputStream implements Synchronizable {
@@ -68,7 +68,7 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
 
     /**
      * Initializes a new {@link SynchronizableBufferedOutputStream}.
-     * 
+     *
      * @param out The underlying output stream.
      */
     public SynchronizableBufferedOutputStream(final OutputStream out) {
@@ -78,7 +78,7 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
 
     /**
      * Initializes a new {@link SynchronizableBufferedOutputStream}.
-     * 
+     *
      * @param out The underlying output stream.
      * @param size The buffer size.
      */
@@ -87,17 +87,19 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
         synchronizer = new NonBlockingSynchronizer();
     }
 
+    @Override
     public void synchronize() {
         synchronizer.synchronize();
     }
 
+    @Override
     public void unsynchronize() {
         synchronizer.unsynchronize();
     }
 
     /**
      * Flush the internal buffer
-     * 
+     *
      * @throws IOException
      */
     private void flushBuffer() throws IOException {
@@ -109,7 +111,7 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
 
     /**
      * Writes the specified byte to this buffered output stream.
-     * 
+     *
      * @param b the byte to be written.
      * @exception IOException if an I/O error occurs.
      */
@@ -133,7 +135,7 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
      * stream as needed. If the requested length is at least as large as this stream's buffer, however, then this method will flush the
      * buffer and write the bytes directly to the underlying output stream. Thus redundant <code>BufferedOutputStream</code>s will not copy
      * data unnecessarily.
-     * 
+     *
      * @param b the data.
      * @param off the start offset in the data.
      * @param len the number of bytes to write.
@@ -164,7 +166,7 @@ public class SynchronizableBufferedOutputStream extends BufferedOutputStream imp
 
     /**
      * Flushes this buffered output stream. This forces any buffered output bytes to be written out to the underlying output stream.
-     * 
+     *
      * @exception IOException if an I/O error occurs.
      * @see java.io.FilterOutputStream#out
      */

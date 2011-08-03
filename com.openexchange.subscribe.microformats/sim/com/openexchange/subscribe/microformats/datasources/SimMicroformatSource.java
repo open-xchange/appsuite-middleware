@@ -63,19 +63,19 @@ import com.openexchange.subscribe.Subscription;
  */
 public class SimMicroformatSource implements OXMFDataSource {
 
-    private String data;
+    private final String data;
     private Subscription subscription;
 
-    
+
     public SimMicroformatSource(String data) {
         this.data = data;
     }
-    
+
     public Reader getData(Subscription subscription) throws OXException {
         this.subscription = subscription;
         return new StringReader(data);
     }
-    
+
     public Subscription getSubscription() {
         return subscription;
     }

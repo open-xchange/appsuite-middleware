@@ -58,7 +58,7 @@ import com.openexchange.twitter.TwitterAccess;
 
 /**
  * {@link TwitterAccessRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -68,7 +68,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static TwitterAccessRegistry getInstance() {
@@ -87,7 +87,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Adds specified twitter access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -109,7 +109,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Check presence of the twitter access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -122,7 +122,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Gets the twitter access associated with given user-context-pair.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -136,7 +136,7 @@ public final class TwitterAccessRegistry {
     /**
      * Removes specified access identifier associated with given user-context-pair and the twitter access as well, if no more
      * user-associated session identifiers are present.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if a twitter access for given user-context-pair was found and removed; otherwise <code>false</code>
@@ -151,7 +151,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Purges specified user's twitter access.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
@@ -168,7 +168,7 @@ public final class TwitterAccessRegistry {
 
     /**
      * Gets a {@link Iterator iterator} over the twitter accesses in this registry.
-     * 
+     *
      * @return A {@link Iterator iterator} over the twitter accesses in this registry.
      */
     Iterator<ConcurrentMap<Integer, TwitterAccess>> iterator() {

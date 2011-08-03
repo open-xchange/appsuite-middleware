@@ -55,9 +55,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link TaskPriorityReplacement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class TaskPriorityReplacement extends FormatLocalizedStringReplacement {
 
@@ -72,7 +72,7 @@ public final class TaskPriorityReplacement extends FormatLocalizedStringReplacem
 
     /**
      * Gets an empty task priority replacement
-     * 
+     *
      * @return An empty task priority replacement
      */
     public static TaskPriorityReplacement emptyTaskPriorityReplacement() {
@@ -88,7 +88,7 @@ public final class TaskPriorityReplacement extends FormatLocalizedStringReplacem
 
     /**
      * Initializes a new {@link TaskPriorityReplacement}
-     * 
+     *
      * @param taskPriority The task priority; supposed to be either
      *            {@link Task#LOW}, {@link Task#NORMAL}, or {@link Task#HIGH},
      * @throws IllegalArgumentException If task priority is invalid

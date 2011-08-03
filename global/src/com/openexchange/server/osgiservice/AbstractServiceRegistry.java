@@ -141,7 +141,7 @@ public class AbstractServiceRegistry {
 
     /**
      * Gets the number of services currently held by this service registration
-     * 
+     *
      * @return The number of services currently held by this service registration
      */
     public int size() {

@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookMessagingAccountTransport}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -83,7 +83,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
 
     /**
      * Initializes a new {@link FacebookMessagingAccountTransport}.
-     * 
+     *
      * @param messagingAccount The facebook account
      * @param session The session
      * @throws OXException If initialization fails
@@ -98,7 +98,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
 
     /**
      * Transports given message; either a status update or a post on a user's wall.
-     * 
+     *
      * @param message The message
      * @param recipients The recipients
      * @param facebookRestClient The facebook REST client
@@ -139,7 +139,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                 if (message.getContentType().startsWith("mulitpart/alternative")) {
                     /*-
                      * Get text/plain content from alternative content:
-                     * 
+                     *
                      * Parse content to look for links?
                      */
                     final MultipartContent mp = (MultipartContent) content;
@@ -222,7 +222,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
 
     /**
      * URL-encodes specified string.
-     * 
+     *
      * @param string The string
      * @return The URL-encoded string
      */

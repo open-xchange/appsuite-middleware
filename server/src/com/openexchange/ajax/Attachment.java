@@ -102,7 +102,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Attachment
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Attachment extends PermissionServlet {
@@ -290,7 +290,7 @@ public class Attachment extends PermissionServlet {
                     upload = processUpload(req);
                     final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                     final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
-                    
+
                     long sum = 0;
                     final JSONObject json = new JSONObject();
                     final List<UploadFile> l = upload.getUploadFiles();
@@ -322,7 +322,7 @@ public class Attachment extends PermissionServlet {
                         // session.getUserId(), session.getContext()));
                         checkSize(sum);
                     }
-                    
+
                     attach(res, attachments, uploadFiles, session, ctx, user, userConfig);
                 } finally {
                     if (upload != null) {

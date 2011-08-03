@@ -66,23 +66,23 @@ import java.util.Locale;
 public class DateStringParser implements StringParser {
 
     private StringParser subParser;
-    
+
     public DateStringParser() {
-        
+
     }
-    
+
     public DateStringParser(StringParser subParser) {
         this.subParser = subParser;
     }
-    
+
     public void setSubParser(StringParser subParser) {
         this.subParser = subParser;
     }
-    
+
     public StringParser getSubParser() {
         return subParser;
     }
-    
+
     public <T> T parse(String s, Class<T> t) {
         if(t != Date.class || s == null) {
             return null;
@@ -93,7 +93,7 @@ public class DateStringParser implements StringParser {
         }
         return (T) parseDate(s);
     }
-    
+
     // Plucked from HCalendarParser
     private static Date parseDate(String data){
         List<Locale> locales = Arrays.asList(Locale.US, Locale.UK, Locale.CANADA, Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN, Locale.CHINA);
@@ -102,19 +102,19 @@ public class DateStringParser implements StringParser {
             for(int dateStyle: styles){
                 for(int timeStyle: styles){
                     DateFormat sdf = SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, loc);
-                    try { return sdf.parse(data); 
+                    try { return sdf.parse(data);
                         } catch (ParseException e) {/*Next*/ };
                 }
                 DateFormat sdf = SimpleDateFormat.getDateInstance(dateStyle, loc);
-                try { return sdf.parse(data); 
+                try { return sdf.parse(data);
                     } catch (ParseException e) {/*Next*/ }
                 }
         }
         DateFormat sdf = SimpleDateFormat.getInstance();
-        try { return sdf.parse(data); 
+        try { return sdf.parse(data);
             } catch (ParseException e) {/*Next*/ }
-        
+
         return null;
     }
-    
+
 }

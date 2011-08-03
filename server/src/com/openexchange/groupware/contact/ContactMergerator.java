@@ -74,8 +74,8 @@ public class ContactMergerator implements SearchIterator<Contact>{
     private OXException e;
     private OXException oxe;
     private final Comparator<Contact> comparator;
-    
-    
+
+
     public ContactMergerator(final Comparator<Contact> comparator, final SearchIterator<Contact>...iterators) throws OXException{
         this(comparator, Arrays.asList(iterators));
     }
@@ -118,27 +118,33 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
     }
 
+    @Override
     public void addWarning(final OXException warning) {
     }
 
+    @Override
     public void close() throws OXException {
         for (final SearchIterator<Contact> iter : delegates) {
             iter.close();
         }
     }
 
+    @Override
     public OXException[] getWarnings() {
         return null;
     }
 
+    @Override
     public boolean hasNext() throws OXException {
         return next != null;
     }
 
+    @Override
     public boolean hasWarnings() {
         return false;
     }
 
+    @Override
     public Contact next() throws OXException {
         throwExceptions();
         final Contact nextContact = next;
@@ -155,18 +161,19 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
     }
 
+    @Override
     public int size() {
         return -1;
     }
-    
+
     private static final class RememberingIterator {
         private final SearchIterator<Contact> iterator;
         private Contact element;
-        
+
         public RememberingIterator(final SearchIterator<Contact> iterator) {
             this.iterator = iterator;
         }
-        
+
         public void forgetCurrent() {
             element = null;
         }
@@ -174,29 +181,30 @@ public class ContactMergerator implements SearchIterator<Contact>{
         public Contact currentOrNext() throws OXException {
             return (element == null) ? next() : getCurrent();
         }
-        
+
         public Contact getCurrent() {
             return element;
         }
-        
+
         public boolean hasNext() throws OXException {
             return iterator.hasNext();
         }
-        
+
         public Contact next() throws OXException {
             return element = iterator.next();
         }
     }
-    
+
     private static final class TopMostComparator implements Comparator<RememberingIterator> {
 
         private Comparator<Contact> contactComparator = null;
-        
+
 
         public TopMostComparator(final Comparator<Contact> comparator) {
             this.contactComparator = comparator;
         }
-        
+
+        @Override
         public int compare(final RememberingIterator o1, final RememberingIterator o2) {
             try {
                 final Contact v1 = o1.currentOrNext();
@@ -208,11 +216,11 @@ public class ContactMergerator implements SearchIterator<Contact>{
         }
 
     }
-    
+
     private static final class ExceptionTransporter extends RuntimeException {
         public OXException e;
 
-        
+
         public ExceptionTransporter(final OXException x) {
             this.e = x;
         }

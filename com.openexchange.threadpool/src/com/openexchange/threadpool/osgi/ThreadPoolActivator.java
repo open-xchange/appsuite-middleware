@@ -69,7 +69,7 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 
 /**
  * {@link ThreadPoolActivator} - The {@link BundleActivator activator} for thread pool bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolActivator extends DeferredActivator {

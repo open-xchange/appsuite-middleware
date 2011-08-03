@@ -65,10 +65,10 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IDManglingFileCustomizer implements Customizer<File> {
-    
+
     private final String service;
     private final String account;
-    
+
     public IDManglingFileCustomizer(final String service, final String account) {
         super();
         this.service = service;
@@ -82,15 +82,15 @@ public class IDManglingFileCustomizer implements Customizer<File> {
     public static SearchIterator<File> fixIDs(final SearchIterator<File> iterator, final String service, final String account) {
         return new CustomizableSearchIterator<File>(iterator, new IDManglingFileCustomizer(service, account));
     }
-    
+
     public static TimedResult<File> fixIDs(final TimedResult<File> result, final String service, final String account) {
         return new CustomizableTimedResult<File>(result, new IDManglingFileCustomizer(service, account));
     }
-    
+
     public static Delta<File> fixIDs(final Delta<File> delta, final String service, final String account) {
         return new CustomizableDelta<File>(delta, new IDManglingFileCustomizer(service, account));
     }
-    
+
     public static File fixIDs(final File file, final String service, final String account) {
         return new IDManglingFile(file, service, account);
     }

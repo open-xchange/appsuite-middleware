@@ -66,36 +66,36 @@ public class ContactTemplateUtilsTest extends TestCase {
     public void testImageURL() {
         Contact contactObject = new Contact();
         contactObject.setObjectID(12);
-        
+
         SimContext context = new SimContext(1337);
-        
+
         Publication publication = new Publication();
         publication.getConfiguration().put("siteName", "my/nice/site");
         publication.setContext(context);
-        
+
         ContactTemplateUtils utils = new ContactTemplateUtils();
-        
+
         String url = utils.getImageURL(publication, contactObject);
-        
+
         assertEquals("/publications/contactPictures/1337/my/nice/site/12/image", url);
     }
-    
+
     public void testImageURLWithSecret() {
         Contact contactObject = new Contact();
         contactObject.setObjectID(12);
-        
+
         SimContext context = new SimContext(1337);
-        
+
         Publication publication = new Publication();
         publication.getConfiguration().put("siteName", "my/nice/site");
         publication.setContext(context);
         publication.getConfiguration().put("secret", "verySecret");
-        
+
         ContactTemplateUtils utils = new ContactTemplateUtils();
-        
+
         String url = utils.getImageURL(publication, contactObject);
-        
+
         assertEquals("/publications/contactPictures/1337/my/nice/site/12/image?secret=verySecret", url);
     }
-    
+
 }

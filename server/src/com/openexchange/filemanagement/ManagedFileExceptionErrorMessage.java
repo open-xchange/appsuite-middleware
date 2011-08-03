@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link ManagedFileExceptionErrorMessage} - Error messages for managed file exceptions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
@@ -86,14 +86,17 @@ public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
         this.category = category;
     }
 
+    @Override
     public String getPrefix() {
         return "MANFILE";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return detailNumber;
     }
@@ -102,17 +105,19 @@ public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -121,7 +126,7 @@ public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -131,7 +136,7 @@ public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +71,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseOutputter;
+import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
@@ -81,52 +82,70 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DispatcherServlet}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DispatcherServlet extends SessionServlet {
-    private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
-
-        private final HttpServletRequest req;
-
-        HTTPRequestInputStreamProvider(final HttpServletRequest req) {
-            this.req = req;
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return req.getInputStream();
-        }
-    }
+public final class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
 
-    private static Dispatcher dispatcher;
+    private static final class HTTPRequestInputStreamProvider implements AJAXRequestData.InputStreamProvider {
 
-    private static String prefix;
-    
-    private static List<ResponseOutputter> responseRenderers = new CopyOnWriteArrayList<ResponseOutputter>();
+        private final HttpServletRequest req;
 
+        protected HTTPRequestInputStreamProvider(final HttpServletRequest req) {
+            this.req = req;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return req.getInputStream();
+        }
+    }
+
+    private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
+
+    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();;
+
+    private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
+
+    /**
+     * Initializes a new {@link DispatcherServlet}.
+     * 
+     * @param dispatcher The dispatcher
+     * @param prefix The prefix
+     */
     public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
         if (null == dispatcher) {
             throw new NullPointerException("Dispatcher is null.");
         }
         // These must be static for our servlet container to work properly.
-        DispatcherServlet.dispatcher = dispatcher;
-        DispatcherServlet.prefix = prefix;
-    }
-    
-    public static void registerRenderer(final ResponseOutputter renderer) {
-        responseRenderers.add(renderer);
+        DispatcherServlet.DISPATCHER.set(dispatcher);
+        DispatcherServlet.PREFIX.set(prefix);
     }
 
-    public static void unregisterRenderer(final ResponseOutputter renderer) {
-        responseRenderers.remove(renderer);
+    /**
+     * Adds specified renderer.
+     * 
+     * @param renderer The renderer
+     */
+    public static void registerRenderer(final ResponseRenderer renderer) {
+        RESPONSE_RENDERERS.add(renderer);
+    }
+
+    /**
+     * Removes specified renderer.
+     * 
+     * @param renderer The renderer
+     */
+    public static void unregisterRenderer(final ResponseRenderer renderer) {
+        RESPONSE_RENDERERS.remove(renderer);
     }
 
     @Override
@@ -153,50 +172,56 @@ public class DispatcherServlet extends SessionServlet {
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected final void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException, ServletException {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(resp);
 
         final String action = req.getParameter(PARAMETER_ACTION);
         final boolean isFileUpload = FileUploadBase.isMultipartContent(new ServletRequestContext(req));
-        
+
         AJAXRequestResult result = null;
-        AJAXRequestData request = null; 
+        AJAXRequestData request = null;
+        AJAXState state = null;
+        final Dispatcher dispatcher = DISPATCHER.get();
         try {
             if (action == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_ACTION);
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_ACTION);
             }
             final ServerSession session = getSessionObject(req);
 
             request = parseRequest(req, preferStream, isFileUpload, session);
 
-            result = dispatcher.perform(request, session);
-            
+            state = dispatcher.begin();
 
-            
+            result = dispatcher.perform(request, state, session);
+
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            final Response response = new Response();
-            response.setException(e);
-            JSONResponseOutputter.writeResponse(response, action, req, resp);
+            JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
             return;
+        } finally {
+            if (null != state) {
+                dispatcher.end(state);
+            }
         }
         sendResponse(request, result, req, resp);
 
     }
 
-    private void sendResponse( final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
-        ResponseOutputter chosen = null;
-        for(final ResponseOutputter renderer : responseRenderers) {
-            if (renderer.handles(request, result) && highest <= renderer.getPriority()) {
-                highest = renderer.getPriority();
-                chosen = renderer;
+        ResponseRenderer candidate = null;
+        for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
+            if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
+                highest = renderer.getRanking();
+                candidate = renderer;
             }
         }
-        
-        chosen.write(request, result, hReq, hResp);
+        if (null == candidate) {
+            throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
+        }
+        candidate.write(request, result, hReq, hResp);
     }
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
@@ -211,16 +236,24 @@ public class DispatcherServlet extends SessionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
-        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name service
+        retval.setRoute(ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName()); // Maybe use system name
+                                                                                                                  // service
         /*
          * Set the module
          */
         final String pathInfo = req.getRequestURI();
-        retval.setModule(pathInfo.substring(prefix.length()));
+        retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
-         * Set the action 
+         * Set request URI
+         */
+        retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
+        /*
+         * Set the action
          */
         retval.setAction(req.getParameter("action"));
+        if (retval.getAction() == null) {
+            retval.setAction(req.getMethod().toUpperCase());
+        }
         /*
          * Set the format
          */
@@ -237,11 +270,11 @@ public class DispatcherServlet extends SessionServlet {
         if (isFileUpload) {
             final UploadEvent upload = processUpload(req);
             final Iterator<UploadFile> iterator = upload.getUploadFilesIterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 retval.addFile(iterator.next());
             }
             final Iterator<String> names = upload.getFormFieldNames();
-            while(names.hasNext()) {
+            while (names.hasNext()) {
                 final String name = names.next();
                 retval.putParameter(name, upload.getFormField(name));
             }
@@ -303,6 +336,5 @@ public class DispatcherServlet extends SessionServlet {
         }
         return startingChar == toCheck.charAt(i);
     }
-
 
 }

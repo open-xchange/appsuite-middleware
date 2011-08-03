@@ -58,7 +58,7 @@ import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link CoercingConfigProperty}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CoercingConfigProperty<T> implements ConfigProperty<T> {

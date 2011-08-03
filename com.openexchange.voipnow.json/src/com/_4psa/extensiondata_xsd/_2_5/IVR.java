@@ -13,11 +13,11 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * IVR extension data
- * 
+ *
  * <p>Java class for IVR complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="IVR">
  *   &lt;complexContent>
@@ -44,8 +44,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "IVR", propOrder = {
@@ -79,11 +79,11 @@ public class IVR
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -91,11 +91,11 @@ public class IVR
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -103,11 +103,11 @@ public class IVR
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -115,11 +115,11 @@ public class IVR
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -127,11 +127,11 @@ public class IVR
 
     /**
      * Gets the value of the timeout property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTimeout() {
         return timeout;
@@ -139,11 +139,11 @@ public class IVR
 
     /**
      * Sets the value of the timeout property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTimeout(BigInteger value) {
         this.timeout = value;
@@ -151,11 +151,11 @@ public class IVR
 
     /**
      * Gets the value of the mohFolder property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public JAXBElement<String> getMohFolder() {
         return mohFolder;
@@ -163,23 +163,23 @@ public class IVR
 
     /**
      * Sets the value of the mohFolder property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link JAXBElement }{@code <}{@link String }{@code >}
-     *     
+     *
      */
     public void setMohFolder(JAXBElement<String> value) {
-        this.mohFolder = ((JAXBElement<String> ) value);
+        this.mohFolder = value;
     }
 
     /**
      * Gets the value of the lifetime property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getLifetime() {
         return lifetime;
@@ -187,11 +187,11 @@ public class IVR
 
     /**
      * Sets the value of the lifetime property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setLifetime(BigInteger value) {
         this.lifetime = value;
@@ -199,11 +199,11 @@ public class IVR
 
     /**
      * Gets the value of the lifetimeExpire property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLifetimeExpire() {
         return lifetimeExpire;
@@ -211,11 +211,11 @@ public class IVR
 
     /**
      * Sets the value of the lifetimeExpire property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLifetimeExpire(String value) {
         this.lifetimeExpire = value;
@@ -223,11 +223,11 @@ public class IVR
 
     /**
      * Gets the value of the transferExtension property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getTransferExtension() {
         return transferExtension;
@@ -235,11 +235,11 @@ public class IVR
 
     /**
      * Sets the value of the transferExtension property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setTransferExtension(BigInteger value) {
         this.transferExtension = value;
@@ -247,11 +247,11 @@ public class IVR
 
     /**
      * Gets the value of the sound property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSound() {
         return sound;
@@ -259,11 +259,11 @@ public class IVR
 
     /**
      * Sets the value of the sound property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSound(String value) {
         this.sound = value;

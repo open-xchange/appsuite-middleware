@@ -61,16 +61,16 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class TestableFolderSecurityStrategy extends FolderSecurityStrategy {
 
-    private OCLPermission permission;
+    private final OCLPermission permission;
 
     public TestableFolderSecurityStrategy(OCLPermission permission) {
        super(null);
        this.permission = permission;
     }
-    
+
     @Override
     public OCLPermission loadFolderPermission(Publication publication) {
         return permission;
     }
-    
+
 }

@@ -71,7 +71,7 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link HttpManagersInit} - {@link Initialization} for HTTP servlet management.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpManagersInit implements Initialization {
@@ -91,13 +91,14 @@ public final class HttpManagersInit implements Initialization {
 
     /**
      * Gets the singleton instance of {@link HttpManagersInit}
-     * 
+     *
      * @return
      */
     public static HttpManagersInit getInstance() {
         return instance;
     }
 
+    @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
             LOG.error(this.getClass().getName() + " already started");
@@ -110,6 +111,7 @@ public final class HttpManagersInit implements Initialization {
         }
     }
 
+    @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
@@ -138,6 +140,7 @@ public final class HttpManagersInit implements Initialization {
                 }
                 final File[] propFiles = dir.listFiles(new FilenameFilter() {
 
+                    @Override
                     public boolean accept(final File dir, final String name) {
                         return toLowerCase(name).endsWith(".properties");
 
@@ -176,7 +179,7 @@ public final class HttpManagersInit implements Initialization {
 
     /**
      * Ensures that servlet path starts with "/" character.
-     * 
+     *
      * @param servletPath The servlet path
      * @return The prepared servlet path
      */

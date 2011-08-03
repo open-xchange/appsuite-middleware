@@ -63,7 +63,7 @@ import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link UserFlagsCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserFlagsCache {
@@ -81,7 +81,7 @@ public final class UserFlagsCache {
 
     /**
      * Determines if specified IMAP folder supports user flags
-     * 
+     *
      * @param f The IMAP folder
      * @param load Whether the <code>SELECT</code> command should be invoked on IMAP folder or not
      * @param session The session providing the session-bound cache
@@ -111,7 +111,7 @@ public final class UserFlagsCache {
 
     /**
      * Removes cached information if given IMAP folder supports user flags
-     * 
+     *
      * @param f The IMAP folder
      * @param session The session providing the session-bound cache
      * @param accountId The account ID
@@ -122,7 +122,7 @@ public final class UserFlagsCache {
 
     /**
      * Removes cached information if given IMAP folder supports user flags
-     * 
+     *
      * @param fullName The IMAP folder full name
      * @param session The session providing the session-bound cache
      * @param accountId The account ID

@@ -65,9 +65,9 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 
 
 public class LdapGlobalFolderCreator {
-    
+
     public static class FolderIDAndAdminID {
-        
+
         /**
          * Initializes a new {@link FolderIDAndAdminID}.
          * @param folderid
@@ -79,23 +79,23 @@ public class LdapGlobalFolderCreator {
         }
 
         private final int folderid;
-        
+
         private final int adminid;
 
-        
+
         public final int getFolderid() {
             return folderid;
         }
 
-        
+
         public final int getAdminid() {
             return adminid;
         }
-        
+
     }
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapGlobalFolderCreator.class));
-    
+
     public static FolderIDAndAdminID createGlobalFolder(final Context ctx, final FolderProperties folderprops) throws OXException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
         int ldapFolderID;
@@ -129,8 +129,8 @@ public class LdapGlobalFolderCreator {
      * @param globalLdapFolderName2
      * @param ctx
      * @param writeCon
-     * @return the id or -1 if not found 
-     * @throws SQLException 
+     * @return the id or -1 if not found
+     * @throws SQLException
      */
     private static int getLdapFolderID(final String globalLdapFolderName2, final Context ctx, final Connection readCon) throws SQLException {
         PreparedStatement ps = null;
@@ -175,7 +175,7 @@ public class LdapGlobalFolderCreator {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION);
         defaultPerm.setFolderAdmin(true);
-         
+
         final OCLPermission allPerm = new OCLPermission();
         allPerm.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         allPerm.setGroupPermission(true);
@@ -269,12 +269,12 @@ public class LdapGlobalFolderCreator {
 
             public void setLocalIp(final String ip) {
                 // TODO Auto-generated method stub
-                
+
             }
 
             public void setHash(final String hash) {
                 // TODO Auto-generated method stub
-                
+
             }
         };
     }

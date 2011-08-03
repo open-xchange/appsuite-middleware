@@ -56,7 +56,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
 
 public class ContactComparator implements Comparator<Contact> {
-    
+
     private final AlphanumComparator alphanumComparator = new AlphanumComparator();
 
     private final int orderfield;
@@ -387,7 +387,7 @@ public class ContactComparator implements Comparator<Contact> {
             return 1;
         }
         if (null == date2) {
-            return -1; 
+            return -1;
         }
         return date1.compareTo(date2);
     }

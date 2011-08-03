@@ -75,7 +75,6 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.proxy.ImageContentTypeRestriction;
-import com.openexchange.exception.OXException;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.session.Session;
@@ -97,18 +96,18 @@ public class SyndMessage implements MessagingMessage {
     private boolean b_picUrl;
     private String picUrl;
     private final String id;
-     
+
     public SyndMessage(final SyndFeed feed, final SyndEntry syndEntry, final String folder, final Session session) throws OXException {
         entry = syndEntry;
         this.folder = folder;
         this.feed = feed;
         this.sessionId = session.getSessionID();
         this.id = createId(entry.getLink(), entry.getTitle(), entry.getPublishedDate());
-        
+
         addStringHeader(KnownHeader.SUBJECT, syndEntry.getTitle());
         final List<SyndContent> contents = syndEntry.getContents();
         // For now we'll only use the first content element
-        
+
         if(contents.size() > 0) {
             final SyndContent content = contents.get(0);
             setContent(content, sessionId);
@@ -118,21 +117,21 @@ public class SyndMessage implements MessagingMessage {
             setContent(entry.getTitleEx(), sessionId);
         }
     }
-    
+
     private String createId(final String link, final String title, final Date publishedDate) {
         final StringBuilder sb = new StringBuilder();
         if (link != null) {
             sb.append(link);
         }
-        
+
         if (title != null) {
             sb.append(title);
         }
-        
+
         if (publishedDate != null) {
             sb.append(publishedDate.getTime());
         }
-        
+
         return "" + sb.toString().hashCode();
     }
 
@@ -146,16 +145,16 @@ public class SyndMessage implements MessagingMessage {
                 type = "text/"+type;
             }
         }
-        
+
         if( isHTML(type) ) {
             final String textVersion = Utility.textFormat(content.getValue());
 
             final MimeMultipartContent multipart = new MimeMultipartContent();
             final MimeMessagingBodyPart textPart = new MimeMessagingBodyPart();
             textPart.setContent(new StringContent(textVersion), "text/plain");
-            
+
             multipart.addBodyPart(textPart);
-            
+
             final MimeMessagingBodyPart htmlPart = new MimeMessagingBodyPart();
             final HTMLService htmlService = HTMLServiceProvider.getInstance().getHTMLService();
             if (null == htmlService) {
@@ -163,12 +162,12 @@ public class SyndMessage implements MessagingMessage {
             } else {
                 htmlPart.setContent(new StringContent(htmlService.replaceImages(content.getValue(), sessionId)), type);
             }
-            
+
             multipart.addBodyPart(htmlPart);
-            
+
             final MimeContentType contentType = new MimeContentType("multipart/alternative");
             addHeader(KnownHeader.CONTENT_TYPE, contentType);
-            
+
             this.content = multipart;
         } else {
             final MimeContentType contentType = new MimeContentType(type);
@@ -192,7 +191,7 @@ public class SyndMessage implements MessagingMessage {
     private void addHeader(final KnownHeader header, final MessagingHeader value) {
         headers.put(header.toString(), Arrays.asList(value));
     }
-    
+
     public int getColorLabel() throws OXException {
         return -1;
     }
@@ -206,7 +205,7 @@ public class SyndMessage implements MessagingMessage {
     }
 
     public String getId() {
-        return id;        
+        return id;
     }
 
     public long getReceivedDate() {
@@ -274,7 +273,7 @@ public class SyndMessage implements MessagingMessage {
     public void writeTo(final OutputStream os) throws IOException, OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create();
     }
-    
+
     public String getPicture() {
         if (!b_picUrl) {
             final SyndImage image = ((entry.getSource() != null) ? entry.getSource() : feed).getImage();
@@ -310,7 +309,7 @@ public class SyndMessage implements MessagingMessage {
         }
         return picUrl;
     }
-    
+
     protected Object tryThese(final Object...objects) {
         for (final Object object : objects) {
             if(object != null) {

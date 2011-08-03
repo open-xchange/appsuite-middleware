@@ -63,7 +63,7 @@ public final class GroupFields {
     }
 
     public static final String IDENTIFIER = "id";
-    
+
     public static final String DISPLAY_NAME = "display_name";
 
     public static final String MEMBERS = "members";

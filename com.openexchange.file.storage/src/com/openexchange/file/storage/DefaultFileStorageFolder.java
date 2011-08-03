@@ -59,7 +59,7 @@ import java.util.Set;
 
 /**
  * {@link DefaultFileStorageFolder} - The default file storage folder providing setter methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultFileStorageFolder implements FileStorageFolder {
@@ -125,7 +125,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
-     * 
+     *
      * @return The list of capabilities or <code>null</code> if not set
      */
     public Set<String> getCapabilities() {
@@ -137,7 +137,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the capabilities.
-     * 
+     *
      * @param capabilities The capabilities
      */
     public void setCapabilities(final Set<String> capabilities) {
@@ -154,7 +154,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the folder identifier.
-     * 
+     *
      * @param id The folder identifier
      */
     public void setId(final String id) {
@@ -167,7 +167,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the file count.
-     * 
+     *
      * @param fileCount The file count
      */
     public void setFileCount(final int fileCount) {
@@ -180,7 +180,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the name.
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {
@@ -193,7 +193,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the own permission.
-     * 
+     *
      * @param ownPermission The own permission
      */
     public void setOwnPermission(final FileStoragePermission ownPermission) {
@@ -206,7 +206,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the parent identifier.
-     * 
+     *
      * @param parentId The parent identifier
      */
     public void setParentId(final String parentId) {
@@ -222,7 +222,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the permissions
-     * 
+     *
      * @param permissions The permissions
      */
     public void setPermissions(final List<FileStoragePermission> permissions) {
@@ -235,7 +235,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Adds given permission.
-     * 
+     *
      * @param permission The permission
      */
     public void addPermission(final FileStoragePermission permission) {
@@ -251,7 +251,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder has subfolders.
-     * 
+     *
      * @param subfolders <code>true</code> if this folder has subfolders; otherwise <code>false</code>
      */
     public void setSubfolders(final boolean subfolders) {
@@ -261,7 +261,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the has-subfolders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the has-subfolders flag set; otherwise <code>false</code>
      */
     public boolean containsSubfolders() {
@@ -282,7 +282,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder has subscribed subfolders.
-     * 
+     *
      * @param subscribedSubfolders <code>true</code> if this folder has subscribed subfolders; otherwise <code>false</code>
      */
     public void setSubscribedSubfolders(final boolean subscribedSubfolders) {
@@ -292,7 +292,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the has-subscribed-subfolders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the has-subscribed-subfolders flag set; otherwise <code>false</code>
      */
     public boolean containsSubscribedSubfolders() {
@@ -313,7 +313,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder is a default folder.
-     * 
+     *
      * @param defaultFolder <code>true</code> if this folder is a default folder; otherwise <code>false</code>
      */
     public void setDefaultFolder(final boolean defaultFolder) {
@@ -323,7 +323,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the default-folder flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the default-folder flag set; otherwise <code>false</code>
      */
     public boolean containsDefaultFolder() {
@@ -344,7 +344,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder has the capability to hold subfolders.
-     * 
+     *
      * @param holdsFolders <code>true</code> if this folder has the capability to hold subfolders; otherwise <code>false</code>
      */
     public void setHoldsFolders(final boolean holdsFolders) {
@@ -354,7 +354,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the holds-folders flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-folders flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsFolders() {
@@ -375,7 +375,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the holds-files flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the holds-files flag set; otherwise <code>false</code>
      */
     public boolean containsHoldsFiles() {
@@ -392,7 +392,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder has the capability to hold files.
-     * 
+     *
      * @param holdsFiles <code>true</code> if this folder has the capability to hold files; otherwise <code>false</code>
      */
     public void setHoldsFiles(final boolean holdsFiles) {
@@ -406,7 +406,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets if this folder is the root folder.
-     * 
+     *
      * @param rootFolder <code>true</code> if this folder is the root folder; otherwise <code>false</code>
      */
     public void setRootFolder(final boolean rootFolder) {
@@ -416,7 +416,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the root-folder flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the root-folder flag set; otherwise <code>false</code>
      */
     public boolean containsRootFolder() {
@@ -437,7 +437,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets if this folder is subscribed.
-     * 
+     *
      * @param subscribed <code>true</code> if this folder is subscribed; otherwise <code>false</code>
      */
     public void setSubscribed(final boolean subscribed) {
@@ -447,7 +447,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder has the subscribed flag set
-     * 
+     *
      * @return <code>true</code> if this folder has the subscribed flag set; otherwise <code>false</code>
      */
     public boolean containsSubscribed() {
@@ -464,7 +464,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Indicates whether this folder exists in folder storage.
-     * 
+     *
      * @return <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
      */
     public boolean exists() {
@@ -473,7 +473,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets whether this folder exists in folder storage.
-     * 
+     *
      * @param exists <code>true</code> if this folder exists in folder storage; otherwise <code>false</code>
      */
     public void setExists(final boolean exists) {
@@ -490,7 +490,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the creation date
-     * 
+     *
      * @param creationDate The creation date to set
      */
     public void setCreationDate(final Date creationDate) {
@@ -499,7 +499,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the last modified date.
-     * 
+     *
      * @param lastModifiedDate The last modified date to set
      */
     public void setLastModifiedDate(final Date lastModifiedDate) {
@@ -512,7 +512,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     /**
      * Sets the properties
-     * 
+     *
      * @param properties The properties to set
      */
     public void setProperties(Map<String, Object> properties) {

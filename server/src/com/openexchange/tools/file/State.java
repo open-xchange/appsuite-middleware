@@ -69,7 +69,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This represents the state of the FileStorage. Only used and unused files are saved.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class State {
@@ -106,7 +106,7 @@ class State {
 
     /**
      * Instantiate the State object.
-     * 
+     *
      * @param entries number of entries in a level
      * @param depth number of levels
      * @param nextEntry next free entry.
@@ -120,7 +120,7 @@ class State {
 
     /**
      * Creates a state object from the inputstream.
-     * 
+     *
      * @param input input stream to read the state file from.
      * @throws OXException if an input error occurs
      */
@@ -166,7 +166,7 @@ class State {
 
     /**
      * Saves the state object.
-     * 
+     *
      * @return an inputstream from that the state file can be read.
      * @throws OXException if an error occurs.
      */
@@ -198,7 +198,7 @@ class State {
 
     /**
      * Gets the next free entry in FileStorage.
-     * 
+     *
      * @return next free entry in filespool
      */
     public String getNextEntry() {
@@ -207,7 +207,7 @@ class State {
 
     /**
      * Sets the next free entry in FileStorage.
-     * 
+     *
      * @param nextEntry value for the next free entry
      */
     public void setNextEntry(final String nextEntry) {
@@ -216,7 +216,7 @@ class State {
 
     /**
      * Adds an unused entry. Instead of writing the next file to the next entry, an unused entry should be used first.
-     * 
+     *
      * @param entry the entry to add
      */
     public void addUnused(final String entry) {
@@ -225,7 +225,7 @@ class State {
 
     /**
      * Tests if there are unused slots.
-     * 
+     *
      * @return true if there are unused slots
      */
     public boolean hasUnused() {
@@ -234,7 +234,7 @@ class State {
 
     /**
      * Get an unused slot. The returned slot is removed from the unused slots.
-     * 
+     *
      * @return an unused slot or null if there are no.
      */
     public String getUnused() {

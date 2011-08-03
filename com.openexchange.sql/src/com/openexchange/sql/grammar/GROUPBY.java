@@ -57,7 +57,8 @@ public class GROUPBY extends OrderingClause {
 		super();
 	}
 
-	public void build(IStatementBuilder builder) {
+	@Override
+    public void build(IStatementBuilder builder) {
 		builder.buildGROUPBY(this);
 	}
 }

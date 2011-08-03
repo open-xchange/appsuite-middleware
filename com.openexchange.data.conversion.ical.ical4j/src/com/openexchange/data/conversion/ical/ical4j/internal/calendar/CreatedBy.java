@@ -85,7 +85,7 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
             String address;
             if (calendar.containsOrganizer()) {
                 address = calendar.getOrganizer();
-            } else if ("defaultSenderAddress".equals(senderSource)) { 
+            } else if ("defaultSenderAddress".equals(senderSource)) {
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(calendar.getCreatedBy(), ctx).getSendAddr();
                 } catch (final OXException e) {

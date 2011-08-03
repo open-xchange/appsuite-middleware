@@ -94,7 +94,7 @@ import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link IMAPFolderConverter} - Converts an instance of {@link IMAPFolder} to an instance of {@link MailFolder}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPFolderConverter {
@@ -113,7 +113,7 @@ public final class IMAPFolderConverter {
 
         /**
          * Initializes a new {@link Entity2ACLArgsImpl}.
-         * 
+         *
          * @param accountId The account ID
          * @param imapServerAddress The IMAP server address
          * @param sessionUser The session user ID
@@ -158,7 +158,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Creates an appropriate implementation of {@link Entity2ACLArgs}.
-     * 
+     *
      * @param session The session
      * @param imapFolder The IMAP folder
      * @param imapConfig The IMAP configuration
@@ -221,7 +221,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Creates a folder data object from given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param session The session
      * @param ctx The context
@@ -584,7 +584,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Parses IMAP folder's ACLs to instances of {@link ACLPermission} and applies them to specified mail folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @param listEntry The LIST entry
      * @param session The session providing needed user data
@@ -649,7 +649,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Adds current user's rights granted to IMAP folder as an ACL permission.
-     * 
+     *
      * @param mailFolder The mail folder containing own permission
      */
     private static void addOwnACL(final MailFolder mailFolder) {
@@ -658,7 +658,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Adds empty ACL permission to specified mail folder for given user.
-     * 
+     *
      * @param sessionUser The session user
      * @param mailFolder The mail folder
      */
@@ -720,7 +720,7 @@ public final class IMAPFolderConverter {
 
     /**
      * Gets the unread count from given IMAP folder.
-     * 
+     *
      * @param imapFolder The IMAP folder
      * @return The unread count
      * @throws OXException If returning unread count fails
@@ -739,7 +739,7 @@ public final class IMAPFolderConverter {
      * <p>
      * <b>Note</b>: This method assumes all preconditions were met (exists, selectable, etc.) to perform MYRIGHTS command on specified IMAP
      * folder.
-     * 
+     *
      * @param folder The IMAP folder
      * @param session The session
      * @param imapConfig The IMAP configuration

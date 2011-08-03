@@ -55,7 +55,7 @@ import com.sun.mail.imap.Rights.Right;
 /**
  * {@link RFC2086ACLExtension} - The ACL extension according to <small><b><a href="http://www.rfc-archive.org/getrfc.php?rfc=2086">RFC
  * 2086</a></b></small>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 class RFC2086ACLExtension extends AbstractACLExtension {

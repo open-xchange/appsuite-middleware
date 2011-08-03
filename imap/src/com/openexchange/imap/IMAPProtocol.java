@@ -59,7 +59,7 @@ import com.openexchange.mail.Protocol;
 
 /**
  * {@link IMAPProtocol} - The IMAP protocol.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPProtocol extends Protocol {
@@ -70,7 +70,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static IMAPProtocol getInstance() {
@@ -92,7 +92,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Sets the overall max. count.
-     * 
+     *
      * @param overallMaxCount The max. count
      */
     public void setOverallMaxCount(final int overallMaxCount) {
@@ -110,7 +110,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Inserts specified max-count setting for given host if no such mapping exists.
-     * 
+     *
      * @param host The mail system's host name
      * @param maxCount The max-count
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
@@ -129,7 +129,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Removes the max-count setting for specified host.
-     * 
+     *
      * @param host The mail system's host name
      */
     public void remove(final String host) {

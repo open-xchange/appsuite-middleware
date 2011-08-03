@@ -61,7 +61,7 @@ import com.openexchange.mdns.internal.MDNSServiceImpl;
 
 /**
  * {@link MDNSActivator} - The mDNS activator.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSActivator implements BundleActivator {

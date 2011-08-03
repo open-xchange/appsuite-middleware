@@ -57,7 +57,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MailAccountExceptionCodes} - The error messages for mail account exceptions.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum MailAccountExceptionCodes implements OXExceptionCode {
@@ -142,7 +142,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
      * Invalid host name: %1$s
      */
     INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, Category.CATEGORY_USER_INPUT, 19),
-    
+
     ;
 
     /**
@@ -164,7 +164,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param message message.
      * @param category category.
      * @param number number.
@@ -176,14 +176,17 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
         display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
+    @Override
     public String getPrefix() {
         return "ACC";
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
@@ -192,17 +195,19 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
         return null;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return getPrefix().equals(e.getPrefix()) && e.getCode() == getNumber();
     }
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -211,7 +216,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -221,7 +226,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

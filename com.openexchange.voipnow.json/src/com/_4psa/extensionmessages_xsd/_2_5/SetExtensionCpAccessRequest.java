@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -48,7 +48,7 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Gets the value of the cpAccess property.
-     * 
+     *
      */
     public boolean isCpAccess() {
         return cpAccess;
@@ -56,7 +56,7 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Sets the value of the cpAccess property.
-     * 
+     *
      */
     public void setCpAccess(boolean value) {
         this.cpAccess = value;
@@ -64,11 +64,11 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getID() {
         return id;
@@ -76,11 +76,11 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setID(BigInteger value) {
         this.id = value;
@@ -88,11 +88,11 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Gets the value of the identifier property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getIdentifier() {
         return identifier;
@@ -100,11 +100,11 @@ public class SetExtensionCpAccessRequest {
 
     /**
      * Sets the value of the identifier property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setIdentifier(String value) {
         this.identifier = value;

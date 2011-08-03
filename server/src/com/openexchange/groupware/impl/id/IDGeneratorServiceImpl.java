@@ -61,7 +61,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link IDGeneratorServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDGeneratorServiceImpl implements IDGeneratorService {
@@ -73,6 +73,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         super();
     }
 
+    @Override
     public int getId(final String type, final int contextId) throws OXException {
         /*
          * Get appropriate connection

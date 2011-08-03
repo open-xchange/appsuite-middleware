@@ -53,7 +53,7 @@ import java.io.InputStream;
 
 /**
  * AttachmenObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 

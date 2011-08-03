@@ -81,18 +81,18 @@ public class AllAction extends AbstractMessagingAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        
+
         final String messagingServiceId = request.getParameter("messagingService");
-        
+
         final List<MessagingService> services = new ArrayList<MessagingService>();
         if(messagingServiceId != null) {
             services.add(registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId()));
         } else {
             services.addAll(registry.getAllServices(session.getUserId(), session.getContextId()));
         }
-        
+
         final JSONArray result = new JSONArray();
-        
+
         for (final MessagingService messagingService : services) {
             final boolean isMail = ("com.openexchange.messaging.mail".equals(messagingService.getId()));
             NextAccount: for (final MessagingAccount account : messagingService.getAccountManager().getAccounts(session)) {
@@ -105,7 +105,7 @@ public class AllAction extends AbstractMessagingAccountAction {
                 result.put(writer.write(account));
             }
         }
-        
+
         return new AJAXRequestResult(result);
     }
 

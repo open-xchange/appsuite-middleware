@@ -155,24 +155,24 @@ public interface File {
     void setNumberOfVersions(int numberOfVersions);
 
     int getNumberOfVersions();
-    
+
     File dup();
-    
+
     void copyInto(File other);
-    
+
     void copyFrom(File other);
-    
+
     void copyInto(File other, Field...fields);
-    
+
     void copyFrom(File other, Field...fields);
-    
+
     Set<File.Field> differences(File other);
-    
+
     boolean equals(File other, Field criterium, Field...criteria);
 
     /**
      * Indicates whether this file matches given pattern.
-     * 
+     *
      * @param pattern The pattern possibly containing wild-card characters
      * @param fields The fields to consider; if <code>null</code> {@link #DEFAULT_SEARCH_FIELDS} is used
      * @return <code>true</code> if this file matches; otherwise <code>false</code>
@@ -324,15 +324,15 @@ public interface File {
                 byName.put(field.getName(), field);
             }
         }
-        
+
         private static final Map<Integer, Field> byNumber = new HashMap<Integer, Field>();
-        
+
         static {
             for (final Field field : values()) {
                 byNumber.put(field.getNumber(), field);
             }
         }
-        
+
         public static Field get(final String key) {
             if(key == null) {
                 return null;
@@ -348,7 +348,7 @@ public interface File {
                 return null;
             }
         }
-        
-      
+
+
     }
 }

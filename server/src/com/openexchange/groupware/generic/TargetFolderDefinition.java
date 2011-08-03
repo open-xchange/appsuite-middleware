@@ -64,19 +64,19 @@ public class TargetFolderDefinition {
     protected String folderId;
 
     protected Context context;
-    
+
     protected int userId;
-    
+
     public TargetFolderDefinition() {
-        
+
     }
-    
+
     public TargetFolderDefinition(final String folderId, final int userId, final Context context) {
         this.folderId = folderId;
         this.userId = userId;
         this.context = context;
     }
-    
+
 
     public String getFolderId() {
         return folderId;
@@ -99,11 +99,11 @@ public class TargetFolderDefinition {
     public void setFolderId(final int folderId) {
         setFolderId(String.valueOf(folderId));
     }
-    
+
     public boolean containsFolderId() {
         return getFolderId() != null;
     }
-    
+
     public Context getContext() {
         return context;
     }

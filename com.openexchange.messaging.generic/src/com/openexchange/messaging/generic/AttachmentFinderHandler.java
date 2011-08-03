@@ -59,7 +59,7 @@ import com.openexchange.messaging.MultipartContent;
 
 /**
  * {@link AttachmentFinderHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AttachmentFinderHandler implements MessageHandler {
@@ -70,7 +70,7 @@ public final class AttachmentFinderHandler implements MessageHandler {
 
     /**
      * Initializes a new {@link AttachmentFinderHandler}.
-     * 
+     *
      * @param sequenceId The sequence identifier of the attachment to find
      */
     public AttachmentFinderHandler(final String sequenceId) {
@@ -121,7 +121,7 @@ public final class AttachmentFinderHandler implements MessageHandler {
 
     /**
      * Gets the part.
-     * 
+     *
      * @return The found part or <code>null</code>
      */
     public MessagingPart getMessagingPart() {

@@ -69,51 +69,51 @@ public class SubscriptionSource {
     private SubscribeService subscribeService;
     private int folderModule = 0;
     private int priority = 0;
-    
+
     public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }
-    
+
     public String getDisplayName() {
         return displayName;
     }
-    
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-    
+
     public String getIcon() {
         return icon;
     }
-    
+
     public void setIcon(String icon) {
         this.icon = icon;
     }
-    
+
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
-    
+
     public void setFormDescription(DynamicFormDescription formDescription) {
         this.formDescription = formDescription;
     }
-    
+
     public SubscribeService getSubscribeService() {
         return subscribeService;
     }
-    
+
     public void setSubscribeService(SubscribeService subscribeService) {
         this.subscribeService = subscribeService;
     }
-    
+
     public void setFolderModule(int folderModule) {
         this.folderModule = folderModule;
     }
-    
+
     public int getFolderModule() {
         return folderModule;
     }
@@ -122,11 +122,11 @@ public class SubscriptionSource {
         return priority;
     }
 
-    
+
     public void setPriority(int priority) {
         this.priority = priority;
     }
-    
+
     public Set<String> getPasswordFields() {
         Set<String> fields = new HashSet<String>();
         for (FormElement element : getFormDescription()) {
@@ -166,5 +166,5 @@ public class SubscriptionSource {
         }
         return true;
     }
-    
+
 }

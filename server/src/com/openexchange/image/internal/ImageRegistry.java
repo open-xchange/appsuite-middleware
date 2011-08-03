@@ -65,7 +65,7 @@ import com.openexchange.timer.TimerService;
 /**
  * {@link ImageRegistry} - The image registry which bounds images to a session or a context. A heart-beat to session service/context storage
  * checks if session/context is still valid.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImageRegistry {
@@ -96,7 +96,7 @@ public final class ImageRegistry {
 
     /**
      * Gets the instance of {@link ImageRegistry}.
-     * 
+     *
      * @return The instance of {@link ImageRegistry}
      */
     static ImageRegistry getInstance() {
@@ -156,7 +156,7 @@ public final class ImageRegistry {
 
     /**
      * Checks if this registry contains images for the specified session.
-     * 
+     *
      * @param session The session
      * @param uniqueId The unique ID
      * @return <code>true</code> if this registry contains images for the specified session; otherwise <code>false</code>
@@ -168,7 +168,7 @@ public final class ImageRegistry {
     /**
      * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
      * registry.
-     * 
+     *
      * @param session The session to which the image data shall be bound
      * @param imageSource The image source
      * @param imageArguments The image arguments
@@ -181,7 +181,7 @@ public final class ImageRegistry {
     /**
      * Adds specified data source and data arguments as image data to this registry if no matching image data is already contained in
      * registry.
-     * 
+     *
      * @param session The session to which the image data shall be bound
      * @param imageSource The image source
      * @param imageArguments The image arguments
@@ -220,7 +220,7 @@ public final class ImageRegistry {
 
     /**
      * Removes imageId-sessionId pairs from the image registry.
-     * 
+     *
      * @param sessionId
      * @return True if at least one imageId-sessionId pair has been removed.
      */
@@ -230,7 +230,7 @@ public final class ImageRegistry {
 
     /**
      * Adds specified image data to this registry.
-     * 
+     *
      * @param session The session to which the image data shall be bound
      * @param imageData The image data
      */
@@ -252,7 +252,7 @@ public final class ImageRegistry {
 
     /**
      * Gets all images bound to specified session.
-     * 
+     *
      * @param session The session to get images from
      * @return All images bound to specified session as an array of {@link ImageData}; an empty array is returned if no images are held for
      *         specified session
@@ -271,7 +271,7 @@ public final class ImageRegistry {
 
     /**
      * Gets the image data bound to specified session and registered to specified unique ID.
-     * 
+     *
      * @param session The session to which the image data is bound
      * @param uniqueId The image data's unique ID
      * @return The image data bound to specified session and registered to specified unique ID, or <code>null</code> if none present
@@ -290,7 +290,7 @@ public final class ImageRegistry {
 
     /**
      * Retrieves the session a certain image was filed under, if it was filed under a session at all
-     * 
+     *
      * @param uniqueID The image data's unique ID
      * @return The session ID the UID was filed under or <code>null</code>, if no such ID could be determined
      */
@@ -300,7 +300,7 @@ public final class ImageRegistry {
 
     /**
      * Tries to retrieve any image filed under any session, regardless which.
-     * 
+     *
      * @param uniqueID The image data's unique ID
      * @return The image data bound to specified session and registered to specified unique ID, or <code>null</code> if none present
      */

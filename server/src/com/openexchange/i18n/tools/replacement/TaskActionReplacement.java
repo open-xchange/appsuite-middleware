@@ -55,9 +55,9 @@ import com.openexchange.i18n.tools.TemplateToken;
 
 /**
  * {@link TaskActionReplacement} - Replacement for an action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public final class TaskActionReplacement extends LocalizedStringReplacement {
 
@@ -79,7 +79,7 @@ public final class TaskActionReplacement extends LocalizedStringReplacement {
 
     /**
      * Initializes a new {@link TaskActionReplacement}
-     * 
+     *
      * @param taskAction The task action; supposed to be either
      *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
      *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
@@ -91,7 +91,7 @@ public final class TaskActionReplacement extends LocalizedStringReplacement {
 
     /**
      * Initializes a new {@link TaskActionReplacement}
-     * 
+     *
      * @param taskAction The task action; supposed to be either
      *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
      *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},

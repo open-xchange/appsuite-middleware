@@ -53,24 +53,24 @@ import com.openexchange.exception.OXException;
 
 /**
  * This switcher can translate all kinds of objects given to a boolean value.
- * 
- * This is necessary for CSV files - mostly for the PRIVATE flag, which 
- * may be -depending on the Outlook version- either "true", "yes", 
+ *
+ * This is necessary for CSV files - mostly for the PRIVATE flag, which
+ * may be -depending on the Outlook version- either "true", "yes",
  * "private" or whatever... so, rather than calling it "BooleanFinder",
- * one might call it "TruthSeeks", because it finds out whether a certain 
- * value might be translated to <code>true</code>, considering everything 
+ * one might call it "TruthSeeks", because it finds out whether a certain
+ * value might be translated to <code>true</code>, considering everything
  * else <code>false</code>.
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
 public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDelegate {
 
 	public String[] trueValues = {"y", "yes", "true" , "privat", "private", "priv\u00e9", "1"};
-	
+
 	public Object[] determineBooleanValue(final Object[] objects){
 		final Object obj = objects[1];
-		
+
 		boolean boolValue = false;
 		//check strings
 		try {
@@ -83,7 +83,7 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 		} catch(final ClassCastException e){
 			//do nothing, keep on trying
 		}
-		
+
 		//check boolean object
 		try {
 			boolValue = (Boolean) obj;
@@ -102,14 +102,14 @@ public class ContactSwitcherForBooleans extends	AbstractContactSwitcherWithDeleg
 
 		objects[1] = boolValue;
 		return objects;
-	
+
 	}
 
 	@Override
 	public Object privateflag(final Object... objects) throws OXException {
 		return delegate.privateflag( determineBooleanValue(objects) );
-		
+
 	}
-	
+
 
 }

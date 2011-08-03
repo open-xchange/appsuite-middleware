@@ -68,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link CalendarFolderUpdaterStrategy}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<CalendarDataObject> {
@@ -82,7 +82,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
     public int calculateSimilarityScore(final CalendarDataObject original, final CalendarDataObject candidate, final Object session) throws OXException {
         int score = 0;
-        // A score of 10 is sufficient for a match        
+        // A score of 10 is sufficient for a match
         // If the UID is the same we can assume it is the same event. Please note the UID is assumed to have been saved with contextid and folder-id as prefix here
         final String candidatesUID = getPrefixForUID(original) + candidate.getUid();
         if ((isset(original.getUid()) || isset(candidate.getUid())) && eq(original.getUid(), candidatesUID)) {
@@ -155,7 +155,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
         newElement.setContext(target.getContext());
-        addPrefixToUID(newElement);  
+        addPrefixToUID(newElement);
         calendarSql.insertAppointmentObject(newElement);
     }
 
@@ -181,9 +181,9 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
 
         calendarSql.updateAppointmentObject(update, original.getParentFolderID(), original.getLastModified());
     }
-    
-    private void addPrefixToUID (final CalendarDataObject cdo){        
-                cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());            
+
+    private void addPrefixToUID (final CalendarDataObject cdo){
+                cdo.setUid(getPrefixForUID(cdo) + cdo.getUid());
     }
 
     private String getPrefixForUID (final CalendarDataObject cdo){
@@ -192,6 +192,6 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
                     return Integer.toString(cdo.getContextID() + cdo.getParentFolderID());
             }
         }
-        return "";        
+        return "";
     }
 }

@@ -70,24 +70,27 @@ public class AllowTextInValuesOfDynamicContextAttributesTask extends ChangeColum
     public AllowTextInValuesOfDynamicContextAttributesTask() {
         super(null, "contextAttribute", "value","TEXT");
     }
-    
+
     @Override
     protected Column modifyColumn(Column c) {
         return new Column("value", "TEXT collate utf8_unicode_ci NOT NULL");
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[]{"com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask"};
     }
 
+    @Override
     public int addedWithVersion() {
         return NO_VERSION;
     }
 
+    @Override
     public int getPriority() {
         return Priority.NORMAL.ordinal();
     }
-    
+
     @Override
     protected void before(Connection con) throws SQLException {
         PreparedStatement stmt = null;
@@ -98,7 +101,7 @@ public class AllowTextInValuesOfDynamicContextAttributesTask extends ChangeColum
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     @Override
     public DatabaseService getDatabaseService() {
         return ServerServiceRegistry.getInstance().getService(DatabaseService.class);

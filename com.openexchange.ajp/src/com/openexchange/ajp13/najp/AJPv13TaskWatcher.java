@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13TaskWatcher} - Keeps track of submitted AJP tasks.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJPv13TaskWatcher {
@@ -82,7 +82,7 @@ public class AJPv13TaskWatcher {
 
     /**
      * Initializes a new {@link AJPv13TaskWatcher}.
-     * 
+     *
      * @param threadPoolService The thread pool service
      */
     public AJPv13TaskWatcher(final ThreadPoolService threadPoolService) {
@@ -106,7 +106,7 @@ public class AJPv13TaskWatcher {
      * Adds given task to this watcher.
      * <p>
      * Invoked within {@link Task#beforeExecute(Thread)} of an AJP task.
-     * 
+     *
      * @param task The AJP task to add
      */
     public void addTask(final AJPv13Task task) {
@@ -119,7 +119,7 @@ public class AJPv13TaskWatcher {
      * Removes given task from this watcher.
      * <p>
      * Invoked within {@link Task#afterExecute(Throwable)} of an AJP task.
-     * 
+     *
      * @param task The AJP task to remove
      */
     public void removeTask(final AJPv13Task task) {
@@ -155,7 +155,7 @@ public class AJPv13TaskWatcher {
 
         /**
          * Initializes a new {@link TimerTaskRunnable}
-         * 
+         *
          * @param tasks The map to iterate
          * @param threadPoolService The thread pool service
          * @param log The logger instance to use
@@ -167,6 +167,7 @@ public class AJPv13TaskWatcher {
             this.threadPoolService = threadPoolService;
         }
 
+        @Override
         public void run() {
             try {
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
@@ -204,7 +205,7 @@ public class AJPv13TaskWatcher {
                         }
                     }
                     /*-
-                     * 
+                     *
                     else {
                         if (log.isTraceEnabled()) {
                             final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
@@ -254,7 +255,7 @@ public class AJPv13TaskWatcher {
 
         /**
          * Initializes a new {@link TaskRunCallable} to only perform keep-alive on given AJP task.
-         * 
+         *
          * @param task The AJP task
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
@@ -273,7 +274,7 @@ public class AJPv13TaskWatcher {
 
         /**
          * Initializes a new {@link TaskRunCallable} fully tracking given AJP task.
-         * 
+         *
          * @param task The AJP task
          * @param waiting The waiting counter
          * @param processing The processing counter
@@ -293,6 +294,7 @@ public class AJPv13TaskWatcher {
             info = log.isInfoEnabled();
         }
 
+        @Override
         public Object call() {
             if (hasPermission) {
                 if (task.isWaitingOnAJPSocket()) {
@@ -342,14 +344,17 @@ public class AJPv13TaskWatcher {
             }
         }
 
+        @Override
         public void afterExecute(final Throwable t) {
             // NOP
         }
 
+        @Override
         public void beforeExecute(final Thread t) {
             // NOP
         }
 
+        @Override
         public void setThreadName(final ThreadRenamer threadRenamer) {
             // NOP
         }

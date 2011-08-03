@@ -56,7 +56,7 @@ import com.openexchange.imap.IMAPException;
 
 /**
  * {@link ThreadSortParser} - Parses an IMAP server's thread-sort string.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -77,7 +77,7 @@ final class ThreadSortParser {
 
     /**
      * Parses specified IMAP server's thread-sort string.
-     * 
+     *
      * @param threadList The thread-sort string.
      * @throws OXException If parsing thread-sort string fails.
      */
@@ -209,7 +209,7 @@ final class ThreadSortParser {
 
     /**
      * Pulls-up first tree node from given tree nodes list.
-     * 
+     *
      * @param threads The tree nodes list
      * @return The tree nodes list with first tree node pulled-up
      */

@@ -50,7 +50,6 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -84,7 +83,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LoginPerformer {
@@ -106,7 +105,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the login for specified login request.
-     * 
+     *
      * @param request The login request
      * @return The login providing login information
      * @throws OXException If login fails
@@ -117,7 +116,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the login for specified login request.
-     * 
+     *
      * @param request The login request
      * @return The login providing login information
      * @throws OXException If login fails
@@ -218,7 +217,7 @@ public final class LoginPerformer {
 
     /**
      * Performs the logout for specified session ID.
-     * 
+     *
      * @param sessionId The session ID
      * @throws OXException If logout fails
      */
@@ -274,6 +273,7 @@ public final class LoginPerformer {
                 final LoginHandlerService handler = it.next();
                 executor.submit(new LoginPerformerTask() {
 
+                    @Override
                     public Object call() {
                         try {
                             handler.handleLogin(login);
@@ -301,6 +301,7 @@ public final class LoginPerformer {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
                 executor.submit(new LoginPerformerTask() {
+                    @Override
                     public Object call() {
                         try {
                             handler.handleLogout(logout);

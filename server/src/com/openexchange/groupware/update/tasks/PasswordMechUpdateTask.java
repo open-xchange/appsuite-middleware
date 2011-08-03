@@ -67,24 +67,26 @@ import com.openexchange.groupware.update.UpdateTask;
 /**
  * PasswordMechUpdateTask - Adds column <tt>passwordMech</tt> to table
  * <tt>user</tt> if it does not exist, yet
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
 public class PasswordMechUpdateTask implements UpdateTask {
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PasswordMechUpdateTask.class));
 
-	public int addedWithVersion() {
+	@Override
+    public int addedWithVersion() {
 		return 1;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.openexchange.groupware.update.UpdateTask#getPriority()
 	 */
-	public int getPriority() {
+	@Override
+    public int getPriority() {
 		/*
 		 * Modification on database: highest priority.
 		 */
@@ -99,7 +101,8 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	private static final String STR_INFO = "Performing update task 'PasswordMechUpdateTask'";
 
-	public void perform(final Schema schema, final int contextId) throws OXException {
+	@Override
+    public void perform(final Schema schema, final int contextId) throws OXException {
 		if (LOG.isInfoEnabled()) {
 			LOG.info(STR_INFO);
 		}
@@ -137,7 +140,7 @@ public class PasswordMechUpdateTask implements UpdateTask {
 
 	/**
 	 * Determines if column named 'passwordMech' already exists in table 'user'
-	 * 
+	 *
 	 * @param contextId -
 	 *            the context ID
 	 * @return <code>true</code> if column named 'passwordMech' was found;

@@ -58,7 +58,7 @@ import com.openexchange.groupware.contact.ContactInterfaceProviderRegistry;
 
 /**
  * {@link ContactServiceListener} - The {@link ServiceTrackerCustomizer} for {@link ContactInterface} instances.
- * 
+ *
  * @author <a href="mailto:ben.pahne@open-xchange.com">Ben Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,7 +70,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
 
     /**
      * Initializes a new {@link ContactServiceListener}.
-     * 
+     *
      * @param context The bundle context
      */
     public ContactServiceListener(final BundleContext context) {
@@ -78,6 +78,7 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
+    @Override
     public Object addingService(final ServiceReference reference) {
         final Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         final Object ctx = reference.getProperty(ContactInterface.OVERRIDE_CONTEXT_ATTRIBUTE);
@@ -99,10 +100,12 @@ public class ContactServiceListener implements ServiceTrackerCustomizer {
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference reference, final Object service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference reference, final Object service) {
         if (null != service) {
             try {

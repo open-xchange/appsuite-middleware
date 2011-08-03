@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * OXServletException
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OXServletException extends OXException {
@@ -126,7 +126,7 @@ public class OXServletException extends OXException {
 
         /**
          * Default constructor.
-         * 
+         *
          * @param message message.
          * @param category category.
          * @param detailNumber detail number.
@@ -139,7 +139,7 @@ public class OXServletException extends OXException {
 
         /**
          * Creates an {@link OXException} instance using this error code.
-         * 
+         *
          * @return The newly created {@link OXException} instance.
          */
         public OXException create() {
@@ -148,7 +148,7 @@ public class OXServletException extends OXException {
 
         /**
          * Creates an {@link OXException} instance using this error code.
-         * 
+         *
          * @param logArguments The arguments for log message.
          * @return The newly created {@link OXException} instance.
          */
@@ -158,7 +158,7 @@ public class OXServletException extends OXException {
 
         /**
          * Creates an {@link OXException} instance using this error code.
-         * 
+         *
          * @param cause The initial cause for {@link OXException}
          * @param logArguments The arguments for log message.
          * @return The newly created {@link OXException} instance.

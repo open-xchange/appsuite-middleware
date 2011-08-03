@@ -62,7 +62,7 @@ public interface Modifier {
 
     /**
      * Modifies account intended for incoming actions.
-     * 
+     *
      * @param account The account
      * @return The modified account
      * @throws OXException If modifying fails
@@ -71,7 +71,7 @@ public interface Modifier {
 
     /**
      * Modifies account intended for outgoing actions.
-     * 
+     *
      * @param account The account
      * @return The modified account
      * @throws OXException If modifying fails

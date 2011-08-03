@@ -97,7 +97,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * vcard
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class vcard extends PermissionServlet {
@@ -230,7 +230,7 @@ public final class vcard extends PermissionServlet {
 
                 final ContactInterface contactInterface = ServerServiceRegistry.getInstance().getService(
                     ContactInterfaceDiscoveryService.class).newContactInterface(contactfolder_id, sessionObj);
-                
+
                 //final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessionObj);
                 it = contactInterface.getModifiedContactsInFolder(contactfolder_id, _contactFields, new Date(0));
 

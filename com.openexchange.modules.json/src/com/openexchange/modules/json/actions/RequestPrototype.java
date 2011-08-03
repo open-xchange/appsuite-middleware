@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RequestPrototype}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RequestPrototype<T extends Model<T>> {
@@ -132,7 +132,7 @@ public class RequestPrototype<T extends Model<T>> {
     public Iterator<String> getParameterNames() {
         return req.getParameterNames();
     }
-    
+
     public ServerSession getSession() {
         return session;
     }

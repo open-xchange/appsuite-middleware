@@ -72,15 +72,15 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link FacebookServiceImpl}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookServiceImpl implements FacebookService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class));
-    
-    private com.openexchange.oauth.OAuthService oAuthService;
-    private OAuthServiceMetaDataFacebookImpl facebookMetaData;
+
+    private final com.openexchange.oauth.OAuthService oAuthService;
+    private final OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
     public FacebookServiceImpl(com.openexchange.oauth.OAuthService oAuthService, OAuthServiceMetaDataFacebookImpl facebookMetaData) {
         this.oAuthService = oAuthService;
@@ -88,13 +88,13 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
-        
+
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
             facebookMetaData.getAPISecret()).build();
 
         OAuthAccount account = null;
-        
+
         try {
             account = oAuthService.getAccount(accountId, password, user, contextId);
         } catch (OXException e) {
@@ -157,7 +157,7 @@ public class FacebookServiceImpl implements FacebookService {
                 // No email-addresses available yet via API, sorry
                 // System.out.println(connection.get("email"));
 
-                if (JSONObject.NULL != connection.get("birthday_date") && !"".equals((String) connection.get("birthday_date")) && !"nil".equals((String) connection.get("birthday_date"))) {
+                if (JSONObject.NULL != connection.get("birthday_date") && !"".equals(connection.get("birthday_date")) && !"nil".equals(connection.get("birthday_date"))) {
                     String dateString = (String) connection.get("birthday_date");
                     Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
                     Integer day = Integer.parseInt(dateString.substring(3, 5));
@@ -173,13 +173,13 @@ public class FacebookServiceImpl implements FacebookService {
 
                 if (JSONObject.NULL != connection.get("hometown_location")) {
                     JSONObject hometownLocation = (JSONObject) connection.get("hometown_location");
-                    if (JSONObject.NULL != hometownLocation.get("city") && !"".equals((String) hometownLocation.get("city")) && !"nil".equals((String) hometownLocation.get("city"))) {
+                    if (JSONObject.NULL != hometownLocation.get("city") && !"".equals(hometownLocation.get("city")) && !"nil".equals(hometownLocation.get("city"))) {
                         contact.setCityHome((String) hometownLocation.get("city"));
                     }
-                    if (JSONObject.NULL != hometownLocation.get("country") && !"".equals((String) hometownLocation.get("country")) && !"nil".equals((String) hometownLocation.get("country"))) {
+                    if (JSONObject.NULL != hometownLocation.get("country") && !"".equals(hometownLocation.get("country")) && !"nil".equals(hometownLocation.get("country"))) {
                         contact.setCountryHome((String) hometownLocation.get("country"));
                     }
-                    if (JSONObject.NULL != hometownLocation.get("zip") && !"".equals((String) hometownLocation.get("zip")) && !"nil".equals((String) hometownLocation.get("zip"))) {
+                    if (JSONObject.NULL != hometownLocation.get("zip") && !"".equals(hometownLocation.get("zip")) && !"nil".equals(hometownLocation.get("zip"))) {
                         contact.setPostalCodeHome((String) hometownLocation.get("zip"));
                     }
                 }
@@ -194,7 +194,7 @@ public class FacebookServiceImpl implements FacebookService {
 
     public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
         String displayName = "";
-        try {            
+        try {
             OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
             displayName = account.getDisplayName();
         } catch (OXException e) {

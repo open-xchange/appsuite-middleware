@@ -59,7 +59,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 
 /**
  * {@link OutlookFolderDeleteListener} - The delete listener for virtual folder tables.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderDeleteListener implements DeleteListener {
@@ -71,6 +71,7 @@ public final class OutlookFolderDeleteListener implements DeleteListener {
         super();
     }
 
+    @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (event.getType() != DeleteEvent.TYPE_USER) {
             return;

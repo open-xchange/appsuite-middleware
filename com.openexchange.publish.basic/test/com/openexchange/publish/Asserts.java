@@ -83,21 +83,21 @@ public class Asserts {
 
     public static void assertTargets(Collection<PublicationTarget> targets, String...ids) {
         assertNotNull("Target list was null", targets);
-        
+
         Set<String> actualIds = new HashSet<String>();
         for(PublicationTarget target : targets) {
             actualIds.add(target.getId());
         }
-        
+
         Set<String> expectedIds = new HashSet<String>();
         for(String id : ids) {
             expectedIds.add(id);
         }
-        
+
         String error = "Expected: "+expectedIds+" Got: "+actualIds;
-        
+
         assertEquals(error, actualIds.size(), expectedIds.size());
-        
+
         for(String expectedId : expectedIds) {
             assertTrue(error, actualIds.remove(expectedId));
         }

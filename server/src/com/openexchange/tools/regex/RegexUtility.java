@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link RegexUtility} - Provides simple helper methods to compose regular expressions in an easier way.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RegexUtility {
@@ -194,7 +194,7 @@ public final class RegexUtility {
      * if it were a literal pattern.
      * </p>
      * Meta-Characters or escape sequences in the input sequence will be given no special meaning.
-     * 
+     *
      * @param s The string to be literalized
      * @return A literal string replacement
      */
@@ -220,7 +220,7 @@ public final class RegexUtility {
 
     /**
      * Concatenates specified first regular expression with given regular expressions.
-     * 
+     *
      * @param regex The first regular expression
      * @param regexes The array of regular expressions to append
      * @return The concatenated regex
@@ -239,11 +239,11 @@ public final class RegexUtility {
 
     /**
      * Combines specified regular expressions with OR operator <code>'|'</code>:
-     * 
+     *
      * <pre>
      * regex1 | regex2
      * </pre>
-     * 
+     *
      * @param regex1 The first regular expression
      * @param regex2 The second regular expression
      * @return The OR-combined regular expression
@@ -254,11 +254,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy optional operator <code>'?'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * regex?
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @return The greedy optional regular expression
      */
@@ -268,11 +268,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy optional operator <code>'?'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)?
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param groupType The group type
      * @return The grouped greedy optional regular expression
@@ -283,11 +283,11 @@ public final class RegexUtility {
 
     /**
      * Appends the optional operator <code>'?'</code> and grouping to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)?&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param qt The quantifier type
      * @param groupType The group type
@@ -307,11 +307,11 @@ public final class RegexUtility {
 
     /**
      * Groups given regular expression
-     * 
+     *
      * <pre>
      * (regex) OR (?:regex)
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param capturing <code>true</code> as capturing group; <code>false</code> for non-capturing
      * @return The grouped regular expression
@@ -323,11 +323,11 @@ public final class RegexUtility {
 
     /**
      * Groups given regular expression as stated by specified <code>groupType</code>.
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param groupType The group type
      * @return The grouped regular expression
@@ -345,11 +345,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy one-or-more-times operator <code>'+'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * regex+
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @return The greedy one-or-more-times regular expression
      */
@@ -359,11 +359,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy one-or-more-times operator <code>'+'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)+
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param groupType The group type
      * @return The grouped greedy one-or-more-times regular expression
@@ -374,11 +374,11 @@ public final class RegexUtility {
 
     /**
      * Appends the one-or-more-times operator <code>'+'</code> and grouping to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)+&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param qt The quantifier type
      * @param groupType The group type
@@ -398,11 +398,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy zero-or-more-times operator <code>'*'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * regex*
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @return The greedy zero-or-more-times regular expression
      */
@@ -412,11 +412,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy zero-or-more-times operator <code>'*'</code> to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)*
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param groupType The group type
      * @return The grouped greedy zero-or-more-times regular expression
@@ -427,11 +427,11 @@ public final class RegexUtility {
 
     /**
      * Appends the zero-or-more-times operator <code>'*'</code> and grouping to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex)*&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param qt The quantifier type
      * @param groupType The group type
@@ -451,11 +451,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy exactly-n-times operator <code>{n}</code> to specified regular expression
-     * 
+     *
      * <pre>
      * regex{n}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>exactly-n-times</code> number
      * @return The greedy exactly-n-times regular expression
@@ -466,11 +466,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy exactly-n-times operator <code>{n}</code> to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>exactly-n-times</code> number
      * @param groupType The group type
@@ -482,11 +482,11 @@ public final class RegexUtility {
 
     /**
      * Appends the exactly-n-times operator <code>{n}</code> and grouping to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n}&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>exactly-n-times</code> number
      * @param qt The quantifier type
@@ -507,11 +507,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy at-least-n-times operator <code>{n,}</code> to specified regular expression
-     * 
+     *
      * <pre>
      * regex{n,}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @return The greedy at-least-n-times regular expression
@@ -522,11 +522,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy at-least-n-times operator <code>{n,}</code> to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n,}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @param groupType The group type
@@ -538,11 +538,11 @@ public final class RegexUtility {
 
     /**
      * Appends the at-least-n-times operator <code>{n}</code> and grouping to specified regular expression
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n,}&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @param qt The quantifier type
@@ -564,11 +564,11 @@ public final class RegexUtility {
 
     /**
      * Appends the greedy at-least-n-but-not-more-than-m-times operator <code>{n,m}</code> to specified regular expression.
-     * 
+     *
      * <pre>
      * regex{n,m}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @param m The <code>not-more-than-m-times</code> number
@@ -580,11 +580,11 @@ public final class RegexUtility {
 
     /**
      * Appends the grouped greedy at-least-n-but-not-more-than-m-times operator <code>{n,m}</code> to specified regular expression.
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n,m}
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @param m The <code>not-more-than-m-times</code> number
@@ -597,11 +597,11 @@ public final class RegexUtility {
 
     /**
      * Appends the at-least-n-but-not-more-than-m-times operator <code>{n,m}</code> and grouping to specified regular expression.
-     * 
+     *
      * <pre>
      * (&lt;group-type&gt;regex){n,m}&lt;quantifier-type&gt;
      * </pre>
-     * 
+     *
      * @param regex The regular expression
      * @param n The <code>at-least-n-times</code> number
      * @param m The <code>not-more-than-m-times</code> number

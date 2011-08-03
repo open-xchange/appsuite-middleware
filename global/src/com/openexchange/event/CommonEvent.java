@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link CommonEvent} - Interface for common event distributed by OSGi's event admin.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface CommonEvent {
@@ -103,70 +103,70 @@ public interface CommonEvent {
 
     /**
      * Gets the context ID.
-     * 
+     *
      * @return The context ID
      */
     public int getContextId();
 
     /**
      * Gets the user ID.
-     * 
+     *
      * @return The user ID
      */
     public int getUserId();
 
     /**
      * Gets the module.
-     * 
+     *
      * @return The module
      */
     public int getModule();
 
     /**
      * Gets the action object.
-     * 
+     *
      * @return The action object
      */
     public Object getActionObj();
 
     /**
      * Gets the old object.
-     * 
+     *
      * @return The old object
      */
     public Object getOldObj();
 
     /**
      * Gets the source folder object.
-     * 
+     *
      * @return The source folder object
      */
     public Object getSourceFolder();
 
     /**
      * Gets the destination folder object.
-     * 
+     *
      * @return The destination folder object
      */
     public Object getDestinationFolder();
 
     /**
      * Gets the action.
-     * 
+     *
      * @return The action
      */
     public int getAction();
 
     /**
      * Gets the session.
-     * 
+     *
      * @return he session
      */
     public Session getSession();
 
     /**
      * Return a map containing the affected users identifiers as keys. The corresponding value contains a set of folder identifier that the
-     * user has to refresh to be up to date. 
+     * user has to refresh to be up to date.
      * @return a map with user identifier as keys and folder identifier sets as values.
      */
     public Map<Integer, Set<Integer>> getAffectedUsersWithFolder();

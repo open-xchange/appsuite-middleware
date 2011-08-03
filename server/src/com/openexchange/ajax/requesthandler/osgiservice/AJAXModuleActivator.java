@@ -51,30 +51,67 @@ package com.openexchange.ajax.requesthandler.osgiservice;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
-
 /**
- * {@link AJAXModuleActivator}
+ * {@link AJAXModuleActivator} - The {@link BundleActivator activator} to register a module.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *  @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AJAXModuleActivator extends HousekeepingActivator {
 
-    public void registerModule(AJAXActionServiceFactory factory, String module) {
+    /**
+     * Initializes a new {@link AJAXModuleActivator}.
+     */
+    protected AJAXModuleActivator() {
+        super();
+    }
+
+    /**
+     * Registers specified factory with given module identifier.
+     * 
+     * @param factory The factory to register
+     * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
+     */
+    public void registerModule(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, true);
     }
-    
-    public void registerModuleWithoutMultipleAccess(AJAXActionServiceFactory factory, String module) {
+
+    /**
+     * Registers specified factory with given module identifier which is not accessible by multiple module.
+     * 
+     * @param factory The factory to register
+     * @param module The module identifier; accessible path would be: <code>"/ajax/"</code> + &lt;module&gt;
+     */
+    public void registerModuleWithoutMultipleAccess(final AJAXActionServiceFactory factory, final String module) {
         this.registerInternal(factory, module, false);
     }
 
-    private void registerInternal(AJAXActionServiceFactory factory, String module, boolean multiple) {
-        Dictionary properties = new Hashtable();
-        
+    private void registerInternal(final AJAXActionServiceFactory factory, final String module, final boolean multiple) {
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("module", module);
-        properties.put("multiple", new Boolean(multiple).toString());
+        properties.put("multiple", multiple ? "true" : "false");
+        /*-
+         * 
+        final Module moduleAnnotation = factory.getClass().getAnnotation(Module.class);
+        if (null != moduleAnnotation) {
+            final String[] actions = moduleAnnotation.actions();
+            if (null != actions && actions.length > 0) {
+                final List<String> list = new ArrayList<String>(actions.length);
+                for (int i = 0; i < actions.length; i++) {
+                    final String action = actions[i];
+                    if (action.length() > 0) {
+                        list.add(action);
+                    }
+                }
+                properties.put("actions", list);
+            }
+        }
+         * 
+         */
         registerService(AJAXActionServiceFactory.class, factory, properties);
     }
 }

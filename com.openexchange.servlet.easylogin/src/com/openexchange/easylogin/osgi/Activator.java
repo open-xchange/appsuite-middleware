@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.Tools;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator implements BundleActivator {

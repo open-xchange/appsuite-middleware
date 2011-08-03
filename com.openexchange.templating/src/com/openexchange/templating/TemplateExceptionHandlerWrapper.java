@@ -61,20 +61,20 @@ import freemarker.template.TemplateExceptionHandler;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TemplateExceptionHandlerWrapper implements TemplateExceptionHandler {
-    
+
     private final OXTemplateExceptionHandler exceptionHandler;
-    
+
     public TemplateExceptionHandlerWrapper(final OXTemplateExceptionHandler exceptionHandler) {
         super();
         this.exceptionHandler = exceptionHandler;
     }
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     public void handleTemplateException(final freemarker.template.TemplateException te, final Environment env, final Writer out) throws freemarker.template.TemplateException {
         final OXException exception = TemplateErrorMessage.UnderlyingException.create(te);
-        
+
         try {
             exceptionHandler.handleTemplateException(exception, out);
         } catch (final OXException e) {

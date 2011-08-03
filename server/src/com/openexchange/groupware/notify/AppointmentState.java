@@ -136,6 +136,7 @@ public class AppointmentState extends LinkableState {
         this.type = type;
     }
 
+    @Override
     public boolean sendMail(final UserSettingMail userSettingMail, final int owner, final int participant,
             final int modificationUser) {
         if (modificationUser == participant) {
@@ -172,10 +173,12 @@ public class AppointmentState extends LinkableState {
         renderMap.put(tr);
     }
 
+    @Override
     public int getModule() {
         return Types.APPOINTMENT;
     }
 
+    @Override
     public DateFormat getDateFormat(final Locale locale) {
         return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, locale));
     }
@@ -189,10 +192,12 @@ public class AppointmentState extends LinkableState {
         return df;
     }
 
+    @Override
     public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
         // Nothing to do
     }
 
+    @Override
     public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sessObj) {
         addICALAttachment(mail, (Appointment) obj, sessObj);
     }
@@ -229,18 +234,22 @@ public class AppointmentState extends LinkableState {
         }
     }
 
+    @Override
     public Template getTemplate() {
         return new StringTemplate(messageTemplate);
     }
 
+    @Override
     public TemplateReplacement getAction() {
         return actionRepl;
     }
 
+    @Override
     public TemplateReplacement getConfirmationAction() {
         return confirmationActionRepl;
     }
 
+    @Override
     public Type getType() {
         return type;
     }
@@ -260,6 +269,7 @@ public class AppointmentState extends LinkableState {
         I(Appointment.SHOWN_AS)
     ));
 
+    @Override
     public boolean onlyIrrelevantFieldsChanged(final CalendarObject oldObj, final CalendarObject newObj) {
         final Set<Integer> differingFields = oldObj.findDifferingFields(newObj);
         differingFields.removeAll(FIELDS_TO_IGNORE);

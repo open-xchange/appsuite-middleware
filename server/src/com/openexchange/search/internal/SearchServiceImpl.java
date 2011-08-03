@@ -67,7 +67,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link SearchServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SearchServiceImpl implements SearchService {
@@ -169,6 +169,7 @@ public final class SearchServiceImpl implements SearchService {
         super();
     }
 
+    @Override
     public <C> boolean matches(final C candidate, final SearchTerm<?> searchTerm, final SearchAttributeFetcher<C> attributeFetcher) {
         final Operation operation = searchTerm.getOperation();
         if (CompositeOperation.AND.equals(operation)) {
@@ -203,6 +204,7 @@ public final class SearchServiceImpl implements SearchService {
         return singleTermMatch(candidate, (SingleSearchTerm) searchTerm, attributeFetcher);
     }
 
+    @Override
     public <C> Collection<C> filter(final Collection<C> candidates, final SearchTerm<?> searchTerm, final SearchAttributeFetcher<C> attributeFetcher) {
         final List<C> retval = new ArrayList<C>(candidates.size());
         for (final C candidate : candidates) {

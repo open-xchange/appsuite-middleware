@@ -54,7 +54,7 @@ import java.util.Set;
 
 /**
  * {@link MessagingFolder} - Represents a messaging folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -99,28 +99,28 @@ public interface MessagingFolder {
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.
-     * 
+     *
      * @return The list of capabilities
      */
     public Set<String> getCapabilities();
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     public String getId();
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName();
 
     /**
      * Gets the separator character.
-     * 
+     *
      * @return The separator character.
      */
     public char getSeparator();
@@ -132,35 +132,35 @@ public interface MessagingFolder {
      * {@link DefaultMessagingPermission} is supposed to be returned on missing permissions support except for the root folder. The root
      * folder should indicate no object permissions in any case, but the folder permission varies if messaging system allows subfolder
      * creation below root folder or not. The returned permission must reflect the allowed behavior.
-     * 
+     *
      * @return The own permission
      */
     public MessagingPermission getOwnPermission();
 
     /**
      * Gets the parent identifier or <code>null</code> if this messaging folder denotes the root folder.
-     * 
+     *
      * @return The parent identifier or <code>null</code> if this messaging folder denotes the root folder
      */
     public String getParentId();
 
     /**
      * Gets the permissions associated with this messaging folder.
-     * 
+     *
      * @return The permissions as a collection of {@link MessagingPermission}
      */
     public List<MessagingPermission> getPermissions();
 
     /**
      * Checks if this messaging folder has subfolders.
-     * 
+     *
      * @return <code>true</code> if this messaging folder has subfolders; otherwise <code>false</code>
      */
     public boolean hasSubfolders();
 
     /**
      * Checks if this messaging folder has subscribed subfolders.
-     * 
+     *
      * @return <code>true</code> if this messaging folder has subscribed subfolders; otherwise <code>false</code>
      */
     public boolean hasSubscribedSubfolders();
@@ -169,42 +169,42 @@ public interface MessagingFolder {
      * Checks whether the denoted messaging folder is subscribed or not.
      * <p>
      * If messaging system does not support subscription, <code>true</code> is supposed to be returned.
-     * 
+     *
      * @return Whether the denoted messaging folder is subscribed or not
      */
     public boolean isSubscribed();
 
     /**
      * Checks if this folder is able to hold folders.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold folders; otherwise <code>false</code>
      */
     public boolean isHoldsFolders();
 
     /**
      * Checks if this folder is able to hold messages.
-     * 
+     *
      * @return <code>true</code> if this folder is able to hold messages; otherwise <code>false</code>
      */
     public boolean isHoldsMessages();
 
     /**
      * Checks if this folder denotes the root folder
-     * 
+     *
      * @return <code>true</code> if this folder denotes the root folder; otherwise <code>false</code>
      */
     public boolean isRootFolder();
 
     /**
      * Checks if this folder denotes a default folder (Drafts, Sent, Trash, etc.)
-     * 
+     *
      * @return <code>true</code> if this folder denotes a default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder();
 
     /**
      * Gets the number of messages.
-     * 
+     *
      * @return The number of messages or <code>-1</code> if this messaging folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -212,7 +212,7 @@ public interface MessagingFolder {
 
     /**
      * Gets the number of new messages (since last time this folder was accessed).
-     * 
+     *
      * @return The number of new messages or <code>-1</code> if this messaging folder does not hold messages.
      * @see #isHoldsMessages()
      */
@@ -220,7 +220,7 @@ public interface MessagingFolder {
 
     /**
      * Gets the number of unread messages.
-     * 
+     *
      * @return The number of unread messages or <code>-1</code> if this messaging folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -228,7 +228,7 @@ public interface MessagingFolder {
 
     /**
      * Gets the number of messages marked for deletion in this folder
-     * 
+     *
      * @return The number of messages marked for deletion in this folder or <code>-1</code> if this messaging folder does not hold messages
      * @see #isHoldsMessages()
      */
@@ -236,14 +236,14 @@ public interface MessagingFolder {
 
     /**
      * Gets the default folder type.
-     * 
+     *
      * @return The default folder type or {@link DefaultFolderType#NONE} if not available
      */
     public DefaultFolderType getDefaultFolderType();
 
     /**
      * Checks if default folder type was applied to this messaging folder.
-     * 
+     *
      * @return <code>true</code> if default folder type is applied; otherwise <code>false</code>
      */
     public boolean containsDefaultFolderType();

@@ -74,13 +74,13 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionReturningStringStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
-   
+
    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
 
    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, submitName;
 
    private int numberOfForm;
-   
+
    private Page loginPage;
 
    public LoginPageByFormActionReturningStringStep() {
@@ -122,7 +122,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                userfield.setValueAttribute(username);
                final HtmlPasswordInput passwordfield = loginForm.getInputByName(nameOfPasswordField);
                passwordfield.setValueAttribute(password);
-               
+
                final HtmlPage pageAfterLogin = (HtmlPage) loginForm.submit(loginForm.getInputByName(submitName));
                Pattern pattern = Pattern.compile(regexForReturnedString);
                Matcher matcher = pattern.matcher(pageAfterLogin.getWebResponse().getContentAsString());
@@ -135,7 +135,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                    }
                    throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                }
-                             
+
                executedSuccessfully = true;
            }
        } catch (final FailingHttpStatusCodeException e) {
@@ -220,28 +220,28 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
     public String getRegexForReturnedString() {
         return regexForReturnedString;
     }
-    
-    
+
+
     public void setRegexForReturnedString(String regexForReturnedString) {
         this.regexForReturnedString = regexForReturnedString;
     }
-    
-    
+
+
     public String getSubmitName() {
         return submitName;
     }
-    
-    
+
+
     public void setSubmitName(String submitName) {
         this.submitName = submitName;
     }
 
-    
+
     public Page getLoginPage() {
         return loginPage;
     }
 
-    
-   
+
+
 }
 

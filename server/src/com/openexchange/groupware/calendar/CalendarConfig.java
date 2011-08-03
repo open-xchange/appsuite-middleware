@@ -65,28 +65,28 @@ import com.openexchange.tools.conf.AbstractConfig;
  * <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CalendarConfig extends AbstractConfig implements Initialization {
-    
+
     private static final CalendarConfig singleton = new CalendarConfig();
-    
+
     private static final Property KEY = Property.CALENDAR;
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
-    
+
     private static boolean solo_reminder_trigger_event = true;
     private static boolean check_and_remove_past_reminders = true;
     private static int max_operations_in_recurrence_calculations;
 
     private static boolean CACHED_ITERATOR_FAST_FETCH = true;
-    
+
     private static boolean seriesconflictlimit = true;
-    
+
     private static boolean undefinedstatusconflict = true;
-    
+
     public static boolean isCACHED_ITERATOR_FAST_FETCH() {
         return CACHED_ITERATOR_FAST_FETCH;
     }
 
-    
+
     public static int getMAX_PRE_FETCH() {
         return MAX_PRE_FETCH;
     }
@@ -111,7 +111,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         }
         return filename;
     }
-    
+
     public static String getProperty(final String key) {
         return singleton.getPropertyInternal(key);
     }
@@ -126,6 +126,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void start() throws OXException {
         if (isPropertiesLoadInternal()) {
             LOG.error("Duplicate initialization of CalendarConfig.");
@@ -137,6 +138,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void stop() throws OXException {
         if (!isPropertiesLoadInternal()) {
             LOG.error("Duplicate shutdown of CalendarConfig.");
@@ -156,7 +158,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             reinit();
         }
     }
-    
+
     public static void reinit() throws OXException {
         singleton.loadPropertiesInternal();
         String check_cached_iterator_fast_fetch = CalendarConfig.getProperty("CACHED_ITERATOR_FAST_FETCH");
@@ -184,7 +186,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             if (check_and_remove_past_reminders_string.equalsIgnoreCase("FALSE")) {
                 check_and_remove_past_reminders = false;
             }
-        }     
+        }
         String solo_reminder_trigger_event_string = CalendarConfig.getProperty("CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS");
         if (solo_reminder_trigger_event_string != null){
             solo_reminder_trigger_event_string = solo_reminder_trigger_event_string.trim();
@@ -203,9 +205,9 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 			} catch (final NumberFormatException e) {
 				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: "+max_operations_in_recurrence_calculations_string);
 				max_operations_in_recurrence_calculations = 999 * 50;
-			} 
+			}
         }
-        
+
         String series_conflict_limit_string = CalendarConfig.getProperty("com.openexchange.calendar.seriesconflictlimit");
         if (series_conflict_limit_string != null){
             series_conflict_limit_string = series_conflict_limit_string.trim();
@@ -213,7 +215,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
                 seriesconflictlimit = false;
             }
         }
-        
+
         String undefined_status_conflict_string = CalendarConfig.getProperty("com.openexchange.calendar.undefinedstatusconflict");
         if (undefined_status_conflict_string != null){
             undefined_status_conflict_string = undefined_status_conflict_string.trim();
@@ -222,11 +224,11 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
             }
         }
     }
-    
+
     public static boolean getCheckAndRemovePastReminders() {
         return check_and_remove_past_reminders;
     }
-    
+
     public static boolean getSoloReminderTriggerEvent() {
         return solo_reminder_trigger_event;
     }
@@ -234,21 +236,21 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     public static int getMaxOperationsInRecurrenceCalculations() {
         return max_operations_in_recurrence_calculations;
     }
-    
+
     public static boolean getSeriesConflictLimit() {
         return seriesconflictlimit;
     }
-    
+
     public static boolean getUndefinedStatusConflict() {
         return undefinedstatusconflict;
     }
-    
+
     //friendly methods for testing purposes
-    
+
     static void setCheckAndRemovePastReminders(final boolean value) {
         check_and_remove_past_reminders = value;
     }
-    
+
     static void setSoloReminderTriggerEvent(final boolean value) {
         solo_reminder_trigger_event = value;
     }
@@ -256,11 +258,11 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
     static void setMaxOperationsInRecurrenceCalculations(final int value) {
         max_operations_in_recurrence_calculations = value;
     }
-    
+
     static void setSeriesConflictLimit(final boolean value) {
         seriesconflictlimit = value;
     }
-    
+
     static void setUndefinedStatusConflict(final boolean value) {
         undefinedstatusconflict = value;
     }

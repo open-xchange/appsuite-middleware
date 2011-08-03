@@ -57,7 +57,7 @@ import com.openexchange.control.internal.BundleNotFoundException;
 
 /**
  * {@link UninstallBundle} - The console handler for <code>&quot;uninstallbundle&quot;</code> command.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class UninstallBundle extends AbstractConsoleHandler {
@@ -66,7 +66,7 @@ public final class UninstallBundle extends AbstractConsoleHandler {
 
     /**
      * Initializes a new {@link UninstallBundle} with specified arguments and performs {@link #uninstall(String) uninstall}.
-     * 
+     *
      * @param args The command-line arguments
      */
     public UninstallBundle(final String args[]) {

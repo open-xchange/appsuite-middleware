@@ -65,7 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FacebookOAuthAccountDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDeleteListener {

@@ -97,7 +97,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AJAXServlet extends HttpServlet implements UploadRegistry {
@@ -228,9 +228,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_LOGOUT = "logout";
 
     public static final String ACTION_REDIRECT = "redirect";
-    
+
     public static final String ACTION_REDEEM = "redeem";
-    
+
     public static final String ACTION_AUTOLOGIN = "autologin";
 
     public static final String ACTION_SAVE_VERSIT = "saveVersit";
@@ -238,15 +238,15 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_CLEAR = "clear";
 
     public static final String ACTION_KEEPALIVE = "keepalive";
-    
+
     public static final String ACTION_RESOLVE_UID = "resolveuid";
 
     public static final String ACTION_IMPORT = "import";
-    
+
     public static final String ACTION_REFRESH = "refresh";
-    
+
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
-    
+
     public static final String ACTION_TERMSEARCH = "advancedSearch";
 
     /**
@@ -285,7 +285,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_INFOLDER = "folder";
 
     public static final String PARAMETER_MODULE = "module";
-    
+
     public static final String PARAMETER_MAIL = "mail";
 
     /**
@@ -343,17 +343,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_USER = "user";
 
     public static final String PARAMETER_TEMPLATE = "template";
-    
+
     public static final String PARAMETER_UID = "uid";
-    
+
     public static final String PARAMETER_SHOW_PRIVATE_APPOINTMENTS = "showPrivate";
 
     public static final String PARAMETER_USERNAME = "name";
-    
+
     public static final String PARAMETER_PASSWORD= "password";
 
     public static final String PARAMETER_FILTER = "filter";
-    
+
     public static final String PARAMETER_COLLATION = "collation";
 
     /**
@@ -383,8 +383,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			+ "(parent.callback_**action** || window.opener && "
 			+ "window.opener.callback_**action**)(**json**)"
 			+ "</script></head></html>";
-	
-    protected static final String SAVE_AS_TYPE = "application/octet-stream";
+
+    public static final String SAVE_AS_TYPE = "application/octet-stream";
 
     protected static final String _doGet = "doGet";
 
@@ -454,7 +454,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Returns the complete body as a string. Be careful when getting big request bodies.
-     * 
+     *
      * @param req The HTTP servlet request.
      * @return A string with the complete body.
      * @throws IOException If an error occurs while reading the body.
@@ -498,7 +498,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Returns the URI part after path to the servlet.
-     * 
+     *
      * @param req the request that url should be parsed
      * @return the URI part after the path to your servlet.
      */
@@ -524,7 +524,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Gets the action parameter ({@link #PARAMETER_ACTION}) from specified servlet request.
-     * 
+     *
      * @param req The servlet request
      * @return The action parameter's value
      * @throws OXException If action parameter is missing in specified servlet request
@@ -539,7 +539,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * This method sends the given error message as a java script error object to the client.
-     * 
+     *
      * @param resp This response will be used to send the java script error object.
      * @param errorMessage The error message to send to the client.
      * @throws IOException if writing to the response fails.
@@ -634,11 +634,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
-     * 
+     *
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
+    @Override
     public UploadEvent processUpload(final HttpServletRequest req) throws OXException {
         return processUploadStatic(req);
     }
@@ -647,7 +648,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Gets the {@link ServletFileUpload} instance.
-     * 
+     *
      * @return The {@link ServletFileUpload} instance
      */
     private static ServletFileUpload getFileUploadBase() {
@@ -670,7 +671,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * Creates a new {@link ServletFileUpload} instance.
-     * 
+     *
      * @return A new {@link ServletFileUpload} instance
      */
     private static ServletFileUpload newFileUploadBase() {
@@ -701,7 +702,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     /**
      * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
-     * 
+     *
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
@@ -722,7 +723,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         /*-
          * Check proper action value
-         * 
+         *
          * ###########################################################################################################
          * ######################### ENSURE YOUR ACTION IS CONTAINED IN UPLOAD_ACTIONS ! ! ! #########################
          * ###########################################################################################################
@@ -806,6 +807,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
+    @Override
     public void fireUploadEvent(final UploadEvent uploadEvent, final Collection<UploadListener> uploadListeners) throws OXException {
         try {
             for (final UploadListener uploadListener : uploadListeners) {

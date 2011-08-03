@@ -62,7 +62,7 @@ import com.openexchange.tools.encoding.Charsets;
 /**
  * {@link RFC2231Tools} - A collection of <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> related utility
  * methods
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RFC2231Tools {
@@ -82,11 +82,11 @@ public final class RFC2231Tools {
      * Parses given <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value into its charset, language and
      * rfc2231-encoded value. Therefore <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value should match
      * pattern:
-     * 
+     *
      * <pre>
      * &lt;charset-name&gt; + &quot;'&quot; + &lt;language-code&gt; + &quot;'&quot; + &lt;encoded-data&gt;
      * </pre>
-     * 
+     *
      * @param rfc2231Value The rfc2231 value
      * @return An array of {@link String} containing charset, language, and rfc2231-encoded value or <code>null</code> if value does not
      *         match pattern.
@@ -104,11 +104,11 @@ public final class RFC2231Tools {
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
      * <p>
      * This method assumes that encoding information are contained in given string; e.g.
-     * 
+     *
      * <pre>
      * utf-8'EN'%C2%A4%20txt
      * </pre>
-     * 
+     *
      * @param encoded The encoded string
      * @return The decoded string
      */
@@ -125,7 +125,7 @@ public final class RFC2231Tools {
     /**
      * Decodes specified string according to mail-safe encoding introduced in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
-     * 
+     *
      * @param encoded The encoded string
      * @param charset The charset name
      * @return The decoded string
@@ -165,7 +165,7 @@ public final class RFC2231Tools {
 
     /**
      * Retries decoding with self-allocated char buffer with double capacity.
-     * 
+     *
      * @param cs The charset object
      * @param bb The allocated byte buffer
      * @return The decoded string
@@ -227,7 +227,7 @@ public final class RFC2231Tools {
     /**
      * Encodes given string according to mechanism provided in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>.
-     * 
+     *
      * @param toEncode The string to encode
      * @param charset The charset encoding
      * @param language The language to append
@@ -241,7 +241,7 @@ public final class RFC2231Tools {
     /**
      * Encodes given string according to mechanism provided in <small><b><a
      * href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>.
-     * 
+     *
      * @param toEncode The string to encode
      * @param charset The charset encoding
      * @param language The language to append
@@ -287,7 +287,7 @@ public final class RFC2231Tools {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -302,7 +302,7 @@ public final class RFC2231Tools {
 
     /**
      * Checks whether the character is ASCII 7 bit
-     * 
+     *
      * @param c The character to check
      * @return <code>true</code> if character is ASCII 7 bit; otherwise <code>false</code>
      */

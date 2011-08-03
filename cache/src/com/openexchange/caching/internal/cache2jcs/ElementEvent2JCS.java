@@ -54,7 +54,7 @@ import com.openexchange.caching.ElementEvent;
 
 /**
  * {@link ElementEvent2JCS}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElementEvent2JCS implements ElementEvent {

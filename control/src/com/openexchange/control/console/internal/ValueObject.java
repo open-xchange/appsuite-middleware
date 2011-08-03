@@ -51,14 +51,14 @@ package com.openexchange.control.console.internal;
 
 /**
  * {@link ValueObject} - The class representing a sole value; meaning its {@link #getType()} method returns {@link AbstractValue#VALUE}.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class ValueObject extends AbstractValue {
 
     /**
      * Initializes a new {@link ValueObject}.
-     * 
+     *
      * @param value The value
      */
     ValueObject(final String value) {

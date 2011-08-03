@@ -57,7 +57,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link CustomThreadPoolExecutorTimerService} - The {@link TimerService} implementation backed by a {@link CustomThreadPoolExecutor}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomThreadPoolExecutorTimerService implements TimerService {

@@ -66,7 +66,7 @@ import com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerAct
  */
 public class PropertyHandler {
 
-    
+
     private interface IntegerSetterClosuse {
 
         void setter(final int value);
@@ -81,46 +81,46 @@ public class PropertyHandler {
         spamd("spamd"),
         timeout("timeout"),
         userSource("userSource");
-        
+
         private final String name;
-        
+
         private Parameters(final String name) {
             this.name = name;
         }
 
         public final String getName() {
             return bundlename + name;
-        }    
+        }
     }
-    
+
 //    public enum UserSource {
 //        login,
 //        mail,
 //        name
 //    }
-    
+
     public static final String bundlename = "com.openexchange.spamhandler.spamassassin.";
-    
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PropertyHandler.class));
-    
+
     private static PropertyHandler singleton = new PropertyHandler();
-    
+
     private String hostname;
-    
+
     private final AtomicBoolean loaded = new AtomicBoolean();
-    
+
     private int port;
-    
+
     private int retries;
-    
+
     private int retrysleep;
-    
+
     private boolean spamd;
-    
+
     private long timeout;
-    
+
 //    private UserSource userSource;
-    
+
     public static PropertyHandler getInstance() {
         return singleton;
     }
@@ -170,7 +170,7 @@ public class PropertyHandler {
                     break;
                 }
             }
-            
+
         });
         if (null == property || 0 == property.length()) {
             return null;
@@ -191,35 +191,35 @@ public class PropertyHandler {
 //    public UserSource getUserSource() {
 //        return userSource;
 //    }
-    
+
     public int getRetries() {
         return retries;
     }
 
-    
-    
-    
+
+
+
     public int getRetrysleep() {
         return retrysleep;
     }
 
-    
+
     public long getTimeout() {
         return timeout;
     }
 
-    
+
     public boolean isSpamd() {
         return spamd;
     }
 
     public void loadProperties() throws OXException {
         final StringBuilder logBuilder = new StringBuilder();
-        
+
         final ConfigurationService configuration = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-        
+
         logBuilder.append("\nLoading spamhandler spamassassin properties...\n");
-        
+
         final String modestring = checkStringProperty(configuration, Parameters.spamd);
         try {
             this.setSpamd(Boolean.valueOf(modestring));
@@ -237,14 +237,14 @@ public class PropertyHandler {
             this.setHostname(hostname);
             logBuilder.append("\t" + Parameters.hostname.getName() + ": ").append(this.getHostname()).append('\n');
         }
-        
-        
+
+
         setIntegerParam(logBuilder, configuration, Parameters.port, new IntegerSetterClosuse() {
             public void setter(final int value) {
                 setPort(value);
             }
         });
-        
+
         final String timeoutstring = checkStringPropertyOptional(configuration, Parameters.timeout);
         if (null == timeoutstring) {
             if (spamd) {
@@ -258,7 +258,7 @@ public class PropertyHandler {
                 throw SpamhandlerSpamassassinConfigurationExceptionCode.PARAMETER_NO_LONG.create(Parameters.timeout.getName(), timeoutstring);
             }
         }
-        
+
         setIntegerParam(logBuilder, configuration, Parameters.retries, new IntegerSetterClosuse() {
             public void setter(final int value) {
                 setRetries(value);
@@ -270,7 +270,7 @@ public class PropertyHandler {
                 setRetrysleep(value);
             }
         });
-        
+
 //        final String userSourceString = checkStringPropertyOptional(configuration, Parameters.userSource);
 //        if (null == userSourceString) {
 //            if (spamd) {
@@ -283,7 +283,7 @@ public class PropertyHandler {
 //                throw new OXException(Code.USERSOURCE_WRONG, userSourceString);
 //            }
 //        }
-        
+
         this.loaded.set(true);
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -291,15 +291,15 @@ public class PropertyHandler {
     }
 
     public void reloadProperties() {
-        
+
     }
 
-    
+
     private void setHostname(final String hostname) {
         this.hostname = hostname;
     }
 
-    
+
     private void setIntegerParam(final StringBuilder logBuilder, final ConfigurationService configuration, final Parameters param, final IntegerSetterClosuse closure) throws OXException {
         final String value = checkStringPropertyOptional(configuration, param);
         if (null == value) {

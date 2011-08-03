@@ -67,7 +67,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * Enumeration about all {@link OXException}s.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum DataExceptionCodes implements OXExceptionCode {
@@ -112,15 +112,15 @@ public enum DataExceptionCodes implements OXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR(IO_ERROR_MSG, Category.CATEGORY_ERROR, 10),
-    
+
     ;
-    
+
     private final Category category;
 
     private final int number;
 
     private final String message;
-    
+
     private final boolean display;
 
     private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -128,7 +128,7 @@ public enum DataExceptionCodes implements OXExceptionCode {
         this.number = detailNumber;
         this.category = category;
         display = category.getLogLevel().implies(LogLevel.DEBUG);
-        
+
     }
 
     public String getPrefix() {
@@ -153,7 +153,7 @@ public enum DataExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -162,7 +162,7 @@ public enum DataExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -172,7 +172,7 @@ public enum DataExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

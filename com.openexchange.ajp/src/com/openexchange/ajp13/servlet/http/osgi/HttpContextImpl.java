@@ -58,13 +58,13 @@ import org.osgi.service.http.HttpContext;
 
 /**
  * {@link HttpContextImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HttpContextImpl implements HttpContext {
 
     /**
-	 * 
+	 *
 	 */
     public HttpContextImpl() {
         super();
@@ -74,6 +74,7 @@ public final class HttpContextImpl implements HttpContext {
      * (non-Javadoc)
      * @see org.osgi.service.http.HttpContext#getMimeType(java.lang.String)
      */
+    @Override
     public String getMimeType(final String name) {
         return FileTypeMap.getDefaultFileTypeMap().getContentType(name);
     }
@@ -82,6 +83,7 @@ public final class HttpContextImpl implements HttpContext {
      * (non-Javadoc)
      * @see org.osgi.service.http.HttpContext#getResource(java.lang.String)
      */
+    @Override
     public URL getResource(final String name) {
         return null;
     }
@@ -90,6 +92,7 @@ public final class HttpContextImpl implements HttpContext {
      * (non-Javadoc)
      * @see org.osgi.service.http.HttpContext#handleSecurity(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
+    @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         return true;
     }

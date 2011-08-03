@@ -58,7 +58,7 @@ import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link ContentDisposition}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContentDisposition extends ParameterizedHeader {
@@ -86,7 +86,7 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     /**
      * Initializes a new {@link ContentDisposition}
-     * 
+     *
      * @param contentDisp The content disposition
      * @throws OXException If content disposition cannot be parsed
      */
@@ -170,7 +170,7 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     /**
      * Applies given content disposition to this content disposition
-     * 
+     *
      * @param contentDisp The content disposition to apply
      */
     public void setContentDisposition(final ContentDisposition contentDisp) {
@@ -239,7 +239,7 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     /**
      * Checks if disposition is inline
-     * 
+     *
      * @return <code>true</code> if disposition is inline; otherwise <code>false</code>
      */
     public boolean isInline() {
@@ -248,7 +248,7 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     /**
      * Checks if disposition is attachment
-     * 
+     *
      * @return <code>true</code> if disposition is attachment; otherwise <code>false</code>
      */
     public boolean isAttachment() {
@@ -262,7 +262,7 @@ public final class ContentDisposition extends ParameterizedHeader {
 
     /**
      * Returns a RFC2045 style (ASCII-only) string representation of this content disposition.
-     * 
+     *
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content disposition
      */

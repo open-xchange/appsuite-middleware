@@ -53,7 +53,8 @@ import com.openexchange.exception.OXException;
 
 public class WebdavDeleteAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		req.getResource().delete();
 	}

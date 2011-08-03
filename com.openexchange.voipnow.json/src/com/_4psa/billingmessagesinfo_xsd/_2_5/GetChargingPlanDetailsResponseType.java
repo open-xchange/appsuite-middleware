@@ -14,11 +14,11 @@ import com._4psa.common_xsd._2_5.Notice;
 
 /**
  * Get charging plan details: response type
- * 
+ *
  * <p>Java class for GetChargingPlanDetailsResponseType complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="GetChargingPlanDetailsResponseType">
  *   &lt;complexContent>
@@ -47,8 +47,8 @@ import com._4psa.common_xsd._2_5.Notice;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "GetChargingPlanDetailsResponseType", propOrder = {
@@ -62,11 +62,11 @@ public class GetChargingPlanDetailsResponseType {
 
     /**
      * Gets the value of the chargingPlan property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link GetChargingPlanDetailsResponseType.ChargingPlan }
-     *     
+     *
      */
     public GetChargingPlanDetailsResponseType.ChargingPlan getChargingPlan() {
         return chargingPlan;
@@ -74,11 +74,11 @@ public class GetChargingPlanDetailsResponseType {
 
     /**
      * Sets the value of the chargingPlan property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link GetChargingPlanDetailsResponseType.ChargingPlan }
-     *     
+     *
      */
     public void setChargingPlan(GetChargingPlanDetailsResponseType.ChargingPlan value) {
         this.chargingPlan = value;
@@ -86,25 +86,25 @@ public class GetChargingPlanDetailsResponseType {
 
     /**
      * Gets the value of the notice property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the notice property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNotice().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Notice }
-     * 
-     * 
+     *
+     *
      */
     public List<Notice> getNotice() {
         if (notice == null) {
@@ -116,9 +116,9 @@ public class GetChargingPlanDetailsResponseType {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -136,8 +136,8 @@ public class GetChargingPlanDetailsResponseType {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -164,11 +164,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the id property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getID() {
             return id;
@@ -176,11 +176,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the id property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setID(BigInteger value) {
             this.id = value;
@@ -188,11 +188,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the identifier property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getIdentifier() {
             return identifier;
@@ -200,11 +200,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the identifier property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setIdentifier(String value) {
             this.identifier = value;
@@ -212,11 +212,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the userID property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getUserID() {
             return userID;
@@ -224,11 +224,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the userID property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setUserID(BigInteger value) {
             this.userID = value;
@@ -236,11 +236,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the userLogin property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getUserLogin() {
             return userLogin;
@@ -248,11 +248,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the userLogin property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setUserLogin(String value) {
             this.userLogin = value;
@@ -260,11 +260,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the status property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Boolean }
-         *     
+         *
          */
         public Boolean isStatus() {
             return status;
@@ -272,11 +272,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the status property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Boolean }
-         *     
+         *
          */
         public void setStatus(Boolean value) {
             this.status = value;
@@ -284,11 +284,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the originalIdentifier property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getOriginalIdentifier() {
             return originalIdentifier;
@@ -296,11 +296,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the originalIdentifier property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setOriginalIdentifier(String value) {
             this.originalIdentifier = value;
@@ -308,11 +308,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Gets the value of the signature property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getSignature() {
             return signature;
@@ -320,11 +320,11 @@ public class GetChargingPlanDetailsResponseType {
 
         /**
          * Sets the value of the signature property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setSignature(String value) {
             this.signature = value;

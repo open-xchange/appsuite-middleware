@@ -12,11 +12,11 @@ import com._4psa.billingmessages_xsd._2_5.EditDestinationExceptionRequest;
 
 /**
  * Destination exception charge
- * 
+ *
  * <p>Java class for DestinationException complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DestinationException">
  *   &lt;complexContent>
@@ -59,8 +59,8 @@ import com._4psa.billingmessages_xsd._2_5.EditDestinationExceptionRequest;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DestinationException", propOrder = {
@@ -84,11 +84,11 @@ public class DestinationException {
 
     /**
      * Gets the value of the areaCode property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getAreaCode() {
         return areaCode;
@@ -96,11 +96,11 @@ public class DestinationException {
 
     /**
      * Sets the value of the areaCode property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setAreaCode(String value) {
         this.areaCode = value;
@@ -108,11 +108,11 @@ public class DestinationException {
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -120,11 +120,11 @@ public class DestinationException {
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -132,11 +132,11 @@ public class DestinationException {
 
     /**
      * Gets the value of the charge property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DestinationException.Charge }
-     *     
+     *
      */
     public DestinationException.Charge getCharge() {
         return charge;
@@ -144,11 +144,11 @@ public class DestinationException {
 
     /**
      * Sets the value of the charge property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DestinationException.Charge }
-     *     
+     *
      */
     public void setCharge(DestinationException.Charge value) {
         this.charge = value;
@@ -156,11 +156,11 @@ public class DestinationException {
 
     /**
      * Gets the value of the chargingPackageID property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getChargingPackageID() {
         return chargingPackageID;
@@ -168,11 +168,11 @@ public class DestinationException {
 
     /**
      * Sets the value of the chargingPackageID property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setChargingPackageID(BigInteger value) {
         this.chargingPackageID = value;
@@ -180,11 +180,11 @@ public class DestinationException {
 
     /**
      * Gets the value of the package property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DestinationException.Package }
-     *     
+     *
      */
     public DestinationException.Package getPackage() {
         return _package;
@@ -192,11 +192,11 @@ public class DestinationException {
 
     /**
      * Sets the value of the package property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DestinationException.Package }
-     *     
+     *
      */
     public void setPackage(DestinationException.Package value) {
         this._package = value;
@@ -205,9 +205,9 @@ public class DestinationException {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -223,8 +223,8 @@ public class DestinationException {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -244,11 +244,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the initialAmount property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getInitialAmount() {
             return initialAmount;
@@ -256,11 +256,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the initialAmount property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setInitialAmount(Float value) {
             this.initialAmount = value;
@@ -268,11 +268,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the initialInterval property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getInitialInterval() {
             return initialInterval;
@@ -280,11 +280,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the initialInterval property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setInitialInterval(BigInteger value) {
             this.initialInterval = value;
@@ -292,11 +292,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the amount property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getAmount() {
             return amount;
@@ -304,11 +304,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the amount property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setAmount(Float value) {
             this.amount = value;
@@ -316,11 +316,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the interval property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public BigInteger getInterval() {
             return interval;
@@ -328,11 +328,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the interval property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link BigInteger }
-         *     
+         *
          */
         public void setInterval(BigInteger value) {
             this.interval = value;
@@ -340,11 +340,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the setupAmount property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link Float }
-         *     
+         *
          */
         public Float getSetupAmount() {
             return setupAmount;
@@ -352,11 +352,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the setupAmount property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link Float }
-         *     
+         *
          */
         public void setSetupAmount(Float value) {
             this.setupAmount = value;
@@ -367,9 +367,9 @@ public class DestinationException {
 
     /**
      * <p>Java class for anonymous complex type.
-     * 
+     *
      * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
+     *
      * <pre>
      * &lt;complexType>
      *   &lt;complexContent>
@@ -382,8 +382,8 @@ public class DestinationException {
      *   &lt;/complexContent>
      * &lt;/complexType>
      * </pre>
-     * 
-     * 
+     *
+     *
      */
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlType(name = "", propOrder = {
@@ -398,11 +398,11 @@ public class DestinationException {
 
         /**
          * Gets the value of the name property.
-         * 
+         *
          * @return
          *     possible object is
          *     {@link String }
-         *     
+         *
          */
         public String getName() {
             return name;
@@ -410,11 +410,11 @@ public class DestinationException {
 
         /**
          * Sets the value of the name property.
-         * 
+         *
          * @param value
          *     allowed object is
          *     {@link String }
-         *     
+         *
          */
         public void setName(String value) {
             this.name = value;
@@ -422,7 +422,7 @@ public class DestinationException {
 
         /**
          * Gets the value of the minutes property.
-         * 
+         *
          */
         public float getMinutes() {
             return minutes;
@@ -430,7 +430,7 @@ public class DestinationException {
 
         /**
          * Sets the value of the minutes property.
-         * 
+         *
          */
         public void setMinutes(float value) {
             this.minutes = value;

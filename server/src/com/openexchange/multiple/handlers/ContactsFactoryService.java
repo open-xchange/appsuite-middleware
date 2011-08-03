@@ -63,7 +63,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactsFactoryService} - Factory service for contacts module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ContactsFactoryService implements MultipleHandlerFactoryService {
@@ -75,10 +75,12 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
         super();
     }
 
+    @Override
     public MultipleHandler createMultipleHandler() {
         return new ContactsHandler();
     }
 
+    @Override
     public String getSupportedModule() {
         return "contacts";
     }
@@ -91,14 +93,17 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
             super();
         }
 
+        @Override
         public void close() {
             // Nothing to do
         }
 
+        @Override
         public Date getTimestamp() {
             return timestamp;
         }
 
+        @Override
         public JSONValue performRequest(final String action, final JSONObject jsonObject, final ServerSession session, final boolean secure) throws JSONException, OXException {
             try {
                 final ContactRequest request = new ContactRequest(session);
@@ -113,6 +118,7 @@ public final class ContactsFactoryService implements MultipleHandlerFactoryServi
             }
         }
 
+        @Override
         public Collection<OXException> getWarnings() {
             return Collections.<OXException> emptySet();
         }

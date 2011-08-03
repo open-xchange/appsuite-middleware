@@ -71,7 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * This class contains some tools methods for tasks.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -90,7 +90,7 @@ public final class Tools {
 
     /**
      * Creates a dummy task for inserting into the deleted tables to tell clients that a task has been removed from some folder.
-     * 
+     *
      * @param identifier unique identifier of the task.
      * @param createdBy user identifier that created the task.
      * @param modifiedBy user identifier that moved the task.
@@ -119,7 +119,7 @@ public final class Tools {
 
     /**
      * Checks if the folder is a public folder.
-     * 
+     *
      * @param folder folder object.
      * @return <code>true</code> if the folder is a public folder, <code>false</code> otherwise.
      */
@@ -129,7 +129,7 @@ public final class Tools {
 
     /**
      * Checks if the folder is a private folder.
-     * 
+     *
      * @param folder folder object.
      * @return <code>true</code> if the folder is a private folder, <code>false</code> otherwise.
      */
@@ -139,7 +139,7 @@ public final class Tools {
 
     /**
      * Checks if the folder is a shared folder.
-     * 
+     *
      * @param folder folder object.
      * @param user requesting user.
      * @return <code>true</code> if the folder is a shared folder, <code>false</code> otherwise.
@@ -150,7 +150,7 @@ public final class Tools {
 
     /**
      * Returns the unique identifier of the users standard tasks folder.
-     * 
+     *
      * @param ctx Context.
      * @param userId unique identifier of the user.
      * @return the unique identifier of the users standard tasks folder.
@@ -168,7 +168,7 @@ public final class Tools {
 
     /**
      * Reads a folder.
-     * 
+     *
      * @param ctx Context.
      * @param folderId unique identifier of the folder to read.
      * @return the folder object.
@@ -180,7 +180,7 @@ public final class Tools {
 
     /**
      * Reads a folder.
-     * 
+     *
      * @param ctx Context.
      * @param folderId unique identifier of the folder to read.
      * @return the folder object.

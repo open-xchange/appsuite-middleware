@@ -71,7 +71,7 @@ public interface ICalParser {
 
     /**
      * Parses the first property possibly contained in specified ICal stream.
-     * 
+     *
      * @param propertyName The property name; e.g. "UID" or "METHOD"
      * @param ical The ICal stream
      * @return The detected property or <code>null</code>

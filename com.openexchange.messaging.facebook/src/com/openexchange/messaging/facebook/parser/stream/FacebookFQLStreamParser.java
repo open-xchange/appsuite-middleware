@@ -81,7 +81,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FacebookFQLStreamParser} - Parses a given facebook stream element into a MIME message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
@@ -557,7 +557,7 @@ public final class FacebookFQLStreamParser {
 
     /**
      * Parses given facebook stream element into a MIME message.
-     * 
+     *
      * @param streamElement The facebook stream element
      * @param locale The user's locale
      * @return The resulting MIME message
@@ -707,7 +707,7 @@ public final class FacebookFQLStreamParser {
 
     /**
      * Gets the first node with specified name occurring as child below given node.
-     * 
+     *
      * @param name The node name to look-up
      * @param node The parent node
      * @return The appropriate node or <code>null</code> if none found
@@ -722,7 +722,7 @@ public final class FacebookFQLStreamParser {
 
     /**
      * Gets the first node with specified name occurring in given node list.
-     * 
+     *
      * @param name The node name to look-up
      * @param nodes The node list
      * @param len The length of the node list
@@ -740,7 +740,7 @@ public final class FacebookFQLStreamParser {
 
     /**
      * Gets all nodes with specified name occurring as child below given node.
-     * 
+     *
      * @param name The node name to look-up
      * @param node The parent node
      * @return The appropriate nodes

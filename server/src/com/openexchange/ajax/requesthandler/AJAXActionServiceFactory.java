@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AJAXActionServiceFactory} a factory for creating action services.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface AJAXActionServiceFactory {
 
     /**
      * Creates the action service for performing the request.
-     * 
+     *
      * @param action The name of the action
      * @return The action service implementation and never <code>null</code>.
      * @throws OXException If an action service can not be created for the given name.

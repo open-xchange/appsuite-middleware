@@ -55,7 +55,7 @@ import com.openexchange.groupware.container.Contact;
 public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 
 	protected ContactSwitcher delegate;
-	
+
 //------//
 	public ContactSwitcher getDelegate() {
 		return delegate;
@@ -63,122 +63,151 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 
 	public void setDelegate(final ContactSwitcher delegate) {
 		this.delegate = delegate;
-	}	
+	}
 
 //------//
-	public Object creationdate(final Object... objects) throws OXException {
+	@Override
+    public Object creationdate(final Object... objects) throws OXException {
 		return delegate.creationdate( objects );
 	}
 
-	public Object anniversary(final Object... objects) throws OXException {
+	@Override
+    public Object anniversary(final Object... objects) throws OXException {
 		return delegate.anniversary( objects) ;
 	}
 
-	public Object birthday(final Object... objects) throws OXException {
+	@Override
+    public Object birthday(final Object... objects) throws OXException {
 		return delegate.birthday(objects );
 	}
 
-	public Object imagelastmodified(final Object... objects) throws OXException {
+	@Override
+    public Object imagelastmodified(final Object... objects) throws OXException {
 		return delegate.imagelastmodified( objects );
 	}
 
-	public Object lastmodified(final Object... objects) throws OXException {
+	@Override
+    public Object lastmodified(final Object... objects) throws OXException {
 		return delegate.lastmodified( objects );
 	}
 
-	public Object assistantname(final Object... objects) throws OXException {
+	@Override
+    public Object assistantname(final Object... objects) throws OXException {
 		return delegate.assistantname(objects);
 	}
 
-	public Object branches(final Object... objects) throws OXException {
+	@Override
+    public Object branches(final Object... objects) throws OXException {
 		return delegate.branches(objects);
 	}
 
-	public Object businesscategory(final Object... objects) throws OXException {
+	@Override
+    public Object businesscategory(final Object... objects) throws OXException {
 		return delegate.businesscategory(objects);
 	}
 
-	public Object categories(final Object... objects) throws OXException {
+	@Override
+    public Object categories(final Object... objects) throws OXException {
 		return delegate.categories(objects);
 	}
 
-	public Object cellulartelephone1(final Object... objects) throws OXException {
+	@Override
+    public Object cellulartelephone1(final Object... objects) throws OXException {
 		return delegate.cellulartelephone1(objects);
 	}
 
-	public Object cellulartelephone2(final Object... objects) throws OXException {
+	@Override
+    public Object cellulartelephone2(final Object... objects) throws OXException {
 		return delegate.cellulartelephone2(objects);
 	}
 
-	public Object citybusiness(final Object... objects) throws OXException {
+	@Override
+    public Object citybusiness(final Object... objects) throws OXException {
 		return delegate.citybusiness(objects);
 	}
 
-	public Object cityhome(final Object... objects) throws OXException {
+	@Override
+    public Object cityhome(final Object... objects) throws OXException {
 		return delegate.cityhome(objects);
 	}
 
-	public Object cityother(final Object... objects) throws OXException {
+	@Override
+    public Object cityother(final Object... objects) throws OXException {
 		return delegate.cityother(objects);
 	}
 
-	public Object commercialregister(final Object... objects) throws OXException {
+	@Override
+    public Object commercialregister(final Object... objects) throws OXException {
 		return delegate.commercialregister(objects);
 	}
 
-	public Object company(final Object... objects) throws OXException {
+	@Override
+    public Object company(final Object... objects) throws OXException {
 		return delegate.company(objects);
 	}
 
-	public Object contextid(final Object... objects) throws OXException {
+	@Override
+    public Object contextid(final Object... objects) throws OXException {
 		return delegate.contextid(objects);
 	}
 
-	public Object countrybusiness(final Object... objects) throws OXException {
+	@Override
+    public Object countrybusiness(final Object... objects) throws OXException {
 		return delegate.countrybusiness(objects);
 	}
 
-	public Object countryhome(final Object... objects) throws OXException {
+	@Override
+    public Object countryhome(final Object... objects) throws OXException {
 		return delegate.countryhome(objects);
 	}
 
-	public Object countryother(final Object... objects) throws OXException {
+	@Override
+    public Object countryother(final Object... objects) throws OXException {
 		return delegate.countryother(objects);
 	}
 
-	public Object createdby(final Object... objects) throws OXException {
+	@Override
+    public Object createdby(final Object... objects) throws OXException {
 		return delegate.createdby(objects);
 	}
 
-	public Object defaultaddress(final Object... objects) throws OXException {
+	@Override
+    public Object defaultaddress(final Object... objects) throws OXException {
 		return delegate.defaultaddress(objects);
 	}
 
-	public Object department(final Object... objects) throws OXException {
+	@Override
+    public Object department(final Object... objects) throws OXException {
 		return delegate.department(objects);
 	}
 
-	public Object displayname(final Object... objects) throws OXException {
+	@Override
+    public Object displayname(final Object... objects) throws OXException {
 		return delegate.displayname(objects);
 	}
 
-	public Object distributionlist(final Object... objects) throws OXException {
+	@Override
+    public Object distributionlist(final Object... objects) throws OXException {
 		return delegate.distributionlist(objects);
 	}
 
-	public Object email1(final Object... objects) throws OXException {
+	@Override
+    public Object email1(final Object... objects) throws OXException {
 		return delegate.email1(objects);
 	}
 
-	public Object email2(final Object... objects) throws OXException {
+	@Override
+    public Object email2(final Object... objects) throws OXException {
 		return delegate.email2(objects);
 	}
 
-	public Object email3(final Object... objects) throws OXException {
+	@Override
+    public Object email3(final Object... objects) throws OXException {
 		return delegate.email3(objects);
 	}
 
-	public Object employeetype(final Object... objects) throws OXException {
+	@Override
+    public Object employeetype(final Object... objects) throws OXException {
 		return delegate.employeetype(objects);
 	}
 
@@ -187,23 +216,28 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.equals(obj);
 	}
 
-	public Object faxbusiness(final Object... objects) throws OXException {
+	@Override
+    public Object faxbusiness(final Object... objects) throws OXException {
 		return delegate.faxbusiness(objects);
 	}
 
-	public Object faxhome(final Object... objects) throws OXException {
+	@Override
+    public Object faxhome(final Object... objects) throws OXException {
 		return delegate.faxhome(objects);
 	}
 
-	public Object faxother(final Object... objects) throws OXException {
+	@Override
+    public Object faxother(final Object... objects) throws OXException {
 		return delegate.faxother(objects);
 	}
 
-	public Object fileas(final Object... objects) throws OXException {
+	@Override
+    public Object fileas(final Object... objects) throws OXException {
 		return delegate.fileas(objects);
 	}
 
-	public Object givenname(final Object... objects) throws OXException {
+	@Override
+    public Object givenname(final Object... objects) throws OXException {
 		return delegate.givenname(objects);
 	}
 
@@ -212,219 +246,273 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.hashCode();
 	}
 
-	public Object info(final Object... objects) throws OXException {
+	@Override
+    public Object info(final Object... objects) throws OXException {
 		return delegate.info(objects);
 	}
 
-	public Object instantmessenger1(final Object... objects) throws OXException {
+	@Override
+    public Object instantmessenger1(final Object... objects) throws OXException {
 		return delegate.instantmessenger1(objects);
 	}
 
-	public Object instantmessenger2(final Object... objects) throws OXException {
+	@Override
+    public Object instantmessenger2(final Object... objects) throws OXException {
 		return delegate.instantmessenger2(objects);
 	}
 
-	public Object internaluserid(final Object... objects) throws OXException {
+	@Override
+    public Object internaluserid(final Object... objects) throws OXException {
 		return delegate.internaluserid(objects);
 	}
 
-	public Object label(final Object... objects) throws OXException {
+	@Override
+    public Object label(final Object... objects) throws OXException {
 		return delegate.label(objects);
 	}
 
-	public Object links(final Object... objects) throws OXException {
+	@Override
+    public Object links(final Object... objects) throws OXException {
 		return delegate.links(objects);
 	}
 
-	public Object managername(final Object... objects) throws OXException {
+	@Override
+    public Object managername(final Object... objects) throws OXException {
 		return delegate.managername(objects);
 	}
 
-	public Object maritalstatus(final Object... objects) throws OXException {
+	@Override
+    public Object maritalstatus(final Object... objects) throws OXException {
 		return delegate.maritalstatus(objects);
 	}
 
-	public Object middlename(final Object... objects) throws OXException {
+	@Override
+    public Object middlename(final Object... objects) throws OXException {
 		return delegate.middlename(objects);
 	}
 
-	public Object modifiedby(final Object... objects) throws OXException {
+	@Override
+    public Object modifiedby(final Object... objects) throws OXException {
 		return delegate.modifiedby(objects);
 	}
 
-	public Object nickname(final Object... objects) throws OXException {
+	@Override
+    public Object nickname(final Object... objects) throws OXException {
 		return delegate.nickname(objects);
 	}
 
-	public Object note(final Object... objects) throws OXException {
+	@Override
+    public Object note(final Object... objects) throws OXException {
 		return delegate.note(objects);
 	}
 
-	public Object numberofattachments(final Object... objects) throws OXException {
+	@Override
+    public Object numberofattachments(final Object... objects) throws OXException {
 		return delegate.numberofattachments(objects);
 	}
 
-	public Object numberofchildren(final Object... objects) throws OXException {
+	@Override
+    public Object numberofchildren(final Object... objects) throws OXException {
 		return delegate.numberofchildren(objects);
 	}
 
-	public Object numberofdistributionlists(final Object... objects) throws OXException {
+	@Override
+    public Object numberofdistributionlists(final Object... objects) throws OXException {
 		return delegate.numberofdistributionlists(objects);
 	}
 
-	public Object numberofemployee(final Object... objects) throws OXException {
+	@Override
+    public Object numberofemployee(final Object... objects) throws OXException {
 		return delegate.numberofemployee(objects);
 	}
 
-	public Object numberoflinks(final Object... objects) throws OXException {
+	@Override
+    public Object numberoflinks(final Object... objects) throws OXException {
 		return delegate.numberoflinks(objects);
 	}
 
-	public Object objectid(final Object... objects) throws OXException {
+	@Override
+    public Object objectid(final Object... objects) throws OXException {
 		return delegate.objectid(objects);
 	}
 
-	public Object parentfolderid(final Object... objects) throws OXException {
+	@Override
+    public Object parentfolderid(final Object... objects) throws OXException {
 		return delegate.parentfolderid(objects);
 	}
 
-	public Object position(final Object... objects) throws OXException {
+	@Override
+    public Object position(final Object... objects) throws OXException {
 		return delegate.position(objects);
 	}
 
-	public Object postalcodebusiness(final Object... objects) throws OXException {
+	@Override
+    public Object postalcodebusiness(final Object... objects) throws OXException {
 		return delegate.postalcodebusiness(objects);
 	}
 
-	public Object postalcodehome(final Object... objects) throws OXException {
+	@Override
+    public Object postalcodehome(final Object... objects) throws OXException {
 		return delegate.postalcodehome(objects);
 	}
 
-	public Object postalcodeother(final Object... objects) throws OXException {
+	@Override
+    public Object postalcodeother(final Object... objects) throws OXException {
 		return delegate.postalcodeother(objects);
 	}
 
-	public Object privateflag(final Object... objects) throws OXException {
+	@Override
+    public Object privateflag(final Object... objects) throws OXException {
 		return delegate.privateflag(objects);
 	}
 
-	public Object profession(final Object... objects) throws OXException {
+	@Override
+    public Object profession(final Object... objects) throws OXException {
 		return delegate.profession(objects);
 	}
 
-	public Object roomnumber(final Object... objects) throws OXException {
+	@Override
+    public Object roomnumber(final Object... objects) throws OXException {
 		return delegate.roomnumber(objects);
 	}
 
-	public Object salesvolume(final Object... objects) throws OXException {
+	@Override
+    public Object salesvolume(final Object... objects) throws OXException {
 		return delegate.salesvolume(objects);
 	}
 
-	public Object spousename(final Object... objects) throws OXException {
+	@Override
+    public Object spousename(final Object... objects) throws OXException {
 		return delegate.spousename(objects);
 	}
 
-	public Object statebusiness(final Object... objects) throws OXException {
+	@Override
+    public Object statebusiness(final Object... objects) throws OXException {
 		return delegate.statebusiness(objects);
 	}
 
-	public Object statehome(final Object... objects) throws OXException {
+	@Override
+    public Object statehome(final Object... objects) throws OXException {
 		return delegate.statehome(objects);
 	}
 
-	public Object stateother(final Object... objects) throws OXException {
+	@Override
+    public Object stateother(final Object... objects) throws OXException {
 		return delegate.stateother(objects);
 	}
 
-	public Object streetbusiness(final Object... objects) throws OXException {
+	@Override
+    public Object streetbusiness(final Object... objects) throws OXException {
 		return delegate.streetbusiness(objects);
 	}
 
-	public Object streethome(final Object... objects) throws OXException {
+	@Override
+    public Object streethome(final Object... objects) throws OXException {
 		return delegate.streethome(objects);
 	}
 
-	public Object streetother(final Object... objects) throws OXException {
+	@Override
+    public Object streetother(final Object... objects) throws OXException {
 		return delegate.streetother(objects);
 	}
 
-	public Object suffix(final Object... objects) throws OXException {
+	@Override
+    public Object suffix(final Object... objects) throws OXException {
 		return delegate.suffix(objects);
 	}
 
-	public Object surname(final Object... objects) throws OXException {
+	@Override
+    public Object surname(final Object... objects) throws OXException {
 		return delegate.surname(objects);
 	}
 
-	public Object taxid(final Object... objects) throws OXException {
+	@Override
+    public Object taxid(final Object... objects) throws OXException {
 		return delegate.taxid(objects);
 	}
 
-	public Object telephoneassistant(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneassistant(final Object... objects) throws OXException {
 		return delegate.telephoneassistant(objects);
 	}
 
-	public Object telephonebusiness1(final Object... objects) throws OXException {
+	@Override
+    public Object telephonebusiness1(final Object... objects) throws OXException {
 		return delegate.telephonebusiness1(objects);
 	}
 
-	public Object telephonebusiness2(final Object... objects) throws OXException {
+	@Override
+    public Object telephonebusiness2(final Object... objects) throws OXException {
 		return delegate.telephonebusiness2(objects);
 	}
 
-	public Object telephonecallback(final Object... objects) throws OXException {
+	@Override
+    public Object telephonecallback(final Object... objects) throws OXException {
 		return delegate.telephonecallback(objects);
 	}
 
-	public Object telephonecar(final Object... objects) throws OXException {
+	@Override
+    public Object telephonecar(final Object... objects) throws OXException {
 		return delegate.telephonecar(objects);
 	}
 
-	public Object telephonecompany(final Object... objects) throws OXException {
+	@Override
+    public Object telephonecompany(final Object... objects) throws OXException {
 		return delegate.telephonecompany(objects);
 	}
 
-	public Object telephonehome1(final Object... objects) throws OXException {
+	@Override
+    public Object telephonehome1(final Object... objects) throws OXException {
 		return delegate.telephonehome1(objects);
 	}
 
-	public Object telephonehome2(final Object... objects) throws OXException {
+	@Override
+    public Object telephonehome2(final Object... objects) throws OXException {
 		return delegate.telephonehome2(objects);
 	}
 
-	public Object telephoneip(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneip(final Object... objects) throws OXException {
 		return delegate.telephoneip(objects);
 	}
 
-	public Object telephoneisdn(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneisdn(final Object... objects) throws OXException {
 		return delegate.telephoneisdn(objects);
 	}
 
-	public Object telephoneother(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneother(final Object... objects) throws OXException {
 		return delegate.telephoneother(objects);
 	}
 
-	public Object telephonepager(final Object... objects) throws OXException {
+	@Override
+    public Object telephonepager(final Object... objects) throws OXException {
 		return delegate.telephonepager(objects);
 	}
 
-	public Object telephoneprimary(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneprimary(final Object... objects) throws OXException {
 		return delegate.telephoneprimary(objects);
 	}
 
-	public Object telephoneradio(final Object... objects) throws OXException {
+	@Override
+    public Object telephoneradio(final Object... objects) throws OXException {
 		return delegate.telephoneradio(objects);
 	}
 
-	public Object telephonetelex(final Object... objects) throws OXException {
+	@Override
+    public Object telephonetelex(final Object... objects) throws OXException {
 		return delegate.telephonetelex(objects);
 	}
 
-	public Object telephonettyttd(final Object... objects) throws OXException {
+	@Override
+    public Object telephonettyttd(final Object... objects) throws OXException {
 		return delegate.telephonettyttd(objects);
 	}
 
-	public Object title(final Object... objects) throws OXException {
+	@Override
+    public Object title(final Object... objects) throws OXException {
 		return delegate.title(objects);
 	}
 
@@ -433,90 +521,112 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 		return delegate.toString();
 	}
 
-	public Object url(final Object... objects) throws OXException {
+	@Override
+    public Object url(final Object... objects) throws OXException {
 		return delegate.url(objects);
 	}
 
-	public Object userfield01(final Object... objects) throws OXException {
+	@Override
+    public Object userfield01(final Object... objects) throws OXException {
 		return delegate.userfield01(objects);
 	}
 
-	public Object userfield02(final Object... objects) throws OXException {
+	@Override
+    public Object userfield02(final Object... objects) throws OXException {
 		return delegate.userfield02(objects);
 	}
 
-	public Object userfield03(final Object... objects) throws OXException {
+	@Override
+    public Object userfield03(final Object... objects) throws OXException {
 		return delegate.userfield03(objects);
 	}
 
-	public Object userfield04(final Object... objects) throws OXException {
+	@Override
+    public Object userfield04(final Object... objects) throws OXException {
 		return delegate.userfield04(objects);
 	}
 
-	public Object userfield05(final Object... objects) throws OXException {
+	@Override
+    public Object userfield05(final Object... objects) throws OXException {
 		return delegate.userfield05(objects);
 	}
 
-	public Object userfield06(final Object... objects) throws OXException {
+	@Override
+    public Object userfield06(final Object... objects) throws OXException {
 		return delegate.userfield06(objects);
 	}
 
-	public Object userfield07(final Object... objects) throws OXException {
+	@Override
+    public Object userfield07(final Object... objects) throws OXException {
 		return delegate.userfield07(objects);
 	}
 
-	public Object userfield08(final Object... objects) throws OXException {
+	@Override
+    public Object userfield08(final Object... objects) throws OXException {
 		return delegate.userfield08(objects);
 	}
 
-	public Object userfield09(final Object... objects) throws OXException {
+	@Override
+    public Object userfield09(final Object... objects) throws OXException {
 		return delegate.userfield09(objects);
 	}
 
-	public Object userfield10(final Object... objects) throws OXException {
+	@Override
+    public Object userfield10(final Object... objects) throws OXException {
 		return delegate.userfield10(objects);
 	}
 
-	public Object userfield11(final Object... objects) throws OXException {
+	@Override
+    public Object userfield11(final Object... objects) throws OXException {
 		return delegate.userfield11(objects);
 	}
 
-	public Object userfield12(final Object... objects) throws OXException {
+	@Override
+    public Object userfield12(final Object... objects) throws OXException {
 		return delegate.userfield12(objects);
 	}
 
-	public Object userfield13(final Object... objects) throws OXException {
+	@Override
+    public Object userfield13(final Object... objects) throws OXException {
 		return delegate.userfield13(objects);
 	}
 
-	public Object userfield14(final Object... objects) throws OXException {
+	@Override
+    public Object userfield14(final Object... objects) throws OXException {
 		return delegate.userfield14(objects);
 	}
 
-	public Object userfield15(final Object... objects) throws OXException {
+	@Override
+    public Object userfield15(final Object... objects) throws OXException {
 		return delegate.userfield15(objects);
 	}
 
-	public Object userfield16(final Object... objects) throws OXException {
+	@Override
+    public Object userfield16(final Object... objects) throws OXException {
 		return delegate.userfield16(objects);
 	}
 
-	public Object userfield17(final Object... objects) throws OXException {
+	@Override
+    public Object userfield17(final Object... objects) throws OXException {
 		return delegate.userfield17(objects);
 	}
 
-	public Object userfield18(final Object... objects) throws OXException {
+	@Override
+    public Object userfield18(final Object... objects) throws OXException {
 		return delegate.userfield18(objects);
 	}
 
-	public Object userfield19(final Object... objects) throws OXException {
+	@Override
+    public Object userfield19(final Object... objects) throws OXException {
 		return delegate.userfield19(objects);
 	}
 
-	public Object userfield20(final Object... objects) throws OXException {
+	@Override
+    public Object userfield20(final Object... objects) throws OXException {
 		return delegate.userfield20(objects);
 	}
 
+    @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {
         return delegate._unknownfield(contact, fieldname, value, additionalObjects);
     }

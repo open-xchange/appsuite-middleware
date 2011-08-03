@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 6.20.0.0
 OXVersion: 6.20.0
 OXRevision: 20
-Bundle-Activator: com.openexchange.server.osgi.Activator
+Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.davekoelle,
  com.mysql.jdbc,
@@ -253,7 +253,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.webdav.protocol.osgi,
  com.openexchange.webdav.protocol.util,
  com.openexchange.webdav.xml.resources
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/commons-lang-2.3.jar,
  lib/backport-util-concurrent-3.1.jar,

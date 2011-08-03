@@ -61,39 +61,39 @@ public class TestCommand extends Command {
      * A test command is used as part of a control command. It is used to
      * specify whether or not the block of code given to the control command is
      * executed.
-     * 
+     *
      * General supported tests: "address", "allof", "anyof", "exists", "false",
      * "header", "not", "size", and "true"
-     * 
+     *
      * Need require "envelope"
-     * 
+     *
      * address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] <header-list:
      * string-list> <key-list: string-list>
-     * 
+     *
      * envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] <envelope-part:
      * string-list> <key-list: string-list>
-     * 
+     *
      * [ADDRESS-PART] = ":localpart" / ":domain" / ":all"
-     * 
+     *
      * exists <header-names: string-list>
-     * 
+     *
      * false
-     * 
+     *
      * true
-     * 
+     *
      * not <test>
-     * 
+     *
      * size <":over" / ":under"> <limit: number>
-     * 
+     *
      * header [COMPARATOR] [MATCH-TYPE] <header-names: string-list> <key-list:
      * string-list>
-     * 
+     *
      * allof <tests: test-list> logical AND
-     * 
+     *
      * anyof <tests: test-list> logical OR
-     * 
+     *
      * Match-types are ":is", ":contains", and ":matches"
-     * 
+     *
      */
 
     // protected static class TagArgument {
@@ -163,7 +163,7 @@ public class TestCommand extends Command {
             standard_match_types.add(new String[]{"", "under"});
             return standard_match_types;
         }
-        
+
         private static Hashtable<String, String> standard_address_part() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
             standard_address_part.put(":localpart", "");
@@ -215,7 +215,7 @@ public class TestCommand extends Command {
             standard_match_types.add(new String[]{"", "matches"});
             return standard_match_types;
         }
-        
+
         private static Hashtable<String, String> date_match_types() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
             standard_match_types.put(":is", "");
@@ -234,7 +234,7 @@ public class TestCommand extends Command {
             standard_match_types.add(new String[]{"", "matches"});
             return standard_match_types;
         }
-        
+
         private static Hashtable<String, String> standard_comparators() {
             final Hashtable<String, String> standard_comparators = new Hashtable<String, String>(2);
             standard_comparators.put("i;ascii-casemap", "");
@@ -276,7 +276,7 @@ public class TestCommand extends Command {
         private Hashtable<String, String> matchtypes;
 
         /**
-         * Needed for the resolution of the configuration parameters for JSON 
+         * Needed for the resolution of the configuration parameters for JSON
          */
         private final List<String[]> jsonMatchTypes;
 
@@ -364,11 +364,11 @@ public class TestCommand extends Command {
 
     private final List<TestCommand> testcommands;
 
-    private int indexOfComparator = -1;
+    private final int indexOfComparator = -1;
 
-    
+
     /**
-     * 
+     *
      */
     public TestCommand() {
         super();
@@ -444,7 +444,7 @@ public class TestCommand extends Command {
      * This method searches for the comparator tag in the array and returns its
      * position. This method must find the right tag, otherwise this is an
      * error. So an exception is thrown here if the comparator tag isn't found
-     * 
+     *
      * @return
      * @throws SieveException
      */
@@ -491,7 +491,7 @@ public class TestCommand extends Command {
 
     /**
      * This method returns the matchtype of this command
-     * 
+     *
      * @return
      */
     public final String getMatchtype() {

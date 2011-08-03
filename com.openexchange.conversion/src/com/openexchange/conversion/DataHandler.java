@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DataHandler} - A data handler that converts specified data to a certain object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DataHandler {
@@ -62,21 +62,21 @@ public interface DataHandler {
     /**
      * Gets the required arguments which must be present in corresponding instance of {@link DataArguments} when performing the
      * {@link #processData(Object, DataArguments, Session)} method
-     * 
+     *
      * @return The required arguments
      */
     public String[] getRequiredArguments();
 
     /**
      * Gets the supported types of this data handler
-     * 
+     *
      * @return The supported types of this data handler
      */
     public Class<?>[] getTypes();
 
     /**
      * Processes given data.
-     * 
+     *
      * @param data The data to process
      * @param dataArguments The data arguments needed for processing data
      * @param session The session providing needed user data

@@ -56,7 +56,7 @@ import com.openexchange.twitter.internal.TwitterConfiguration;
 
 /**
  * {@link OXConfigurationBase}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXConfigurationBase {
@@ -65,7 +65,7 @@ public final class OXConfigurationBase {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static OXConfigurationBase getInstance() {
@@ -97,7 +97,7 @@ public final class OXConfigurationBase {
 
     /**
      * Parses given {@link ConfigurationService}.
-     * 
+     *
      * @param configurationService The service
      */
     public void parseFrom(final ConfigurationService configurationService) {
@@ -207,7 +207,7 @@ public final class OXConfigurationBase {
 
     /**
      * Generates a new configuration with parsed values applied.
-     * 
+     *
      * @return The new configuration with parsed values applied
      */
     public Configuration generateConfiguration() {
@@ -218,7 +218,7 @@ public final class OXConfigurationBase {
 
     /**
      * Applies parsed values to specified configuration.
-     * 
+     *
      * @param configuration The configuration to apply to
      */
     private void applyTo(final PropertyConfiguration configuration) {
@@ -226,7 +226,7 @@ public final class OXConfigurationBase {
             configuration.setClientVersion(clientVersion);
         }
         configuration.setUseSSL(httpUseSSL);
-        
+
         configuration.setHttpProxyHost(httpProxyHost);
         configuration.setHttpProxyPort(httpProxyPort);
         configuration.setHttpConnectionTimeout(httpConnectionTimeout);
@@ -238,7 +238,7 @@ public final class OXConfigurationBase {
 
     /**
      * Generates a new configuration with parsed values applied.
-     * 
+     *
      * @return The new configuration with parsed values applied
      */
     public Configuration generateConfiguration(final String consumerKey, final String consumerSecret) {
@@ -251,7 +251,7 @@ public final class OXConfigurationBase {
 
     /**
      * Generates a new configuration with parsed values applied.
-     * 
+     *
      * @return The new configuration with parsed values applied
      */
     public Configuration generateConfiguration(final String consumerKey, final String consumerSecret, final String twitterToken, final String twitterTokenSecret) {

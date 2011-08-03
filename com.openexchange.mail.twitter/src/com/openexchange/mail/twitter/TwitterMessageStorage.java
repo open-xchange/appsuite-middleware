@@ -79,7 +79,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link TwitterMessageStorage} - The twitter message storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterMessageStorage extends MailMessageStorageLong {
@@ -98,7 +98,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
 
     /**
      * Initializes a new {@link TwitterMessageStorage}.
-     * 
+     *
      * @param twitterAccess The access to twitter API
      * @param session The session
      * @param accountId The account ID
@@ -132,7 +132,7 @@ public final class TwitterMessageStorage extends MailMessageStorageLong {
 
     /**
      * Gets session user's locale
-     * 
+     *
      * @return The session user's locale
      * @throws OXException If retrieving user's locale fails
      */
