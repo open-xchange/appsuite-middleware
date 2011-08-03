@@ -185,15 +185,20 @@ public enum ContactField{
     IMAGE1 (570 , "intfield04" , "IMAGE1" , ""  , ContactFields.IMAGE1),
     IMAGE_LAST_MODIFIED (597 , "intfield04" , "IMAGE_LAST_MODIFIED" , ""  , ""),
     IMAGE1_CONTENT_TYPE (601 , "intfield04" , "IMAGE1_CONTENT_TYPE" , ""  , ""),
-    INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ""),
+    INTERNAL_USERID (524 , "userid" , "INTERNAL_USERID" , ""  , ContactFields.USER_ID),
     COLOR_LABEL (102 , "intfield05" , "COLOR_LABEL" , ""  , CommonFields.COLORLABEL),
     FILE_AS (599 , "field90" , "FILE_AS" , ""  , ContactFields.FILE_AS),
     DEFAULT_ADDRESS (605 , "intfield06" , "DEFAULT_ADDRESS" , "Default address"  , ContactFields.DEFAULT_ADDRESS),
     MARK_AS_DISTRIBUTIONLIST (602 , "intfield07" , "MARK_AS_DISTRIBUTIONLIST" , ""  , ContactFields.MARK_AS_DISTRIBUTIONLIST),
-    NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , ""),
+    NUMBER_OF_ATTACHMENTS (104 , "intfield08" , "NUMBER_OF_ATTACHMENTS" , ""  , ContactFields.NUMBER_OF_ATTACHMENTS),
     YOMI_FIRST_NAME(610, "yomiFirstName", "YOMI_FIRST_NAME", "yomiFirstName", ContactFields.YOMI_FIRST_NAME),
     YOMI_LAST_NAME(611, "yomiLastName", "YOMI_LAST_NAME", "yomiLastName", ContactFields.YOMI_LAST_NAME),
-    YOMI_COMPANY(612, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY);
+    YOMI_COMPANY(612, "yomiCompany", "YOMI_COMPANY", "yomiCompany", ContactFields.YOMI_COMPANY),
+    NUMBER_OF_IMAGES(596, "number_of_images", "NUMBER_OF_IMAGES", "number_of_images", ContactFields.NUMBER_OF_IMAGES),
+    LAST_MODIFIED_OF_NEWEST_ATTACHMENT(105, "lastModifiedOfNewestAttachment", "LAST_MODIFIED_OF_NEWEST_ATTACHMENT", "lastModifiedOfNewestAttachment", ContactFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC),
+    USE_COUNT(608, "use_count", "USE_COUNT", "useCount", ContactFields.USE_COUNT),
+    IMAGE1_URL(606, "image1_url", "IMAGE1_URL", "image1_url", ContactFields.IMAGE1_URL),
+    LAST_MODIFIED_UTC(6, "last_modified_utc", "LAST_MODIFIED_UTC", "last_modified_utc", ContactFields.LAST_MODIFIED_UTC);
 
 	private int columnNumber;
 	private String dbName, readableName, fieldName, ajaxName;
@@ -438,6 +443,9 @@ public enum ContactField{
 		case FILE_AS : return switcher.fileas(objects);
 		case DEFAULT_ADDRESS : return switcher.defaultaddress(objects);
 		case NUMBER_OF_ATTACHMENTS : return switcher.numberofattachments(objects);
+		case NUMBER_OF_IMAGES: return switcher.numberofimages(objects);
+		case LAST_MODIFIED_OF_NEWEST_ATTACHMENT: return switcher.lastmodifiedofnewestattachment(objects);
+		case USE_COUNT: return switcher.usecount(objects);
 		default: return null;
 		}
 	}

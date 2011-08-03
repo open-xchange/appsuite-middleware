@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Contact JSON Bundle
+Bundle-SymbolicName: com.openexchange.contacts.json
+Bundle-Version: 7.0.0
+Bundle-Activator: com.openexchange.contact.json.osgi.ContactJSONActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.ajax.fields,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.ajax.writer,
+ com.openexchange.conversion,
+ com.openexchange.exception,
+ com.openexchange.groupware.contact,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.tools,
+ com.openexchange.tools.session,
+ gnu.trove,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.session,
+ com.openexchange.image
+Require-Bundle: com.openexchange.server,
+ com.openexchange.global

@@ -1624,6 +1624,45 @@ public class ContactSetter implements ContactSwitcher {
         contact.setMarkAsDistributionlist(b(value));
         return true;
     }
+    
+    public Object numberofimages(Object... objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("NumberOfImages");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final int value = toInt(objects[1]);
+        conObj.setNumberOfImages(value);
+        return conObj;
+    }
+
+    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("Anniversary");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final Date value = (Date) objects[1];
+        conObj.setLastModifiedOfNewestAttachment(value);
+        return conObj;
+    }
+
+    public Object usecount(Object... objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create("UseCount");
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final int value = toInt(objects[1]);
+        conObj.setUseCount(value);
+        return conObj;
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {

@@ -321,7 +321,7 @@ public class Contact extends CommonObject implements Serializable {
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
         USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY
     };
-    public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[]{
+    public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         // From ContactObject itself
         INTERNAL_USERID,
         // Produces error: missing field in mapping: 593 (ContactWriter.java:603)// CONTEXTID,
@@ -340,6 +340,12 @@ public class Contact extends CommonObject implements Serializable {
         FOLDER_ID,
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC });
+    
+    public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
+        USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
+        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT
+    });
 
     protected String display_name;
 
