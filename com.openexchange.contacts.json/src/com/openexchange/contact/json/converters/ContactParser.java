@@ -63,6 +63,7 @@ import com.openexchange.groupware.contact.helpers.ContactSetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
 /**
@@ -101,8 +102,7 @@ public class ContactParser {
                             field.doSwitch(cs, contact, value);
                         }                        
                     } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
                     }                             
                 }
             }

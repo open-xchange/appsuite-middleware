@@ -53,6 +53,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +62,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 
@@ -70,7 +74,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class RequestTools {
     
-    public static int[] getColumnsAsIntArray(AJAXRequestData request, String parameter) {
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestTools.class));
+    
+    public static int[] getColumnsAsIntArray(AJAXRequestData request, String parameter) throws OXException {
         String valueStr = request.getParameter("columns");
         String[] valueStrArr = valueStr.split(",");
         
@@ -79,28 +85,28 @@ public class RequestTools {
             try {
                 values[i] = Integer.parseInt(valueStrArr[i].trim());
             } catch (NumberFormatException e) {
-                // TODO: handle exception
+                throw AjaxExceptionCodes.InvalidParameterValue.create(e, "columns", valueStr);
             }
         }
         
         return values;
     }
     
-    public static int getNullableIntParameter(AJAXRequestData request, String parameter) {
+    public static int getNullableIntParameter(AJAXRequestData request, String parameter) throws OXException {
+        Integer intParam = null;
         try {
-            Integer sort = request.getParameter(parameter, int.class);
-            if (sort == null) {
+            intParam = request.getParameter(parameter, int.class);
+            if (intParam == null) {
                 return 0;
             } else {
-                return sort.intValue();
+                return intParam.intValue();
             }
         } catch (NumberFormatException e) {
-            // TODO: handle exception
-            return 0;
+            throw AjaxExceptionCodes.InvalidParameterValue.create(e, parameter, intParam);
         } 
     }
 
-    public static int[][] buildObjectIdAndFolderId(JSONArray json) {
+    public static int[][] buildObjectIdAndFolderId(JSONArray json) throws OXException {
         int[][] objectIdAndFolderId = new int[json.length()][];
         for (int i = 0; i < json.length(); i++) {
             try {
@@ -109,8 +115,7 @@ public class RequestTools {
                 int id = object.getInt("id");
                 objectIdAndFolderId[i] = new int[] { id, folder };
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
         
@@ -130,18 +135,15 @@ public class RequestTools {
             contact.setImage1(tmp.toByteArray());
             contact.setImageContentType(file.getContentType());
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw AjaxExceptionCodes.NoUploadImage.create(e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw AjaxExceptionCodes.UnexpectedError.create(e, "I/O error while reading uploaded contact image.");
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warn("Error while closing FileInputStream for contact image upload.", e);
                 }
             }
         }        

@@ -95,9 +95,6 @@ public class CopyAction extends ContactAction {
         super(serviceLookup);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.contact.json.actions.ContactAction#perform(com.openexchange.contact.json.actions.ContactRequest)
-     */
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
         ServerSession session = req.getSession();

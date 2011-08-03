@@ -67,6 +67,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -116,8 +117,7 @@ public class AdvancedSearchAction extends ContactAction {
                 }
             }
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         } finally {
             if (it != null) {
                 it.close();

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.json.converters;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -69,8 +68,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactResultConverter extends JSONResultConverter {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactResultConverter.class));
 
     public ContactResultConverter(ImageService imageService) {
         super(imageService);

@@ -62,6 +62,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -116,9 +117,7 @@ public class NewAction extends ContactAction {
             JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
             return new AJAXRequestResult(object, contact.getLastModified(), "json");
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }        
     }
     

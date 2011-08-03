@@ -69,6 +69,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -177,8 +178,7 @@ public class SearchAction extends ContactAction {
             searchObject.setYomiFirstname(DataParser.parseString(json, ContactFields.YOMI_FIRST_NAME));
             searchObject.setYomiLastName(DataParser.parseString(json, ContactFields.YOMI_LAST_NAME));
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
         
         return searchObject;

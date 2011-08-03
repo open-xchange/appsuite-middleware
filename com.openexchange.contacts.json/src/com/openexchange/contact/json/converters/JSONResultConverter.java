@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.image.ImageService;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -177,8 +178,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             try {
                 distributionList = getDistributionListAsJSONArray(contact);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
             
             return distributionList;
@@ -187,8 +187,7 @@ public abstract class JSONResultConverter implements ResultConverter {
             try {
                 links = getLinksAsJSONArray(contact);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
             
             return links;

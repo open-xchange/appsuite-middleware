@@ -62,6 +62,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -74,7 +75,6 @@ public class ContactRequest {
     private AJAXRequestData request;
 
     private ServerSession session;
-
 
     public ContactRequest(AJAXRequestData request, ServerSession session) {
         super();
@@ -96,19 +96,19 @@ public class ContactRequest {
             return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         } else {
             return TimeZoneUtils.getTimeZone(timezone);
-        }        
+        }
     }
 
     public ServerSession getSession() {
         return session;
     }
-    
-    public int[] getColumns() {
+
+    public int[] getColumns() throws OXException {
         return checkOrInsertLastModified(removeVirtual(RequestTools.getColumnsAsIntArray(request, "columns")));
     }
 
-    public int getSort() {
-        return RequestTools.getNullableIntParameter(request, "sort");    
+    public int getSort() throws OXException {
+        return RequestTools.getNullableIntParameter(request, "sort");
     }
 
     public Order getOrder() {
@@ -118,45 +118,42 @@ public class ContactRequest {
     public String getCollation() {
         return request.getParameter("collation");
     }
-    
-    public int getLeftHandLimit() {
-        return RequestTools.getNullableIntParameter(request, "left_hand_limit");    
+
+    public int getLeftHandLimit() throws OXException {
+        return RequestTools.getNullableIntParameter(request, "left_hand_limit");
     }
-    
-    public int getRightHandLimit() {
-        return RequestTools.getNullableIntParameter(request, "right_hand_limit");    
-    }  
-    
-    public int[][] getListRequestData() {
+
+    public int getRightHandLimit() throws OXException {
+        return RequestTools.getNullableIntParameter(request, "right_hand_limit");
+    }
+
+    public int[][] getListRequestData() throws OXException {
         JSONArray data = request.getParameter("data", JSONArray.class);
-        
+
         return RequestTools.buildObjectIdAndFolderId(data);
     }
-    
+
     public boolean containsImage() {
         return request.hasUploads();
     }
-    
+
     public JSONObject getContactJSON(boolean isUpload) throws OXException {
         if (isUpload) {
             String jsonField = request.getUploadEvent().getFormField("json");
             try {
                 return new JSONObject(jsonField);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                
-                return null;
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
             }
         } else {
             return (JSONObject) request.getData();
         }
     }
-    
+
     public UploadEvent getUploadEvent() {
         return request.getUploadEvent();
     }
-    
+
     public int[] getDeleteRequestData() throws OXException {
         JSONObject json = (JSONObject) request.getData();
         int[] data = new int[2];
@@ -164,10 +161,9 @@ public class ContactRequest {
             data[0] = json.getInt("id");
             data[1] = json.getInt("folder");
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }        
-        
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
+        }
+
         return data;
     }
 
@@ -175,7 +171,7 @@ public class ContactRequest {
         long timestamp = request.getParameter("timestamp", long.class);
         return timestamp;
     }
-    
+
     public int[] getUserIds() throws OXException {
         JSONArray json = (JSONArray) request.getData();
         int userIdArray[] = new int[json.length()];
@@ -183,31 +179,26 @@ public class ContactRequest {
             try {
                 userIdArray[i] = json.getInt(i);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
             }
         }
-        
+
         return userIdArray;
     }
-    
+
     public int getFolderFromJSON() throws OXException {
         JSONObject json = (JSONObject) request.getData();
         try {
             return json.getInt("folder_id");
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
         }
-        
-        // TODO: remove
-        return 0;
     }
-    
+
     public Object getData() {
         return request.getData();
     }
-    
+
     private int[] removeVirtual(final int[] columns) {
         final TIntArrayList helper = new TIntArrayList(columns.length);
         for (final int col : columns) {
@@ -220,21 +211,20 @@ public class ContactRequest {
             }
 
         }
-        
+
         return helper.toNativeArray();
     }
-    
+
     private int[] checkOrInsertLastModified(int[] columns) {
         if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
             int[] newColumns = new int[columns.length + 1];
             System.arraycopy(columns, 0, newColumns, 0, columns.length);
             newColumns[columns.length] = Contact.LAST_MODIFIED;
-            
+
             return newColumns;
         } else {
             return columns;
-        }        
+        }
     }
 
-    
 }
