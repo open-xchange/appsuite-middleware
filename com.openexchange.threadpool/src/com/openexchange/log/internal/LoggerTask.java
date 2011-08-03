@@ -278,9 +278,7 @@ final class LoggerTask extends AbstractTask<Object> {
             final Map<String, Object> properties = loggable.properties();
             for (final String name : names) {
                 final Object value = properties.get(name);
-                if (null != name) {
-                    sb.append('\n').append(name).append('=').append(value.toString());
-                }
+                sb.append('\n').append(name).append('=').append(null == value ? "<not-available>" : value.toString());
             }
         }
         return sb.toString();

@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -97,13 +99,16 @@ public final class LogProperties {
     /**
      * The {@link ThreadLocal} variable.
      */
-    private static final ThreadLocal<Map<String, Object>> THREAD_LOCAL = new ThreadLocal<Map<String, Object>>() {
+    private static final ConcurrentMap<Thread, Map<String, Object>> THREAD_LOCAL = new ConcurrentHashMap<Thread, Map<String,Object>>();
 
-        @Override
-        protected Map<String, Object> initialValue() {
-            return new HashMap<String, Object>();
-        }
-    };
+    /**
+     * Gets the thread-local log properties.
+     * 
+     * @return The log properties
+     */
+    public static Map<String, Object> optLogProperties() {
+        return THREAD_LOCAL.get(Thread.currentThread());
+    }
 
     /**
      * Gets the thread-local log properties.
@@ -111,7 +116,16 @@ public final class LogProperties {
      * @return The log properties
      */
     public static Map<String, Object> getLogProperties() {
-        return THREAD_LOCAL.get();
+        final Thread thread = Thread.currentThread();
+        Map<String, Object> map = THREAD_LOCAL.get(thread);
+        if (null == map) {
+            final Map<String, Object> newmap = new HashMap<String, Object>();
+            map = THREAD_LOCAL.put(thread, newmap);
+            if (null == map) {
+                map = newmap;
+            }
+        }
+        return map;
     }
 
     /**
@@ -122,9 +136,9 @@ public final class LogProperties {
      */
     public static void putLogProperty(final String name, final Object value) {
         if (null == value) {
-            THREAD_LOCAL.get().remove(name);
+            getLogProperties().remove(name);
         } else {
-            THREAD_LOCAL.get().put(name, value);
+            getLogProperties().put(name, value);
         }
     }
 
