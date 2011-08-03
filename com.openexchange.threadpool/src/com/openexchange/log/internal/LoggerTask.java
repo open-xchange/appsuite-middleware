@@ -50,7 +50,9 @@
 package com.openexchange.log.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
@@ -70,28 +72,39 @@ final class LoggerTask extends AbstractTask<Object> {
      */
     private static final Loggable POISON = new Loggable() {
 
+        @Override
         public Throwable getThrowable() {
             return null;
         }
 
+        @Override
         public String getMessage() {
             return null;
         }
 
+        @Override
         public Log getLog() {
             return null;
         }
 
+        @Override
         public Level getLevel() {
             return null;
         }
 
+        @Override
         public StackTraceElement[] getCallerTrace() {
             return null;
         }
 
+        @Override
         public boolean isLoggable() {
             return false;
+        }
+
+        @Override
+        public Map<String, Object> properties() {
+            return Collections.emptyMap();
         }
     };
 
@@ -133,6 +146,7 @@ final class LoggerTask extends AbstractTask<Object> {
         threadRenamer.rename("OX-Logger");
     }
 
+    @Override
     public Object call() throws Exception {
         try {
             final List<Loggable> loggables = new ArrayList<Loggable>(16);
