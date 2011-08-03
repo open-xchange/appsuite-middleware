@@ -158,7 +158,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 initialization.start();
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server ").append("successfully started.").toString());
+                LOG.info(new StringBuilder(32).append("NIO AJP server successfully started.").toString());
             }
             /*
              * Start trackers
@@ -198,7 +198,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 inits = null;
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server ").append("successfully stopped.").toString());
+                LOG.info(new StringBuilder(32).append("NIO AJP server successfully stopped.").toString());
             }
             /*
              * Clear service registry
