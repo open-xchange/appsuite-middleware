@@ -101,8 +101,9 @@ public final class LoggableImpl implements Loggable {
      * 
      * @param properties The properties
      */
-    public void putProperties(final Map<String, Object> properties) {
+    public LoggableImpl putProperties(final Map<String, Object> properties) {
         this.properties.putAll(properties);
+        return this;
     }
 
     @Override
