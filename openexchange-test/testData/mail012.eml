@@ -1,0 +1,64 @@
+Return-Path: <rolf.haynberg@1und1.de>
+Delivery-Date: Mon, 23 Jul 2007 12:28:42 +0200
+Received-SPF: pass (mxeu24: domain of 1und1.de designates 212.227.126.201 as permitted sender) client-ip=212.227.126.201; envelope-from=rolf.haynberg@1und1.de; helo=mxintern.schlund.de;
+Received: from [212.227.126.201] (helo=mxintern.schlund.de)
+	by mx.kundenserver.de (node=mxeu24) with ESMTP (Nemesis),
+	id 0MKtd6-1ICv9b3jPS-0001BJ for user2@oxtest40.de; Mon, 23 Jul 2007 12:28:42 +0200
+Received: from [172.23.1.244] (helo=titan.schlund.de)
+	by mxintern.kundenserver.de with esmtp (Exim 4.50)
+	id 1ICv9b-0004A2-Jn
+	for user2@oxtest40.de; Mon, 23 Jul 2007 12:28:39 +0200
+x-mimeole: Produced By Microsoft Exchange V6.5
+Content-class: urn:content-classes:message
+MIME-Version: 1.0
+Content-Type: text/plain;
+	charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+Subject: Ticket#2007072310001368
+Date: Mon, 23 Jul 2007 12:26:22 +0200
+Message-ID: <A9B4FE9586E6C94F968BD3583EE140AC0CA6591B@titan.1und1.domain>
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Thread-Topic: Ticket#2007072310001368
+Thread-Index: AcfNE+puRB1fws5/T7SXGzYgwnaqAg==
+From: "Rolf Haynberg" <rolf.haynberg@1und1.de>
+To: <user2@oxtest40.de>
+X-Virus-Scanned: Symantec AntiVirus Scan Engine
+X-UI-Msg-Verification: 0f30078a728a3c336c5b893d7f3a9ca1
+Envelope-To: user2@oxtest40.de
+
+Dies ist eine Testmail zu Ticket#2007072310001368
+
+##################################################################
+
+Hallo Rolf,
+
+"Rolf Haynberg" <rolf.haynberg@1und1.de> wrote:
+> RegCode: OX-ASP-1-178362-OOQ-466
+> Build: 6250, 2007-07-16 10:55:12
+> http://oxtest.kundenserver.de/ox.html
+> Browser: Firefox 2
+> Cache: Off
+> Resolution: 1280x1024
+>=20
+> User: sp2test@oxtest38.de
+> Module: E-Mail
+> Severity: Normal
+>=20
+> Ist:
+> In der Detail, H- und V-Split Ansicht wird der Absendername in=20
+> Anf=FChrungsstrichen und Backslashes dargestellt. Beispiel: "\"Rolf =
+Haynberg\""
+> , siehe Screenshot.
+>=20
+> Soll:
+> Der Absendername wird wie gew=F6hnlich in einfachen =
+Anf=FChrungsstrichen=20
+> angezeigt.
+
+ich bekomme das nicht nachgestellt. Wie hast du die Email erstellt?
+im Webfrontend? Kannst du mir diese zur Verf=FCgung stellen (an =
+user2@oxtest40.de schicken)?
+
+Gru=DF,
+Holger

@@ -1,0 +1,30 @@
+hugoHerrlich:
+    step: 1
+    display_name: Herrlich, Hugo
+    given_name: Hugo
+    sur_name: Herrlich
+    title: Dr.
+    email1: hugo.herrlich@bla.ox
+
+hugoHerrlich_verify:
+    step: 2
+    display_name: Herrlich, Hugo
+    given_name: Hugo
+    sur_name: Herrlich
+    title: Dr.
+    email1: hugo.herrlich@bla.ox
+
+hugoHerrlich_update:
+    step: 3
+    email1: der_Herrliche@hoster.invalid
+
+hugoHerrlich_verify:
+    step: 4
+    display_name: Herrlich, Hugo
+    given_name: Hugo
+    sur_name: Herrlich
+    title: Dr.
+    email1: der_Herrliche@hoster.invalid
+
+hugoHerrlich_delete:
+    step: 5
