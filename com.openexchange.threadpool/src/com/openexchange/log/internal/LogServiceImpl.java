@@ -56,6 +56,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogService;
 import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
@@ -107,10 +108,12 @@ public final class LogServiceImpl implements LogService {
         }
     }
 
+    @Override
     public void log(final Level level, final Log log, final Throwable throwable) {
         log(loggableFor(level, log, throwable.getMessage(), throwable));
     }
 
+    @Override
     public void log(final Loggable loggable) {
         final Log log = loggable.getLog();
         if (null == log) {
@@ -148,12 +151,14 @@ public final class LogServiceImpl implements LogService {
         }
     }
 
+    @Override
     public Loggable loggableFor(final Level level, final Log log, final String message, final Throwable throwable) {
-        return new LoggableImpl(level, log, message, throwable, new Throwable());
+        return new LoggableImpl(level, log, message, throwable, new Throwable()).putProperties(LogProperties.getLogProperties());
     }
 
+    @Override
     public Loggable loggableFor(final Level level, final Log log, final String message) {
-        return new LoggableImpl(level, log, message, null, new Throwable());
+        return new LoggableImpl(level, log, message, null, new Throwable()).putProperties(LogProperties.getLogProperties());
     }
 
 }
