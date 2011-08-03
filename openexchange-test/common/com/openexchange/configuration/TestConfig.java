@@ -3,6 +3,7 @@
  */
 package com.openexchange.configuration;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**
@@ -33,20 +34,19 @@ public class TestConfig extends AbstractConfig {
      * {@inheritDoc}
      */
     @Override
-    protected String getPropertyFileName() throws ConfigurationException {
+    protected String getPropertyFileName() throws OXException {
         final String fileName = System.getProperty(KEY);
         if (null == fileName) {
-            throw new ConfigurationException(ConfigurationException.Code
-                .PROPERTY_MISSING, KEY);
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(KEY);
         }
     	return fileName;
     }
 
     /**
      * Reads the configuration.
-     * @throws ConfigurationException if reading configuration fails.
+     * @throws OXException if reading configuration fails.
      */
-    public static void init() throws ConfigurationException {
+    public static void init() throws OXException {
         if (null == singleton) {
             singleton = new TestConfig();
             singleton.loadPropertiesInternal();
