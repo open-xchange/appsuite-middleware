@@ -315,6 +315,15 @@ public class AJPv13Response {
     }
 
     /**
+     * Gets the name of the echo header.
+     * 
+     * @return The header name
+     */
+    public static String getEchoHeaderName() {
+        return ECHO_HEADER_NAME.get();
+    }
+
+    /**
      * Creates the <code>SEND_HEADERS</code> response bytes.
      *
      * @param servletResponse - the <code>HttpServletResponse</code> object containing http header data
