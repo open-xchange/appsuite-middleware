@@ -361,7 +361,7 @@ public final class AJPv13Task implements Task<Object> {
                 final Map<String, Object> properties = LogProperties.getLogProperties();
                 properties.put("com.openexchange.ajp13.threadName", t.getName());
                 properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(client.getPort()));
-                properties.put("com.openexchange.ajp13.remoteAddress", client.getInetAddress());
+                properties.put("com.openexchange.ajp13.remoteAddress", client.getInetAddress().getHostAddress());
             }
             final long start = System.currentTimeMillis();
             /*
