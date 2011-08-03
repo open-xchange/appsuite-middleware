@@ -87,13 +87,17 @@ public final class LogProperties {
     }
 
     /**
-     * Puts specified log property.
+     * Puts specified log property. A <code>null</code> value removes the property.
      * 
      * @param name The property name
      * @param value The property value
      */
     public static void putLogProperty(final String name, final Object value) {
-        THREAD_LOCAL.get().put(name, value);
+        if (null == value) {
+            THREAD_LOCAL.get().remove(name);
+        } else {
+            THREAD_LOCAL.get().put(name, value);
+        }
     }
 
 }
