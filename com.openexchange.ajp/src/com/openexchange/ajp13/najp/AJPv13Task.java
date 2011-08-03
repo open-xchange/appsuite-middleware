@@ -72,6 +72,7 @@ import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -352,6 +353,11 @@ public final class AJPv13Task implements Task<Object> {
     public Object call() {
         final Thread t = thread = Thread.currentThread();
         if (!t.isInterrupted() && client != null && !client.isClosed()) {
+            /*
+             * Gather logging info
+             */
+            LogProperties.putLogProperty("com.openexchange.ajp13.remotePort", Integer.valueOf(client.getPort()));
+            LogProperties.putLogProperty("com.openexchange.ajp13.remoteAddress", client.getInetAddress());
             final long start = System.currentTimeMillis();
             /*
              * Assign a connection to this listener
