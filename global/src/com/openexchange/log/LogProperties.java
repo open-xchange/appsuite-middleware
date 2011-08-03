@@ -49,8 +49,12 @@
 
 package com.openexchange.log;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -64,6 +68,30 @@ public final class LogProperties {
      */
     private LogProperties() {
         super();
+    }
+
+    /**
+     * The copy-on-write list containing sorted property names.
+     */
+    private static final List<String> PROPERTY_NAMES = new CopyOnWriteArrayList<String>();
+
+    /**
+     * Sets the configured log property names.
+     * 
+     * @param propertyNames The log property names
+     */
+    public static void configuredProperties(final Collection<String> propertyNames) {
+        PROPERTY_NAMES.clear();
+        PROPERTY_NAMES.addAll(new TreeSet<String>(propertyNames));
+    }
+
+    /**
+     * Gets the list containing sorted property names.
+     * 
+     * @return The list containing sorted property names
+     */
+    public static List<String> getPropertyNames() {
+        return PROPERTY_NAMES;
     }
 
     /**
