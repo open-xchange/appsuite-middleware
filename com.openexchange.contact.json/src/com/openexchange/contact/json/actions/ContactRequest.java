@@ -49,14 +49,19 @@
 
 package com.openexchange.contact.json.actions;
 
+import gnu.trove.TIntArrayList;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -86,7 +91,12 @@ public class ContactRequest {
     }
 
     public TimeZone getTimeZone() {
-        return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        String timezone = request.getParameter("timezone");
+        if (timezone == null) {
+            return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        } else {
+            return TimeZoneUtils.getTimeZone(timezone);
+        }        
     }
 
     public ServerSession getSession() {
@@ -94,15 +104,15 @@ public class ContactRequest {
     }
     
     public int[] getColumns() {
-        return RequestTools.getIntArray(request, "columns");
+        return checkOrInsertLastModified(removeVirtual(RequestTools.getColumnsAsIntArray(request, "columns")));
     }
 
     public int getSort() {
         return RequestTools.getNullableIntParameter(request, "sort");    
     }
 
-    public String getOrder() {
-        return request.getParameter("order");
+    public Order getOrder() {
+        return OrderFields.parse(request.getParameter("order"));
     }
 
     public String getCollation() {
@@ -146,4 +156,81 @@ public class ContactRequest {
     public UploadEvent getUploadEvent() {
         return request.getUploadEvent();
     }
+    
+    public int[] getDeleteRequestData() throws OXException {
+        JSONObject json = (JSONObject) request.getData();
+        int[] data = new int[2];
+        try {
+            data[0] = json.getInt("id");
+            data[1] = json.getInt("folder");
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }        
+        
+        return data;
+    }
+
+    public long getTimestamp() {
+        long timestamp = request.getParameter("timestamp", long.class);
+        return timestamp;
+    }
+    
+    public int[] getUserIds() throws OXException {
+        JSONArray json = (JSONArray) request.getData();
+        int userIdArray[] = new int[json.length()];
+        for (int i = 0; i < userIdArray.length; i++) {
+            try {
+                userIdArray[i] = json.getInt(i);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        return userIdArray;
+    }
+    
+    public int getFolderFromJSON() throws OXException {
+        JSONObject json = (JSONObject) request.getData();
+        try {
+            return json.getInt("folder_id");
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        // TODO: remove
+        return 0;
+    }
+    
+    private int[] removeVirtual(final int[] columns) {
+        final TIntArrayList helper = new TIntArrayList(columns.length);
+        for (final int col : columns) {
+            if (col == Contact.LAST_MODIFIED_UTC) {
+                // SKIP
+            } else if (col == Contact.IMAGE1_URL) {
+                helper.add(Contact.IMAGE1);
+            } else {
+                helper.add(col);
+            }
+
+        }
+        
+        return helper.toNativeArray();
+    }
+    
+    protected int[] checkOrInsertLastModified(int[] columns) {
+        if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
+            int[] newColumns = new int[columns.length + 1];
+            System.arraycopy(columns, 0, newColumns, 0, columns.length);
+            newColumns[columns.length] = Contact.LAST_MODIFIED;
+            
+            return newColumns;
+        } else {
+            return columns;
+        }        
+    }
+
+    
 }

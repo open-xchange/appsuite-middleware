@@ -25,6 +25,7 @@ Import-Package: com.openexchange.ajax.fields,
  org.osgi.framework,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.session,
- com.openexchange.image
+ com.openexchange.image,
+ com.openexchange.tx
 Require-Bundle: com.openexchange.server,
  com.openexchange.global

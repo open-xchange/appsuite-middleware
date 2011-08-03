@@ -49,9 +49,13 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.Date;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -71,8 +75,16 @@ public class DeleteAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        ServerSession session = req.getSession();
+        long timestamp = req.getTimestamp();
+        int[] deleteRequestData = req.getDeleteRequestData();
+        Date date = new Date(timestamp);
+        
+        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(deleteRequestData[1], session);
+        contactInterface.deleteContactObject(deleteRequestData[0], deleteRequestData[1], date);
+        
+        JSONObject response = new JSONObject();
+        return new AJAXRequestResult(response, date, "json");
     }
 
 }

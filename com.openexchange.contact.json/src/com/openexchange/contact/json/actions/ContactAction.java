@@ -58,9 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -104,17 +102,5 @@ public abstract class ContactAction implements AJAXActionService {
         calendar.add(Calendar.MILLISECOND, offset);
         
         return calendar.getTime();
-    }
-    
-    protected int[] checkOrInsertLastModified(int[] columns) {
-        if (!Arrays.contains(columns, Contact.LAST_MODIFIED)) {
-            int[] newColumns = new int[columns.length + 1];
-            System.arraycopy(columns, 0, newColumns, 0, columns.length);
-            newColumns[columns.length] = Contact.LAST_MODIFIED;
-            
-            return newColumns;
-        } else {
-            return columns;
-        }        
     }
 }

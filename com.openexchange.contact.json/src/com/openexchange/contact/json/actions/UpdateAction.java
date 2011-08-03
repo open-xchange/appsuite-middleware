@@ -49,40 +49,73 @@
 
 package com.openexchange.contact.json.actions;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.Date;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactActionFactory}
+ * {@link UpdateAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Map<String, ContactAction> ACTIONS = new HashMap<String, ContactAction>();
-    
-    public ContactActionFactory(ServiceLookup serviceLookup) {
-        super();
-        ACTIONS.put("get", new GetAction(serviceLookup));
-        ACTIONS.put("all", new AllAction(serviceLookup));
-        ACTIONS.put("list", new ListAction(serviceLookup));
-        ACTIONS.put("new", new NewAction(serviceLookup));
-        ACTIONS.put("delete", new DeleteAction(serviceLookup));
-        ACTIONS.put("update", new UpdateAction(serviceLookup));
-        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
-        ACTIONS.put("listuser", new ListUserAction(serviceLookup));
-        ACTIONS.put("getuser", new GetUserAction(serviceLookup));
-        ACTIONS.put("copy", new CopyAction(serviceLookup));
+public class UpdateAction extends ContactAction {
+
+    /**
+     * Initializes a new {@link UpdateAction}.
+     * @param serviceLookup
+     */
+    public UpdateAction(ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.contact.json.actions.ContactAction#perform(com.openexchange.contact.json.actions.ContactRequest)
+     */
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
+        ServerSession session = req.getSession();
+        int folder = req.getFolder();
+        int id = req.getId();
+        long timestamp = req.getTimestamp();
+        Date date = new Date(timestamp);
+        boolean containsImage = req.containsImage();
+        JSONObject json = req.getContactJSON(containsImage);
+        
+        ContactParser parser = new ContactParser();
+        Contact contact = parser.parse(json);
+        contact.setObjectID(id);
+        
+        if (containsImage) {
+            UploadEvent uploadEvent = null;               
+            try {
+                uploadEvent = req.getUploadEvent();
+                UploadFile file = uploadEvent.getUploadFileByFieldName("file");
+                if (file == null) {
+                    throw AjaxExceptionCodes.NoUploadImage.create();
+                }
+                
+                RequestTools.setImageData(contact, file);
+            } finally {
+                if (uploadEvent != null) {
+                    uploadEvent.cleanUp();
+                }
+            }
+        }
+        
+        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        contactInterface.updateContactObject(contact, folder, date);
+        
+        JSONObject response = new JSONObject();
+        return new AJAXRequestResult(response, contact.getLastModified(), "json");
     }
 
 }

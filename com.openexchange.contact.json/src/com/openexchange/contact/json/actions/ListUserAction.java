@@ -49,40 +49,59 @@
 
 package com.openexchange.contact.json.actions;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactActionFactory}
+ * {@link ListUserAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Map<String, ContactAction> ACTIONS = new HashMap<String, ContactAction>();
-    
-    public ContactActionFactory(ServiceLookup serviceLookup) {
-        super();
-        ACTIONS.put("get", new GetAction(serviceLookup));
-        ACTIONS.put("all", new AllAction(serviceLookup));
-        ACTIONS.put("list", new ListAction(serviceLookup));
-        ACTIONS.put("new", new NewAction(serviceLookup));
-        ACTIONS.put("delete", new DeleteAction(serviceLookup));
-        ACTIONS.put("update", new UpdateAction(serviceLookup));
-        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
-        ACTIONS.put("listuser", new ListUserAction(serviceLookup));
-        ACTIONS.put("getuser", new GetUserAction(serviceLookup));
-        ACTIONS.put("copy", new CopyAction(serviceLookup));
+public class ListUserAction extends ContactAction {
+
+    /**
+     * Initializes a new {@link ListUserAction}.
+     * @param serviceLookup
+     */
+    public ListUserAction(ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
+        ServerSession session = req.getSession();
+        int[] uids = req.getUserIds();
+        Context ctx = session.getContext();
+        Date timestamp = new Date(0);
+        Date lastModified = null;
+        
+        ContactInterface contactInterface = new RdbContactSQLImpl(session, ctx);
+        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
+        List<Contact> contacts = new ArrayList<Contact>();
+        for (int uid : uids) {
+            Contact contact = contactInterface.getUserById(uid);
+            contacts.add(contact);
+            
+            lastModified = contact.getLastModified();
+            if (lastModified != null && timestamp.before(lastModified)) {
+                timestamp = lastModified;
+            }
+        }
+
+        contactMap.put("contacts", contacts);        
+        return new AJAXRequestResult(contactMap, timestamp, "contacts");
     }
 
 }

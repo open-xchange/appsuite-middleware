@@ -47,42 +47,28 @@
  *
  */
 
-package com.openexchange.contact.json.actions;
+package com.openexchange.groupware.attach;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.attach.impl.AttachmentImpl;
 
 
 /**
- * {@link ContactActionFactory}
+ * {@link AttachmentMetadataFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactActionFactory implements AJAXActionServiceFactory {
+public class AttachmentMetadataFactory {
     
-    private static final Map<String, ContactAction> ACTIONS = new HashMap<String, ContactAction>();
-    
-    public ContactActionFactory(ServiceLookup serviceLookup) {
+    public AttachmentMetadataFactory() {
         super();
-        ACTIONS.put("get", new GetAction(serviceLookup));
-        ACTIONS.put("all", new AllAction(serviceLookup));
-        ACTIONS.put("list", new ListAction(serviceLookup));
-        ACTIONS.put("new", new NewAction(serviceLookup));
-        ACTIONS.put("delete", new DeleteAction(serviceLookup));
-        ACTIONS.put("update", new UpdateAction(serviceLookup));
-        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
-        ACTIONS.put("listuser", new ListUserAction(serviceLookup));
-        ACTIONS.put("getuser", new GetUserAction(serviceLookup));
-        ACTIONS.put("copy", new CopyAction(serviceLookup));
     }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    
+    public AttachmentMetadata newAttachmentMetadata(AttachmentMetadata orig) {
+        return new AttachmentImpl(orig);
+    }
+    
+    public AttachmentMetadata newAttachmentMetadata() {
+        return new AttachmentImpl();
     }
 
 }

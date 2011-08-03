@@ -50,6 +50,7 @@
 package com.openexchange.contact.json.actions;
 
 import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -73,6 +74,7 @@ public class GetAction extends ContactAction {
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
         int id = req.getId();
         int folder = req.getFolder();
+        TimeZone timeZone = req.getTimeZone();
         ServerSession session = req.getSession();
         
         ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
@@ -80,8 +82,8 @@ public class GetAction extends ContactAction {
         Date lastModified = contact.getLastModified();
         
         // Correct last modified and creation date with users timezone
-        contact.setLastModified(getCorrectedTime(contact.getLastModified(), req.getTimeZone()));
-        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), req.getTimeZone()));
+        contact.setLastModified(getCorrectedTime(contact.getLastModified(), timeZone));
+        contact.setCreationDate(getCorrectedTime(contact.getCreationDate(), timeZone));
         
         return new AJAXRequestResult(contact, lastModified, "contact");
     }

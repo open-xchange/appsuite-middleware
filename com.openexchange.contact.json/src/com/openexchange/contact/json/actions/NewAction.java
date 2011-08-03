@@ -49,10 +49,6 @@
 
 package com.openexchange.contact.json.actions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,7 +60,6 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 
 /**
@@ -105,7 +100,7 @@ public class NewAction extends ContactAction {
                         throw AjaxExceptionCodes.NoUploadImage.create();
                     }
                     
-                    setImageData(contact, file);
+                    RequestTools.setImageData(contact, file);
                 } finally {
                     if (uploadEvent != null) {
                         uploadEvent.cleanUp();
@@ -124,33 +119,5 @@ public class NewAction extends ContactAction {
         }        
     }
     
-    private void setImageData(Contact contact, UploadFile file) throws OXException {
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file.getTmpFile());
-            ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
-            final byte[] buf = new byte[2048];
-            int len = -1;
-            while ((len = fis.read(buf)) != -1) {
-                tmp.write(buf, 0, len);
-            }
-            contact.setImage1(tmp.toByteArray());
-            contact.setImageContentType(file.getContentType());
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }        
-    }
+
 }

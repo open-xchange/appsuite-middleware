@@ -51,8 +51,9 @@ package com.openexchange.contact.json.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import com.openexchange.ajax.fields.OrderFields;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -82,9 +83,9 @@ public class AllAction extends ContactAction {
     protected AJAXRequestResult perform(ContactRequest req) throws OXException {
         ServerSession session = req.getSession();
         int folder = req.getFolder();
-        int[] columns = checkOrInsertLastModified(req.getColumns());
+        int[] columns = req.getColumns();
         int sort = req.getSort();
-        Order order = OrderFields.parse(req.getOrder());
+        Order order = req.getOrder();
         String collation = req.getCollation();
         int leftHandLimit = req.getLeftHandLimit();
         int rightHandLimit = req.getRightHandLimit();
@@ -95,6 +96,7 @@ public class AllAction extends ContactAction {
         Date timestamp = new Date(0);
         ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
         SearchIterator<Contact> it = null;
+        Map<String, List<Contact>> contactMap = new HashMap<String, List<Contact>>(1);
         List<Contact> contacts = new ArrayList<Contact>();
         try {
             it = contactInterface.getContactsInFolder(folder, leftHandLimit, rightHandLimit, sort, order, collation, columns);
@@ -107,13 +109,15 @@ public class AllAction extends ContactAction {
                     timestamp = lastModified;
                 }
             }
+            
+            contactMap.put("contacts", contacts);
         } finally {
             if (it != null) {
                 it.close();
             }
         }
         
-        return new AJAXRequestResult(contacts, timestamp, "contacts");
+        return new AJAXRequestResult(contactMap, timestamp, "contacts");
     }
 
 }

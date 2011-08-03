@@ -47,88 +47,88 @@
  *
  */
 
-package com.openexchange.contact.json.osgi;
+package com.openexchange.contact.json.actions;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.contact.json.actions.RequestTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.helpers.ContactGetter;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.image.ImageService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactListResultConverter}
+ * {@link UpdatesAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ContactListResultConverter extends JSONResultConverter {    
-    
-    public ContactListResultConverter(ImageService imageService) {
-        super(imageService);
+public class UpdatesAction extends ContactAction {
+
+    /**
+     * Initializes a new {@link UpdatesAction}.
+     * @param serviceLookup
+     */
+    public UpdatesAction(ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.contact.json.actions.ContactAction#perform(com.openexchange.contact.json.actions.ContactRequest)
+     */
     @Override
-    public String getInputFormat() {
-        return "contacts";
-    }
-
-    @Override
-    public void convertResult(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) result.getResultObject();
-        List<Contact> contacts = null;
-        List<Contact> deleted = null;
-        if (contactMap.size() == 1) {
-            contacts = contactMap.get("contacts");
-        } else {
-            contacts = contactMap.get("modified");
-            deleted = contactMap.get("deleted");
-        }
+    protected AJAXRequestResult perform(ContactRequest req) throws OXException {
+        ServerSession session = req.getSession();
+        int folder = req.getFolder();
+        int[] columns = req.getColumns();
+        long timestampLong = req.getTimestamp();
+        Date timestamp = new Date(timestampLong);
+        Date lastModified = null;
         
-        int[] columns = RequestTools.getColumnsAsIntArray(request, "columns");
-        
-        JSONArray resultArray = new JSONArray();
-        for (Contact contact : contacts) {
-            JSONArray contactArray = new JSONArray();
-            
-            ContactGetter cg = new ContactGetter();
-            for (int column : columns) {
-                ContactField field = ContactField.getByValue(column);
-                if (field != null && !field.getAjaxName().isEmpty()) {                
-                    Object value = field.doSwitch(cg, contact);
-                    if (value == null) {
-                        contactArray.put(JSONObject.NULL);
-                    } else if (isSpecial(column)) {
-                        Object special = convertSpecial(field, contact, cg);
-                        if (special == null) {
-                            contactArray.put(JSONObject.NULL);                            
-                        } else {
-                            contactArray.put(special);
-                        }                        
-                    } else {
-                        contactArray.put(value);
-                    }
+        ContactInterface contactInterface = getContactInterfaceDiscoveryService().newContactInterface(folder, session);
+        List<Contact> modifiedList = new ArrayList<Contact>();
+        List<Contact> deletedList = new ArrayList<Contact>();
+        Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
+        SearchIterator<Contact> it = null;
+        try {
+            it = contactInterface.getModifiedContactsInFolder(folder, columns, timestamp);
+            while (it.hasNext()) {
+                Contact contact = it.next();
+                modifiedList.add(contact);
+                
+                lastModified = contact.getLastModified();
+                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                    timestamp = lastModified;
                 }
             }
             
-            resultArray.put(contactArray);
-        }
-        
-        if (deleted != null) {
-            for (Contact contact : deleted) {
-                resultArray.put(contact.getObjectID());
+            it = contactInterface.getDeletedContactsInFolder(folder, columns, timestamp);
+            while (it.hasNext()) {
+                Contact contact = it.next();
+                deletedList.add(contact);
+                
+                lastModified = contact.getLastModified();
+                if ((lastModified != null) && (timestamp.getTime() < lastModified.getTime())) {
+                    timestamp = lastModified;
+                }
+            }
+            
+            responseMap.put("modified", modifiedList);
+            responseMap.put("deleted", deletedList);
+        } finally {
+            if (it != null) {
+                it.close();
             }
         }
-        
-        result.setResultObject(resultArray, "json");
+
+        return new AJAXRequestResult(responseMap, timestamp, "contacts");
     }
+    
+    
 
 }
