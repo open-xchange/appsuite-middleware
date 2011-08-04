@@ -51,39 +51,31 @@ package com.openexchange.folder.json.osgi;
 
 import static com.openexchange.folder.json.services.ServiceRegistry.getInstance;
 import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folder.json.services.ServiceRegistry;
-import com.openexchange.folder.json.servlet.FolderServlet;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends DeferredActivator {
+public class Activator extends AJAXModuleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private List<ServiceRegistration> serviceRegistrations;
-
-    private List<ServiceTracker> trackers;
 
     private String module;
 
@@ -114,25 +106,16 @@ public class Activator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(6);
-            trackers.add(new ServiceTracker(context, FolderService.class.getName(), new RegistryServiceTrackerCustomizer<FolderService>(
+            track(FolderService.class, new RegistryServiceTrackerCustomizer<FolderService>(context, getInstance(), FolderService.class));
+            track(ContentTypeDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(
                 context,
                 getInstance(),
-                FolderService.class)));
-            trackers.add(new SessionServletRegistration(context, new FolderServlet(), Constants.getServletPath()));
-            trackers.add(new ServiceTracker(
-                context,
-                ContentTypeDiscoveryService.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(context, getInstance(), ContentTypeDiscoveryService.class)));
-            trackers.add(new ServiceTracker(context, AdditionalFolderField.class.getName(), new FolderFieldCollector(
-                context,
-                Constants.ADDITIONAL_FOLDER_FIELD_LIST)));
+                ContentTypeDiscoveryService.class));
+            track(AdditionalFolderField.class, new FolderFieldCollector(context, Constants.ADDITIONAL_FOLDER_FIELD_LIST));
             /*
              * Open trackers
              */
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
             /*
              * Preference item
              */

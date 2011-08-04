@@ -60,7 +60,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FolderFieldCollector implements ServiceTrackerCustomizer {
+public class FolderFieldCollector implements ServiceTrackerCustomizer<AdditionalFolderField, AdditionalFolderField> {
 
     /**
      * The list.
@@ -84,19 +84,22 @@ public class FolderFieldCollector implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final AdditionalFolderField field = (AdditionalFolderField) context.getService(reference);
+    @Override
+    public AdditionalFolderField addingService(final ServiceReference<AdditionalFolderField> reference) {
+        final AdditionalFolderField field = context.getService(reference);
         list.addField(field);
         return field;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<AdditionalFolderField> reference, final AdditionalFolderField service) {
         // Nothing to do
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<AdditionalFolderField> reference, final AdditionalFolderField service) {
         try {
-            final AdditionalFolderField field = (AdditionalFolderField) service;
+            final AdditionalFolderField field = service;
             list.remove(field.getColumnID());
         } finally {
             context.ungetService(reference);
