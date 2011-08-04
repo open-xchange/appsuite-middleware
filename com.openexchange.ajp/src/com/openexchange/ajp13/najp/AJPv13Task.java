@@ -493,7 +493,7 @@ public final class AJPv13Task implements Task<Object> {
                 }
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
                 /*
-                 * Drop logging info
+                 * Drop logging info for executing thread
                  */
                 LogProperties.removeLogProperties();
             }
