@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,35 @@
  *
  */
 
-package com.openexchange.mailaccount.json.servlet;
+package com.openexchange.mailaccount.json.osgi;
 
-import com.openexchange.ajax.MultipleAdapterServletNew;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
-import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link MailAccountServlet}
+ * {@link MailAccountJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MailAccountServlet extends MultipleAdapterServletNew {
-
-    private static final long serialVersionUID = -2969154857342400038L;
+public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link MailAccountServlet}.
+     * Initializes a new {@link MailAccountJSONActivator}.
      */
-    public MailAccountServlet() {
-        super(MailAccountActionFactory.getInstance());
+    public MailAccountJSONActivator() {
+        super();
     }
 
     @Override
-    protected boolean hasModulePermission(final ServerSession session) {
-        // some mail account data needs to be changeable even for Webmail only users. Detailed permission checks are done in the action
-        // implementations.
-        return session.getUserConfiguration().hasWebMail();
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
+    }
+
 }
