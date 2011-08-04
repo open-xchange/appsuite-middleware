@@ -69,7 +69,7 @@ public class AJPv13BrokenCycleException extends AJPv13Exception {
      * Initializes a new {@link AJPv13BrokenCycleException}
      */
     public AJPv13BrokenCycleException() {
-        super(AJPCode.BROKEN_AJP_CYLCE, false);
+        super(AJPCode.BROKEN_AJP_CYCLE, false);
     }
 
     /**
