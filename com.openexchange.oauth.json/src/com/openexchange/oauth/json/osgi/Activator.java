@@ -49,38 +49,26 @@
 
 package com.openexchange.oauth.json.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.oauthaccount.AccountServlet;
-import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
-import com.openexchange.oauth.json.oauthmeta.MetaDataServlet;
-import com.openexchange.oauth.json.oauthmeta.multiple.MetaDataMultipleHandlerFactory;
+import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
+import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
  * {@link Activator} - Activator for JSON folder interface.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends DeferredActivator {
+public class Activator extends AJAXModuleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private List<ServiceRegistration> serviceRegistrations;
-
-    private List<ServiceTracker> trackers;
 
     private OSGiOAuthService oAuthService;
 
@@ -125,30 +113,25 @@ public class Activator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(6);
-            trackers.add(new ServiceTracker(context, OAuthService.class.getName(), new RegistryServiceTrackerCustomizer<OAuthService>(
-                context,
-                registry,
-                OAuthService.class)));
+            track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
             /*
              * Tracker for HTTPService to register servlets
              */
-            trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
-            trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" + MetaDataMultipleHandlerFactory.MODULE));
+            // trackers.add(new SessionServletRegistration(context, new AccountServlet(), "/ajax/" + AccountMultipleHandlerFactory.MODULE));
+            // trackers.add(new SessionServletRegistration(context,new MetaDataServlet(), "/ajax/" +
+            // MetaDataMultipleHandlerFactory.MODULE));
             /*
              * Open trackers
              */
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
             /*
              * Service registrations
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(
-                MultipleHandlerFactoryService.class.getName(),
-                new AccountMultipleHandlerFactory(),
-                null));
+            registerModule(AccountActionFactory.getInstance(), "oauth/accounts");
+            registerModule(MetaDataActionFactory.getInstance(), "oauth/services");
+            /*
+             * Apply OAuth service to actions
+             */
             oAuthService = new OSGiOAuthService().start(context);
             // registry.addService(OAuthService.class, oAuthService);
             AbstractOAuthAJAXActionService.setOAuthService(oAuthService);
@@ -164,27 +147,10 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if(secretService != null) {
+            if (secretService != null) {
                 secretService.close();
             }
-            if (null != trackers) {
-                /*
-                 * Close trackers
-                 */
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != serviceRegistrations) {
-                /*
-                 * Unregister
-                 */
-                while (!serviceRegistrations.isEmpty()) {
-                    serviceRegistrations.remove(0).unregister();
-                }
-                serviceRegistrations = null;
-            }
+            cleanUp();
             if (null != oAuthService) {
                 oAuthService.stop();
                 oAuthService = null;
