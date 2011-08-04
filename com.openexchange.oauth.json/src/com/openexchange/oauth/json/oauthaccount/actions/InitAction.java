@@ -68,7 +68,6 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
-import com.openexchange.oauth.json.oauthaccount.multiple.AccountMultipleHandlerFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,6 +85,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         super();
     }
 
+    @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
             final String accountId = request.getParameter("id");
@@ -125,7 +125,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
         callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
         callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
+        callbackUrlBuilder.append("/ajax/").append("oauth/accounts");
         callbackUrlBuilder.append("?action=create");
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
         {
@@ -176,7 +176,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
         callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
         callbackUrlBuilder.append(request.getHostname());
-        callbackUrlBuilder.append("/ajax/").append(AccountMultipleHandlerFactory.MODULE);
+        callbackUrlBuilder.append("/ajax/").append("oauth/accounts");
         callbackUrlBuilder.append("?action=reauthorize");
         callbackUrlBuilder.append("&id=").append(account.getId());
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
