@@ -295,17 +295,19 @@ final class SessionData {
     }
 
     void checkAuthId(final String login, final String authId) throws OXException {
-        rlock.lock();
-        try {
-            for (final SessionContainer container : sessionList) {
-                for (final SessionControl sc : container.getSessionControls()) {
-                    if (null != authId && authId.equals(sc.getSession().getAuthId())) {
-                        throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
+        if (null != authId) {
+            rlock.lock();
+            try {
+                for (final SessionContainer container : sessionList) {
+                    for (final SessionControl sc : container.getSessionControls()) {
+                        if (authId.equals(sc.getSession().getAuthId())) {
+                            throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
+                        }
                     }
                 }
+            } finally {
+                rlock.unlock();
             }
-        } finally {
-            rlock.unlock();
         }
         longTermLock.lock();
         try {
@@ -578,6 +580,7 @@ final class SessionData {
         }
         if (null == threadPoolService) {
             new Thread(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         task.call();
@@ -619,6 +622,7 @@ final class SessionData {
             deactivated = true;
         }
 
+        @Override
         public Void call() {
             if (deactivated) {
                 return null;
@@ -665,6 +669,7 @@ final class SessionData {
             this.randomToken = randomToken;
         }
 
+        @Override
         public void run() {
             try {
                 removers.remove(randomToken);
