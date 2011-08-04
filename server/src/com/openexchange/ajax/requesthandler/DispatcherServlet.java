@@ -71,7 +71,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.responseOutputters.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;

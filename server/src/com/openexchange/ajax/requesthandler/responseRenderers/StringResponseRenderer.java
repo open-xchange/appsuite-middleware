@@ -47,89 +47,71 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseOutputters;
+package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
-import java.io.Writer;
-import java.util.regex.Pattern;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.UnsynchronizedStringWriter;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link JSONResponseRenderer}
+ * {@link StringResponseRenderer}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JSONResponseRenderer implements ResponseRenderer {
+public class StringResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseRenderer.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(StringResponseRenderer.class));
+
+    /**
+     * Initializes a new {@link StringResponseRenderer}.
+     */
+    public StringResponseRenderer() {
+        super();
+    }
 
     @Override
     public int getRanking() {
-        return 0;
+        return Integer.MIN_VALUE;
     }
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return Response.class.isAssignableFrom(result.getResultObject().getClass());
+        return true;
     }
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
-    }
-
-    public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
-        try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (isRespondWithHTML(req)) || req.getParameter("callback") != null) {
-                resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                String callback = req.getParameter("callback");
-                if (callback == null) {
-                    callback = action;
-                }
-                final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w);
-                resp.getWriter().print(substituteJS(w.toString(), callback));
+        final String output;
+        {
+            final Object resultObject = result.getResultObject();
+            if (resultObject == null) {
+                output = "";
             } else {
-                ResponseWriter.write(response, resp.getWriter());
+                output = resultObject.toString();
             }
-        } catch (final JSONException e) {
-            final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(e1.getMessage(), e1);
-            try {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (final IOException e2) {
-                LOG.error(e2.getMessage(), e);
-            }
+        }
+        /*
+         * Write headers
+         */
+        final Map<String, String> headers = result.getHeaders();
+        for (final Map.Entry<String, String> entry : headers.entrySet()) {
+            resp.setHeader(entry.getKey(), entry.getValue());
+        }
+        /*
+         * Write output to OutputStream
+         */
+        try {
+            resp.getWriter().write(output);
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
         }
-    }
-
-    private static boolean isRespondWithHTML(final HttpServletRequest req) {
-        return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
-    }
-
-    private static final Pattern PATTERN_JSON = Pattern.compile("**json**", Pattern.LITERAL);
-
-    private static final Pattern PATTERN_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
-
-    private static String substituteJS(final String json, final String action) {
-        return PATTERN_JSON.matcher(PATTERN_ACTION.matcher(AJAXServlet.JS_FRAGMENT).replaceAll(action)).replaceFirst(json);
     }
 
 }

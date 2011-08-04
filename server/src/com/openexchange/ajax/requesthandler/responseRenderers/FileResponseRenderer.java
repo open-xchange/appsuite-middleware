@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseOutputters;
+package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
