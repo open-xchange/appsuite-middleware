@@ -49,40 +49,25 @@
 
 package com.openexchange.voipnow.json.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
-import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
-import com.openexchange.voipnow.json.multiple.VoipNowMultipleHandlerFactory;
 import com.openexchange.voipnow.json.preferences.GUI;
 import com.openexchange.voipnow.json.preferences.VoipNowEnabled;
 import com.openexchange.voipnow.json.preferences.VoipNowFaxAddress;
 import com.openexchange.voipnow.json.services.ServiceRegistry;
-import com.openexchange.voipnow.json.servlet.VoipNowServlet;
 
 /**
  * {@link Activator} - Activator for VoipNow component.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
-
-    private List<ServiceRegistration> serviceRegistrations;
-
-    private Stack<ServiceTracker> trackers;
+public class Activator extends AJAXModuleActivator {
 
     /**
      * Initializes a new {@link Activator}.
@@ -91,87 +76,60 @@ public class Activator implements BundleActivator {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         try {
             /*
              * Register user multiple service
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration>(4);
-            serviceRegistrations.add(context.registerService(
-                MultipleHandlerFactoryService.class.getName(),
-                new VoipNowMultipleHandlerFactory(),
-                null));
-            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowEnabled(), null));
-            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new VoipNowFaxAddress(), null));
-            serviceRegistrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            registerModule(VoipNowActionFactory.getInstance(), com.openexchange.voipnow.json.Constants.MODULE);
+            registerService(PreferencesItemService.class, new VoipNowEnabled());
+            registerService(PreferencesItemService.class, new VoipNowFaxAddress());
+            registerService(PreferencesItemService.class, new GUI());
             /*
              * User service tracker
              */
-            trackers = new Stack<ServiceTracker>();
             final ServiceRegistry serviceRegistry = ServiceRegistry.getInstance();
-            trackers.push(new ServiceTracker(context, UserService.class.getName(), new RegistryServiceTrackerCustomizer<UserService>(
-                context,
-                serviceRegistry,
-                UserService.class)));
+            track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, serviceRegistry, UserService.class));
             /*
              * Configuration service tracker
              */
-            {
-                final ServiceTrackerCustomizer cst = new InitializingRegistryServiceTrackerCustomizer(context, serviceRegistry);
-                trackers.push(new ServiceTracker(context, ConfigurationService.class.getName(), cst));
-            }
+            track(ConfigurationService.class, new InitializingRegistryServiceTrackerCustomizer(context, serviceRegistry));
             /*
              * Contact interface factory tracker
              */
-            trackers.push(new ServiceTracker(
+            track(ContactInterfaceFactory.class, new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(
                 context,
-                ContactInterfaceFactory.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContactInterfaceFactory>(context, serviceRegistry, ContactInterfaceFactory.class)));
+                serviceRegistry,
+                ContactInterfaceFactory.class));
             /*
              * HTTP service tracker
              */
-            VoipNowActionFactory.getInstance();
-            trackers.push(new SessionServletRegistration(context, new VoipNowServlet(), com.openexchange.voipnow.json.Constants.SERVLET_PATH));
-            trackers.push(new ServiceTracker(
+            track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
                 context,
-                ContactInterfaceDiscoveryService.class.getName(),
-                new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
-                    context,
-                    serviceRegistry,
-                    ContactInterfaceDiscoveryService.class)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+                serviceRegistry,
+                ContactInterfaceDiscoveryService.class));
+            openTrackers();
         } catch (final Throwable e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+            final org.apache.commons.logging.Log LOG =
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
             LOG.error(e.getMessage(), e);
-            //throw e;
+            // throw e;
         }
     }
 
-    public void stop(final BundleContext context) throws Exception {
+    @Override
+    protected void stopBundle() throws Exception {
         try {
-            /*
-             * Close trackers
-             */
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.pop().close();
-                }
-                trackers = null;
-            }
-            /*
-             * Unregister all
-             */
-            if (null != serviceRegistrations) {
-                for (final ServiceRegistration serviceRegistration : serviceRegistrations) {
-                    serviceRegistration.unregister();
-                }
-                serviceRegistrations.clear();
-                serviceRegistrations = null;
-            }
+            cleanUp();
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
+            final org.apache.commons.logging.Log LOG =
+                com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Activator.class));
             LOG.error(e.getMessage(), e);
             throw e;
         }
