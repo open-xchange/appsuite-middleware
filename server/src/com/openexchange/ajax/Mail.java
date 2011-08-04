@@ -4694,7 +4694,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 accountId = MailAccount.DEFAULT_ID;
             } else {
                 accountId = storageService.getByPrimaryAddress(from.getAddress(), user, cid);
-                if (accountId != -1) {
+                if (accountId == -1) {
                     accountId = storageService.getByPrimaryAddress(QuotedInternetAddress.toIDN(from.getAddress()), user, cid);
                 }
             }
