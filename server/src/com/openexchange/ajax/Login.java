@@ -885,7 +885,7 @@ public class Login extends AJAXServlet {
         String client;
         try {
             client = parseClient(req, false);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             client = defaultClient;
         }
         return client;
@@ -893,13 +893,14 @@ public class Login extends AJAXServlet {
 
     private static String parseAuthId(final HttpServletRequest req, final boolean strict) throws OXException {
         final String authId;
-        if (null == req.getParameter(LoginFields.AUTHID_PARAM)) {
+        final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
+        if (null == authIdParam) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
             }
             authId = UUIDs.getUnformattedString(UUID.randomUUID());
         } else {
-            authId = req.getParameter(LoginFields.AUTHID_PARAM);
+            authId = authIdParam;
         }
         return authId;
     }
