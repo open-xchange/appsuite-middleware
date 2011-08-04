@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomizer {
+public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomizer<AJAXRequestHandler, AJAXRequestHandler> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJAXRequestHandlerCustomizer.class);
@@ -80,30 +80,26 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 	}
 
 	@Override
-    public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
+    public AJAXRequestHandler addingService(final ServiceReference<AJAXRequestHandler> reference) {
+		final AJAXRequestHandler addedService = context.getService(reference);
 		if (null == addedService) {
 			LOG.warn("Added service is null!", new Throwable());
 		}
-		if (addedService instanceof AJAXRequestHandler) {
-			ServerRequestHandlerRegistry.getInstance().addHandler((AJAXRequestHandler) addedService);
-		}
+		ServerRequestHandlerRegistry.getInstance().addHandler(addedService);
 		return addedService;
 	}
 
 	@Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<AJAXRequestHandler> reference, final AJAXRequestHandler service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("AJAXRequestHandlerCustomizer.modifiedService()");
 		}
 	}
 
 	@Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<AJAXRequestHandler> reference, final AJAXRequestHandler service) {
 		try {
-			if (service instanceof AJAXRequestHandler) {
-				ServerRequestHandlerRegistry.getInstance().removeHandler((AJAXRequestHandler) service);
-			}
+			ServerRequestHandlerRegistry.getInstance().removeHandler(service);
 		} finally {
 			context.ungetService(reference);
 		}

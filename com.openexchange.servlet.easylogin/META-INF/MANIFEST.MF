@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.servlet.easylogin
 Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.easylogin.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,

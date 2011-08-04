@@ -1,0 +1,26 @@
+simpleAppointment:
+    step: 1
+    title: Nice Appointment
+    start_date: 11:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+    expectedError: APP-0020
+
+otherAppointment:
+    step: 2
+    title: Nice Appointment
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+otherAppointment_update:
+    step: 3
+    start_date: 11:30 AM
+    expectedError: APP-0020
+
+otherAppointment_verify:
+    step: 4
+    title: Nice Appointment
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note

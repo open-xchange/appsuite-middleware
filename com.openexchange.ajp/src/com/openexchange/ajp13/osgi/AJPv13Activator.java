@@ -52,50 +52,35 @@ package com.openexchange.ajp13.osgi;
 import static com.openexchange.ajp13.AJPv13ServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Request;
 import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.threadpool.AJPv13SynchronousQueueProvider;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
-import com.openexchange.ajp13.xajp.XAJPv13Server;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13Activator extends DeferredActivator {
+public final class AJPv13Activator extends HousekeepingActivator {
 
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
-
-    private static final int AJP_MODE_STABLE = 1;
-
-    private static final int AJP_MODE_THREAD_POOL = 2;
-
-    private static final int AJP_MODE_NIO = 3;
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
 
     private List<Initialization> inits;
-
-    private int mode;
-
-    private List<ServiceTracker> trackers;
-
-    private List<ServiceRegistration> registrations;
 
     /**
      * Initializes a new {@link AJPv13Activator}.
@@ -111,7 +96,8 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+        final org.apache.commons.logging.Log logger =
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
@@ -121,7 +107,8 @@ public final class AJPv13Activator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
+        final org.apache.commons.logging.Log logger =
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class));
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
@@ -145,24 +132,11 @@ public final class AJPv13Activator extends DeferredActivator {
                     }
                 }
             }
-            inits = new ArrayList<Initialization>(2);
+            inits = new ArrayList<Initialization>(3);
             /*
              * Set starter dependent on mode
              */
-            mode = AJP_MODE_THREAD_POOL;
-            switch (mode) {
-            case AJP_MODE_STABLE:
-                inits.add(new AJPStableStarter());
-                break;
-            case AJP_MODE_THREAD_POOL:
-                inits.add(new NAJPStarter());
-                break;
-            case AJP_MODE_NIO:
-                inits.add(new XAJPStarter());
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown AJP mode: " + mode);
-            }
+            inits.add(new NAJPStarter());
             inits.add(com.openexchange.ajp13.servlet.http.HttpManagersInit.getInstance());
             inits.add(new Initialization() {
 
@@ -184,23 +158,18 @@ public final class AJPv13Activator extends DeferredActivator {
                 initialization.start();
             }
             if (LOG.isInfoEnabled()) {
-                final String prefix = ((AJP_MODE_STABLE == mode) ? "Stable AJP server " : ((AJP_MODE_NIO == mode) ? "NIO AJP server " : "New AJP server "));
-                LOG.info(new StringBuilder(32).append(prefix).append("successfully started.").toString());
+                LOG.info(new StringBuilder(32).append("NIO AJP server successfully started.").toString());
             }
             /*
              * Start trackers
              */
-            trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTracker(context)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            track(ManagementService.class, new ManagementServiceTracker(context));
+            openTrackers();
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration>(1);
             final HttpServiceImpl http = new HttpServiceImpl();
-            registrations.add(context.registerService(HttpService.class.getName(), http, null));
+            registerService(HttpService.class, http);
             http.registerServlet("/servlet/TestServlet", new com.openexchange.ajp13.TestServlet(), null, null);
 
             /*-
@@ -221,18 +190,7 @@ public final class AJPv13Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (registrations != null) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
-            if (trackers != null) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
+            cleanUp();
             if (inits != null) {
                 while (!inits.isEmpty()) {
                     inits.remove(0).stop();
@@ -240,8 +198,7 @@ public final class AJPv13Activator extends DeferredActivator {
                 inits = null;
             }
             if (LOG.isInfoEnabled()) {
-                final String prefix = ((AJP_MODE_STABLE == mode) ? "Stable AJP server " : ((AJP_MODE_NIO == mode) ? "NIO AJP server " : "New AJP server "));
-                LOG.info(new StringBuilder(32).append(prefix).append("successfully stopped.").toString());
+                LOG.info(new StringBuilder(32).append("NIO AJP server successfully stopped.").toString());
             }
             /*
              * Clear service registry
@@ -250,29 +207,6 @@ public final class AJPv13Activator extends DeferredActivator {
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
             throw e;
-        }
-    }
-
-    private static final class AJPStableStarter implements Initialization {
-
-        public AJPStableStarter() {
-            super();
-        }
-
-        @Override
-        public void start() throws OXException {
-            AJPv13Server.setInstance(new com.openexchange.ajp13.stable.AJPv13ServerImpl());
-            AJPv13Config.getInstance().start();
-            AJPv13Monitors.setListenerMonitor(com.openexchange.ajp13.stable.AJPv13ServerImpl.getListenerMonitor());
-            AJPv13Server.startAJPServer();
-        }
-
-        @Override
-        public void stop() throws OXException {
-            AJPv13Server.stopAJPServer();
-            AJPv13Monitors.releaseListenerMonitor();
-            AJPv13Config.getInstance().stop();
-            AJPv13Server.releaseInstrance();
         }
     }
 
@@ -313,27 +247,6 @@ public final class AJPv13Activator extends DeferredActivator {
             AJPv13Server.releaseInstrance();
             AJPv13SynchronousQueueProvider.releaseInstance();
         }
-    }
-
-    private static final class XAJPStarter implements Initialization {
-
-        public XAJPStarter() {
-            super();
-        }
-
-        @Override
-        public void start() throws OXException {
-            AJPv13Config.getInstance().start();
-            XAJPv13Server.getInstance().start();
-        }
-
-        @Override
-        public void stop() throws OXException {
-            AJPv13Config.getInstance().stop();
-            XAJPv13Server.getInstance().close();
-            XAJPv13Server.releaseInstance();
-        }
-
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.log;
 
+import java.util.Map;
+
 /**
  * {@link Loggable} - A loggable object.
  *
@@ -104,4 +106,11 @@ public interface Loggable {
      * @return <code>true</code> if loggable; otherwise <code>false</code>
      */
     public boolean isLoggable();
+
+    /**
+     * Gets the properties.
+     * 
+     * @return The properties
+     */
+    public Map<String, Object> properties();
 }

@@ -30,4 +30,4 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

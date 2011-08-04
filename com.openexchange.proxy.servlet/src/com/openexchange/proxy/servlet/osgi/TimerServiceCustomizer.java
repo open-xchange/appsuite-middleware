@@ -67,7 +67,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
+public final class TimerServiceCustomizer implements ServiceTrackerCustomizer<TimerService, TimerService> {
 
     private final BundleContext context;
 
@@ -83,21 +83,23 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
         this.context = context;
     }
 
-    public Object addingService(final ServiceReference reference) {
-        final Object service = context.getService(reference);
-        final TimerService timerService = (TimerService) service;
+    @Override
+    public TimerService addingService(final ServiceReference<TimerService> reference) {
+        final TimerService timerService = context.getService(reference);;
         ServiceRegistry.getInstance().addService(TimerService.class, timerService);
         scheduleTask(timerService);
-        return service;
+        return timerService;
     }
 
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void modifiedService(final ServiceReference<TimerService> reference, final TimerService service) {
         // Nope
     }
 
-    public void removedService(final ServiceReference reference, final Object service) {
+    @Override
+    public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
         ServiceRegistry.getInstance().removeService(TimerService.class);
-        dropTask((TimerService) service);
+        dropTask(service);
         context.ungetService(reference);
     }
 
@@ -105,6 +107,7 @@ public final class TimerServiceCustomizer implements ServiceTrackerCustomizer {
         if (null == scheduledTimerTask) {
             final Runnable task = new Runnable() {
 
+                @Override
                 public void run() {
                     final Collection<ConcurrentMap<UUID, ProxyRegistrationEntry>> values = ProxyRegistryImpl.getInstance().values();
                     if (values.isEmpty()) {

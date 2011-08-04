@@ -273,7 +273,7 @@ public abstract class MailMessage extends MailPart {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Inbvalid color label: " + cl, e);
+                LOG.debug("Invalid color label: " + cl, e);
             }
             return defaultValue;
         }
@@ -503,7 +503,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addFrom(QuotedInternetAddress.parse(fromStr, true));
             } catch (final AddressException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
                 addFrom(new PlainTextAddress(fromStr));
             }
         }
@@ -570,7 +570,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addTo(QuotedInternetAddress.parse(toStr, true));
             } catch (final AddressException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
                 addTo(new PlainTextAddress(toStr));
             }
         }
@@ -637,7 +637,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addCc(QuotedInternetAddress.parse(ccStr, true));
             } catch (final AddressException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
                 addCc(new PlainTextAddress(ccStr));
             }
         }
@@ -704,7 +704,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addBcc(QuotedInternetAddress.parse(bccStr, true));
             } catch (final AddressException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
                 addBcc(new PlainTextAddress(bccStr));
             }
         }

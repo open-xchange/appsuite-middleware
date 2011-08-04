@@ -1,0 +1,27 @@
+simpleAppointment:
+    step: 1
+    title: Nice Appointment
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+simpleAppointment_verify:
+    step: 2
+    title: Nice Appointment
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+simpleAppointment_update:
+    step: 3
+    title: Very Nice Appointment
+
+simpleAppointment_verifyUpdate:
+    step: 4
+    title: Very Nice Appointment
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+simpleAppointment_delete:
+    step: 5

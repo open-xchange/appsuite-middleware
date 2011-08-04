@@ -1,0 +1,7 @@
++com.openexchange.ajax.appointment.*
+-com.openexchange.ajax.appointment.action.*
++com.openexchange.groupware.calendar.*
+#com.openexchange.webdav.xml.appointments.*
++com.openexchange.groupware.container.AppointmentObject
++com.openexchange.groupware.settings.tree.modules.calendar.*
++com.openexchange.groupware.search.CalendarSearchObject

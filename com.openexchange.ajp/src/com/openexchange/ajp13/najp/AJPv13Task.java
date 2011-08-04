@@ -52,6 +52,7 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,6 +73,7 @@ import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -352,6 +354,15 @@ public final class AJPv13Task implements Task<Object> {
     public Object call() {
         final Thread t = thread = Thread.currentThread();
         if (!t.isInterrupted() && client != null && !client.isClosed()) {
+            {
+                /*
+                 * Gather logging info
+                 */
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.ajp13.threadName", t.getName());
+                properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(client.getPort()));
+                properties.put("com.openexchange.ajp13.remoteAddress", client.getInetAddress().getHostAddress());
+            }
             final long start = System.currentTimeMillis();
             /*
              * Assign a connection to this listener
@@ -481,6 +492,10 @@ public final class AJPv13Task implements Task<Object> {
                     processing = false;
                 }
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+                /*
+                 * Gather logging info
+                 */
+                LogProperties.getLogProperties().clear();
             }
             final long duration = System.currentTimeMillis() - start;
             monitor.addUseTime(duration);

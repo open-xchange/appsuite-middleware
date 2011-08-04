@@ -1,0 +1,94 @@
+Return-Path: <Hagedorn@uni-koeln.de>
+Received: from ox.open-xchange.com ([unix socket])
+	 by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA;
+	 Fri, 19 Oct 2007 10:04:30 +0200
+X-Sieve: CMU Sieve 2.2
+Received: by ox.open-xchange.com (Postfix, from userid 99)
+	id 8CB3F32CDC7; Fri, 19 Oct 2007 10:04:30 +0200 (CEST)
+X-Spam-Checker-Version: SpamAssassin 3.1.8 (2007-02-13) on ox.open-xchange.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-2.5 required=5.0 tests=AWL,BAYES_00,FORGED_RCVD_HELO
+	autolearn=ham version=3.1.8
+Received: from smtp-out.rrz.uni-koeln.de (smtp-out.rrz.uni-koeln.de [134.95.19.53])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(Client did not present a certificate)
+	by ox.open-xchange.com (Postfix) with ESMTP id 888DB32CDA1;
+	Fri, 19 Oct 2007 10:04:25 +0200 (CEST)
+Received: from smtp.uni-koeln.de (lvr6.rrz.uni-koeln.de [134.95.19.104])
+	by smtp-out.rrz.uni-koeln.de (8.13.8/8.13.8) with ESMTP id l9J84PSs021333;
+	Fri, 19 Oct 2007 10:04:25 +0200
+Received: from www.mac.com (tyrion.rrz.uni-koeln.de [134.95.128.1])
+	by smtp.uni-koeln.de (8.12.11.20060308/8.12.11) with ESMTP id l9J84Olo008365;
+	Fri, 19 Oct 2007 10:04:24 +0200
+Date: Fri, 19 Oct 2007 10:04:25 +0200
+From: Sebastian Hagedorn <Hagedorn@uni-koeln.de>
+Reply-To: =?ISO-8859-1?Q?UKLAN-Team_Uni_K=F6ln?= <uklan@uni-koeln.de>
+To: "Hoberg, Frank" <frank.hoberg@open-xchange.com>, "Betten, Thorben" <thorben.betten@open-xchange.com>
+cc: "Seelbach, Carolin" <carolin.seelbach@open-xchange.com>,
+ =?ISO-8859-1?Q?UKLAN-Team_Uni_K=F6ln?= <uklan@uni-koeln.de>
+Subject: Re: Open-Xchange
+Message-ID: <DD4122716A909F14E615DB84@www.mac.com>
+In-Reply-To: <19293023.911192780601356.JavaMail.open-xchange@oxee>
+References: <19293023.911192780601356.JavaMail.open-xchange@oxee>
+X-Mailer: Mulberry/4.0.9b1 (Mac OS X)
+MIME-Version: 1.0
+Content-Type: multipart/signed;
+  micalg=pgp-sha1;
+  protocol="application/pgp-signature";
+  boundary="==========51DFF2428A53599648C6=========="
+X-Virus-Scanned: by amavisd-new
+X-Length: 3663
+X-UID: 48998
+
+--==========51DFF2428A53599648C6==========
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
+
+Hallo Herr Hoberg,
+
+danke f=C3=BCr Ihre Mail.
+
+--On 19. Oktober 2007 09:56:41 +0200 "Hoberg, Frank"=20
+<frank.hoberg@open-xchange.com> wrote:
+
+> Sie hatten ja schon Kontakt zu meiner Kollegin, Frau Seelbach. Ich =
+w=C3=BCrde
+> gerne, wenn m=C3=B6glich noch heute (da ich ansonsten die komplette =
+n=C3=A4chste
+> Woche unterwegs bin) ein erstes Telefonat zur weiteren Vorgehensweise mit
+> Ihnen f=C3=BChren und - soweit Sie welche haben - einige Ihrer aktuellen
+> Fragen beantworten.
+>
+> Bekommen wir ein Telefonta heute noch hin?
+
+Von mir aus ist das kein Problem.
+
+> Von mir aus passt das am Besten gleich um 10:30 h oder auch um 12 h oder
+> 14 h.
+>
+> Bitte um kurze Best=C3=A4tigung.
+
+In Ordnung, dann rufe ich Sie um 10:30 Uhr an.
+
+Mit freundlichen Gr=C3=BC=C3=9Fen, Sebastian Hagedorn
+--=20
+     .:.Sebastian Hagedorn - RZKR-R1 (Geb=C3=A4ude 52), Zimmer 18.:.
+Zentrum f=C3=BCr angewandte Informatik - Universit=C3=A4tsweiter Service =
+RRZK
+.:.Universit=C3=A4t zu K=C3=B6ln / Cologne University - =E2=9C=86 =
++49-221-478-5587.:.
+                   .:.:.:.Skype: shagedorn.:.:.:.
+--==========51DFF2428A53599648C6==========
+Content-Type: application/pgp-signature
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (Darwin)
+
+iD8DBQFHGGUJGXsGmU0QW0URAu2rAKDkFcns9F5wSOWLanPhA8QNL2sj6QCeNebY
+gJHYJGZlh0qRB84BU7oZSW0=
+=4/bX
+-----END PGP SIGNATURE-----
+
+--==========51DFF2428A53599648C6==========--

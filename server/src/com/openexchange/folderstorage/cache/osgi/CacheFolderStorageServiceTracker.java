@@ -60,7 +60,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorageServiceTracker implements ServiceTrackerCustomizer {
+public final class CacheFolderStorageServiceTracker implements ServiceTrackerCustomizer<FolderStorage, FolderStorage> {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CacheFolderStorageServiceTracker.class));
@@ -73,8 +73,8 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
     }
 
     @Override
-    public Object addingService(final ServiceReference reference) {
-        final Object addedService = context.getService(reference);
+    public FolderStorage addingService(final ServiceReference<FolderStorage> reference) {
+        final FolderStorage addedService = context.getService(reference);
         // Get tree identifier
         final String treeId;
         {
@@ -89,7 +89,7 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
             treeId = obj.toString();
         }
         // Add to registry
-        if (CacheFolderStorageRegistry.getInstance().addFolderStorage(treeId, (FolderStorage) addedService)) {
+        if (CacheFolderStorageRegistry.getInstance().addFolderStorage(treeId, addedService)) {
             return addedService;
         }
         // Nothing to track, return null
@@ -98,12 +98,12 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
     }
 
     @Override
-    public void modifiedService(final ServiceReference reference, final Object service) {
+    public void modifiedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
         // Nothing to do
     }
 
     @Override
-    public void removedService(final ServiceReference reference, final Object service) {
+    public void removedService(final ServiceReference<FolderStorage> reference, final FolderStorage service) {
         if (null != service) {
             try {
                 // Get tree identifier
@@ -117,7 +117,7 @@ public final class CacheFolderStorageServiceTracker implements ServiceTrackerCus
                     }
                     treeId = obj.toString();
                 }
-                CacheFolderStorageRegistry.getInstance().removeFolderStorage(treeId, (FolderStorage) service);
+                CacheFolderStorageRegistry.getInstance().removeFolderStorage(treeId, service);
             } finally {
                 context.ungetService(reference);
             }

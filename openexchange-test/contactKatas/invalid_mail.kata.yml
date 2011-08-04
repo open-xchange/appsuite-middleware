@@ -1,0 +1,17 @@
+invalidMail:
+    step: 1
+    expectedError: CON-0100
+    email1: hugo
+
+hugoHerrlich:
+    step: 2
+    display_name: Herrlich, Hugo
+    given_name: Hugo
+    sur_name: Herrlich
+    title: Dr.
+    email1: hugo.herrlich@bla.ox
+
+hugoHerrlich_update:
+    step: 3
+    expectedError: CON-0100
+    email1: hugo

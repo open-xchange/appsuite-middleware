@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.polling
 Bundle-Version: 6.20.0.0
 Bundle-Activator: com.openexchange.polling.osgi.PollingActivator
 Bundle-Vendor: Open-Xchange inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.server.osgiservice,
  org.osgi.framework;version="1.3.0",

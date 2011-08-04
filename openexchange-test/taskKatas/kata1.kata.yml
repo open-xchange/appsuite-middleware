@@ -1,0 +1,27 @@
+simpleTask:
+    step: 1
+    title: Nice Task
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+simpleTask_verify:
+    step: 2
+    title: Nice Task
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+
+simpleTask_update:
+    step: 3
+    title: Very Nice Task
+
+simpleTask_verifyUpdate:
+    step: 4
+    title: Very Nice Task
+    start_date: 08:30 AM
+    end_date: 10:30 AM
+    note: Nice note
+    
+simpleTask_delete:
+    step: 5

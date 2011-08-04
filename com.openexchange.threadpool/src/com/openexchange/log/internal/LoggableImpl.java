@@ -49,6 +49,8 @@
 
 package com.openexchange.log.internal;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.Loggable;
 
@@ -69,9 +71,11 @@ public final class LoggableImpl implements Loggable {
 
     private final Throwable callerTrace;
 
+    private final Map<String, Object> properties;
+
     /**
      * Initializes a new {@link LoggableImpl}.
-     *
+     * 
      * @param level
      * @param log
      * @param message
@@ -84,28 +88,52 @@ public final class LoggableImpl implements Loggable {
         this.message = message;
         this.throwable = throwable;
         this.callerTrace = callerTrace;
+        properties = new HashMap<String, Object>();
     }
 
+    @Override
+    public Map<String, Object> properties() {
+        return properties;
+    }
+
+    /**
+     * Puts specified properties.
+     * 
+     * @param properties The properties
+     */
+    public LoggableImpl putProperties(final Map<String, Object> properties) {
+        if (null != properties) {
+            this.properties.putAll(properties);
+        }
+        return this;
+    }
+
+    @Override
     public Level getLevel() {
         return level;
     }
 
+    @Override
     public Log getLog() {
         return log;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Throwable getThrowable() {
         return throwable;
     }
 
+    @Override
     public StackTraceElement[] getCallerTrace() {
         return callerTrace.getStackTrace();
     }
 
+    @Override
     public boolean isLoggable() {
         return null != message || null != throwable;
     }

@@ -50,13 +50,10 @@
 package com.openexchange.imap.osgi;
 
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -73,7 +70,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -84,14 +81,13 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPActivator} - The {@link BundleActivator activator} for IMAP bundle.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPActivator extends DeferredActivator {
+public final class IMAPActivator extends HousekeepingActivator {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class));
-
-    private List<ServiceRegistration> registrations;
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPActivator.class));
 
     private WhiteboardSecretService secretService;
 
@@ -148,18 +144,14 @@ public final class IMAPActivator extends DeferredActivator {
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
-            registrations = new ArrayList<ServiceRegistration>(2);
             /*
              * Register IMAP mail provider
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
-            registrations.add(context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(), dictionary));
+            registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
             if (IMAPProperties.getInstance().notifyRecent()) {
-                registrations.add(context.registerService(
-                    IMAPNotifierRegistryService.class.getName(),
-                    IMAPNotifierRegistry.getInstance(),
-                    null));
+                registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
             }
             /*
              * Register event handle
@@ -167,12 +159,14 @@ public final class IMAPActivator extends DeferredActivator {
             {
                 final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
                 serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-                registrations.add(context.registerService(EventHandler.class.getName(), new EventHandler() {
+                registerService(EventHandler.class, new EventHandler() {
 
+                    @Override
                     public void handleEvent(final Event event) {
                         final String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            @SuppressWarnings("unchecked") final Map<String, Session> container =
+                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                             final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
@@ -183,7 +177,8 @@ public final class IMAPActivator extends DeferredActivator {
                             handleSession(session);
                             IMAPNotifierRegistry.getInstance().handleRemovedSession(session);
                         } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            @SuppressWarnings("unchecked") final Map<String, Session> container =
+                                (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
                             final IMAPNotifierRegistryService notifierRegistry = IMAPNotifierRegistry.getInstance();
                             for (final Session session : container.values()) {
                                 handleSession(session);
@@ -204,7 +199,8 @@ public final class IMAPActivator extends DeferredActivator {
                         }
                     }
 
-                }, serviceProperties));
+                },
+                    serviceProperties);
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -215,12 +211,7 @@ public final class IMAPActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

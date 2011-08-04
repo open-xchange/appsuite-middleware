@@ -82,6 +82,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -192,6 +193,7 @@ public abstract class SessionServlet extends AJAXServlet {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
         final String sessionId = getSessionId(req);
+        LogProperties.putLogProperty("com.openexchange.session.sessionId", sessionId);
         final ServerSession session = getSession(req, sessionId, sessiondService);
         if (!sessionId.equals(session.getSessionID())) {
             throw SessionExceptionCodes.WRONG_SESSION.create();
