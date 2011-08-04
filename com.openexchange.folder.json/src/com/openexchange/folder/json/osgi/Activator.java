@@ -57,14 +57,12 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.actions.FolderActionFactory;
-import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
@@ -123,7 +121,6 @@ public class Activator extends AJAXModuleActivator {
              * Preference item
              */
             registerService(PreferencesItemService.class, new Tree());
-            registerService(MultipleHandlerFactoryService.class, new FolderMultipleHandlerFactory());
             registerService(LoginHandlerService.class, new FolderConsistencyLoginHandler());
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
