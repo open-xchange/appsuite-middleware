@@ -191,17 +191,22 @@ public class PushOutputQueue implements Runnable {
         final int contextId = pushObject.getContextId();
         final int folderId = pushObject.getFolderId();
         final String fullName = pushObject.getFullName();
-        for (final int user : users) {
-
-            if (RegisterHandler.isRegistered(user, contextId)) {
-                final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
+        {
+            final byte[] bytes;
+            {
                 final StringBuilder sb = new StringBuilder();
                 sb.append(folderId < 0 ? (null == fullName ? Integer.valueOf(1) : fullName) : Integer.valueOf(folderId));
                 sb.append('\1');
-                try {
-                    channels.makeAndSendPackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort(), INTERNAL);
-                } catch (final Exception exc) {
-                    LOG.error("createPushPackage", exc);
+                bytes = sb.toString().getBytes();
+            }
+            for (final int user : users) {
+                if (RegisterHandler.isRegistered(user, contextId)) {
+                    final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
+                    try {
+                        channels.makeAndSendPackage(bytes, registerObj.getHostAddress(), registerObj.getPort(), INTERNAL);
+                    } catch (final Exception exc) {
+                        LOG.error("createPushPackage", exc);
+                    }
                 }
             }
         }

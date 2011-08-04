@@ -54,6 +54,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
+import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
+import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 /**
  * {@link MailFolderUtility} - Provides utility methods for mail folders.
@@ -67,6 +69,26 @@ public final class MailFolderUtility {
      */
     private MailFolderUtility() {
         super();
+    }
+
+    /**
+     * Performs mailbox encoding.
+     * 
+     * @param fullName The full name
+     * @return The encoded full name
+     */
+    public static String encode(final String fullName) {
+        return BASE64MailboxEncoder.encode(fullName);
+    }
+
+    /**
+     * Performs mailbox decoding.
+     * 
+     * @param encoded The encoded full name
+     * @return The decoded full name
+     */
+    public static String decode(final String encoded) {
+        return BASE64MailboxDecoder.decode(encoded);
     }
 
     private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
