@@ -58,12 +58,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -141,18 +141,18 @@ public class Login extends AJAXServlet {
         SECRET;
     }
 
-    private String uiWebPath;
-    private boolean sessiondAutoLogin;
-    private CookieHashSource hashSource;
-    private String httpAuthAutoLogin;
-    private String defaultClient;
-    private String clientVersion;
-    private String errorPageTemplate;
-    private int cookieExpiry;
-    private boolean insecure = false;
-    private boolean cookieForceHTTPS;
-    private boolean ipCheck;
-    private Queue<IPRange> ranges;
+    private volatile String uiWebPath;
+    protected volatile boolean sessiondAutoLogin;
+    protected volatile CookieHashSource hashSource;
+    private volatile String httpAuthAutoLogin;
+    private volatile String defaultClient;
+    private volatile String clientVersion;
+    protected volatile String errorPageTemplate;
+    private volatile int cookieExpiry;
+    protected volatile boolean insecure = false;
+    private volatile boolean cookieForceHTTPS;
+    protected volatile boolean ipCheck;
+    protected volatile Queue<IPRange> ranges;
     private final Map<String, JSONRequestHandler> handlerMap;
 
     /**
@@ -537,7 +537,7 @@ public class Login extends AJAXServlet {
         cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
         insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
         ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-        ranges = new LinkedList<IPRange>();
+        ranges = new ConcurrentLinkedQueue<IPRange>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
         if (tmp != null) {
             final String[] lines = tmp.split("\n");
@@ -593,7 +593,7 @@ public class Login extends AJAXServlet {
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
      */
-    private void updateIPAddress(final String newIP, final Session session) {
+    protected void updateIPAddress(final String newIP, final Session session) {
         if (insecure) {
             final String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) { // IPs differ
@@ -658,19 +658,19 @@ public class Login extends AJAXServlet {
         ResponseWriter.write(response, resp.getWriter());
     }
 
-    private void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
+    protected void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         doCookieReWrite(req, resp, CookieType.SESSION);
     }
 
-    private void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
+    protected void doRefreshSecret(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    private void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
+    protected void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
         LOG.debug(e.getMessage(), e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -714,7 +714,7 @@ public class Login extends AJAXServlet {
         cookie.setMaxAge(cookieExpiry);
     }
 
-    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
+    protected void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 
@@ -898,7 +898,7 @@ public class Login extends AJAXServlet {
         return authId;
     }
 
-    private static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
+    protected static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
         final String modules = "modules";
         if (parseBoolean(req.getParameter(modules))) {
             try {
@@ -924,7 +924,7 @@ public class Login extends AJAXServlet {
         return "true".equalsIgnoreCase(parameter) || "1".equals(parameter) || "yes".equalsIgnoreCase(parameter) || "on".equalsIgnoreCase(parameter);
     }
 
-    private void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
+    protected void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
         final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
@@ -1000,7 +1000,7 @@ public class Login extends AJAXServlet {
         resp.sendRedirect(generateRedirectURL(null, httpAuthAutoLogin, session.getSessionID()));
     }
 
-    private String generateRedirectURL(final String uiWebPathParam, final String shouldStore, final String sessionId) {
+    protected String generateRedirectURL(final String uiWebPathParam, final String shouldStore, final String sessionId) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
