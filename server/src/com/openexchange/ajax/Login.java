@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -508,7 +509,7 @@ public class Login extends AJAXServlet {
                 }
             }
         });
-        handlerMap = map;
+        handlerMap = Collections.unmodifiableMap(map);
     }
 
     @Override
@@ -868,19 +869,24 @@ public class Login extends AJAXServlet {
     }
 
     private String parseClient(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String client = parseClient(req);
-        if (strict && defaultClient.equals(client)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+        final String client;
+        if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
+            if (strict) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
+            }
+            client = defaultClient;
+        } else {
+            client = req.getParameter(LoginFields.CLIENT_PARAM);
         }
         return client;
     }
 
     private String parseClient(final HttpServletRequest req) {
-        final String client;
-        if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
+        String client;
+        try {
+            client = parseClient(req, false);
+        } catch (OXException e) {
             client = defaultClient;
-        } else {
-            client = req.getParameter(LoginFields.CLIENT_PARAM);
         }
         return client;
     }
@@ -925,7 +931,7 @@ public class Login extends AJAXServlet {
     }
 
     protected void doFormLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, OXException, IOException {
-        final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM ,true);
+        final LoginRequest request = parseLogin(req, LoginFields.LOGIN_PARAM, true);
         final LoginResult result = LoginPerformer.getInstance().doLogin(request);
         final Session session = result.getSession();
 

@@ -1,3 +1,7 @@
+* 2011-08-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19989: Correctly handling the client parameter for the formLogin request.
+
 * 2011-07-24 - marcus.klein@open-xchange.com
 
  - Fixed bug 19928: Added configuration parameter insecure. Default is false. Actions redirect and redeem then require a proper initialized
