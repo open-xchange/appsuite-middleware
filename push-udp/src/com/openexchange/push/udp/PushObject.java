@@ -61,8 +61,6 @@ public class PushObject extends AbstractPushObject {
 
     private final int folderId;
 
-    private final String fullName;
-
     private final int module;
 
     private final int users[];
@@ -85,28 +83,6 @@ public class PushObject extends AbstractPushObject {
     public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
         super();
         this.folderId = folderId;
-        fullName = null;
-        this.module = module;
-        this.contextId = contextId;
-        this.users = users;
-        remote = isRemote;
-        hash = hashCode0();
-        this.timestamp = timestamp;
-    }
-
-    /**
-     * Initializes a new {@link PushObject}.
-     * 
-     * @param fullName The full name
-     * @param module The module
-     * @param contextId The context ID
-     * @param users The user IDs as an array
-     * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
-     */
-    public PushObject(final String fullName, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
-        super();
-        this.folderId = -1;
-        this.fullName = fullName;
         this.module = module;
         this.contextId = contextId;
         this.users = users;
@@ -119,7 +95,6 @@ public class PushObject extends AbstractPushObject {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + folderId;
-        result = prime * result + (null == fullName ? 0 : fullName.hashCode());
         result = prime * result + module;
         return result;
     }
@@ -131,15 +106,6 @@ public class PushObject extends AbstractPushObject {
      */
     public int getFolderId() {
         return folderId;
-    }
-
-    /**
-     * Gets the full name.
-     * 
-     * @return The full name
-     */
-    public String getFullName() {
-        return fullName;
     }
 
     /**

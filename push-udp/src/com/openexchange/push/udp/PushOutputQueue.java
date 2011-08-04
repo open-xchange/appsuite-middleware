@@ -190,12 +190,11 @@ public class PushOutputQueue implements Runnable {
         final int users[] = pushObject.getUsers();
         final int contextId = pushObject.getContextId();
         final int folderId = pushObject.getFolderId();
-        final String fullName = pushObject.getFullName();
         {
             final byte[] bytes;
             {
                 final StringBuilder sb = new StringBuilder();
-                sb.append(folderId < 0 ? (null == fullName ? Integer.valueOf(1) : fullName) : Integer.valueOf(folderId));
+                sb.append(folderId);
                 sb.append('\1');
                 bytes = sb.toString().getBytes();
             }

@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 
 /**
@@ -129,7 +128,7 @@ public class PushHandler implements EventHandler {
             }
             break;
         case Types.EMAIL:
-            event(MailFolderUtility.prepareFullname(0, "INBOX"), new int[] { event.getUserId() }, module, ctx, 0);
+            event(1, new int[] { event.getUserId() }, module, ctx, 0);
             break;
         case Types.INFOSTORE:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
@@ -147,19 +146,6 @@ public class PushHandler implements EventHandler {
         }
         try {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
-    }
-
-    private static void event(final String fullName, final int[] users, final int module, final Context ctx, final long timestamp) {
-        if (users == null) {
-            return;
-        }
-        try {
-            PushOutputQueue.add(new PushObject(fullName, module, ctx.getContextId(), users, false, timestamp));
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final Throwable t) {
