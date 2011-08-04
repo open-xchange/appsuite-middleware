@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletResponse;
  * {@link ResponseRenderer} - Writes a certain request data and result pair to HTTP request/response.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ResponseRenderer {
 

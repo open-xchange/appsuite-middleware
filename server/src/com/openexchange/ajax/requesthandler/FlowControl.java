@@ -53,6 +53,7 @@ package com.openexchange.ajax.requesthandler;
  * {@link FlowControl}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FlowControl {
 
@@ -60,6 +61,9 @@ public class FlowControl {
      * The flow control indicating "later" policy.
      */
     public static final class Later extends RuntimeException {
+
+        private static final long serialVersionUID = -4574040443336613087L;
+
     };
 
 }
