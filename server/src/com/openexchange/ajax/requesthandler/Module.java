@@ -53,7 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link Module}
+ * {@link Module} - The module annotation specifies supported actions via {@link #actions()}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
