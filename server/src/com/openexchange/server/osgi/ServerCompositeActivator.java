@@ -90,6 +90,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
         new com.openexchange.groupware.calendar.json.osgi.AppointmentJSONActivator(),
+        new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
     };
 
     public ServerCompositeActivator() {
