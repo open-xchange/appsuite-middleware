@@ -54,12 +54,14 @@ import com.openexchange.tools.StringCollection;
 
 /**
  * {@link PushObject} - The push object.
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public class PushObject extends AbstractPushObject {
 
     private final int folderId;
+
+    private final String fullName;
 
     private final int module;
 
@@ -73,7 +75,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Initializes a new {@link PushObject}.
-     *
+     * 
      * @param folderId The folder ID
      * @param module The module
      * @param contextId The context ID
@@ -83,6 +85,28 @@ public class PushObject extends AbstractPushObject {
     public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
         super();
         this.folderId = folderId;
+        fullName = null;
+        this.module = module;
+        this.contextId = contextId;
+        this.users = users;
+        remote = isRemote;
+        hash = hashCode0();
+        this.timestamp = timestamp;
+    }
+
+    /**
+     * Initializes a new {@link PushObject}.
+     * 
+     * @param fullName The full name
+     * @param module The module
+     * @param contextId The context ID
+     * @param users The user IDs as an array
+     * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
+     */
+    public PushObject(final String fullName, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
+        super();
+        this.folderId = -1;
+        this.fullName = fullName;
         this.module = module;
         this.contextId = contextId;
         this.users = users;
@@ -95,13 +119,14 @@ public class PushObject extends AbstractPushObject {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + folderId;
+        result = prime * result + (null == fullName ? 0 : fullName.hashCode());
         result = prime * result + module;
         return result;
     }
 
     /**
      * Gets the folder ID.
-     *
+     * 
      * @return The folder ID
      */
     public int getFolderId() {
@@ -109,8 +134,17 @@ public class PushObject extends AbstractPushObject {
     }
 
     /**
+     * Gets the full name.
+     * 
+     * @return The full name
+     */
+    public String getFullName() {
+        return fullName;
+    }
+
+    /**
      * Gets the module.
-     *
+     * 
      * @return The module
      */
     public int getModule() {
@@ -119,7 +153,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the user IDs as an array.
-     *
+     * 
      * @return The user IDs as an array
      */
     public int[] getUsers() {
@@ -128,7 +162,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the creation date.
-     *
+     * 
      * @return The creation date
      */
     public Date getCreationDate() {
@@ -137,7 +171,7 @@ public class PushObject extends AbstractPushObject {
 
     /**
      * Gets the time stamp or <code>0</code> if not available.
-     *
+     * 
      * @return The time stamp or <code>0</code> if not available
      */
     public long getTimestamp() {
