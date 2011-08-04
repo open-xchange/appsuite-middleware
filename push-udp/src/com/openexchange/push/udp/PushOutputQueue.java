@@ -190,12 +190,13 @@ public class PushOutputQueue implements Runnable {
         final int users[] = pushObject.getUsers();
         final int contextId = pushObject.getContextId();
         final int folderId = pushObject.getFolderId();
+        final String fullName = pushObject.getFullName();
         for (final int user : users) {
 
             if (RegisterHandler.isRegistered(user, contextId)) {
                 final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
                 final StringBuilder sb = new StringBuilder();
-                sb.append(folderId);
+                sb.append(folderId < 0 ? (null == fullName ? Integer.valueOf(1) : fullName) : Integer.valueOf(folderId));
                 sb.append('\1');
                 try {
                     channels.makeAndSendPackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort(), INTERNAL);
@@ -415,6 +416,7 @@ public class PushOutputQueue implements Runnable {
         isRunning = false;
     }
 
+    @Override
     public void run() {
         while (isRunning) {
             if (DEBUG) {
