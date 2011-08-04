@@ -52,14 +52,23 @@ package com.openexchange.ajax.requesthandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 /**
  * {@link ResponseOutputter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ResponseOutputter {
+
+    /**
+     * 
+     * 
+     * @param request
+     * @param result
+     * @return
+     */
     public boolean handles(AJAXRequestData request, AJAXRequestResult result);
+
     public int getPriority();
+
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest hReq, HttpServletResponse hResp);
 }
