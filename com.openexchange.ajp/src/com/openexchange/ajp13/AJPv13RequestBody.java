@@ -50,6 +50,7 @@
 package com.openexchange.ajp13;
 
 import java.io.IOException;
+import com.openexchange.ajp13.exception.AJPv13BrokenCycleException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 
@@ -65,51 +66,67 @@ public final class AJPv13RequestBody extends AJPv13Request {
         if (isPayloadNull()) {
             throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA, true);
         }
-        final int chunkContentLength;
-        if (getPayloadLength() == 0 || (chunkContentLength = parseInt()) == 0) {
-            /*
-             * Empty data package received
-             */
-            if (ajpRequestHandler.isMoreDataExpected()) {
+        try {
+            final int chunkContentLength;
+            if (getPayloadLength() == 0 || (chunkContentLength = parseInt()) == 0) {
                 /*
-                 * Hmm... we actually expect more data
+                 * Empty data package received
                  */
-                if (LOG.isWarnEnabled()) {
-                    final AJPv13Exception ajpExc = new AJPv13Exception(
-                        AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
-                        true,
-                        Long.valueOf(ajpRequestHandler.getTotalRequestedContentLength()),
-                        Long.valueOf(ajpRequestHandler.getContentLength()),
-                        ajpRequestHandler.getForwardRequest());
-                    ajpExc.fillInStackTrace();
-                    LOG.warn(ajpExc.getMessage(), ajpExc);
+                if (ajpRequestHandler.isMoreDataExpected()) {
+                    /*
+                     * Hmm... we actually expect more data
+                     */
+                    if (LOG.isWarnEnabled()) {
+                        final AJPv13Exception ajpExc = new AJPv13Exception(
+                            AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
+                            true,
+                            Long.valueOf(ajpRequestHandler.getTotalRequestedContentLength()),
+                            Long.valueOf(ajpRequestHandler.getContentLength()),
+                            ajpRequestHandler.getForwardRequest());
+                        ajpExc.fillInStackTrace();
+                        LOG.warn(ajpExc.getMessage(), ajpExc);
+                    }
+                    /*
+                     * Set data to null to indicate that no more data is available from web server
+                     */
+                    ajpRequestHandler.makeEqual();
+                    ajpRequestHandler.setData(null);
+                    return;
                 }
                 /*
-                 * Set data to null to indicate that no more data is available from web server
+                 * If we currently read from a chunked http input stream - transfer-encoding: chunked - , then 'content-length' header has not
+                 * been set
                  */
-                ajpRequestHandler.makeEqual();
+                if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
+                    ajpRequestHandler.makeEqual();
+                }
                 ajpRequestHandler.setData(null);
                 return;
             }
             /*
-             * If we currently read from a chunked http input stream - transfer-encoding: chunked - , then 'content-length' header has not
-             * been set
+             * Parse current size
              */
-            if (ajpRequestHandler.isNotSet() || ajpRequestHandler.isMoreDataReadThanExpected()) {
-                ajpRequestHandler.makeEqual();
-            }
-            ajpRequestHandler.setData(null);
-            return;
+            ajpRequestHandler.increaseTotalRequestedContentLength(chunkContentLength);
+            final byte[] contentBytes = getByteSequence(chunkContentLength);
+            /*
+             * Add payload data to servlet's request input stream
+             */
+            ajpRequestHandler.setData(contentBytes);
+        } catch (final IndexOutOfBoundsException e) {
+            final AJPv13BrokenCycleException ajpExc = new AJPv13BrokenCycleException().setPayload(payloadData);
+            /*
+             * Dump package
+             */
+            final byte[] payload = payloadData;
+            final byte[] clonedPackage = new byte[payload.length + 4];
+            clonedPackage[0] = 0x12;
+            clonedPackage[1] = 0x34;
+            clonedPackage[2] = (byte) (dataLength >> 8);
+            clonedPackage[3] = (byte) (dataLength & (255));
+            System.arraycopy(payload, 0, clonedPackage, 4, payload.length);
+            ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
+            throw ajpExc;
         }
-        /*
-         * Parse current size
-         */
-        ajpRequestHandler.increaseTotalRequestedContentLength(chunkContentLength);
-        final byte[] contentBytes = getByteSequence(chunkContentLength);
-        /*
-         * Add payload data to servlet's request input stream
-         */
-        ajpRequestHandler.setData(contentBytes);
     }
 
     /**

@@ -81,11 +81,11 @@ public abstract class AJPv13Request {
         ECHO_HEADER_NAME.set(headerName);
     }
 
-    private final byte[] payloadData;
+    protected final byte[] payloadData;
 
-    private int pos;
+    protected int pos;
 
-    private final int dataLength;
+    protected final int dataLength;
 
     /**
      * Initializes a new {@link AJPv13Request}.
