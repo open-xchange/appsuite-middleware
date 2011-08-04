@@ -50,13 +50,9 @@
 package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -71,23 +67,13 @@ import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
 import com.openexchange.messaging.json.actions.messages.MessagingActionFactory;
 import com.openexchange.messaging.json.actions.services.ServicesActionFactory;
-import com.openexchange.messaging.json.multiple.AccountMultipleHandler;
-import com.openexchange.messaging.json.multiple.MessagesMultipleHandler;
-import com.openexchange.messaging.json.multiple.ServicesMultipleHandler;
-import com.openexchange.messaging.json.servlets.AccountServlet;
-import com.openexchange.messaging.json.servlets.MessagesServlet;
-import com.openexchange.messaging.json.servlets.ServicesServlet;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.tools.service.SessionServletRegistration;
 
 public class Activator extends AJAXModuleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
-
-    private final List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(3);
 
     private MessagingServiceRegistry registry;
 
@@ -117,11 +103,6 @@ public class Activator extends AJAXModuleActivator {
     }
 
     private void hide() {
-        for(final SessionServletRegistration reg : servletRegistrations) {
-            reg.close();
-        }
-        servletRegistrations.clear();
-
         unregisterServices();
     }
 
@@ -167,24 +148,12 @@ public class Activator extends AJAXModuleActivator {
                 MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
                 ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
             }
-
-            if (servletRegistrations.isEmpty()) {
-                
-                
-                
-                servletRegistrations.add(new SessionServletRegistration(context, new AccountServlet(), "ajax/messaging/account"));
-                servletRegistrations.add(new SessionServletRegistration(context, new MessagesServlet(), "/ajax/messaging/message"));
-                servletRegistrations.add(new SessionServletRegistration(context, new ServicesServlet(), "/ajax/messaging/service"));
-                for (final SessionServletRegistration reg : servletRegistrations) {
-                    reg.open();
-                }
-            }
-            if (registrations.isEmpty()) {
-                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new AccountMultipleHandler(), null));
-                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new MessagesMultipleHandler(), null));
-                registrations.add(context.registerService(MultipleHandlerFactoryService.class.getName(), new ServicesMultipleHandler(), null));
-                registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
-                registrations.add(context.registerService(PreferencesItemService.class.getName(), new GUI(), null));
+            if (!hasRegisteredServices()) {
+                registerModule(AccountActionFactory.INSTANCE, "messaging/account");
+                registerModule(MessagingActionFactory.INSTANCE, "messaging/message");
+                registerModule(ServicesActionFactory.INSTANCE, "messaging/service");
+                registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
+                registerService(PreferencesItemService.class, new GUI());
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -208,18 +177,7 @@ public class Activator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            for (final ServiceTracker tracker : trackers) {
-                tracker.close();
-            }
-            trackers.clear();
-            for(final SessionServletRegistration reg : servletRegistrations) {
-                reg.close();
-            }
-            servletRegistrations.clear();
-            for (final ServiceRegistration registration : registrations) {
-                registration.unregister();
-            }
-            registrations.clear();
+            cleanUp();
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
             throw x;

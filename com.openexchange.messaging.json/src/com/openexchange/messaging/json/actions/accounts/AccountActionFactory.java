@@ -64,7 +64,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  */
 public class AccountActionFactory implements AJAXActionServiceFactory {
 
-    public static AccountActionFactory INSTANCE; // Initialize in Activator
+    public static volatile AccountActionFactory INSTANCE; // Initialize in Activator
 
     private Map<String, AJAXActionService> actions = null;
 
@@ -79,6 +79,7 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
 
     }
 
+    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
