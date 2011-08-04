@@ -57,7 +57,8 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CombinedActionFactory}
+ * {@link CombinedActionFactory} - Gathers {@link AJAXActionServiceFactory AJAX action factories} which share the same module identifier but
+ * offer different actions as indicated by {@link Module} annotation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
