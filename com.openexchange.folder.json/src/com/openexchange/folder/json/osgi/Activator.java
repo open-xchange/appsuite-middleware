@@ -56,6 +56,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.folder.json.multiple.FolderMultipleHandlerFactory;
 import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -114,6 +115,10 @@ public class Activator extends AJAXModuleActivator {
              * Open trackers
              */
             openTrackers();
+            /*
+             * Register module
+             */
+            registerModule(FolderActionFactory.getInstance(), Constants.getModule());
             /*
              * Preference item
              */
