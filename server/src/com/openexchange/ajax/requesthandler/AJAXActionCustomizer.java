@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AJAXActionCustomizer}
+ * {@link AJAXActionCustomizer} - Customizes a specified request data and result pair.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
