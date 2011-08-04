@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 public interface AJAXStateHandler {
 
     /**
-     * Initializes common state.
+     * Initializes specified state.
      * 
      * @param state The state
      * @throws OXException If start-up fails
@@ -68,7 +68,7 @@ public interface AJAXStateHandler {
     void begin(AJAXState state) throws OXException;
 
     /**
-     * Ends common state.
+     * Cleans-up specified state.
      * 
      * @param state The state
      * @throws OXException If shut-down fails
