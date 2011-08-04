@@ -54,6 +54,8 @@ import com.openexchange.exception.OXException;
 /**
  * {@link AJAXStateHandler} - Offers methods to change a specified {@link AJAXState} instance right before and rights after a dispatcher
  * cycle.
+ * <p>
+ * This interface is optionally implemented by {@link AJAXActionServiceFactory AJAX action factories}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
