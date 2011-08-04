@@ -65,7 +65,7 @@ public interface AJAXStateHandler {
      * @param state The state
      * @throws OXException If start-up fails
      */
-    void begin(AJAXState state) throws OXException;
+    void initialize(AJAXState state) throws OXException;
 
     /**
      * Cleans-up specified state.
@@ -73,6 +73,6 @@ public interface AJAXStateHandler {
      * @param state The state
      * @throws OXException If shut-down fails
      */
-    void end(AJAXState state) throws OXException;
+    void cleanUp(AJAXState state) throws OXException;
 
 }

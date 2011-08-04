@@ -174,7 +174,7 @@ public final class AJAXState {
         while (!handlers.isEmpty()) {
             final AJAXStateHandler handler = handlers.remove(0);
             try {
-                handler.end(this);
+                handler.cleanUp(this);
             } catch (final OXException e) {
                 LOG.error("Failed closeing handler: " + handler.getClass().getName(), e);
             }

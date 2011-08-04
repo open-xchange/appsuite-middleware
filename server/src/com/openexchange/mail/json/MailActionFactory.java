@@ -128,12 +128,12 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     }
 
     @Override
-    public void begin(final AJAXState state) throws OXException {
+    public void initialize(final AJAXState state) throws OXException {
         // Nope
     }
 
     @Override
-    public void end(final AJAXState state) throws OXException {
+    public void cleanUp(final AJAXState state) throws OXException {
         /*
          * Drop possibly opened mail access instances
          */

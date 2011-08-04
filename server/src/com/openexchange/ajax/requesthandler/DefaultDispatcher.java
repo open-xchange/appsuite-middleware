@@ -158,7 +158,7 @@ public class DefaultDispatcher implements Dispatcher {
         if (factory instanceof AJAXStateHandler) {
             final AJAXStateHandler handler = (AJAXStateHandler) factory;
             if (state.addInitializer(modifiedRequest.getModule(), handler)) {
-                handler.begin(state);
+                handler.initialize(state);
             }
         }
         modifiedRequest.setState(state);
