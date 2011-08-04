@@ -49,58 +49,25 @@
 
 package com.openexchange.sso.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.sso.SSOConstants;
-import com.openexchange.sso.multiple.SSOMultipleHandlerFactory;
-import com.openexchange.sso.servlet.SSOServlet;
-import com.openexchange.tools.service.SessionServletRegistration;
+import com.openexchange.sso.action.SSOActionFactory;
 
 /**
  * {@link SSOActivator} - Activator for JSON single sign-on interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SSOActivator implements BundleActivator {
+public class SSOActivator extends AJAXModuleActivator {
 
-    private ServiceRegistration ssoMultipleService;
-
-    private List<ServiceTracker> trackers;
-
-    public void start(final BundleContext context) throws Exception {
-        ssoMultipleService = context.registerService(MultipleHandlerFactoryService.class.getName(), new SSOMultipleHandlerFactory(), null);
-        /*
-         * Service trackers
-         */
-        trackers = new ArrayList<ServiceTracker>(1);
-        trackers.add(new SessionServletRegistration(context, new SSOServlet(), SSOConstants.SERVLET_PATH));
-        /*
-         * Open trackers
-         */
-        for (final ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        if (null != trackers) {
-            /*
-             * Close trackers
-             */
-            while (!trackers.isEmpty()) {
-                trackers.remove(0).close();
-            }
-            trackers = null;
-        }
-        if (null != ssoMultipleService) {
-            ssoMultipleService.unregister();
-            ssoMultipleService = null;
-        }
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(SSOActionFactory.getInstance(), SSOConstants.MODULE);
     }
 
 }
