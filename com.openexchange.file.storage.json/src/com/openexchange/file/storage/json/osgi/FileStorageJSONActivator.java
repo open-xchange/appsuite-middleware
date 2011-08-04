@@ -87,6 +87,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             Services.LOOKUP = this;
             rememberTracker(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             openTrackers();
+            // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
