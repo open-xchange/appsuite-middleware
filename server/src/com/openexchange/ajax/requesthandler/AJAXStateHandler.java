@@ -52,15 +52,16 @@ package com.openexchange.ajax.requesthandler;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AJAXStateHandler}
- *
+ * {@link AJAXStateHandler} - Offers methods to change a specified {@link AJAXState} instance right before and rights after a dispatcher
+ * cycle.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface AJAXStateHandler {
 
     /**
      * Initializes common state.
-     *
+     * 
      * @param state The state
      * @throws OXException If start-up fails
      */
@@ -68,7 +69,7 @@ public interface AJAXStateHandler {
 
     /**
      * Ends common state.
-     *
+     * 
      * @param state The state
      * @throws OXException If shut-down fails
      */
