@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link AJAXState}
+ * {@link AJAXState} - Stores properties bound to a dispatcher cycle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
