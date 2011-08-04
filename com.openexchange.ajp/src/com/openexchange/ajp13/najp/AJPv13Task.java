@@ -493,9 +493,9 @@ public final class AJPv13Task implements Task<Object> {
                 }
                 AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
                 /*
-                 * Gather logging info
+                 * Drop logging info
                  */
-                LogProperties.getLogProperties().clear();
+                LogProperties.removeLogProperties();
             }
             final long duration = System.currentTimeMillis() - start;
             monitor.addUseTime(duration);
