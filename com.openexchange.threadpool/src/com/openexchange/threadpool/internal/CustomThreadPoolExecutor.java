@@ -78,6 +78,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -590,6 +591,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             // fall through to call terminate() outside of lock.
         } finally {
             mainLock.unlock();
+            LogProperties.removeLogProperties();
         }
 
         assert runState == TERMINATED;
@@ -768,6 +770,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         /**
          * Main run loop
          */
+        @Override
         public void run() {
             try {
                 Runnable task = firstTask;
@@ -828,10 +831,12 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.sequenceNumber = getSequencer().getAndIncrement();
         }
 
+        @Override
         public long getDelay(final TimeUnit unit) {
             return unit.convert(time - now(), TimeUnit.NANOSECONDS);
         }
 
+        @Override
         public int compareTo(final Delayed other) {
             if (other == this) {
                 return 0;
@@ -907,6 +912,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             cancelTasksOnShutdown = false;
         }
 
+        @Override
         public void run() {
             final Thread currentThread = Thread.currentThread();
             try {
@@ -994,18 +1000,22 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             super();
         }
 
+        @Override
         public Runnable poll() {
             return dq.poll();
         }
 
+        @Override
         public Runnable peek() {
             return dq.peek();
         }
 
+        @Override
         public Runnable take() throws InterruptedException {
             return dq.take();
         }
 
+        @Override
         public Runnable poll(final long timeout, final TimeUnit unit) throws InterruptedException {
             return dq.poll(timeout, unit);
         }
@@ -1015,22 +1025,27 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             return dq.add((ScheduledFutureTask<?>) x);
         }
 
+        @Override
         public boolean offer(final Runnable x) {
             return dq.offer((ScheduledFutureTask<?>) x);
         }
 
+        @Override
         public void put(final Runnable x) {
             dq.put((ScheduledFutureTask<?>) x);
         }
 
+        @Override
         public boolean offer(final Runnable x, final long timeout, final TimeUnit unit) {
             return dq.offer((ScheduledFutureTask<?>) x, timeout, unit);
         }
 
+        @Override
         public Runnable remove() {
             return dq.remove();
         }
 
+        @Override
         public Runnable element() {
             return dq.element();
         }
@@ -1040,14 +1055,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             dq.clear();
         }
 
+        @Override
         public int drainTo(final Collection<? super Runnable> c) {
             return dq.drainTo(c);
         }
 
+        @Override
         public int drainTo(final Collection<? super Runnable> c, final int maxElements) {
             return dq.drainTo(c, maxElements);
         }
 
+        @Override
         public int remainingCapacity() {
             return dq.remainingCapacity();
         }
@@ -1088,14 +1106,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                 private final Iterator<ScheduledFutureTask<?>> it = dq.iterator();
 
+                @Override
                 public boolean hasNext() {
                     return it.hasNext();
                 }
 
+                @Override
                 public Runnable next() {
                     return it.next();
                 }
 
+                @Override
                 public void remove() {
                     it.remove();
                 }
@@ -1206,6 +1227,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         consumerThread.start();
     }
 
+    @Override
     public ScheduledFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
         if ((null == command) || (null == unit)) {
             throw new NullPointerException();
@@ -1219,6 +1241,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         return t;
     }
 
+    @Override
     public <V> ScheduledFuture<V> schedule(final Callable<V> callable, final long delay, final TimeUnit unit) {
         if ((null == callable) || (null == unit)) {
             throw new NullPointerException();
@@ -1232,6 +1255,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         return t;
     }
 
+    @Override
     public ScheduledFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
         if ((null == command) || (null == unit)) {
             throw new NullPointerException();
@@ -1249,6 +1273,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         return t;
     }
 
+    @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
         if ((null == command) || (null == unit)) {
             throw new NullPointerException();
@@ -1287,6 +1312,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } else {
             task = new AbstractTask<T>() {
 
+                @Override
                 public T call() throws Exception {
                     return callable.call();
                 }
@@ -1596,7 +1622,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @param blocking <code>true</code> if blocking; otherwise <code>false</code>
      */
-    public void setBlocking(boolean blocking) {
+    public void setBlocking(final boolean blocking) {
         this.blocking = blocking;
     }
 
@@ -2039,6 +2065,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
+        @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
             if (!e.isShutdown()) {
                 r.run();
@@ -2065,6 +2092,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * @param e the executor attempting to execute this task
          * @throws RejectedExecutionException always.
          */
+        @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
             throw new RejectedExecutionException();
         }
@@ -2088,6 +2116,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
+        @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
             // Discard silently
         }
@@ -2113,6 +2142,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * @param r the runnable task requested to be executed
          * @param e the executor attempting to execute this task
          */
+        @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor e) {
             if (!e.isShutdown()) {
                 e.getQueue().poll();
