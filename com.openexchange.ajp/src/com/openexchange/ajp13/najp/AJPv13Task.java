@@ -66,10 +66,10 @@ import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.BlockableBufferedOutputStream;
+import com.openexchange.ajp13.exception.AJPv13BrokenCycleException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13SocketClosedException;
 import com.openexchange.ajp13.exception.AJPv13TimeoutException;
-import com.openexchange.ajp13.exception.AJPv13UnknownPrefixCodeException;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -465,7 +465,7 @@ public final class AJPv13Task implements Task<Object> {
                 if (DEBUG_ENABLED) {
                     LOG.debug(e.getMessage(), e);
                 }
-            } catch (final AJPv13UnknownPrefixCodeException e) {
+            } catch (final AJPv13BrokenCycleException e) {
                 final String dump = e.getDump();
                 LOG.error(e.getMessage() + (dump == null ? "" : "\nCorresponding AJP package:\n" + dump));
             } catch (final AJPv13Exception e) {

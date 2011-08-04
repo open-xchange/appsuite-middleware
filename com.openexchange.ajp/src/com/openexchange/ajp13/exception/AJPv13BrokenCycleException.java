@@ -47,48 +47,77 @@
  *
  */
 
-package com.openexchange.ajp13;
-
-import java.io.IOException;
-import javax.servlet.ServletException;
-import com.openexchange.ajp13.exception.AJPv13Exception;
+package com.openexchange.ajp13.exception;
 
 /**
- * AJPv13CPingRequest - Respond quickly with a CPong reply
- *
+ * {@link AJPv13BrokenCycleException} - Thrown if a broken AJP cycle is detected
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AJPv13CPingRequest extends AJPv13Request {
+public class AJPv13BrokenCycleException extends AJPv13Exception {
 
-    private static final String STR_RECEIVED_CPING = "Received CPing";
+    private static final long serialVersionUID = -11763074640120576L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AJPv13CPingRequest.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private byte[] payload;
 
     /**
-     * Initializes a new {@link AJPv13CPingRequest}
-     *
-     * @param payloadData The payload data
+     * The optional package dump.
      */
-    public AJPv13CPingRequest(final byte[] payloadData, final int dataLength) {
-        super(payloadData, dataLength);
+    protected String dump;
+
+    /**
+     * Initializes a new {@link AJPv13BrokenCycleException}
+     */
+    public AJPv13BrokenCycleException() {
+        super(AJPCode.BROKEN_AJP_CYCLE, false);
     }
 
-    @Override
-    public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-        if (DEBUG_ENABLED) {
-            LOG.debug(STR_RECEIVED_CPING);
-        }
+    /**
+     * Initializes a new {@link AJPv13BrokenCycleException}.
+     * 
+     * @param code The code
+     * @param args The arguments
+     */
+    protected AJPv13BrokenCycleException(final AJPCode code, final Object... args) {
+        super(code, false, args);
     }
 
-    @Override
-    public void response(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, ServletException, IOException {
-        writeResponse(AJPv13Response.getCPongBytes(), ajpRequestHandler.getAJPConnection().getOutputStream(), true);
-        /*
-         * No END_RESPONSE package for CPONG response
-         */
-        ajpRequestHandler.setEndResponseSent();
+    /**
+     * Sets the package's payload.
+     * 
+     * @param payload the payload
+     * @return This exception with payload applied
+     */
+    public AJPv13BrokenCycleException setPayload(final byte[] payload) {
+        this.payload = payload;
+        return this;
+    }
+
+    /**
+     * Gets the package payload.
+     * 
+     * @return The payload or <code>null</code>
+     */
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    /**
+     * Gets the dump.
+     * 
+     * @return The dump
+     */
+    public String getDump() {
+        return dump;
+    }
+
+    /**
+     * Sets the dump.
+     * 
+     * @param dumped The dump
+     */
+    public void setDump(final String dumped) {
+        this.dump = dumped;
     }
 
 }

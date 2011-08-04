@@ -63,10 +63,12 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link LoggerTask}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class LoggerTask extends AbstractTask<Object> {
+
+    private static final String PREFIX = "Logged at: ";
 
     /**
      * The poison element.
@@ -115,7 +117,7 @@ final class LoggerTask extends AbstractTask<Object> {
 
     /**
      * Initializes a new {@link LoggerTask}.
-     *
+     * 
      * @param queue
      */
     protected LoggerTask(final BlockingQueue<Loggable> queue) {
@@ -173,54 +175,54 @@ final class LoggerTask extends AbstractTask<Object> {
                         case FATAL:
                             if (log.isFatalEnabled()) {
                                 if (null == t) {
-                                    log.fatal(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.fatal(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
                         case ERROR:
                             if (log.isErrorEnabled()) {
                                 if (null == t) {
-                                    log.error(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.error(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
                         case WARNING:
                             if (log.isWarnEnabled()) {
                                 if (null == t) {
-                                    log.warn(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.warn(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
                         case INFO:
                             if (log.isInfoEnabled()) {
                                 if (null == t) {
-                                    log.info(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.info(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
                         case DEBUG:
                             if (log.isDebugEnabled()) {
                                 if (null == t) {
-                                    log.debug(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.debug(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
                         case TRACE:
                             if (log.isTraceEnabled()) {
                                 if (null == t) {
-                                    log.trace(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable));
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable));
                                 } else {
-                                    log.trace(message.startsWith("Logged at: ") ? message : prependLocation(message, loggable), t);
+                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable), t);
                                 }
                             }
                             break;
@@ -245,11 +247,12 @@ final class LoggerTask extends AbstractTask<Object> {
     private static String prependLocation(final String message, final Loggable loggable) {
         final StringBuilder sb = new StringBuilder(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
+        String logClass = null;
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
                 if (null != className && !className.startsWith("com.openexchange.log")) {
-                    sb.append("Logged at: ").append(className).append(".").append(ste.getMethodName());
+                    sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
                     if (ste.isNativeMethod()) {
                         sb.append("(Native Method)");
                     } else {
@@ -266,6 +269,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         }
                     }
                     sb.append("\n");
+                    logClass = className;
                     break;
                 }
             }

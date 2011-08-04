@@ -52,6 +52,7 @@ package com.openexchange.ajp13;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
+import com.openexchange.ajp13.exception.AJPv13BrokenCycleException;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 
 /**
@@ -80,17 +81,22 @@ public abstract class AJPv13Request {
         ECHO_HEADER_NAME.set(headerName);
     }
 
-    private final byte[] payloadData;
+    protected final byte[] payloadData;
 
-    private int pos;
+    protected int pos;
+
+    protected final int dataLength;
 
     /**
      * Initializes a new {@link AJPv13Request}.
      *
      * @param payloadData The payload data
+     * @param dataLength The AJP package's data length
      */
-    protected AJPv13Request(final byte[] payloadData) {
+    protected AJPv13Request(final byte[] payloadData, final int dataLength) {
+        super();
         this.payloadData = payloadData;
+        this.dataLength = dataLength;
         pos = 0;
     }
 
@@ -295,13 +301,30 @@ public abstract class AJPv13Request {
      *
      * @param numOfBytes The number of bytes to return
      * @return The next bytes
+     * @throws AJPv13Exception If a broken AJP cycle is detected
      */
-    protected final byte[] getByteSequence(final int numOfBytes) {
-        final byte[] retval = new byte[numOfBytes];
-        final int available = payloadData.length - pos;
-        System.arraycopy(payloadData, pos, retval, 0, numOfBytes > available ? available : numOfBytes);
-        pos += numOfBytes;
-        return retval;
+    protected final byte[] getByteSequence(final int numOfBytes) throws AJPv13Exception {
+        try {
+            final byte[] retval = new byte[numOfBytes];
+            final int available = payloadData.length - pos;
+            System.arraycopy(payloadData, pos, retval, 0, numOfBytes > available ? available : numOfBytes);
+            pos += numOfBytes;
+            return retval;
+        } catch (final IndexOutOfBoundsException e) {
+            final AJPv13BrokenCycleException ajpExc = new AJPv13BrokenCycleException().setPayload(payloadData);
+            /*
+             * Dump package
+             */
+            final byte[] payload = payloadData;
+            final byte[] clonedPackage = new byte[payload.length + 4];
+            clonedPackage[0] = 0x12;
+            clonedPackage[1] = 0x34;
+            clonedPackage[2] = (byte) (dataLength >> 8);
+            clonedPackage[3] = (byte) (dataLength & (255));
+            System.arraycopy(payload, 0, clonedPackage, 4, payload.length);
+            ajpExc.setDump(AJPv13Utility.dumpBytes(clonedPackage));
+            throw ajpExc;
+        }
     }
 
     /**
