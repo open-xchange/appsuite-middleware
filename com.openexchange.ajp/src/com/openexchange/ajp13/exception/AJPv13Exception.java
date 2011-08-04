@@ -170,7 +170,11 @@ public class AJPv13Exception extends OXException {
         /**
          * Invalid cookie header value: %1$s
          */
-        INVALID_COOKIE_HEADER("Invalid cookie header value: %1$s", Category.CATEGORY_ERROR, 23);
+        INVALID_COOKIE_HEADER("Invalid cookie header value: %1$s", Category.CATEGORY_ERROR, 23),
+        /**
+         * Broken AJP cycle detected.
+         */
+        BROKEN_AJP_CYCLE("Broken AJP cycle detected.", Category.CATEGORY_ERROR, 24);
 
         private final String message;
 

@@ -50,24 +50,74 @@
 package com.openexchange.ajp13.exception;
 
 /**
- * {@link AJPv13UnknownPrefixCodeException} - Thrown if an unknown prefix code is detected
+ * {@link AJPv13BrokenCycleException} - Thrown if a broken AJP cycle is detected
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13UnknownPrefixCodeException extends AJPv13BrokenCycleException {
+public class AJPv13BrokenCycleException extends AJPv13Exception {
+
+    private static final long serialVersionUID = -11763074640120576L;
+
+    private byte[] payload;
 
     /**
-     * 
+     * The optional package dump.
      */
-    private static final long serialVersionUID = 6801323036004164878L;
+    protected String dump;
 
     /**
-     * Initializes a new {@link AJPv13UnknownPrefixCodeException}
-     * 
-     * @param unknownPrefixCode The unknown prefix code
+     * Initializes a new {@link AJPv13BrokenCycleException}
      */
-    public AJPv13UnknownPrefixCodeException(final int unknownPrefixCode) {
-        super(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(unknownPrefixCode));
+    public AJPv13BrokenCycleException() {
+        super(AJPCode.BROKEN_AJP_CYLCE, false);
+    }
+
+    /**
+     * Initializes a new {@link AJPv13BrokenCycleException}.
+     * 
+     * @param code The code
+     * @param args The arguments
+     */
+    protected AJPv13BrokenCycleException(final AJPCode code, final Object... args) {
+        super(code, false, args);
+    }
+
+    /**
+     * Sets the package's payload.
+     * 
+     * @param payload the payload
+     * @return This exception with payload applied
+     */
+    public AJPv13BrokenCycleException setPayload(final byte[] payload) {
+        this.payload = payload;
+        return this;
+    }
+
+    /**
+     * Gets the package payload.
+     * 
+     * @return The payload or <code>null</code>
+     */
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    /**
+     * Gets the dump.
+     * 
+     * @return The dump
+     */
+    public String getDump() {
+        return dump;
+    }
+
+    /**
+     * Sets the dump.
+     * 
+     * @param dumped The dump
+     */
+    public void setDump(final String dumped) {
+        this.dump = dumped;
     }
 
 }
