@@ -111,6 +111,13 @@ public final class LogProperties {
     }
 
     /**
+     * Removes the log properties for calling thread.
+     */
+    public static void removeLogProperties() {
+        THREAD_LOCAL.remove(Thread.currentThread());
+    }
+
+    /**
      * Gets the thread-local log properties.
      * 
      * @return The log properties
