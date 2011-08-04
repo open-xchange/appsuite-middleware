@@ -245,6 +245,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private static String prependLocation(final String message, final Loggable loggable) {
         final StringBuilder sb = new StringBuilder(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
+        String logClass = null;
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
@@ -266,6 +267,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         }
                     }
                     sb.append("\n");
+                    logClass = className;
                     break;
                 }
             }
